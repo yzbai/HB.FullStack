@@ -1,0 +1,17 @@
+﻿{
+  "Aliyun": {
+    "RegionId": "cn-hangzhou",
+    "AccessKeyId": "LTAI0xWtkSKjq3OU",
+    "AccessKeySecret": "OUbxdNB45fjMPW8w8hCo1ww2ygKlUT"
+  },
+
+  "AliyunSms": {
+    "SignName": "礼鱼",
+    "TemplateIdentityValidation": {
+      "TemplateCode": "SMS_73985016",
+      "ParamCode": "code",
+      "ParamProduct": "product",
+      "ParamProductValue": "礼鱼"
+    }
+  }
+}
