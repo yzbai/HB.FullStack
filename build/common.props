@@ -1,0 +1,14 @@
+<Project>
+
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Product>HB.Framework</Product>
+    <Authors>yzbai@brlite.com</Authors>
+    <Company>Wuxi Brilliant Technology Company Limited.</Company>
+    <Copyright>@2017 Wuxi Brilliant Technology Company Limited. All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/yzbai</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yzbai</RepositoryUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
