@@ -1,0 +1,48 @@
+﻿{
+  "MySQL": {
+    "DatabaseSettings": [
+      {
+        "Name": "presentfish_customer",
+        "ConnectionString": "server=192.168.0.112;port=3306;user=root;password=Brlite2015;database=presentfish_customer;SslMode=None",
+        "IsMaster": "true"
+      }
+    ]
+  },
+
+  "Database": {
+    "DatabaseSchemas": [
+      {
+        "Assembly": "HB.Framework.Identity",
+        "EntityTypeFullName": "HB.Framework.Identity.Role",
+        "DatabaseName": "presentfish_customer",
+        "TableName": "tb_role",
+        "Writeable": "true",
+        "Description": ""
+      },
+      {
+        "Assembly": "HB.Framework.Identity",
+        "EntityTypeFullName": "HB.Framework.Identity.User",
+        "DatabaseName": "presentfish_customer",
+        "TableName": "tb_user",
+        "Writeable": "true",
+        "Description": ""
+      },
+      {
+        "Assembly": "HB.Framework.Identity",
+        "EntityTypeFullName": "HB.Framework.Identity.UserClaim",
+        "DatabaseName": "presentfish_customer",
+        "TableName": "tb_userclaim",
+        "Writeable": "true",
+        "Description": ""
+      },
+      {
+        "Assembly": "HB.Framework.Identity",
+        "EntityTypeFullName": "HB.Framework.Identity.UserRole",
+        "DatabaseName": "presentfish_customer",
+        "TableName": "tb_userrole",
+        "Writeable": "true",
+        "Description": ""
+      }
+    ]
+  }
+}

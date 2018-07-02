@@ -1,0 +1,19 @@
+init:
+  - git config --global core.autocrlf true
+
+build_script:
+  - ps: .\build.ps1
+  
+test: off
+
+artifacts:
+  - path: .\artifacts\*.nupkg
+    name: NuGet
+
+
+deploy:
+  provider: NuGet
+  api_key:
+    secure: euxwvMlaAPyzXFE+7TYpc0lapFW55+5Cq9wVUperasYjLOfLpTXervuO3+Wf0WzO
+  skip_symbols: true
+ #artifact: /.*\.nupkg/
