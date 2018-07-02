@@ -1,8 +1,7 @@
 ﻿using HB.Framework.KVStore;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -28,7 +27,7 @@ namespace HB.Infrastructure.Redis.Test
 
             IServiceCollection serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
+            serviceCollection.AddSingleton<IApplicationLifetime, Microsoft.Extensions.Hosting.Internal.ApplicationLifetime>();
 
             serviceCollection.AddOptions();
 
