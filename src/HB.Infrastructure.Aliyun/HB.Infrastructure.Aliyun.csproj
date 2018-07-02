@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HB.Infrastructure.Aliyun.Acs.Sms" Version="1.0.0-CI-20180702-151429" />
+    <PackageReference Include="HB.Infrastructure.Aliyun.Acs.Sms" Version="1.0.0-CI-20180702-154724" />
   </ItemGroup>
 
   <ItemGroup>
