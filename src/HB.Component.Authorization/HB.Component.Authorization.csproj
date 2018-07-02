@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.Component.Identity\HB.Component.Identity.csproj" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.2.0-preview2-41113220915" />
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="4.4.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.2.4" />
+    <PackageReference Include="System.Security.Cryptography.Cng" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
