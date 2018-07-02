@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using Microsoft.Extensions.Logging;
 using HB.Framework.EventBus;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
+
 using CommonSample;
+using Microsoft.Extensions.Hosting;
 
 namespace HB.PresentFish.Tools
 {
@@ -49,7 +49,7 @@ namespace HB.PresentFish.Tools
             serviceCollection.AddAliyunClient(Configuration.GetSection("Aliyun"));
             serviceCollection.AddAliyunSms(Configuration.GetSection("AliyunSms"));
 
-            serviceCollection.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
+            serviceCollection.AddSingleton<IApplicationLifetime, Microsoft.Extensions.Hosting.Internal.ApplicationLifetime>();
 
             serviceCollection.AddKafkaEngine(Configuration.GetSection("Kafka"));
 
