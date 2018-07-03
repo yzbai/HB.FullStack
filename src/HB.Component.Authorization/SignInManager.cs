@@ -84,7 +84,7 @@ namespace HB.Component.Authorization
 
             if (user == null && context.SignInType == SignInType.BySms)
             {
-                IdentityResult identityResult = await _userBiz.CreateUserByMobileAsync(context.Mobile, context.UserName, context.Password, true);
+                IdentityResult identityResult = await _userBiz.CreateUserByMobileAsync(context.UserType, context.Mobile, context.UserName, context.Password, true);
 
                 if (identityResult.Status == IdentityResultStatus.Failed)
                 {
