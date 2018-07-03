@@ -5,13 +5,17 @@ using System.ComponentModel.DataAnnotations;
 namespace HB.Component.Identity.Entity
 {
     /// <summary>
-    /// 通用用户类
+    /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
     //[Serializable]
     public class User : DatabaseEntity
     {
         [Required]
-        [DatabaseEntityProperty("Guid", NotNull=true, Length=50)]
+        [DatabaseEntityProperty("UserType", NotNull = true, Length = 100)]
+        public string UserType { get; set; }
+
+        [Required]
+        [DatabaseEntityProperty("Guid", NotNull=true, Length=50, Unique = true)]
         public string Guid { get; set; }
 
         [Required]
@@ -22,20 +26,20 @@ namespace HB.Component.Identity.Entity
         /// 唯一, 可为空，一旦不为空后不可修改
         /// </summary>
         [UserName]
-        [DatabaseEntityProperty("用户名称", Length = 100)]
+        [DatabaseEntityProperty("用户名称", Length = 100, Unique = true)]
         public string UserName { get; set; }
         /// <summary>
         /// 唯一
         /// </summary>
         [Phone]
-        [DatabaseEntityProperty("手机号")]
+        [DatabaseEntityProperty("手机号", Unique = true)]
         public string Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [DatabaseEntityProperty("邮箱")]
+        [DatabaseEntityProperty("邮箱", Unique = true)]
         public string Email { get; set; }
 
         /// <summary>
@@ -90,7 +94,7 @@ namespace HB.Component.Identity.Entity
         [DatabaseEntityProperty("Accessfailed last time")]
         public DateTimeOffset? AccessFailedLastTime { get; set; }
 
-        [DatabaseEntityProperty("ImageUrl")]
-        public string ImageUrl { get; set; }
+        //[DatabaseEntityProperty("ImageUrl")]
+        //public string ImageUrl { get; set; }
     }
 }
