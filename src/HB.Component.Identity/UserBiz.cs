@@ -190,10 +190,11 @@ namespace HB.Component.Identity
 
         #region Register
 
-        private User InitNewUser(string mobile, string userName, string password)
+        private User InitNewUser(string userType, string mobile, string userName, string password)
         {
             User user = new User
             {
+                UserType = userType,
                 Mobile = mobile,
                 Guid = SecurityHelper.CreateUniqueToken(),
                 SecurityStamp = SecurityHelper.CreateUniqueToken(),
@@ -201,7 +202,7 @@ namespace HB.Component.Identity
                 AccessFailedCount = 0,
                 UserName = userName,
                 TwoFactorEnabled = false,
-                ImageUrl = string.Empty
+                //ImageUrl = string.Empty
             };
 
             user.PasswordHash = SecurityHelper.EncryptPwdWithSalt(password, user.Guid);
@@ -209,9 +210,15 @@ namespace HB.Component.Identity
             return user;
         }
 
-        public async Task<IdentityResult> CreateUserByMobileAsync(string mobile, string userName, string password, bool mobileConfirmed, DbTransactionContext transContext = null)
+        public async Task<IdentityResult> CreateUserByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed, DbTransactionContext transContext = null)
         {
             #region Argument Check
+
+            if (!string.IsNullOrEmpty(userType))
+            {
+                _logger.LogDebug("In UserType Check, Failed, userType :" + userType);
+                return IdentityResult.Failed();
+            }
 
             if (!string.IsNullOrEmpty(mobile) && !ValidationMethods.IsMobilePhone(mobile))
             {
@@ -248,7 +255,7 @@ namespace HB.Component.Identity
 
             #endregion
 
-            user = InitNewUser(mobile, userName, password);
+            user = InitNewUser(userType, mobile, userName, password);
             user.MobileConfirmed = mobileConfirmed;
 
             IdentityResult result = user.IsValid() ? (await _db.AddAsync(user, transContext)).ToIdentityResult() : IdentityResult.ArgumentError();

@@ -9,7 +9,7 @@ namespace HB.Component.Identity.Abstractions
 {
     public interface IUserBiz
     {
-        Task<IdentityResult> CreateUserByMobileAsync(string mobile, string userName, string password, bool mobileConfirmed, DbTransactionContext transContext = null);
+        Task<IdentityResult> CreateUserByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed, DbTransactionContext transContext = null);
         Task<long?> GetIdByUserNameAsync(string userName, DbTransactionContext transContext = null);
         Task<User> GetUserByEmailAsync(string email, DbTransactionContext transContext = null);
         Task<User> GetUserByIdAsync(long userId, DbTransactionContext transContext = null);
