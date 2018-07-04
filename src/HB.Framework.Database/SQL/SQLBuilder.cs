@@ -30,7 +30,7 @@ namespace HB.Framework.Database.SQL
         private IDatabaseEntityDefFactory _entityDefFactory;
         private IDatabaseEngine _databaseEngine;
 
-        private readonly int DEFAULT_STRING_LENGTH = 100;
+        
 
         public SQLBuilder(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
         {
@@ -630,7 +630,7 @@ namespace HB.Framework.Database.SQL
 
         #region Create
 
-        //TODO: 目前只适用Mysql
+        //TODO: 目前只适用Mysql，需要后期改造
         public string GetCreateStatement(Type type, bool addDropStatement)
         {
             StringBuilder sql = new StringBuilder();
@@ -654,7 +654,7 @@ namespace HB.Framework.Database.SQL
                 {
                     if (info.PropertyType == typeof(string) || info.PropertyType == typeof(char))
                     {
-                        length = DEFAULT_STRING_LENGTH;
+                        length = _entityDefFactory.GetVarcharDefaultLength();
                     }
                 }
                 else
