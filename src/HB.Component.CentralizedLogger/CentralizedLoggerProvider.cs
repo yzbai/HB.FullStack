@@ -31,8 +31,8 @@ namespace HB.Component.CentralizedLogger
 
         private void addEventInfoToEventBus()
         {
-            _eventBus.AddEventConfig(new EventConfig() {
-                MessageQueueServerName = _options.MessageQueueServerName,
+            _eventBus.RegisterEvent(new EventConfig() {
+                ServerName = _options.ServerName,
                 EventName = _options.LogEventName
             });
         }

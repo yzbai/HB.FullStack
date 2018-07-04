@@ -10,11 +10,14 @@ namespace HB.Component.CentralizedLogger
     {
         public CentralizedLoggerOptions Value => this;
 
+        /// <summary>
+        /// 关于哪一个站点或应用的日志
+        /// </summary>
         public string HostName { get; set; } = "";
 
         public string LogEventName { get; set; }
 
-        public string MessageQueueServerName { get; set; }
+        public string ServerName { get; set; }
 
         public string LogLevel { get; set; }
 
