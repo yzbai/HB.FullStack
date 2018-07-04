@@ -30,7 +30,7 @@ namespace HB.Component.CentralizedLogger.LoggerServer
         public EventHandlerConfig GetConfig()
         {
             return new EventHandlerConfig {
-                MessageQueueServerName = _options.MessageQueueServerName,
+                ServerName = _options.ServerName,
                 EventName = _options.LogEventName,
                 SubscribeGroup = _options.SubscribeGroup
             };
