@@ -6,5 +6,6 @@ namespace HB.Framework.Database.Entity
     {
         DatabaseEntityDef Get(Type domainType);
         DatabaseEntityDef Get<T>();
+        int GetVarcharDefaultLength();
     }
 }

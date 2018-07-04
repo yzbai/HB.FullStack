@@ -15,6 +15,8 @@ namespace HB.Framework.Database.Entity
     /// </summary>
     public class DefaultDatabaseEntityDefFactory : IDatabaseEntityDefFactory
     {
+        private readonly int DEFAULT_STRING_LENGTH = 100;
+
         private ConcurrentDictionary<Type, DatabaseEntityDef> _defDict;
         private readonly object _lockObj;
         private DatabaseOptions _options;
@@ -176,6 +178,11 @@ namespace HB.Framework.Database.Entity
             #endregion
 
             return propertyDef;
+        }
+
+        public int GetVarcharDefaultLength()
+        {
+            return _options.DefaultVarcharLength == 0 ? DEFAULT_STRING_LENGTH : _options.DefaultVarcharLength;
         }
     }
 

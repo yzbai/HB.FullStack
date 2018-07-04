@@ -10,6 +10,7 @@ using HB.Framework.Common.Entity;
 using System.Threading.Tasks;
 using HB.Framework.Database.Engine;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HB.Framework.Database
 {
