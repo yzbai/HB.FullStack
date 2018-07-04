@@ -12,7 +12,7 @@ namespace HB.Component.CentralizedLogger.LoggerServer
 
         public string LogEventName { get; set; }
 
-        public string MessageQueueServerName { get; set; }
+        public string ServerName { get; set; }
 
         public string SubscribeGroup { get; set; }
     }
