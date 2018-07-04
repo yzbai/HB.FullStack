@@ -15,10 +15,14 @@ namespace HB.Framework.EventBus
         Task<PublishResult> Publish(string eventName, string jsonString);
 
         /// <summary>
-        /// Start to handle events
+        /// Start to handle events，需要提前把eventhandler放到DI中
         /// </summary>
         void Handle();
 
-        void AddEventConfig(EventConfig eventConfig);
+        /// <summary>
+        /// 动态注册事件，也可以在appsetting中设置
+        /// </summary>
+        /// <param name="eventConfig"></param>
+        void RegisterEvent(EventConfig eventConfig);
     }
 }

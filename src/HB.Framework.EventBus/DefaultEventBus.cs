@@ -57,14 +57,14 @@ namespace HB.Framework.EventBus
                         handlerConfig.SubscribeGroup = _options.SubscribeConfig.DefaultSubscribeGroup;
                     }
 
-                    _engine.SubscribeAndConsume(handlerConfig.MessageQueueServerName, handlerConfig.SubscribeGroup, handlerConfig.EventName, handler);
+                    _engine.SubscribeAndConsume(handlerConfig.ServerName, handlerConfig.SubscribeGroup, handlerConfig.EventName, handler);
                 }
             }
 
             _handled = true;
         }
 
-        public void AddEventConfig(EventConfig eventConfig)
+        public void RegisterEvent(EventConfig eventConfig)
         {
             if (eventConfig == null)
             {
@@ -96,7 +96,7 @@ namespace HB.Framework.EventBus
 
             return TaskRetry.Retry<PublishResult>(
                 _options.PublishConfig.RetryCount,
-                () => _engine.PublishString(eventConfig.MessageQueueServerName, eventConfig.EventName, jsonString),
+                () => _engine.PublishString(eventConfig.ServerName, eventConfig.EventName, jsonString),
                 (ret, ex) =>
                 {
                     _logger.LogCritical(ex.Message);
