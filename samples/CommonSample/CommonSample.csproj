@@ -28,9 +28,7 @@
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
-  </ItemGroup>
+ 
 
   <ItemGroup>
     <None Update="appsettings.json">
