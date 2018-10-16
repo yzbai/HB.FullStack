@@ -7,6 +7,8 @@ namespace HB.Infrastructure.Aliyun.Sms
 {
     public class AliyunSmsOptions : IOptions<AliyunSmsOptions>
     {
+        public string ProductName { get; set; }
+
         public AliyunSmsOptions Value { get { return this; } }
 
         public string SignName { get; set; }
@@ -29,7 +31,5 @@ namespace HB.Infrastructure.Aliyun.Sms
         public int CodeLength { get; set; } = 6;
 
         public string ParamProductValue { get; set; }
-
-        public TimeSpan? ExpireTimeRange { get; set; } = TimeSpan.FromMinutes(5);
     }
 }
