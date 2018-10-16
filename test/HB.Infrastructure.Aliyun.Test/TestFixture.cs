@@ -30,7 +30,7 @@ namespace HB.Infrastructure.Aliyun.Test
                 builder.AddConsole();
             });
 
-            serviceCollection.AddAliyunClient(Configuration.GetSection("Aliyun"));
+            serviceCollection.AddAliyunService(Configuration.GetSection("Aliyun"));
             serviceCollection.AddAliyunSms(Configuration.GetSection("AliyunSms"));
 
             Services = serviceCollection.BuildServiceProvider();

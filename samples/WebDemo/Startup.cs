@@ -34,7 +34,7 @@ namespace WebDemo
 
             services.AddCentralizedLoggerEventHandler(Configuration.GetSection("CentralizedLogServer"));
 
-            services.AddAliyunClient(Configuration.GetSection("Aliyun"));
+            services.AddAliyunService(Configuration.GetSection("Aliyun"));
             services.AddAliyunSms(Configuration.GetSection("AliyunSms"));
 
             services.AddMvc();

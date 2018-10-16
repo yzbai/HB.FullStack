@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
-		global.json = global.json
 		PresentFish_DataProtection.pfx = PresentFish_DataProtection.pfx
 		README.md = README.md
 	EndProjectSection
@@ -70,7 +69,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.Identity", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.CentralizedLogger", "src\HB.Component.CentralizedLogger\HB.Component.CentralizedLogger.csproj", "{B62A4AB5-17CF-4DD2-BD32-9278B315930F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Component.Authorization", "src\HB.Component.Authorization\HB.Component.Authorization.csproj", "{0DC67DC8-B036-4687-BF4D-2128C8212A27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.Authorization", "src\HB.Component.Authorization\HB.Component.Authorization.csproj", "{0DC67DC8-B036-4687-BF4D-2128C8212A27}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{E3F87ADC-8DCC-435B-869F-90DD5A88896A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aliyun-net-sdk-core.vs2017", "..\aliyun-openapi-net-sdk\aliyun-net-sdk-core\aliyun-net-sdk-core.vs2017.csproj", "{8EE63B9C-DEFF-4CD9-8FEF-4DF3B388EBC5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aliyun-net-sdk-vod.vs2017", "..\aliyun-openapi-net-sdk\aliyun-net-sdk-vod\aliyun-net-sdk-vod.vs2017.csproj", "{A2C9437D-3BAC-4B72-8A01-A686659AACA2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aliyun-net-sdk-dysmsapi.vs2017", "..\aliyun-net-sdk-dysmsapi\aliyun-net-sdk-dysmsapi.vs2017.csproj", "{AEA5F829-60D0-45E1-9CFD-DB508A4878AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -163,6 +170,18 @@ Global
 		{0DC67DC8-B036-4687-BF4D-2128C8212A27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DC67DC8-B036-4687-BF4D-2128C8212A27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DC67DC8-B036-4687-BF4D-2128C8212A27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EE63B9C-DEFF-4CD9-8FEF-4DF3B388EBC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EE63B9C-DEFF-4CD9-8FEF-4DF3B388EBC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EE63B9C-DEFF-4CD9-8FEF-4DF3B388EBC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EE63B9C-DEFF-4CD9-8FEF-4DF3B388EBC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2C9437D-3BAC-4B72-8A01-A686659AACA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2C9437D-3BAC-4B72-8A01-A686659AACA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2C9437D-3BAC-4B72-8A01-A686659AACA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2C9437D-3BAC-4B72-8A01-A686659AACA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEA5F829-60D0-45E1-9CFD-DB508A4878AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEA5F829-60D0-45E1-9CFD-DB508A4878AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEA5F829-60D0-45E1-9CFD-DB508A4878AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEA5F829-60D0-45E1-9CFD-DB508A4878AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -193,6 +212,9 @@ Global
 		{81DAEF93-21A8-4262-B0E2-5A9F0B037BB0} = {7AB355DB-795C-4A78-9E00-C14D897C31B0}
 		{B62A4AB5-17CF-4DD2-BD32-9278B315930F} = {7AB355DB-795C-4A78-9E00-C14D897C31B0}
 		{0DC67DC8-B036-4687-BF4D-2128C8212A27} = {7AB355DB-795C-4A78-9E00-C14D897C31B0}
+		{8EE63B9C-DEFF-4CD9-8FEF-4DF3B388EBC5} = {E3F87ADC-8DCC-435B-869F-90DD5A88896A}
+		{A2C9437D-3BAC-4B72-8A01-A686659AACA2} = {E3F87ADC-8DCC-435B-869F-90DD5A88896A}
+		{AEA5F829-60D0-45E1-9CFD-DB508A4878AC} = {E3F87ADC-8DCC-435B-869F-90DD5A88896A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {81307950-DF5A-4A8D-B3B9-6724112D8232}
