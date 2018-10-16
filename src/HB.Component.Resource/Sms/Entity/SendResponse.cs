@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Component.Common.Sms.Entity
+namespace HB.Component.Resource.Sms.Entity
 {
     public class SendResponse
     {
