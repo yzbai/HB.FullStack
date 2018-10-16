@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Compnent.Common.Sms
+namespace HB.Component.Common.Sms.Entity
 {
-    public class SmsResponseResult
+    public class SendResponse
     {
         public string Message { get; set; }
         public bool Succeeded { get; set; }
