@@ -5,9 +5,9 @@ using Aliyun.Acs.Core;
 using HB.Framework.Common;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
-using HB.Compnent.Common.Sms;
+using HB.Compnent.Resource.Sms;
 using Aliyun.Acs.Dysmsapi.Model.V20170525;
-using HB.Component.Common.Sms.Entity;
+using HB.Component.Resource.Sms.Entity;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
