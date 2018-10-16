@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             IAcsClientManager clientManager = new DefaultAcsClientManager();
 
-            foreach (var item in aliyunOptions.Products)
+            foreach (var item in aliyunOptions.Accesses)
             {
                 DefaultProfile profile = DefaultProfile.GetProfile(item.RegionId, item.AccessKeyId, item.AccessKeySecret);
 
@@ -37,6 +37,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     DefaultProfile.AddEndpoint(item.ProductName + item.RegionId, item.RegionId, item.ProductName, item.Endpoint);
                 }
+
+                clientManager.AddProfile(item.ProductName, profile);
             }
 
             serviceCollection.AddSingleton<IAcsClientManager>(clientManager);

@@ -1,10 +1,10 @@
-﻿using HB.Component.Common.Sms.Entity;
+﻿using HB.Component.Resource.Sms.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HB.Compnent.Common.Sms
+namespace HB.Compnent.Resource.Sms
 {
     public interface ISmsBiz
     {
