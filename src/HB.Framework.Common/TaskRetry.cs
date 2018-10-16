@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common
 {
+    //TODO: 考虑是否要用Polly库代替
     /// <summary>
     /// Retry the task without await. You can fire and forgot.
     /// </summary>

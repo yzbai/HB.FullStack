@@ -1,12 +1,12 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Aliyun.Acs.Sms.Model.V20170525;
 using Aliyun.Acs.Core;
 using HB.Framework.Common;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
 using HB.Compnent.Common.Sms;
+using Aliyun.Acs.Dysmsapi.Model.V20170525;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                     _options.TemplateIdentityValidation.ParamProductValue)
             };
 
-
+            
             return TaskRetry.Retry(1, () => Task.Run<SendSmsResponse>(() => _client.GetAcsResponse(request)), 
                 (response, ex) => {
                     _logger.LogError("Validation Sms Send Err. {0}, {1}, {2}", mobile, _options.TemplateIdentityValidation.ParamProductValue, ex.Message);
