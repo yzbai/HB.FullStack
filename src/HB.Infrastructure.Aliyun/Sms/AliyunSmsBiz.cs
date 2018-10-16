@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
 using HB.Compnent.Common.Sms;
 using Aliyun.Acs.Dysmsapi.Model.V20170525;
+using HB.Component.Common.Sms.Entity;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -16,14 +17,14 @@ namespace HB.Infrastructure.Aliyun.Sms
         private IAcsClient _client;
         private ILogger _logger;
 
-        public AliyunSmsBiz(IAcsClient acsClient, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsBiz> logger) 
+        public AliyunSmsBiz(IAcsClientManager acsClientManager, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsBiz> logger) 
         {
             _options = options.Value;
-            _client = acsClient;
+            _client = acsClientManager.GetAcsClient(_options.ProductName);
             _logger = logger;
         }
 
-        public Task<SmsResponseResult> SendIdentityValidationCode(string mobile, out string code)
+        public Task<SendResponse> SendIdentityValidationCode(string mobile, out string code)
         {
             code = SecurityHelper.CreateRandomNumbericString(_options.TemplateIdentityValidation.CodeLength);
 
@@ -51,26 +52,14 @@ namespace HB.Infrastructure.Aliyun.Sms
                     if (t.IsFaulted || t.Result == null)
                     {
                         _logger.LogError("Validation Sms Send Err, Result is empty");
-                        return new SmsResponseResult() { Message = "Error.", Succeeded = false };
+                        return new SendResponse() { Message = "Error.", Succeeded = false };
                     }
 
                     _logger.LogInformation("Validation Sms Sended. Mobile:{0}, {1}, Content : {2}", mobile, _options.TemplateIdentityValidation.ParamProductValue, 
                         Encoding.UTF8.GetString(t.Result.HttpResponse.Content));
 
-                    return new SmsResponseResult() { Message = t.Result.Message, Succeeded = true };
+                    return new SendResponse() { Message = t.Result.Message, Succeeded = true };
                 });
         }
-
-        //public async Task<bool> VerifyIdentityValidateCode(string mobile, string code)
-        //{
-        //    if (string.IsNullOrWhiteSpace(code))
-        //    {
-        //        return await Task.FromResult(false);
-        //    }
-
-        //    string cachedCode = await Cache.GetStringAsync(GetIdentityValidationCacheKey(mobile));
-
-        //    return code.Equals(cachedCode, StringComparison.InvariantCultureIgnoreCase);
-        //}
     }
 }
