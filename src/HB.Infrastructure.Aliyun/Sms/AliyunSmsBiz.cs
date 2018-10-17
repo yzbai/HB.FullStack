@@ -24,7 +24,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             _logger = logger;
         }
 
-        public Task<SendResponse> SendIdentityValidationCode(string mobile, out string code)
+        public Task<SendResponse> SendValidationCode(string mobile, out string code)
         {
             code = SecurityHelper.CreateRandomNumbericString(_options.TemplateIdentityValidation.CodeLength);
 
