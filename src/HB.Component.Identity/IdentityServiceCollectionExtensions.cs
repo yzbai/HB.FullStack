@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IdentityServiceCollectionExtensions
     {
-        public static IServiceCollection AddUserIdentity(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
+        public static IServiceCollection AddIdentity(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
         {
             services.AddOptions();
 

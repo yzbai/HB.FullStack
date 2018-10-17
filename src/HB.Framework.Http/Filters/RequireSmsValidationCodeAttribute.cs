@@ -7,15 +7,15 @@ using System.Collections.Generic;
 namespace Microsoft.AspNetCore.Mvc.Filters
 {
 
-    public class RequireSmsIdentityValidationCodeAttribute : ActionFilterAttribute
+    public class RequireSmsValidationCodeAttribute : ActionFilterAttribute
     {
         public string SmsCodeParameterName { get; set; }
         
         public string SmsCodeSessiionName { get; set; }
 
-        public RequireSmsIdentityValidationCodeAttribute(string parameterName) : this(parameterName, parameterName) { }
+        public RequireSmsValidationCodeAttribute(string parameterName) : this(parameterName, parameterName) { }
 
-        public RequireSmsIdentityValidationCodeAttribute(string smsCodeParameterName, string smsCodeSessionName)
+        public RequireSmsValidationCodeAttribute(string smsCodeParameterName, string smsCodeSessionName)
         {
             SmsCodeParameterName = smsCodeParameterName;
             SmsCodeSessiionName = smsCodeSessionName;
