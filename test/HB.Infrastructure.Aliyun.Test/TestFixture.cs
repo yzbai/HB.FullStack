@@ -1,4 +1,4 @@
-﻿using HB.Compnent.Common.Sms;
+﻿using HB.Compnent.Resource.Sms;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,9 +36,9 @@ namespace HB.Infrastructure.Aliyun.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public ISmsBiz GetSmsBiz()
+        public ISmsService GetSmsBiz()
         {
-            return Services.GetRequiredService<ISmsBiz>();
+            return Services.GetRequiredService<ISmsService>();
         }
 
         public void Dispose()

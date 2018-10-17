@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.Configure(optionSetup);
-            services.AddSingleton<ISmsBiz, AliyunSmsBiz>();
+            services.AddSingleton<ISmsService, AliyunSmsBiz>();
 
             return services;
         }
@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.Configure<AliyunSmsOptions>(configuration);
-            services.AddSingleton<ISmsBiz, AliyunSmsBiz>();
+            services.AddSingleton<ISmsService, AliyunSmsBiz>();
 
             return services;
         }

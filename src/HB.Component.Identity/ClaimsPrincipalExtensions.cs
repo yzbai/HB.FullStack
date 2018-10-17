@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Claims;
 
-namespace HB.Component.Identity
+namespace System.Security.Claims
 {
     public static class ClaimsPrincipalExtensions
     {
