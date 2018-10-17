@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.Compnent.Resource.Sms
 {
-    public interface ISmsBiz
+    public interface ISmsService
     {
         /// <summary>
         /// 用于验证用户手机
@@ -14,7 +14,7 @@ namespace HB.Compnent.Resource.Sms
         /// <param name="mobile"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<SendResponse> SendIdentityValidationCode(string mobile, out string code);
+        Task<SendResponse> SendValidationCode(string mobile, out string code);
 
     }
 }
