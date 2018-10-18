@@ -9,7 +9,7 @@ namespace HB.Infrastructure.MySQL
     /// 动态SQL和SP执行
     /// 具体执行步骤都要有异常捕捉，直接抛出给上一层
     /// </summary>
-    public partial class MySQLExecuter
+    public static partial class MySQLExecuter
     {
         #region private utility methods & constructors
 
@@ -122,7 +122,7 @@ namespace HB.Infrastructure.MySQL
 
                 return reader;
             }
-            catch (Exception ex)
+            catch
             {
                 if (isOwnedConnection)
                 {
@@ -134,7 +134,7 @@ namespace HB.Infrastructure.MySQL
                     reader.Close();
                 }
 
-                throw ex;
+                throw;
             }
         }
 
@@ -192,9 +192,9 @@ namespace HB.Infrastructure.MySQL
 
                 rtObj = command.ExecuteScalar();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -262,9 +262,9 @@ namespace HB.Infrastructure.MySQL
 
                 rtInt = command.ExecuteNonQuery();
             }
-            catch (Exception ex)
+            catch  
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -305,9 +305,9 @@ namespace HB.Infrastructure.MySQL
             {
                 rtInt = command.ExecuteNonQuery();
             }
-            catch (Exception ex)
+            catch 
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -348,9 +348,9 @@ namespace HB.Infrastructure.MySQL
             {
                 rtObj = command.ExecuteScalar();
             }
-            catch (Exception ex)
+            catch  
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -399,7 +399,7 @@ namespace HB.Infrastructure.MySQL
                     reader = command.ExecuteReader();
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 if (isOwedConnection)
                 {
@@ -411,7 +411,7 @@ namespace HB.Infrastructure.MySQL
                     reader.Close();
                 }
 
-                throw ex;
+                throw;
             }
 
             command.Parameters.Clear();
@@ -435,7 +435,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (mySqlTransaction == null)
             {
-                throw new ArgumentNullException("ExecuteSqlReader方法不接收NULL参数");
+                throw new ArgumentNullException(nameof(mySqlTransaction), "ExecuteSqlReader方法不接收NULL参数");
             }
 
             return ExecuteSqlDataTable(mySqlTransaction.Connection, sqlString, false);

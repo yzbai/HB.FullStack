@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common.Validation.Attributes
 {
-    public class YearAttribute : ValidationAttribute
+    public sealed class YearAttribute : ValidationAttribute
     {
         public YearAttribute()
         {

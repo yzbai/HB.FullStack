@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common.Validate
 {
-    public class ValidationMethods
+    public static class ValidationMethods
     {
         public static bool IsEmail(string str)
         {

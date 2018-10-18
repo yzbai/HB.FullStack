@@ -28,7 +28,7 @@ namespace HB.Infrastructure.Redis
         private ILogger _logger;
         private Dictionary<string, RedisWrapper> _connectionDict;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-        private object _closeLocker = new object();
+        private readonly object _closeLocker = new object();
 
         protected RedisEngineOptions Options { get; private set; }
 

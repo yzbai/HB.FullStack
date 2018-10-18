@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Aliyun
         {
             if (string.IsNullOrWhiteSpace(productName) || profile == null)
             {
-                throw new ArgumentNullException("Aliyun client profile 配置不能为空，或者productname不能为空.");
+                throw new ArgumentNullException(nameof(productName), "Aliyun client profile 配置不能为空，或者productname不能为空.");
             }
 
             if (_clients.ContainsKey(productName))

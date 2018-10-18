@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common.Validation.Attributes
 {
-    public class DayAttribute : ValidationAttribute
+    public sealed class DayAttribute : ValidationAttribute
     {
         public DayAttribute()
         {

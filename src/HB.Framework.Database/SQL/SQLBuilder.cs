@@ -484,7 +484,7 @@ namespace HB.Framework.Database.SQL
         {
             if (domains == null || domains.Count == 0)
             {
-                throw new ArgumentNullException("domains");
+                throw new ArgumentNullException(nameof(domains));
             }
 
             StringBuilder innerBuilder = new StringBuilder();
@@ -554,7 +554,7 @@ namespace HB.Framework.Database.SQL
         {
             if (entities == null || entities.Count == 0)
             {
-                throw new ArgumentNullException("domains");
+                throw new ArgumentNullException(nameof(entities));
             }
 
             StringBuilder innerBuilder = new StringBuilder();
@@ -610,7 +610,7 @@ namespace HB.Framework.Database.SQL
         {
             if (domains == null || domains.Count == 0)
             {
-                throw new ArgumentNullException("domains");
+                throw new ArgumentNullException(nameof(domains));
             }
 
             StringBuilder innerBuilder = new StringBuilder();

@@ -13,8 +13,8 @@ namespace HB.Framework.Database.SQL
 
         private bool _firstAssign;
 
-        private DatabaseEntityDef _sourceModelDef;
-        private IDatabaseEngine _databaseEngine;
+        private readonly DatabaseEntityDef _sourceModelDef;
+        private readonly IDatabaseEngine _databaseEngine;
 
         public bool WithSelectString { get; set; }
 

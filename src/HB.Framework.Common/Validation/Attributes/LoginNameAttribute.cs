@@ -1,6 +1,6 @@
 ﻿namespace System.ComponentModel.DataAnnotations
 {
-    public class LoginNameAttribute : ValidationAttribute
+    public sealed class LoginNameAttribute : ValidationAttribute
     {
         public LoginNameAttribute()
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace HB.Framework.KVStore.Entity
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class KVStoreKeyAttribute : System.Attribute
+    public sealed class KVStoreKeyAttribute : System.Attribute
     {
     }
 }
