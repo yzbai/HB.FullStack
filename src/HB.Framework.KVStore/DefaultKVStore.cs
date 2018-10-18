@@ -12,7 +12,7 @@ namespace HB.Framework.KVStore
 {
     public class DefaultKVStore : IKVStore
     {
-        private KVStoreOptions _options;
+        private readonly KVStoreOptions _options;
         private IKVStoreEngine _engine;
         private IKVStoreEntityDefFactory _entityDefFactory;
 
@@ -264,7 +264,8 @@ namespace HB.Framework.KVStore
                 storeName(entityDef),
                 storeIndex(entityDef),
                 entityName(entityDef),
-                entityKey(keyValue)).ContinueWith(t=>deSerialize<T>(t.Result));
+                entityKey(keyValue))
+                .ContinueWith(t=>deSerialize<T>(t.Result), TaskScheduler.Default);
         }
 
         public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -275,7 +276,8 @@ namespace HB.Framework.KVStore
                 storeName(entityDef),
                 storeIndex(entityDef),
                 entityName(entityDef),
-                entityKey(keyValues)).ContinueWith(t=>deSerialize<T>(t.Result));
+                entityKey(keyValues))
+                .ContinueWith(t=>deSerialize<T>(t.Result), TaskScheduler.Default);
         }
 
         public Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
@@ -285,7 +287,8 @@ namespace HB.Framework.KVStore
             return _engine.EntityGetAllAsync(
                 storeName(entityDef),
                 storeIndex(entityDef),
-                entityName(entityDef)).ContinueWith(t=>deSerialize<T>(t.Result));
+                entityName(entityDef))
+                .ContinueWith(t=>deSerialize<T>(t.Result), TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> AddAsync<T>(T item) where T : KVStoreEntity, new()
@@ -343,8 +346,8 @@ namespace HB.Framework.KVStore
                 entityName(entityDef),
                 entityKey(items, entityDef),
                 entityValue(items),
-                originalVersions
-                ).ContinueWith(t=> {
+                originalVersions)
+                .ContinueWith(t=> {
                     if (!t.Result.IsSucceeded())
                     {
                         foreach (T item in items)
@@ -354,7 +357,7 @@ namespace HB.Framework.KVStore
                     }
 
                     return t.Result;
-                });
+                }, TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> DeleteAsync<T>(T item) where T : KVStoreEntity, new()

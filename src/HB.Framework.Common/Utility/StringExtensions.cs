@@ -10,7 +10,7 @@ namespace HB.Framework.Common
         {
             if (str == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(str));
             }
 
             if (words == null || words.Length == 0)

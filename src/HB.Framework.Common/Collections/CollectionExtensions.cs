@@ -17,17 +17,17 @@ namespace System.Collections.Generic
                     ICloneable cloneable = entry.Value as ICloneable;
                     ret.Add(entry.Key, (TValue)cloneable.Clone());
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    throw ex;
+                    throw;
                 }
             }
             return ret;
         }
 
-        public static IDictionary<Tkey, TNewValue> ConvertValue<Tkey, TValue, TNewValue>(this IDictionary<Tkey, TValue> original, Func<TValue, TNewValue> converter)
+        public static IDictionary<TKey, TNewValue> ConvertValue<TKey, TValue, TNewValue>(this IDictionary<TKey, TValue> original, Func<TValue, TNewValue> converter)
         {
-            IDictionary<Tkey, TNewValue> ret = new Dictionary<Tkey, TNewValue>();
+            IDictionary<TKey, TNewValue> ret = new Dictionary<TKey, TNewValue>();
 
             foreach (var pair in original)
             {

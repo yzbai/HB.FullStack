@@ -16,7 +16,7 @@ namespace HB.Framework.Database.SQL
         {
             if (!enumType.GetTypeInfo().IsEnum)
             {
-                throw new ArgumentException("Type not valid", "enumType");
+                throw new ArgumentException("Type not valid", nameof(enumType));
             }
 
             EnumType = enumType;

@@ -17,7 +17,7 @@ namespace HB.Component.Authorization
 {
     public class SignInTokenBiz : BizWithDbTransaction, ISignInTokenBiz
     {
-        private AuthorizationServerOptions _options;
+        private readonly AuthorizationServerOptions _options;
 
         private IDatabase _db;
         private ILogger _logger;

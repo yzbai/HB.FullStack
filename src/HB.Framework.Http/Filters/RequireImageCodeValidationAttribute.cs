@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Microsoft.AspNetCore.Mvc.Filters
 {
-    public class RequireImageCodeValidationAttribute : ActionFilterAttribute
+    public sealed class RequireImageCodeValidationAttribute : ActionFilterAttribute
     {
         public string ImageCodeParameterName { get; set; }
 

@@ -17,7 +17,7 @@ namespace HB.Framework.Database.SQL
 
         private DatabaseEntityDef _sourceEntityDef;
 
-        private IDatabaseEngine _databaseEngine;
+        private readonly IDatabaseEngine _databaseEngine;
 
         public bool WithFromString { get; set; }
 
