@@ -31,7 +31,7 @@ namespace HB.Framework.Common.Validate
             //= @"^(\d{3.4}-)\d{7,8}$"; //@"^([0-9]{3}|0[0-9]{3})-[1-9][0-9]{6,7}(-[0-9]{1,6})?$";
             = @"^[0-9\-()（）]{7,18}$";
 
-        public static readonly string Integer
+        public static readonly string IntegerNumber
             = @"^-?[1-9]\d*$";
 
         public static readonly string PositiveInteger

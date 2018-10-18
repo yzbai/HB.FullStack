@@ -18,12 +18,12 @@ namespace HB.Framework.KVStore.Entity
             _options = options.Value;
         }
 
-        public KVStoreEntityDef Get<T>()
+        public KVStoreEntityDef GetDef<T>()
         {
-            return Get(typeof(T));
+            return GetDef(typeof(T));
         }
 
-        public KVStoreEntityDef Get(Type type)
+        public KVStoreEntityDef GetDef(Type type)
         {
             if (!_defDict.ContainsKey(type))
             {

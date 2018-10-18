@@ -14,18 +14,22 @@ namespace HB.Infrastructure.MySQL
         {
             MySqlConnection conn = new MySqlConnection(connectionString);
 
-            MySqlCommand command = new MySqlCommand();
-            command.CommandType = CommandType.Text;
-            command.CommandText = sqlString;
+            MySqlCommand command = new MySqlCommand
+            {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
 
             return ExecuteCommandReaderAsync(conn, true, command);
         }
 
         public static Task<IDataReader> ExecuteSqlReaderAsync(MySqlTransaction mySqlTransaction, string sqlString)
         {
-            MySqlCommand command = new MySqlCommand();
-            command.CommandType = CommandType.Text;
-            command.CommandText = sqlString;
+            MySqlCommand command = new MySqlCommand
+            {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
 
             return ExecuteCommandReaderAsync(mySqlTransaction.Connection, false, command);
         }
@@ -56,11 +60,11 @@ namespace HB.Infrastructure.MySQL
 
                 if (isOwnedConnection)
                 {
-                    reader = (MySqlDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+                    reader = (MySqlDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
                 }
                 else
                 {
-                    reader = (MySqlDataReader)await command.ExecuteReaderAsync();
+                    reader = (MySqlDataReader)await command.ExecuteReaderAsync().ConfigureAwait(false);
                 }
 
                 return reader;
@@ -100,18 +104,22 @@ namespace HB.Infrastructure.MySQL
         {
             MySqlConnection conn = new MySqlConnection(connectionString);
 
-            MySqlCommand command = new MySqlCommand();
-            command.CommandType = CommandType.Text;
-            command.CommandText = sqlString;
+            MySqlCommand command = new MySqlCommand
+            {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
 
             return ExecuteCommandScalarAsync(conn, true, command);
         }
 
         public static Task<object> ExecuteSqlScalarAsync(MySqlTransaction mySqlTransaction, string sqlString)
         {
-            MySqlCommand command = new MySqlCommand();
-            command.CommandType = CommandType.Text;
-            command.CommandText = sqlString;
+            MySqlCommand command = new MySqlCommand
+            {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
 
             return ExecuteCommandScalarAsync(mySqlTransaction.Connection, false, command);
         }
@@ -129,7 +137,7 @@ namespace HB.Infrastructure.MySQL
 
                 command.Connection = connection;
 
-                rtObj = await command.ExecuteScalarAsync();
+                rtObj = await command.ExecuteScalarAsync().ConfigureAwait(false);
             }
             catch 
             {
@@ -166,18 +174,22 @@ namespace HB.Infrastructure.MySQL
         {
             MySqlConnection conn = new MySqlConnection(connectionString);
 
-            MySqlCommand command = new MySqlCommand();
-            command.CommandType = CommandType.Text;
-            command.CommandText = sqlString;
+            MySqlCommand command = new MySqlCommand
+            {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
 
             return ExecuteCommandNonQueryAsync(conn, true, command);
         }
 
         public static Task<int> ExecuteSqlNonQueryAsync(MySqlTransaction mySqlTransaction, string sqlString)
         {
-            MySqlCommand command = new MySqlCommand();
-            command.CommandType = CommandType.Text;
-            command.CommandText = sqlString;
+            MySqlCommand command = new MySqlCommand
+            {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
 
             return ExecuteCommandNonQueryAsync(mySqlTransaction.Connection, false, command);
         }
@@ -195,7 +207,7 @@ namespace HB.Infrastructure.MySQL
 
                 command.Connection = conn;
 
-                rtInt = await command.ExecuteNonQueryAsync();
+                rtInt = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
             catch
             {
@@ -238,7 +250,7 @@ namespace HB.Infrastructure.MySQL
 
             try
             {
-                rtInt = await command.ExecuteNonQueryAsync();
+                rtInt = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
             catch 
             {
@@ -268,7 +280,7 @@ namespace HB.Infrastructure.MySQL
 
         public static Task<object> ExecuteSPScalarAsync(string connectString, string spName, IList<IDataParameter> parameters)
         {
-            MySqlConnection conn = new MySqlConnection();
+            MySqlConnection conn = new MySqlConnection(connectString);
             return ExecuteSPScalarAsync(conn, null, true, spName, parameters);
         }
 
@@ -281,7 +293,7 @@ namespace HB.Infrastructure.MySQL
 
             try
             {
-                rtObj = await command.ExecuteScalarAsync();
+                rtObj = await command.ExecuteScalarAsync().ConfigureAwait(false);
             }
             catch
             {
@@ -327,11 +339,11 @@ namespace HB.Infrastructure.MySQL
             {
                 if (isOwedConnection)
                 {
-                    reader = (MySqlDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+                    reader = (MySqlDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
                 }
                 else
                 {
-                    reader = (MySqlDataReader)await command.ExecuteReaderAsync();
+                    reader = (MySqlDataReader)await command.ExecuteReaderAsync().ConfigureAwait(false);
                 }
             }
             catch

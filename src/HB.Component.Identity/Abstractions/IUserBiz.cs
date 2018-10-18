@@ -13,7 +13,7 @@ namespace HB.Component.Identity.Abstractions
         Task<long?> GetIdByUserNameAsync(string userName, DbTransactionContext transContext = null);
         Task<User> GetUserByEmailAsync(string email, DbTransactionContext transContext = null);
         Task<User> GetUserByIdAsync(long userId, DbTransactionContext transContext = null);
-        Task<User> GetUserByGuidAsync(string guid, DbTransactionContext transContext = null);
+        Task<User> GetUserByGuidAsync(string guidStr, DbTransactionContext transContext = null);
         Task<User> GetUserByMobileAsync(string mobile, DbTransactionContext transContext = null);
         Task<User> GetUserByUserNameAsync(string userName, DbTransactionContext transContext = null);
         Task<IList<User>> GetUsersByIdsAsync(IEnumerable<long> userIds, DbTransactionContext transContext = null);

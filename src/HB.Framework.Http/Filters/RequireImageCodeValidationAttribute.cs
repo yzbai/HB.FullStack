@@ -21,19 +21,19 @@ namespace Microsoft.AspNetCore.Mvc.Filters
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (handleValidation(context.HttpContext))
+            if (HandleValidation(context.HttpContext))
             {
                 base.OnActionExecuting(context);
             }
             else
             {
-                handleFailRequest(context);
+                HandleFailRequest(context);
             }
         }
 
-        private void handleFailRequest(ActionExecutingContext context)
+        private static void HandleFailRequest(ActionExecutingContext context)
         {
-            if (context.HttpContext.Request.Path.StartsWithSegments("/api"))
+            if (context.HttpContext.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCulture))
             {
                 context.Result = new BadRequestObjectResult("ImageCode Error.");
             }
@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
             }
         }
 
-        private bool handleValidation(HttpContext httpContext)
+        private bool HandleValidation(HttpContext httpContext)
         {
             if (httpContext == null)
             {
@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
 
             string cachedCode = httpContext.Session.GetString(ImageCodeParameterName);
 
-            return imageCode.Equals(cachedCode);
+            return imageCode.Equals(cachedCode, StringComparison.InvariantCulture);
         }
     }
 }

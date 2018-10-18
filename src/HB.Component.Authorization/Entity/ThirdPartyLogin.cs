@@ -5,7 +5,6 @@ using HB.Component.Identity.Entity;
 
 namespace HB.Component.Authorization.Entity
 {
-    [Serializable]
     public class ThirdPartyLogin : DatabaseEntity
     {
         [DatabaseForeignKey("用户ID", typeof(User))]

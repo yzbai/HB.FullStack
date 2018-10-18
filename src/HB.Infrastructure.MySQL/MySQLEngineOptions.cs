@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +25,7 @@ namespace HB.Infrastructure.MySQL
 
         public IEnumerable<MySQLDatabaseSetting> GetDatabaseSetting(string databaseName)
         {
-            return DatabaseSettings.Where(ds => ds.Name.Equals(databaseName));
+            return DatabaseSettings.Where(ds => ds.Name.Equals(databaseName, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

@@ -13,49 +13,49 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 实体名
         /// </summary>
-        public string EntityFullName;
+        public string EntityFullName { get; set; }
         /// <summary>
         /// 实体类型
         /// </summary>
-        public Type EntityType;
-               
+        public Type EntityType { get; set; }
+
         #endregion
 
         #region 针对数据库描述
         /// <summary>
         /// 是否是TableDomain
         /// </summary>
-        public bool IsTableModel;
+        public bool IsTableModel { get; set; }
         /// <summary>
         /// 所属数据库
         /// 在IsTableDomain为false时没有意义
         /// </summary>
-        public string DatabaseName;
+        public string DatabaseName { get; set; }
 
         /// <summary>
         /// 数据库是否可写
         /// </summary>
-        public bool DatabaseWriteable;
+        public bool DatabaseWriteable { get; set; }
 
         /// <summary>
         /// 数据库表名
         /// 在IsTableDomain为false时没有意义
         /// </summary>
-        public string TableName;
+        public string TableName { get; set; }
         /// <summary>
         /// 数据库专有化后的名称
         /// 在IsTableDomain为false时没有意义
         /// </summary>
-        public string DbTableReservedName;
+        public string DbTableReservedName { get; set; }
 
         /// <summary>
         /// 数据库表描述（备注）
         /// 在IsTableDomain为false时没有意义
         /// </summary>
-        public string DbTableDescription;
+        public string DbTableDescription { get; set; }
 
-        public int FieldCount;
-        
+        public int FieldCount { get; set; }
+
         #endregion
 
         #region 所含属性
@@ -63,8 +63,7 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 属性字典
         /// </summary>
-        public Dictionary<string, DatabaseEntityPropertyDef> PropertyDict;
-
+        public Dictionary<string, DatabaseEntityPropertyDef> PropertyDict { get; } = new Dictionary<string, DatabaseEntityPropertyDef>();
         /// <summary>
         /// 属性枚举
         /// </summary>
@@ -72,7 +71,7 @@ namespace HB.Framework.Database.Entity
 
         #endregion
 
-        public DatabaseEntityDef() 
+        public DatabaseEntityDef()
         {
             FieldCount = 0;
         }

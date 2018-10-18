@@ -6,15 +6,15 @@ namespace HB.Framework.Database.Entity
 {
     public interface IDatabaseEntityMapper
     {
-        IList<T> To<T>(IDataReader reader) where T : DatabaseEntity, new();
+        IList<T> ToList<T>(IDataReader reader) where T : DatabaseEntity, new();
 
-        void To<T>(IDataReader reader, T item) where T : DatabaseEntity, new();
+        void ToObject<T>(IDataReader reader, T item) where T : DatabaseEntity, new();
 
-        IList<Tuple<TSource, TTarget>> To<TSource, TTarget>(IDataReader reader)
+        IList<Tuple<TSource, TTarget>> ToList<TSource, TTarget>(IDataReader reader)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new();
 
-        IList<Tuple<TSource, TTarget2, TTarget3>> To<TSource, TTarget2, TTarget3>(IDataReader reader)
+        IList<Tuple<TSource, TTarget2, TTarget3>> ToList<TSource, TTarget2, TTarget3>(IDataReader reader)
             where TSource : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
             where TTarget3 : DatabaseEntity, new();

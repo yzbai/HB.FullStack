@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using HB.Framework.KVStore;
 using System.Text;
 using Microsoft.AspNetCore.Hosting;
+using System.Globalization;
 
 namespace HB.Infrastructure.Redis.KVStore
 {
@@ -19,26 +20,28 @@ namespace HB.Infrastructure.Redis.KVStore
         //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";
         //private static readonly string luaUpdateScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) redis.call('HSET', KEYS[1], ARGV[1], ARGV[4]) return 1 end";
 
-        private static readonly string luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then return 9 end ";
-        private static readonly string luaBatchAddTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) ";
-        private static readonly string luaBatchAddReturnTemplate = @"return 1";
+        private static CultureInfo _culture = CultureInfo.InvariantCulture;
 
-        private static readonly string luaBatchUpdateVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
-        private static readonly string luaBatchUpdateTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], ARGV[{2}]+1) ";
-        private static readonly string luaBatchUpdateReturnTemplate = @"return 1";
+        private const string luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then return 9 end ";
+        private const string luaBatchAddTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) ";
+        private const string luaBatchAddReturnTemplate = @"return 1";
 
-        private static readonly string luaBatchDeleteVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
-        private static readonly string luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
-        private static readonly string luaBatchDeleteReturnTemplate = @"return 1";
+        private const string luaBatchUpdateVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
+        private const string luaBatchUpdateTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], ARGV[{2}]+1) ";
+        private const string luaBatchUpdateReturnTemplate = @"return 1";
+
+        private const string luaBatchDeleteVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
+        private const string luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
+        private const string luaBatchDeleteReturnTemplate = @"return 1";
 
         public RedisKVStoreEngine(IApplicationLifetime applicationLifetime, IOptions<RedisEngineOptions> options, ILogger<RedisKVStoreEngine> logger) : base(applicationLifetime, options.Value, logger) { }
 
-        private string entityVersionName(string entityName)
+        private static string EntityVersionName(string entityName)
         {
             return entityName + ":Version";
         }
 
-        private static KVStoreResult mapResult(RedisResult redisResult)
+        private static KVStoreResult MapResult(RedisResult redisResult)
         {
             int result = (int)redisResult;
 
@@ -52,18 +55,18 @@ namespace HB.Infrastructure.Redis.KVStore
             }
         }
 
-        private static string assembleBatchAddLuaScript(int count)
+        private static string AssembleBatchAddLuaScript(int count)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(luaBatchAddExistCheckTemplate, i + 1);
+                stringBuilder.AppendFormat(_culture, luaBatchAddExistCheckTemplate, i + 1);
             }
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(luaBatchAddTemplate, i + 1, i + count + 1);
+                stringBuilder.AppendFormat(_culture, luaBatchAddTemplate, i + 1, i + count + 1);
             }
 
             stringBuilder.Append(luaBatchAddReturnTemplate);
@@ -71,18 +74,18 @@ namespace HB.Infrastructure.Redis.KVStore
             return stringBuilder.ToString();
         }
 
-        private static string assembleBatchUpdateLuaScript(int count)
+        private static string AssembleBatchUpdateLuaScript(int count)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(luaBatchUpdateVersionCheckTemplate, i + 1, i + count + count + 1);
+                stringBuilder.AppendFormat(_culture, luaBatchUpdateVersionCheckTemplate, i + 1, i + count + count + 1);
             }
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(luaBatchUpdateTemplate, i + 1, i + count + 1, i + count + count + 1);
+                stringBuilder.AppendFormat(_culture, luaBatchUpdateTemplate, i + 1, i + count + 1, i + count + count + 1);
             }
 
             stringBuilder.Append(luaBatchUpdateReturnTemplate);
@@ -90,18 +93,18 @@ namespace HB.Infrastructure.Redis.KVStore
             return stringBuilder.ToString();
         }
 
-        private static string assembleBatchDeleteLuaScript(int count)
+        private static string AssembleBatchDeleteLuaScript(int count)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(luaBatchDeleteVersionCheckTemplate, i + 1, i + count + 1);
+                stringBuilder.AppendFormat(_culture, luaBatchDeleteVersionCheckTemplate, i + 1, i + count + 1);
             }
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(luaBatchDeleteTemplate, i + 1);
+                stringBuilder.AppendFormat(_culture, luaBatchDeleteTemplate, i + 1);
             }
 
             stringBuilder.Append(luaBatchDeleteReturnTemplate);
@@ -139,18 +142,18 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<byte[]> entityValues)
         {
-            string luaScript = assembleBatchAddLuaScript(entityKeys.Count());
+            string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
 
-            RedisKey[] keys = new RedisKey[] { entityName, entityVersionName(entityName) };
+            RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
 
 
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityValues.Select(bytes=>(RedisValue)bytes)).ToArray();
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript.ToString(_culture), keys, argvs);
 
-            return mapResult(result);
+            return MapResult(result);
 
         }
 
@@ -161,18 +164,18 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<byte[]> entityValues, IEnumerable<int> entityVersions)
         {
-            string luaScript = assembleBatchUpdateLuaScript(entityKeys.Count());
+            string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
 
-            RedisKey[] keys = new RedisKey[] { entityName, entityVersionName(entityName) };
+            RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t)
                 .Concat(entityValues.Select(t=>(RedisValue)t))
                 .Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript.ToString(_culture), keys, argvs);
 
-            return mapResult(result);
+            return MapResult(result);
         }
 
         public KVStoreResult EntityDelete(string storeName, int storeIndex, string entityName, string entityKey, int entityVersion)
@@ -182,16 +185,16 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public KVStoreResult EntityDelete(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
         {
-            string luaScript = assembleBatchDeleteLuaScript(entityKeys.Count());
+            string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
 
-            RedisKey[] keys = new RedisKey[] { entityName, entityVersionName(entityName) };
+            RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript.ToString(_culture), keys, argvs);
 
-            return mapResult(result);
+            return MapResult(result);
         }
 
         public KVStoreResult EntityDeleteAll(string storeName, int storeIndex, string entityName)

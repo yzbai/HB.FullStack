@@ -13,23 +13,23 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 所属实体名称
         /// </summary>
-        public DatabaseEntityDef EntityDef;
+        public DatabaseEntityDef EntityDef { get; set; }
         /// <summary>
         /// 属性名称
         /// </summary>
-        public string PropertyName;
+        public string PropertyName { get; set; }
         /// <summary>
         /// 属性类型
         /// </summary>
-        public Type PropertyType;
+        public Type PropertyType { get; set; }
         /// <summary>
         /// Get方法
         /// </summary>
-        public MethodInfo GetMethod;
+        public MethodInfo GetMethod { get; set; }
         /// <summary>
         /// Set方法
         /// </summary>
-        public MethodInfo SetMethod;
+        public MethodInfo SetMethod { get; set; }
 
         #endregion
 
@@ -38,37 +38,37 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 是否是数据库表字段
         /// </summary>
-        public bool IsTableProperty;
+        public bool IsTableProperty { get; set; }
         /// <summary>
         /// 数据库引号化后的名称
         /// IsTableProperty为false时无意义
         /// </summary>
-        public string DbReservedName;
+        public string DbReservedName { get; set; }
         /// <summary>
         /// 数据库参数化后的名称
         /// IsTableProperty为false时无意义
         /// </summary>
-        public string DbParameterizedName;
+        public string DbParameterizedName { get; set; }
         /// <summary>
         /// 数据库中对应类型
         /// IsTableProperty为false时无意义
         /// </summary>
-        public DbType DbFieldType;
+        public DbType DbFieldType { get; set; }
         /// <summary>
         /// 是否是主键
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsPrimaryKey;
+        public bool IsPrimaryKey { get; set; }
         /// <summary>
         /// 是否是外键
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsForeignKey;
+        public bool IsForeignKey { get; set; }
         /// <summary>
         /// 是否唯一值
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsUnique;
+        public bool IsUnique { get; set; }
         /// <summary>
         /// 是否自增长
         /// IsTableProperty为false时无意义
@@ -78,22 +78,22 @@ namespace HB.Framework.Database.Entity
         /// 是否可空
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsNullable;
+        public bool IsNullable { get; set; }
         /// <summary>
         /// 数据库字段长度
         /// IsTableProperty为false时无意义
         /// </summary>
-        public int? DbLength;
+        public int? DbLength { get; set; }
         /// <summary>
         /// 数据库默认值
         /// IsTableProperty为false时无意义
         /// </summary>
-        public string DbDefaultValue;
+        public string DbDefaultValue { get; set; }
         /// <summary>
         /// 数据库中备注、描述
         /// IsTableProperty为false时无意义
         /// </summary>
-        public string DbDescription;
+        public string DbDescription { get; set; }
 
         #endregion
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace HB.Framework.Database
     {
         #region 单表查询, Select, From, Where
 
-        public Task<T> ScalarAsync<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(selectCondition, fromCondition, whereCondition, transContext, useMaster)
@@ -36,7 +37,7 @@ namespace HB.Framework.Database
                 }, TaskScheduler.Default);
         }
 
-        public async Task<IList<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(Select<TSelect> selectCondition, From<TFrom> fromCondition, Where<TWhere> whereCondition, DbTransactionContext transContext = null, bool useMaster = false)
+        public async Task<IList<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(SelectExpression<TSelect> selectCondition, FromExpression<TFrom> fromCondition, WhereExpression<TWhere> whereCondition, DbTransactionContext transContext = null, bool useMaster = false)
             where TSelect : DatabaseEntity, new()
             where TFrom : DatabaseEntity, new()
             where TWhere : DatabaseEntity, new()
@@ -45,12 +46,12 @@ namespace HB.Framework.Database
 
             if (selectCondition != null)
             {
-                selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+                selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
             }
 
             if (whereCondition == null)
             {
-                whereCondition = new Where<TWhere>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TWhere>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false).And<TSelect>(ts=>ts.Deleted == false).And<TFrom>(tf=>tf.Deleted == false);
@@ -59,14 +60,14 @@ namespace HB.Framework.Database
 
             IList<TSelect> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef selectDef = _entityDefFactory.Get<TSelect>();
+            DatabaseEntityDef selectDef = _entityDefFactory.GetDef<TSelect>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(selectCondition, fromCondition, whereCondition);
 
-                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<TSelect>(reader);
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName, command, useMaster).ConfigureAwait(false);
+                result = _modelMapper.ToList<TSelect>(reader);
             }
             catch (Exception ex)
             {
@@ -84,19 +85,19 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public async Task<IList<T>> RetrieveAsync<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<IList<T>> RetrieveAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
 
 			if (selectCondition != null)
 			{
-				selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
 			}
 
 			if (whereCondition == null)
 			{
-				whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
+				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -105,14 +106,14 @@ namespace HB.Framework.Database
 
 			IList<T> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef modelDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef modelDef = _entityDefFactory.GetDef<T>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<T>(selectCondition, fromCondition, whereCondition);
 
-                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<T>(reader);
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName, command, useMaster).ConfigureAwait(false);
+                result = _modelMapper.ToList<T>(reader);
             }
             catch (Exception ex)
             {
@@ -130,19 +131,19 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public Task<IList<T>> PageAsync<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
 
 			if (selectCondition != null)
 			{
-				selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
 			}
 
 			if (whereCondition == null)
 			{
-				whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
+				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -154,19 +155,19 @@ namespace HB.Framework.Database
             return RetrieveAsync<T>(selectCondition, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public async Task<long> CountAsync<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<long> CountAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
 
 			if (selectCondition != null)
 			{
-				selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
 			}
 
 			if (whereCondition == null)
 			{
-				whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
+				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -175,12 +176,12 @@ namespace HB.Framework.Database
 
             long count = -1;
 
-			DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+			DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
             try
             {
                 IDbCommand command = _sqlBuilder.CreateCountCommand<T>(fromCondition, whereCondition);
-                object countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                count = Convert.ToInt32(countObj);
+                object countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster).ConfigureAwait(false);
+                count = Convert.ToInt32(countObj, CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
@@ -194,25 +195,25 @@ namespace HB.Framework.Database
 
         #region 单表查询, From, Where
 
-        public Task<T> ScalarAsync<T>(From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return ScalarAsync<T>(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> RetrieveAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> PageAsync<T>(From<T> fromCondition, Where<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return PageAsync<T>(null, fromCondition, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public Task<long> CountAsync<T>(From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<long> CountAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return CountAsync<T>(null, fromCondition, whereCondition, transContext, useMaster);
@@ -228,19 +229,19 @@ namespace HB.Framework.Database
             return RetrieveAsync<T>(null, null, null, transContext, useMaster);
         }
 
-        public Task<T> ScalarAsync<T>(Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return ScalarAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> RetrieveAsync<T>(WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> PageAsync<T>(Where<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return PageAsync<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
@@ -252,7 +253,7 @@ namespace HB.Framework.Database
             return PageAsync<T>(null, null, null, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public Task<long> CountAsync<T>(Where<T> condition, DbTransactionContext transContext, bool useMaster)
+        public Task<long> CountAsync<T>(WhereExpression<T> condition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return CountAsync<T>(null, null, condition, transContext, useMaster);
@@ -277,8 +278,8 @@ namespace HB.Framework.Database
         //public Task<T> RetrieveScalaAsyncr<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster = false) where T : DatabaseEntity, new();
         public Task<T> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster = false) where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
-            whereCondition.where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            whereCondition.Where(whereExpr);
 
             return ScalarAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
@@ -286,8 +287,8 @@ namespace HB.Framework.Database
         public Task<IList<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
-            whereCondition.where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            whereCondition.Where(whereExpr);
 
             return RetrieveAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
@@ -295,7 +296,7 @@ namespace HB.Framework.Database
         public Task<IList<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory).where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(whereExpr);
 
             return PageAsync<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
@@ -303,8 +304,8 @@ namespace HB.Framework.Database
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
-            whereCondition.where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            whereCondition.Where(whereExpr);
 
             return CountAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
@@ -313,26 +314,26 @@ namespace HB.Framework.Database
 
         #region 双表查询
 
-        public async Task<IList<Tuple<TSource, TTarget>>> RetrieveAsync<TSource, TTarget>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<IList<Tuple<TSource, TTarget>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
 
             IList<Tuple<TSource, TTarget>> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<TSource>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<TSource>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition);
-                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<TSource, TTarget>(reader);
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster).ConfigureAwait(false);
+                result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
             catch (Exception ex)
             {
@@ -351,13 +352,13 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public Task<IList<Tuple<TSource, TTarget>>> PageAsync<TSource, TTarget>(From<TSource> fromCondition, Where<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<Tuple<TSource, TTarget>>> PageAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -365,7 +366,7 @@ namespace HB.Framework.Database
             return RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<Tuple<TSource, TTarget>> ScalarAsync<TSource, TTarget>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<Tuple<TSource, TTarget>> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
@@ -394,14 +395,14 @@ namespace HB.Framework.Database
 
         #region 三表查询
 
-        public async Task<IList<Tuple<TSource, TTarget1, TTarget2>>> RetrieveAsync<TSource, TTarget1, TTarget2>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<IList<Tuple<TSource, TTarget1, TTarget2>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false)
@@ -411,14 +412,14 @@ namespace HB.Framework.Database
 
             IList<Tuple<TSource, TTarget1, TTarget2>> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<TSource>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<TSource>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition);
 
-                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<TSource, TTarget1, TTarget2>(reader);
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster).ConfigureAwait(false);
+                result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
             catch (Exception ex)
             {
@@ -438,14 +439,14 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public Task<IList<Tuple<TSource, TTarget1, TTarget2>>> PageAsync<TSource, TTarget1, TTarget2>(From<TSource> fromCondition, Where<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<Tuple<TSource, TTarget1, TTarget2>>> PageAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -453,7 +454,7 @@ namespace HB.Framework.Database
             return RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<Tuple<TSource, TTarget1, TTarget2>> ScalarAsync<TSource, TTarget1, TTarget2>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<Tuple<TSource, TTarget1, TTarget2>> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -491,7 +492,7 @@ namespace HB.Framework.Database
                 return DatabaseResult.Fail("entity check failed.");
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -502,9 +503,9 @@ namespace HB.Framework.Database
 
             try
             {
-                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateAddCommand<T>(item, "default"), true);
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateAddCommand(item, "default"), true).ConfigureAwait(false);
 
-                _modelMapper.To(reader, item);
+                _modelMapper.ToObject(reader, item);
 
                 return DatabaseResult.Succeeded();
             }
@@ -532,7 +533,7 @@ namespace HB.Framework.Database
                 return DatabaseResult.Fail("entity check failed.");
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -541,11 +542,11 @@ namespace HB.Framework.Database
 
             long id = item.Id;
             long version = item.Version;
-            Where<T> condition = new Where<T>(_databaseEngine, _entityDefFactory).where(t => t.Id == id && t.Deleted == false && t.Version == version);
+            WhereExpression<T> condition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(t => t.Id == id && t.Deleted == false && t.Version == version);
 
             try
             {
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.GetDeleteCommand<T>(condition, "default"));
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.GetDeleteCommand(condition, "default")).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -576,26 +577,26 @@ namespace HB.Framework.Database
                 return DatabaseResult.Fail("entity check failed.");
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
                 return DatabaseResult.NotWriteable();
             }
 
-            Where<T> condition = new Where<T>(_databaseEngine, _entityDefFactory);
+            WhereExpression<T> condition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 
             long id = item.Id;
             long version = item.Version;
 
-            condition.where(t => t.Id == id).And(t => t.Deleted == false);
+            condition.Where(t => t.Id == id).And(t => t.Deleted == false);
 
             //版本控制
             condition.And(t => t.Version == version);
 
             try
             {
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateUpdateCommand<T>(condition, item, "default"));
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateUpdateCommand(condition, item, "default")).ConfigureAwait(false);
 
                 if (rows == 1)
                 {

@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Session
 
             string sessionKey = GetSessionKey(context);
 
-            if (isSessionKeyInValid(sessionKey))
+            if (IsSessionKeyInValid(sessionKey))
             {
                 byte[] guidBytes = new byte[16];
                 CryptoRandom.GetBytes(guidBytes);
@@ -86,13 +86,15 @@ namespace Microsoft.AspNetCore.Session
                 isNewSessionKey = true;
             }
 
-            var feature = new SessionFeature();
-            feature.Session = _sessionStore.Create(sessionKey, _options.IdleTimeout, _options.IOTimeout, tryEstablishSession, isNewSessionKey);
+            var feature = new SessionFeature
+            {
+                Session = _sessionStore.Create(sessionKey, _options.IdleTimeout, _options.IOTimeout, tryEstablishSession, isNewSessionKey)
+            };
             context.Features.Set<ISessionFeature>(feature);
 
             try
             {
-                await _next(context);
+                await _next(context).ConfigureAwait(true);
             }
             finally
             {
@@ -102,7 +104,7 @@ namespace Microsoft.AspNetCore.Session
                 {
                     try
                     {
-                        await feature.Session.CommitAsync();
+                        await feature.Session.CommitAsync().ConfigureAwait(true);
                     }
                     catch (Exception ex)
                     {
@@ -127,7 +129,7 @@ namespace Microsoft.AspNetCore.Session
             return cookieValue;
         }
 
-        private bool isSessionKeyInValid(string key)
+        private static bool IsSessionKeyInValid(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {

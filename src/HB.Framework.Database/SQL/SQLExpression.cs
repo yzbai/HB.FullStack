@@ -7,27 +7,35 @@ using System.Text;
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.Engine;
 using System.Reflection;
+using System.Globalization;
 
 namespace HB.Framework.Database.SQL
 {
     public abstract class SQLExpression
     {
-        protected string _sep;
-        protected int _paramCounter;
-        protected string _paramPlaceHolderPrefix;
-        protected IDatabaseEntityDefFactory _entityDefFactory;
+        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
+
+        protected string Seperator { get; set; }
+
+        protected int ParamCounter { get; set; }
+
+        protected string ParamPlaceHolderPrefix { get; set; }
+
+        protected IDatabaseEntityDefFactory EntityDefFactory { get; set; }
 
         public bool IsParameterized { get; set; }
+
         public bool PrefixFieldWithTableName { get; set; }
+
         public IList<KeyValuePair<string, object>> Params { get; set; }
 
         protected SQLExpression(IDatabaseEntityDefFactory modelDefFactory)
         {
-            _entityDefFactory = modelDefFactory;
-            _sep = string.Empty;
-            _paramPlaceHolderPrefix = "_";
+            EntityDefFactory = modelDefFactory;
+            Seperator = string.Empty;
+            ParamPlaceHolderPrefix = "_";
             PrefixFieldWithTableName = false;
-            _paramCounter = 0;
+            ParamCounter = 0;
             IsParameterized = true;
 
             Params = new List<KeyValuePair<string, object>>();
@@ -100,7 +108,7 @@ namespace HB.Framework.Database.SQL
 
         protected virtual object VisitLambda(LambdaExpression lambda)
         {
-            if (lambda.Body.NodeType == ExpressionType.MemberAccess && _sep == " ")
+            if (lambda.Body.NodeType == ExpressionType.MemberAccess && Seperator == " ")
             {
                 MemberExpression m = lambda.Body as MemberExpression;
 
@@ -132,11 +140,10 @@ namespace HB.Framework.Database.SQL
             var operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
-                var m = b.Left as MemberExpression;
 
-                if (m != null && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
+                if (b.Left is MemberExpression m && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    left = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)));
+                    left = new PartialSqlString(string.Format(_culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
                 }
                 else
                 {
@@ -147,7 +154,7 @@ namespace HB.Framework.Database.SQL
 
                 if (m != null && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    right = new PartialSqlString(string.Format("{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)));
+                    right = new PartialSqlString(string.Format(_culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)));
                 }
                 else
                 {
@@ -193,7 +200,7 @@ namespace HB.Framework.Database.SQL
                     }
                     else
                     {
-                        string paramPlaceholder = _paramPlaceHolderPrefix + _paramCounter++;
+                        string paramPlaceholder = ParamPlaceHolderPrefix + ParamCounter++;
                         Params.Add(new KeyValuePair<string, object>(paramPlaceholder, right));
                         right = paramPlaceholder;
                     }
@@ -201,7 +208,7 @@ namespace HB.Framework.Database.SQL
 
             }
             //TODO: Test this. switch InvariantCultureIgnoreCase to OrdinalIgnoreCase
-            rightIsNull = right.ToString().Equals("null", StringComparison.OrdinalIgnoreCase);
+            rightIsNull = right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase);
             if (operand == "=" && rightIsNull) operand = "is";
             else if (operand == "<>" && rightIsNull) operand = "is not";
 
@@ -209,9 +216,9 @@ namespace HB.Framework.Database.SQL
             {
                 case "MOD":
                 case "COALESCE":
-                    return new PartialSqlString(string.Format("{0}({1},{2})", operand, left, right));
+                    return new PartialSqlString(string.Format(_culture, "{0}({1},{2})", operand, left, right));
                 default:
-                    return new PartialSqlString("(" + left + _sep + operand + _sep + right + ")");
+                    return new PartialSqlString("(" + left + Seperator + operand + Seperator + right + ")");
             }
         }
 
@@ -238,7 +245,7 @@ namespace HB.Framework.Database.SQL
                     }
                 }
 
-                DatabaseEntityDef entityDef = _entityDefFactory.Get(modelType);
+                DatabaseEntityDef entityDef = EntityDefFactory.GetDef(modelType);
                 DatabaseEntityPropertyDef propertyDef = entityDef.GetProperty(m.Member.Name);
 
                 string prefix = "";
@@ -281,7 +288,7 @@ namespace HB.Framework.Database.SQL
                 StringBuilder r = new StringBuilder();
                 foreach (Object e in exprs)
                 {
-                    r.AppendFormat("{0}{1}",
+                    r.AppendFormat(_culture, "{0}{1}",
                                    r.Length > 0 ? "," : "",
                                    e);
                 }
@@ -419,7 +426,7 @@ namespace HB.Framework.Database.SQL
                     {
                         if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
                         {
-                            sIn.AppendFormat("{0}{1}",
+                            sIn.AppendFormat(_culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(e, needQuoted: true));
                         }
@@ -428,14 +435,14 @@ namespace HB.Framework.Database.SQL
                             var listArgs = e as IList<Object>;
                             foreach (Object el in listArgs)
                             {
-                                sIn.AppendFormat("{0}{1}",
+                                sIn.AppendFormat(_culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(el, needQuoted: true));
                             }
                         }
                     }
 
-                    statement = string.Format("{0} {1} ({2})", quotedColName, "In", sIn.ToString());
+                    statement = string.Format(_culture, "{0} {1} ({2})", quotedColName, "In", sIn.ToString());
                     break;
 
                 default:
@@ -468,7 +475,7 @@ namespace HB.Framework.Database.SQL
                     {
                         if (!typeof(ICollection).GetTypeInfo().IsAssignableFrom(e.GetType()))
                         {
-                            sIn.AppendFormat("{0}{1}",
+                            sIn.AppendFormat(_culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(e, needQuoted: true));
                         }
@@ -477,20 +484,20 @@ namespace HB.Framework.Database.SQL
                             var listArgs = e as ICollection;
                             foreach (Object el in listArgs)
                             {
-                                sIn.AppendFormat("{0}{1}",
+                                sIn.AppendFormat(_culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(el, needQuoted: true));
                             }
                         }
                     }
 
-                    statement = string.Format("{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
+                    statement = string.Format(_culture, "{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
                     break;
                 case "Desc":
-                    statement = string.Format("{0} DESC", quotedColName);
+                    statement = string.Format(_culture, "{0} DESC", quotedColName);
                     break;
                 case "As":
-                    statement = string.Format("{0} As {1}", quotedColName,
+                    statement = string.Format(_culture, "{0} As {1}", quotedColName,
                         GetDatabaseEngine().GetQuotedStatement(RemoveQuoteFromAlias(args[0].ToString())));
                     break;
                 case "Sum":
@@ -499,10 +506,10 @@ namespace HB.Framework.Database.SQL
                 case "Max":
                 case "Avg":
                 case "Distinct":
-                    statement = string.Format("{0}({1}{2})",
+                    statement = string.Format(_culture, "{0}({1}{2})",
                                          m.Method.Name,
                                          quotedColName,
-                                         args.Count == 1 ? string.Format(",{0}", args[0]) : "");
+                                         args.Count == 1 ? string.Format(_culture, ",{0}", args[0]) : "");
                     break;
                 case "Plain":
                     statement = quotedColName.ToString();
@@ -522,7 +529,7 @@ namespace HB.Framework.Database.SQL
             {
                 List<Object> args0 = this.VisitExpressionList(m.Arguments);
                 var quotedColName0 = Visit(m.Object);
-                return new PartialSqlString(string.Format("LEFT( {0},{1})= {2} ", quotedColName0
+                return new PartialSqlString(string.Format(_culture, "LEFT( {0},{1})= {2} ", quotedColName0
                                                           , args0[0].ToString().Length,
                                                           GetDatabaseEngine().GetDbValueStatement(args0[0], needQuoted: true)));
             }
@@ -536,41 +543,41 @@ namespace HB.Framework.Database.SQL
             switch (m.Method.Name)
             {
                 case "Trim":
-                    statement = string.Format("ltrim(rtrim({0}))", quotedColName);
+                    statement = string.Format(_culture, "ltrim(rtrim({0}))", quotedColName);
                     break;
                 case "LTrim":
-                    statement = string.Format("ltrim({0})", quotedColName);
+                    statement = string.Format(_culture, "ltrim({0})", quotedColName);
                     break;
                 case "RTrim":
-                    statement = string.Format("rtrim({0})", quotedColName);
+                    statement = string.Format(_culture, "rtrim({0})", quotedColName);
                     break;
                 case "ToUpper":
-                    statement = string.Format("upper({0})", quotedColName);
+                    statement = string.Format(_culture, "upper({0})", quotedColName);
                     break;
                 case "ToLower":
-                    statement = string.Format("lower({0})", quotedColName);
+                    statement = string.Format(_culture, "lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format("upper({0}) like {1} ", quotedColName, GetDatabaseEngine().GetQuotedStatement(args[0].ToString().ToUpper() + "%"));
+                    statement = string.Format(_culture, "upper({0}) like {1} ", quotedColName, GetDatabaseEngine().GetQuotedStatement(args[0].ToString().ToUpper(_culture) + "%"));
                     break;
                 case "EndsWith":
-                    statement = string.Format("upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper()));
+                    statement = string.Format(_culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(_culture)));
                     break;
                 case "Contains":
-                    statement = string.Format("upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper() + "%"));
+                    statement = string.Format(_culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(_culture) + "%"));
                     break;
                 case "Substring":
-                    var startIndex = Int32.Parse(args[0].ToString()) + 1;
+                    var startIndex = Int32.Parse(args[0].ToString(), _culture) + 1;
                     if (args.Count == 2)
                     {
-                        var length = Int32.Parse(args[1].ToString());
-                        statement = string.Format("substring({0} from {1} for {2})",
+                        var length = Int32.Parse(args[1].ToString(), _culture);
+                        statement = string.Format(_culture, "substring({0} from {1} for {2})",
                                                   quotedColName,
                                                   startIndex,
                                                   length);
                     }
                     else
-                        statement = string.Format("substring({0} from {1})",
+                        statement = string.Format(_culture, "substring({0} from {1})",
                                          quotedColName,
                                          startIndex);
                     break;
@@ -585,8 +592,7 @@ namespace HB.Framework.Database.SQL
             if (m.Object != null && m.Object as MethodCallExpression != null)
                 return IsColumnAccess(m.Object as MethodCallExpression);
 
-            var exp = m.Object as MemberExpression;
-            return exp != null
+            return m.Object is MemberExpression exp
                 && exp.Expression != null
                 //&& _modelDefCollection.Any<ModelDef>(md => md.ModelType == exp.Expression.Type)
                 && exp.Expression.NodeType == ExpressionType.Parameter;
@@ -630,12 +636,12 @@ namespace HB.Framework.Database.SQL
             }
         }
 
-        protected string RemoveQuoteFromAlias(string exp)
+        protected static string RemoveQuoteFromAlias(string exp)
         {
 
-            if ((exp.StartsWith("\"") || exp.StartsWith("`") || exp.StartsWith("'"))
+            if ((exp.StartsWith("\"", StringComparison.InvariantCulture) || exp.StartsWith("`", StringComparison.InvariantCulture) || exp.StartsWith("'", StringComparison.InvariantCulture))
                 &&
-                (exp.EndsWith("\"") || exp.EndsWith("`") || exp.EndsWith("'")))
+                (exp.EndsWith("\"", StringComparison.InvariantCulture) || exp.EndsWith("`", StringComparison.InvariantCulture) || exp.EndsWith("'", StringComparison.InvariantCulture)))
             {
                 exp = exp.Remove(0, 1);
                 exp = exp.Remove(exp.Length - 1, 1);
@@ -647,7 +653,7 @@ namespace HB.Framework.Database.SQL
         {
             string name = quotedExp.ToString().Replace(GetDatabaseEngine().QuotedChar, "");
 
-            DatabaseEntityDef entityDef = _entityDefFactory.Get(type);
+            DatabaseEntityDef entityDef = EntityDefFactory.GetDef(type);
 
             DatabaseEntityPropertyDef property = entityDef.GetProperty(name);
 
@@ -661,15 +667,15 @@ namespace HB.Framework.Database.SQL
 
         protected object GetTrueExpression()
         {
-            return new PartialSqlString(string.Format("({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
+            return new PartialSqlString(string.Format(_culture, "({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
         }
 
         protected object GetFalseExpression()
         {
-            return new PartialSqlString(string.Format("({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(false, needQuoted: true)));
+            return new PartialSqlString(string.Format(_culture, "({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(false, needQuoted: true)));
         }
 
-        private bool IsArrayMethod(MethodCallExpression m)
+        private static bool IsArrayMethod(MethodCallExpression m)
         {
             if (m.Object == null && m.Method.Name == "Contains")
             {
