@@ -430,7 +430,7 @@ namespace HB.Framework.Common
             TypeInfo typeInfo = type.GetTypeInfo();
             if (typeInfo.IsEnum)
             {
-                return Convert.ToInt32(culture);
+                return Convert.ToInt32(value, culture);
             }
 
             if (value.GetType() == typeof(DBNull))
@@ -596,7 +596,7 @@ namespace HB.Framework.Common
 
             foreach (byte b in bytes)
             {
-                hex.AppendFormat("{0:x2}", b);
+                hex.AppendFormat(culture, "{0:x2}", b);
             }
 
             return hex.ToString();

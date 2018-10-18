@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using HB.Framework.Database.Engine;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace HB.Framework.Database
 {
@@ -59,7 +60,7 @@ namespace HB.Framework.Database
 
         #region 单表查询, Select, From, Where
 
-        public IList<TSelect> Retrieve<TSelect, TFrom, TWhere>(Select<TSelect> selectCondition, From<TFrom> fromCondition, Where<TWhere> whereCondition, DbTransactionContext transContext = null, bool useMaster = false)
+        public IList<TSelect> Retrieve<TSelect, TFrom, TWhere>(SelectExpression<TSelect> selectCondition, FromExpression<TFrom> fromCondition, WhereExpression<TWhere> whereCondition, DbTransactionContext transContext = null, bool useMaster = false)
             where TSelect : DatabaseEntity, new()
             where TFrom : DatabaseEntity, new()
             where TWhere : DatabaseEntity, new()
@@ -68,12 +69,12 @@ namespace HB.Framework.Database
 
             if (selectCondition != null)
             {
-                selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+                selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
             }
 
             if (whereCondition == null)
             {
-                whereCondition = new Where<TWhere>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TWhere>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false).And<TSelect>(ts=>ts.Deleted == false).And<TFrom>(tf=>tf.Deleted == false);
@@ -82,14 +83,14 @@ namespace HB.Framework.Database
 
             IList<TSelect> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef selectDef = _entityDefFactory.Get<TSelect>();
+            DatabaseEntityDef selectDef = _entityDefFactory.GetDef<TSelect>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(selectCondition, fromCondition, whereCondition);
 
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, selectDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<TSelect>(reader);
+                result = _modelMapper.ToList<TSelect>(reader);
             }
             catch (Exception ex)
             {
@@ -108,7 +109,7 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public T Scalar<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public T Scalar<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             IList<T> result = Retrieve<T>(selectCondition, fromCondition, whereCondition, transContext, useMaster);
@@ -127,19 +128,19 @@ namespace HB.Framework.Database
             return result[0];
         }
 
-        public IList<T> Retrieve<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public IList<T> Retrieve<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             #region Argument Adjusting
 
             if (selectCondition != null)
             {
-                selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+                selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
             }
 
             if (whereCondition == null)
             {
-                whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false);
@@ -148,14 +149,14 @@ namespace HB.Framework.Database
 
             IList<T> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<T>(selectCondition, fromCondition, whereCondition);
 
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<T>(reader);
+                result = _modelMapper.ToList<T>(reader);
             }
             catch (Exception ex)
             {
@@ -173,19 +174,19 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public IList<T> Page<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public IList<T> Page<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
 
 			if (selectCondition != null)
 			{
-				selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
 			}
 
 			if (whereCondition == null)
 			{
-				whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
+				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -197,19 +198,19 @@ namespace HB.Framework.Database
             return Retrieve<T>(selectCondition, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public long Count<T>(Select<T> selectCondition, From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public long Count<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
 
 			if (selectCondition != null)
 			{
-				selectCondition.select(t => t.Id).select(t => t.Deleted).select(t => t.LastTime).select(t => t.LastUser).select(t => t.Version);
+				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
 			}
 
 			if (whereCondition == null)
 			{
-				whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
+				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -218,12 +219,12 @@ namespace HB.Framework.Database
 
             long count = -1;
 
-			DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+			DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
             try
             {
                 IDbCommand command = _sqlBuilder.CreateCountCommand<T>(fromCondition, whereCondition);
                 object countObj = _databaseEngine.ExecuteCommandScalar(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                count = Convert.ToInt32(countObj);
+                count = Convert.ToInt32(countObj, CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
@@ -237,25 +238,25 @@ namespace HB.Framework.Database
 
         #region 单表查询, From, Where
 
-        public T Scalar<T>(From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public T Scalar<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return Scalar<T>(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public IList<T> Retrieve<T>(From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public IList<T> Retrieve<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return Retrieve<T>(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public  IList<T> Page<T>(From<T> fromCondition, Where<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public  IList<T> Page<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return Page<T>(null, fromCondition, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public  long Count<T>(From<T> fromCondition, Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public  long Count<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return Count<T>(null, fromCondition, whereCondition, transContext, useMaster);
@@ -271,19 +272,19 @@ namespace HB.Framework.Database
             return Retrieve<T>(null, null, null, transContext, useMaster);
         }
 
-        public T Scalar<T>(Where<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public T Scalar<T>(WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return Scalar<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public IList<T> Retrieve<T>(Where<T> whereCondition, DbTransactionContext transContext, bool useMaster) 
+        public IList<T> Retrieve<T>(WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster) 
             where T : DatabaseEntity, new()
         {
             return Retrieve<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public IList<T> Page<T>(Where<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster) 
+        public IList<T> Page<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster) 
             where T : DatabaseEntity, new()
         {
             return Page<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
@@ -295,7 +296,7 @@ namespace HB.Framework.Database
             return Page<T>(null, null, null, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public long Count<T>(Where<T> condition, DbTransactionContext transContext, bool useMaster) 
+        public long Count<T>(WhereExpression<T> condition, DbTransactionContext transContext, bool useMaster) 
             where T : DatabaseEntity, new()
         {
             return Count<T>(null, null, condition, transContext, useMaster);
@@ -320,8 +321,8 @@ namespace HB.Framework.Database
         public T Scalar<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
-            whereCondition.where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            whereCondition.Where(whereExpr);
 
             return Scalar<T>(null, null, whereCondition, transContext, useMaster);
         }
@@ -329,8 +330,8 @@ namespace HB.Framework.Database
         public IList<T> Retrieve<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
-            whereCondition.where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            whereCondition.Where(whereExpr);
 
             return Retrieve<T>(null, null, whereCondition, transContext, useMaster);
         }
@@ -338,7 +339,7 @@ namespace HB.Framework.Database
         public IList<T> Page<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory).where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(whereExpr);
 
             return Page<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
@@ -346,8 +347,8 @@ namespace HB.Framework.Database
         public long Count<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            Where<T> whereCondition = new Where<T>(_databaseEngine, _entityDefFactory);
-            whereCondition.where(whereExpr);
+            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            whereCondition.Where(whereExpr);
 
             return Count<T>(null, null, whereCondition, transContext, useMaster);
         }
@@ -356,26 +357,26 @@ namespace HB.Framework.Database
 
         #region 双表查询
 
-        public IList<Tuple<TSource, TTarget>> Retrieve<TSource, TTarget>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public IList<Tuple<TSource, TTarget>> Retrieve<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
 
             IList<Tuple<TSource, TTarget>> result = null;
             IDataReader reader = null;
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<TSource>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<TSource>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition);
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<TSource, TTarget>(reader);
+                result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
             catch (Exception ex)
             {
@@ -394,13 +395,13 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public IList<Tuple<TSource, TTarget>> Page<TSource, TTarget>(From<TSource> fromCondition, Where<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public IList<Tuple<TSource, TTarget>> Page<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -408,7 +409,7 @@ namespace HB.Framework.Database
             return Retrieve<TSource, TTarget>(fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Tuple<TSource, TTarget> Scalar<TSource, TTarget>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Tuple<TSource, TTarget> Scalar<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
@@ -432,14 +433,14 @@ namespace HB.Framework.Database
 
         #region 三表查询
 
-        public IList<Tuple<TSource, TTarget1, TTarget2>> Retrieve<TSource, TTarget1, TTarget2>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public IList<Tuple<TSource, TTarget1, TTarget2>> Retrieve<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.And(t => t.Deleted == false)
@@ -449,14 +450,14 @@ namespace HB.Framework.Database
 
             IList<Tuple<TSource, TTarget1, TTarget2>>  result = null;
             IDataReader reader = null;
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<TSource>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<TSource>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition);
 
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                result = _modelMapper.To<TSource, TTarget1, TTarget2>(reader);
+                result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
             catch (Exception ex)
             {
@@ -476,14 +477,14 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public IList<Tuple<TSource, TTarget1, TTarget2>> Page<TSource, TTarget1, TTarget2>(From<TSource> fromCondition, Where<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public IList<Tuple<TSource, TTarget1, TTarget2>> Page<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
-                whereCondition = new Where<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -491,7 +492,7 @@ namespace HB.Framework.Database
             return Retrieve<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Tuple<TSource, TTarget1, TTarget2> Scalar<TSource, TTarget1, TTarget2>(From<TSource> fromCondition, Where<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Tuple<TSource, TTarget1, TTarget2> Scalar<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -526,7 +527,7 @@ namespace HB.Framework.Database
                 return DatabaseResult.Fail("entity check failed.");
             }
   
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -539,7 +540,7 @@ namespace HB.Framework.Database
             {
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateAddCommand<T>(item, "default"), true);
 
-                _modelMapper.To(reader, item);
+                _modelMapper.ToObject(reader, item);
 
                 return DatabaseResult.Succeeded();
             }
@@ -567,7 +568,7 @@ namespace HB.Framework.Database
                 return DatabaseResult.Fail("entity check failed.");
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -576,7 +577,7 @@ namespace HB.Framework.Database
 
             long id = item.Id;
             long version = item.Version;
-            Where<T> condition = new Where<T>(_databaseEngine, _entityDefFactory).where(t => t.Id == id && t.Deleted == false && t.Version == version);
+            WhereExpression<T> condition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(t => t.Id == id && t.Deleted == false && t.Version == version);
 
             try
             {
@@ -611,19 +612,19 @@ namespace HB.Framework.Database
                 return DatabaseResult.Fail("entity check failed.");
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
                 return DatabaseResult.NotWriteable();
             }
 
-            Where<T> condition = new Where<T>(_databaseEngine, _entityDefFactory);
+            WhereExpression<T> condition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
 
             long id = item.Id;
             long version = item.Version;
 
-            condition.where(t => t.Id == id).And(t => t.Deleted == false);
+            condition.Where(t => t.Id == id).And(t => t.Deleted == false);
             
             //版本控制
             condition.And(t => t.Version == version);
@@ -792,7 +793,7 @@ namespace HB.Framework.Database
 
         public IDbTransaction CreateTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
         {
-            DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _databaseEngine.CreateTransaction(entityDef.DatabaseName, isolationLevel);
         }
@@ -801,17 +802,17 @@ namespace HB.Framework.Database
 
         #region 条件构造
 
-        public Select<T> Select<T>() where T : DatabaseEntity, new()
+        public SelectExpression<T> NewSelect<T>() where T : DatabaseEntity, new()
         {
             return _sqlBuilder.NewSelect<T>();
         }
 
-        public From<T> From<T>() where T : DatabaseEntity, new()
+        public FromExpression<T> NewFrom<T>() where T : DatabaseEntity, new()
         {
             return _sqlBuilder.NewFrom<T>();
         }
 
-        public Where<T> Where<T>() where T : DatabaseEntity, new()
+        public WhereExpression<T> NewWhere<T>() where T : DatabaseEntity, new()
         {
             return _sqlBuilder.NewWhere<T>();
         }

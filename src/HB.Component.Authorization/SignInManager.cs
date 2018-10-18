@@ -33,7 +33,8 @@ namespace HB.Component.Authorization
         public async Task SignOutAsync(SignOutContext context)
         {
             string userTokenIdentifier = context.HttpContext.User.GetUserTokenIdentifier();
-            await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(userTokenIdentifier);
+
+            await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(userTokenIdentifier).ConfigureAwait(false);
         }
 
         public async Task<SignInResult> SignInAsync(SignInContext context)
@@ -56,7 +57,7 @@ namespace HB.Component.Authorization
                     return SignInResult.ArgumentError();
                 }
 
-                user = await _userBiz.GetUserByMobileAsync(context.Mobile);
+                user = await _userBiz.GetUserByMobileAsync(context.Mobile).ConfigureAwait(false);
             }
             else if (context.SignInType == SignInType.ByMobileAndPassword)
             {
@@ -65,7 +66,7 @@ namespace HB.Component.Authorization
                     return SignInResult.ArgumentError();
                 }
 
-                user = await _userBiz.GetUserByMobileAsync(context.Mobile);
+                user = await _userBiz.GetUserByMobileAsync(context.Mobile).ConfigureAwait(false);
             }
             else if (context.SignInType == SignInType.ByUserNameAndPassword)
             {
@@ -74,7 +75,7 @@ namespace HB.Component.Authorization
                     return SignInResult.ArgumentError();
                 }
 
-                user = await _userBiz.GetUserByUserNameAsync(context.UserName);
+                user = await _userBiz.GetUserByUserNameAsync(context.UserName).ConfigureAwait(false);
             }
 
             #endregion
@@ -85,7 +86,7 @@ namespace HB.Component.Authorization
 
             if (user == null && context.SignInType == SignInType.BySms)
             {
-                IdentityResult identityResult = await _userBiz.CreateUserByMobileAsync(context.UserType, context.Mobile, context.UserName, context.Password, true);
+                IdentityResult identityResult = await _userBiz.CreateUserByMobileAsync(context.UserType, context.Mobile, context.UserName, context.Password, true).ConfigureAwait(false);
 
                 if (identityResult.Status == IdentityResultStatus.Failed)
                 {
@@ -122,7 +123,7 @@ namespace HB.Component.Authorization
             {
                 if (!PassowrdCheck(user, context.Password))
                 {
-                    await OnPasswordCheckFailedAsync(user);
+                    await OnPasswordCheckFailedAsync(user).ConfigureAwait(false);
                     return SignInResult.PasswordWrong();
                 }
             }
@@ -131,7 +132,7 @@ namespace HB.Component.Authorization
 
             #region Pre Sign Check 
 
-            SignInResult result = await PreSignInCheckAsync(user);
+            SignInResult result = await PreSignInCheckAsync(user).ConfigureAwait(false);
 
             if (!result.IsSucceeded())
             {
@@ -144,7 +145,7 @@ namespace HB.Component.Authorization
 
             if (context.ClientType != ClientType.Web && _signInOptions.AllowOnlyOneAppClient)
             {
-                await _signInTokenBiz.DeleteAppClientTokenByUserIdAsync(user.Id);
+                await _signInTokenBiz.DeleteAppClientTokenByUserIdAsync(user.Id).ConfigureAwait(false);
             }
 
             #endregion
@@ -158,7 +159,7 @@ namespace HB.Component.Authorization
                 context.ClientVersion, 
                 context.ClientAddress, 
                 context.ClientIp, 
-                context.RememberMe? _signInOptions.RefreshTokenLongExpireTimeSpan : _signInOptions.RefreshTokenShortExpireTimeSpan);
+                context.RememberMe? _signInOptions.RefreshTokenLongExpireTimeSpan : _signInOptions.RefreshTokenShortExpireTimeSpan).ConfigureAwait(false);
 
             if (userToken == null)
             {
@@ -169,7 +170,7 @@ namespace HB.Component.Authorization
 
             #region Construct Jwt
 
-            result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, userToken, context.SignToWhere);
+            result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, userToken, context.SignToWhere).ConfigureAwait(false);
             result.RefreshToken = userToken.RefreshToken;
             result.NewUserCreated = newUserCreated;
             result.CurrentUser = user;
@@ -218,12 +219,12 @@ namespace HB.Component.Authorization
 
             if (_signInOptions.RequiredLockoutCheck)
             {
-                await _userBiz.SetLockoutAsync(user.Id, false);
+                await _userBiz.SetLockoutAsync(user.Id, false).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                await _userBiz.SetAccessFailedCountAsync(user.Id, 0);
+                await _userBiz.SetAccessFailedCountAsync(user.Id, 0).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
@@ -237,21 +238,21 @@ namespace HB.Component.Authorization
         private static bool PassowrdCheck(User user, string password)
         {
             string passwordHash = SecurityHelper.EncryptPwdWithSalt(password, user.Guid);
-            return passwordHash.Equals(user.PasswordHash);
+            return passwordHash.Equals(user.PasswordHash, StringComparison.InvariantCulture);
         }
 
         private async Task OnPasswordCheckFailedAsync(User user)
         {
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                await _userBiz.SetAccessFailedCountAsync(user.Id, user.AccessFailedCount + 1);
+                await _userBiz.SetAccessFailedCountAsync(user.Id, user.AccessFailedCount + 1).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequiredLockoutCheck)
             {
                 if (user.AccessFailedCount + 1 > _signInOptions.LockoutAfterAccessFailedCount)
                 {
-                    await _userBiz.SetLockoutAsync(user.Id, true, _signInOptions.LockoutTimeSpan);
+                    await _userBiz.SetLockoutAsync(user.Id, true, _signInOptions.LockoutTimeSpan).ConfigureAwait(false);
                 }
             }
 

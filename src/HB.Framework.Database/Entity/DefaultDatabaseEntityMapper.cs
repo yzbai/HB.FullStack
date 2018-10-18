@@ -19,7 +19,7 @@ namespace HB.Framework.Database.Entity
 
         #region 表行与实体间映射
 
-        public IList<T> To<T>(IDataReader reader)
+        public IList<T> ToList<T>(IDataReader reader)
             where T : DatabaseEntity, new()
         {
             IList<T> lst = new List<T>();
@@ -33,7 +33,7 @@ namespace HB.Framework.Database.Entity
             string[] propertyNames = new string[len];
             
 
-            DatabaseEntityDef definition = _modelDefFactory.Get<T>();
+            DatabaseEntityDef definition = _modelDefFactory.GetDef<T>();
 
             for (int i = 0; i < len; ++i)
             {
@@ -60,7 +60,7 @@ namespace HB.Framework.Database.Entity
             return lst;
         }
 
-        public IList<Tuple<TSource, TTarget>> To<TSource, TTarget>(IDataReader reader)
+        public IList<Tuple<TSource, TTarget>> ToList<TSource, TTarget>(IDataReader reader)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
@@ -71,8 +71,8 @@ namespace HB.Framework.Database.Entity
                 return lst;
             }
 
-            DatabaseEntityDef definition1 = _modelDefFactory.Get<TSource>();
-            DatabaseEntityDef definition2 = _modelDefFactory.Get<TTarget>();
+            DatabaseEntityDef definition1 = _modelDefFactory.GetDef<TSource>();
+            DatabaseEntityDef definition2 = _modelDefFactory.GetDef<TTarget>();
 
             string[] propertyNames1 = new string[definition1.FieldCount];
             string[] propertyNames2 = new string[definition2.FieldCount];
@@ -122,7 +122,7 @@ namespace HB.Framework.Database.Entity
             return lst;
         }
 
-        public IList<Tuple<TSource, TTarget2, TTarget3>> To<TSource, TTarget2, TTarget3>(IDataReader reader)
+        public IList<Tuple<TSource, TTarget2, TTarget3>> ToList<TSource, TTarget2, TTarget3>(IDataReader reader)
             where TSource : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
             where TTarget3 : DatabaseEntity, new()
@@ -134,9 +134,9 @@ namespace HB.Framework.Database.Entity
                 return lst;
             }
 
-            DatabaseEntityDef definition1 = _modelDefFactory.Get<TSource>();
-            DatabaseEntityDef definition2 = _modelDefFactory.Get<TTarget2>();
-            DatabaseEntityDef definition3 = _modelDefFactory.Get<TTarget3>();
+            DatabaseEntityDef definition1 = _modelDefFactory.GetDef<TSource>();
+            DatabaseEntityDef definition2 = _modelDefFactory.GetDef<TTarget2>();
+            DatabaseEntityDef definition3 = _modelDefFactory.GetDef<TTarget3>();
 
             string[] propertyNames1 = new string[definition1.FieldCount];
             string[] propertyNames2 = new string[definition2.FieldCount];
@@ -203,7 +203,7 @@ namespace HB.Framework.Database.Entity
             return lst;
         }
 
-        public void To<T>(IDataReader reader, T item) where T : DatabaseEntity, new()
+        public void ToObject<T>(IDataReader reader, T item) where T : DatabaseEntity, new()
         {
             if (reader == null)
             {
@@ -213,7 +213,7 @@ namespace HB.Framework.Database.Entity
             int len = reader.FieldCount;
             string[] propertyNames = new string[len];
 
-            DatabaseEntityDef definition = _modelDefFactory.Get<T>();
+            DatabaseEntityDef definition = _modelDefFactory.GetDef<T>();
 
             for (int i = 0; i < len; ++i)
             {

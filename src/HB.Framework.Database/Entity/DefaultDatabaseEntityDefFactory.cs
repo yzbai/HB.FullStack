@@ -30,12 +30,12 @@ namespace HB.Framework.Database.Entity
             _lockObj = new object();
         }
 
-        public DatabaseEntityDef Get<T>()
+        public DatabaseEntityDef GetDef<T>()
         {
-            return Get(typeof(T));
+            return GetDef(typeof(T));
         }
 
-        public DatabaseEntityDef Get(Type domainType)
+        public DatabaseEntityDef GetDef(Type domainType)
         {
             if (!_defDict.ContainsKey(domainType))
             {
@@ -59,7 +59,7 @@ namespace HB.Framework.Database.Entity
 
             modelDef.EntityType = modelType;
             modelDef.EntityFullName = modelType.FullName;
-            modelDef.PropertyDict = new Dictionary<string, DatabaseEntityPropertyDef>();
+            //modelDef.PropertyDict = new Dictionary<string, DatabaseEntityPropertyDef>();
 
             #endregion
 

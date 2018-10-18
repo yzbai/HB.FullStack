@@ -14,7 +14,7 @@ namespace HB.Compnent.Resource.Sms
         /// <param name="mobile"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<SendResponse> SendValidationCode(string mobile, out string code);
+        Task<SendResult> SendValidationCode(string mobile, out string code);
 
     }
 }

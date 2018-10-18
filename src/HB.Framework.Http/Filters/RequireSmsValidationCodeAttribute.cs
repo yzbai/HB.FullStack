@@ -23,19 +23,19 @@ namespace Microsoft.AspNetCore.Mvc.Filters
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (handleValidationAsync(context.HttpContext))
+            if (HandleValidationAsync(context.HttpContext))
             {
                 base.OnActionExecuting(context);
             }
             else
             {
-                handleFailRequest(context);
+                HandleFailRequest(context);
             }
         }
 
-        private void handleFailRequest(ActionExecutingContext context)
+        private static void HandleFailRequest(ActionExecutingContext context)
         {
-            if (context.HttpContext.Request.Path.StartsWithSegments("/api"))
+            if (context.HttpContext.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCulture))
             {
                 context.Result = new BadRequestObjectResult("Sms Error.");
             }
@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
             }
         }
 
-        private bool handleValidationAsync(HttpContext httpContext)
+        private bool HandleValidationAsync(HttpContext httpContext)
         {
             if (httpContext == null)
             {
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
                 return false;
             }
 
-            return code.Equals(httpContext.Session.GetString(SmsCodeSessiionName));
+            return code.Equals(httpContext.Session.GetString(SmsCodeSessiionName), StringComparison.InvariantCulture);
         }
     }
 }

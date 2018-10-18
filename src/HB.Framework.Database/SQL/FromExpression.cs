@@ -10,7 +10,7 @@ namespace HB.Framework.Database.SQL
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class From<T> : SQLExpression
+    public class FromExpression<T> : SQLExpression
         where T : DatabaseEntity, new()
     {
         private StringBuilder _statementBuilder;
@@ -31,13 +31,13 @@ namespace HB.Framework.Database.SQL
             return resultBuilder.ToString();
         }
 
-        public From(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory) : base(entityDefFactory)
+        public FromExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory) : base(entityDefFactory)
         {
-            _entityDefFactory = entityDefFactory;
-            _sourceEntityDef = _entityDefFactory.Get<T>();
+            EntityDefFactory = entityDefFactory;
+            _sourceEntityDef = EntityDefFactory.GetDef<T>();
             _databaseEngine = databaseEngine;
 
-            _sep = " ";
+            Seperator = " ";
             PrefixFieldWithTableName = true;
             WithFromString = true;
 
@@ -49,34 +49,34 @@ namespace HB.Framework.Database.SQL
             return _databaseEngine;
         }
 
-        public From<T> InnerJoin<Target>(Expression<Func<T, Target, bool>> joinExpr) where Target : DatabaseEntity, new()
+        public FromExpression<T> InnerJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
-            return InternalJoin<Target>("INNER JOIN", joinExpr);
+            return InternalJoin<TTarget>("INNER JOIN", joinExpr);
         }
 
-        public From<T> LeftJoin<Target>(Expression<Func<T, Target, bool>> joinExpr) where Target : DatabaseEntity, new()
+        public FromExpression<T> LeftJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
-            return InternalJoin<Target>("LEFT JOIN", joinExpr);
+            return InternalJoin<TTarget>("LEFT JOIN", joinExpr);
         }
 
-        public From<T> RightJoin<Target>(Expression<Func<T, Target, bool>> joinExpr) where Target : DatabaseEntity, new()
+        public FromExpression<T> RightJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
-            return InternalJoin<Target>("RIGHT JOIN", joinExpr);
+            return InternalJoin<TTarget>("RIGHT JOIN", joinExpr);
         }
 
-        public From<T> FullJoin<Target>(Expression<Func<T, Target, bool>> joinExpr) where Target : DatabaseEntity, new()
+        public FromExpression<T> FullJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
-            return InternalJoin<Target>("FULL JOIN", joinExpr);
+            return InternalJoin<TTarget>("FULL JOIN", joinExpr);
         }
 
-        public From<T> CrossJoin<Target>(Expression<Func<T, Target, bool>> joinExpr) where Target : DatabaseEntity, new()
+        public FromExpression<T> CrossJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
-            return InternalJoin<Target>("CROSS JOIN", joinExpr);
+            return InternalJoin<TTarget>("CROSS JOIN", joinExpr);
         }
 
-        private From<T> InternalJoin<Target>(string joinType, Expression joinExpr)
+        private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr)
         {
-            DatabaseEntityDef targetDef = _entityDefFactory.Get(typeof(Target));
+            DatabaseEntityDef targetDef = EntityDefFactory.GetDef(typeof(Target));
 
             _statementBuilder.Append(" ");
             _statementBuilder.Append(joinType);

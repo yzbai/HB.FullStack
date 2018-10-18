@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Reflection;
 
 namespace HB.Infrastructure.MySQL
@@ -24,62 +25,66 @@ namespace HB.Infrastructure.MySQL
 
     static class MySQLUtility
     {
+        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         //参数化
-        public static readonly string ParameterizedChar = "@";
+        public const string ParameterizedChar = "@";
         //引号化
-        public static readonly string QuotedChar = "'";
+        public const string QuotedChar = "'";
         //保留化
-        public static readonly string ReservedChar = "`";
+        public const string ReservedChar = "`";
 
         /// <summary>
         /// 类型与数据库类型映射字典
         /// </summary>
-        private static readonly Dictionary<Type, DbTypeInfo> dbTypeInfoMap;
+        private static readonly Dictionary<Type, DbTypeInfo> dbTypeInfoMap = InitDbTypeInfoMap();
 
-        static MySQLUtility()
+        private static Dictionary<Type, DbTypeInfo> InitDbTypeInfoMap()
         {
-            dbTypeInfoMap = new Dictionary<Type, DbTypeInfo>();
+            Dictionary<Type, DbTypeInfo> map = new Dictionary<Type, DbTypeInfo>
+            {
+                [typeof(byte)] = new DbTypeInfo() { DatabaseType = DbType.Byte, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(sbyte)] = new DbTypeInfo() { DatabaseType = DbType.SByte, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(short)] = new DbTypeInfo() { DatabaseType = DbType.Int16, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(ushort)] = new DbTypeInfo() { DatabaseType = DbType.UInt16, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(int)] = new DbTypeInfo() { DatabaseType = DbType.Int32, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(uint)] = new DbTypeInfo() { DatabaseType = DbType.UInt32, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(long)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
+                [typeof(ulong)] = new DbTypeInfo() { DatabaseType = DbType.UInt64, Statement = "BIGINT", IsValueQuoted = false },
+                [typeof(float)] = new DbTypeInfo() { DatabaseType = DbType.Single, Statement = "DOUBLE", IsValueQuoted = false },
+                [typeof(double)] = new DbTypeInfo() { DatabaseType = DbType.Double, Statement = "DOUBLE", IsValueQuoted = false },
+                [typeof(decimal)] = new DbTypeInfo() { DatabaseType = DbType.Decimal, Statement = "DECIMAL", IsValueQuoted = false },
+                [typeof(bool)] = new DbTypeInfo() { DatabaseType = DbType.Boolean, Statement = "BOOL", IsValueQuoted = false },
+                [typeof(string)] = new DbTypeInfo() { DatabaseType = DbType.String, Statement = "VARCHAR", IsValueQuoted = true },
+                [typeof(char)] = new DbTypeInfo() { DatabaseType = DbType.StringFixedLength, Statement = "CHAR", IsValueQuoted = true },
+                [typeof(Guid)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true },
+                [typeof(DateTime)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true },
+                [typeof(DateTimeOffset)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true },
+                [typeof(TimeSpan)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true },
+                [typeof(byte[])] = new DbTypeInfo() { DatabaseType = DbType.Binary, Statement = "BLOB", IsValueQuoted = false },
+                [typeof(byte?)] = new DbTypeInfo() { DatabaseType = DbType.Byte, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(sbyte?)] = new DbTypeInfo() { DatabaseType = DbType.SByte, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(short?)] = new DbTypeInfo() { DatabaseType = DbType.Int16, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(ushort?)] = new DbTypeInfo() { DatabaseType = DbType.UInt16, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(int?)] = new DbTypeInfo() { DatabaseType = DbType.Int32, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(uint?)] = new DbTypeInfo() { DatabaseType = DbType.UInt32, Statement = "INTEGER", IsValueQuoted = false },
+                [typeof(long?)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
+                [typeof(ulong?)] = new DbTypeInfo() { DatabaseType = DbType.UInt64, Statement = "BIGINT", IsValueQuoted = false },
+                [typeof(float?)] = new DbTypeInfo() { DatabaseType = DbType.Single, Statement = "DOUBLE", IsValueQuoted = false },
+                [typeof(double?)] = new DbTypeInfo() { DatabaseType = DbType.Double, Statement = "DOUBLE", IsValueQuoted = false },
+                [typeof(decimal?)] = new DbTypeInfo() { DatabaseType = DbType.Decimal, Statement = "DECIMAL", IsValueQuoted = false },
+                [typeof(bool?)] = new DbTypeInfo() { DatabaseType = DbType.Boolean, Statement = "BOOLEAN", IsValueQuoted = false },
+                [typeof(char?)] = new DbTypeInfo() { DatabaseType = DbType.StringFixedLength, Statement = "CHAR", IsValueQuoted = true },
+                [typeof(Guid?)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true },
+                [typeof(DateTime?)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true },
+                [typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true },
+                [typeof(TimeSpan?)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true },
+                [typeof(Object)] = new DbTypeInfo() { DatabaseType = DbType.Object, Statement = "", IsValueQuoted = true },
+                [typeof(DBNull)] = new DbTypeInfo() { DatabaseType = DbType.Object, Statement = "", IsValueQuoted = false }
+            };
 
-            dbTypeInfoMap[typeof(byte)] = new DbTypeInfo() { DatabaseType = DbType.Byte, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(sbyte)] = new DbTypeInfo() { DatabaseType = DbType.SByte, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(short)] = new DbTypeInfo() { DatabaseType = DbType.Int16, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(ushort)] = new DbTypeInfo() { DatabaseType = DbType.UInt16, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(int)] = new DbTypeInfo() { DatabaseType = DbType.Int32, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(uint)] = new DbTypeInfo() { DatabaseType = DbType.UInt32, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(long)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(ulong)] = new DbTypeInfo() { DatabaseType = DbType.UInt64, Statement = "BIGINT", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(float)] = new DbTypeInfo() { DatabaseType = DbType.Single, Statement = "DOUBLE", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(double)] = new DbTypeInfo() { DatabaseType = DbType.Double, Statement = "DOUBLE", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(decimal)] = new DbTypeInfo() { DatabaseType = DbType.Decimal, Statement = "DECIMAL", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(bool)] = new DbTypeInfo() { DatabaseType = DbType.Boolean, Statement = "BOOL", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(string)] = new DbTypeInfo() { DatabaseType = DbType.String, Statement = "VARCHAR", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(char)] = new DbTypeInfo() { DatabaseType = DbType.StringFixedLength, Statement = "CHAR", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(Guid)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(DateTime)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(DateTimeOffset)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(TimeSpan)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(byte[])] = new DbTypeInfo() { DatabaseType = DbType.Binary, Statement = "BLOB", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(byte?)] = new DbTypeInfo() { DatabaseType = DbType.Byte, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(sbyte?)] = new DbTypeInfo() { DatabaseType = DbType.SByte, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(short?)] = new DbTypeInfo() { DatabaseType = DbType.Int16, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(ushort?)] = new DbTypeInfo() { DatabaseType = DbType.UInt16, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(int?)] = new DbTypeInfo() { DatabaseType = DbType.Int32, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(uint?)] = new DbTypeInfo() { DatabaseType = DbType.UInt32, Statement = "INTEGER", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(long?)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(ulong?)] = new DbTypeInfo() { DatabaseType = DbType.UInt64, Statement = "BIGINT", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(float?)] = new DbTypeInfo() { DatabaseType = DbType.Single, Statement = "DOUBLE", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(double?)] = new DbTypeInfo() { DatabaseType = DbType.Double, Statement = "DOUBLE", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(decimal?)] = new DbTypeInfo() { DatabaseType = DbType.Decimal, Statement = "DECIMAL", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(bool?)] = new DbTypeInfo() { DatabaseType = DbType.Boolean, Statement = "BOOLEAN", IsValueQuoted = false };
-            dbTypeInfoMap[typeof(char?)] = new DbTypeInfo() { DatabaseType = DbType.StringFixedLength, Statement = "CHAR", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(Guid?)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(DateTime?)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(TimeSpan?)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(Object)] = new DbTypeInfo() { DatabaseType = DbType.Object, Statement = "", IsValueQuoted = true };
-            dbTypeInfoMap[typeof(DBNull)] = new DbTypeInfo() { DatabaseType = DbType.Object, Statement = "", IsValueQuoted = false };
+            return map;
         }
-
+        
         public static bool IsValueNeedQuoted(Type type)
         {
             if (type.GetTypeInfo().IsEnum)
@@ -162,7 +167,7 @@ namespace HB.Infrastructure.MySQL
                 return dbValueStatement;
             }
             //TODO:增加对值的过滤，预防SQL注入
-            return dbValueStatement.ToString()
+            return dbValueStatement.ToString(_culture)
                 .Replace("'", "''")
                 .Replace("--", "")
                 .Replace("/*", "")
