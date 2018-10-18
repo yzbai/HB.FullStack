@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HB.Compnent.Common.Sms;
+using HB.Compnent.Resource.Sms;
 using HB.Framework.Common;
 using HB.Framework.EventBus;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +26,9 @@ namespace WebDemo.Controllers
 
         private static int runTimes = 0;
 
-        private ISmsBiz _smsBiz; 
+        private ISmsService _smsBiz; 
 
-        public ValuesController(ILogger<ValuesController> logger, IEventBus eventBus, ISmsBiz smsBiz)
+        public ValuesController(ILogger<ValuesController> logger, IEventBus eventBus, ISmsService smsBiz)
         {
             _logger = logger;
             _eventBus = eventBus;

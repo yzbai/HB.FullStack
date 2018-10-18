@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure<AliyunVodOptions>(configuration);
 
-            services.AddSingleton<IVodBiz, AliyunVodBiz>();
+            services.AddSingleton<IVodService, AliyunVodService>();
 
             return services;
         }
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.Configure(action);
-            services.AddSingleton<IVodBiz, AliyunVodBiz>();
+            services.AddSingleton<IVodService, AliyunVodService>();
 
             return services;
         }

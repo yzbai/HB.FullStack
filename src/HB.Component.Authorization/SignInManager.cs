@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using HB.Component.Authorization.Abstractions;
 using HB.Component.Authorization.Entity;
 using HB.Component.Identity.Entity;
+using System.Security.Claims;
 
 namespace HB.Component.Authorization
 {
