@@ -10,7 +10,7 @@ namespace HB.Framework.Common
     /// </summary>
     public class StringTagParser
     {
-        private string _matchPattern = @"(\[%\w+%\])";
+        private readonly string _matchPattern = @"(\[%\w+%\])";
         private Hashtable tagCache = new Hashtable();       
 
         public StringTagParser() { }

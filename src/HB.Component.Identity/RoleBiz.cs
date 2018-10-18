@@ -6,13 +6,14 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entity;
+using System;
 
 namespace HB.Component.Identity
 {
     public class RoleBiz : BizWithDbTransaction, IRoleBiz
     {
         private IDatabase _database;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public RoleBiz(IDatabase database, ILogger<RoleBiz> logger) : base(database)
         {
@@ -25,7 +26,8 @@ namespace HB.Component.Identity
             From<Role> from = _database.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
             Where<Role> where = _database.Where<Role>().And<UserRole>(ru => ru.UserId == userId);
 
-            return _database.RetrieveAsync<Role>(from, where, transContext).ContinueWith(o=>o.Result.Select(r=>r.Name));
+            return _database.RetrieveAsync<Role>(from, where, transContext)
+                .ContinueWith(o=>o.Result.Select(r=>r.Name), TaskScheduler.Default);
         }
 
         public Task<int> GetRoleByNameAsync(string roleName, DbTransactionContext transContext = null)

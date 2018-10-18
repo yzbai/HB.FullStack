@@ -20,7 +20,7 @@ namespace HB.Component.Authorization
         private AuthorizationServerOptions _options;
         private IClaimsPrincipalFactory _claimsPrincipalFactory;
         private ICredentialManager _credentialManager;
-        private SigningCredentials _signingCredentials;
+        private readonly SigningCredentials _signingCredentials;
 
         public JwtBuilder(IOptions<AuthorizationServerOptions> options, IClaimsPrincipalFactory claimsPrincipalFactory, ICredentialManager credentialManager)
         {

@@ -5,14 +5,10 @@ using MySql.Data.MySqlClient;
 
 namespace HB.Infrastructure.MySQL
 {
-    public class MySQLTableCache
+    public static class MySQLTableCache
     {
+
         #region 构造函数 和 私有
-
-        //private static readonly string SELECT_SQL = "SELECT TOP 0 * FROM ";
-        private static Hashtable cachedTable = Hashtable.Synchronized(new Hashtable());
-
-        private MySQLTableCache() { }
 
         #endregion
 

@@ -7,28 +7,28 @@ using System.Globalization;
 
 namespace HB.Framework.Common
 {
-    public class SecurityHelper
+    public static class SecurityHelper
     {
-        public static string GetSHA1(string str)
-        {
-            SHA1 sha1 = SHA1.Create();
-            byte[] buffer = Encoding.UTF8.GetBytes(str);
+        //public static string GetSHA1(string str)
+        //{
+        //    SHA1 sha1 = SHA1.Create();
+        //    byte[] buffer = Encoding.UTF8.GetBytes(str);
 
-            byte[] sha1Bytes = sha1.ComputeHash(buffer);
+        //    byte[] sha1Bytes = sha1.ComputeHash(buffer);
 
-            return DataConverter.ToHexString(sha1Bytes);
+        //    return DataConverter.ToHexString(sha1Bytes);
             
-        }
+        //}
 
-        public static string GetMD5(string str)
-        {
-            MD5 md5 = MD5.Create();
-            byte[] buffer = Encoding.UTF8.GetBytes(str);
-            byte[] md5Bytes = md5.ComputeHash(buffer);
+        //public static string GetMD5(string str)
+        //{
+        //    MD5 md5 = MD5.Create();
+        //    byte[] buffer = Encoding.UTF8.GetBytes(str);
+        //    byte[] md5Bytes = md5.ComputeHash(buffer);
 
-            return DataConverter.ToHexString(md5Bytes);
-            //return Convert.ToBase64String(md5Bytes);
-        }
+        //    return DataConverter.ToHexString(md5Bytes);
+        //    //return Convert.ToBase64String(md5Bytes);
+        //}
 
         public static string EncryptPwdWithSalt(string pwd, string salt)
         {
@@ -46,8 +46,8 @@ namespace HB.Framework.Common
         #region Random String
 
         private static String charCollection = "0,1,2,3,4,5,6,7,8,9,a,s,d,f,g,h,z,c,v,b,n,m,k,q,w,e,r,t,y,u,p,A,S,D,F,G,H,Z,C,V,B,N,M,K,Q,W,E,R,T,Y,U,P"; //定义验证码字符及出现频次 ,避免出现0 o j i l 1 x;
-        private static string[] charArray = charCollection.Split(',');
-        private static string[] numbericCharArray = charCollection.Substring(0, 20).Split(',');
+        private static readonly string[] charArray = charCollection.Split(',');
+        private static readonly string[] numbericCharArray = charCollection.Substring(0, 20).Split(',');
 
         public static string CreateRandomString(int length)
         {

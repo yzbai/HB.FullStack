@@ -7,12 +7,12 @@ namespace HB.Framework.Database.Entity
     /// 标识字段为外键
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class DatabaseForeignKeyAttribute : DatabaseEntityPropertyAttribute
+    public sealed class DatabaseForeignKeyAttribute : DatabaseEntityPropertyAttribute
     {
         /// <summary>
         /// 引用的表类
         /// </summary>
-        private Type baseType;
+        private readonly Type baseType;
 
         /// <summary>
         /// 

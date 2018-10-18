@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Microsoft.AspNetCore.Mvc.Filters
 {
 
-    public class RequireSmsValidationCodeAttribute : ActionFilterAttribute
+    public sealed class RequireSmsValidationCodeAttribute : ActionFilterAttribute
     {
         public string SmsCodeParameterName { get; set; }
         

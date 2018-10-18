@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Http
 
             if (httpContext.Request == null)
             {
-                throw new ArgumentNullException(nameof(httpContext.Request));
+                throw new NullReferenceException(nameof(httpContext.Request));
             }
 
             IDictionary<string, string> parameters = new Dictionary<string, string>();
@@ -61,7 +61,7 @@ namespace Microsoft.AspNetCore.Http
 
             if (httpContext.Request == null)
             {
-                throw new ArgumentNullException(nameof(httpContext.Request));
+                throw new NullReferenceException(nameof(httpContext.Request));
             }
 
             StringValues value = StringValues.Empty;
@@ -101,7 +101,7 @@ namespace Microsoft.AspNetCore.Http
 
             if (httpContext.Request == null)
             {
-                throw new ArgumentNullException(nameof(httpContext.Request));
+                throw new NullReferenceException(nameof(httpContext.Request));
             }
 
             return httpContext.Request.GetDisplayUrl().Replace(httpContext.Request.Scheme, "https");

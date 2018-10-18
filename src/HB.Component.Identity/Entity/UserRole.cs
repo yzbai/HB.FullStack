@@ -6,7 +6,6 @@ namespace HB.Component.Identity.Entity
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    [Serializable]
     public class UserRole : DatabaseEntity
     {
         [DatabaseForeignKey("用户ID", typeof(User))]

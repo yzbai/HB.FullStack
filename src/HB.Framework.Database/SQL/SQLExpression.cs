@@ -21,7 +21,7 @@ namespace HB.Framework.Database.SQL
         public bool PrefixFieldWithTableName { get; set; }
         public IList<KeyValuePair<string, object>> Params { get; set; }
 
-        public SQLExpression(IDatabaseEntityDefFactory modelDefFactory)
+        protected SQLExpression(IDatabaseEntityDefFactory modelDefFactory)
         {
             _entityDefFactory = modelDefFactory;
             _sep = string.Empty;
