@@ -1,4 +1,4 @@
-﻿using HB.Compnent.Common.Sms;
+﻿using HB.Compnent.Resource.Sms;
 using HB.Infrastructure.Aliyun.Test;
 using Xunit;
 using Xunit.Abstractions;
@@ -7,7 +7,7 @@ namespace HB.PresentFish.Tools
 {
     public class SmsTest : IClassFixture<TestFixture>
     {
-        private ISmsBiz _smsBiz;
+        private ISmsService _smsBiz;
         private TestFixture _fixture;
         private ITestOutputHelper _output;
 
@@ -23,7 +23,7 @@ namespace HB.PresentFish.Tools
         [InlineData("18015323958")]
         public void SendSms(string mobile)
         {
-            var result = _smsBiz.SendIdentityValidationCode(mobile, out string code).Result;
+            var result = _smsBiz.SendValidationCode(mobile, out string code).Result;
 
             _output.WriteLine(result.Message);
 
