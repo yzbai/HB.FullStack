@@ -11,7 +11,7 @@ using HB.Component.Resource.Sms.Entity;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsBiz : ISmsBiz
+    public class AliyunSmsBiz : ISmsService
     {
         private AliyunSmsOptions _options;
         private IAcsClient _client;

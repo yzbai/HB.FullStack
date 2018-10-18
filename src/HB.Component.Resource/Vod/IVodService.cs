@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Resource.Vod
 {
-    public interface IVodBiz
+    public interface IVodService
     {
         Task<PlayAuth> GetVideoPlayAuth(string vid, long timeout);
     }
