@@ -40,7 +40,7 @@ namespace HB.Framework.Common
 
         public static string CreateUniqueToken()
         {
-            return Guid.NewGuid().ToString("N");
+            return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
         }
 
         #region Random String
@@ -51,15 +51,15 @@ namespace HB.Framework.Common
 
         public static string CreateRandomString(int length)
         {
-            return createRandomString(length, charArray);
+            return CreateRandomString(length, charArray);
         }
 
         public static string CreateRandomNumbericString(int length)
         {
-            return createRandomString(length, numbericCharArray);
+            return CreateRandomString(length, numbericCharArray);
         }
 
-        private static string createRandomString(int length, string[] charArray)
+        private static string CreateRandomString(int length, string[] charArray)
         {
             Random random = new Random(Guid.NewGuid().GetHashCode());
             int arrayLength = charArray.Length - 1;

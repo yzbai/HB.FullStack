@@ -17,4 +17,8 @@
     <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>

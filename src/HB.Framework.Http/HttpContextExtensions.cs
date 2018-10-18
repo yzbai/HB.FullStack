@@ -3,11 +3,14 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http.Extensions;
 using System.Text;
+using System.Globalization;
 
 namespace Microsoft.AspNetCore.Http
 {
     public static class HttpContextExtensions
     {
+        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture;
+
         public static IDictionary<string, string> GetParametersFromRequest(this HttpContext httpContext)
         {
             if (httpContext == null)
@@ -45,7 +48,7 @@ namespace Microsoft.AspNetCore.Http
             {
                 foreach (KeyValuePair<string, string> item in httpContext.Request.Cookies)
                 {
-                    parameters.Add(item.Key, item.Value.ToString());
+                    parameters.Add(item.Key, item.Value.ToString(_culture));
                 }
             }
 
@@ -92,7 +95,7 @@ namespace Microsoft.AspNetCore.Http
             return value.ToString();
         }
 
-        public static string MaketoHttpsRawUri(this HttpContext httpContext)
+        public static Uri MakeToHttpsRawUri(this HttpContext httpContext)
         {
             if (httpContext == null)
             {
@@ -104,7 +107,11 @@ namespace Microsoft.AspNetCore.Http
                 throw new NullReferenceException(nameof(httpContext.Request));
             }
 
-            return httpContext.Request.GetDisplayUrl().Replace(httpContext.Request.Scheme, "https");
+            string url = httpContext.Request.GetEncodedUrl().Replace(httpContext.Request.Scheme, "https");
+
+            Uri uri = new Uri(url);
+
+            return uri;
         }
 
         public static string GetIpAddress(this HttpContext httpContext)
@@ -133,7 +140,7 @@ namespace Microsoft.AspNetCore.Http
                 string rawValues = values.ToString();   // writes out as Csv when there are multiple.
 
                 if (!string.IsNullOrEmpty(rawValues))
-                    return (T)Convert.ChangeType(values.ToString(), typeof(T));
+                    return (T)Convert.ChangeType(values.ToString(), typeof(T), CultureInfo.InvariantCulture);
             }
             return default(T);
         }

@@ -2,20 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using System.Text;
 
 namespace HB.Framework.Http.Security
 {
-    public class InvalidTokenErrorMessages
+    public static class InvalidTokenErrorMessages
     {
-        public static readonly string AUDIENCE_INVALID          = "AUDIENCE_INVALID";
-        public static readonly string ISSUER_INVALID            = "ISSUER_INVALID";
-        public static readonly string NO_EXPIRATION             = "NO_EXPIRATION";
-        public static readonly string LIFETIME_INVALID          = "LIFETIME_INVALID";
-        public static readonly string NOT_VALID_YET             = "NOT_VALID_YET";
-        public static readonly string EXPIRED                   = "EXPIRED";
-        public static readonly string SIGNATURE_KEY_NOT_FOUND   = "SIGNATURE_KEY_NOT_FOUND";
-        public static readonly string SIGNATURE_INVALID         = "SIGNATURE_INVALID";
+        private const string ErrorMessage_AUDIENCE_INVALID = "ErrorMessage_AUDIENCE_INVALID";
+        private const string ErrorMessage_EXPIRED = "ErrorMessage_EXPIRED";
+        private const string ErrorMessage_ISSUER_INVALID = "ErrorMessage_ISSUER_INVALID";
+        private const string ErrorMessage_LIFETIME_INVALID = "ErrorMessage_LIFETIME_INVALID";
+        private const string ErrorMessage_NO_EXPIRATION = "ErrorMessage_NO_EXPIRATION";
+        private const string ErrorMessage_NOT_VALID_YET = "ErrorMessage_NOT_VALID_YET";
+        private const string ErrorMessage_SIGNATURE_INVALID = "ErrorMessage_SIGNATURE_INVALID";
+        private const string ErrorMessage_SIGNATURE_KEY_NOT_FOUND = "ErrorMessage_SIGNATURE_KEY_NOT_FOUND";
 
         public static string GetErrorMessage(Exception authFailure)
         {
@@ -44,35 +45,35 @@ namespace HB.Framework.Http.Security
             // and we want to display the most specific message possible.
             if (ex is SecurityTokenInvalidAudienceException)
             {
-                message = InvalidTokenErrorMessages.AUDIENCE_INVALID;
+                message = ErrorMessage_AUDIENCE_INVALID;
             }
             else if (ex is SecurityTokenInvalidIssuerException)
             {
-                message = InvalidTokenErrorMessages.ISSUER_INVALID;
+                message = ErrorMessage_ISSUER_INVALID;
             }
             else if (ex is SecurityTokenNoExpirationException)
             {
-                message = InvalidTokenErrorMessages.NO_EXPIRATION;
+                message = ErrorMessage_NO_EXPIRATION;
             }
             else if (ex is SecurityTokenInvalidLifetimeException)
             {
-                message = InvalidTokenErrorMessages.LIFETIME_INVALID;
+                message = ErrorMessage_LIFETIME_INVALID;
             }
             else if (ex is SecurityTokenNotYetValidException)
             {
-                message = InvalidTokenErrorMessages.NOT_VALID_YET;
+                message = ErrorMessage_NOT_VALID_YET;
             }
             else if (ex is SecurityTokenExpiredException)
             {
-                message = InvalidTokenErrorMessages.EXPIRED;
+                message = ErrorMessage_EXPIRED;
             }
             else if (ex is SecurityTokenSignatureKeyNotFoundException)
             {
-                message = InvalidTokenErrorMessages.SIGNATURE_KEY_NOT_FOUND;
+                message = ErrorMessage_SIGNATURE_KEY_NOT_FOUND;
             }
             else if (ex is SecurityTokenInvalidSignatureException)
             {
-                message = InvalidTokenErrorMessages.SIGNATURE_INVALID;
+                message = ErrorMessage_SIGNATURE_INVALID;
             }
 
             return message;

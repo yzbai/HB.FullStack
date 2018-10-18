@@ -6,7 +6,7 @@ using System.Text;
 
 namespace HB.Framework.Database.SQL
 {
-    public class Select<T> : SQLExpression
+    public class SelectExpression<T> : SQLExpression
         where T : DatabaseEntity, new()
     {
         private StringBuilder _statementBuilder;
@@ -28,13 +28,13 @@ namespace HB.Framework.Database.SQL
             return resultBuilder.ToString();
         }
 
-        public Select(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
+        public SelectExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
         {
-            _entityDefFactory = modelDefFactory;
-            _sourceModelDef = _entityDefFactory.Get<T>();
+            EntityDefFactory = modelDefFactory;
+            _sourceModelDef = EntityDefFactory.GetDef<T>();
             _databaseEngine = databaseEngine;
 
-            _sep = " ";
+            Seperator = " ";
             PrefixFieldWithTableName = true;
             WithSelectString = true;
 
@@ -61,7 +61,7 @@ namespace HB.Framework.Database.SQL
             return _databaseEngine;
         }
 
-        public Select<T> select<TTarget>(Expression<Func<T, TTarget>> expr)
+        public SelectExpression<T> Select<TTarget>(Expression<Func<T, TTarget>> expr)
         {
             if (!_firstAssign)
             {

@@ -2,6 +2,7 @@ using HB.Framework.Database.Engine;
 using HB.Framework.Database.Entity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -11,8 +12,9 @@ namespace HB.Framework.Database.SQL
     /// SQLÌõ¼þ.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Where<T> : SQLExpression
+    public class WhereExpression<T> : SQLExpression
     {
+        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         private IDatabaseEngine _databaseEngine;
         private Expression<Func<T, bool>> _whereExpression;
         private List<string> _orderByProperties;
@@ -28,13 +30,13 @@ namespace HB.Framework.Database.SQL
 
         public bool WithWhereString { get; set; }
 
-        public Where(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
+        public WhereExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
         {
-            _entityDefFactory = modelDefFactory;
-            DatabaseEntityDef modelDef = _entityDefFactory.Get<T>();
+            EntityDefFactory = modelDefFactory;
+            DatabaseEntityDef modelDef = EntityDefFactory.GetDef<T>();
             _databaseEngine = databaseEngine;
             base.PrefixFieldWithTableName = true;
-            base._paramPlaceHolderPrefix = _databaseEngine.ParameterizedChar + "wPARAM__";
+            base.ParamPlaceHolderPrefix = _databaseEngine.ParameterizedChar + "wPARAM__";
 
             _whereExpression = null;
             _whereString = string.Empty;
@@ -57,7 +59,7 @@ namespace HB.Framework.Database.SQL
         {
             StringBuilder sql = new StringBuilder();
 
-            _sep = " ";
+            Seperator = " ";
             string lamdaWhereString = Visit(_whereExpression).ToString();
 
             bool hasLamdaWhere = !string.IsNullOrEmpty(lamdaWhereString);
@@ -114,24 +116,24 @@ namespace HB.Framework.Database.SQL
         /// <param name="sqlFilter">ex: A={0} and B={1} and C in ({2})</param>
         /// <param name="filterParams">ex: ["name",12, new SqlInValues(new int[]{1,2,3})]</param>
         /// <returns></returns>
-        public virtual Where<T> where(string sqlFilter, params object[] filterParams)
+        public virtual WhereExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
             _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_databaseEngine, sqlFilter, filterParams);
 
             return this;
         }
         
-        public virtual Where<T> where()
+        public virtual WhereExpression<T> Where()
         {
             if (_whereExpression != null)
             {
                 _whereExpression = null; //Where() clears the expression
             }
 
-            return where(string.Empty);
+            return Where(string.Empty);
         }
-        
-        public virtual Where<T> where(Expression<Func<T, bool>> predicate)
+
+        public virtual WhereExpression<T> Where(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
             {
@@ -145,7 +147,7 @@ namespace HB.Framework.Database.SQL
             return this;
         }
 
-        public static string SqlFormat(IDatabaseEngine dbEngine, string sqlText, params object[] sqlParams)
+        public string SqlFormat(IDatabaseEngine dbEngine, string sqlText, params object[] sqlParams)
         {
             var escapedParams = new List<string>();
 
@@ -157,9 +159,8 @@ namespace HB.Framework.Database.SQL
                 }
                 else
                 {
-                    var sqlInValues = sqlParam as SQLInValues;
 
-                    if (sqlInValues != null)
+                    if (sqlParam is SQLInValues sqlInValues)
                     {
                         escapedParams.Add(sqlInValues.ToSqlInString(dbEngine));
                     }
@@ -169,14 +170,14 @@ namespace HB.Framework.Database.SQL
                     }
                 }
             }
-            return string.Format(sqlText, escapedParams.ToArray());
+            return string.Format(_culture, sqlText, escapedParams.ToArray());
         }
 
         #endregion
 
         #region And & Or
 
-        public virtual Where<T> And(Expression<Func<T, bool>> predicate)
+        public virtual WhereExpression<T> And(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
             {
@@ -192,7 +193,7 @@ namespace HB.Framework.Database.SQL
             return this;
         }
 
-        public virtual Where<T> Or(Expression<Func<T, bool>> predicate)
+        public virtual WhereExpression<T> Or(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
             {
@@ -212,25 +213,25 @@ namespace HB.Framework.Database.SQL
 
         #region Group By
 
-        public virtual Where<T> GroupBy()
+        public virtual WhereExpression<T> GroupBy()
         {
             return GroupBy(string.Empty);
         }
 
-        public virtual Where<T> GroupBy(string groupByString)
+        public virtual WhereExpression<T> GroupBy(string groupByString)
         {
             _groupByString = groupByString;
             return this;
         }
 
-        public virtual Where<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual WhereExpression<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            _sep = string.Empty;
+            Seperator = string.Empty;
             _groupByString = Visit(keySelector).ToString();
 
             if (!string.IsNullOrEmpty(_groupByString))
             {
-                _groupByString = string.Format("GROUP BY {0}", _groupByString);
+                _groupByString = string.Format(_culture, "GROUP BY {0}", _groupByString);
             }
 
             return this;
@@ -240,12 +241,12 @@ namespace HB.Framework.Database.SQL
 
         #region Having
 
-        public virtual Where<T> Having()
+        public virtual WhereExpression<T> Having()
         {
             return Having(string.Empty);
         }
 
-        public virtual Where<T> Having(string sqlFilter, params object[] filterParams)
+        public virtual WhereExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
             _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_databaseEngine, sqlFilter, filterParams);
 
@@ -257,11 +258,11 @@ namespace HB.Framework.Database.SQL
             return this;
         }
 
-        public virtual Where<T> Having(Expression<Func<T, bool>> predicate)
+        public virtual WhereExpression<T> Having(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
             {
-                _sep = " ";
+                Seperator = " ";
                 _havingString = Visit(predicate).ToString();
 
                 if (!string.IsNullOrEmpty(_havingString)) 
@@ -281,57 +282,57 @@ namespace HB.Framework.Database.SQL
 
         #region Order By
 
-        public virtual Where<T> OrderBy()
+        public virtual WhereExpression<T> OrderBy()
         {
             return OrderBy(string.Empty);
         }
 
-        public virtual Where<T> OrderBy(string orderBy)
+        public virtual WhereExpression<T> OrderBy(string orderBy)
         {
             _orderByProperties.Clear();
             _orderByString = orderBy;
             return this;
         }
 
-        public virtual Where<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual WhereExpression<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            _sep = string.Empty;
+            Seperator = string.Empty;
             _orderByProperties.Clear();
             var property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " ASC");
-            updateOrderByString();
+            UpdateOrderByString();
             return this;
         }
 
-        public virtual Where<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual WhereExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            _sep = string.Empty;
+            Seperator = string.Empty;
             var property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " ASC");
-            updateOrderByString();
+            UpdateOrderByString();
             return this;
         }
 
-        public virtual Where<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual WhereExpression<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            _sep = string.Empty;
+            Seperator = string.Empty;
             _orderByProperties.Clear();
             var property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " DESC");
-            updateOrderByString();
+            UpdateOrderByString();
             return this;
         }
 
-        public virtual Where<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
+        public virtual WhereExpression<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            _sep = string.Empty;
+            Seperator = string.Empty;
             var property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " DESC");
-            updateOrderByString();
+            UpdateOrderByString();
             return this;
         }
 
-        private void updateOrderByString()
+        private void UpdateOrderByString()
         {
             if (_orderByProperties.Count > 0)
             {
@@ -354,46 +355,46 @@ namespace HB.Framework.Database.SQL
 
         #region Limit
 
-        public virtual Where<T> Limit(long Skip, long Rows)
+        public virtual WhereExpression<T> Limit(long Skip, long Rows)
         {
             _limitRows = Rows;
             _limitSkip = Skip;
 
-            updateLimitString();
+            UpdateLimitString();
 
             return this;
         }
 
-        public virtual Where<T> Limit(long Rows)
+        public virtual WhereExpression<T> Limit(long Rows)
         {
             _limitRows = Rows;
             _limitSkip = 0;
 
-            updateLimitString();
+            UpdateLimitString();
 
             return this;
         }
 
-        public virtual Where<T> Limit()
+        public virtual WhereExpression<T> Limit()
         {
             _limitSkip = null;
             _limitRows = null;
 
-            updateLimitString();
+            UpdateLimitString();
 
             return this;
         }
 
-        private void updateLimitString()
+        private void UpdateLimitString()
         {
             if (!_limitSkip.HasValue)
             {
                 _limitString = string.Empty;
             }
 
-            string rows = _limitRows.HasValue ? string.Format(",{0}", _limitRows.Value) : string.Empty;
+            string rows = _limitRows.HasValue ? string.Format(_culture, ",{0}", _limitRows.Value) : string.Empty;
 
-            _limitString = string.Format("LIMIT {0}{1}", _limitSkip.Value, rows);
+            _limitString = string.Format(_culture, "LIMIT {0}{1}", _limitSkip.Value, rows);
         }
 
         #endregion 
@@ -409,35 +410,35 @@ namespace HB.Framework.Database.SQL
                 return;
             }
 
-            _sep = " ";
+            Seperator = " ";
             string newExpr = Visit(predicate).ToString();
 
             _whereString += string.IsNullOrEmpty(_whereString) ? "" : (" " + appendType + " ");
             _whereString += newExpr;
         }
 
-        public virtual Where<T> And<TSource>(Expression<Func<TSource, bool>> predicate)
+        public virtual WhereExpression<T> And<TSource>(Expression<Func<TSource, bool>> predicate)
         {
             AppendToWhereString("AND", predicate);
 
             return this;
         }
 
-        public virtual Where<T> And<TSource, TTarget>(Expression<Func<TSource, TTarget, bool>> predicate)
+        public virtual WhereExpression<T> And<TSource, TTarget>(Expression<Func<TSource, TTarget, bool>> predicate)
         {
             AppendToWhereString("AND", predicate);
 
             return this;
         }
 
-        public virtual Where<T> Or<TSource>(Expression<Func<TSource, bool>> predicate)
+        public virtual WhereExpression<T> Or<TSource>(Expression<Func<TSource, bool>> predicate)
         {
             AppendToWhereString("OR", predicate);
 
             return this;
         }
 
-        public virtual Where<T> Or<TSource, TTarget>(Expression<Func<TSource, TTarget, bool>> predicate)
+        public virtual WhereExpression<T> Or<TSource, TTarget>(Expression<Func<TSource, TTarget, bool>> predicate)
         {
             AppendToWhereString("OR", predicate);
 

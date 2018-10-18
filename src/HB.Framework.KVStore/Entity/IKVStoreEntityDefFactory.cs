@@ -7,7 +7,7 @@ namespace HB.Framework.KVStore.Entity
 {
     public interface IKVStoreEntityDefFactory
     {
-        KVStoreEntityDef Get<T>();
-        KVStoreEntityDef Get(Type type);
+        KVStoreEntityDef GetDef<T>();
+        KVStoreEntityDef GetDef(Type type);
     }
 }

@@ -4,8 +4,8 @@ namespace HB.Framework.Database.Entity
 {
     public interface IDatabaseEntityDefFactory
     {
-        DatabaseEntityDef Get(Type domainType);
-        DatabaseEntityDef Get<T>();
+        DatabaseEntityDef GetDef(Type domainType);
+        DatabaseEntityDef GetDef<T>();
         int GetVarcharDefaultLength();
     }
 }

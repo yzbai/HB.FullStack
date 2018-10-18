@@ -23,8 +23,8 @@ namespace HB.Component.Identity
 
         public Task<IEnumerable<string>> GetUserRoleNamesAsync(long userId, DbTransactionContext transContext = null)
         {
-            From<Role> from = _database.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
-            Where<Role> where = _database.Where<Role>().And<UserRole>(ru => ru.UserId == userId);
+            FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
+            WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserId == userId);
 
             return _database.RetrieveAsync<Role>(from, where, transContext)
                 .ContinueWith(o=>o.Result.Select(r=>r.Name), TaskScheduler.Default);

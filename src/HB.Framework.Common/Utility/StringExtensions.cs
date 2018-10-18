@@ -20,7 +20,7 @@ namespace HB.Framework.Common
 
             foreach (string word in words)
             {
-                if (str.Equals(word))
+                if (str.Equals(word, StringComparison.InvariantCulture))
                 {
                     return true;
                 }
