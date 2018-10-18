@@ -60,9 +60,9 @@ namespace AliyunSample
 
     public class VodTest
     {
-        private IVodBiz _vodService;
+        private IVodService _vodService;
 
-        public VodTest(IVodBiz vodBiz)
+        public VodTest(IVodService vodBiz)
         {
             _vodService = vodBiz;  
         }

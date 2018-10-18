@@ -13,13 +13,13 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Aliyun.Vod
 {
-    public class AliyunVodBiz : IVodBiz
+    public class AliyunVodService : IVodService
     {
         private IAcsClient _acsClient;
         private AliyunVodOptions _options;
         private ILogger _logger;
 
-        public AliyunVodBiz(IAcsClientManager acsClientManager, IOptions<AliyunVodOptions> options, ILogger<AliyunVodBiz> logger)
+        public AliyunVodService(IAcsClientManager acsClientManager, IOptions<AliyunVodOptions> options, ILogger<AliyunVodService> logger)
         {
             _options = options.Value;
             _acsClient = acsClientManager.GetAcsClient(_options.ProductName);

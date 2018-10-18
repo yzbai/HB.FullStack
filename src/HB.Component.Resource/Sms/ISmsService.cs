@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.Compnent.Resource.Sms
 {
-    public interface ISmsBiz
+    public interface ISmsService
     {
         /// <summary>
         /// 用于验证用户手机

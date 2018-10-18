@@ -2,7 +2,7 @@
 
 using System.Security.Claims;
 
-namespace HB.Component.Identity
+namespace System.Security.Claims
 {
     public class ClaimExtensionTypes
     {
