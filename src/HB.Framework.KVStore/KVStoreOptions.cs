@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,7 +27,7 @@ namespace HB.Framework.KVStore
 
         public KVStoreSchema GetKVStoreSchema(string entityTypeFullName)
         {
-            return KVStoreSchemas.FirstOrDefault<KVStoreSchema>(ks => ks.EntityTypeFullName.Equals(entityTypeFullName));
+            return KVStoreSchemas.FirstOrDefault<KVStoreSchema>(ks => ks.EntityTypeFullName.Equals(entityTypeFullName, StringComparison.InvariantCulture));
         }
     }
 }

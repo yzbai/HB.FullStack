@@ -61,8 +61,8 @@ namespace HB.Component.Authorization
         public async Task<AuthorizationServerResult> DeleteAppClientTokenByUserIdAsync(long userId, DbTransactionContext transContext = null)
         {
             //TODO: Test this where expression
-            Where<SignInToken> where = _db.Where<SignInToken>()
-                .where(at=>at.ClientType != Enum.GetName(typeof(ClientType), ClientType.Web))
+            WhereExpression<SignInToken> where = _db.NewWhere<SignInToken>()
+                .Where(at=>at.ClientType != Enum.GetName(typeof(ClientType), ClientType.Web))
                 .And(at=>at.UserId == userId);
 
             IList<SignInToken> resultList = await _db.RetrieveAsync<SignInToken>(where, transContext);

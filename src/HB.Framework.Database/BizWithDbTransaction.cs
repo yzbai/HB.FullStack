@@ -34,7 +34,7 @@ namespace HB.Framework.Database
         /// <summary>
         /// 提交事务
         /// </summary>
-        protected void Commit(DbTransactionContext context)
+        protected static void Commit(DbTransactionContext context)
         {
             if (context == null || context.Transaction == null)
             {
@@ -69,7 +69,7 @@ namespace HB.Framework.Database
         /// <summary>
         /// 回滚事务
         /// </summary>
-        protected void Rollback(DbTransactionContext context)
+        protected static void Rollback(DbTransactionContext context)
         {
             if(context == null || context.Transaction == null)
             {

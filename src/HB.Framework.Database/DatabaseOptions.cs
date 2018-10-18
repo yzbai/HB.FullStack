@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Options;
 
@@ -29,7 +30,7 @@ namespace HB.Framework.Database
 
         public DatabaseSchema GetDatabaseSchema(string modelTypeFullName)
         {
-            return DatabaseSchemas.First(ds => ds.EntityTypeFullName.Equals(modelTypeFullName));
+            return DatabaseSchemas.First(ds => ds.EntityTypeFullName.Equals(modelTypeFullName, StringComparison.InvariantCulture));
         }
     }
 }

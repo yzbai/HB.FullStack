@@ -328,7 +328,7 @@ namespace HB.Infrastructure.MySQL
 
         public static object ExecuteSPScalar(string connectString, string spName, IList<IDataParameter> parameters)
         {
-            MySqlConnection conn = new MySqlConnection();
+            MySqlConnection conn = new MySqlConnection(connectString);
             return ExecuteSPScalar(conn, null, true, spName, parameters);
         }
 

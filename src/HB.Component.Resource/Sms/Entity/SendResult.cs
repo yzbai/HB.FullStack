@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.Component.Resource.Sms.Entity
 {
-    public class SendResponse
+    public class SendResult
     {
         public string Message { get; set; }
         public bool Succeeded { get; set; }

@@ -111,7 +111,7 @@ namespace HB.Framework.KVStore
 
         public T GetById<T>(object keyValue) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             byte[] value = _engine.EntityGet(
                 storeName(entityDef),
@@ -124,7 +124,7 @@ namespace HB.Framework.KVStore
 
         public IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             IEnumerable<byte[]> values = _engine.EntityGet(
                 storeName(entityDef),
@@ -137,7 +137,7 @@ namespace HB.Framework.KVStore
 
         public IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             IEnumerable<byte[]> values = _engine.EntityGetAll(
                 storeName(entityDef),
@@ -164,7 +164,7 @@ namespace HB.Framework.KVStore
                 return KVStoreResult.Fail("item wanted to be added, version should be 0.");
             }
 
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityAdd(
                 storeName(entityDef),
@@ -187,7 +187,7 @@ namespace HB.Framework.KVStore
                 return KVStoreResult.Fail("items is not valid.");
             }
 
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             IEnumerable<int> originalVersions = items.Select(t => t.Version).ToArray();
 
@@ -218,14 +218,14 @@ namespace HB.Framework.KVStore
 
         public KVStoreResult Delete<T>(T item) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return DeleteByIds<T>(new object[] { entityKey(item, entityDef) }, new int[] { item.Version });
         }
 
         public KVStoreResult DeleteAll<T>() where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDeleteAll(
                 storeName(entityDef),
@@ -241,7 +241,7 @@ namespace HB.Framework.KVStore
 
         public KVStoreResult DeleteByIds<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDelete(
                 storeName(entityDef),
@@ -258,7 +258,7 @@ namespace HB.Framework.KVStore
 
         public Task<T> GetByIdAsync<T>(object keyValue) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityGetAsync(
                 storeName(entityDef),
@@ -270,7 +270,7 @@ namespace HB.Framework.KVStore
 
         public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityGetAsync(
                 storeName(entityDef),
@@ -282,7 +282,7 @@ namespace HB.Framework.KVStore
 
         public Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityGetAllAsync(
                 storeName(entityDef),
@@ -308,7 +308,7 @@ namespace HB.Framework.KVStore
                 return Task.FromResult(KVStoreResult.Fail("item wanted to be added, version should be 0."));
             }
 
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return  _engine.EntityAddAsync(
                 storeName(entityDef),
@@ -331,7 +331,7 @@ namespace HB.Framework.KVStore
                 return Task.FromResult(KVStoreResult.Fail("items is not valid."));
             }
 
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             IEnumerable<int> originalVersions = items.Select(t => t.Version).ToArray();
 
@@ -367,14 +367,14 @@ namespace HB.Framework.KVStore
                 return Task.FromResult(KVStoreResult.Fail("item is not valid."));
             }
 
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return DeleteByIdsAsync<T>(new object[] { entityKey(item, entityDef) }, new int[] { item.Version });
         }
 
         public Task<KVStoreResult> DeleteAllAsync<T>() where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDeleteAllAsync(
                 storeName(entityDef),
@@ -390,7 +390,7 @@ namespace HB.Framework.KVStore
 
         public Task<KVStoreResult> DeleteByIdsAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
-            KVStoreEntityDef entityDef = _entityDefFactory.Get<T>();
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDeleteAsync(
                 storeName(entityDef),
