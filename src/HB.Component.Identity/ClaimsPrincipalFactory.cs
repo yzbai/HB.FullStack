@@ -10,8 +10,8 @@ namespace HB.Component.Identity
 {
     public class ClaimsPrincipalFactory : BizWithDbTransaction, IClaimsPrincipalFactory
     {
-        private IDatabase _db;
-        private ILogger _logger;
+        private readonly IDatabase _db;
+        private readonly ILogger _logger;
         private IRoleBiz _roleBiz;
         private IUserClaimBiz _userClaimBiz;
 

@@ -1,7 +1,7 @@
 ﻿
 namespace HB.Framework.Database.Entity
 {
-    public class DatabaseEntityPropertyIgnoreAttribute : System.Attribute
+    public sealed class DatabaseEntityPropertyIgnoreAttribute : System.Attribute
     {
     }
 }

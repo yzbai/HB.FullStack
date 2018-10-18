@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common.Validation.Attributes
 {
-    public class PositiveNumberAttribute : ValidationAttribute
+    public sealed class PositiveNumberAttribute : ValidationAttribute
     {
         public PositiveNumberAttribute()
         {

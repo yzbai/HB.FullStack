@@ -38,7 +38,7 @@ namespace HB.Framework.Database
         {
             if (context == null || context.Transaction == null)
             {
-                throw new ArgumentException("can not be null", "DbTransactionContext context");
+                throw new ArgumentException("can not be null", nameof(context));
             }
 
             if (context.Status != DbTransactionStatus.InTransaction)
@@ -59,10 +59,10 @@ namespace HB.Framework.Database
 
                 context.Status = DbTransactionStatus.Commited;
             }
-            catch (Exception ex)
+            catch
             {
                 context.Status = DbTransactionStatus.Failed;
-                throw ex;
+                throw;
             }
         }
 
@@ -73,7 +73,7 @@ namespace HB.Framework.Database
         {
             if(context == null || context.Transaction == null)
             {
-                throw new ArgumentException("can not be null", "DbTransactionContext context");
+                throw new ArgumentException("can not be null", nameof(context));
             }
 
             if (context.Status != DbTransactionStatus.InTransaction)
@@ -94,10 +94,10 @@ namespace HB.Framework.Database
 
                 context.Status = DbTransactionStatus.Rollbacked;
             }
-            catch (Exception ex)
+            catch 
             {
                 context.Status = DbTransactionStatus.Failed;
-                throw ex;
+                throw;
             }
         }
 

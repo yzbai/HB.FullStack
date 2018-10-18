@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common.Validation.Attributes
 {
-    public class MonthAttribute : ValidationAttribute
+    public sealed class MonthAttribute : ValidationAttribute
     {
         public MonthAttribute()
         {

@@ -12,7 +12,7 @@ namespace HB.Framework.Common.Entity
     {
         #region Validation
 
-        private IList<ValidationResult> __validateResults = null;
+        private readonly IList<ValidationResult> __validateResults = null;
 
         public bool IsValid()
         {

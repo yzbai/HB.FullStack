@@ -7,7 +7,6 @@ namespace HB.Component.Identity.Entity
     /// <summary>
     /// ½ÇÉ«
     /// </summary>
-    [Serializable]
     public class Role : DatabaseEntity
     {
         [Required]

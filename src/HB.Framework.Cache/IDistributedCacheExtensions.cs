@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Distributed
 
         public static Task<T> GetAsync<T>(this IDistributedCache cache, string key)
         {
-            return cache.GetAsync(key).ContinueWith(t => { return DataConverter.DeSerialize<T>(t.Result); });
+            return cache.GetAsync(key).ContinueWith(t => { return DataConverter.DeSerialize<T>(t.Result); }, TaskScheduler.Default);
         }
 
         public static void SetInt(this IDistributedCache cache, string key, int value, DistributedCacheEntryOptions options)

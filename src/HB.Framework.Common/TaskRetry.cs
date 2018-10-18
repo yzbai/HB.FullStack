@@ -10,11 +10,14 @@ namespace HB.Framework.Common
     /// <summary>
     /// Retry the task without await. You can fire and forgot.
     /// </summary>
-    public class TaskRetry
+    public static class TaskRetryOldxx
     {
-        public static Func<int, TimeSpan> DefaultSleepDurationProvider = retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+        private static Func<int, TimeSpan> defaultSleepDurationProvider = retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
 
-        public static Func<int, TimeSpan> ZeroSleepDurationProvider = retryAttempt => TimeSpan.Zero;
+        private static Func<int, TimeSpan> zeroSleepDurationProvider = retryAttempt => TimeSpan.Zero;
+
+        public static Func<int, TimeSpan> DefaultSleepDurationProvider { get => defaultSleepDurationProvider; set => defaultSleepDurationProvider = value; }
+        public static Func<int, TimeSpan> ZeroSleepDurationProvider { get => zeroSleepDurationProvider; set => zeroSleepDurationProvider = value; }
 
         public static Task Retry(int retryCount, Func<Task> taskAction, Action<Task, AggregateException> exceptionAction, Func<int, TimeSpan> sleepDurationProvider = null)
         {
@@ -34,7 +37,7 @@ namespace HB.Framework.Common
                     }
 
                     return t;
-                });
+                }, TaskScheduler.Default);
             }
 
             if (sleepDurationProvider == null)
@@ -55,7 +58,7 @@ namespace HB.Framework.Common
                     Thread.Sleep(sleepDurationProvider(i));
 
                     return taskAction();
-                });
+                }, TaskScheduler.Default);
             }
 
             return task;
@@ -81,7 +84,7 @@ namespace HB.Framework.Common
                     }
 
                     return t.Result;
-                });
+                }, TaskScheduler.Default);
             }
 
             if (sleepDurationProvider == null)
@@ -102,7 +105,7 @@ namespace HB.Framework.Common
                     Thread.Sleep(sleepDurationProvider(i));
 
                     return taskAction().Result;
-                });
+                }, TaskScheduler.Default);
             }
 
             return task;

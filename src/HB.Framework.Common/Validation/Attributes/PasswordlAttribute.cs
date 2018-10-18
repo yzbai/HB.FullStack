@@ -1,6 +1,6 @@
 ﻿namespace System.ComponentModel.DataAnnotations
 {
-    public class PasswordAttribute : ValidationAttribute
+    public sealed class PasswordAttribute : ValidationAttribute
     {
         public PasswordAttribute()
         {

@@ -1,6 +1,6 @@
 ﻿namespace System.ComponentModel.DataAnnotations
 {
-    public class MobileAttribute : ValidationAttribute
+    public sealed class MobileAttribute : ValidationAttribute
     {
         public MobileAttribute()
         {

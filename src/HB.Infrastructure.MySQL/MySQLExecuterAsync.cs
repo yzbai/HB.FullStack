@@ -65,7 +65,7 @@ namespace HB.Infrastructure.MySQL
 
                 return reader;
             }
-            catch (Exception ex)
+            catch 
             {
                 if (isOwnedConnection)
                 {
@@ -77,7 +77,7 @@ namespace HB.Infrastructure.MySQL
                     reader.Close();
                 }
 
-                throw ex;
+                throw;
             }
         }
 
@@ -131,9 +131,9 @@ namespace HB.Infrastructure.MySQL
 
                 rtObj = await command.ExecuteScalarAsync();
             }
-            catch (Exception ex)
+            catch 
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -197,9 +197,9 @@ namespace HB.Infrastructure.MySQL
 
                 rtInt = await command.ExecuteNonQueryAsync();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -240,9 +240,9 @@ namespace HB.Infrastructure.MySQL
             {
                 rtInt = await command.ExecuteNonQueryAsync();
             }
-            catch (Exception ex)
+            catch 
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -283,9 +283,9 @@ namespace HB.Infrastructure.MySQL
             {
                 rtObj = await command.ExecuteScalarAsync();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -334,7 +334,7 @@ namespace HB.Infrastructure.MySQL
                     reader = (MySqlDataReader)await command.ExecuteReaderAsync();
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 if (isOwedConnection)
                 {
@@ -346,7 +346,7 @@ namespace HB.Infrastructure.MySQL
                     reader.Close();
                 }
 
-                throw ex;
+                throw;
             }
 
             command.Parameters.Clear();
@@ -370,7 +370,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (mySqlTransaction == null)
             {
-                throw new ArgumentNullException("ExecuteSqlReader方法不接收NULL参数");
+                throw new ArgumentNullException(nameof(mySqlTransaction), "ExecuteSqlReader方法不接收NULL参数");
             }
 
             return ExecuteSqlDataTableAsync(mySqlTransaction.Connection, sqlString, false);

@@ -1,58 +1,61 @@
 ﻿//using HB.Framework.Cache;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace HB.Framework.Common
 {
-    public class DataConverter
+    public static class DataConverter
     {
-        private static Dictionary<Type, Func<object, object>> convertFunDict = new Dictionary<Type, Func<object, object>>();
+        private static readonly Dictionary<Type, Func<object, object>> convertFunDict = new Dictionary<Type, Func<object, object>>();
         private static Dictionary<string, string> mediaType2FileTypeDict = new Dictionary<string, string>();
+        private static CultureInfo culture = CultureInfo.InvariantCulture;
 
         static DataConverter()
         {
             #region type to type
 
-            convertFunDict[typeof(byte)] = o => { return Convert.ToByte(o); };
-            convertFunDict[typeof(sbyte)] = o => { return Convert.ToSByte(o); };
-            convertFunDict[typeof(short)] = o => { return Convert.ToInt16(o); };
-            convertFunDict[typeof(ushort)] = o => { return Convert.ToUInt16(o); };
-            convertFunDict[typeof(int)] = o => { return Convert.ToInt32(o); };
-            convertFunDict[typeof(uint)] = o => { return Convert.ToUInt32(o); };
-            convertFunDict[typeof(long)] = o => { return Convert.ToInt64(o); };
-            convertFunDict[typeof(ulong)] = o => { return Convert.ToUInt64(o); };
-            convertFunDict[typeof(float)] = o => { return Convert.ToSingle(o); };
-            convertFunDict[typeof(double)] = o => { return Convert.ToDouble(o); };
-            convertFunDict[typeof(decimal)] = o => { return Convert.ToDecimal(o); };
-            convertFunDict[typeof(bool)] = o => { return Convert.ToBoolean(o); };
-            convertFunDict[typeof(string)] = o => { return Convert.ToString(o); };
-            convertFunDict[typeof(char)] = o => { return Convert.ToChar(o); };
+            convertFunDict[typeof(byte)] = o => { return Convert.ToByte(o, culture); };
+            convertFunDict[typeof(sbyte)] = o => { return Convert.ToSByte(o, culture); };
+            convertFunDict[typeof(short)] = o => { return Convert.ToInt16(o, culture); };
+            convertFunDict[typeof(ushort)] = o => { return Convert.ToUInt16(o, culture); };
+            convertFunDict[typeof(int)] = o => { return Convert.ToInt32(o, culture); };
+            convertFunDict[typeof(uint)] = o => { return Convert.ToUInt32(o, culture); };
+            convertFunDict[typeof(long)] = o => { return Convert.ToInt64(o, culture); };
+            convertFunDict[typeof(ulong)] = o => { return Convert.ToUInt64(o, culture); };
+            convertFunDict[typeof(float)] = o => { return Convert.ToSingle(o, culture); };
+            convertFunDict[typeof(double)] = o => { return Convert.ToDouble(o, culture); };
+            convertFunDict[typeof(decimal)] = o => { return Convert.ToDecimal(o, culture); };
+            convertFunDict[typeof(bool)] = o => { return Convert.ToBoolean(o, culture); };
+            convertFunDict[typeof(string)] = o => { return Convert.ToString(o, culture); };
+            convertFunDict[typeof(char)] = o => { return Convert.ToChar(o, culture); };
             convertFunDict[typeof(Guid)] = o => { return Guid.Parse(o.ToString()); };
-            convertFunDict[typeof(DateTime)] = o => { return Convert.ToDateTime(o); };
-            convertFunDict[typeof(DateTimeOffset)] = o => { return (DateTimeOffset)DateTime.SpecifyKind(Convert.ToDateTime(o), DateTimeKind.Utc); };
-            convertFunDict[typeof(TimeSpan)] = o => { return Convert.ToDateTime(o); };
+            convertFunDict[typeof(DateTime)] = o => { return Convert.ToDateTime(o, culture); };
+            convertFunDict[typeof(DateTimeOffset)] = o => { return (DateTimeOffset)DateTime.SpecifyKind(Convert.ToDateTime(o, culture), DateTimeKind.Utc); };
+            convertFunDict[typeof(TimeSpan)] = o => { return Convert.ToDateTime(o, culture); };
             convertFunDict[typeof(byte[])] = o => { return Serialize(o); };
-            convertFunDict[typeof(byte?)] = o => { return o == null ? null : (object)Convert.ToByte(o); };
-            convertFunDict[typeof(sbyte?)] = o => { return o == null ? null : (object)Convert.ToSByte(o); };
-            convertFunDict[typeof(short?)] = o => { return o == null ? null : (object)Convert.ToInt16(o); };
-            convertFunDict[typeof(ushort?)] = o => { return o == null ? null : (object)Convert.ToUInt16(o); };
-            convertFunDict[typeof(int?)] = o => { return o == null ? null : (object)Convert.ToInt32(o); };
-            convertFunDict[typeof(uint?)] = o => { return o == null ? null : (object)Convert.ToUInt32(o); };
-            convertFunDict[typeof(long?)] = o => { return o == null ? null : (object)Convert.ToInt64(o); };
-            convertFunDict[typeof(ulong?)] = o => { return o == null ? null : (object)Convert.ToUInt64(o); };
-            convertFunDict[typeof(float?)] = o => { return o == null ? null : (object)Convert.ToSingle(o); };
-            convertFunDict[typeof(double?)] = o => { return o == null ? null : (object)Convert.ToDouble(o); };
-            convertFunDict[typeof(decimal?)] = o => { return o == null ? null : (object)Convert.ToDecimal(o); };
-            convertFunDict[typeof(bool?)] = o => { return o == null ? null : (object)Convert.ToBoolean(o); };
-            convertFunDict[typeof(char?)] = o => { return o == null ? null : (object)Convert.ToChar(o); };
+            convertFunDict[typeof(byte?)] = o => { return o == null ? null : (object)Convert.ToByte(o, culture); };
+            convertFunDict[typeof(sbyte?)] = o => { return o == null ? null : (object)Convert.ToSByte(o, culture); };
+            convertFunDict[typeof(short?)] = o => { return o == null ? null : (object)Convert.ToInt16(o, culture); };
+            convertFunDict[typeof(ushort?)] = o => { return o == null ? null : (object)Convert.ToUInt16(o, culture); };
+            convertFunDict[typeof(int?)] = o => { return o == null ? null : (object)Convert.ToInt32(o, culture); };
+            convertFunDict[typeof(uint?)] = o => { return o == null ? null : (object)Convert.ToUInt32(o, culture); };
+            convertFunDict[typeof(long?)] = o => { return o == null ? null : (object)Convert.ToInt64(o, culture); };
+            convertFunDict[typeof(ulong?)] = o => { return o == null ? null : (object)Convert.ToUInt64(o, culture); };
+            convertFunDict[typeof(float?)] = o => { return o == null ? null : (object)Convert.ToSingle(o, culture); };
+            convertFunDict[typeof(double?)] = o => { return o == null ? null : (object)Convert.ToDouble(o, culture); };
+            convertFunDict[typeof(decimal?)] = o => { return o == null ? null : (object)Convert.ToDecimal(o, culture); };
+            convertFunDict[typeof(bool?)] = o => { return o == null ? null : (object)Convert.ToBoolean(o, culture); };
+            convertFunDict[typeof(char?)] = o => { return o == null ? null : (object)Convert.ToChar(o, culture); };
             convertFunDict[typeof(Guid?)] = o => { return o == null ? null : (object)Guid.Parse(o.ToString()); };
-            convertFunDict[typeof(DateTime?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o); };
-            convertFunDict[typeof(DateTimeOffset?)] = o => { return o == null ? null : (DateTimeOffset?)DateTime.SpecifyKind(Convert.ToDateTime(o), DateTimeKind.Utc); };
-            convertFunDict[typeof(TimeSpan?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o); };
+            convertFunDict[typeof(DateTime?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o, culture); };
+            convertFunDict[typeof(DateTimeOffset?)] = o => { return o == null ? null : (DateTimeOffset?)DateTime.SpecifyKind(Convert.ToDateTime(o, culture), DateTimeKind.Utc); };
+            convertFunDict[typeof(TimeSpan?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o, culture); };
             convertFunDict[typeof(Object)] = o => { return o == null ? null : o; };
             convertFunDict[typeof(DBNull)] = o => { return o == null ? null : DBNull.Value; };
 
@@ -408,7 +411,7 @@ namespace HB.Framework.Common
 
         public static string GetFileTypeByMediaType(string mediaType)
         {
-            string mType = mediaType.ToLower();
+            string mType = mediaType.ToLower(culture);
 
             if (mediaType2FileTypeDict.ContainsKey(mType))
             {
@@ -427,7 +430,7 @@ namespace HB.Framework.Common
             TypeInfo typeInfo = type.GetTypeInfo();
             if (typeInfo.IsEnum)
             {
-                return Convert.ToInt32(value);
+                return Convert.ToInt32(culture);
             }
 
             if (value.GetType() == typeof(DBNull))
@@ -473,7 +476,7 @@ namespace HB.Framework.Common
 
                 if (typeInfo.IsEnum)
                 {
-                    valueStr = ((Int32)value).ToString();
+                    valueStr = ((Int32)value).ToString(culture);
                 }
 
                 else if (type == typeof(string))
@@ -482,11 +485,11 @@ namespace HB.Framework.Common
                 }
                 else if (type == typeof(DateTime))
                 {
-                    valueStr = ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss");
+                    valueStr = ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss", culture);
                 }
                 else if (type == typeof(DateTimeOffset))
                 {
-                    valueStr = ((DateTimeOffset)value).ToString("yyyy-MM-dd HH:mm:ss");
+                    valueStr = ((DateTimeOffset)value).ToString("yyyy-MM-dd HH:mm:ss", culture);
                 }
                 else if (type == typeof(bool))
                 {
@@ -608,11 +611,6 @@ namespace HB.Framework.Common
             return JsonConvert.SerializeObject(domain);
         }
 
-        public static Task<string> ToJsonAsync(object domain)
-        {
-            return Task.Factory.StartNew(() => JsonConvert.SerializeObject(domain));
-        }
-
         public static T FromJson<T>(string jsonString)
         {
             if (string.IsNullOrWhiteSpace(jsonString))
@@ -621,11 +619,6 @@ namespace HB.Framework.Common
             }
 
             return JsonConvert.DeserializeObject<T>(jsonString);
-        }
-
-        public static Task<T> FromJsonAsync<T>(string jsonString)
-        {
-            return Task.Factory.StartNew(() => JsonConvert.DeserializeObject<T>(jsonString));
         }
 
         #endregion

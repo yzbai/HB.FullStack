@@ -3,7 +3,6 @@ using System;
 
 namespace HB.Component.Identity.Entity
 {
-    [Serializable]
     public class UserClaim : DatabaseEntity
     {
         [DatabaseForeignKey("用户ID", typeof(User))]

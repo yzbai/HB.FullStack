@@ -1,6 +1,6 @@
 ﻿namespace System.ComponentModel.DataAnnotations
 {
-    public class UserNameAttribute : ValidationAttribute
+    public sealed class UserNameAttribute : ValidationAttribute
     {
         public UserNameAttribute()
         {

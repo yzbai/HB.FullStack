@@ -33,7 +33,7 @@ namespace HB.Framework.Database
                     }
 
                     return lst[0];
-                });
+                }, TaskScheduler.Default);
         }
 
         public async Task<IList<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(Select<TSelect> selectCondition, From<TFrom> fromCondition, Where<TWhere> whereCondition, DbTransactionContext transContext = null, bool useMaster = false)
@@ -387,7 +387,7 @@ namespace HB.Framework.Database
 
                     return lst[0];
 
-                });
+                }, TaskScheduler.Default);
         }
 
         #endregion
@@ -474,7 +474,7 @@ namespace HB.Framework.Database
                     }
 
                     return lst[0];
-                });
+                }, TaskScheduler.Default);
         }
 
         #endregion
