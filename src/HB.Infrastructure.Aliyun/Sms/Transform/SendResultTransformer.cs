@@ -15,10 +15,11 @@ namespace HB.Infrastructure.Aliyun.Sms.Transform
                 return null;
             }
 
-            SendResult sendResult = new SendResult();
-
-            sendResult.Message = response.Message;
-            sendResult.Succeeded = response.Code.Equals("ok", StringComparison.InvariantCultureIgnoreCase);
+            SendResult sendResult = new SendResult
+            {
+                Message = response.Message,
+                Succeeded = response.Code.Equals("ok", StringComparison.InvariantCultureIgnoreCase)
+            };
 
             return sendResult;
         }

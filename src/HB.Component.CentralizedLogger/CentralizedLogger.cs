@@ -16,7 +16,7 @@ namespace HB.Component.CentralizedLogger
     {
         private string _host;
         private string _name;
-        private Func<string, LogLevel, bool> _filter;
+        private readonly Func<string, LogLevel, bool> _filter;
         private CentralizedLoggerProcessor _processor;
 
         public CentralizedLogger(string host, string name, Func<string, LogLevel, bool> filter, CentralizedLoggerProcessor processor)

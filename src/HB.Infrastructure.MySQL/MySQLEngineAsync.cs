@@ -17,7 +17,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSPReaderAsync(getConnectionString(dbName, useMaster), spName, dbParameters);
+                return MySQLExecuter.ExecuteSPReaderAsync(GetConnectionString(dbName, useMaster), spName, dbParameters);
             }
             else
             {
@@ -29,7 +29,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSPScalarAsync(getConnectionString(dbName, useMaster), spName, parameters);
+                return MySQLExecuter.ExecuteSPScalarAsync(GetConnectionString(dbName, useMaster), spName, parameters);
             }
             else
             {
@@ -41,7 +41,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSPNonQueryAsync(getConnectionString(dbName, true), spName, parameters);
+                return MySQLExecuter.ExecuteSPNonQueryAsync(GetConnectionString(dbName, true), spName, parameters);
             }
             else
             {
@@ -57,7 +57,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlReaderAsync(getConnectionString(dbName, useMaster), SQL);
+                return MySQLExecuter.ExecuteSqlReaderAsync(GetConnectionString(dbName, useMaster), SQL);
             }
             else
             {
@@ -69,7 +69,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlScalarAsync(getConnectionString(dbName, useMaster), SQL);
+                return MySQLExecuter.ExecuteSqlScalarAsync(GetConnectionString(dbName, useMaster), SQL);
             }
             else
             {
@@ -81,7 +81,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlNonQueryAsync(getConnectionString(dbName, true), SQL);
+                return MySQLExecuter.ExecuteSqlNonQueryAsync(GetConnectionString(dbName, true), SQL);
             }
             else
             {
@@ -93,7 +93,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlDataTableAsync(getConnectionString(dbName, true), SQL);
+                return MySQLExecuter.ExecuteSqlDataTableAsync(GetConnectionString(dbName, true), SQL);
             }
             else
             {
@@ -109,7 +109,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandNonQueryAsync(getConnectionString(dbName, true), dbCommand);
+                return MySQLExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), dbCommand);
             }
             else
             {
@@ -121,7 +121,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandReaderAsync(getConnectionString(dbName, useMaster), dbCommand);
+                return MySQLExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), dbCommand);
             }
             else
             {
@@ -133,7 +133,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandScalarAsync(getConnectionString(dbName, useMaster), dbCommand);
+                return MySQLExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), dbCommand);
             }
             else
             {

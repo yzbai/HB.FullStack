@@ -9,7 +9,7 @@ using System.Text;
 
 namespace HB.Infrastructure.Redis.Test
 {
-    public class TestFixture : IDisposable
+    public class TestFixture
     {
         public static IConfiguration Configuration { get; private set; }
 
@@ -41,14 +41,6 @@ namespace HB.Infrastructure.Redis.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IKVStore GetKVStore()
-        {
-            return Services.GetRequiredService<IKVStore>();
-        }
-
-        public void Dispose()
-        {
-
-        }
+        public IKVStore KVStore => Services.GetRequiredService<IKVStore>();
     }
 }

@@ -6,7 +6,7 @@ using System;
 
 namespace HB.Component.Identity.Test
 {
-    public class DatabaseTestFixture : IDisposable
+    public class DatabaseTestFixture
     {
         public static IConfiguration Configuration { get; private set; }
 
@@ -36,14 +36,6 @@ namespace HB.Component.Identity.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public void Dispose()
-        {
-            
-        }
-
-        public IDatabase GetDatabase()
-        {
-            return Services.GetRequiredService<IDatabase>();
-        }
+        public IDatabase Database => Services.GetRequiredService<IDatabase>();
     }
 }

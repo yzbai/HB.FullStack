@@ -24,12 +24,12 @@ namespace HB.Infrastructure.MySQL
         {
             _options = optionsAccessor.Value;
 
-            setConnectionStrings();
+            SetConnectionStrings();
         }
 
         public MySQLEngineOptions Options { get { return _options; } }
 
-        private void setConnectionStrings()
+        private void SetConnectionStrings()
         {
             _connectionStringDict = new Dictionary<string, string>();
 
@@ -51,7 +51,7 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-        private string getConnectionString(string dbName, bool isMaster)
+        private string GetConnectionString(string dbName, bool isMaster)
         {
             if (isMaster)
             {
@@ -76,7 +76,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSPReader(getConnectionString(dbName, useMaster), spName, dbParameters);
+                return MySQLExecuter.ExecuteSPReader(GetConnectionString(dbName, useMaster), spName, dbParameters);
             }
             else
             {
@@ -88,7 +88,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSPScalar(getConnectionString(dbName, useMaster), spName, parameters);
+                return MySQLExecuter.ExecuteSPScalar(GetConnectionString(dbName, useMaster), spName, parameters);
             }
             else
             {
@@ -100,7 +100,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSPNonQuery(getConnectionString(dbName, true), spName, parameters);
+                return MySQLExecuter.ExecuteSPNonQuery(GetConnectionString(dbName, true), spName, parameters);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace HB.Infrastructure.MySQL
 
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlReader(getConnectionString(dbName, useMaster), SQL);
+                return MySQLExecuter.ExecuteSqlReader(GetConnectionString(dbName, useMaster), SQL);
             }
             else
             {
@@ -132,7 +132,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlScalar(getConnectionString(dbName, useMaster), SQL);
+                return MySQLExecuter.ExecuteSqlScalar(GetConnectionString(dbName, useMaster), SQL);
             }
             else
             {
@@ -144,7 +144,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlNonQuery(getConnectionString(dbName, true), SQL);
+                return MySQLExecuter.ExecuteSqlNonQuery(GetConnectionString(dbName, true), SQL);
             }
             else
             {
@@ -156,7 +156,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (transaction == null)
             {
-                return MySQLExecuter.ExecuteSqlDataTable(getConnectionString(dbName, true), SQL);
+                return MySQLExecuter.ExecuteSqlDataTable(GetConnectionString(dbName, true), SQL);
             }
             else
             {
@@ -172,7 +172,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandNonQuery(getConnectionString(dbName, true), dbCommand);
+                return MySQLExecuter.ExecuteCommandNonQuery(GetConnectionString(dbName, true), dbCommand);
             }
             else
             {
@@ -190,7 +190,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandReader(getConnectionString(dbName, useMaster), dbCommand);
+                return MySQLExecuter.ExecuteCommandReader(GetConnectionString(dbName, useMaster), dbCommand);
             }
             else
             {
@@ -202,7 +202,7 @@ namespace HB.Infrastructure.MySQL
         {
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandScalar(getConnectionString(dbName, useMaster), dbCommand);
+                return MySQLExecuter.ExecuteCommandScalar(GetConnectionString(dbName, useMaster), dbCommand);
             }
             else
             {
@@ -216,18 +216,22 @@ namespace HB.Infrastructure.MySQL
 
         public IDataParameter CreateParameter(string name, object value, DbType dbType)
         {
-            MySqlParameter parameter = new MySqlParameter();
-            parameter.ParameterName = name;
-            parameter.Value = value;
-            parameter.DbType = dbType;
+            MySqlParameter parameter = new MySqlParameter
+            {
+                ParameterName = name,
+                Value = value,
+                DbType = dbType
+            };
             return parameter;
         }
 
         public IDataParameter CreateParameter(string name, object value)
         {
-            MySqlParameter parameter = new MySqlParameter();
-            parameter.ParameterName = name;
-            parameter.Value = value;
+            MySqlParameter parameter = new MySqlParameter
+            {
+                ParameterName = name,
+                Value = value
+            };
             return parameter;
         }
 
@@ -239,12 +243,12 @@ namespace HB.Infrastructure.MySQL
 
         public DataTable CreateEmptyDataTable(string dbName, string tableName)
         {
-            return MySQLTableCache.CreateEmptyDataTable(getConnectionString(dbName, true), tableName);
+            return MySQLTableCache.CreateEmptyDataTable(GetConnectionString(dbName, true), tableName);
         }
 
         public IDbTransaction CreateTransaction(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            MySqlConnection conn = new MySqlConnection(getConnectionString(dbName, true));
+            MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
             conn.Open();
 
             return conn.BeginTransaction(isolationLevel);
