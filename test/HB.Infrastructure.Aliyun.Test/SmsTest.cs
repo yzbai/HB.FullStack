@@ -15,7 +15,7 @@ namespace HB.PresentFish.Tools
         {
             _output = output;
             _fixture = testFixture;
-            _smsBiz = _fixture.GetSmsBiz();
+            _smsBiz = _fixture.SmsService;
         }
 
         [Theory]

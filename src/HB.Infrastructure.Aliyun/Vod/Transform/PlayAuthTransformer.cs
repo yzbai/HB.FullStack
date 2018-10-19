@@ -15,15 +15,16 @@ namespace HB.Infrastructure.Aliyun.Vod.Transform
                 return null;
             }
 
-            PlayAuth playAuth = new PlayAuth();
-
-            playAuth.RequestId = response.RequestId;
-            playAuth.Auth = response.PlayAuth;
-            playAuth.Title = response.VideoMeta.Title;
-            playAuth.VideoId = response.VideoMeta.VideoId;
-            playAuth.Status = response.VideoMeta.Status;
-            playAuth.CoverURL = response.VideoMeta.CoverURL;
-            playAuth.Duration = response.VideoMeta.Duration;
+            PlayAuth playAuth = new PlayAuth
+            {
+                RequestId = response.RequestId,
+                Auth = response.PlayAuth,
+                Title = response.VideoMeta.Title,
+                VideoId = response.VideoMeta.VideoId,
+                Status = response.VideoMeta.Status,
+                CoverURL = response.VideoMeta.CoverURL,
+                Duration = response.VideoMeta.Duration
+            };
 
             return playAuth;
         }

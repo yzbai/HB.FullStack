@@ -18,7 +18,7 @@ namespace HB.Infrastructure.Aliyun.Vod
     {
         private IAcsClient _acsClient;
         private AliyunVodOptions _options;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public AliyunVodService(IAcsClientManager acsClientManager, IOptions<AliyunVodOptions> options, ILogger<AliyunVodService> logger)
         {
@@ -29,9 +29,11 @@ namespace HB.Infrastructure.Aliyun.Vod
 
         public Task<PlayAuth> GetVideoPlayAuth(string vid, long timeout)
         {
-            GetVideoPlayAuthRequest request = new GetVideoPlayAuthRequest();
-            request.VideoId = vid;
-            request.AuthInfoTimeout = timeout;
+            GetVideoPlayAuthRequest request = new GetVideoPlayAuthRequest
+            {
+                VideoId = vid,
+                AuthInfoTimeout = timeout
+            };
 
             return PolicyManager.Default(_logger).ExecuteAsync<PlayAuth>(async () => {
 

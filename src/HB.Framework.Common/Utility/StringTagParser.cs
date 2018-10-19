@@ -57,14 +57,14 @@ namespace HB.Framework.Common
 
         #endregion
 
-        private string replaceTagHandler(Match token)
+        private string ReplaceTagHandler(Match token)
         {
             return tagCache.Contains(token.Value) ? tagCache[token.Value].ToString() : string.Empty;
         }
 
         public string Parse(string stringWithTag)
         {
-            MatchEvaluator replaceCallback = new MatchEvaluator(replaceTagHandler);
+            MatchEvaluator replaceCallback = new MatchEvaluator(ReplaceTagHandler);
             return Regex.Replace(stringWithTag, _matchPattern, replaceCallback);
         }
     }

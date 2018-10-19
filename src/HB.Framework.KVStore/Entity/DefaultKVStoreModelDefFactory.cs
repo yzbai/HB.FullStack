@@ -41,10 +41,11 @@ namespace HB.Framework.KVStore.Entity
 
         private KVStoreEntityDef CreateEntityDef(Type type)
         {
-            KVStoreEntityDef entityDef = new KVStoreEntityDef();
-
-            entityDef.EntityFullName = type.FullName;
-            entityDef.EntityType = type;
+            KVStoreEntityDef entityDef = new KVStoreEntityDef
+            {
+                EntityFullName = type.FullName,
+                EntityType = type
+            };
 
             PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
 
