@@ -25,7 +25,6 @@ namespace HB.Infrastructure.Redis
 
     public class RedisEngineBase : IDisposable
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         private bool _disposed = false;
         private ILogger _logger;
         private Dictionary<string, RedisWrapper> _connectionDict;
@@ -47,15 +46,15 @@ namespace HB.Infrastructure.Redis
 
         protected IDatabase GetDatabase(string dbName, int dbIndex, bool isMaster)
         {
-            string key = string.Format(_culture, "{0}:{1}:{2}", dbName, dbIndex, isMaster ? 1 : 0);
+            string key = string.Format(GlobalSettings.Culture, "{0}:{1}:{2}", dbName, dbIndex, isMaster ? 1 : 0);
 
             if (!_connectionDict.ContainsKey(key))
             {
-                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.Name.Equals(dbName, StringComparison.InvariantCulture) && rs.IsMaster == isMaster);
+                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.Name.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
 
                 if (rss.Count() == 0 && isMaster == false)
                 {
-                    rss = Options.ConnectionSettings.Where(rs => rs.Name.Equals(dbName, StringComparison.InvariantCulture) && rs.IsMaster);
+                    rss = Options.ConnectionSettings.Where(rs => rs.Name.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster);
                 }
 
                 if (rss.Count() == 0)

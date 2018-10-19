@@ -13,7 +13,6 @@ namespace HB.Framework.Database.SQL
 {
     public abstract class SQLExpression
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
 
         protected string Seperator { get; set; }
 
@@ -143,7 +142,7 @@ namespace HB.Framework.Database.SQL
 
                 if (b.Left is MemberExpression m && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    left = new PartialSqlString(string.Format(_culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
+                    left = new PartialSqlString(string.Format(GlobalSettings.Culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
                 }
                 else
                 {
@@ -154,7 +153,7 @@ namespace HB.Framework.Database.SQL
 
                 if (m != null && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    right = new PartialSqlString(string.Format(_culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)));
+                    right = new PartialSqlString(string.Format(GlobalSettings.Culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)));
                 }
                 else
                 {
@@ -208,7 +207,7 @@ namespace HB.Framework.Database.SQL
 
             }
             //TODO: Test this. switch InvariantCultureIgnoreCase to OrdinalIgnoreCase
-            rightIsNull = right.ToString().Equals("null", StringComparison.InvariantCultureIgnoreCase);
+            rightIsNull = right.ToString().Equals("null", GlobalSettings.ComparisonIgnoreCase);
             if (operand == "=" && rightIsNull) operand = "is";
             else if (operand == "<>" && rightIsNull) operand = "is not";
 
@@ -216,7 +215,7 @@ namespace HB.Framework.Database.SQL
             {
                 case "MOD":
                 case "COALESCE":
-                    return new PartialSqlString(string.Format(_culture, "{0}({1},{2})", operand, left, right));
+                    return new PartialSqlString(string.Format(GlobalSettings.Culture, "{0}({1},{2})", operand, left, right));
                 default:
                     return new PartialSqlString("(" + left + Seperator + operand + Seperator + right + ")");
             }
@@ -288,7 +287,7 @@ namespace HB.Framework.Database.SQL
                 StringBuilder r = new StringBuilder();
                 foreach (Object e in exprs)
                 {
-                    r.AppendFormat(_culture, "{0}{1}",
+                    r.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                    r.Length > 0 ? "," : "",
                                    e);
                 }
@@ -426,7 +425,7 @@ namespace HB.Framework.Database.SQL
                     {
                         if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
                         {
-                            sIn.AppendFormat(_culture, "{0}{1}",
+                            sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(e, needQuoted: true));
                         }
@@ -435,14 +434,14 @@ namespace HB.Framework.Database.SQL
                             var listArgs = e as IList<Object>;
                             foreach (Object el in listArgs)
                             {
-                                sIn.AppendFormat(_culture, "{0}{1}",
+                                sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(el, needQuoted: true));
                             }
                         }
                     }
 
-                    statement = string.Format(_culture, "{0} {1} ({2})", quotedColName, "In", sIn.ToString());
+                    statement = string.Format(GlobalSettings.Culture, "{0} {1} ({2})", quotedColName, "In", sIn.ToString());
                     break;
 
                 default:
@@ -475,7 +474,7 @@ namespace HB.Framework.Database.SQL
                     {
                         if (!typeof(ICollection).GetTypeInfo().IsAssignableFrom(e.GetType()))
                         {
-                            sIn.AppendFormat(_culture, "{0}{1}",
+                            sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(e, needQuoted: true));
                         }
@@ -484,20 +483,20 @@ namespace HB.Framework.Database.SQL
                             var listArgs = e as ICollection;
                             foreach (Object el in listArgs)
                             {
-                                sIn.AppendFormat(_culture, "{0}{1}",
+                                sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
                                          GetDatabaseEngine().GetDbValueStatement(el, needQuoted: true));
                             }
                         }
                     }
 
-                    statement = string.Format(_culture, "{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
+                    statement = string.Format(GlobalSettings.Culture, "{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
                     break;
                 case "Desc":
-                    statement = string.Format(_culture, "{0} DESC", quotedColName);
+                    statement = string.Format(GlobalSettings.Culture, "{0} DESC", quotedColName);
                     break;
                 case "As":
-                    statement = string.Format(_culture, "{0} As {1}", quotedColName,
+                    statement = string.Format(GlobalSettings.Culture, "{0} As {1}", quotedColName,
                         GetDatabaseEngine().GetQuotedStatement(RemoveQuoteFromAlias(args[0].ToString())));
                     break;
                 case "Sum":
@@ -506,10 +505,10 @@ namespace HB.Framework.Database.SQL
                 case "Max":
                 case "Avg":
                 case "Distinct":
-                    statement = string.Format(_culture, "{0}({1}{2})",
+                    statement = string.Format(GlobalSettings.Culture, "{0}({1}{2})",
                                          m.Method.Name,
                                          quotedColName,
-                                         args.Count == 1 ? string.Format(_culture, ",{0}", args[0]) : "");
+                                         args.Count == 1 ? string.Format(GlobalSettings.Culture, ",{0}", args[0]) : "");
                     break;
                 case "Plain":
                     statement = quotedColName.ToString();
@@ -529,7 +528,7 @@ namespace HB.Framework.Database.SQL
             {
                 List<Object> args0 = this.VisitExpressionList(m.Arguments);
                 var quotedColName0 = Visit(m.Object);
-                return new PartialSqlString(string.Format(_culture, "LEFT( {0},{1})= {2} ", quotedColName0
+                return new PartialSqlString(string.Format(GlobalSettings.Culture, "LEFT( {0},{1})= {2} ", quotedColName0
                                                           , args0[0].ToString().Length,
                                                           GetDatabaseEngine().GetDbValueStatement(args0[0], needQuoted: true)));
             }
@@ -543,41 +542,41 @@ namespace HB.Framework.Database.SQL
             switch (m.Method.Name)
             {
                 case "Trim":
-                    statement = string.Format(_culture, "ltrim(rtrim({0}))", quotedColName);
+                    statement = string.Format(GlobalSettings.Culture, "ltrim(rtrim({0}))", quotedColName);
                     break;
                 case "LTrim":
-                    statement = string.Format(_culture, "ltrim({0})", quotedColName);
+                    statement = string.Format(GlobalSettings.Culture, "ltrim({0})", quotedColName);
                     break;
                 case "RTrim":
-                    statement = string.Format(_culture, "rtrim({0})", quotedColName);
+                    statement = string.Format(GlobalSettings.Culture, "rtrim({0})", quotedColName);
                     break;
                 case "ToUpper":
-                    statement = string.Format(_culture, "upper({0})", quotedColName);
+                    statement = string.Format(GlobalSettings.Culture, "upper({0})", quotedColName);
                     break;
                 case "ToLower":
-                    statement = string.Format(_culture, "lower({0})", quotedColName);
+                    statement = string.Format(GlobalSettings.Culture, "lower({0})", quotedColName);
                     break;
                 case "StartsWith":
-                    statement = string.Format(_culture, "upper({0}) like {1} ", quotedColName, GetDatabaseEngine().GetQuotedStatement(args[0].ToString().ToUpper(_culture) + "%"));
+                    statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1} ", quotedColName, GetDatabaseEngine().GetQuotedStatement(args[0].ToString().ToUpper(GlobalSettings.Culture) + "%"));
                     break;
                 case "EndsWith":
-                    statement = string.Format(_culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(_culture)));
+                    statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(GlobalSettings.Culture)));
                     break;
                 case "Contains":
-                    statement = string.Format(_culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(_culture) + "%"));
+                    statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(GlobalSettings.Culture) + "%"));
                     break;
                 case "Substring":
-                    var startIndex = Int32.Parse(args[0].ToString(), _culture) + 1;
+                    var startIndex = Int32.Parse(args[0].ToString(), GlobalSettings.Culture) + 1;
                     if (args.Count == 2)
                     {
-                        var length = Int32.Parse(args[1].ToString(), _culture);
-                        statement = string.Format(_culture, "substring({0} from {1} for {2})",
+                        var length = Int32.Parse(args[1].ToString(), GlobalSettings.Culture);
+                        statement = string.Format(GlobalSettings.Culture, "substring({0} from {1} for {2})",
                                                   quotedColName,
                                                   startIndex,
                                                   length);
                     }
                     else
-                        statement = string.Format(_culture, "substring({0} from {1})",
+                        statement = string.Format(GlobalSettings.Culture, "substring({0} from {1})",
                                          quotedColName,
                                          startIndex);
                     break;
@@ -639,9 +638,9 @@ namespace HB.Framework.Database.SQL
         protected static string RemoveQuoteFromAlias(string exp)
         {
 
-            if ((exp.StartsWith("\"", StringComparison.InvariantCulture) || exp.StartsWith("`", StringComparison.InvariantCulture) || exp.StartsWith("'", StringComparison.InvariantCulture))
+            if ((exp.StartsWith("\"", GlobalSettings.Comparison) || exp.StartsWith("`", GlobalSettings.Comparison) || exp.StartsWith("'", GlobalSettings.Comparison))
                 &&
-                (exp.EndsWith("\"", StringComparison.InvariantCulture) || exp.EndsWith("`", StringComparison.InvariantCulture) || exp.EndsWith("'", StringComparison.InvariantCulture)))
+                (exp.EndsWith("\"", GlobalSettings.Comparison) || exp.EndsWith("`", GlobalSettings.Comparison) || exp.EndsWith("'", GlobalSettings.Comparison)))
             {
                 exp = exp.Remove(0, 1);
                 exp = exp.Remove(exp.Length - 1, 1);
@@ -667,12 +666,12 @@ namespace HB.Framework.Database.SQL
 
         protected object GetTrueExpression()
         {
-            return new PartialSqlString(string.Format(_culture, "({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
+            return new PartialSqlString(string.Format(GlobalSettings.Culture, "({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
         }
 
         protected object GetFalseExpression()
         {
-            return new PartialSqlString(string.Format(_culture, "({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(false, needQuoted: true)));
+            return new PartialSqlString(string.Format(GlobalSettings.Culture, "({0}={1})", GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true), GetDatabaseEngine().GetDbValueStatement(false, needQuoted: true)));
         }
 
         private static bool IsArrayMethod(MethodCallExpression m)

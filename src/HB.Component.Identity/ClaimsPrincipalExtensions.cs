@@ -6,8 +6,6 @@ namespace System.Security.Claims
 {
     public static class ClaimsPrincipalExtensions
     {
-        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture;
-
         public static string GetClaimValue(this ClaimsPrincipal principal, string claimExtensionType)
         {
             if (principal.HasClaim(c => c.Type == claimExtensionType))
@@ -44,7 +42,7 @@ namespace System.Security.Claims
         {
             string value = principal.GetClaimValue(ClaimExtensionTypes.UserId);
 
-            return string.IsNullOrEmpty(value) ? 0 : Convert.ToInt64(value, _culture);
+            return string.IsNullOrEmpty(value) ? 0 : Convert.ToInt64(value, GlobalSettings.Culture);
         }
 
         public static string GetAudience(this ClaimsPrincipal principal)
@@ -76,14 +74,14 @@ namespace System.Security.Claims
         {
             string value = principal.GetClaimValue(ClaimExtensionTypes.IsEmailConfirmed);
 
-            return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, _culture);
+            return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
         }
 
         public static bool GetIsMobileConfirmed(this ClaimsPrincipal principal)
         {
             string value = principal.GetClaimValue(ClaimExtensionTypes.IsMobileConfirmed);
 
-            return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, _culture);
+            return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
         }
     }
 }

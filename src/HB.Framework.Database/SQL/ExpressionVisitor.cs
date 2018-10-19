@@ -9,7 +9,6 @@ namespace HB.Framework.Database.SQL
     //http://blogs.msdn.com/b/mattwar/archive/2007/07/31/linq-building-an-iqueryable-provider-part-ii.aspx
     public abstract class ExpressionVisitor
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         protected virtual Expression Visit(Expression exp)
         {
             if (exp == null)
@@ -75,7 +74,7 @@ namespace HB.Framework.Database.SQL
                 case ExpressionType.ListInit:
                     return this.VisitListInit((ListInitExpression)exp);
                 default:
-                    throw new Exception(string.Format(_culture, "Unhandled expression type: '{0}'", exp.NodeType));
+                    throw new Exception(string.Format(GlobalSettings.Culture, "Unhandled expression type: '{0}'", exp.NodeType));
             }
         }
 
@@ -90,7 +89,7 @@ namespace HB.Framework.Database.SQL
                 case MemberBindingType.ListBinding:
                     return this.VisitMemberListBinding((MemberListBinding)binding);
                 default:
-                    throw new Exception(string.Format(_culture, "Unhandled binding type '{0}'", binding.BindingType));
+                    throw new Exception(string.Format(GlobalSettings.Culture, "Unhandled binding type '{0}'", binding.BindingType));
             }
         }
 

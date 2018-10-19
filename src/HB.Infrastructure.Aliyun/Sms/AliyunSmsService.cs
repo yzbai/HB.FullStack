@@ -12,12 +12,12 @@ using System.Globalization;
 using Polly;
 using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Sms.Transform;
+using System;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
     public class AliyunSmsBiz : ISmsService
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         private AliyunSmsOptions _options;
         private IAcsClient _client;
         private readonly ILogger _logger;
@@ -39,7 +39,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                 SignName = _options.SignName,
                 TemplateCode = _options.TemplateIdentityValidation.TemplateCode,
                 PhoneNumbers = mobile,
-                TemplateParam = string.Format(_culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}", 
+                TemplateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}", 
                     _options.TemplateIdentityValidation.ParamCode, 
                     code, 
                     _options.TemplateIdentityValidation.ParamProduct, 

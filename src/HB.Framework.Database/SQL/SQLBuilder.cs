@@ -24,7 +24,6 @@ namespace HB.Framework.Database.SQL
     /// </summary>
     public class SQLBuilder : ISQLBuilder
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         /// <summary>
         /// sql字典. 数据库名:TableName:操作-SQL语句
         /// </summary>
@@ -87,7 +86,7 @@ namespace HB.Framework.Database.SQL
         private string GetSelectClauseStatement<T>()
         {
             DatabaseEntityDef modelDef = _entityDefFactory.GetDef<T>();
-            string cacheKey = string.Format(_culture, "{0}_{1}_SELECT", modelDef.DatabaseName, modelDef.TableName);
+            string cacheKey = string.Format(GlobalSettings.Culture, "{0}_{1}_SELECT", modelDef.DatabaseName, modelDef.TableName);
 
             if (_sqlStatementDict.ContainsKey(cacheKey))
             {
@@ -100,7 +99,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    argsBuilder.AppendFormat(_culture, "{0}.{1},", modelDef.DbTableReservedName, info.DbReservedName);
+                    argsBuilder.AppendFormat(GlobalSettings.Culture, "{0}.{1},", modelDef.DbTableReservedName, info.DbReservedName);
                     //argsBuilder.AppendFormat("{0},", info.DbReservedName);
                 }
             }
@@ -110,7 +109,7 @@ namespace HB.Framework.Database.SQL
                 argsBuilder.Remove(argsBuilder.Length - 1, 1);
             }
 
-            string selectClause = string.Format(_culture, "SELECT {0} ", argsBuilder.ToString());
+            string selectClause = string.Format(GlobalSettings.Culture, "SELECT {0} ", argsBuilder.ToString());
 
             _sqlStatementDict.TryAdd(cacheKey, selectClause);
 
@@ -145,7 +144,7 @@ namespace HB.Framework.Database.SQL
             DatabaseEntityDef modelDef1 = _entityDefFactory.GetDef<T1>();
             DatabaseEntityDef modelDef2 = _entityDefFactory.GetDef<T2>();
 
-            string cacheKey = string.Format(_culture, "{0}_{1}_{2}_SELECT", modelDef1.DatabaseName, modelDef1.TableName, modelDef2.TableName);
+            string cacheKey = string.Format(GlobalSettings.Culture, "{0}_{1}_{2}_SELECT", modelDef1.DatabaseName, modelDef1.TableName, modelDef2.TableName);
 
             if (_sqlStatementDict.ContainsKey(cacheKey))
             {
@@ -158,7 +157,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    argsBuilder.AppendFormat(_culture, "{0}.{1},", modelDef1.DbTableReservedName, info.DbReservedName);
+                    argsBuilder.AppendFormat(GlobalSettings.Culture, "{0}.{1},", modelDef1.DbTableReservedName, info.DbReservedName);
                 }
             }
 
@@ -166,7 +165,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    argsBuilder.AppendFormat(_culture, "{0}.{1},", modelDef2.DbTableReservedName, info.DbReservedName);
+                    argsBuilder.AppendFormat(GlobalSettings.Culture, "{0}.{1},", modelDef2.DbTableReservedName, info.DbReservedName);
                 }
             }
 
@@ -175,7 +174,7 @@ namespace HB.Framework.Database.SQL
                 argsBuilder.Remove(argsBuilder.Length - 1, 1);
             }
 
-            string selectClause = string.Format(_culture, "SELECT {0} ", argsBuilder.ToString());
+            string selectClause = string.Format(GlobalSettings.Culture, "SELECT {0} ", argsBuilder.ToString());
 
             _sqlStatementDict.TryAdd(cacheKey, selectClause);
 
@@ -199,7 +198,7 @@ namespace HB.Framework.Database.SQL
             DatabaseEntityDef modelDef2 = _entityDefFactory.GetDef<T2>();
             DatabaseEntityDef modelDef3 = _entityDefFactory.GetDef<T3>();
 
-            string cacheKey = string.Format(_culture, "{0}_{1}_{2}_{3}_SELECT", modelDef1.DatabaseName, modelDef1.TableName, modelDef2.TableName, modelDef3.TableName);
+            string cacheKey = string.Format(GlobalSettings.Culture, "{0}_{1}_{2}_{3}_SELECT", modelDef1.DatabaseName, modelDef1.TableName, modelDef2.TableName, modelDef3.TableName);
 
             if (_sqlStatementDict.ContainsKey(cacheKey))
             {
@@ -212,7 +211,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    argsBuilder.AppendFormat(_culture, "{0}.{1},", modelDef1.DbTableReservedName, info.DbReservedName);
+                    argsBuilder.AppendFormat(GlobalSettings.Culture, "{0}.{1},", modelDef1.DbTableReservedName, info.DbReservedName);
                 }
             }
 
@@ -220,7 +219,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    argsBuilder.AppendFormat(_culture, "{0}.{1},", modelDef2.DbTableReservedName, info.DbReservedName);
+                    argsBuilder.AppendFormat(GlobalSettings.Culture, "{0}.{1},", modelDef2.DbTableReservedName, info.DbReservedName);
                 }
             }
 
@@ -228,7 +227,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    argsBuilder.AppendFormat(_culture, "{0}.{1},", modelDef3.DbTableReservedName, info.DbReservedName);
+                    argsBuilder.AppendFormat(GlobalSettings.Culture, "{0}.{1},", modelDef3.DbTableReservedName, info.DbReservedName);
                 }
             }
 
@@ -237,7 +236,7 @@ namespace HB.Framework.Database.SQL
                 argsBuilder.Remove(argsBuilder.Length - 1, 1);
             }
 
-            string selectClause = string.Format(_culture, "SELECT {0} ", argsBuilder.ToString());
+            string selectClause = string.Format(GlobalSettings.Culture, "SELECT {0} ", argsBuilder.ToString());
 
             _sqlStatementDict.TryAdd(cacheKey, selectClause);
 
@@ -280,14 +279,14 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    selectArgs.AppendFormat(_culture, "{0},", info.DbReservedName);
+                    selectArgs.AppendFormat(GlobalSettings.Culture, "{0},", info.DbReservedName);
 
                     if (info.AutoIncrement || info.IsPrimaryKey || info.PropertyName == "LastTime")
                     {
                         continue;
                     }
 
-                    args.AppendFormat(_culture, "{0},", info.DbReservedName);
+                    args.AppendFormat(GlobalSettings.Culture, "{0},", info.DbReservedName);
                 }
             }
 
@@ -301,7 +300,7 @@ namespace HB.Framework.Database.SQL
                 args.Remove(args.Length - 1, 1);
             }
 
-            string statement = string.Format(_culture,
+            string statement = string.Format(GlobalSettings.Culture,
                 "insert into {0}({1}) values({{0}});select {2} from {0} where {3} = last_insert_id();",
                 definition.DbTableReservedName, args.ToString(), selectArgs.ToString(), _databaseEngine.GetReservedStatement("Id"));
 
@@ -342,22 +341,22 @@ namespace HB.Framework.Database.SQL
 
                     if (info.PropertyName == "Version")
                     {
-                        values.AppendFormat(_culture, " {0},", info.DbParameterizedName);
+                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, domain.Version + 1, info.DbFieldType));
                     }
                     else if (info.PropertyName == "Deleted")
                     {
-                        values.AppendFormat(_culture, " {0},", info.DbParameterizedName);
+                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, 0, info.DbFieldType));
                     }
                     else if (info.PropertyName == "LastUser")
                     {
-                        values.AppendFormat(_culture, " {0},", info.DbParameterizedName);
+                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, lastUser, info.DbFieldType));
                     }
                     else
                     {
-                        values.AppendFormat(_culture, " {0},", info.DbParameterizedName);
+                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false), info.DbFieldType));
                     }
                 }
@@ -365,7 +364,7 @@ namespace HB.Framework.Database.SQL
 
             if (values.Length > 0) values.Remove(values.Length - 1, 1);
 
-            string mainClause = string.Format(_culture, addTemplate, values.ToString());
+            string mainClause = string.Format(GlobalSettings.Culture, addTemplate, values.ToString());
 
             return AssembleCommand<T, T>(false, mainClause, null, null, parameters);
         }
@@ -387,7 +386,7 @@ namespace HB.Framework.Database.SQL
                         continue;
                     }
 
-                    args.AppendFormat(_culture, " {0}={1},", info.DbReservedName, info.DbParameterizedName);
+                    args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, info.DbParameterizedName);
                 }
             }
 
@@ -396,7 +395,7 @@ namespace HB.Framework.Database.SQL
                 args.Remove(args.Length - 1, 1);
             }
 
-            string statement = string.Format(_culture, "UPDATE {0} SET {1}", modelDef.DbTableReservedName, args.ToString());
+            string statement = string.Format(GlobalSettings.Culture, "UPDATE {0} SET {1}", modelDef.DbTableReservedName, args.ToString());
 
             return statement;
         }
@@ -447,13 +446,13 @@ namespace HB.Framework.Database.SQL
 
             for (int i = 0; i < length; i++)
             {
-                args.AppendFormat(_culture, " {0}={1},", _databaseEngine.GetReservedStatement(keys[i]), _databaseEngine.GetDbValueStatement(values[i], needQuoted: true));
+                args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement(keys[i]), _databaseEngine.GetDbValueStatement(values[i], needQuoted: true));
             }
 
-            args.AppendFormat(_culture, " {0}={1},", _databaseEngine.GetReservedStatement("Version"), _databaseEngine.GetReservedStatement("Version") + " + 1");
-            args.AppendFormat(_culture, " {0}={1}", _databaseEngine.GetReservedStatement("LastUser"), _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
+            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement("Version"), _databaseEngine.GetReservedStatement("Version") + " + 1");
+            args.AppendFormat(GlobalSettings.Culture, " {0}={1}", _databaseEngine.GetReservedStatement("LastUser"), _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
 
-            string statement = string.Format(_culture, "UPDATE {0} SET {1} ", modelDef.DbTableReservedName, args.ToString());
+            string statement = string.Format(GlobalSettings.Culture, "UPDATE {0} SET {1} ", modelDef.DbTableReservedName, args.ToString());
 
             return statement;
         }
@@ -513,23 +512,23 @@ namespace HB.Framework.Database.SQL
                             continue;
                         }
 
-                        args.AppendFormat(_culture, " {0},", info.DbReservedName);
+                        args.AppendFormat(GlobalSettings.Culture, " {0},", info.DbReservedName);
 
                         if (info.PropertyName == "Version")
                         {
-                            values.AppendFormat(_culture, " {0},", domain.Version + 1);
+                            values.AppendFormat(GlobalSettings.Culture, " {0},", domain.Version + 1);
                         }
                         else if (info.PropertyName == "Deleted")
                         {
-                            values.AppendFormat(_culture, " {0},", 0);
+                            values.AppendFormat(GlobalSettings.Culture, " {0},", 0);
                         }
                         else if (info.PropertyName == "LastUser")
                         {
-                            values.AppendFormat(_culture, " {0},", _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
+                            values.AppendFormat(GlobalSettings.Culture, " {0},", _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
                         }
                         else
                         {
-                            values.AppendFormat(_culture, " {0},", _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: true));
+                            values.AppendFormat(GlobalSettings.Culture, " {0},", _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: true));
                         }
                     }
                 }
@@ -544,11 +543,11 @@ namespace HB.Framework.Database.SQL
                     values.Remove(values.Length - 1, 1);
                 }
 
-                innerBuilder.AppendFormat(_culture, "insert into {0}({1}) values ({2});insert into tb_tmp_batchAddID(id) values(last_insert_id());",
+                innerBuilder.AppendFormat(GlobalSettings.Culture, "insert into {0}({1}) values ({2});insert into tb_tmp_batchAddID(id) values(last_insert_id());",
                     definition.DbTableReservedName, args.ToString(), values.ToString());
             }
 
-            return string.Format(_culture, "drop temporary table if exists `tb_tmp_batchAddID`;create temporary table `tb_tmp_batchAddID` ( `id` int not null);start transaction;{0}commit;select `id` from `tb_tmp_batchAddID`;drop temporary table `tb_tmp_batchAddID`;",
+            return string.Format(GlobalSettings.Culture, "drop temporary table if exists `tb_tmp_batchAddID`;create temporary table `tb_tmp_batchAddID` ( `id` int not null);start transaction;{0}commit;select `id` from `tb_tmp_batchAddID`;drop temporary table `tb_tmp_batchAddID`;",
                 innerBuilder.ToString());
         }
 
@@ -581,16 +580,16 @@ namespace HB.Framework.Database.SQL
 
                         if (info.PropertyName == "Version")
                         {
-                            args.AppendFormat(_culture, " {0}={1},", info.DbReservedName, entity.Version + 1);
+                            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, entity.Version + 1);
                             
                         }
                         else if(info.PropertyName == "LastUser")
                         {
-                            args.AppendFormat(_culture, " {0}={1},", info.DbReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
+                            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
                         }
                         else
                         {
-                            args.AppendFormat(_culture, " {0}={1},", info.DbReservedName, _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true));
+                            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true));
                         }
                     }
                 }
@@ -598,13 +597,13 @@ namespace HB.Framework.Database.SQL
                 if (args.Length > 0)
                     args.Remove(args.Length - 1, 1);
 
-                innerBuilder.AppendFormat(_culture,
+                innerBuilder.AppendFormat(GlobalSettings.Culture,
                     "update {0} set {1} WHERE `Id`={2} and `Version`={3};insert into tb_tmp_batchUpdateCount(AffectedRowCount) values(row_count());",
                     definition.DbTableReservedName, args.ToString(), entity.Id, entity.Version);
             }
 
 
-            return string.Format(_culture, "drop temporary table if exists `tb_tmp_batchUpdateCount`;create temporary table `tb_tmp_batchUpdateCount`( `AffectedRowCount` int not null);start transaction;{0}commit;select `AffectedRowCount` from `tb_tmp_batchUpdateCount`;drop temporary table `tb_tmp_batchUpdateCount`;",
+            return string.Format(GlobalSettings.Culture, "drop temporary table if exists `tb_tmp_batchUpdateCount`;create temporary table `tb_tmp_batchUpdateCount`( `AffectedRowCount` int not null);start transaction;{0}commit;select `AffectedRowCount` from `tb_tmp_batchUpdateCount`;drop temporary table `tb_tmp_batchUpdateCount`;",
                 innerBuilder.ToString());
         }       
 
@@ -620,11 +619,11 @@ namespace HB.Framework.Database.SQL
 
             foreach (T domain in domains)
             {
-                innerBuilder.AppendFormat(_culture, "UPDATE {0} set `Deleted` = 1, `LastUser` = {1}, `Version` = {2}  WHERE `Id`={3} AND `Version`={4};insert into tb_tmp_batchDeleteCount(AffectedRowCount) values(row_count());",
+                innerBuilder.AppendFormat(GlobalSettings.Culture, "UPDATE {0} set `Deleted` = 1, `LastUser` = {1}, `Version` = {2}  WHERE `Id`={3} AND `Version`={4};insert into tb_tmp_batchDeleteCount(AffectedRowCount) values(row_count());",
                     definition.DbTableReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true), domain.Version + 1, domain.Id, domain.Version);
             }
 
-            return string.Format(_culture, "drop temporary table if exists `tb_tmp_batchDeleteCount`;create temporary table `tb_tmp_batchDeleteCount`( `AffectedRowCount` int not null);start transaction;{0}commit;select `AffectedRowCount` from `tb_tmp_batchDeleteCount`;drop temporary table `tb_tmp_batchDeleteCount`;",
+            return string.Format(GlobalSettings.Culture, "drop temporary table if exists `tb_tmp_batchDeleteCount`;create temporary table `tb_tmp_batchDeleteCount`( `AffectedRowCount` int not null);start transaction;{0}commit;select `AffectedRowCount` from `tb_tmp_batchDeleteCount`;drop temporary table `tb_tmp_batchDeleteCount`;",
                 innerBuilder.ToString());
         }
 
@@ -671,7 +670,7 @@ namespace HB.Framework.Database.SQL
                     binary = "";
                 }
 
-                sql.AppendFormat(_culture, " {0} {1}{2} {6} {3} {4} {5},",
+                sql.AppendFormat(GlobalSettings.Culture, " {0} {1}{2} {6} {3} {4} {5},",
                     info.DbReservedName,
                     length >= 21845 ? "TEXT" : _databaseEngine.GetDbTypeStatement(info.PropertyType),
                     length == 0 ? "" : "(" + length + ")",
@@ -687,10 +686,10 @@ namespace HB.Framework.Database.SQL
 
             if (addDropStatement)
             {
-                dropStatement = string.Format(_culture, "Drop table {0};" + Environment.NewLine, definition.DbTableReservedName);
+                dropStatement = string.Format(GlobalSettings.Culture, "Drop table {0};" + Environment.NewLine, definition.DbTableReservedName);
             }
 
-            return string.Format(_culture,
+            return string.Format(GlobalSettings.Culture,
                 "{2}" +
                 "CREATE TABLE {0} (" + Environment.NewLine +
                 "`Id` bigint(20) NOT NULL AUTO_INCREMENT," + Environment.NewLine +

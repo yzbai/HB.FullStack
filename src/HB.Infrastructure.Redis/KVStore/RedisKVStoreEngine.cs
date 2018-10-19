@@ -20,7 +20,6 @@ namespace HB.Infrastructure.Redis.KVStore
         //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";
         //private static readonly string luaUpdateScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) redis.call('HSET', KEYS[1], ARGV[1], ARGV[4]) return 1 end";
 
-        private static CultureInfo _culture = CultureInfo.InvariantCulture;
 
         private const string luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then return 9 end ";
         private const string luaBatchAddTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) ";
@@ -61,12 +60,12 @@ namespace HB.Infrastructure.Redis.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(_culture, luaBatchAddExistCheckTemplate, i + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, luaBatchAddExistCheckTemplate, i + 1);
             }
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(_culture, luaBatchAddTemplate, i + 1, i + count + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, luaBatchAddTemplate, i + 1, i + count + 1);
             }
 
             stringBuilder.Append(luaBatchAddReturnTemplate);
@@ -80,12 +79,12 @@ namespace HB.Infrastructure.Redis.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(_culture, luaBatchUpdateVersionCheckTemplate, i + 1, i + count + count + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, luaBatchUpdateVersionCheckTemplate, i + 1, i + count + count + 1);
             }
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(_culture, luaBatchUpdateTemplate, i + 1, i + count + 1, i + count + count + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, luaBatchUpdateTemplate, i + 1, i + count + 1, i + count + count + 1);
             }
 
             stringBuilder.Append(luaBatchUpdateReturnTemplate);
@@ -99,12 +98,12 @@ namespace HB.Infrastructure.Redis.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(_culture, luaBatchDeleteVersionCheckTemplate, i + 1, i + count + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, luaBatchDeleteVersionCheckTemplate, i + 1, i + count + 1);
             }
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(_culture, luaBatchDeleteTemplate, i + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, luaBatchDeleteTemplate, i + 1);
             }
 
             stringBuilder.Append(luaBatchDeleteReturnTemplate);
@@ -151,7 +150,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(_culture), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript.ToString(GlobalSettings.Culture), keys, argvs);
 
             return MapResult(result);
 
@@ -173,7 +172,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(_culture), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript.ToString(GlobalSettings.Culture), keys, argvs);
 
             return MapResult(result);
         }
@@ -192,7 +191,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(_culture), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript.ToString(GlobalSettings.Culture), keys, argvs);
 
             return MapResult(result);
         }

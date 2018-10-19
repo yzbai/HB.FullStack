@@ -55,7 +55,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            return db.ScriptEvaluateAsync(luaScript.ToString(_culture), keys, argvs).ContinueWith(t=>MapResult(t.Result), TaskScheduler.Default);
+            return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t=>MapResult(t.Result), TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> EntityUpdateAsync(string storeName, int storeIndex, string entityName, string entityKey, byte[] entityValue, int entityVersion)
@@ -74,7 +74,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            return db.ScriptEvaluateAsync(luaScript.ToString(_culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
+            return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> EntityDeleteAsync(string storeName, int storeIndex, string entityName, string entityKey, int entityVersion)
@@ -91,7 +91,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            return db.ScriptEvaluateAsync(luaScript.ToString(_culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
+            return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> EntityDeleteAllAsync(string storeName, int storeIndex, string entityName)
