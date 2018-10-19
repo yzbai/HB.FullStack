@@ -32,7 +32,7 @@ namespace CommonSample
             throw new NotImplementedException();
         }
 
-        public void handleConsumerEvent(string jsonData)
+        public static void HandleConsumerEvent(string jsonData)
         {
             Console.WriteLine("Customer.Event.Text Handled: " + jsonData);
         }
@@ -90,7 +90,7 @@ namespace CommonSample
             throw new NotImplementedException();
         }
 
-        public void handleEvent(string jsonData)
+        public void HandleEvent(string jsonData)
         {
             Console.WriteLine("KafkaTest.Event.Text " + jsonData);
         }

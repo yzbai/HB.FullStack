@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Kafka
 {
     public class KafkaEngine : IEventBusEngine
     {
-        private object _objLocker = new object();
+        private readonly object _objLocker = new object();
         private KafkaEngineOptions _options;
         private ILogger _logger;
 
@@ -41,15 +41,15 @@ namespace HB.Infrastructure.Kafka
         {
             if (string.IsNullOrWhiteSpace(serverName))
             {
-                throw new ArgumentNullException("serverName");
+                throw new ArgumentNullException(nameof(serverName));
             }
 
             if (string.IsNullOrWhiteSpace(eventName))
             {
-                throw new ArgumentNullException("eventName");
+                throw new ArgumentNullException(nameof(eventName));
             }
 
-            var producer = getProducerByServerName(serverName);
+            var producer = GetProducerByServerName(serverName);
 
             var task = producer.ProduceAsync(eventName, null, data);
 
@@ -63,17 +63,17 @@ namespace HB.Infrastructure.Kafka
         {
             if (string.IsNullOrWhiteSpace(serverName))
             {
-                throw new ArgumentNullException("serverName");
+                throw new ArgumentNullException(nameof(serverName));
             }
 
             if (string.IsNullOrWhiteSpace(subscriberGroup))
             {
-                throw new ArgumentNullException("subscriberGroup");
+                throw new ArgumentNullException(nameof(subscriberGroup));
             }
 
             if (string.IsNullOrWhiteSpace(eventName))
             {
-                throw new ArgumentNullException("eventName");
+                throw new ArgumentNullException(nameof(eventName));
             }
 
             if (handler == null)
@@ -87,7 +87,7 @@ namespace HB.Infrastructure.Kafka
 
             return Task.Factory.StartNew(() => {
 
-                using (Consumer<Null, string> consumer = new Consumer<Null, string>(getConsumerConfig(serverName, subscriberGroup), null, new StringDeserializer(Encoding.UTF8)))
+                using (Consumer<Null, string> consumer = new Consumer<Null, string>(GetConsumerConfig(serverName, subscriberGroup), null, new StringDeserializer(Encoding.UTF8)))
                 {
                     consumer.OnMessage += (sender, message) => {
                         handler.Handle(message.Value);
@@ -110,14 +110,14 @@ namespace HB.Infrastructure.Kafka
 
         }
 
-        private Producer<Null, string> getProducerByServerName(string serverName)
+        private Producer<Null, string> GetProducerByServerName(string serverName)
         {
-            return _producers.GetOrAdd(serverName, sname => createProducer(sname));
+            return _producers.GetOrAdd(serverName, sname => CreateProducer(sname));
         }
 
-        private Producer<Null, string> createProducer(string serverName)
+        private Producer<Null, string> CreateProducer(string serverName)
         {
-            var producer = new Producer<Null, string>(getProducerConfig(serverName), null, new StringSerializer(Encoding.UTF8));
+            var producer = new Producer<Null, string>(GetProducerConfig(serverName), null, new StringSerializer(Encoding.UTF8));
 
             producer.OnError += (obj, error) =>
             {
@@ -127,7 +127,7 @@ namespace HB.Infrastructure.Kafka
             return producer;
         }
 
-        private IDictionary<string, object> getProducerConfig(string serverName)
+        private IDictionary<string, object> GetProducerConfig(string serverName)
         {
             var serverInfo = _options.GetServerInfo(serverName);
             var producerConfig = serverInfo?.ProducerConfig?.CloningWithValues();
@@ -145,7 +145,7 @@ namespace HB.Infrastructure.Kafka
             return producerConfig.ConvertValue<string, string, object>(str => str);
         }
 
-        private IDictionary<string, object> getConsumerConfig(string serverName, string subscriberGroup)
+        private IDictionary<string, object> GetConsumerConfig(string serverName, string subscriberGroup)
         {
             var serverInfo = _options.GetServerInfo(serverName);
             var consumerConfig = serverInfo?.ConsumerConfig?.CloningWithValues();

@@ -56,7 +56,7 @@ namespace HB.PresentFish.Tools
     public class KVStoreTest : IClassFixture<TestFixture>
     {
         private IKVStore _kvStore;
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
         private TestFixture _fixture;
 
         private UserEntity _userEntity1 = new UserEntity()
@@ -81,11 +81,11 @@ namespace HB.PresentFish.Tools
         {
             _output = output;
             _fixture = fixture;
-            _kvStore = _fixture.GetKVStore();
+            _kvStore = _fixture.KVStore;
         }
 
         [Fact]
-        public void addAndFetch()
+        public void AddAndFetch()
         {
             UserEntity fetched = _kvStore.GetById<UserEntity>(_userEntity1.Id);
 
@@ -105,7 +105,7 @@ namespace HB.PresentFish.Tools
         }
 
         [Fact]
-        public void addAndUpdate()
+        public void AddAndUpdate()
         {
             KVStoreResult result = KVStoreResult.Succeeded();
 

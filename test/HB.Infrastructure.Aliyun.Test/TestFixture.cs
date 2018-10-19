@@ -6,7 +6,7 @@ using System;
 
 namespace HB.Infrastructure.Aliyun.Test
 {
-    public class TestFixture : IDisposable
+    public class TestFixture
     {
         public static IConfiguration Configuration { get; private set; }
 
@@ -36,14 +36,6 @@ namespace HB.Infrastructure.Aliyun.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public ISmsService GetSmsBiz()
-        {
-            return Services.GetRequiredService<ISmsService>();
-        }
-
-        public void Dispose()
-        {
-
-        }
+        public ISmsService SmsService => Services.GetRequiredService<ISmsService>();
     }
 }

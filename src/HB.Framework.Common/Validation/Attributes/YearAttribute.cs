@@ -24,9 +24,7 @@ namespace HB.Framework.Common.Validation.Attributes
                 return true;
             }
 
-            string text = value as string;
-
-            return text != null && ValidationMethods.IsYear(text);
+            return value is string text && ValidationMethods.IsYear(text);
         }
     }
 }

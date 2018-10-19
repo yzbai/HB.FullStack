@@ -30,12 +30,13 @@ namespace HB.Component.Identity.Test
 
         public static IList<Role> MockRoles()
         {
-            IList<Role> list = new List<Role>();
-
-            list.Add(new Role() { Name = "Admin", DisplayName = "Diplay-Admin", IsActivated = true, Comment = "xxxxx" });
-            list.Add(new Role() { Name = "Level1", DisplayName = "Diplay-Level1", IsActivated = true, Comment = "xxxxx" });
-            list.Add(new Role() { Name = "Level2", DisplayName = "Diplay-Level2", IsActivated = true, Comment = "xxxxx" });
-            list.Add(new Role() { Name = "Level3", DisplayName = "Diplay-Level3", IsActivated = true, Comment = "xxxxx" });
+            IList<Role> list = new List<Role>
+            {
+                new Role() { Name = "Admin", DisplayName = "Diplay-Admin", IsActivated = true, Comment = "xxxxx" },
+                new Role() { Name = "Level1", DisplayName = "Diplay-Level1", IsActivated = true, Comment = "xxxxx" },
+                new Role() { Name = "Level2", DisplayName = "Diplay-Level2", IsActivated = true, Comment = "xxxxx" },
+                new Role() { Name = "Level3", DisplayName = "Diplay-Level3", IsActivated = true, Comment = "xxxxx" }
+            };
 
             return list;
         }

@@ -38,13 +38,14 @@ namespace HB.Framework.Common.Test
         [Fact]
         public void TestJsonMapString()
         {
-            Dictionary<MapKey, MapValue> map = new Dictionary<MapKey, MapValue>();
-
-            map.Add(new MapKey { KeyName = "key1", KeyDescription = "key1__" }, new MapValue { Value = "value1", ValueDescription = "value1__" });
-            map.Add(new MapKey { KeyName = "key2", KeyDescription = "key2__" }, new MapValue { Value = "value2", ValueDescription = "value2__" });
-            map.Add(new MapKey { KeyName = "key3", KeyDescription = "key3__" }, new MapValue { Value = "value3", ValueDescription = "value3__" });
-            map.Add(new MapKey { KeyName = "key4", KeyDescription = "key4__" }, new MapValue { Value = "value4", ValueDescription = "value4__" });
-            map.Add(new MapKey { KeyName = "key5", KeyDescription = "key5__" }, new MapValue { Value = "value5", ValueDescription = "value5__" });
+            Dictionary<MapKey, MapValue> map = new Dictionary<MapKey, MapValue>
+            {
+                { new MapKey { KeyName = "key1", KeyDescription = "key1__" }, new MapValue { Value = "value1", ValueDescription = "value1__" } },
+                { new MapKey { KeyName = "key2", KeyDescription = "key2__" }, new MapValue { Value = "value2", ValueDescription = "value2__" } },
+                { new MapKey { KeyName = "key3", KeyDescription = "key3__" }, new MapValue { Value = "value3", ValueDescription = "value3__" } },
+                { new MapKey { KeyName = "key4", KeyDescription = "key4__" }, new MapValue { Value = "value4", ValueDescription = "value4__" } },
+                { new MapKey { KeyName = "key5", KeyDescription = "key5__" }, new MapValue { Value = "value5", ValueDescription = "value5__" } }
+            };
 
             string json = DataConverter.ToJson(map);
 
@@ -76,9 +77,11 @@ namespace HB.Framework.Common.Test
         {
             Dictionary<string, MapMapValue> map = new Dictionary<string, MapMapValue>();
 
-            var mapValue1 = new Dictionary<string, KeyValuePair<int, string>>();
-            mapValue1.Add("mm1", new KeyValuePair<int, string>(1, "mm1__"));
-            mapValue1.Add("mm2", new KeyValuePair<int, string>(2, "mm2__"));
+            var mapValue1 = new Dictionary<string, KeyValuePair<int, string>>
+            {
+                { "mm1", new KeyValuePair<int, string>(1, "mm1__") },
+                { "mm2", new KeyValuePair<int, string>(2, "mm2__") }
+            };
 
             map.Add("key1", new MapMapValue { Value = "value1", ValueDescription = "value1__", MapValue = mapValue1 });
             map.Add("key2", new MapMapValue { Value = "value2", ValueDescription = "value2__", MapValue = mapValue1 });
@@ -96,13 +99,16 @@ namespace HB.Framework.Common.Test
         [Fact]
         public void TestJsonMapString4()
         {
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-            dict.Add("key1", "value1");
-            dict.Add("key2", "value2");
+            Dictionary<string, string> dict = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            };
 
-            ApplicationOptions optoins = new ApplicationOptions();
-
-            optoins.Database = new ApplicationOptions.DatabaseOptions() { Name = "presentfish.db" };
+            ApplicationOptions optoins = new ApplicationOptions
+            {
+                Database = new ApplicationOptions.DatabaseOptions() { Name = "presentfish.db" }
+            };
             optoins.WebApis.Add("Authorization", new ApplicationOptions.WebApiOptions() {
 
                 BaseUrl = "http://192.168.0.112/",

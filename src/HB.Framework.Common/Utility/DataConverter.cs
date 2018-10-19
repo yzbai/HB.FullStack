@@ -56,7 +56,7 @@ namespace HB.Framework.Common
             convertFunDict[typeof(DateTime?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o, culture); };
             convertFunDict[typeof(DateTimeOffset?)] = o => { return o == null ? null : (DateTimeOffset?)DateTime.SpecifyKind(Convert.ToDateTime(o, culture), DateTimeKind.Utc); };
             convertFunDict[typeof(TimeSpan?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o, culture); };
-            convertFunDict[typeof(Object)] = o => { return o == null ? null : o; };
+            convertFunDict[typeof(Object)] = o => { return o ?? null; };
             convertFunDict[typeof(DBNull)] = o => { return o == null ? null : DBNull.Value; };
 
             #endregion
