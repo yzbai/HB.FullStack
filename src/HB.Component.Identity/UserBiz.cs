@@ -83,7 +83,7 @@ namespace HB.Component.Identity
                 return null;
             }
 
-            return _db.ScalarAsync<User>(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase), transContext);
+            return _db.ScalarAsync<User>(u => u.Email.Equals(email, GlobalSettings.ComparisonIgnoreCase), transContext);
         }
 
         public Task<IList<User>> GetUsersByIdsAsync(IEnumerable<long> userIds, DbTransactionContext transContext = null)
@@ -142,7 +142,7 @@ namespace HB.Component.Identity
                 return IdentityResult.NotFound();
             }
 
-            if (!user.UserName.Equals(userName, StringComparison.InvariantCulture) && 0 != await _db.CountAsync<User>(u => u.UserName == userName, transContext).ConfigureAwait(false))
+            if (!user.UserName.Equals(userName, GlobalSettings.Comparison) && 0 != await _db.CountAsync<User>(u => u.UserName == userName, transContext).ConfigureAwait(false))
             {
                 return IdentityResult.AlreadyExists();
             }

@@ -9,7 +9,6 @@ namespace Microsoft.AspNetCore.Http
 {
     public static class HttpContextExtensions
     {
-        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture;
 
         public static IDictionary<string, string> GetParametersFromRequest(this HttpContext httpContext)
         {
@@ -48,7 +47,7 @@ namespace Microsoft.AspNetCore.Http
             {
                 foreach (KeyValuePair<string, string> item in httpContext.Request.Cookies)
                 {
-                    parameters.Add(item.Key, item.Value.ToString(_culture));
+                    parameters.Add(item.Key, item.Value.ToString(GlobalSettings.Culture));
                 }
             }
 
@@ -140,7 +139,7 @@ namespace Microsoft.AspNetCore.Http
                 string rawValues = values.ToString();   // writes out as Csv when there are multiple.
 
                 if (!string.IsNullOrEmpty(rawValues))
-                    return (T)Convert.ChangeType(values.ToString(), typeof(T), CultureInfo.InvariantCulture);
+                    return (T)Convert.ChangeType(values.ToString(), typeof(T), GlobalSettings.Culture);
             }
             return default(T);
         }

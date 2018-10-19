@@ -238,7 +238,7 @@ namespace HB.Component.Authorization
         private static bool PassowrdCheck(User user, string password)
         {
             string passwordHash = SecurityHelper.EncryptPwdWithSalt(password, user.Guid);
-            return passwordHash.Equals(user.PasswordHash, StringComparison.InvariantCulture);
+            return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
         private async Task OnPasswordCheckFailedAsync(User user)

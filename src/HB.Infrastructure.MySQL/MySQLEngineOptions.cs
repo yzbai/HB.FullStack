@@ -25,7 +25,7 @@ namespace HB.Infrastructure.MySQL
 
         public IEnumerable<MySQLDatabaseSetting> GetDatabaseSetting(string databaseName)
         {
-            return DatabaseSettings.Where(ds => ds.Name.Equals(databaseName, StringComparison.InvariantCultureIgnoreCase));
+            return DatabaseSettings.Where(ds => ds.Name.Equals(databaseName, GlobalSettings.ComparisonIgnoreCase));
         }
     }
 }

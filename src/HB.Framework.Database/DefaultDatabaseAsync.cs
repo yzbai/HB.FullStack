@@ -181,7 +181,7 @@ namespace HB.Framework.Database
             {
                 IDbCommand command = _sqlBuilder.CreateCountCommand<T>(fromCondition, whereCondition);
                 object countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName, command, useMaster).ConfigureAwait(false);
-                count = Convert.ToInt32(countObj, CultureInfo.InvariantCulture);
+                count = Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
             catch (Exception ex)
             {

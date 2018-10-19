@@ -10,7 +10,8 @@ namespace HB.Framework.Common
     /// <summary>
     /// Retry the task without await. You can fire and forgot.
     /// </summary>
-    public static class TaskRetryOldxx
+    [Obsolete]
+    internal static class TaskRetryOldxx
     {
         private static Func<int, TimeSpan> defaultSleepDurationProvider = retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
 

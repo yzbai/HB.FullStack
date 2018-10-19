@@ -2,6 +2,7 @@
 using HB.Component.Identity.Entity;
 using HB.Framework.Database;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
@@ -11,7 +12,6 @@ namespace HB.Component.Identity
 {
     public class ClaimsPrincipalFactory : BizWithDbTransaction, IClaimsPrincipalFactory
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         private readonly IDatabase _db;
         private readonly ILogger _logger;
         private IRoleBiz _roleBiz;
@@ -33,11 +33,11 @@ namespace HB.Component.Identity
             IList<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimExtensionTypes.UserGUID, user.Guid),
-                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(_culture)),
+                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
                 new Claim(ClaimExtensionTypes.UserName, user.UserName??""),
                 new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
-                new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(_culture))
+                new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
             };
 
             IList<UserClaim> userClaims = await _userClaimBiz.GetUserClaimsByUserIdAsync(user.Id, transContext).ConfigureAwait(false);

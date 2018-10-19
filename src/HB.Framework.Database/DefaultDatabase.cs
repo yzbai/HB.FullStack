@@ -224,7 +224,7 @@ namespace HB.Framework.Database
             {
                 IDbCommand command = _sqlBuilder.CreateCountCommand<T>(fromCondition, whereCondition);
                 object countObj = _databaseEngine.ExecuteCommandScalar(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
-                count = Convert.ToInt32(countObj, CultureInfo.InvariantCulture);
+                count = Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
             catch (Exception ex)
             {
