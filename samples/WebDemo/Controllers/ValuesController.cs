@@ -20,13 +20,13 @@ namespace WebDemo.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
-        private IEventBus _eventBus;
+        private readonly IEventBus _eventBus;
 
-        private static int runTimes = 0;
+        //private static int runTimes = 0;
 
-        private ISmsService _smsBiz; 
+        private readonly ISmsService _smsBiz; 
 
         public ValuesController(ILogger<ValuesController> logger, IEventBus eventBus, ISmsService smsBiz)
         {
@@ -44,33 +44,33 @@ namespace WebDemo.Controllers
             return new string[] { "value1", "value4346464" };
         }
 
-        private void TaskRetryTest()
+        private static void TaskRetryTest()
         {
-            int mm = 0;
+            //int mm = 0;
 
-            var task = TaskRetry.Retry<int>(2, () => Task.Run<int>(() =>
-            {
+            //var task = TaskRetry.Retry<int>(2, () => Task.Run<int>(() =>
+            //{
 
-                runTimes++;
+            //    runTimes++;
 
-                if (runTimes < 4)
-                {
-                    int a = 1 / mm;
-                    Console.Write(a);
-                }
+            //    if (runTimes < 4)
+            //    {
+            //        int a = 1 / mm;
+            //        Console.Write(a);
+            //    }
 
-                return new Random().Next(1000);
-            }),
-            (ret, ex) =>
-            {
-                _logger.LogInformation("Runtimes exception : " + runTimes);
-                _logger.LogCritical(ex.Message);
-            });
+            //    return new Random().Next(1000);
+            //}),
+            //(ret, ex) =>
+            //{
+            //    _logger.LogInformation("Runtimes exception : " + runTimes);
+            //    _logger.LogCritical(ex.Message);
+            //});
 
-            task.ContinueWith(t =>
-            {
-                _logger.LogCritical("The final value status true / false : " + t.IsFaulted);
-            });
+            //task.ContinueWith(t =>
+            //{
+            //    _logger.LogCritical("The final value status true / false : " + t.IsFaulted);
+            //});
 
             //TestEntity entity = new TestEntity {
             //    Name = "Haha,You",

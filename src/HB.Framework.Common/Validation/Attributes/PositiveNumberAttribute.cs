@@ -21,9 +21,8 @@ namespace HB.Framework.Common.Validation.Attributes
         {
             if (value == null) { return true; }
 
-            string text = value as string;
 
-            return text != null && ValidationMethods.IsPositiveNumber(text);
+            return value is string text && ValidationMethods.IsPositiveNumber(text);
         }
     }
 }

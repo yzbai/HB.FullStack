@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HB.Component.CentralizedLogger\HB.Component.CentralizedLogger.csproj" />
-    <ProjectReference Include="..\..\src\HB.Component.Common\HB.Component.Common.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Kafka\HB.Infrastructure.Kafka.csproj" />
   </ItemGroup>

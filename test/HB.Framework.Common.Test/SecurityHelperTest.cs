@@ -21,7 +21,7 @@ namespace HB.Framework.Common.Test
         }
 
         [Theory]
-        [MemberData("get_randomNumbericStringLength")]
+        [MemberData(nameof(get_randomNumbericStringLength))]
         public void CreateRandomNumbericStringTest(int length)
         {
             string result = SecurityHelper.CreateRandomNumbericString(length).Trim();

@@ -18,11 +18,11 @@ namespace HB.Component.Identity.Test
         private IList<User> _userList;
         private IList<Role> _roleList;
 
-        public DatabaseTest(ITestOutputHelper output, DatabaseTestFixture databaseTestFixture) : base(databaseTestFixture.GetDatabase())
+        public DatabaseTest(ITestOutputHelper output, DatabaseTestFixture databaseTestFixture) : base(databaseTestFixture.Database)
         {
             _output = output;
             _fixture = databaseTestFixture;
-            _db = _fixture.GetDatabase();
+            _db = _fixture.Database;
 
             _userList = DataMocker.MockUsers();
             _roleList = DataMocker.MockRoles();
@@ -117,13 +117,13 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetAdminUsers()
         {
-            Select<User> select = _db.Select<User>().select(u => u.UserName).select(u => u.Mobile);
+            SelectExpression<User> select = _db.NewSelect<User>().Select(u => u.UserName).Select(u => u.Mobile);
 
-            From<UserRole> from = _db.From<UserRole>()
+            FromExpression<UserRole> from = _db.NewFrom<UserRole>()
                                           .LeftJoin<Role>((ur, r) => ur.RoleId == r.Id)
                                           .LeftJoin<User>((ur, u) => ur.UserId == u.Id);
 
-            Where<UserRole> where = _db.Where<UserRole>().And<Role>(r => r.Name == "Admin");
+            WhereExpression<UserRole> where = _db.NewWhere<UserRole>().And<Role>(r => r.Name == "Admin");
 
             IList<User> resultList = _db.RetrieveAsync(select, from, where).Result;
 
@@ -149,7 +149,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetWhoHasClaims()
         {
-            From<UserClaim> from = _db.From<UserClaim>().LeftJoin<User>((uc, u) => uc.UserId == u.Id);
+            FromExpression<UserClaim> from = _db.NewFrom<UserClaim>().LeftJoin<User>((uc, u) => uc.UserId == u.Id);
 
 
             var resultList = _db.RetrieveAsync<UserClaim, User>(from, null).Result;
@@ -219,7 +219,7 @@ namespace HB.Component.Identity.Test
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
            
                 Rollback(transContext);
@@ -295,7 +295,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetWhoHasRoles()
         {
-            From<UserRole> from = _db.From<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleId == r.Id).LeftJoin<User>((ur, u) => ur.UserId == u.Id);
+            FromExpression<UserRole> from = _db.NewFrom<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleId == r.Id).LeftJoin<User>((ur, u) => ur.UserId == u.Id);
 
             var resultList = _db.RetrieveAsync<UserRole, User, Role>(from, null).Result;
 

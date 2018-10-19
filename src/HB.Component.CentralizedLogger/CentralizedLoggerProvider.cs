@@ -14,7 +14,7 @@ namespace HB.Component.CentralizedLogger
         private IEventBus _eventBus;
         private CentralizedLoggerProcessor _processor;
 
-        private Func<string, LogLevel, bool> _filter;
+        private readonly Func<string, LogLevel, bool> _filter;
         private readonly ConcurrentDictionary<string, CentralizedLogger> _loggers;
 
 
@@ -24,12 +24,12 @@ namespace HB.Component.CentralizedLogger
             _options = options.Value;
             _processor = processor;
             _loggers = new ConcurrentDictionary<string, CentralizedLogger>();
-            _filter = getFilter(_options.LogLevel);
+            _filter = GetFilter(_options.LogLevel);
 
-            addEventInfoToEventBus();
+            AddEventInfoToEventBus();
         }
 
-        private void addEventInfoToEventBus()
+        private void AddEventInfoToEventBus()
         {
             _eventBus.RegisterEvent(new EventConfig() {
                 ServerName = _options.ServerName,
@@ -37,7 +37,7 @@ namespace HB.Component.CentralizedLogger
             });
         }
 
-        private static Func<string, LogLevel, bool> getFilter(string logLevelString)
+        private static Func<string, LogLevel, bool> GetFilter(string logLevelString)
         {
             if (!Enum.TryParse(logLevelString, out LogLevel level))
             {

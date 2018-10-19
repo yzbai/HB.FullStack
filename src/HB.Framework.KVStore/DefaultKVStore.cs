@@ -25,67 +25,67 @@ namespace HB.Framework.KVStore
 
         #region Private
 
-        private static int entityVersion<T>(T item) where T : KVStoreEntity, new()
+        private static int EntityVersion<T>(T item) where T : KVStoreEntity, new()
         {
             return item.Version;
         }
 
-        private static string storeName(KVStoreEntityDef entityDef)
+        private static string StoreName(KVStoreEntityDef entityDef)
         {
             return entityDef.KVStoreName;
         }
 
-        private static int storeIndex(KVStoreEntityDef entityDef)
+        private static int StoreIndex(KVStoreEntityDef entityDef)
         {
             return entityDef.KVStoreIndex;
         }
 
-        private static string entityName(KVStoreEntityDef entityDef)
+        private static string EntityName(KVStoreEntityDef entityDef)
         {
             return entityDef.EntityFullName;
         }
 
-        private static string entityKey(object keyValue)
+        private static string EntityKey(object keyValue)
         {
             return DataConverter.GetObjectValueStringStatement(keyValue);
         }
 
-        private static string entityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
+        private static string EntityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
         {
             return DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfo.GetValue(item));
         }
 
-        private static IEnumerable<string> entityKey<T>(IEnumerable<T> items, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
+        private static IEnumerable<string> EntityKey<T>(IEnumerable<T> items, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
         {
             return items.Select(t => DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfo.GetValue(t)));
         }
 
-        private static IEnumerable<string> entityKey(IEnumerable<object> keyValues)
+        private static IEnumerable<string> EntityKey(IEnumerable<object> keyValues)
         {
             return keyValues.Select(obj => DataConverter.GetObjectValueStringStatement(obj));
         }
 
-        private static byte[] entityValue<T>(T item) where T : KVStoreEntity, new()
+        private static byte[] EntityValue<T>(T item) where T : KVStoreEntity, new()
         {
             return DataConverter.Serialize<T>(item);
         }
 
-        private static IEnumerable<byte[]> entityValue<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
+        private static IEnumerable<byte[]> EntityValue<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
             return items.Select(t => DataConverter.Serialize<T>(t));
         }
 
-        private static T deSerialize<T>(byte[] value) where T : KVStoreEntity, new()
+        private static T DeSerialize<T>(byte[] value) where T : KVStoreEntity, new()
         {
             return DataConverter.DeSerialize<T>(value);
         }
 
-        private static IEnumerable<T> deSerialize<T>(IEnumerable<byte[]> values) where T : KVStoreEntity, new()
+        private static IEnumerable<T> DeSerialize<T>(IEnumerable<byte[]> values) where T : KVStoreEntity, new()
         {
             return values?.Select(bytes => DataConverter.DeSerialize<T>(bytes));
         }
 
-        private bool checkEntities<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
+        private static bool CheckEntities<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
             if (items == null || items.Count() == 0)
             {
@@ -95,7 +95,7 @@ namespace HB.Framework.KVStore
             return items.All(t => t.IsValid());
         }
 
-        private bool checkEntityVersions<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
+        private static bool CheckEntityVersions<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
             if (items == null || items.Count() == 0)
             {
@@ -114,12 +114,12 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             byte[] value = _engine.EntityGet(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(keyValue));
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValue));
 
-            return deSerialize<T>(value);
+            return DeSerialize<T>(value);
         }
 
         public IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -127,12 +127,12 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             IEnumerable<byte[]> values = _engine.EntityGet(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(keyValues));
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValues));
 
-            return deSerialize<T>(values);
+            return DeSerialize<T>(values);
         }
 
         public IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new()
@@ -140,11 +140,11 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             IEnumerable<byte[]> values = _engine.EntityGetAll(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef));
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef));
 
-            return deSerialize<T>(values);
+            return DeSerialize<T>(values);
         }
 
         public KVStoreResult Add<T>(T item) where T : KVStoreEntity, new()
@@ -154,12 +154,12 @@ namespace HB.Framework.KVStore
 
         public KVStoreResult Add<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            if (!checkEntities<T>(items))
+            if (!CheckEntities<T>(items))
             {
                 return KVStoreResult.Fail("item is not valid.");
             }
 
-            if (!checkEntityVersions<T>(items))
+            if (!CheckEntityVersions<T>(items))
             {
                 return KVStoreResult.Fail("item wanted to be added, version should be 0.");
             }
@@ -167,11 +167,11 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityAdd(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(items, entityDef),
-                entityValue(items)
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(items, entityDef),
+                EntityValue(items)
                 );
         }
 
@@ -182,7 +182,7 @@ namespace HB.Framework.KVStore
 
         public KVStoreResult Update<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            if (!checkEntities<T>(items))
+            if (!CheckEntities<T>(items))
             {
                 return KVStoreResult.Fail("items is not valid.");
             }
@@ -197,11 +197,11 @@ namespace HB.Framework.KVStore
             }
 
             KVStoreResult result = _engine.EntityUpdate(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(items, entityDef),
-                entityValue(items),
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(items, entityDef),
+                EntityValue(items),
                 originalVersions
                 );
 
@@ -220,7 +220,7 @@ namespace HB.Framework.KVStore
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return DeleteByIds<T>(new object[] { entityKey(item, entityDef) }, new int[] { item.Version });
+            return DeleteByIds<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
         }
 
         public KVStoreResult DeleteAll<T>() where T : KVStoreEntity, new()
@@ -228,9 +228,9 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDeleteAll(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef)
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef)
                 );
         }
 
@@ -244,10 +244,10 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDelete(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(keyValues),
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValues),
                 versions
                 );
         }
@@ -261,11 +261,11 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityGetAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(keyValue))
-                .ContinueWith(t=>deSerialize<T>(t.Result), TaskScheduler.Default);
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValue))
+                .ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
         }
 
         public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -273,11 +273,11 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityGetAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(keyValues))
-                .ContinueWith(t=>deSerialize<T>(t.Result), TaskScheduler.Default);
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValues))
+                .ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
         }
 
         public Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
@@ -285,10 +285,10 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityGetAllAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef))
-                .ContinueWith(t=>deSerialize<T>(t.Result), TaskScheduler.Default);
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef))
+                .ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> AddAsync<T>(T item) where T : KVStoreEntity, new()
@@ -298,12 +298,12 @@ namespace HB.Framework.KVStore
 
         public Task<KVStoreResult> AddAsync<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            if (!checkEntities<T>(items))
+            if (!CheckEntities<T>(items))
             {
                 return Task.FromResult(KVStoreResult.Fail("item is not valid."));
             }
 
-            if (!checkEntityVersions<T>(items))
+            if (!CheckEntityVersions<T>(items))
             {
                 return Task.FromResult(KVStoreResult.Fail("item wanted to be added, version should be 0."));
             }
@@ -311,11 +311,11 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return  _engine.EntityAddAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(items, entityDef),
-                entityValue(items)
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(items, entityDef),
+                EntityValue(items)
                 );
         }
 
@@ -326,7 +326,7 @@ namespace HB.Framework.KVStore
 
         public Task<KVStoreResult> UpdateAsync<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            if (!checkEntities<T>(items))
+            if (!CheckEntities<T>(items))
             {
                 return Task.FromResult(KVStoreResult.Fail("items is not valid."));
             }
@@ -341,11 +341,11 @@ namespace HB.Framework.KVStore
             }
 
             return _engine.EntityUpdateAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(items, entityDef),
-                entityValue(items),
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(items, entityDef),
+                EntityValue(items),
                 originalVersions)
                 .ContinueWith(t=> {
                     if (!t.Result.IsSucceeded())
@@ -369,7 +369,7 @@ namespace HB.Framework.KVStore
 
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return DeleteByIdsAsync<T>(new object[] { entityKey(item, entityDef) }, new int[] { item.Version });
+            return DeleteByIdsAsync<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
         }
 
         public Task<KVStoreResult> DeleteAllAsync<T>() where T : KVStoreEntity, new()
@@ -377,9 +377,9 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDeleteAllAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef)
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef)
                 );
         }
 
@@ -393,10 +393,10 @@ namespace HB.Framework.KVStore
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return _engine.EntityDeleteAsync(
-                storeName(entityDef),
-                storeIndex(entityDef),
-                entityName(entityDef),
-                entityKey(keyValues),
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValues),
                 versions
                 );
         }

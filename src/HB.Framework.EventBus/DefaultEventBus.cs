@@ -21,7 +21,7 @@ namespace HB.Framework.EventBus
         private EventBusOptions _options;
         private IEventBusEngine _engine;
         private ILogger _logger;
-        private IEnumerable<IEventHandler> _eventHandlers;
+        private readonly IEnumerable<IEventHandler> _eventHandlers;
         private bool _handled;
 
         public DefaultEventBus(IEventBusEngine eventBusEngine, IEnumerable<IEventHandler> eventHandlers, IOptions<EventBusOptions> options, ILogger<DefaultEventBus> logger)
@@ -68,7 +68,7 @@ namespace HB.Framework.EventBus
         {
             if (eventConfig == null)
             {
-                throw new ArgumentNullException("eventConfig");
+                throw new ArgumentNullException(nameof(eventConfig));
             }
 
             if (_options.PublishConfig == null)
@@ -94,12 +94,13 @@ namespace HB.Framework.EventBus
                 return null;
             }
 
-            return TaskRetry.Retry<PublishResult>(
-                _options.PublishConfig.RetryCount,
-                () => _engine.PublishString(eventConfig.ServerName, eventConfig.EventName, jsonString),
-                (ret, ex) =>
-                {
-                    _logger.LogCritical(ex.Message);
+            return Policy
+                .Handle<Exception>()
+                .WaitAndRetryForeverAsync(n => TimeSpan.FromSeconds(1), (ex, count, ts) => {
+                    _logger.LogCritical(ex, "Publish Error: EventName : {0}, Json : {1}, Message : {2}, Count : {3}", eventName, jsonString, ex.Message, count);
+                })
+                .ExecuteAsync(() => {
+                    return _engine.PublishString(eventConfig.ServerName, eventConfig.EventName, jsonString);
                 });
         }
 
