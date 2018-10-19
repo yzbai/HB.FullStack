@@ -30,6 +30,10 @@ namespace HB.Framework.Database.Entity
         /// </summary>
         public bool Unique { get; set; }
 
+        public DatabaseEntityPropertyAttribute()
+        {
+
+        }
 
         public DatabaseEntityPropertyAttribute(string desc)
         {
