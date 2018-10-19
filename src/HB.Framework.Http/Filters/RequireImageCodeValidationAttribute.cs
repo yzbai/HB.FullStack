@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
 
         private static void HandleFailRequest(ActionExecutingContext context)
         {
-            if (context.HttpContext.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCulture))
+            if (context.HttpContext.Request.Path.StartsWithSegments("/api", GlobalSettings.Comparison))
             {
                 context.Result = new BadRequestObjectResult("ImageCode Error.");
             }
@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
 
             string cachedCode = httpContext.Session.GetString(ImageCodeParameterName);
 
-            return imageCode.Equals(cachedCode, StringComparison.InvariantCulture);
+            return imageCode.Equals(cachedCode, GlobalSettings.Comparison);
         }
     }
 }

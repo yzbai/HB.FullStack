@@ -18,7 +18,7 @@ namespace HB.Infrastructure.Aliyun.Sms.Transform
             SendResult sendResult = new SendResult
             {
                 Message = response.Message,
-                Succeeded = response.Code.Equals("ok", StringComparison.InvariantCultureIgnoreCase)
+                Succeeded = response.Code.Equals("ok", GlobalSettings.ComparisonIgnoreCase)
             };
 
             return sendResult;

@@ -25,7 +25,6 @@ namespace HB.Infrastructure.MySQL
 
     static class MySQLUtility
     {
-        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         //参数化
         public const string ParameterizedChar = "@";
         //引号化
@@ -167,7 +166,7 @@ namespace HB.Infrastructure.MySQL
                 return dbValueStatement;
             }
             //TODO:增加对值的过滤，预防SQL注入
-            return dbValueStatement.ToString(_culture)
+            return dbValueStatement.ToString(GlobalSettings.Culture)
                 .Replace("'", "''")
                 .Replace("--", "")
                 .Replace("/*", "")

@@ -14,7 +14,6 @@ namespace HB.Framework.Database.SQL
     /// <typeparam name="T"></typeparam>
     public class WhereExpression<T> : SQLExpression
     {
-        private readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         private IDatabaseEngine _databaseEngine;
         private Expression<Func<T, bool>> _whereExpression;
         private List<string> _orderByProperties;
@@ -170,7 +169,7 @@ namespace HB.Framework.Database.SQL
                     }
                 }
             }
-            return string.Format(_culture, sqlText, escapedParams.ToArray());
+            return string.Format(GlobalSettings.Culture, sqlText, escapedParams.ToArray());
         }
 
         #endregion
@@ -231,7 +230,7 @@ namespace HB.Framework.Database.SQL
 
             if (!string.IsNullOrEmpty(_groupByString))
             {
-                _groupByString = string.Format(_culture, "GROUP BY {0}", _groupByString);
+                _groupByString = string.Format(GlobalSettings.Culture, "GROUP BY {0}", _groupByString);
             }
 
             return this;
@@ -392,9 +391,9 @@ namespace HB.Framework.Database.SQL
                 _limitString = string.Empty;
             }
 
-            string rows = _limitRows.HasValue ? string.Format(_culture, ",{0}", _limitRows.Value) : string.Empty;
+            string rows = _limitRows.HasValue ? string.Format(GlobalSettings.Culture, ",{0}", _limitRows.Value) : string.Empty;
 
-            _limitString = string.Format(_culture, "LIMIT {0}{1}", _limitSkip.Value, rows);
+            _limitString = string.Format(GlobalSettings.Culture, "LIMIT {0}{1}", _limitSkip.Value, rows);
         }
 
         #endregion 

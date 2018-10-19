@@ -30,7 +30,7 @@ namespace HB.Framework.Database
 
         public DatabaseSchema GetDatabaseSchema(string modelTypeFullName)
         {
-            return DatabaseSchemas.First(ds => ds.EntityTypeFullName.Equals(modelTypeFullName, StringComparison.InvariantCulture));
+            return DatabaseSchemas.First(ds => ds.EntityTypeFullName.Equals(modelTypeFullName, GlobalSettings.Comparison));
         }
     }
 }

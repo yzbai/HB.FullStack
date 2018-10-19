@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace HB.Framework.Database.SQL
 {
@@ -7,7 +8,6 @@ namespace HB.Framework.Database.SQL
     /// </summary>
     public static class SQLUtility
     {
-        private static readonly CultureInfo _culture = CultureInfo.InvariantCulture;
         #region 表达
 
         public static bool In<T>(T value, params object[] list)
@@ -40,7 +40,7 @@ namespace HB.Framework.Database.SQL
 
         public static string As<T>(T value, object asValue)
         {
-            return value == null ? "" : string.Format(_culture, "{0} AS {1}", value.ToString(), asValue);
+            return value == null ? "" : string.Format(GlobalSettings.Culture, "{0} AS {1}", value.ToString(), asValue);
         }
 
         public static T Sum<T>(T value)
