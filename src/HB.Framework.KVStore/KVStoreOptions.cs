@@ -27,7 +27,7 @@ namespace HB.Framework.KVStore
 
         public KVStoreSchema GetKVStoreSchema(string entityTypeFullName)
         {
-            return KVStoreSchemas.FirstOrDefault<KVStoreSchema>(ks => ks.EntityTypeFullName.Equals(entityTypeFullName, StringComparison.InvariantCulture));
+            return KVStoreSchemas.FirstOrDefault<KVStoreSchema>(ks => ks.EntityTypeFullName.Equals(entityTypeFullName, GlobalSettings.Comparison));
         }
     }
 }

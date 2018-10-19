@@ -40,7 +40,7 @@ namespace HB.Framework.Common
 
         public static string CreateUniqueToken()
         {
-            return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+            return Guid.NewGuid().ToString("N", GlobalSettings.Culture);
         }
 
         #region Random String

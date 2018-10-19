@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
 
         private static void HandleFailRequest(ActionExecutingContext context)
         {
-            if (context.HttpContext.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCulture))
+            if (context.HttpContext.Request.Path.StartsWithSegments("/api", GlobalSettings.Comparison))
             {
                 context.Result = new BadRequestObjectResult("Sms Error.");
             }
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Mvc.Filters
                 return false;
             }
 
-            return code.Equals(httpContext.Session.GetString(SmsCodeSessiionName), StringComparison.InvariantCulture);
+            return code.Equals(httpContext.Session.GetString(SmsCodeSessiionName), GlobalSettings.Comparison);
         }
     }
 }
