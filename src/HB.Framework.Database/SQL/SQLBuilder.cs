@@ -373,7 +373,7 @@ namespace HB.Framework.Database.SQL
 
         #region 修改
 
-        private string GetUpdateStatement(DatabaseEntityDef modelDef)
+        private static string GetUpdateStatement(DatabaseEntityDef modelDef)
         {
             StringBuilder args = new StringBuilder();
 
