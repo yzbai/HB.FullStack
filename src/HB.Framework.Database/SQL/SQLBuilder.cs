@@ -686,7 +686,7 @@ namespace HB.Framework.Database.SQL
 
             if (addDropStatement)
             {
-                dropStatement = string.Format(GlobalSettings.Culture, "Drop table {0};" + Environment.NewLine, definition.DbTableReservedName);
+                dropStatement = string.Format(GlobalSettings.Culture, "Drop table if exists {0};" + Environment.NewLine, definition.DbTableReservedName);
             }
 
             return string.Format(GlobalSettings.Culture,
