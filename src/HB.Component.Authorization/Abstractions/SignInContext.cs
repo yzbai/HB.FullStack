@@ -15,6 +15,7 @@ namespace HB.Component.Authorization.Abstractions
 
         public SignInType SignInType { get; set; }
 
+        [Required]
         public string UserType { get; set; }
 
         [UserName]
