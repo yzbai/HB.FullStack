@@ -16,5 +16,7 @@ namespace HB.Compnent.Resource.Sms
         /// <returns></returns>
         Task<SendResult> SendValidationCode(string mobile, out string code);
 
+        bool Validate(string mobile, string code);
+
     }
 }
