@@ -214,7 +214,7 @@ namespace HB.Component.Identity
         {
             #region Argument Check
 
-            if (!string.IsNullOrEmpty(userType))
+            if (string.IsNullOrEmpty(userType))
             {
                 _logger.LogDebug("In UserType Check, Failed, userType :" + userType);
                 return IdentityResult.Failed();

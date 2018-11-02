@@ -31,5 +31,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         public int CodeLength { get; set; } = 6;
 
         public string ParamProductValue { get; set; }
+
+        public int ExpireMinutes { get; set; } = 10;
     }
 }
