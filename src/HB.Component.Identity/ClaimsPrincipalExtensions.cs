@@ -83,5 +83,10 @@ namespace System.Security.Claims
 
             return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
         }
+
+        public static string GetClientId(this ClaimsPrincipal principal)
+        {
+            return principal.GetClaimValue(ClaimExtensionTypes.ClientId);
+        }
     }
 }
