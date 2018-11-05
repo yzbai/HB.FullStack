@@ -28,5 +28,7 @@ namespace System.Security.Claims
         public const string Email = "HB.Identity.Email";
         public const string Audience = "aud";
         public const string UserGUID = "HB.Identity.GUID";
+
+        public const string ClientId = "HB.Identity.ClientId";
     }
 }

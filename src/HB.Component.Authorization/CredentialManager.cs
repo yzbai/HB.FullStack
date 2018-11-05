@@ -14,6 +14,7 @@ namespace HB.Component.Authorization
     {
         private AuthorizationServerOptions _options;
         private IList<SecurityKey> _issuerSigningKeys;
+        private SigningCredentials _signingCredentials;
 
         public CredentialManager(IOptions<AuthorizationServerOptions> options)
         {
@@ -38,9 +39,15 @@ namespace HB.Component.Authorization
 
         public SigningCredentials GetSigningCredentialsFromCertificate()
         {
-            X509Certificate2 cert = new X509Certificate2(_options.CertificateFileName, _options.CertificatePassword, X509KeyStorageFlags.Exportable);
-            X509SecurityKey securityKey = new X509SecurityKey(cert);
-            return new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256Signature);
+            if (_signingCredentials == null)
+            {
+                X509Certificate2 cert = new X509Certificate2(_options.CertificateFileName, _options.CertificatePassword, X509KeyStorageFlags.Exportable);
+                X509SecurityKey securityKey = new X509SecurityKey(cert);
+
+                _signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256Signature);
+            }
+
+            return _signingCredentials;
         }
     }
 }
