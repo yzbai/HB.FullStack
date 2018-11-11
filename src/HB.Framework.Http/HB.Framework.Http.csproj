@@ -18,6 +18,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Folder Include="Filters\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
