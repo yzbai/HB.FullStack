@@ -11,9 +11,11 @@ using Microsoft.IdentityModel.Tokens;
 using HB.Component.Authorization.Abstractions;
 using HB.Component.Authorization.Entity;
 using HB.Component.Identity.Entity;
+using System.Security;
 
 namespace HB.Component.Authorization
 {
+    [SecurityCritical]
     public class JwtBuilder : IJwtBuilder
     {
         private SignInOptions _signInOptions;
@@ -31,11 +33,38 @@ namespace HB.Component.Authorization
             _signingCredentials = _credentialManager.GetSigningCredentialsFromCertificate();
         }
 
-        public async Task<string> BuildJwtAsync(User user, SignInToken signInToken, string audience)
+        //public async Task<string> BuildJwtAsync(User user, SignInToken signInToken, string audience)
+        //{
+        //    DateTime utcNow = DateTime.UtcNow;
+
+        //    IList<Claim> claims = await _claimsPrincipalFactory.CreateClaimsAsync(user);
+
+        //    claims.Add(new Claim(ClaimExtensionTypes.SignInTokenIdentifier, signInToken.SignInTokenIdentifier));
+
+        //    //这个JWT只能在当前ClientId上使用
+        //    claims.Add(new Claim(ClaimExtensionTypes.ClientId, signInToken.ClientId));
+
+        //    JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+
+        //    JwtSecurityToken token = handler.CreateJwtSecurityToken(
+        //        _options.OpenIdConnectConfiguration.Issuer,
+        //        _options.NeedAudienceToBeChecked ? audience : null,
+        //        new ClaimsIdentity(claims),
+        //        utcNow,
+        //        utcNow + _signInOptions.AccessTokenExpireTimeSpan,
+        //        utcNow,
+        //        _signingCredentials
+        //        );
+
+        //    return handler.WriteToken(token);
+        //}
+
+        [SecurityCritical]
+        public string BuildJwt(User user, SignInToken signInToken, string audience)
         {
             DateTime utcNow = DateTime.UtcNow;
 
-            IList<Claim> claims = await _claimsPrincipalFactory.CreateClaimsAsync(user);
+            IList<Claim> claims = _claimsPrincipalFactory.CreateClaimsAsync(user).Result;
 
             claims.Add(new Claim(ClaimExtensionTypes.SignInTokenIdentifier, signInToken.SignInTokenIdentifier));
 

@@ -170,7 +170,8 @@ namespace HB.Component.Authorization
 
             #region Construct Jwt
 
-            result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, userToken, context.SignToWhere).ConfigureAwait(false);
+            //result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, userToken, context.SignToWhere).ConfigureAwait(false);
+            result.AccessToken = _jwtBuilder.BuildJwt(user, userToken, context.SignToWhere);
             result.RefreshToken = userToken.RefreshToken;
             result.NewUserCreated = newUserCreated;
             result.CurrentUser = user;

@@ -126,7 +126,8 @@ namespace HB.Component.Authorization
 
             RefreshResult result = new RefreshResult() { Status = RefreshResultStatus.Succeeded };
 
-            result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, signInToken, claimsPrincipal.GetAudience());
+            //result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, signInToken, claimsPrincipal.GetAudience());
+            result.AccessToken = _jwtBuilder.BuildJwt(user, signInToken, claimsPrincipal.GetAudience());
 
             return result;
 

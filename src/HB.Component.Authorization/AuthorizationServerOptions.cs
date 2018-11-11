@@ -17,13 +17,11 @@ namespace HB.Component.Authorization
 
         public bool NeedAudienceToBeChecked { get; set; } = true;
 
-        public string CertificateFileName { get; set; }
-        public string CertificatePassword { get; set; }
-
+        public string CertificateSubject { get; set; }
 
         public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; }
 
-        public JsonWebKeySet JsonWebKeys { get; set; }
+        //public JsonWebKeySet JsonWebKeys { get; set; }
 
         /// <summary>
         /// 连续两次请求Refresh最小时间间隔
