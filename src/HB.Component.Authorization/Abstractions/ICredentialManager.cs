@@ -7,7 +7,7 @@ namespace HB.Component.Authorization.Abstractions
 {
     public interface ICredentialManager
     {
-        SigningCredentials GetSigningCredentialsFromCertificate();
+        SigningCredentials GetSigningCredentials();
 
         IEnumerable<SecurityKey> GetIssuerSigningKeys();
 
