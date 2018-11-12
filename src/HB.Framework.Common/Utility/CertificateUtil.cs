@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,6 +9,7 @@ namespace System.Security.Cryptography.X509Certificates
     {
         public static X509Certificate2 GetBySubject(string subjectName, StoreLocation storeLocation)
         {
+            LogHelper.GlobalLogger.LogInformation("寻找证书......");
             using (X509Store store = new X509Store(storeLocation))
             {
                 store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
@@ -16,6 +18,8 @@ namespace System.Security.Cryptography.X509Certificates
 
                 if (collection.Count != 1)
                 {
+                    LogHelper.GlobalLogger.LogCritical("找不到证书 Subject：{0}", subjectName);
+
                     return null;
                 }
 
@@ -33,6 +37,8 @@ namespace System.Security.Cryptography.X509Certificates
 
                 if (collection.Count != 1)
                 {
+                    LogHelper.GlobalLogger.LogCritical("找不到证书 Subject：{0}", subjectName);
+
                     return null;
                 }
 
@@ -50,6 +56,8 @@ namespace System.Security.Cryptography.X509Certificates
 
                 if (collection.Count != 1)
                 {
+                    LogHelper.GlobalLogger.LogCritical("找不到证书 Thumbprint：{0}", thumbprint);
+
                     return null;
                 }
 
