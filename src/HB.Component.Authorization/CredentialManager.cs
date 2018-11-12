@@ -9,6 +9,7 @@ using HB.Framework.Common;
 using HB.Component.Authorization.Abstractions;
 using System.Security.Cryptography;
 using System.Security;
+using Microsoft.Extensions.Logging;
 
 namespace HB.Component.Authorization
 {
@@ -17,12 +18,20 @@ namespace HB.Component.Authorization
         private AuthorizationServerOptions _options;
         private SigningCredentials _signingCredentials;
         private JsonWebKeySet _jsonWebKeySet;
+        private ILogger _logger;
 
-        public CredentialManager(IOptions<AuthorizationServerOptions> options)
+        public CredentialManager(IOptions<AuthorizationServerOptions> options, ILogger<CredentialManager> logger)
         {
             _options = options.Value;
+            _logger = logger;
 
             X509Certificate2 cert = CertificateUtil.GetBySubject(_options.CertificateSubject, StoreLocation.CurrentUser, StoreName.My);
+
+            if (cert == null)
+            {
+                logger.LogCritical("找不到证书 Subject:" + _options.CertificateSubject);
+            }
+
             X509SecurityKey securityKey = new X509SecurityKey(cert);
 
             _signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256Signature);

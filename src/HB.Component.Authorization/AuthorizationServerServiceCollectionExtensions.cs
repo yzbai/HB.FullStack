@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IJwtBuilder, JwtBuilder>();
             services.AddSingleton<IRefreshManager, RefreshManager>();
             services.AddSingleton<ISignInManager, SignInManager>();
-            services.AddSingleton<ISignInTokenBiz, SignInTokenBiz>();
+            services.AddSingleton<ISignInTokenManager, SignInTokenManager>();
 
             return services;
         }
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IJwtBuilder, JwtBuilder>();
             services.AddSingleton<IRefreshManager, RefreshManager>();
             services.AddSingleton<ISignInManager, SignInManager>();
-            services.AddSingleton<ISignInTokenBiz, SignInTokenBiz>();
+            services.AddSingleton<ISignInTokenManager, SignInTokenManager>();
 
             return services;
         }
