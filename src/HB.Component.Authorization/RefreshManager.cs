@@ -23,7 +23,7 @@ namespace HB.Component.Authorization
     public class RefreshManager : BizWithDbTransaction, IRefreshManager
     {
         private const string Frequency_Check_Key_Prefix = "Refresh_Freq_Check";
-        private ISignInTokenBiz _signInTokenBiz;
+        private ISignInTokenManager _signInTokenBiz;
         private ICredentialManager _credentialManager;
         private AuthorizationServerOptions _options;
         private IUserBiz _userBiz;
@@ -33,7 +33,7 @@ namespace HB.Component.Authorization
         private IDistributedCache _cache;
 
         public RefreshManager(IOptions<AuthorizationServerOptions> options, IDatabase database, IDistributedCache cache, ILogger<RefreshManager> logger,
-            ICredentialManager credentialManager, ISignInTokenBiz signInTokenBiz, IUserBiz userBiz, IJwtBuilder jwtBuilder) : base(database)
+            ICredentialManager credentialManager, ISignInTokenManager signInTokenBiz, IUserBiz userBiz, IJwtBuilder jwtBuilder) : base(database)
         {
             _options = options.Value;
             _credentialManager = credentialManager;
