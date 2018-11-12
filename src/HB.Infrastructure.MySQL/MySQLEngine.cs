@@ -37,16 +37,16 @@ namespace HB.Infrastructure.MySQL
             {
                 if (ds.IsMaster)
                 {
-                    _connectionStringDict[ds.Name + "_1"] = ds.ConnectionString;
+                    _connectionStringDict[ds.DatabaseName + "_1"] = ds.ConnectionString;
 
-                    if (!_connectionStringDict.ContainsKey(ds.Name + "_0"))
+                    if (!_connectionStringDict.ContainsKey(ds.DatabaseName + "_0"))
                     {
-                        _connectionStringDict[ds.Name + "_0"] = ds.ConnectionString;
+                        _connectionStringDict[ds.DatabaseName + "_0"] = ds.ConnectionString;
                     }
                 }
                 else
                 {
-                    _connectionStringDict[ds.Name + "_0"] = ds.ConnectionString;
+                    _connectionStringDict[ds.DatabaseName + "_0"] = ds.ConnectionString;
                 }
             }
         }

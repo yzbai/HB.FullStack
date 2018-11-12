@@ -8,7 +8,7 @@ namespace HB.Infrastructure.MySQL
     public class MySQLDatabaseSetting
     {
         public bool IsMaster { get; set; }
-        public string Name { get; set; }
+        public string DatabaseName { get; set; }
         public string ConnectionString { get; set; }
     }
 
@@ -25,7 +25,7 @@ namespace HB.Infrastructure.MySQL
 
         public IEnumerable<MySQLDatabaseSetting> GetDatabaseSetting(string databaseName)
         {
-            return DatabaseSettings.Where(ds => ds.Name.Equals(databaseName, GlobalSettings.ComparisonIgnoreCase));
+            return DatabaseSettings.Where(ds => ds.DatabaseName.Equals(databaseName, GlobalSettings.ComparisonIgnoreCase));
         }
     }
 }
