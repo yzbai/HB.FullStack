@@ -25,7 +25,7 @@ namespace HB.Component.Authorization
             _options = options.Value;
             _logger = logger;
 
-            X509Certificate2 cert = CertificateUtil.GetBySubject(_options.CertificateSubject, StoreLocation.CurrentUser, StoreName.My);
+            X509Certificate2 cert = CertificateUtil.GetBySubject(_options.CertificateSubject);
 
             if (cert == null)
             {
