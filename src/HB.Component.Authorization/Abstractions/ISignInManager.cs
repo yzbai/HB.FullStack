@@ -10,6 +10,6 @@ namespace HB.Component.Authorization.Abstractions
     {
         Task<SignInResult> SignInAsync(SignInContext context);
 
-        Task SignOutAsync(SignOutContext context);
+        Task SignOutAsync(string userTokenIdentifier);
     }
 }
