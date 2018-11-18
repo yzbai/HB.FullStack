@@ -30,11 +30,12 @@ namespace HB.Component.Authorization
             _jwtBuilder = jwtBuilder;
         }
 
-        public async Task SignOutAsync(SignOutContext context)
+        public async Task SignOutAsync(string userTokenIdentifier)
         {
-            string userTokenIdentifier = context.HttpContext.User.GetUserTokenIdentifier();
-
-            await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(userTokenIdentifier).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(userTokenIdentifier))
+            {
+                await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(userTokenIdentifier).ConfigureAwait(false);
+            }
         }
 
         public async Task<SignInResult> SignInAsync(SignInContext context)
