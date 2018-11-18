@@ -11,7 +11,7 @@ namespace HB.Component.Authorization.Abstractions
 
     public class SignInContext : CommonEntity
     {
-        public HttpContext HttpContext { get; set; }
+        //public HttpContext HttpContext { get; set; }
 
         public SignInType SignInType { get; set; }
 
