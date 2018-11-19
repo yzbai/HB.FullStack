@@ -60,7 +60,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                 if (result.Code == "OK")
                 {
                     _cache.SetString(
-                        getCachedKey(mobile), 
+                        GetCachedKey(mobile), 
                         cachedValue, 
                         new DistributedCacheEntryOptions() { 
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.TemplateIdentityValidation.ExpireMinutes)
@@ -78,12 +78,12 @@ namespace HB.Infrastructure.Aliyun.Sms
                 return false;
             }
 
-            string storedCode = _cache.GetString(getCachedKey(mobile));
+            string storedCode = _cache.GetString(GetCachedKey(mobile));
 
             return string.Equals(code, storedCode, GlobalSettings.Comparison);
         }
 
-        public string getCachedKey(string mobile)
+        private static string GetCachedKey(string mobile)
         {
             return mobile + "_vlc";
         }

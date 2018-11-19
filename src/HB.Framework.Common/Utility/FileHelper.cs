@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace HB.Framework.Common.Utility
 {
-    public class FileHelper
+    public static class FileHelper
     {
         public static byte[] ComputeHash(string filePath)
         {
