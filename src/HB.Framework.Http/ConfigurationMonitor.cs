@@ -16,7 +16,7 @@ namespace HB.Framework.Http
         private readonly IHostingEnvironment _env;
 
         private IApplicationLifetime _applicationLifeTime;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
  
         public ConfigurationMonitor(IConfiguration config, IHostingEnvironment env, IApplicationLifetime applicationLifetime, ILogger<ConfigurationMonitor> logger)

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    public class CertificateUtil
+    public static class CertificateUtil
     {
         /// <summary>
         /// 在CurrentUser中和LocalMachine中寻找
