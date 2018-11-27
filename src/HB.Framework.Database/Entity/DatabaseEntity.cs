@@ -18,13 +18,13 @@ namespace HB.Framework.Database.Entity
         public long Version { get; set; } = 0;
 
         [DatabaseEntityProperty("上一次更改者", Length = 10)]
-        public String LastUser { get; set; } = string.Empty;
+        public string LastUser { get; set; } = string.Empty;
 
         [DatabaseEntityProperty("上一次更改时间")]
         public DateTimeOffset? LastTime { get; set; }
 
         [DatabaseEntityProperty("逻辑删除标志")]
-        public Boolean Deleted { get; set; } = false;
+        public bool Deleted { get; set; } = false;
     }
 }
 
