@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
+    <ProjectReference Include="..\HB.Framework.DocumentDB\HB.Framework.DocumentDB.csproj" />
   </ItemGroup>
 
 </Project>
