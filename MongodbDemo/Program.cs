@@ -39,7 +39,7 @@ namespace MongodbDemo
                 cm.MapIdMember(c => c.Guid);
             });
 
-            MongoClient client = new MongoClient("mongodb://localhost:27017");
+            MongoClient client = new MongoClient("mongodb://admin:_admin@192.168.0.112:27017");
 
 
             IMongoDatabase database = client.GetDatabase("AHabit");
@@ -127,7 +127,6 @@ namespace MongodbDemo
 
         public string Subject { get; set; }
 
-        //[BsonDictionaryOptions]
         public Dictionary<string, QNode> QNodes { get; set; }
 
         
@@ -145,7 +144,7 @@ namespace MongodbDemo
     {
         public string Question { get; set; }
 
-        //[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+        //[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
         public Dictionary<int, Option> Options { get; set; }
 
     }
