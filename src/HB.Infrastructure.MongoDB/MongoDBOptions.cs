@@ -6,31 +6,26 @@ using System.Text;
 
 namespace HB.Infrastructure.MongoDB
 {
-    public class MongoDBSchema
+    public class MongoDBConnectionSetting
     {
-        public string EntityTypeFullName { get; set; }
-
-        public string Database { get; set; }
+        public string InstanceName { get; set; }
+        public string ConnectionString { get; set; }
     }
 
     public class MongoDBOptions : IOptions<MongoDBOptions>
     {
-        public string ConnectionString { get; set; }
-
-        public IList<MongoDBSchema> Schemas { get; set; } = new List<MongoDBSchema>();
+        public IList<MongoDBConnectionSetting> ConnectionSettings { get; set; } = new List<MongoDBConnectionSetting>();
 
         public MongoDBOptions Value => this;
 
-        public string GetDatabaseName(Type type)
+        public string GetConnectionString(string instanceName)
         {
-            if (type == null)
+            if (string.IsNullOrEmpty(instanceName))
             {
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException(nameof(instanceName));
             }
 
-            MongoDBSchema schema = Schemas.First(s => type.FullName.Equals(s.EntityTypeFullName, GlobalSettings.Comparison));
-
-            return schema?.Database;
+            return ConnectionSettings.First(s => instanceName.Equals(s.InstanceName, GlobalSettings.Comparison))?.ConnectionString;
         }
     }
 }

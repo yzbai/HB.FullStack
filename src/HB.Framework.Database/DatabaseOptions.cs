@@ -7,7 +7,7 @@ namespace HB.Framework.Database
 {
     public class DatabaseSchema
     {
-        public string Assembly { get; set; }
+        //public string Assembly { get; set; }
         public string EntityTypeFullName { get; set; }
         public string DatabaseName { get; set; }
         public string TableName { get; set; }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.Framework.DocumentStore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System;
@@ -7,36 +8,99 @@ using System.Text;
 
 namespace HB.Infrastructure.MongoDB
 {
-    public class MongoDatabaseManager : IMongoDatabaseManager
+    public class MongoManager : IMongoManager
     {
-        private MongoDBOptions _options;
+        private DocumentStoreOptions _documentOptions;
+        private MongoDBOptions _mongoOptions;
+
         private ILogger _logger;
-        private IMongoClient _client;
 
-        private IDictionary<Type, IMongoDatabase> _dbDict;
+        /// <summary>
+        /// key:InstanceName
+        /// </summary>
+        private IDictionary<string, IMongoClient> _clientDict;
 
-        private IDictionary<Type, object> _collectionDict;
+        /// <summary>
+        /// key:InstanceName_DatabaseName
+        /// </summary>
+        private IDictionary<string, IMongoDatabase> _dbDict;
 
-        public MongoDatabaseManager(IOptions<MongoDBOptions> options, ILogger<MongoDatabaseManager> logger, IMongoClient mongoClient)
+        /// <summary>
+        /// key:InstanceName_DatabaseName_CollectionName
+        /// </summary>
+        private IDictionary<string, object> _collectionDict;
+
+        public MongoManager(IOptions<DocumentStoreOptions> documentOptions, IOptions<MongoDBOptions> mongoOptions, ILogger<MongoManager> logger)
         {
-            _options = options.Value;
             _logger = logger;
-            _client = mongoClient;
 
-            _dbDict = new Dictionary<Type, IMongoDatabase>();
-            _collectionDict = new Dictionary<Type, object>();
+            _documentOptions = documentOptions.Value;
+            _mongoOptions = mongoOptions.Value;
+
+            _clientDict = new Dictionary<string, IMongoClient>();
+            _dbDict = new Dictionary<string, IMongoDatabase>();
+            _collectionDict = new Dictionary<string, object>();
+        }
+
+        public IMongoClient GetClient(string instanceName)
+        {
+            if (_clientDict.ContainsKey(instanceName))
+            {
+                return _clientDict[instanceName];
+            }
+
+            string connectionString = _mongoOptions.GetConnectionString(instanceName);
+
+            IMongoClient mongoClient = new MongoClient(connectionString);
+
+            if (mongoClient != null)
+            {
+                _clientDict[instanceName] = mongoClient;
+            }
+
+            return mongoClient;
+        }
+
+        public IMongoDatabase GetDatabase(string instanceName, string databaseName)
+        {
+            string key = instanceName + "_" + databaseName;
+
+            if (_dbDict.ContainsKey(key))
+            {
+                return _dbDict[key];
+            }
+
+            IMongoClient client = GetClient(instanceName);
+
+            if (client == null)
+            {
+                return null;
+            }
+
+            IMongoDatabase database = client.GetDatabase(databaseName);
+
+            if (database != null)
+            {
+                _dbDict[key] = database;
+            }
+
+            return database;
         }
 
         public IMongoCollection<T> GetCollection<T>() where T : class, new()
         {
             Type type = typeof(T);
 
-            if (_collectionDict.ContainsKey(type))
+            DocumentStoreSchema schema = _documentOptions.GetDocumentStoreSchema(type);
+
+            string key = schema.InstanceName + "_" + schema.Database + "_" + schema.CollectionName;
+
+            if (_collectionDict.ContainsKey(key))
             {
-                return _collectionDict[type] as IMongoCollection<T>;
+                return _collectionDict[key] as IMongoCollection<T>;
             }
 
-            IMongoDatabase db = GetDatabase<T>();
+            IMongoDatabase db = GetDatabase(schema.InstanceName, schema.Database);
 
             if (db == null)
             {
@@ -47,36 +111,12 @@ namespace HB.Infrastructure.MongoDB
 
             if (collection != null)
             {
-                _collectionDict[type] = collection;
+                _collectionDict[key] = collection;
             }
 
             return collection;
         }
 
-        public IMongoDatabase GetDatabase<T>() where T : class, new()
-        {
-            Type key = typeof(T);
-
-            if (_dbDict.ContainsKey(key))
-            {
-                return _dbDict[key];
-            }
-
-            string dbName = _options.GetDatabaseName(key);
-
-            if (string.IsNullOrEmpty(dbName))
-            {
-                return null;
-            }
-
-            IMongoDatabase database = _client.GetDatabase(dbName);
-
-            if (database != null)
-            {
-                _dbDict[key] = database;
-            }
-
-            return database;
-        }
+        
     }
 }

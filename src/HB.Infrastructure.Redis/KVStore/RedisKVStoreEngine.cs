@@ -150,7 +150,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(GlobalSettings.Culture), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
             return MapResult(result);
 
@@ -172,7 +172,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(GlobalSettings.Culture), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
             return MapResult(result);
         }
@@ -191,7 +191,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
-            RedisResult result = db.ScriptEvaluate(luaScript.ToString(GlobalSettings.Culture), keys, argvs);
+            RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
             return MapResult(result);
         }

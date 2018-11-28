@@ -14,12 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<MongoDBOptions>(configuration);
 
-            MongoDBOptions options = new MongoDBOptions();
-            configuration.Bind(options);
-
-            serviceCollection.AddSingleton<IMongoClient>(new MongoClient(options.ConnectionString));
-
-            serviceCollection.AddSingleton<IMongoDatabaseManager, MongoDatabaseManager>();
+            serviceCollection.AddSingleton<IMongoManager, MongoManager>();
 
             return serviceCollection;
         }

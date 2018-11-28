@@ -50,11 +50,11 @@ namespace HB.Infrastructure.Redis
 
             if (!_connectionDict.ContainsKey(key))
             {
-                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.Name.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
+                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
 
                 if (rss.Count() == 0 && isMaster == false)
                 {
-                    rss = Options.ConnectionSettings.Where(rs => rs.Name.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster);
+                    rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster);
                 }
 
                 if (rss.Count() == 0)
