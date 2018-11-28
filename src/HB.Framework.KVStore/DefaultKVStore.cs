@@ -7,6 +7,7 @@ using HB.Framework.KVStore.Engine;
 using Microsoft.Extensions.Options;
 using HB.Framework.Common;
 using HB.Framework.Common.Entity;
+using System.Text;
 
 namespace HB.Framework.KVStore
 {
@@ -52,12 +53,20 @@ namespace HB.Framework.KVStore
 
         private static string EntityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
         {
-            return DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfo.GetValue(item));
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < entityDef.KeyPropertyInfos.Count; ++i)
+            {
+                builder.Append(DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfos[i].GetValue(item)));
+                builder.Append("_");
+            }
+
+            return builder.ToString();
         }
 
         private static IEnumerable<string> EntityKey<T>(IEnumerable<T> items, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
         {
-            return items.Select(t => DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfo.GetValue(t)));
+            return items.Select(t=>EntityKey(t, entityDef));
         }
 
         private static IEnumerable<string> EntityKey(IEnumerable<object> keyValues)
