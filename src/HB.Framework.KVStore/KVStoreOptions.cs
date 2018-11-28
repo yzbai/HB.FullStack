@@ -7,11 +7,10 @@ namespace HB.Framework.KVStore
 {
     public class KVStoreSchema
     {
-        public string Assembly { get; set; }
         public string EntityTypeFullName { get; set; }
-        public string KVStoreName { get; set; }
-        public int KVStoreIndex { get; set; }
-        public string Description { get; set; }
+        public string InstanceName { get; set; }
+        public int KVStoreIndex { get; set; } = 0;
+        public string Description { get; set; } = "";
     }
 
     public class KVStoreOptions : IOptions<KVStoreOptions>

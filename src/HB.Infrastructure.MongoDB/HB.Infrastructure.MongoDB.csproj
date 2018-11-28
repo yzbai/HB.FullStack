@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.DocumentDB\HB.Framework.DocumentDB.csproj" />
+    <ProjectReference Include="..\HB.Framework.DocumentStore\HB.Framework.DocumentStore.csproj" />
   </ItemGroup>
 
 </Project>
