@@ -79,11 +79,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliyunSample", "samples\Ali
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.Resource", "src\HB.Component.Resource\HB.Component.Resource.csproj", "{5291B347-C95F-4D11-8E18-F653785A3422}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongodbDemo", "MongodbDemo\MongodbDemo.csproj", "{B7CCF860-D8FC-415F-8ABE-F837D539A079}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongodbDemo", "MongodbDemo\MongodbDemo.csproj", "{B7CCF860-D8FC-415F-8ABE-F837D539A079}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.MongoDB", "src\HB.Infrastructure.MongoDB\HB.Infrastructure.MongoDB.csproj", "{7A3D9E8A-414D-456B-9533-0DDC52AE2413}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MongoDB", "src\HB.Infrastructure.MongoDB\HB.Infrastructure.MongoDB.csproj", "{7A3D9E8A-414D-456B-9533-0DDC52AE2413}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.DocumentDB", "Src\HB.Framework.DocumentDB\HB.Framework.DocumentDB.csproj", "{97594EF6-972C-46B8-9ED9-B14A6611B5DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.DocumentStore", "src\HB.Framework.DocumentStore\HB.Framework.DocumentStore.csproj", "{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -196,10 +196,10 @@ Global
 		{7A3D9E8A-414D-456B-9533-0DDC52AE2413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A3D9E8A-414D-456B-9533-0DDC52AE2413}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A3D9E8A-414D-456B-9533-0DDC52AE2413}.Release|Any CPU.Build.0 = Release|Any CPU
-		{97594EF6-972C-46B8-9ED9-B14A6611B5DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97594EF6-972C-46B8-9ED9-B14A6611B5DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97594EF6-972C-46B8-9ED9-B14A6611B5DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97594EF6-972C-46B8-9ED9-B14A6611B5DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -235,7 +235,7 @@ Global
 		{5291B347-C95F-4D11-8E18-F653785A3422} = {7AB355DB-795C-4A78-9E00-C14D897C31B0}
 		{B7CCF860-D8FC-415F-8ABE-F837D539A079} = {DFFFDEC7-B203-40D6-9DA0-B79D9378FDFF}
 		{7A3D9E8A-414D-456B-9533-0DDC52AE2413} = {4281500B-4033-4BEF-8A05-C924EC564467}
-		{97594EF6-972C-46B8-9ED9-B14A6611B5DE} = {833ACC08-9EF8-4690-B295-18D56D45C4E0}
+		{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B} = {833ACC08-9EF8-4690-B295-18D56D45C4E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {81307950-DF5A-4A8D-B3B9-6724112D8232}

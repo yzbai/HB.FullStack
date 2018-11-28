@@ -5,7 +5,7 @@ namespace HB.Infrastructure.Redis
 {
     public class RedisConnectionSetting
     {
-        public string Name { get; set; }
+        public string InstanceName { get; set; }
         public string ConnectionString { get; set; }
         public bool IsMaster { get; set; }
     }

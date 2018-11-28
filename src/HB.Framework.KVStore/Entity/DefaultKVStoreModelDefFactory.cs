@@ -55,18 +55,17 @@ namespace HB.Framework.KVStore.Entity
 
                 if (keyAttr != null)
                 {
-                    entityDef.KeyPropertyInfo = info;
-                    break;
+                    entityDef.KeyPropertyInfos.Add(keyAttr.Order, info);
                 }
             }
 
-            if (entityDef.KeyPropertyInfo == null)
+            if (entityDef.KeyPropertyInfos.Count == 0)
             {
                 throw new Exception("lack of KVStoreKeyAttribute.");
             }
 
             KVStoreSchema schema = _options.GetKVStoreSchema(entityDef.EntityFullName);
-            entityDef.KVStoreName = schema.KVStoreName;
+            entityDef.KVStoreName = schema.InstanceName;
             entityDef.KVStoreIndex = schema.KVStoreIndex;
 
             return entityDef;

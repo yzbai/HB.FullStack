@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace HB.Framework.KVStore.Entity
@@ -13,33 +14,33 @@ namespace HB.Framework.KVStore.Entity
 
         public string EntityFullName { get; set; }
 
-        public PropertyInfo KeyPropertyInfo { get; set; }
+        public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; set; } = new Dictionary<int, PropertyInfo>();
 
-        public string KeyPropertyName
-        {
-            get
-            {
-                if (KeyPropertyInfo == null)
-                {
-                    return null;
-                }
+        //public string KeyPropertyName
+        //{
+        //    get
+        //    {
+        //        if (KeyPropertyInfo == null)
+        //        {
+        //            return null;
+        //        }
 
-                return KeyPropertyInfo.Name;
-            }
-        }
+        //        return KeyPropertyInfo.Name;
+        //    }
+        //}
 
-        public Type KeyPropertyType
-        {
-            get
-            {
-                if (KeyPropertyInfo == null)
-                {
-                    return null;
-                }
+        //public Type KeyPropertyType
+        //{
+        //    get
+        //    {
+        //        if (KeyPropertyInfo == null)
+        //        {
+        //            return null;
+        //        }
 
-                return KeyPropertyInfo.PropertyType;
-            }
-        }
+        //        return KeyPropertyInfo.PropertyType;
+        //    }
+        //}
 
         public KVStoreEntityDef() { }        
     }
