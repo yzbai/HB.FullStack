@@ -5,7 +5,6 @@ using Aliyun.Acs.Core;
 using HB.Framework.Common;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
-using HB.Compnent.Resource.Sms;
 using Aliyun.Acs.Dysmsapi.Model.V20170525;
 using HB.Component.Resource.Sms.Entity;
 using System.Globalization;
@@ -14,28 +13,30 @@ using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Sms.Transform;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
+using HB.Component.Resource.Sms;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsBiz : ISmsService
+    public class AliyunSmsService : ISmsService
     {
         private AliyunSmsOptions _options;
         private IAcsClient _client;
+        private ISmsCodeBiz _smsCodeBiz;
         private readonly ILogger _logger;
         private IDistributedCache _cache;
 
-        public AliyunSmsBiz(IAcsClientManager acsClientManager, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsBiz> logger, IDistributedCache cache) 
+        public AliyunSmsService(IAcsClientManager acsClientManager, ISmsCodeBiz smsCodeBiz, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger) 
         {
             _options = options.Value;
             _client = acsClientManager.GetAcsClient(_options.ProductName);
             _logger = logger;
-            _cache = cache;
+            _smsCodeBiz = smsCodeBiz;
         }
 
-        public Task<SendResult> SendValidationCode(string mobile, out string code)
+        public Task<SendResult> SendValidationCode(string mobile, out string smsCode)
         {
-            code = SecurityHelper.CreateRandomNumbericString(_options.TemplateIdentityValidation.CodeLength);
-
+            smsCode = _smsCodeBiz.GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
+            
             SendSmsRequest request = new SendSmsRequest
             {
                 AcceptFormat = FormatType.JSON,
@@ -44,12 +45,12 @@ namespace HB.Infrastructure.Aliyun.Sms
                 PhoneNumbers = mobile,
                 TemplateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}", 
                     _options.TemplateIdentityValidation.ParamCode, 
-                    code, 
+                    smsCode, 
                     _options.TemplateIdentityValidation.ParamProduct, 
                     _options.TemplateIdentityValidation.ParamProductValue)
             };
 
-            string cachedValue = code;
+            string cachedSmsCode = smsCode;
 
             return PolicyManager.Default(_logger).ExecuteAsync(async ()=> {
                 Task<SendSmsResponse> task = new Task<SendSmsResponse>(() => _client.GetAcsResponse(request));
@@ -59,12 +60,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
                 if (result.Code == "OK")
                 {
-                    _cache.SetString(
-                        GetCachedKey(mobile), 
-                        cachedValue, 
-                        new DistributedCacheEntryOptions() { 
-                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.TemplateIdentityValidation.ExpireMinutes)
-                        });
+                    _smsCodeBiz.CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
 
                 return SendResultTransformer.Transform(result);
@@ -78,14 +74,11 @@ namespace HB.Infrastructure.Aliyun.Sms
                 return false;
             }
 
-            string storedCode = _cache.GetString(GetCachedKey(mobile));
+            string cachedSmsCode = _smsCodeBiz.GetSmsCodeFromCache(mobile);
 
-            return string.Equals(code, storedCode, GlobalSettings.Comparison);
+            return string.Equals(code, cachedSmsCode, GlobalSettings.Comparison);
         }
 
-        private static string GetCachedKey(string mobile)
-        {
-            return mobile + "_vlc";
-        }
+        
     }
 }

@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<MongoDBOptions>(configuration);
 
-            serviceCollection.AddSingleton<IMongoManager, MongoManager>();
+            serviceCollection.AddSingleton<IMongoDB, MongoDB>();
 
             return serviceCollection;
         }

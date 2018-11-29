@@ -16,16 +16,17 @@ namespace HB.Component.Authorization
     {
         private AuthorizationServerOptions _options;
         private SignInOptions _signInOptions;
-        private IUserBiz _userBiz;
-        private ISignInTokenManager _signInTokenBiz;
+        //private IUserBiz _userBiz;
+        private IIdentityManager _identityManager;
+        private ISignInTokenBiz _signInTokenBiz;
         private IJwtBuilder _jwtBuilder;
 
-        public SignInManager(IOptions<AuthorizationServerOptions> options, ILogger<SignInManager> logger, ISignInTokenManager signInTokenBiz, IUserBiz userBiz, IJwtBuilder jwtBuilder) 
+        public SignInManager(IOptions<AuthorizationServerOptions> options, ILogger<SignInManager> logger, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, IJwtBuilder jwtBuilder) 
         {
             _options = options.Value;
             _signInOptions = _options.SignInOptions;
 
-            _userBiz = userBiz;
+            _identityManager = identityManager;
             _signInTokenBiz = signInTokenBiz;
             _jwtBuilder = jwtBuilder;
         }
@@ -58,7 +59,7 @@ namespace HB.Component.Authorization
                     return SignInResult.ArgumentError();
                 }
 
-                user = await _userBiz.GetUserByMobileAsync(context.Mobile).ConfigureAwait(false);
+                user = await _identityManager.GetUserByMobileAsync(context.Mobile).ConfigureAwait(false);
             }
             else if (context.SignInType == SignInType.ByMobileAndPassword)
             {
@@ -67,7 +68,7 @@ namespace HB.Component.Authorization
                     return SignInResult.ArgumentError();
                 }
 
-                user = await _userBiz.GetUserByMobileAsync(context.Mobile).ConfigureAwait(false);
+                user = await _identityManager.GetUserByMobileAsync(context.Mobile).ConfigureAwait(false);
             }
             else if (context.SignInType == SignInType.ByUserNameAndPassword)
             {
@@ -76,7 +77,7 @@ namespace HB.Component.Authorization
                     return SignInResult.ArgumentError();
                 }
 
-                user = await _userBiz.GetUserByUserNameAsync(context.UserName).ConfigureAwait(false);
+                user = await _identityManager.GetUserByUserNameAsync(context.UserName).ConfigureAwait(false);
             }
 
             #endregion
@@ -87,7 +88,7 @@ namespace HB.Component.Authorization
 
             if (user == null && context.SignInType == SignInType.BySms)
             {
-                IdentityResult identityResult = await _userBiz.CreateUserByMobileAsync(context.UserType, context.Mobile, context.UserName, context.Password, true).ConfigureAwait(false);
+                IdentityResult identityResult = await _identityManager.CreateUserByMobileAsync(context.UserType, context.Mobile, context.UserName, context.Password, true).ConfigureAwait(false);
 
                 if (identityResult.Status == IdentityResultStatus.Failed)
                 {
@@ -220,12 +221,12 @@ namespace HB.Component.Authorization
 
             if (_signInOptions.RequiredLockoutCheck)
             {
-                await _userBiz.SetLockoutAsync(user.Id, false).ConfigureAwait(false);
+                await _identityManager.SetLockoutAsync(user.Id, false).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                await _userBiz.SetAccessFailedCountAsync(user.Id, 0).ConfigureAwait(false);
+                await _identityManager.SetAccessFailedCountAsync(user.Id, 0).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
@@ -246,14 +247,14 @@ namespace HB.Component.Authorization
         {
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                await _userBiz.SetAccessFailedCountAsync(user.Id, user.AccessFailedCount + 1).ConfigureAwait(false);
+                await _identityManager.SetAccessFailedCountAsync(user.Id, user.AccessFailedCount + 1).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequiredLockoutCheck)
             {
                 if (user.AccessFailedCount + 1 > _signInOptions.LockoutAfterAccessFailedCount)
                 {
-                    await _userBiz.SetLockoutAsync(user.Id, true, _signInOptions.LockoutTimeSpan).ConfigureAwait(false);
+                    await _identityManager.SetLockoutAsync(user.Id, true, _signInOptions.LockoutTimeSpan).ConfigureAwait(false);
                 }
             }
 
