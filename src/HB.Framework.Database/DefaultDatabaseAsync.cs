@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.SQL;
+using HB.Framework.Database.Transaction;
 using Microsoft.Extensions.Logging;
 
 namespace HB.Framework.Database
@@ -15,7 +16,7 @@ namespace HB.Framework.Database
     {
         #region 单表查询, Select, From, Where
 
-        public Task<T> ScalarAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(selectCondition, fromCondition, whereCondition, transContext, useMaster)
@@ -37,7 +38,7 @@ namespace HB.Framework.Database
                 }, TaskScheduler.Default);
         }
 
-        public async Task<IList<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(SelectExpression<TSelect> selectCondition, FromExpression<TFrom> fromCondition, WhereExpression<TWhere> whereCondition, DbTransactionContext transContext = null, bool useMaster = false)
+        public async Task<IList<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(SelectExpression<TSelect> selectCondition, FromExpression<TFrom> fromCondition, WhereExpression<TWhere> whereCondition, DatabaseTransactionContext transContext = null, bool useMaster = false)
             where TSelect : DatabaseEntity, new()
             where TFrom : DatabaseEntity, new()
             where TWhere : DatabaseEntity, new()
@@ -85,7 +86,7 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public async Task<IList<T>> RetrieveAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<IList<T>> RetrieveAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
@@ -131,7 +132,7 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public Task<IList<T>> PageAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
@@ -155,7 +156,7 @@ namespace HB.Framework.Database
             return RetrieveAsync<T>(selectCondition, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public async Task<long> CountAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<long> CountAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
 			#region Argument Adjusting
@@ -195,25 +196,25 @@ namespace HB.Framework.Database
 
         #region 单表查询, From, Where
 
-        public Task<T> ScalarAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return ScalarAsync<T>(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> RetrieveAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> PageAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return PageAsync<T>(null, fromCondition, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public Task<long> CountAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<long> CountAsync<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return CountAsync<T>(null, fromCondition, whereCondition, transContext, useMaster);
@@ -223,43 +224,43 @@ namespace HB.Framework.Database
 
         #region 单表查询, Where
 
-        public Task<IList<T>> RetrieveAllAsync<T>(DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> RetrieveAllAsync<T>(DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(null, null, null, transContext, useMaster);
         }
 
-        public Task<T> ScalarAsync<T>(WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return ScalarAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(WhereExpression<T> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> RetrieveAsync<T>(WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> PageAsync<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return PageAsync<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public Task<IList<T>> PageAsync<T>(long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return PageAsync<T>(null, null, null, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public Task<long> CountAsync<T>(WhereExpression<T> condition, DbTransactionContext transContext, bool useMaster)
+        public Task<long> CountAsync<T>(WhereExpression<T> condition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return CountAsync<T>(null, null, condition, transContext, useMaster);
         }
 
-        public Task<long> CountAsync<T>(DbTransactionContext transContext, bool useMaster)
+        public Task<long> CountAsync<T>(DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return CountAsync<T>(null, null, null, transContext, useMaster);
@@ -269,14 +270,14 @@ namespace HB.Framework.Database
 
         #region 单表查询, Expression Where
 
-        public Task<T> ScalarAsync<T>(long id, DbTransactionContext transContext, bool useMaster)
+        public Task<T> ScalarAsync<T>(long id, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             return ScalarAsync<T>(t => t.Id == id && t.Deleted == false, transContext, useMaster);
         }
 
-        //public Task<T> RetrieveScalaAsyncr<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster = false) where T : DatabaseEntity, new();
-        public Task<T> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster = false) where T : DatabaseEntity, new()
+        //public Task<T> RetrieveScalaAsyncr<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext, bool useMaster = false) where T : DatabaseEntity, new();
+        public Task<T> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext, bool useMaster = false) where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
             whereCondition.Where(whereExpr);
@@ -284,7 +285,7 @@ namespace HB.Framework.Database
             return ScalarAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
@@ -293,7 +294,7 @@ namespace HB.Framework.Database
             return RetrieveAsync<T>(null, null, whereCondition, transContext, useMaster);
         }
 
-        public Task<IList<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(whereExpr);
@@ -301,7 +302,7 @@ namespace HB.Framework.Database
             return PageAsync<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
-        public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, DbTransactionContext transContext, bool useMaster)
+        public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
@@ -314,7 +315,7 @@ namespace HB.Framework.Database
 
         #region 双表查询
 
-        public async Task<IList<Tuple<TSource, TTarget>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<IList<Tuple<TSource, TTarget>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
@@ -352,7 +353,7 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public Task<IList<Tuple<TSource, TTarget>>> PageAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<Tuple<TSource, TTarget>>> PageAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
@@ -366,7 +367,7 @@ namespace HB.Framework.Database
             return RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<Tuple<TSource, TTarget>> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<Tuple<TSource, TTarget>> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
@@ -395,7 +396,7 @@ namespace HB.Framework.Database
 
         #region 三表查询
 
-        public async Task<IList<Tuple<TSource, TTarget1, TTarget2>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public async Task<IList<Tuple<TSource, TTarget1, TTarget2>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -439,7 +440,7 @@ namespace HB.Framework.Database
             return result;
         }
 
-        public Task<IList<Tuple<TSource, TTarget1, TTarget2>>> PageAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DbTransactionContext transContext, bool useMaster)
+        public Task<IList<Tuple<TSource, TTarget1, TTarget2>>> PageAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -454,7 +455,7 @@ namespace HB.Framework.Database
             return RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext, useMaster);
         }
 
-        public Task<Tuple<TSource, TTarget1, TTarget2>> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DbTransactionContext transContext, bool useMaster)
+        public Task<Tuple<TSource, TTarget1, TTarget2>> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -485,7 +486,7 @@ namespace HB.Framework.Database
         /// <summary>
         /// 增加,并且item被重新赋值
         /// </summary>
-        public async Task<DatabaseResult> AddAsync<T>(T item, DbTransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<DatabaseResult> AddAsync<T>(T item, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             if (!item.IsValid())
             {
@@ -526,7 +527,7 @@ namespace HB.Framework.Database
         /// <summary>
         /// 删除, Version控制
         /// </summary>
-        public async Task<DatabaseResult> DeleteAsync<T>(T item, DbTransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<DatabaseResult> DeleteAsync<T>(T item, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             if (!item.IsValid())
             {
@@ -570,7 +571,7 @@ namespace HB.Framework.Database
         ///  修改，建议每次修改前先select，并放置在一个事务中。
         ///  版本控制，如果item中Version未赋值，会无法更改
         /// </summary>
-        public async Task<DatabaseResult> UpdateAsync<T>(T item, DbTransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<DatabaseResult> UpdateAsync<T>(T item, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             if (!item.IsValid())
             {
@@ -628,7 +629,7 @@ namespace HB.Framework.Database
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DbTransactionContext transContext) where T : DatabaseEntity, new()
+        public Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             throw new NotImplementedException();
             //if (!checkEntities<T>(items))
@@ -679,7 +680,7 @@ namespace HB.Framework.Database
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DbTransactionContext transContext) where T : DatabaseEntity, new()
+        public Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             throw new NotImplementedException();
             //updatedIds = new List<long>();
@@ -722,7 +723,7 @@ namespace HB.Framework.Database
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DbTransactionContext transContext) where T : DatabaseEntity, new()
+        public Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             throw new NotImplementedException();
             //deletedIds = new List<long>();
