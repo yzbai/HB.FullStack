@@ -10,7 +10,11 @@ namespace HB.Framework.KVStore
     {
         Task<T> GetByIdAsync<T>(object keyValue) where T : KVStoreEntity, new();
 
+        Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new();
+
         Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
+
+        Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
 
         Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new();
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HB.Compnent.Resource.Sms
+namespace HB.Component.Resource.Sms
 {
     public interface ISmsService
     {

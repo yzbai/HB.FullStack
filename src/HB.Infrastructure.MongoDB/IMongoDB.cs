@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace HB.Infrastructure.MongoDB
 {
-    public interface IMongoManager
+    public interface IMongoDB
     {
         IMongoCollection<T> GetCollection<T>() where T:class, new();
     }
