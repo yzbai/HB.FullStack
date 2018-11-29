@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using HB.Framework.Database.Engine;
+using HB.Framework.Database.Transaction;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -16,11 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure<DatabaseOptions>(configuration);
 
-            services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
-            services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
-            services.AddSingleton<ISQLBuilder, SQLBuilder>();
-
-            services.AddSingleton<IDatabase, DefaultDatabase>();
+            AddDatabase(services);
 
             return services;
         }
@@ -31,13 +28,20 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure(databaseSchemaOptionsSetup);
 
+            AddDatabase(services);
+
+            return services;
+        }
+
+        private static void AddDatabase(IServiceCollection services)
+        {
             services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
             services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
             services.AddSingleton<ISQLBuilder, SQLBuilder>();
 
             services.AddSingleton<IDatabase, DefaultDatabase>();
 
-            return services;
+            services.AddSingleton<IDatabaseTransaction, DatabaseTransaction>();
         }
     }
 }

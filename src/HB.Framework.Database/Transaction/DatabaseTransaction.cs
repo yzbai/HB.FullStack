@@ -2,46 +2,44 @@
 using System.Data;
 using HB.Framework.Database.Entity;
 
-namespace HB.Framework.Database
+namespace HB.Framework.Database.Transaction
 {
     /// <summary>
     /// 对逻辑层基础设施搭建
     /// 多线程复用
     /// 不支持跨库事务，如遇到跨库需求，请考虑是否应该把数据库设计到一个库中。
     /// </summary>
-    public class BizWithDbTransaction
+    public class DatabaseTransaction : IDatabaseTransaction
     {
         private IDatabase _database { get; set; }
         
-        public BizWithDbTransaction(IDatabase database)
+        public DatabaseTransaction(IDatabase database)
         {
             _database = database;
         }
 
-        #region  数据库事务
-
         /// <summary>
         /// 开始事务
         /// </summary>
-        protected DbTransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity
+        public DatabaseTransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity
         {
-            return new DbTransactionContext() {
+            return new DatabaseTransactionContext() {
                 Transaction = _database.CreateTransaction<T>(isolationLevel),
-                Status = DbTransactionStatus.InTransaction
+                Status = DatabaseTransactionStatus.InTransaction
             };
         }
 
         /// <summary>
         /// 提交事务
         /// </summary>
-        protected static void Commit(DbTransactionContext context)
+        public void Commit(DatabaseTransactionContext context)
         {
             if (context == null || context.Transaction == null)
             {
                 throw new ArgumentException("can not be null", nameof(context));
             }
 
-            if (context.Status != DbTransactionStatus.InTransaction)
+            if (context.Status != DatabaseTransactionStatus.InTransaction)
             {
                 return;
             }
@@ -57,11 +55,11 @@ namespace HB.Framework.Database
                     conn.Dispose();
                 }
 
-                context.Status = DbTransactionStatus.Commited;
+                context.Status = DatabaseTransactionStatus.Commited;
             }
             catch
             {
-                context.Status = DbTransactionStatus.Failed;
+                context.Status = DatabaseTransactionStatus.Failed;
                 throw;
             }
         }
@@ -69,14 +67,14 @@ namespace HB.Framework.Database
         /// <summary>
         /// 回滚事务
         /// </summary>
-        protected static void Rollback(DbTransactionContext context)
+        public void Rollback(DatabaseTransactionContext context)
         {
             if(context == null || context.Transaction == null)
             {
                 throw new ArgumentException("can not be null", nameof(context));
             }
 
-            if (context.Status != DbTransactionStatus.InTransaction)
+            if (context.Status != DatabaseTransactionStatus.InTransaction)
             {
                 return;
             }
@@ -92,15 +90,13 @@ namespace HB.Framework.Database
                     conn.Dispose();
                 }
 
-                context.Status = DbTransactionStatus.Rollbacked;
+                context.Status = DatabaseTransactionStatus.Rollbacked;
             }
             catch 
             {
-                context.Status = DbTransactionStatus.Failed;
+                context.Status = DatabaseTransactionStatus.Failed;
                 throw;
             }
         }
-
-        #endregion
     }
 }

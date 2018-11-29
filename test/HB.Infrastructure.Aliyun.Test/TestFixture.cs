@@ -1,4 +1,4 @@
-﻿using HB.Compnent.Resource.Sms;
+﻿using HB.Component.Resource.Sms;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
