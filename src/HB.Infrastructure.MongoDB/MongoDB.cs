@@ -8,7 +8,7 @@ using System.Text;
 
 namespace HB.Infrastructure.MongoDB
 {
-    public class MongoManager : IMongoManager
+    public class MongoDB : IMongoDB
     {
         private DocumentStoreOptions _documentOptions;
         private MongoDBOptions _mongoOptions;
@@ -30,7 +30,7 @@ namespace HB.Infrastructure.MongoDB
         /// </summary>
         private IDictionary<string, object> _collectionDict;
 
-        public MongoManager(IOptions<DocumentStoreOptions> documentOptions, IOptions<MongoDBOptions> mongoOptions, ILogger<MongoManager> logger)
+        public MongoDB(IOptions<DocumentStoreOptions> documentOptions, IOptions<MongoDBOptions> mongoOptions, ILogger<MongoDB> logger)
         {
             _logger = logger;
 

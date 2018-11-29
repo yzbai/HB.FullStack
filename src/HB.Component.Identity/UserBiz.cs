@@ -15,7 +15,7 @@ namespace HB.Component.Identity
     /// <summary>
     /// 重要改变（比如Password）后，一定要清空对应UserId的Authtoken
     /// </summary>
-    public class UserBiz : BizWithDbTransaction, IUserBiz
+    internal class UserBiz : BizWithDbTransaction, IUserBiz
     {
         private IDatabase _db;
         private IdentityOptions _identityOptions;

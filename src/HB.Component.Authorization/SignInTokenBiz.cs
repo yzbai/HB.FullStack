@@ -15,17 +15,14 @@ using HB.Component.Authorization.Abstractions;
 
 namespace HB.Component.Authorization
 {
-    public class SignInTokenManager : BizWithDbTransaction, ISignInTokenManager
+    public class SignInTokenBiz : BizWithDbTransaction, ISignInTokenBiz
     {
-        private readonly AuthorizationServerOptions _options;
-
         private IDatabase _db;
         private ILogger _logger;
 
-        public SignInTokenManager(IDatabase database, IKVStore kvstore, IDistributedCache cache, IOptions<AuthorizationServerOptions> options, ILogger<SignInTokenManager> logger) 
+        public SignInTokenBiz(IDatabase database, ILogger<SignInTokenBiz> logger) 
             : base(database)
         {
-            _options = options.Value;
             _db = database;
             _logger = logger;
         }

@@ -131,6 +131,21 @@ namespace HB.Framework.KVStore
             return DeSerialize<T>(value);
         }
 
+        public T GetById<T>(T t) where T : KVStoreEntity, new()
+        {
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            byte[] value = _engine.EntityGet(
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(t, entityDef));
+
+            return DeSerialize<T>(value);
+
+
+        }
+
         public IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
@@ -140,6 +155,19 @@ namespace HB.Framework.KVStore
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues));
+
+            return DeSerialize<T>(values);
+        }
+
+        public IEnumerable<T> GetByIds<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
+        {
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            IEnumerable<byte[]> values = _engine.EntityGet(
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValues, entityDef));
 
             return DeSerialize<T>(values);
         }
@@ -273,8 +301,18 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
-                EntityKey(keyValue))
-                .ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+                EntityKey(keyValue)).ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+        }
+
+        public Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new()
+        {
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            return _engine.EntityGetAsync(
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(t, entityDef)).ContinueWith(tt=>DeSerialize<T>(tt.Result), TaskScheduler.Default);
         }
 
         public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -285,8 +323,19 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
-                EntityKey(keyValues))
-                .ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+                EntityKey(keyValues)).ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+        }
+
+        public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
+        {
+            KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            return _engine.EntityGetAsync(
+                StoreName(entityDef),
+                StoreIndex(entityDef),
+                EntityName(entityDef),
+                EntityKey(keyValues, entityDef)).ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+
         }
 
         public Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()

@@ -17,32 +17,35 @@ using HB.Framework.Common;
 using HB.Component.Authorization.Abstractions;
 using HB.Component.Authorization.Entity;
 using HB.Component.Identity.Entity;
+using HB.Framework.Cache;
 
 namespace HB.Component.Authorization
 {
-    public class RefreshManager : BizWithDbTransaction, IRefreshManager
+    public class RefreshManager : IRefreshManager
     {
-        private const string Frequency_Check_Key_Prefix = "Refresh_Freq_Check";
-        private ISignInTokenManager _signInTokenBiz;
+        private ISignInTokenBiz _signInTokenBiz;
         private ICredentialManager _credentialManager;
         private AuthorizationServerOptions _options;
-        private IUserBiz _userBiz;
+        //private IUserBiz _userBiz;
+        private IIdentityManager _identityManager;
         private IJwtBuilder _jwtBuilder;
+        private IFrequencyChecker _frequencyChecker;
 
         private ILogger _logger;
-        private IDistributedCache _cache;
 
-        public RefreshManager(IOptions<AuthorizationServerOptions> options, IDatabase database, IDistributedCache cache, ILogger<RefreshManager> logger,
-            ICredentialManager credentialManager, ISignInTokenManager signInTokenBiz, IUserBiz userBiz, IJwtBuilder jwtBuilder) : base(database)
+        public RefreshManager(IOptions<AuthorizationServerOptions> options, ILogger<RefreshManager> logger, 
+            IFrequencyChecker frequencyChecker, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, 
+            ICredentialManager credentialManager,  IJwtBuilder jwtBuilder)
         {
             _options = options.Value;
             _credentialManager = credentialManager;
             _signInTokenBiz = signInTokenBiz;
-            _userBiz = userBiz;
+            _identityManager = identityManager;
             _jwtBuilder = jwtBuilder;
 
+            _frequencyChecker = frequencyChecker;
+
             _logger = logger;
-            _cache = cache;
         }
 
         public async Task<RefreshResult> RefreshAccessTokenAsync(RefreshContext context)
@@ -50,7 +53,8 @@ namespace HB.Component.Authorization
             #region 频率检查
 
             //解决并发涌入
-            if (!(await FrequencyCheckAsync(context.ClientId)))
+
+            if (!(await _frequencyChecker.CheckAsync(context.ClientId, _options.RefreshIntervalTimeSpan)))
             {
                 return RefreshResult.TooFrequent();
             }
@@ -95,7 +99,7 @@ namespace HB.Component.Authorization
 
             #region User 信息变动验证
 
-            User user = await _userBiz.ValidateSecurityStampAsync(userId, claimsPrincipal.GetUserSecurityStamp());
+            User user = await _identityManager.ValidateSecurityStampAsync(userId, claimsPrincipal.GetUserSecurityStamp());
 
             if (user == null)
             {
@@ -162,20 +166,6 @@ namespace HB.Component.Authorization
                 _logger.LogWarning(ex, "wrong token to refren.Context : {0}", DataConverter.ToJson(context));
                 return null;
             }
-        }
-
-        private async Task<bool> FrequencyCheckAsync(string clientId)
-        {
-            string key = $"{Frequency_Check_Key_Prefix}:{clientId}";
-            string value = await _cache.GetStringAsync(key);
-
-            if (string.IsNullOrEmpty(value))
-            {
-                await _cache.SetStringAsync(key, "Hit", new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = _options.RefreshIntervalTimeSpan });
-                return true;
-            }
-
-            return false;
         }
     }
 }
