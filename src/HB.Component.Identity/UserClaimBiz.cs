@@ -4,22 +4,22 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entity;
+using HB.Framework.Database.Transaction;
 
 namespace HB.Component.Identity
 {
-    public class UserClaimBiz : BizWithDbTransaction, IUserClaimBiz
+    public class UserClaimBiz : IUserClaimBiz
     {
         private IDatabase _db;
         private readonly ILogger _logger;
 
         public UserClaimBiz(IDatabase database, ILogger<UserClaimBiz> logger)
-            : base(database)
         {
             _db = database;
             _logger = logger;
         }
 
-        public Task<IList<UserClaim>> GetUserClaimsByUserIdAsync(long userId, DbTransactionContext transContext = null)
+        public Task<IList<UserClaim>> GetUserClaimsByUserIdAsync(long userId, DatabaseTransactionContext transContext = null)
         {
             return _db.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
         }

@@ -12,7 +12,7 @@ namespace HB.Component.Identity.Abstractions
         Task<User> GetUserByMobileAsync(string mobile);
         Task<User> GetUserByUserNameAsync(string userName);
         Task<IdentityResult> CreateUserByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed);
-        Task SetLockoutAsync(long userId, bool lockout, TimeSpan? lockoutTimeSpan = null);
-        Task SetAccessFailedCountAsync(long userId, long count);
+        Task<IdentityResult> SetLockoutAsync(long userId, bool lockout, TimeSpan? lockoutTimeSpan = null);
+        Task<IdentityResult> SetAccessFailedCountAsync(long userId, long count);
     }
 }

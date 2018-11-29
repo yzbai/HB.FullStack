@@ -1,4 +1,4 @@
-﻿using HB.Compnent.Resource.Sms;
+﻿using HB.Component.Resource.Sms;
 using HB.Infrastructure.Aliyun.Test;
 using Xunit;
 using Xunit.Abstractions;
