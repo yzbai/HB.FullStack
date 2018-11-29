@@ -7,21 +7,22 @@ using System.Threading.Tasks;
 using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entity;
 using System;
+using HB.Framework.Database.Transaction;
 
 namespace HB.Component.Identity
 {
-    public class RoleBiz : BizWithDbTransaction, IRoleBiz
+    public class RoleBiz : IRoleBiz
     {
         private IDatabase _database;
         private readonly ILogger _logger;
 
-        public RoleBiz(IDatabase database, ILogger<RoleBiz> logger) : base(database)
+        public RoleBiz(IDatabase database, ILogger<RoleBiz> logger)
         {
             _database = database;
             _logger = logger;
         }
 
-        public Task<IEnumerable<string>> GetUserRoleNamesAsync(long userId, DbTransactionContext transContext = null)
+        public Task<IEnumerable<string>> GetUserRoleNamesAsync(long userId, DatabaseTransactionContext transContext = null)
         {
             FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
             WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserId == userId);
@@ -30,7 +31,7 @@ namespace HB.Component.Identity
                 .ContinueWith(o=>o.Result.Select(r=>r.Name), TaskScheduler.Default);
         }
 
-        public Task<int> GetRoleByNameAsync(string roleName, DbTransactionContext transContext = null)
+        public Task<int> GetRoleByNameAsync(string roleName, DatabaseTransactionContext transContext = null)
         {
             //动用Cache
             return Task.FromResult(0);

@@ -1,7 +1,6 @@
 ﻿using HB.Infrastructure.MongoDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 using System;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -14,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<MongoDBOptions>(configuration);
 
-            serviceCollection.AddSingleton<IMongoDB, MongoDB>();
+            serviceCollection.AddSingleton<IMongoDB, DefaultMongoDB>();
 
             return serviceCollection;
         }

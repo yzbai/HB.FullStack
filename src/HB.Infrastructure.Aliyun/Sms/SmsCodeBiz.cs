@@ -1,5 +1,4 @@
-﻿using HB.Component.Resource.Sms;
-using HB.Framework.Common;
+﻿using HB.Framework.Common;
 using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;

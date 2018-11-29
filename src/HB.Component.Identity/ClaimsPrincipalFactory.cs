@@ -1,6 +1,7 @@
 ﻿using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entity;
 using HB.Framework.Database;
+using HB.Framework.Database.Transaction;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -10,15 +11,14 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    public class ClaimsPrincipalFactory : BizWithDbTransaction, IClaimsPrincipalFactory
+    public class ClaimsPrincipalFactory : IClaimsPrincipalFactory
     {
         private readonly IDatabase _db;
         private readonly ILogger _logger;
         private IRoleBiz _roleBiz;
         private IUserClaimBiz _userClaimBiz;
 
-        public ClaimsPrincipalFactory(IDatabase database, ILogger<ClaimsPrincipalFactory> logger, IUserClaimBiz userClaims, IRoleBiz roleBiz) 
-            : base(database)
+        public ClaimsPrincipalFactory(IDatabase database, ILogger<ClaimsPrincipalFactory> logger, IUserClaimBiz userClaims, IRoleBiz roleBiz)
         {
             _db = database;
             _logger = logger;
@@ -26,7 +26,7 @@ namespace HB.Component.Identity
             _roleBiz = roleBiz;
         }
 
-        public async Task<IList<Claim>> CreateClaimsAsync(User user, DbTransactionContext transContext = null)
+        public async Task<IList<Claim>> CreateClaimsAsync(User user, DatabaseTransactionContext transContext = null)
         {
             if (user == null) { return null; }
 

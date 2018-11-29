@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HB.Compnent.Resource.Sms;
+using HB.Component.Resource.Sms;
 using HB.Framework.Common;
 using HB.Framework.EventBus;
 using Microsoft.AspNetCore.Mvc;

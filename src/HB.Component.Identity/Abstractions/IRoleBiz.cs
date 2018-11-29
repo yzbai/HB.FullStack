@@ -1,4 +1,5 @@
 ﻿using HB.Framework.Database;
+using HB.Framework.Database.Transaction;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -22,8 +23,8 @@ namespace HB.Component.Identity.Abstractions
         //bool IsUserInRole(int userId, string roleName);
         //ErrCode SetUserRoles(int userId, string[] roleNames, string lastUser);
         //ErrCode UpdateRole(Role role, string lastUser);
-        Task<IEnumerable<string>> GetUserRoleNamesAsync(long userId, DbTransactionContext transContext = null);
+        Task<IEnumerable<string>> GetUserRoleNamesAsync(long userId, DatabaseTransactionContext transContext = null);
 
-        Task<int> GetRoleByNameAsync(string roleName, DbTransactionContext transContext = null);
+        Task<int> GetRoleByNameAsync(string roleName, DatabaseTransactionContext transContext = null);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HB.Framework.Database;
+using HB.Framework.Database.Transaction;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,5 +38,7 @@ namespace HB.Component.Identity.Test
         }
 
         public IDatabase Database => Services.GetRequiredService<IDatabase>();
+
+        public IDatabaseTransaction DatabaseTransaction => Services.GetRequiredService<IDatabaseTransaction>();
     }
 }

@@ -23,7 +23,6 @@ namespace HB.Infrastructure.Aliyun.Sms
         private IAcsClient _client;
         private ISmsCodeBiz _smsCodeBiz;
         private readonly ILogger _logger;
-        private IDistributedCache _cache;
 
         public AliyunSmsService(IAcsClientManager acsClientManager, ISmsCodeBiz smsCodeBiz, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger) 
         {
