@@ -17,6 +17,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IRoleBiz, RoleBiz>();
             services.AddSingleton<IClaimsPrincipalFactory, ClaimsPrincipalFactory>();
 
+            services.AddSingleton<IIdentityManager, IdentityManager>();
+
             return services;
         }
     }

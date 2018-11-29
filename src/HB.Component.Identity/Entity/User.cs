@@ -14,6 +14,7 @@ namespace HB.Component.Identity.Entity
         [DatabaseEntityProperty("UserType", NotNull = true, Length = 100)]
         public string UserType { get; set; }
 
+        //TODO: 建立索引
         [Required]
         [DatabaseEntityProperty("Guid", NotNull=true, Length=50, Unique = true)]
         public string Guid { get; set; }

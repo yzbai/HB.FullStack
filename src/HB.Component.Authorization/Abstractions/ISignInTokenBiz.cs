@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Authorization.Abstractions
 {
-    public interface ISignInTokenManager
+    public interface ISignInTokenBiz
     {
         Task<SignInToken> CreateNewTokenAsync(long userId, string clientId, string clientType, string clientVersion, string clientAddress, string ipAddress, TimeSpan expireTimeSpan, DbTransactionContext transContext = null);
         Task<AuthorizationServerResult> DeleteByUserIdAsync(long userId, DbTransactionContext transContext = null);

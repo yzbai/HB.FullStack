@@ -12,7 +12,11 @@ namespace HB.Framework.KVStore
     {
         T GetById<T>(object keyValue) where T : KVStoreEntity, new();
 
+        T GetById<T>(T t) where T : KVStoreEntity, new();
+
         IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
+
+        IEnumerable<T> GetByIds<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
 
         IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new();
 
