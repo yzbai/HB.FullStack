@@ -87,7 +87,7 @@ namespace HB.Infrastructure.MongoDB
             return database;
         }
 
-        public IMongoCollection<T> GetCollection<T>() where T : class, new()
+        public IMongoCollection<T> GetCollection<T>() where T : DocumentStoreEntity, new()
         {
             Type type = typeof(T);
 
