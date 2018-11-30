@@ -17,7 +17,7 @@ namespace HB.Framework.Common
         //    byte[] sha1Bytes = sha1.ComputeHash(buffer);
 
         //    return DataConverter.ToHexString(sha1Bytes);
-            
+
         //}
 
         //public static string GetMD5(string str)
@@ -30,6 +30,19 @@ namespace HB.Framework.Common
         //    //return Convert.ToBase64String(md5Bytes);
         //}
 
+        public static string GetHashCode<T>(T item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            byte[] result = HashAlgorithm.Create().ComputeHash(DataConverter.Serialize<T>(item));
+
+
+            return Convert.ToBase64String(result);
+        }
+
         public static string EncryptPwdWithSalt(string pwd, string salt)
         {
             byte[] pwdAndSaltBytes = Encoding.UTF8.GetBytes(pwd + salt);
@@ -37,7 +50,6 @@ namespace HB.Framework.Common
 
             return Convert.ToBase64String(hashBytes);
         }
-
         public static string CreateUniqueToken()
         {
             return Guid.NewGuid().ToString("N", GlobalSettings.Culture);
