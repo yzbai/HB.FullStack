@@ -1,12 +1,8 @@
-﻿//using HB.Framework.Cache;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace HB.Framework.Common
 {
@@ -441,10 +437,10 @@ namespace HB.Framework.Common
             return convertFn(value);
         }
 
-        public static object DefaultForType(Type targetType) 
+        public static object DefaultForType(Type targetType)
         {
             TypeInfo typeInfo = targetType.GetTypeInfo();
-            return typeInfo.IsValueType ? Activator.CreateInstance(targetType) : null;  
+            return typeInfo.IsValueType ? Activator.CreateInstance(targetType) : null;
         }
 
         public static T To<T>(object value)
@@ -540,11 +536,16 @@ namespace HB.Framework.Common
             if (buffer == null)
             {
                 return null;
+
+
+
+
+
             }
 
             return MsgPack.Serialization.MessagePackSerializer.Get(type).UnpackSingleObject(buffer);
         }
-    
+
 
         public static byte[] Serialize<T>(T item)
         {
