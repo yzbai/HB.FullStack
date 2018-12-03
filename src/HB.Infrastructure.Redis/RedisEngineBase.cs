@@ -33,15 +33,11 @@ namespace HB.Infrastructure.Redis
 
         protected RedisEngineOptions Options { get; private set; }
 
-        public RedisEngineBase(IApplicationLifetime applicationLifetime, RedisEngineOptions options, ILogger logger)
+        public RedisEngineBase(RedisEngineOptions options, ILogger logger)
         {
             _logger = logger;
             Options = options;
             _connectionDict = new Dictionary<string, RedisWrapper>();
-
-            applicationLifetime.ApplicationStopped.Register(() => {
-                Dispose();
-            });
         }
 
         protected IDatabase GetDatabase(string dbName, int dbIndex, bool isMaster)
