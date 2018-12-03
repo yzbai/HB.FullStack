@@ -13,7 +13,7 @@ namespace HB.Infrastructure.MongoDB
         private DocumentStoreOptions _documentOptions;
         private MongoDBOptions _mongoOptions;
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// key:InstanceName
