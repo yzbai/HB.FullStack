@@ -50,8 +50,8 @@ namespace HB.Framework.Http
                     _appsettingsHash = appsettingsHash;
                     _appsettingsEnvHash = appsettingsEnvHash;
 
-                    LogHelper.GlobalLogger.LogInformation("appsettings.json 配置文件变动");
-                    LogHelper.GlobalLogger.LogInformation("系统即将重启......");
+                    _logger.LogInformation("appsettings.json 配置文件变动");
+                    _logger.LogInformation("系统即将重启......");
 
 
                     //TODO: 这里放关闭应用前，需要做的工作
