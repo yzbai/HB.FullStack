@@ -14,14 +14,14 @@ namespace System.Security.Cryptography.X509Certificates
         /// <returns></returns>
         public static X509Certificate2 GetBySubject(string subjectName)
         {
-            X509Certificate2 cert = GetBySubject(subjectName, StoreLocation.CurrentUser) ?? GetBySubject(subjectName, StoreLocation.LocalMachine);
+            return GetBySubject(subjectName, StoreLocation.CurrentUser) ?? GetBySubject(subjectName, StoreLocation.LocalMachine);
 
-            if (cert == null)
-            {
-                LogHelper.GlobalLogger.LogCritical("证书找不到，SubjectName : {0}", subjectName);
-            }
+            //if (cert == null)
+            //{
+            //    LogHelper.GlobalLogger.LogCritical("证书找不到，SubjectName : {0}", subjectName);
+            //}
 
-            return cert;
+            //return cert;
         }
 
 
@@ -44,14 +44,7 @@ namespace System.Security.Cryptography.X509Certificates
 
         public static X509Certificate2 GetByThumbprint(string thumbprint)
         {
-            X509Certificate2 cert = GetByThumbprint(thumbprint, StoreLocation.CurrentUser) ?? GetByThumbprint(thumbprint, StoreLocation.LocalMachine);
-
-            if (cert == null)
-            {
-                LogHelper.GlobalLogger.LogCritical("证书找不到, thumbprint : {0}", thumbprint);
-            }
-
-            return cert;
+            return GetByThumbprint(thumbprint, StoreLocation.CurrentUser) ?? GetByThumbprint(thumbprint, StoreLocation.LocalMachine);
         }
 
         /// <summary>
