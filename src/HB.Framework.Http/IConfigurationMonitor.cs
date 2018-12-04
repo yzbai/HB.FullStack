@@ -2,6 +2,8 @@
 {
     public interface IConfigurationMonitor
     {
-        bool MonitoringEnabled { get; set; }
+        void EnableMonitoring();
+
+        void DisableMonitoring();
     }
 }

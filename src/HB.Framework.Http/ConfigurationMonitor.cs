@@ -60,6 +60,15 @@ namespace HB.Framework.Http
                 }
             }
         }
- 
+
+        public void EnableMonitoring()
+        {
+            this.MonitoringEnabled = true;
+        }
+
+        public void DisableMonitoring()
+        {
+            this.MonitoringEnabled = false;
+        }
     }
 }
