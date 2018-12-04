@@ -29,7 +29,7 @@ namespace HB.Component.Authorization
             _signInOptions = _options.SignInOptions;
             _claimsPrincipalFactory = claimsPrincipalFactory;
             _credentialManager = credentialManager;
-            _signingCredentials = _credentialManager.GetSigningCredentials();
+            _signingCredentials = _credentialManager.GetSigningCredentials();   
         }
 
         public async Task<string> BuildJwtAsync(User user, SignInToken signInToken, string audience)
