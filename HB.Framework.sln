@@ -1,13 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28315.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FA6E769E-482A-4A98-85B1-39CFEF3ABE79}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
+		global.json = global.json
 		PresentFish_DataProtection.pfx = PresentFish_DataProtection.pfx
 		README.md = README.md
 	EndProjectSection
@@ -83,7 +84,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongodbDemo", "MongodbDemo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MongoDB", "src\HB.Infrastructure.MongoDB\HB.Infrastructure.MongoDB.csproj", "{7A3D9E8A-414D-456B-9533-0DDC52AE2413}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.DocumentStore", "src\HB.Framework.DocumentStore\HB.Framework.DocumentStore.csproj", "{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.DocumentStore", "src\HB.Framework.DocumentStore\HB.Framework.DocumentStore.csproj", "{95DBE5C1-EA56-4B9C-A9E3-D44F0C01319B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
