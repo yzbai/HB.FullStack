@@ -36,7 +36,7 @@ namespace HB.Component.Authorization
         {
             DateTime utcNow = DateTime.UtcNow;
 
-            IList<Claim> claims = await _claimsPrincipalFactory.CreateClaimsAsync(user);
+            IList<Claim> claims = await _claimsPrincipalFactory.CreateClaimsAsync(user).ConfigureAwait(false);
 
             claims.Add(new Claim(ClaimExtensionTypes.SignInTokenIdentifier, signInToken.SignInTokenIdentifier));
 

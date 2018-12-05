@@ -41,7 +41,7 @@ namespace WebDemo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, CentralizedLoggerProvider centralizedLoggerProvider, IEventBus eventBus)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, LoggerProvider centralizedLoggerProvider, IEventBus eventBus)
         {
             loggerFactory.AddCentralizedLog(centralizedLoggerProvider);
 

@@ -12,14 +12,14 @@ namespace HB.Infrastructure.MongoDB
 
         public static async Task<T> GetByIdAsync<T>(this IMongoCollection<T> collection, string id) where T : DocumentStoreEntity, new()
         {
-            IAsyncCursor<T> cursor = await collection.FindAsync(t => t.Id == id);
+            IAsyncCursor<T> cursor = await collection.FindAsync(t => t.Id == id).ConfigureAwait(false);
 
             return cursor.FirstOrDefault();
         }
 
         public static async Task<IEnumerable<T>> GetByIdsAsync<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
         {
-            IAsyncCursor<T> cursor = await collection.FindAsync(Builders<T>.Filter.In(t => t.Id, ids));
+            IAsyncCursor<T> cursor = await collection.FindAsync(Builders<T>.Filter.In(t => t.Id, ids)).ConfigureAwait(false);
 
             return cursor.ToEnumerable();
         }

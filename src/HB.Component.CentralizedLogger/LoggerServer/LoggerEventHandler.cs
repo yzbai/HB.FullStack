@@ -10,13 +10,13 @@ using System.Text;
 
 namespace HB.Component.CentralizedLogger.LoggerServer
 {
-    public class CentralizedLoggerEventHandler : IEventHandler
+    public class LoggerEventHandler : IEventHandler
     {
-        private CentralizedLoggerEventHandlerOptions _options;
+        private LoggerEventHandlerOptions _options;
         private IElasticClient _elasticClient;
         private ILogger _logger;
 
-        public CentralizedLoggerEventHandler(IOptions<CentralizedLoggerEventHandlerOptions> options, IElasticClient elasticClient, ILogger<CentralizedLoggerEventHandler> logger)
+        public LoggerEventHandler(IOptions<LoggerEventHandlerOptions> options, IElasticClient elasticClient, ILogger<LoggerEventHandler> logger)
         {
             _options = options.Value;
             _elasticClient = elasticClient;
@@ -38,23 +38,23 @@ namespace HB.Component.CentralizedLogger.LoggerServer
 
         public void Handle(string jsonString)
         {
-            CentralizedLogEntity logEntity = null;
+            LogEntity logEntity = null;
 
             try
             {
-                logEntity = DataConverter.FromJson<CentralizedLogEntity>(jsonString);
+                logEntity = DataConverter.FromJson<LogEntity>(jsonString);
             }
             catch(Exception ex)
             {
-                logEntity = new CentralizedLogEntity() { Exception = ex, Message = jsonString, DateTime = DateTime.Now };
+                logEntity = new LogEntity() { Exception = ex, Message = jsonString, DateTime = DateTime.Now };
             }
 
             if (logEntity == null)
             {
-                logEntity = new CentralizedLogEntity() { Message = jsonString, DateTime = DateTime.Now};
+                logEntity = new LogEntity() { Message = jsonString, DateTime = DateTime.Now};
             }
 
-            IIndexResponse indexResponse = _elasticClient.Index(logEntity, idx => idx.Index(_options.LogEventName.ToLower()));
+            IIndexResponse indexResponse = _elasticClient.Index(logEntity, idx => idx.Index(_options.LogEventName.ToLower(GlobalSettings.Culture)));
 
             if (indexResponse != null)
             {
@@ -90,7 +90,7 @@ namespace HB.Component.CentralizedLogger.LoggerServer
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        ~CentralizedLoggerEventHandler()
+        ~LoggerEventHandler()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(false);

@@ -54,7 +54,7 @@ namespace HB.Component.Authorization
 
             //解决并发涌入
 
-            if (!(await _frequencyChecker.CheckAsync(context.ClientId, _options.RefreshIntervalTimeSpan)))
+            if (!(await _frequencyChecker.CheckAsync(context.ClientId, _options.RefreshIntervalTimeSpan).ConfigureAwait(false)))
             {
                 return RefreshResult.TooFrequent();
             }
@@ -87,7 +87,7 @@ namespace HB.Component.Authorization
                 context.RefreshToken,
                 context.ClientId,
                 userId
-                );
+                ).ConfigureAwait(false);
 
             if (signInToken == null || signInToken.Blacked)
             {
@@ -99,11 +99,11 @@ namespace HB.Component.Authorization
 
             #region User 信息变动验证
 
-            User user = await _identityManager.ValidateSecurityStampAsync(userId, claimsPrincipal.GetUserSecurityStamp());
+            User user = await _identityManager.ValidateSecurityStampAsync(userId, claimsPrincipal.GetUserSecurityStamp()).ConfigureAwait(false);
 
             if (user == null)
             {
-                await BlackSignInTokenAsync(signInToken);
+                await BlackSignInTokenAsync(signInToken).ConfigureAwait(false);
 
                 _logger.LogWarning("Refresh token error. User SecurityStamp Changed. Context : {0}", DataConverter.ToJson(context));
 
@@ -116,7 +116,7 @@ namespace HB.Component.Authorization
 
             signInToken.RefreshCount++;
 
-            AuthorizationServerResult authorizationServerResult = await _signInTokenBiz.UpdateAsync(signInToken);
+            AuthorizationServerResult authorizationServerResult = await _signInTokenBiz.UpdateAsync(signInToken).ConfigureAwait(false);
 
             if (!authorizationServerResult.IsSucceeded())
             {
@@ -130,7 +130,7 @@ namespace HB.Component.Authorization
 
             RefreshResult result = new RefreshResult() { Status = RefreshResultStatus.Succeeded };
 
-            result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, signInToken, claimsPrincipal.GetAudience());
+            result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, signInToken, claimsPrincipal.GetAudience()).ConfigureAwait(false);
 
             return result;
 
@@ -139,7 +139,7 @@ namespace HB.Component.Authorization
 
         private async Task BlackSignInTokenAsync(SignInToken signInToken)
         {
-            AuthorizationServerResult result = await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(signInToken.SignInTokenIdentifier);
+            AuthorizationServerResult result = await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(signInToken.SignInTokenIdentifier).ConfigureAwait(false);
 
             if (!result.IsSucceeded())
             {

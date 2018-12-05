@@ -4,21 +4,21 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class CentralizedLoggerServerExtensions
+    public static class LoggerServerExtensions
     {
         public static IServiceCollection AddCentralizedLoggerEventHandler(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddOptions();
-            services.Configure<CentralizedLoggerEventHandlerOptions>(configuration);
-            services.AddEventHandler<CentralizedLoggerEventHandler>();
+            services.Configure<LoggerEventHandlerOptions>(configuration);
+            services.AddEventHandler<LoggerEventHandler>();
             return services;
         }
 
-        public static IServiceCollection AddCentralizedLoggerEventHandler(this IServiceCollection services, Action<CentralizedLoggerEventHandlerOptions> action)
+        public static IServiceCollection AddCentralizedLoggerEventHandler(this IServiceCollection services, Action<LoggerEventHandlerOptions> action)
         {
             services.AddOptions();
             services.Configure(action);
-            services.AddEventHandler<CentralizedLoggerEventHandler>();
+            services.AddEventHandler<LoggerEventHandler>();
             return services;
         }
     }

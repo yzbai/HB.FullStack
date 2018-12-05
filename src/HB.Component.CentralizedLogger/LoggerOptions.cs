@@ -6,9 +6,9 @@ using System.Text;
 
 namespace HB.Component.CentralizedLogger
 {
-    public class CentralizedLoggerOptions : IOptions<CentralizedLoggerOptions>
+    public class LoggerOptions : IOptions<LoggerOptions>
     {
-        public CentralizedLoggerOptions Value => this;
+        public LoggerOptions Value => this;
 
         /// <summary>
         /// 关于哪一个站点或应用的日志

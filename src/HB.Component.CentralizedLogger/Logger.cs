@@ -12,14 +12,14 @@ namespace HB.Component.CentralizedLogger
     /// <summary>
     /// This is Cheap
     /// </summary>
-    public class CentralizedLogger : ILogger
+    public class Logger : ILogger
     {
         private string _host;
         private string _name;
         private readonly Func<string, LogLevel, bool> _filter;
-        private CentralizedLoggerProcessor _processor;
+        private LoggerProcessor _processor;
 
-        public CentralizedLogger(string host, string name, Func<string, LogLevel, bool> filter, CentralizedLoggerProcessor processor)
+        public Logger(string host, string name, Func<string, LogLevel, bool> filter, LoggerProcessor processor)
         {
             _host = host;
             _name = name;
@@ -58,7 +58,7 @@ namespace HB.Component.CentralizedLogger
 
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                CentralizedLogEntity logEntity = new CentralizedLogEntity {
+                LogEntity logEntity = new LogEntity {
                     DateTime = DateTime.Now,
                     HostName = _host,
                     LoggerName = _name,
