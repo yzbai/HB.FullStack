@@ -6,4 +6,6 @@
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:HB.Component.Authorization.Abstractions.SignInResultStatus")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:HB.Component.Authorization.Abstractions.RefreshResultStatus")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:HB.Component.Authorization.AuthorizationServerResultStatus")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "<Pending>", Scope = "member", Target = "~P:HB.Component.Authorization.Entity.ThirdPartyLogin.IconUrl")]
 

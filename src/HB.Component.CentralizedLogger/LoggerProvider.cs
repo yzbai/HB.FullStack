@@ -8,22 +8,22 @@ using System.Threading.Tasks;
 
 namespace HB.Component.CentralizedLogger
 {
-    public sealed class CentralizedLoggerProvider : ILoggerProvider
+    public sealed class LoggerProvider : ILoggerProvider
     {
-        private CentralizedLoggerOptions _options;
+        private LoggerOptions _options;
         private IEventBus _eventBus;
-        private CentralizedLoggerProcessor _processor;
+        private LoggerProcessor _processor;
 
         private readonly Func<string, LogLevel, bool> _filter;
-        private readonly ConcurrentDictionary<string, CentralizedLogger> _loggers;
+        private readonly ConcurrentDictionary<string, Logger> _loggers;
 
 
-        public CentralizedLoggerProvider(IOptions<CentralizedLoggerOptions> options, IEventBus eventBus, CentralizedLoggerProcessor processor)
+        public LoggerProvider(IOptions<LoggerOptions> options, IEventBus eventBus, LoggerProcessor processor)
         {
             _eventBus = eventBus;
             _options = options.Value;
             _processor = processor;
-            _loggers = new ConcurrentDictionary<string, CentralizedLogger>();
+            _loggers = new ConcurrentDictionary<string, Logger>();
             _filter = GetFilter(_options.LogLevel);
 
             AddEventInfoToEventBus();
@@ -50,7 +50,7 @@ namespace HB.Component.CentralizedLogger
         public ILogger CreateLogger(string categoryName)
         {
             return _loggers.GetOrAdd(categoryName, name => {
-                return new CentralizedLogger(_options.HostName, name, _filter, _processor);
+                return new Logger(_options.HostName, name, _filter, _processor);
             });
         }
 

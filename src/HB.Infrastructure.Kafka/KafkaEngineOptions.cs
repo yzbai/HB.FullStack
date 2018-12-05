@@ -38,7 +38,7 @@ namespace HB.Infrastructure.Kafka
                 return null;
             }
 
-            return Servers.First(s => s.Name.Equals(serverName));
+            return Servers.First(s => s.Name.Equals(serverName, GlobalSettings.Comparison));
         }
         
     }

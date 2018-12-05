@@ -57,13 +57,14 @@ namespace HB.Framework.Common.Test
         [Fact]
         public void TestJsonMapString2()
         {
-            Dictionary<string, MapValue> map = new Dictionary<string, MapValue>();
-
-            map.Add("key1", new MapValue { Value = "value1", ValueDescription = "value1__" });
-            map.Add("key2", new MapValue { Value = "value2", ValueDescription = "value2__" });
-            map.Add("key3", new MapValue { Value = "value3", ValueDescription = "value3__" });
-            map.Add("key4", new MapValue { Value = "value4", ValueDescription = "value4__" });
-            map.Add("key5", new MapValue { Value = "value5", ValueDescription = "value5__" });
+            Dictionary<string, MapValue> map = new Dictionary<string, MapValue>
+            {
+                { "key1", new MapValue { Value = "value1", ValueDescription = "value1__" } },
+                { "key2", new MapValue { Value = "value2", ValueDescription = "value2__" } },
+                { "key3", new MapValue { Value = "value3", ValueDescription = "value3__" } },
+                { "key4", new MapValue { Value = "value4", ValueDescription = "value4__" } },
+                { "key5", new MapValue { Value = "value5", ValueDescription = "value5__" } }
+            };
 
             string json = DataConverter.ToJson(map);
 
