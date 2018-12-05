@@ -10,22 +10,22 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
 
-            services.Configure<CentralizedLoggerOptions>(configuration);
+            services.Configure<LoggerOptions>(configuration);
 
-            services.AddSingleton<CentralizedLoggerProcessor>();
-            services.AddSingleton<CentralizedLoggerProvider>();
+            services.AddSingleton<LoggerProcessor>();
+            services.AddSingleton<LoggerProvider>();
 
             return services;
         }
 
-        public static IServiceCollection AddCentralizedLogger(this IServiceCollection services, Action<CentralizedLoggerOptions> configAction)
+        public static IServiceCollection AddCentralizedLogger(this IServiceCollection services, Action<LoggerOptions> configAction)
         {
             services.AddOptions();
 
             services.Configure(configAction);
 
-            services.AddSingleton<CentralizedLoggerProcessor>();
-            services.AddSingleton<CentralizedLoggerProvider>();
+            services.AddSingleton<LoggerProcessor>();
+            services.AddSingleton<LoggerProvider>();
 
             return services;
         }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HB.Component.CentralizedLogger
 {
-    public class CentralizedLogEntity
+    public class LogEntity
     {
         [Nest.Date]
         public DateTime DateTime { get; set; }

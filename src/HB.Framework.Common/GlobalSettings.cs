@@ -11,10 +11,5 @@ namespace System
 
         public static StringComparison ComparisonIgnoreCase { get; set; } = StringComparison.InvariantCultureIgnoreCase;
 
-        public static void test()
-        {
-
-        }
-
     }
 }

@@ -5,24 +5,27 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.Component.CentralizedLogger
 {
-    public class CentralizedLoggerProcessor : IDisposable
+    public class LoggerProcessor : IDisposable
     {
         private const int _maxQueuedMessages = 2048;
 
-        private readonly BlockingCollection<CentralizedLogEntity> _messageQueue = new BlockingCollection<CentralizedLogEntity>(_maxQueuedMessages);
+        private readonly BlockingCollection<LogEntity> _messageQueue = new BlockingCollection<LogEntity>(_maxQueuedMessages);
         private readonly Task _outputTask;
 
+        private CancellationTokenSource _cts;
         private IEventBus _eventBus;
-        private CentralizedLoggerOptions _options;
+        private LoggerOptions _options;
 
-        public CentralizedLoggerProcessor(IEventBus eventBus, IOptions<CentralizedLoggerOptions> options)
+        public LoggerProcessor(IEventBus eventBus, IOptions<LoggerOptions> options)
         {
             _eventBus = eventBus;
             _options = options.Value;
+            _cts = new CancellationTokenSource();
 
             _outputTask = Task.Factory.StartNew(()=> {
 
@@ -31,15 +34,15 @@ namespace HB.Component.CentralizedLogger
                     PublishLog(message);
                 }
 
-            }, TaskCreationOptions.LongRunning);
+            }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        private void PublishLog(CentralizedLogEntity entity)
+        private void PublishLog(LogEntity entity)
         {
             _eventBus.Publish(_options.LogEventName, DataConverter.ToJson(entity));
         }
 
-        public void EnqueLogEntity(CentralizedLogEntity logEntity)
+        public void EnqueLogEntity(LogEntity logEntity)
         {
             if (!_messageQueue.IsAddingCompleted)
             {
@@ -48,9 +51,9 @@ namespace HB.Component.CentralizedLogger
                     _messageQueue.Add(logEntity);
                     return;
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException)
                 {
-                    throw ex;
+                    //throw ex;
                 }
             }
 
@@ -78,9 +81,9 @@ namespace HB.Component.CentralizedLogger
                 {
                     _outputTask.Wait(2000);
                 }
-                catch (Exception ex)
+                catch (Exception /*ex*/)
                 {
-                    throw ex;
+                    //throw ex;
                 }
 
             }
@@ -90,7 +93,7 @@ namespace HB.Component.CentralizedLogger
             _disposed = true;
         }
 
-        ~CentralizedLoggerProcessor()
+        ~LoggerProcessor()
         {
             Dispose(false);
         }

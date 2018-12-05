@@ -44,7 +44,7 @@ namespace HB.Component.Authorization
                 ExpireAt = DateTimeOffset.UtcNow + expireTimeSpan
             };
 
-            AuthorizationServerResult err = (await _db.AddAsync(token, transContext)).ToAuthorizationResult();
+            AuthorizationServerResult err = (await _db.AddAsync(token, transContext).ConfigureAwait(false)).ToAuthorizationResult();
 
             if (!err.IsSucceeded())
             {
@@ -62,11 +62,11 @@ namespace HB.Component.Authorization
                 .Where(at=>at.ClientType != Enum.GetName(typeof(ClientType), ClientType.Web))
                 .And(at=>at.UserId == userId);
 
-            IList<SignInToken> resultList = await _db.RetrieveAsync<SignInToken>(where, transContext);
+            IList<SignInToken> resultList = await _db.RetrieveAsync(where, transContext).ConfigureAwait(false);
 
             foreach (SignInToken at in resultList)
             {
-                AuthorizationServerResult err = (await _db.DeleteAsync(at, transContext)).ToAuthorizationResult();
+                AuthorizationServerResult err = (await _db.DeleteAsync(at, transContext).ConfigureAwait(false)).ToAuthorizationResult();
 
                 if (!err.IsSucceeded())
                 {
@@ -81,11 +81,11 @@ namespace HB.Component.Authorization
 
         public async Task<AuthorizationServerResult> DeleteByUserIdAsync(long userId, DatabaseTransactionContext transContext = null)
         {
-            IList<SignInToken> resultList = await _db.RetrieveAsync<SignInToken>(at => at.UserId == userId, transContext);
+            IList<SignInToken> resultList = await _db.RetrieveAsync<SignInToken>(at => at.UserId == userId, transContext).ConfigureAwait(false);
 
             foreach (SignInToken at in resultList)
             {
-                AuthorizationServerResult err = (await _db.DeleteAsync(at, transContext)).ToAuthorizationResult();
+                AuthorizationServerResult err = (await _db.DeleteAsync(at, transContext).ConfigureAwait(false)).ToAuthorizationResult();
 
                 if (!err.IsSucceeded())
                 {
@@ -100,11 +100,11 @@ namespace HB.Component.Authorization
 
         public async Task<AuthorizationServerResult> DeleteBySignInTokenIdentifierAsync(string signInTokenIdentifier, DatabaseTransactionContext transContext = null)
         {
-            IList<SignInToken> resultList = await _db.RetrieveAsync<SignInToken>(at => at.SignInTokenIdentifier == signInTokenIdentifier, transContext);
+            IList<SignInToken> resultList = await _db.RetrieveAsync<SignInToken>(at => at.SignInTokenIdentifier == signInTokenIdentifier, transContext).ConfigureAwait(false);
 
             foreach (SignInToken at in resultList)
             {
-                AuthorizationServerResult err = (await _db.DeleteAsync(at, transContext)).ToAuthorizationResult();
+                AuthorizationServerResult err = (await _db.DeleteAsync(at, transContext).ConfigureAwait(false)).ToAuthorizationResult();
 
                 if (!err.IsSucceeded())
                 {
@@ -128,7 +128,7 @@ namespace HB.Component.Authorization
 
         public async Task<AuthorizationServerResult> UpdateAsync(SignInToken signInToken, DatabaseTransactionContext transContext = null)
         {
-            return (await _db.UpdateAsync(signInToken, transContext)).ToAuthorizationResult();
+            return (await _db.UpdateAsync(signInToken, transContext).ConfigureAwait(false)).ToAuthorizationResult();
         }
     }
 }
