@@ -6,9 +6,9 @@ using System.Text;
 namespace HB.Component.CentralizedLogger.LoggerServer
 {
     //TODO: 现在还只能处理一个事件名称，之后要扩展到多个
-    public class CentralizedLoggerEventHandlerOptions : IOptions<CentralizedLoggerEventHandlerOptions>
+    public class LoggerEventHandlerOptions : IOptions<LoggerEventHandlerOptions>
     {
-        public CentralizedLoggerEventHandlerOptions Value => this;
+        public LoggerEventHandlerOptions Value => this;
 
         public string LogEventName { get; set; }
 

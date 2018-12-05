@@ -21,11 +21,11 @@ namespace HB.Framework.Cache
         {
             string key = $"{Frequency_Check_Key_Prefix}:{resource}";
 
-            string value = await _cache.GetStringAsync(key);
+            string value = await _cache.GetStringAsync(key).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(value))
             {
-                await _cache.SetStringAsync(key, "Hit", new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = aliveTimeSpan });
+                await _cache.SetStringAsync(key, "Hit", new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = aliveTimeSpan }).ConfigureAwait(false);
                 return true;
             }
 

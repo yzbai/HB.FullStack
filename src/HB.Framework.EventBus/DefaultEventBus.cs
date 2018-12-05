@@ -106,7 +106,7 @@ namespace HB.Framework.EventBus
 
         private EventConfig GetEventConfiguration(string eventName)
         {
-            return _options.PublishConfig?.Events?.FirstOrDefault(e => e.EventName.Equals(eventName));
+            return _options.PublishConfig?.Events?.FirstOrDefault(e => e.EventName.Equals(eventName, GlobalSettings.Comparison));
         }
     }
 }

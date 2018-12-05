@@ -21,7 +21,7 @@ namespace HB.Component.Authorization
         private ISignInTokenBiz _signInTokenBiz;
         private IJwtBuilder _jwtBuilder;
 
-        public SignInManager(IOptions<AuthorizationServerOptions> options, ILogger<SignInManager> logger, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, IJwtBuilder jwtBuilder) 
+        public SignInManager(IOptions<AuthorizationServerOptions> options, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, IJwtBuilder jwtBuilder) 
         {
             _options = options.Value;
             _signInOptions = _options.SignInOptions;
