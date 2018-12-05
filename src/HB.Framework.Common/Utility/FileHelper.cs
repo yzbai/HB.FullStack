@@ -20,7 +20,7 @@ namespace HB.Framework.Common.Utility
                     {
                         using (var fs = File.OpenRead(filePath))
                         {
-                            return System.Security.Cryptography.SHA1.Create().ComputeHash(fs);
+                            return System.Security.Cryptography.SHA256.Create().ComputeHash(fs);
                         }
                     }
                     else
