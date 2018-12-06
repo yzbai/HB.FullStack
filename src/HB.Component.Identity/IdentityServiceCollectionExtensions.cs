@@ -21,6 +21,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return services;
         }
+
+        public static IServiceCollection AddIdentity(this IServiceCollection services)
+        {
+            return services.AddIdentity(o => { });
+        }
     }
     
 }
