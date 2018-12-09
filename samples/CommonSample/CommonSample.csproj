@@ -22,7 +22,6 @@
     <ProjectReference Include="..\..\src\HB.Framework.Common\HB.Framework.Common.csproj" />
     <ProjectReference Include="..\..\src\HB.Framework.Http\HB.Framework.Http.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Kafka\HB.Infrastructure.Kafka.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
   </ItemGroup>
