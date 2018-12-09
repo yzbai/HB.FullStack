@@ -21,92 +21,36 @@ namespace HB.Framework.EventBus
         private EventBusOptions _options;
         private IEventBusEngine _engine;
         private ILogger _logger;
-        private readonly IEnumerable<IEventHandler> _eventHandlers;
-        private bool _handled;
 
-        public DefaultEventBus(IEventBusEngine eventBusEngine, IEnumerable<IEventHandler> eventHandlers, IOptions<EventBusOptions> options, ILogger<DefaultEventBus> logger)
+        public DefaultEventBus(IEventBusEngine eventBusEngine, IOptions<EventBusOptions> options, ILogger<DefaultEventBus> logger)
         {
             _options = options.Value;
             _engine = eventBusEngine;
             _logger = logger;
-            _eventHandlers = eventHandlers;
-            _handled = false;
         }
 
-        public void Handle()
+      
+        public void Publish(EventMessage eventMessage)
         {
-            if (_handled)
+            if (!EventMessage.IsValid(eventMessage))
             {
-                return;
+                Exception ex = new ArgumentException("不符合要求", nameof(eventMessage));
+                _logger.LogError(ex, "用于Publish的eventMessage不符合要求");
+
+                throw ex;
             }
 
+            string brokerName = _options.GetTopicSchema(eventMessage.Topic)?.BrokerName;
 
-            if (_eventHandlers == null)
+            if (string.IsNullOrEmpty(brokerName))
             {
-                return;
-            }
- 
-            foreach (var handler in _eventHandlers)
-            {
-                EventHandlerConfig handlerConfig = handler.GetConfig();
+                Exception ex = new Exception("配置中没有找到对应主题事件的Broker");
+                _logger.LogCritical(ex, $"没有Topic对应的BrokerName， Topic：{eventMessage.Topic}");
 
-                if (handlerConfig != null)
-                {
-                    if (string.IsNullOrWhiteSpace(handlerConfig.SubscribeGroup))
-                    {
-                        handlerConfig.SubscribeGroup = _options.SubscribeConfig.DefaultSubscribeGroup;
-                    }
-
-                    _engine.SubscribeAndConsume(handlerConfig.ServerName, handlerConfig.SubscribeGroup, handlerConfig.EventName, handler);
-                }
+                throw ex;
             }
 
-            _handled = true;
-        }
-
-        public void RegisterEvent(EventConfig eventConfig)
-        {
-            if (eventConfig == null)
-            {
-                throw new ArgumentNullException(nameof(eventConfig));
-            }
-
-            if (_options.PublishConfig == null)
-            {
-                _options.PublishConfig = new PublishConfig();
-            }
-
-            if (_options.PublishConfig.Events == null)
-            {
-                _options.PublishConfig.Events = new List<EventConfig>();
-            }
-
-            _options.PublishConfig.Events.Add(eventConfig);
-        }
-
-        public Task<PublishResult> Publish(string eventName, string jsonString)
-        {
-            EventConfig eventConfig = GetEventConfiguration(eventName);
-
-            if (eventConfig == null)
-            {
-                _logger.LogCritical("Event :{0} dot not have configuration.", eventName);
-                return null;
-            }
-
-            return Policy
-                .Handle<Exception>()
-                .WaitAndRetryForeverAsync(n => TimeSpan.FromSeconds(1), (ex, count, ts) => {
-                    _logger.LogCritical(ex, "Publish Error: EventName : {0}, Json : {1}, Message : {2}, Count : {3}", eventName, jsonString, ex.Message, count);
-                })
-                .ExecuteAsync(() => {
-                    return _engine.PublishString(eventConfig.ServerName, eventConfig.EventName, jsonString);
-                });
-        }
-
-        private EventConfig GetEventConfiguration(string eventName)
-        {
-            return _options.PublishConfig?.Events?.FirstOrDefault(e => e.EventName.Equals(eventName, GlobalSettings.Comparison));
+            _engine.Publish(brokerName, eventMessage);
         }
     }
 }

@@ -24,12 +24,10 @@ namespace HB.Infrastructure.Redis
     }
 
     public class RedisEngineBase : IDisposable
-    {
-        private bool _disposed = false;
+    {      
         private ILogger _logger;
         private Dictionary<string, RedisWrapper> _connectionDict;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-        private readonly object _closeLocker = new object();
 
         protected RedisEngineOptions Options { get; private set; }
 
@@ -65,7 +63,7 @@ namespace HB.Infrastructure.Redis
 
             if (redisWrapper.Connection != null && !redisWrapper.Connection.IsConnected)
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
             }
 
             if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
@@ -98,6 +96,11 @@ namespace HB.Infrastructure.Redis
             return GetDatabase(dbName, dbIndex, true);
         }
 
+        #region Dispose Support
+
+        private readonly object _disposeLocker = new object();
+        private bool _disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
@@ -114,19 +117,21 @@ namespace HB.Infrastructure.Redis
             if (disposing)
             {
                 // Free managed
-            }
 
-            // Free unmanaged
-            lock (_closeLocker)
-            {
-                if (_connectionDict != null)
+                lock (_disposeLocker)
                 {
-                    foreach (KeyValuePair<string, RedisWrapper> pair in _connectionDict)
+                    if (_connectionDict != null)
                     {
-                        pair.Value?.Connection?.Dispose();
+                        foreach (KeyValuePair<string, RedisWrapper> pair in _connectionDict)
+                        {
+                            pair.Value?.Connection?.Dispose();
+                        }
                     }
                 }
             }
+
+            // Free unmanaged
+
 
             _disposed = true;
         }
@@ -135,5 +140,7 @@ namespace HB.Infrastructure.Redis
         {
             Dispose(false);
         }
+
+        #endregion
     }
 }
