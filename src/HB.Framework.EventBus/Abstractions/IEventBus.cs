@@ -2,27 +2,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HB.Framework.EventBus
+namespace HB.Framework.EventBus.Abstractions
 {
+    /// <summary>
+    /// 以Topic为中心的时间总线
+    /// 需要保证事件的不丢失，每一个event都有追溯，都有因果
+    /// </summary>
     public interface IEventBus
     {
-        /// <summary>
-        /// you can fire away to publish
-        /// </summary>
-        /// <param name="eventName"></param>
-        /// <param name="jsonString"></param>
-        /// <returns></returns>
-        Task<PublishResult> Publish(string eventName, string jsonString);
 
-        /// <summary>
-        /// Start to handle events，需要提前把eventhandler放到DI中
-        /// </summary>
-        void Handle();
-
-        /// <summary>
-        /// 动态注册事件，也可以在appsetting中设置
-        /// </summary>
-        /// <param name="eventConfig"></param>
-        void RegisterEvent(EventConfig eventConfig);
+        void Publish(EventMessage eventMessage);
     }
 }
