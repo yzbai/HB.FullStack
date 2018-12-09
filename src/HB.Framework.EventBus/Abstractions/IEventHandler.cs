@@ -1,17 +1,11 @@
-﻿using HB.Framework.EventBus.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.EventBus
+namespace HB.Framework.EventBus.Abstractions
 {
-    /// <summary>
-    /// 单例启动
-    /// </summary>
     public interface IEventHandler : IDisposable
     {
-        EventHandlerConfig GetConfig();
-
-        void Handle(string jsonString);
+        void Handle(EventMessage eventMessage);
     }
 }

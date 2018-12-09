@@ -1,4 +1,5 @@
 ﻿using HB.Framework.EventBus;
+using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -27,10 +28,10 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddEventHandler<T>(this IServiceCollection services) where T: IEventHandler
-        {
-            services.Add(new ServiceDescriptor(typeof(IEventHandler), typeof(T), ServiceLifetime.Singleton));
-            return services;
-        }
+        //public static IServiceCollection AddEventHandler<T>(this IServiceCollection services) where T: IEventHandler
+        //{
+        //    services.Add(new ServiceDescriptor(typeof(IEventHandler), typeof(T), ServiceLifetime.Singleton));
+        //    return services;
+        //}
     }
 }
