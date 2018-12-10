@@ -1,29 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
 using HB.Framework.KVStore;
-using HB.Framework.KVStore.Entity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.RabbitMQ
 {
-    internal class EventMessageWrapper : KVStoreEntity
-    {
-        public string BrokerName { get; set; }
-
-        public EventMessage Message { get; set; }
-
-        public EventMessageWrapper() { }
-
-        public EventMessageWrapper(string brokerName, EventMessage message) : this()
-        {
-            BrokerName = brokerName;
-            Message = message;
-        }
-    }
-
     public class RabbitMQEventBusEngine : IEventBusEngine
     {
         private ILogger _logger;
@@ -44,16 +30,22 @@ namespace HB.Infrastructure.RabbitMQ
             //初始化 自拥有线程池
 
             //线程池开始工作
+
+            Thread thread = new Thread(new ThreadStart(() => { }));
+            thread.Start();
         }
 
-        public void Publish(string brokerName, EventMessage eventMessage)
+        public async Task<bool> PublishAsync(string brokerName, EventMessage eventMessage)
         {
             //大量Request线程放入缓存池中，离开
             //缓存池内容不能丢，所以用抗击打的Redis来存储
+            //注意取消息后需要从kvstore删除
 
-            EventMessageWrapper wrapper = new EventMessageWrapper(brokerName, eventMessage);
+            EventMessageEntity entity = new EventMessageEntity(brokerName, eventMessage);
 
-            _kvStore.AddAsync(wrapper);
+            KVStoreResult storeResult = await _kvStore.AddAsync(entity);
+
+            return storeResult.IsSucceeded();
         }
     }
 }

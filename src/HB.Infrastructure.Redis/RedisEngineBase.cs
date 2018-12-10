@@ -69,11 +69,18 @@ namespace HB.Infrastructure.Redis
             if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
             {
                 _connectionLock.Wait();
+
+                //TODO: add polly here,
+                //TODO: add heath check
+                //TODO: add Event Listening
+                //TODO: add More Log here
+
                 try
                 {
                     redisWrapper.Connection?.Dispose();
                     redisWrapper.Connection = ConnectionMultiplexer.Connect(redisWrapper.ConnectionString);
                     redisWrapper.Database = redisWrapper.Connection.GetDatabase(dbIndex);
+                    //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
                     _logger.LogInformation("Redis KVStoreEngine Connection ReConnected : " + key);
                 }
@@ -84,6 +91,11 @@ namespace HB.Infrastructure.Redis
             }
 
             return redisWrapper.Database;
+        }
+
+        private void Connection_ConnectionFailed(object sender, ConnectionFailedEventArgs e)
+        {
+            
         }
 
         protected IDatabase GetReadDatabase(string dbName, int dbIndex)
