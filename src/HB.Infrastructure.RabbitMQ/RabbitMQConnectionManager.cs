@@ -69,7 +69,13 @@ namespace HB.Infrastructure.RabbitMQ
             
         }
 
-        
+        public IModel GetChannel(string threadName)
+        {
+            //缓存Channel，并且初始化好，各种事件处理
+            throw new NotImplementedException();
+        }
+
+
 
         /// <summary>
         /// make the connection connected.
