@@ -74,6 +74,7 @@ namespace HB.Infrastructure.Redis
                 //TODO: add heath check
                 //TODO: add Event Listening
                 //TODO: add More Log here
+                //TODO: dig into ConfigurationOptions when create ConnectionMultiplexer
 
                 try
                 {
@@ -106,6 +107,24 @@ namespace HB.Infrastructure.Redis
         protected IDatabase GetWriteDatabase(string dbName, int dbIndex)
         {
             return GetDatabase(dbName, dbIndex, true);
+        }
+
+        protected IDatabase GetQueueDatabase()
+        {
+            RedisConnectionSetting connectionSetting = Options.GetQueueConnectionSetting();
+
+            if (connectionSetting == null)
+            {
+                string msg = "没有支持Queue的Redis实例";
+                Exception ex = new Exception(msg);
+
+                _logger.LogCritical(ex, msg);
+
+                throw ex;
+            }
+
+            return GetDatabase(connectionSetting.InstanceName, 0, true);
+
         }
 
         #region Dispose Support
