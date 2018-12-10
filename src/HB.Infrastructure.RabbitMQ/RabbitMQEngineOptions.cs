@@ -13,6 +13,8 @@ namespace HB.Infrastructure.RabbitMQ
         public string ConnectionString { get; set; }
 
         public string ExchangeName { get; set; }
+
+        public int MaxPublishWorkerThread { get; set; } = 10;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>
@@ -23,9 +25,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         public int NetworkRecoveryIntervalSeconds { get; set; } = 10;
 
-        public int MaxPublishWorkerThread { get; set; } = 300;
-
-        public int MinPublishWorkerThread { get; set; } = 5;
+        
 
         public RabbitMQConnectionSetting GetConnectionSetting(string brokerName)
         {
