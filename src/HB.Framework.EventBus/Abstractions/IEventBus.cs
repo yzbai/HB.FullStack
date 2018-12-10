@@ -10,7 +10,11 @@ namespace HB.Framework.EventBus.Abstractions
     /// </summary>
     public interface IEventBus
     {
-
-        void Publish(EventMessage eventMessage);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventMessage"></param>
+        /// <returns>是否发布成功，只有返回true才能确保消息不丢失</returns>
+        Task<bool> PublishAsync(EventMessage eventMessage);
     }
 }

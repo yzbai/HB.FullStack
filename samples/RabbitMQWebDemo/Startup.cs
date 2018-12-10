@@ -87,7 +87,7 @@ namespace RabbitMQWebDemo
 
             var eventMsg = new EventMessage(topic: "Framework.RabbitMQWebDemo.DoSomework.Done", body: Encoding.UTF8.GetBytes($"true,  {str}"));
 
-            _eventBus.Publish(eventMsg);
+            _eventBus.PublishAsync(eventMsg);
 
             _logger.LogDebug($"End Do some work with {str}");
         }

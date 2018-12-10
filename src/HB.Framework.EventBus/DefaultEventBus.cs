@@ -30,7 +30,7 @@ namespace HB.Framework.EventBus
         }
 
       
-        public void Publish(EventMessage eventMessage)
+        public async Task<bool> PublishAsync(EventMessage eventMessage)
         {
             if (!EventMessage.IsValid(eventMessage))
             {
@@ -50,7 +50,7 @@ namespace HB.Framework.EventBus
                 throw ex;
             }
 
-            _engine.Publish(brokerName, eventMessage);
+            return await _engine.PublishAsync(brokerName, eventMessage).ConfigureAwait(false);
         }
     }
 }

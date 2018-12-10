@@ -12,6 +12,6 @@ namespace HB.Framework.EventBus
         /// Engine负责确保，将Event发布
         /// </summary>
         /// <param name="eventMessage"></param>
-        void Publish(string brokerName, EventMessage eventMessage);
+        Task<bool> PublishAsync(string brokerName, EventMessage eventMessage);
     }
 }
