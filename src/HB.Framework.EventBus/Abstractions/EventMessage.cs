@@ -9,11 +9,11 @@ namespace HB.Framework.EventBus.Abstractions
     public class EventMessage
     {
 
-        public EventMessage(string topic, byte[] body)
+        public EventMessage(string type, byte[] body)
         {
-            if (string.IsNullOrEmpty(topic))
+            if (string.IsNullOrEmpty(type))
             {
-                throw new ArgumentNullException(nameof(topic));
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (body == null)
@@ -21,20 +21,25 @@ namespace HB.Framework.EventBus.Abstractions
                 throw new ArgumentNullException(nameof(body));
             }
 
-            Topic = topic;
+            Type = type;
 
             Body = new byte[body.Length];
 
             body.CopyTo(Body, 0);
         }
 
-        public string Topic { get; set; }
+        public string Type { get; set; }
 
         public byte[] Body { get; set; }
 
         public static bool IsValid(EventMessage msg)
         {
-            return !(string.IsNullOrEmpty(msg.Topic) || msg.Body == null);
+            if (msg == null)
+            {
+                return false;
+            }
+
+            return !(string.IsNullOrEmpty(msg.Type) || msg.Body == null);
         }
 
     }

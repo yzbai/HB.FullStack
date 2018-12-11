@@ -7,6 +7,6 @@ namespace HB.Infrastructure.RabbitMQ
 {
     public interface IRabbitMQConnectionManager : IDisposable
     {
-        IModel GetChannel(string threadName);
+        IModel CreateChannel(string brokerName, bool isPublish);
     }
 }

@@ -17,24 +17,26 @@ namespace HB.Infrastructure.RabbitMQ
         private RabbitMQEngineOptions _options;
         private IRabbitMQConnectionManager _connectionManager;
         private IDistributedQueue _queue;
-        private IDictionary<string, PublishWorkerManager> _managers;
+        private IDictionary<string, PublishTaskManager> _managers;
         
-        public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILogger<RabbitMQEventBusEngine> logger, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue)
+        public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue)
         {
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<RabbitMQEventBusEngine>();
             _options = options.Value;
             _connectionManager = connectionManager;
 
             _queue = queue;
 
-            _managers = new Dictionary<string, PublishWorkerManager>();
+            _managers = new Dictionary<string, PublishTaskManager>();
 
-           //初始化每一个PublishWorkerManager
-           //放入——managers
+            //初始化每一个PublishWorkerManager
+            //放入——managers
+
+            ILogger publishTaskManagerLogger = loggerFactory.CreateLogger<PublishTaskManager>();
 
             foreach (RabbitMQConnectionSetting connectionSetting in _options.ConnectionSettings)
             {
-                _managers.Add(connectionSetting.BrokerName, new PublishWorkerManager(connectionSetting, _connectionManager, _queue));
+                _managers.Add(connectionSetting.BrokerName, new PublishTaskManager(connectionSetting, _connectionManager, _queue, publishTaskManagerLogger));
             }
         }
 
