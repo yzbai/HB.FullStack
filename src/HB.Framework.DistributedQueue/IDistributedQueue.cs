@@ -8,5 +8,7 @@ namespace HB.Framework.DistributedQueue
     public interface IDistributedQueue
     {
         Task<IDistributedQueueResult> Push<T>(string queueName, T data);
+        ulong Length(string queueName);
+        IDistributedQueueResult PopAndPush<T>(string fromQueueName, string toQueueName);
     }
 }

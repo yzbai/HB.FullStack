@@ -40,12 +40,12 @@ namespace HB.Framework.EventBus
                 throw ex;
             }
 
-            string brokerName = _options.GetTopicSchema(eventMessage.Topic)?.BrokerName;
+            string brokerName = _options.GetTopicSchema(eventMessage.Type)?.BrokerName;
 
             if (string.IsNullOrEmpty(brokerName))
             {
                 Exception ex = new Exception("配置中没有找到对应主题事件的Broker");
-                _logger.LogCritical(ex, $"没有Topic对应的BrokerName， Topic：{eventMessage.Topic}");
+                _logger.LogCritical(ex, $"没有Topic对应的BrokerName， Topic：{eventMessage.Type}");
 
                 throw ex;
             }
