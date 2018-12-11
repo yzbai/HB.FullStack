@@ -15,6 +15,8 @@ namespace HB.Infrastructure.RabbitMQ
         public string ExchangeName { get; set; }
 
         public int MaxPublishWorkerThread { get; set; } = 10;
+
+        public int MaxSecondsWaitForConfirms { get; set; } = 60;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>
