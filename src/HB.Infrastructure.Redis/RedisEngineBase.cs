@@ -79,7 +79,11 @@ namespace HB.Infrastructure.Redis
                 try
                 {
                     redisWrapper.Connection?.Dispose();
-                    redisWrapper.Connection = ConnectionMultiplexer.Connect(redisWrapper.ConnectionString);
+
+                    ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(redisWrapper.ConnectionString);
+                    //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
+
+                    redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);
                     redisWrapper.Database = redisWrapper.Connection.GetDatabase(dbIndex);
                     //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 

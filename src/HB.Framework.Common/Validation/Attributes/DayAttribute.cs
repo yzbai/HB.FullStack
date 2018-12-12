@@ -13,6 +13,7 @@ namespace HB.Framework.Common.Validation.Attributes
         {
             if (string.IsNullOrEmpty(ErrorMessage))
             {
+                //TODO: 修改项目中所有ValidationAttribute的ErrorMessage
                 ErrorMessage = "xxxxx";
             }
         }

@@ -627,13 +627,13 @@ namespace HB.Framework.Common
 
         //TODO: 对系统中的DateTime, DateTimeOffset,DateTime.UtcNow做出梳理和清理
 
-        public static long ToTimestamp(DateTimeOffset dt)
+        public static double ToTimestamp(DateTimeOffset dt)
         {
             TimeSpan ts = dt - new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
-            return Convert.ToInt64(ts.TotalSeconds);
+            return ts.TotalSeconds;
         }
 
-        public static DateTimeOffset ToDateTimeOffset(long timestamp)
+        public static DateTimeOffset ToDateTimeOffset(double timestamp)
         {
             return new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero).AddSeconds(timestamp);
         }
