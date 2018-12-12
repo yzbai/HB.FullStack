@@ -61,7 +61,9 @@ namespace HB.Infrastructure.RabbitMQ
                 return false;
             }
 
-            IDistributedQueueResult queueResult = await _queue.Push(queueName: brokerName, data: eventMessage);
+            EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.Body);
+
+            IDistributedQueueResult queueResult = await _queue.Push(queueName: brokerName, data: eventEntity);
 
             if (queueResult.IsSucceeded())
             {
