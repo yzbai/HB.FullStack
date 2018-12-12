@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using HB.Framework.Common;
 using HB.Framework.DistributedQueue;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -30,12 +32,17 @@ namespace HB.Infrastructure.RabbitMQ
 
         private LinkedList<TaskNode> _taskNodes;
 
+        //EventMessage.Type
+        private ConcurrentDictionary<string, bool> _eventDeclareDict;
+
         public PublishTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue, ILogger logger)
         {
             _logger = logger;
             _connectionManager = connectionManager;
             _queue = queue;
             _connectionSetting = connectionSetting;
+
+            _queueDict = new ConcurrentDictionary<string, bool>();
 
             _taskNodes = new LinkedList<TaskNode>();
             
@@ -81,6 +88,8 @@ namespace HB.Infrastructure.RabbitMQ
         //per thread per channel
         private void PublishToRabbitMQ()
         {
+            _logger.LogTrace($"Enter Thread : {Thread.CurrentThread.ManagedThreadId}");
+
             IModel channel = null;
 
             try
@@ -90,12 +99,12 @@ namespace HB.Infrastructure.RabbitMQ
                 while (true)
                 {
                     //获取数据
-                    IDistributedQueueResult<EventMessage> queueResult = _queue.PopAndPush<EventMessage>(fromQueueName: QueueName, toQueueName: QueueHistoryName);
+                    IDistributedQueueResult queueResult = _queue.PopAndPush<EventMessage>(fromQueueName: QueueName, toQueueName: QueueHistoryName);
 
                     if (!queueResult.IsSucceeded() || !EventMessage.IsValid(queueResult.Data))
                     {
                         //可能性1：Queue挂掉，取不到；可能性2：Queue已空
-                        //退出循环
+                        //退出循环, 结束Thread
 
                         bool allAcks = channel.WaitForConfirms(TimeSpan.FromSeconds(_connectionSetting.MaxSecondsWaitForConfirms), out bool timedOut);
 
@@ -115,6 +124,8 @@ namespace HB.Infrastructure.RabbitMQ
                         break;
                     }
 
+                    EventMessage message = queueResult.Data as EventMessage;
+
                     //确保Channel 可用, 不可用，再create一个
                     if (channel ==null || channel.CloseReason != null)
                     {
@@ -123,15 +134,19 @@ namespace HB.Infrastructure.RabbitMQ
                         channel = CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
                     }
 
+                    //Declare Queue & Binding
+
+                    DeclareEventType(channel, message);
+                    
                     //publish
                     IBasicProperties basicProperties = channel.CreateBasicProperties();
                     basicProperties.DeliveryMode = 2;
 
                     ulong sequenceNumber = channel.NextPublishSeqNo;
 
+                    channel.BasicPublish(_connectionSetting.ExchangeName, message.Type, true, basicProperties, message.Body);
 
-
-
+                    //暂存
                 }
             }
             catch (Exception ex)
@@ -144,15 +159,38 @@ namespace HB.Infrastructure.RabbitMQ
             }
         }
 
+        private void DeclareEventType(IModel channel, EventMessage message)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            if (_eventDeclareDict.ContainsKey(message.Type))
+            {
+                return;
+            }
+
+            //Queue
+            channel.QueueDeclare(message.Type, true, false, false);
+
+            //Bind
+            channel.QueueBind(message.Type, _connectionSetting.ExchangeName, message.Type);
+
+            _eventDeclareDict.TryAdd(message.Type, true);
+        }
+
         private IModel CreateChannel(string brokerName, bool isPublish)
         {
             IModel channel = _connectionManager.CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
 
+            //Events
             SettingUpChannelEvents(channel);
 
+            //Declare
             channel.ExchangeDeclare(_connectionSetting.ExchangeName, ExchangeType.Direct, true, false);
-            //channel.QueueDeclare(_)
 
+            //Confirm Mode
             channel.ConfirmSelect();
 
             return channel;

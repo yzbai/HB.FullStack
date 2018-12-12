@@ -4,10 +4,10 @@ using System.Text;
 
 namespace HB.Framework.DistributedQueue
 {
-    public class IDistributedQueueResult<T>
+    public class IDistributedQueueResult
     {
         public int QueueLength { get; set; }
-        public T Data { get; set; }
+        public object Data { get; set; }
 
         public bool IsSucceeded()
         {

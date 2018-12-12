@@ -42,5 +42,21 @@ namespace HB.Framework.EventBus.Abstractions
             return !(string.IsNullOrEmpty(msg.Type) || msg.Body == null);
         }
 
+        public static bool IsValid(object data)
+        {
+            if (data == null)
+            {
+                return false;
+            }
+
+            EventMessage ev = (EventMessage)data;
+
+            if (ev == null)
+            {
+                return false;
+            }
+
+            return IsValid(ev);
+        }
     }
 }

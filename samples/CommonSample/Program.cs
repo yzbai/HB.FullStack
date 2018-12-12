@@ -2,9 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using Microsoft.Extensions.Logging;
-using HB.Framework.EventBus;
 
-using CommonSample;
 using Microsoft.Extensions.Hosting;
 
 namespace HB.PresentFish.Tools
@@ -51,12 +49,12 @@ namespace HB.PresentFish.Tools
 
             serviceCollection.AddSingleton<IApplicationLifetime, Microsoft.Extensions.Hosting.Internal.ApplicationLifetime>();
 
-            serviceCollection.AddKafkaEngine(Configuration.GetSection("Kafka"));
+            //serviceCollection.AddKafkaEngine(Configuration.GetSection("Kafka"));
 
-            serviceCollection.AddEventBus(Configuration.GetSection("EventBus"));
+            //serviceCollection.AddEventBus(Configuration.GetSection("EventBus"));
 
-            serviceCollection.AddSingleton<IEventHandler, TestEventHandler>();
-            serviceCollection.AddSingleton<IEventHandler, TestEventHandler2>();
+            //serviceCollection.AddSingleton<IEventHandler, TestEventHandler>();
+            //serviceCollection.AddSingleton<IEventHandler, TestEventHandler2>();
 
             Services = serviceCollection.BuildServiceProvider();
 
