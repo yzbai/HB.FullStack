@@ -11,7 +11,6 @@ namespace HB.Framework.DistributedQueue
 
         ulong Length(string queueName);
 
-        IDistributedQueueResult PopAndPush<T>(string fromQueueName, string toQueueName);
 
         /// <summary>
         /// 不能保证一定是在最前面
@@ -21,5 +20,8 @@ namespace HB.Framework.DistributedQueue
         /// <param name="data"></param>
         /// <returns></returns>
         IDistributedQueueResult InsertFront<T>(string queueName, T data);
+
+        IDistributedQueueResult PopAndHistory<T>(string fromQueueName, string historyName);
+        IDistributedQueueResult DeleteHistory<T>(string historyName, IList<string> ids);
     }
 }

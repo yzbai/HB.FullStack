@@ -6,6 +6,7 @@ using Xunit.Abstractions;
 
 namespace HB.Framework.Common.Test
 {
+    //TODO: 什么时间做单元测试？
     public class MapKey
     {
         public string KeyName { get; set; }

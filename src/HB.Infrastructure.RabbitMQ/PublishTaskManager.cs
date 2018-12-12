@@ -67,45 +67,95 @@ namespace HB.Infrastructure.RabbitMQ
         //per thread per channel
         private void PublishToRabbitMQ()
         {
-            _logger.LogTrace($"Enter Thread : {Thread.CurrentThread.ManagedThreadId}");
             IModel channel = null;
 
-            LinkedList<string> confirmEventIdList = new LinkedList<string>();
-            ulong firstListNodeSeqno = 1;
+            List<string> confirmEventIdList = new List<string>();
+            
+            ulong fs = 1; //the seqno of first in confirmEventIdList
 
-            
-            
+            object lockObj = new object();
+
             try
             {
                 channel = CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
 
                 channel.BasicAcks += (sender, eventArgs) =>
                 {
-                    List<string> ids = new List<string>();
+                    List<string> deleteIds = new List<string>();
 
-                    if (eventArgs.Multiple)
+                    lock (lockObj)
                     {
+                        ulong seqno = eventArgs.DeliveryTag;
+                        int index = (int)(seqno - fs);
 
-                    }
-                    else
-                    {
-                        
-                    }
+                        if (eventArgs.Multiple)
+                        {
+                            for (int i = 0; i < index; i++)
+                            {
+                                deleteIds.Add(confirmEventIdList[i]);
+                                confirmEventIdList[i] = null;
+                            }
+                        }
+                        else
+                        {
+                            deleteIds.Add(confirmEventIdList[index]);
+                            confirmEventIdList[index] = null;
+                        }
 
-                    tempEventIdDicts.Remove()
+                        // 收缩,每100次，收缩一次
+                        if (seqno % 100 == 0 && confirmEventIdList.Count > 100)
+                        {
+                            //奇点处理,直接当成nack
+                            confirmEventIdList[0] = null;
+
+                            int nextIndex = 0;
+
+                            for (int i = 0; i < confirmEventIdList.Count; ++i)
+                            {
+                                if (confirmEventIdList[i] != null)
+                                {
+                                    nextIndex = i;
+                                    break;
+                                }
+                            }
+
+                            fs = fs + (ulong)nextIndex;
+
+                            confirmEventIdList.RemoveRange(0, nextIndex);
+                            confirmEventIdList.TrimExcess();
+                        }
+                    }
 
                     //从brokerName_history删除
+                    IDistributedQueueResult result = _distributedQueue.DeleteHistory<EventMessageEntity>(historyName: DistributedQueueHistoryName, ids:deleteIds);
                 };
 
                 channel.BasicNacks += (sender, eventArgs) =>
                 {
-                    //重新放入队列中,比较靠前
+                    //那就在history里待着吧，等待回收
+                    lock(lockObj)
+                    {
+                        ulong seqno = eventArgs.DeliveryTag;
+                        int index = (int)(seqno - fs);
+
+                        if (eventArgs.Multiple)
+                        {
+                            for (int i = 0; i < index; i++)
+                            {
+                                confirmEventIdList[i] = null;
+                            }
+                        }
+                        else
+                        {
+                            confirmEventIdList[index] = null;
+                        }
+                    }
                 };
 
                 while (true)
                 {
                     //获取数据.用同步方法，不能用await，避免前后线程不一致
-                    IDistributedQueueResult queueResult = _distributedQueue.PopAndPush<EventMessageEntity>(fromQueueName: DistributedQueueName, toQueueName: DistributedQueueHistoryName);
+                    IDistributedQueueResult queueResult = _distributedQueue.PopAndHistory<EventMessageEntity>(fromQueueName: DistributedQueueName, historyName: DistributedQueueHistoryName);
 
                     //没有数据，queue为空，直接推出
                     if (!queueResult.IsSucceeded() || !EventMessageEntity.IsValid(queueResult.Data))
@@ -148,13 +198,10 @@ namespace HB.Infrastructure.RabbitMQ
                     IBasicProperties basicProperties = channel.CreateBasicProperties();
                     basicProperties.DeliveryMode = 2;
 
-                    ulong sequenceNumber = channel.NextPublishSeqNo;
-
                     channel.BasicPublish(_connectionSetting.ExchangeName, EventTypeToRoutingKey(eventEntity.Type), true, basicProperties, eventEntity.Body);
 
-                    eventIdList.AddLast(eventEntity.Id);
-                    //tempEventIdList.Add(eventEntity.Id);
-                    //tempEventIdDicts.Add(sequenceNumber, eventEntity.Id);
+                    //Confirm
+                    confirmEventIdList.Add(eventEntity.Id);
                 }
             }
             catch (Exception ex)
