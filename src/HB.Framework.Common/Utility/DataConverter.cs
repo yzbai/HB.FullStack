@@ -625,6 +625,8 @@ namespace HB.Framework.Common
 
         #region Time
 
+        //TODO: 对系统中的DateTime, DateTimeOffset,DateTime.UtcNow做出梳理和清理
+
         public static long ToTimestamp(DateTimeOffset dt)
         {
             TimeSpan ts = dt - new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
