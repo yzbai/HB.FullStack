@@ -15,7 +15,8 @@ namespace RabbitMQDemo
             //应该Retry
             ConnectionFactory connectionFactory = new ConnectionFactory();
 
-            connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
+            connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
+            //connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
             connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             connectionFactory.AutomaticRecoveryEnabled = true;
 
@@ -104,7 +105,7 @@ namespace RabbitMQDemo
                 channel.ConfirmSelect();
 
 
-                channel.ExchangeDeclare("DefaultTopic", ExchangeType.Topic, true, false);
+                //channel.ExchangeDeclare("DefaultTopic", ExchangeType.Topic, true, false);
 
                 Thread.Sleep(5 * 1000);
 
