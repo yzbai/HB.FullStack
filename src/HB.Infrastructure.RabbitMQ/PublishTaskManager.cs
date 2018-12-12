@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HB.Framework.Common;
@@ -20,6 +22,7 @@ namespace HB.Infrastructure.RabbitMQ
 
     /// <summary>
     /// 每一个PublishWokerManager，负责一个broker的工作，自己决定工作量的大小
+    /// eventType = routingkey = queuename
     /// </summary>
     public class PublishTaskManager
     {
@@ -28,24 +31,20 @@ namespace HB.Infrastructure.RabbitMQ
         private ILogger _logger;
         private RabbitMQConnectionSetting _connectionSetting;
         private IRabbitMQConnectionManager _connectionManager;
-        private IDistributedQueue _queue;
+        private IDistributedQueue _distributedQueue;
 
-        private LinkedList<TaskNode> _taskNodes;
+        private LinkedList<TaskNode> _taskNodes = new LinkedList<TaskNode>();
 
-        //EventMessage.Type
-        private ConcurrentDictionary<string, bool> _eventDeclareDict;
+        //EventMessageEntity.Type
+        private ConcurrentDictionary<string, bool> _eventDeclareDict = new ConcurrentDictionary<string, bool>();
 
-        public PublishTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue, ILogger logger)
+        public PublishTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
         {
             _logger = logger;
             _connectionManager = connectionManager;
-            _queue = queue;
+            _distributedQueue = distributedQueue;
             _connectionSetting = connectionSetting;
 
-            _queueDict = new ConcurrentDictionary<string, bool>();
-
-            _taskNodes = new LinkedList<TaskNode>();
-            
             for (int i = 0; i < InitialTaskNumber(); ++i)
             {
                 CancellationTokenSource cs = new CancellationTokenSource();
@@ -58,30 +57,10 @@ namespace HB.Infrastructure.RabbitMQ
             }
         }
 
-        private string QueueName
+        public void NotifyPublishComming()
         {
-            get { return _connectionSetting.BrokerName; }
-        }
-
-        private string QueueHistoryName
-        {
-            get { return _connectionSetting.BrokerName + "_History"; }
-        }
-
-        private int InitialTaskNumber()
-        {
-            //根据初始队列长度，确定线程数量
-            ulong length = _queue.Length(queueName: QueueName);
-
-            if (length == 0)
-            {
-                return 0;
-            }
-
-            int taskNumber = (int)(length / PER_THREAD_FACING) + 1;
-
-            return taskNumber;
-
+            //管理
+            //控制Task的数量
         }
 
         //await前后线程不同。想让前后线程一致。Task里避免用await，用wait()
@@ -89,19 +68,47 @@ namespace HB.Infrastructure.RabbitMQ
         private void PublishToRabbitMQ()
         {
             _logger.LogTrace($"Enter Thread : {Thread.CurrentThread.ManagedThreadId}");
-
             IModel channel = null;
 
+            LinkedList<string> confirmEventIdList = new LinkedList<string>();
+            ulong firstListNodeSeqno = 1;
+
+            
+            
             try
             {
                 channel = CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
 
+                channel.BasicAcks += (sender, eventArgs) =>
+                {
+                    List<string> ids = new List<string>();
+
+                    if (eventArgs.Multiple)
+                    {
+
+                    }
+                    else
+                    {
+                        
+                    }
+
+                    tempEventIdDicts.Remove()
+
+                    //从brokerName_history删除
+                };
+
+                channel.BasicNacks += (sender, eventArgs) =>
+                {
+                    //重新放入队列中,比较靠前
+                };
+
                 while (true)
                 {
-                    //获取数据
-                    IDistributedQueueResult queueResult = _queue.PopAndPush<EventMessage>(fromQueueName: QueueName, toQueueName: QueueHistoryName);
+                    //获取数据.用同步方法，不能用await，避免前后线程不一致
+                    IDistributedQueueResult queueResult = _distributedQueue.PopAndPush<EventMessageEntity>(fromQueueName: DistributedQueueName, toQueueName: DistributedQueueHistoryName);
 
-                    if (!queueResult.IsSucceeded() || !EventMessage.IsValid(queueResult.Data))
+                    //没有数据，queue为空，直接推出
+                    if (!queueResult.IsSucceeded() || !EventMessageEntity.IsValid(queueResult.Data))
                     {
                         //可能性1：Queue挂掉，取不到；可能性2：Queue已空
                         //退出循环, 结束Thread
@@ -110,7 +117,7 @@ namespace HB.Infrastructure.RabbitMQ
 
                         if (allAcks && !timedOut)
                         {
-                            _logger.LogDebug($"Task will end, no in queue : {QueueName}, and all good.");
+                            _logger.LogDebug($"Task will end, no in queue : {DistributedQueueName}, and all good.");
                         }
                         else if (allAcks && timedOut)
                         {
@@ -124,19 +131,18 @@ namespace HB.Infrastructure.RabbitMQ
                         break;
                     }
 
-                    EventMessage message = queueResult.Data as EventMessage;
+                    EventMessageEntity eventEntity = queueResult.Data as EventMessageEntity;
 
-                    //确保Channel 可用, 不可用，再create一个
-                    if (channel ==null || channel.CloseReason != null)
+                    //Channel 不可用，直接结束Thread
+                    if (channel == null || channel.CloseReason != null)
                     {
                         _logger.LogWarning($"Channel for broker: {_connectionSetting.BrokerName}, has closed, reason:{channel?.CloseReason.ToString()}");
 
-                        channel = CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
+                        break;
                     }
 
                     //Declare Queue & Binding
-
-                    DeclareEventType(channel, message);
+                    DeclareEventType(channel, eventEntity);
                     
                     //publish
                     IBasicProperties basicProperties = channel.CreateBasicProperties();
@@ -144,14 +150,16 @@ namespace HB.Infrastructure.RabbitMQ
 
                     ulong sequenceNumber = channel.NextPublishSeqNo;
 
-                    channel.BasicPublish(_connectionSetting.ExchangeName, message.Type, true, basicProperties, message.Body);
+                    channel.BasicPublish(_connectionSetting.ExchangeName, EventTypeToRoutingKey(eventEntity.Type), true, basicProperties, eventEntity.Body);
 
-                    //暂存
+                    eventIdList.AddLast(eventEntity.Id);
+                    //tempEventIdList.Add(eventEntity.Id);
+                    //tempEventIdDicts.Add(sequenceNumber, eventEntity.Id);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, $"在PublishToRabbitMQ中，Thread Id : {Thread.CurrentThread.ManagedThreadId}, Exceptions: {ex.Message}");
+                _logger.LogCritical(ex, $"在PublishToRabbitMQ {_connectionSetting.BrokerName} 中，Thread Id : {Thread.CurrentThread.ManagedThreadId}, Exceptions: {ex.Message}");
             }
             finally
             {
@@ -159,7 +167,7 @@ namespace HB.Infrastructure.RabbitMQ
             }
         }
 
-        private void DeclareEventType(IModel channel, EventMessage message)
+        private void DeclareEventType(IModel channel, EventMessageEntity message)
         {
             if (message == null)
             {
@@ -171,11 +179,14 @@ namespace HB.Infrastructure.RabbitMQ
                 return;
             }
 
+            string queueName = EventTypeToQueueName(message.Type);
+            string routingKey = EventTypeToRoutingKey(message.Type);
+
             //Queue
-            channel.QueueDeclare(message.Type, true, false, false);
+            channel.QueueDeclare(queueName, true, false, false);
 
             //Bind
-            channel.QueueBind(message.Type, _connectionSetting.ExchangeName, message.Type);
+            channel.QueueBind(queueName, _connectionSetting.ExchangeName, routingKey);
 
             _eventDeclareDict.TryAdd(message.Type, true);
         }
@@ -196,52 +207,91 @@ namespace HB.Infrastructure.RabbitMQ
             return channel;
         }
 
-        private static void SettingUpChannelEvents(IModel channel)
+        private void SettingUpChannelEvents(IModel channel)
         {
             channel.BasicReturn += (sender, eventArgs) =>
             {
-                //没有人听，返回来，重新放入
-                Console.WriteLine($"broker return : {eventArgs.Exchange} : {eventArgs.RoutingKey}");
-            };
-
-            channel.BasicAcks += (sender, eventArgs) =>
-            {
-                Console.WriteLine($"broker ack : {eventArgs.DeliveryTag}");
-                //从brokerName_history删除
-            };
-
-            channel.BasicNacks += (sender, eventArgs) =>
-            {
-                //重新放入队列中,比较靠前
-                Console.WriteLine($"broker nack : {eventArgs.DeliveryTag}");
+                //直接留在history中，稍后会有人打扫
+                _logger.LogWarning($"rabbitmq 没有 queue接受，留在 history 中：{DistributedQueueHistoryName} 。MessageType:{eventArgs.RoutingKey}");
             };
 
             channel.BasicRecoverOk += (sender, eventArgs) =>
             {
-                //重新放入队列中，比较靠前
                 //Log 记录
+                _logger.LogInformation($"RabbitMQ Broker : {_connectionSetting.BrokerName} Recovery Ok.");
             };
 
             channel.CallbackException += (sender, eventArgs) =>
             {
-                //Re create channel
+                string detailMessage = "RabbitMQ Channel Exception:";
+
+                if (eventArgs != null & eventArgs.Detail != null)
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    stringBuilder.AppendLine(detailMessage);
+
+                    foreach (KeyValuePair<string, object> pair in eventArgs.Detail)
+                    {
+                        stringBuilder.AppendLine($"{pair.Key} : {pair.Value.ToString()}");
+                    }
+
+                    detailMessage = stringBuilder.ToString();
+                }
+
+                _logger.LogError($"RabbitMQ Broker : {_connectionSetting.BrokerName}, Detail:{detailMessage}");
             };
 
             channel.FlowControl += (sender, eventArgs) =>
             {
-
+                _logger.LogInformation($"RabbitMQ Broker : {_connectionSetting.BrokerName}, Active: {eventArgs.Active}");
             };
 
             channel.ModelShutdown += (sender, eventArgs) =>
             {
-
+                _logger.LogInformation($"RabbitMQ Broker : {_connectionSetting.BrokerName}, {eventArgs.ToString()}");
             };
         }
 
-        public void NotifyPublishComming()
+        private string DistributedQueueName
         {
-            //管理
-            //控制Task的数量
+            get { return _connectionSetting.BrokerName; }
+        }
+
+        private string DistributedQueueHistoryName
+        {
+            get { return _connectionSetting.BrokerName + "_History"; }
+        }
+
+        private int InitialTaskNumber()
+        {
+            //根据初始队列长度，确定线程数量
+            ulong length = _distributedQueue.Length(queueName: DistributedQueueName);
+
+            if (length == 0)
+            {
+                return 0;
+            }
+
+            int taskNumber = (int)(length / PER_THREAD_FACING) + 1;
+
+            return taskNumber;
+
+        }
+
+        private string RoutingKeyToEventType(string routingKey)
+        {
+            return routingKey;
+        }
+
+        private string EventTypeToRoutingKey(string eventType)
+        {
+            return eventType;
+        }
+
+        private string EventTypeToQueueName(string eventType)
+        {
+            return eventType;
         }
     }
 }

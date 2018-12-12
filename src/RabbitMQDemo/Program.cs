@@ -15,8 +15,8 @@ namespace RabbitMQDemo
             //应该Retry
             ConnectionFactory connectionFactory = new ConnectionFactory();
 
-            connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
-            //connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
+            //connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
+            connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
             connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             connectionFactory.AutomaticRecoveryEnabled = true;
 
@@ -51,97 +51,24 @@ namespace RabbitMQDemo
             #endregion
 
             //start Pub
-            Task.Run(() => 
+            Task.Run(() =>
             {
-                IModel channel = connection.CreateModel();
+                Pub(connection, "11111111111111");
+            });
 
-                #region channel event
-                channel.BasicReturn += (sender, eventArgs) =>
-                {
-                    Console.WriteLine($"broker return : {eventArgs.Exchange} : {eventArgs.RoutingKey}");
-                };
+            Task.Run(() =>
+            {
+                Pub(connection, "333333333333333");
+            });
 
-                channel.BasicAcks += (sender, eventArgs) =>
-                {
-                    Console.WriteLine($"broker ack : {eventArgs.DeliveryTag}");
-                };
+            Task.Run(() =>
+            {
+                Pub(connection, "4444444444444444");
+            });
 
-                channel.BasicNacks += (sender, eventArgs) =>
-                {
-
-                    Console.WriteLine($"broker nack : {eventArgs.DeliveryTag}");
-                };
-
-                channel.BasicRecoverOk += (sender, eventArgs) =>
-                {
-
-                };
-
-                channel.CallbackException += (sender, eventArgs) =>
-                {
-                    //Re create channel
-                };
-
-                channel.FlowControl += (sender, eventArgs) =>
-                {
-
-                };
-
-                channel.ModelShutdown += (sender, eventArgs) =>
-                {
-
-                };
-
-                #endregion
-
-                //channel.WaitForConfirms();
-
-                //channel.ExchangeDeclare("testExchange", ExchangeType.Direct);
-                //channel.QueueDeclare("hello", false, false, false, null);
-
-                //channel.QueueBind("testQueue", "testExchange", "testRoutingKey");
-                //Thread.Sleep(5000);
-
-                channel.ConfirmSelect();
-
-
-                //channel.ExchangeDeclare("DefaultTopic", ExchangeType.Topic, true, false);
-
-                Thread.Sleep(5 * 1000);
-
-                for (int i =0; i < 10; i++)
-                {
-                    byte[] data = Encoding.UTF8.GetBytes($"Publisher : hello, there. This is {i} th times.");
-
-                    IBasicProperties basicProperties = channel.CreateBasicProperties();
-                    basicProperties.ContentType = "text/plain";
-                    basicProperties.DeliveryMode = 2;
-
-                    ulong number = channel.NextPublishSeqNo;
-                    Console.WriteLine($"接下来的序号：{number}");
-
-                    channel.BasicPublish("DefaultTopic", "a.b.c", true, basicProperties, data);
-
-                    //channel.BasicPublish("", "testRoutingKey", basicProperties, Encoding.UTF8.GetBytes($"Publisher : hello, there. This is {i} th times."));
-
-
-                    //channel.BasicPublish()
-                    //ulong number = channel.NextPublishSeqNo;
-                    //channel.BasicPublish(exchange: "", routingKey: "hello", mandatory: false, basicProperties: basicProperties, body: data);
-
-                    //当用default direct exchange "" 时，routingkey 可以直接是queue name。默认binding了。
-                    //channel.BasicPublish("testExchange", "test", basicProperties, data);
-
-
-
-
-                    //需要检测有没有被reject with an exception，如果时，需要自己retry。 这个时候channel不会auto recover。
-                    //再下来，消息到底有没有被送达，就要靠 publisher confirms了。
-
-
-
-                    //Thread.Sleep(new Random().Next(1, 2) * 1000);
-                }
+            Task.Run(() =>
+            {
+                Pub(connection, "22222222222222222");
             });
 
             Task.Run(() => 
@@ -246,6 +173,99 @@ namespace RabbitMQDemo
 
             connection.Close();
 
+        }
+
+        private static void Pub(IConnection connection, string pubName)
+        {
+            IModel channel = connection.CreateModel();
+
+            #region channel event
+            channel.BasicReturn += (sender, eventArgs) =>
+            {
+                Console.WriteLine($"{pubName} broker return : {eventArgs.Exchange} : {eventArgs.RoutingKey}");
+            };
+
+            channel.BasicAcks += (sender, eventArgs) =>
+            {
+                Console.WriteLine($"{pubName} broker ack : {eventArgs.DeliveryTag}");
+            };
+
+            channel.BasicNacks += (sender, eventArgs) =>
+            {
+
+                Console.WriteLine($"{pubName} broker nack : {eventArgs.DeliveryTag}");
+            };
+
+            channel.BasicRecoverOk += (sender, eventArgs) =>
+            {
+
+            };
+
+            channel.CallbackException += (sender, eventArgs) =>
+            {
+                //Re create channel
+            };
+
+            channel.FlowControl += (sender, eventArgs) =>
+            {
+
+            };
+
+            channel.ModelShutdown += (sender, eventArgs) =>
+            {
+
+            };
+
+            #endregion
+
+            //channel.WaitForConfirms();
+
+            //channel.ExchangeDeclare("testExchange", ExchangeType.Direct);
+            //channel.QueueDeclare("hello", false, false, false, null);
+
+            //channel.QueueBind("testQueue", "testExchange", "testRoutingKey");
+            //Thread.Sleep(5000);
+
+            channel.ConfirmSelect();
+
+
+            //channel.ExchangeDeclare("DefaultTopic", ExchangeType.Topic, true, false);
+
+            Thread.Sleep(5 * 1000);
+
+            for (int i = 0; i < 10; i++)
+            {
+                byte[] data = Encoding.UTF8.GetBytes($"{pubName} Publisher : hello, there. This is {i} th times.");
+
+                IBasicProperties basicProperties = channel.CreateBasicProperties();
+                basicProperties.ContentType = "text/plain";
+                basicProperties.DeliveryMode = 2;
+
+                ulong number = channel.NextPublishSeqNo;
+                Console.WriteLine($"{pubName} 接下来的序号：{number}");
+
+                channel.BasicPublish("DefaultTopic", "a.b.c", true, basicProperties, data);
+
+                //channel.BasicPublish("", "testRoutingKey", basicProperties, Encoding.UTF8.GetBytes($"Publisher : hello, there. This is {i} th times."));
+
+
+                //channel.BasicPublish()
+                //ulong number = channel.NextPublishSeqNo;
+                //channel.BasicPublish(exchange: "", routingKey: "hello", mandatory: false, basicProperties: basicProperties, body: data);
+
+                //当用default direct exchange "" 时，routingkey 可以直接是queue name。默认binding了。
+                //channel.BasicPublish("testExchange", "test", basicProperties, data);
+
+
+
+
+                //需要检测有没有被reject with an exception，如果时，需要自己retry。 这个时候channel不会auto recover。
+                //再下来，消息到底有没有被送达，就要靠 publisher confirms了。
+
+
+
+                //Thread.Sleep(new Random().Next(1, 2) * 1000);
+            }
         }
     }
 }

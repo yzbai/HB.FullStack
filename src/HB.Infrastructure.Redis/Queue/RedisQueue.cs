@@ -16,6 +16,12 @@ namespace HB.Infrastructure.Redis.Queue
             _logger = logger;
         }
 
+        public IDistributedQueueResult InsertFront<T>(string queueName, T data)
+        {
+            //TODO: 要用polly来确保吗?
+            throw new NotImplementedException();
+        }
+
         public ulong Length(string queueName)
         {
             throw new NotImplementedException();

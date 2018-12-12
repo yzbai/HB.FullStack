@@ -255,6 +255,7 @@ namespace HB.Infrastructure.MySQL
             {
                 if (conn.State != ConnectionState.Open)
                 {
+                    //TODO: 要用Polly来确保吗?
                     conn.Open();
                 }
 
