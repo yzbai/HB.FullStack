@@ -65,30 +65,46 @@ namespace HB.Infrastructure.RabbitMQ
             //Now we have to make new connection
             connection = CreateNewConnection(brokerName);
 
-            connection.i
-            
+            if (isPublishConnection)
+            {
+                _pubConnectionDict[brokerName] = connection;
+            }
+            else
+            {
+                _subConnectionDict[brokerName] = connection;
+            }
+
+            return connection;
         }
-
-        public IModel GetChannel(string threadName)
-        {
-            //缓存Channel，并且初始化好，各种事件处理
-            throw new NotImplementedException();
-        }
-
-
 
         /// <summary>
-        /// make the connection connected.
+        /// no cached
         /// </summary>
-        /// <param name="connection"></param>
-        private IConnection MaintainConnection(string brokerName, IConnection connection)
+        /// <param name="brokerName"></param>
+        /// <param name="isPublish"></param>
+        /// <returns></returns>
+        public IModel CreateChannel(string brokerName, bool isPublish)
         {
+            IConnection connection = GetConnection(brokerName, isPublish);
 
+            return connection.CreateModel();
         }
 
         private bool IsConnected(IConnection connection)
         {
-            return connection != null && connection.IsOpen && !_disposed;
+            if (connection == null)
+            {
+                _logger.LogError("发现一个为null的RabbitMQ Connection");
+            }
+
+            if (connection.CloseReason != null)
+            {
+                _logger.LogError($"发现一个关闭了的RabbitMQ Connection, 原因：{connection.CloseReason}");
+
+                return false;
+            }
+
+            return true;
         }
 
         #region Connection Creat
@@ -105,6 +121,9 @@ namespace HB.Infrastructure.RabbitMQ
 
                 throw ex;
             }
+
+            //TODO: add polly here, make sure the connection is established, or just keep trying
+            //TODO: add log here
 
             ConnectionFactory connectionFactory = new ConnectionFactory();
             connectionFactory.Uri = new Uri(connectionSetting.ConnectionString);
@@ -125,32 +144,48 @@ namespace HB.Infrastructure.RabbitMQ
 
         private void Connection_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            throw new NotImplementedException();
+            _logger.LogWarning(e.ToString());
         }
 
         private void Connection_ConnectionRecoveryError(object sender, ConnectionRecoveryErrorEventArgs e)
         {
-            throw new NotImplementedException();
+            _logger.LogCritical(e.Exception, $"RabbitMQ Connection Recovery Error, Exception:{e.Exception.Message}");
         }
 
         private void Connection_RecoverySucceeded(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            _logger.LogWarning("RabbitMQ Recovery suncceeded.");
         }
 
         private void Connection_ConnectionUnblocked(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            _logger.LogWarning("RabbitMQ Connection Unblocked.");
         }
 
         private void Connection_ConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            throw new NotImplementedException();
+            _logger.LogWarning($"RabbitMQ Connection Blocked. Reason:{e.Reason}");
         }
 
         private void Connection_CallbackException(object sender, CallbackExceptionEventArgs e)
         {
-            throw new NotImplementedException();
+            string detailMessage = "RabbitMQ Connection Exception:";
+
+            if (e != null & e.Detail != null)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+
+                stringBuilder.AppendLine(detailMessage);
+
+                foreach (KeyValuePair<string, object> pair in e.Detail)
+                {
+                    stringBuilder.AppendLine($"{pair.Key} : {pair.Value.ToString()}");
+                }
+
+                detailMessage = stringBuilder.ToString();
+            }
+
+            _logger.LogError(detailMessage);
         }
 
         #endregion
@@ -209,6 +244,8 @@ namespace HB.Infrastructure.RabbitMQ
             // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
+
+        
         #endregion
     }
 }
