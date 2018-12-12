@@ -65,6 +65,7 @@ namespace HB.Infrastructure.MySQL
 
         public static IDataReader ExecuteSqlReader(string connectionString, string sqlString)
         {
+            //TODO: do we need a connection manager, that retry and makesure connection is avalible?
             MySqlConnection conn = new MySqlConnection(connectionString);
 
             MySqlCommand command = new MySqlCommand
@@ -133,7 +134,7 @@ namespace HB.Infrastructure.MySQL
                 {
                     reader.Close();
                 }
-
+                //TODO: 检查，整个解决方案，中所有的throw都要加log
                 throw;
             }
         }

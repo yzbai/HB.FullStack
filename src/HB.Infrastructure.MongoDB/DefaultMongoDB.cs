@@ -42,7 +42,7 @@ namespace HB.Infrastructure.MongoDB
             _collectionDict = new Dictionary<string, object>();
         }
 
-        public IMongoClient GetClient(string instanceName)
+        private IMongoClient GetClient(string instanceName)
         {
             if (_clientDict.ContainsKey(instanceName))
             {
@@ -51,7 +51,11 @@ namespace HB.Infrastructure.MongoDB
 
             string connectionString = _mongoOptions.GetConnectionString(instanceName);
 
-            IMongoClient mongoClient = new MongoClient(connectionString);
+            MongoClientSettings clientSettings = MongoClientSettings.FromConnectionString(connectionString);
+            IMongoClient mongoClient = new MongoClient(clientSettings);
+
+            //TODO: More MongoClientSettings Detail
+            //TODO: should retry?
 
             if (mongoClient != null)
             {
@@ -61,7 +65,7 @@ namespace HB.Infrastructure.MongoDB
             return mongoClient;
         }
 
-        public IMongoDatabase GetDatabase(string instanceName, string databaseName)
+        private IMongoDatabase GetDatabase(string instanceName, string databaseName)
         {
             string key = instanceName + "_" + databaseName;
 
@@ -74,6 +78,7 @@ namespace HB.Infrastructure.MongoDB
 
             if (client == null)
             {
+                //TODO: add log
                 return null;
             }
 
@@ -104,6 +109,7 @@ namespace HB.Infrastructure.MongoDB
 
             if (db == null)
             {
+                //TODO: add log
                 return null;
             }
 
