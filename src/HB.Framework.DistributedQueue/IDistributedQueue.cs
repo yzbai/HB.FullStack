@@ -21,7 +21,8 @@ namespace HB.Framework.DistributedQueue
         /// <returns></returns>
         IDistributedQueueResult InsertFront<T>(string queueName, T data);
 
-        IDistributedQueueResult PopAndHistory<T>(string fromQueueName, string historyName);
-        IDistributedQueueResult DeleteHistory<T>(string historyName, IList<string> ids);
+        IDistributedQueueResult PopAndPush<T>(string fromQueueName, string toQueueName);
+        IDistributedQueueResult AddIntToHash(string hashName, IList<string> fields, IList<int> values);
+        IDistributedQueueResult PopHistoryToQueueIfNotExistInHash<T>(string historyQueue, string queue, string hash);
     }
 }
