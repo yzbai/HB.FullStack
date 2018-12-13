@@ -40,16 +40,6 @@ namespace HB.Infrastructure.RabbitMQ
             }
         }
 
-        private void NotifyPublishToRabbitMQ(string brokerName)
-        {
-            //让 broker 名字为brokerName的 publishmanager开始工作
-            //publishmanager开始创建Task, publishmanager
-
-            //这里已经确保brokerName是存在的了,之前再PublishAsync里已经检查过
-
-            _managers[brokerName].NotifyPublishComming();
-        }
-
         public async Task<bool> PublishAsync(string brokerName, EventMessage eventMessage)
         {
             //大量Request线程放入缓存池中，离开
@@ -73,6 +63,16 @@ namespace HB.Infrastructure.RabbitMQ
             }
 
             return false;
+        }
+
+        private void NotifyPublishToRabbitMQ(string brokerName)
+        {
+            //让 broker 名字为brokerName的 publishmanager开始工作
+            //publishmanager开始创建Task, publishmanager
+
+            //这里已经确保brokerName是存在的了,之前再PublishAsync里已经检查过
+
+            _managers[brokerName].NotifyPublishComming();
         }
 
         private bool IsBrokerExists(string brokerName)
