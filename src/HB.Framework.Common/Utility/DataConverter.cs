@@ -536,11 +536,6 @@ namespace HB.Framework.Common
             if (buffer == null)
             {
                 return null;
-
-
-
-
-
             }
 
             return MsgPack.Serialization.MessagePackSerializer.Get(type).UnpackSingleObject(buffer);
