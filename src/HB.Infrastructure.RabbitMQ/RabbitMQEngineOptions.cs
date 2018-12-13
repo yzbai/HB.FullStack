@@ -17,6 +17,10 @@ namespace HB.Infrastructure.RabbitMQ
         public int MaxPublishWorkerThread { get; set; } = 10;
 
         public int MaxSecondsWaitForConfirms { get; set; } = 60;
+
+        public ulong PerThreadFacingEventCount { get; set; } = 10;
+
+        public ulong PerThreadFacingHistoryCount { get; set; } = 100;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>
