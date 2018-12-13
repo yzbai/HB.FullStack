@@ -9,13 +9,11 @@ namespace HB.Infrastructure.RabbitMQ
     {
         public string Id { get; set; } = SecurityHelper.CreateUniqueToken();
 
+        public double Timestamp { get; set; } = DataConverter.ToTimestamp(DateTimeOffset.UtcNow);
+
         public string Type { get; set; }
 
         public byte[] Body { get; set; }
-
-        public DateTimeOffset PublishTime { get; set; } = DateTimeOffset.UtcNow;
-
-        public int PublishTimes { get; set; } = 0;
 
         public EventMessageEntity(string type, byte[] body)
         {
