@@ -1,13 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using HB.Framework.DistributedQueue;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
 
 namespace HB.Infrastructure.RabbitMQ
 {
@@ -31,8 +28,7 @@ namespace HB.Infrastructure.RabbitMQ
             _publishManagers = new Dictionary<string, PublishTaskManager>();
             _historyManager = new Dictionary<string, HistoryTaskManager>();
 
-
-            
+                       
             //publish
             ILogger publishTaskManagerLogger = loggerFactory.CreateLogger<PublishTaskManager>();
 
