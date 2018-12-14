@@ -17,7 +17,8 @@ namespace HB.Infrastructure.RabbitMQ
         private RabbitMQEngineOptions _options;
         private IRabbitMQConnectionManager _connectionManager;
         private IDistributedQueue _queue;
-        private IDictionary<string, PublishTaskManager> _managers;
+        private IDictionary<string, PublishTaskManager> _publishManagers;
+        private IDictionary<string, HistoryTaskManager> _historyManager;
         
         public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue)
         {
@@ -27,16 +28,25 @@ namespace HB.Infrastructure.RabbitMQ
 
             _queue = queue;
 
-            _managers = new Dictionary<string, PublishTaskManager>();
+            _publishManagers = new Dictionary<string, PublishTaskManager>();
+            _historyManager = new Dictionary<string, HistoryTaskManager>();
 
-            //初始化每一个PublishWorkerManager
-            //放入——managers
 
+            
+            //publish
             ILogger publishTaskManagerLogger = loggerFactory.CreateLogger<PublishTaskManager>();
 
             foreach (RabbitMQConnectionSetting connectionSetting in _options.ConnectionSettings)
             {
-                _managers.Add(connectionSetting.BrokerName, new PublishTaskManager(connectionSetting, _connectionManager, _queue, publishTaskManagerLogger));
+                _publishManagers.Add(connectionSetting.BrokerName, new PublishTaskManager(connectionSetting, _connectionManager, _queue, publishTaskManagerLogger));
+            }
+
+            //history
+            ILogger historyTaskManagerLogger = loggerFactory.CreateLogger<HistoryTaskManager>();
+
+            foreach(RabbitMQConnectionSetting connectionSetting in _options.ConnectionSettings)
+            {
+                _historyManager.Add(connectionSetting.BrokerName, new HistoryTaskManager(connectionSetting, _connectionManager, _queue, historyTaskManagerLogger));
             }
         }
 
@@ -72,7 +82,8 @@ namespace HB.Infrastructure.RabbitMQ
 
             //这里已经确保brokerName是存在的了,之前再PublishAsync里已经检查过
 
-            _managers[brokerName].NotifyPublishComming();
+            _publishManagers[brokerName].NotifyInComming();
+            _historyManager[brokerName].NotifyInComming();
         }
 
         private bool IsBrokerExists(string brokerName)
