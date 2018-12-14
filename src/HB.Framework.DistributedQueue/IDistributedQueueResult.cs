@@ -8,6 +8,9 @@ namespace HB.Framework.DistributedQueue
     {
         public int QueueLength { get; set; }
         public object Data { get; set; }
+        public bool HistoryDeleted { get; set; }
+        public bool HistoryReback { get; set; }
+        public bool HistoryShouldWait { get; set; }
 
         public bool IsSucceeded()
         {
