@@ -6,7 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.Infrastructure.RabbitMQ
 {
-    internal class ConsumeTaskManager
+    /// <summary>
+    /// 一个RabbitMQ的Queue，对应一个线程的Consumer，用BasicQos来控制速度
+    /// </summary>
+    public class ConsumeTaskManager
     {
         private ILogger _logger;
         private RabbitMQConnectionSetting _connectionSetting;
@@ -33,7 +36,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         public void RemoveEventHandler(string eventyType, string handlerId)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }
