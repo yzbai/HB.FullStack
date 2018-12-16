@@ -35,22 +35,46 @@ namespace HB.Framework.EventBus
             if (!EventMessage.IsValid(eventMessage))
             {
                 Exception ex = new ArgumentException("不符合要求", nameof(eventMessage));
-                _logger.LogError(ex, "用于Publish的eventMessage不符合要求");
+                _logger.LogCritical(ex, "用于Publish的eventMessage不符合要求");
 
                 throw ex;
             }
 
-            string brokerName = _options.GetTopicSchema(eventMessage.Type)?.BrokerName;
+
+            return await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
+        }
+
+        public void Subscribe(string eventType, IEventHandler handler)
+        {
+            eventType.ThrowIfNull(nameof(eventType));
+
+            handler.ThrowIfNull(nameof(handler));
+
+            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
+        }
+
+        public void UnSubscribe(string eventType, string handlerId)
+        {
+            eventType.ThrowIfNull(nameof(eventType));
+            handlerId.ThrowIfNull(nameof(handlerId));
+
+            _engine.UnSubscribeHandler(brokerName: GetBrokerName(eventType), eventyType: eventType, handlerId: handlerId);
+        }
+
+        private string GetBrokerName(string eventType)
+        {
+            string brokerName = _options.GetTopicSchema(eventType)?.BrokerName;
 
             if (string.IsNullOrEmpty(brokerName))
             {
                 Exception ex = new Exception("配置中没有找到对应主题事件的Broker");
-                _logger.LogCritical(ex, $"没有Topic对应的BrokerName， Topic：{eventMessage.Type}");
+
+                _logger.LogCritical(ex, $"没有Topic对应的BrokerName， eventType：{eventType}");
 
                 throw ex;
             }
 
-            return await _engine.PublishAsync(brokerName, eventMessage).ConfigureAwait(false);
+            return brokerName;
         }
     }
 }
