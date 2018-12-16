@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 namespace HB.Framework.EventBus.Abstractions
 {
     /// <summary>
-    /// 以Topic为中心的时间总线
+    /// 以EventType为中心的时间总线
     /// 需要保证事件的不丢失，每一个event都有追溯，都有因果
+    /// 
+    /// 同一个事件，只支持被处理一次，即同一个type的事件，只有一个handler对应
     /// </summary>
     public interface IEventBus
     {
@@ -16,5 +18,9 @@ namespace HB.Framework.EventBus.Abstractions
         /// <param name="eventMessage"></param>
         /// <returns>是否发布成功，只有返回true才能确保消息不丢失</returns>
         Task<bool> PublishAsync(EventMessage eventMessage);
+
+        void Subscribe(string eventType, IEventHandler handler);
+
+        void UnSubscribe(string eventType, string handlerId);
     }
 }
