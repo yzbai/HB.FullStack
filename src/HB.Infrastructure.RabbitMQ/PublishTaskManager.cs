@@ -18,7 +18,7 @@ namespace HB.Infrastructure.RabbitMQ
     /// 每一个PublishWokerManager，负责一个broker的工作，自己决定工作量的大小
     /// eventType = routingkey = queuename
     /// </summary>
-    public class PublishTaskManager
+    public class PublishTaskManager : DynamicTaskManager
     {
         private ILogger _logger;
         private RabbitMQConnectionSetting _connectionSetting;
@@ -39,7 +39,7 @@ namespace HB.Infrastructure.RabbitMQ
             _distributedQueue = distributedQueue;
             _connectionSetting = connectionSetting;
 
-            AddTask(InitialTaskNumber);
+            AddTaskAndStart(InitialTaskNumber);
         }
 
         private void TaskProcedure()
@@ -258,7 +258,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         }
 
-        private void AddTask(int count)
+        private void AddTaskAndStart(int count)
         {
             for (int i = 0; i < count; ++i)
             {
@@ -299,7 +299,7 @@ namespace HB.Infrastructure.RabbitMQ
                 {
                     int toAddNumber = InitialTaskNumber - _taskNodes.Count;
 
-                    AddTask(toAddNumber);
+                    AddTaskAndStart(toAddNumber);
                 }
             }
         }

@@ -6,22 +6,23 @@ using System.Linq;
 
 namespace HB.Framework.EventBus
 {
-    public class TopicSchema
+    public class EventSchema
     {
-        public string Name { get; set; }
+        public string EventType { get; set; }
 
         public string BrokerName { get; set; }
+
     }
 
     public class EventBusOptions : IOptions<EventBusOptions>
     {
         public EventBusOptions Value => this;
 
-        public IList<TopicSchema> TopicShemas { get; set; } = new List<TopicSchema>();
+        public IList<EventSchema> TopicShemas { get; set; } = new List<EventSchema>();
 
-        public TopicSchema GetTopicSchema(string topic)
+        public EventSchema GetTopicSchema(string topic)
         {
-            return TopicShemas.FirstOrDefault(t => t.Name.Equals(topic, GlobalSettings.Comparison));
+            return TopicShemas.FirstOrDefault(t => t.EventType.Equals(topic, GlobalSettings.Comparison));
         }
     }
 }
