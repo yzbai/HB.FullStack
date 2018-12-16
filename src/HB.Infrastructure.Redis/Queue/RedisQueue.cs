@@ -16,6 +16,11 @@ namespace HB.Infrastructure.Redis.Queue
             _logger = logger;
         }
 
+        public IDistributedQueueResult AddIntToHash(string hashName, IList<string> fields, IList<int> values)
+        {
+            throw new NotImplementedException();
+        }
+
         public IDistributedQueueResult InsertFront<T>(string queueName, T data)
         {
             //TODO: 要用polly来确保吗?
@@ -28,6 +33,11 @@ namespace HB.Infrastructure.Redis.Queue
         }
 
         public IDistributedQueueResult PopAndPush<T>(string fromQueueName, string toQueueName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDistributedQueueResult PopHistoryToQueueIfNotExistInHash<T>(string historyQueue, string queue, string hash)
         {
             throw new NotImplementedException();
         }

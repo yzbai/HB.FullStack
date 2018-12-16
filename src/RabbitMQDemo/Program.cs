@@ -15,8 +15,8 @@ namespace RabbitMQDemo
             //应该Retry
             ConnectionFactory connectionFactory = new ConnectionFactory();
 
-            //connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
-            connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
+            connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
+            //connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
             connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             connectionFactory.AutomaticRecoveryEnabled = true;
 
@@ -56,110 +56,40 @@ namespace RabbitMQDemo
                 Pub(connection, "11111111111111");
             });
 
-            Task.Run(() =>
-            {
-                Pub(connection, "333333333333333");
-            });
+            //Task.Run(() =>
+            //{
+            //    Pub(connection, "333333333333333");
+            //});
+
+            //Task.Run(() =>
+            //{
+            //    Pub(connection, "4444444444444444");
+            //});
+
+            //Task.Run(() =>
+            //{
+            //    Pub(connection, "22222222222222222");
+            //});
 
             Task.Run(() =>
             {
-                Pub(connection, "4444444444444444");
+                Sub(connection, 1);
             });
 
             Task.Run(() =>
             {
-                Pub(connection, "22222222222222222");
+                Sub(connection, 2);
             });
 
-            Task.Run(() => 
-            {
-                IModel channel = connection.CreateModel();
+            //Task.Run(() =>
+            //{
+            //    Publish(connection, 3);
+            //});
 
-                #region channel event
-                channel.BasicReturn += (sender, eventArgs) =>
-                {
-                    Console.WriteLine($"broker return : {eventArgs.Exchange} : {eventArgs.RoutingKey}");
-                };
-
-                channel.BasicAcks += (sender, eventArgs) =>
-                {
-                    Console.WriteLine($"broker ack : {eventArgs.DeliveryTag}");
-                };
-
-                channel.BasicNacks += (sender, eventArgs) =>
-                {
-
-                    Console.WriteLine($"broker nack : {eventArgs.DeliveryTag}");
-                };
-
-                channel.BasicRecoverOk += (sender, eventArgs) =>
-                {
-
-                };
-
-                channel.CallbackException += (sender, eventArgs) =>
-                {
-                    //Re create channel
-                };
-
-                channel.FlowControl += (sender, eventArgs) =>
-                {
-
-                };
-
-                channel.ModelShutdown += (sender, eventArgs) =>
-                {
-
-                };
-
-                #endregion
-
-                //channel.WaitForConfirms();
-
-                //channel.ExchangeDeclare("testExchange", ExchangeType.Direct);
-                //channel.QueueDeclare("hello", false, false, false, null);
-
-                //channel.QueueBind("testQueue", "testExchange", "testRoutingKey");
-
-                //一个接一个处理，别一次性给多个
-
-                
-
-                channel.BasicQos(0, 1, false);
-
-
-                EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
-
-                consumer.Received += (sender, eventArgs) =>
-                {
-                    byte[] data = eventArgs.Body;
-
-                    string message = Encoding.UTF8.GetString(data);
-
-                    Console.WriteLine($"Consumer : Received {message}");
-
-                    if (eventArgs.Redelivered)
-                    {
-                        //log, we have found a redelivered.
-                        Console.WriteLine(" we have found a redelivered");
-                    }
-
-                    channel.BasicAck(eventArgs.DeliveryTag, false);
-                };
-
-                string queueName = channel.QueueDeclare().QueueName;
-
-                channel.QueueBind(queueName, "DefaultTopic", "a.b.c");
-
-                string consumerTag = channel.BasicConsume(queueName, false, consumer);
-
-                //channel.BasicCancel(consumerTag);
-
-                //channel.Close();
-
-
-            });
-            
+            //Task.Run(() =>
+            //{
+            //    Publish(connection, 4);
+            //});
 
             while (true)
             {
@@ -173,6 +103,95 @@ namespace RabbitMQDemo
 
             connection.Close();
 
+        }
+
+        private static void Sub(IConnection connection, int name)
+        {
+            IModel channel = connection.CreateModel();
+
+            #region channel event
+            channel.BasicReturn += (sender, eventArgs) =>
+            {
+                Console.WriteLine($"broker return : {eventArgs.Exchange} : {eventArgs.RoutingKey}");
+            };
+
+            channel.BasicAcks += (sender, eventArgs) =>
+            {
+                Console.WriteLine($"broker ack : {eventArgs.DeliveryTag}");
+            };
+
+            channel.BasicNacks += (sender, eventArgs) =>
+            {
+
+                Console.WriteLine($"broker nack : {eventArgs.DeliveryTag}");
+            };
+
+            channel.BasicRecoverOk += (sender, eventArgs) =>
+            {
+
+            };
+
+            channel.CallbackException += (sender, eventArgs) =>
+            {
+                //Re create channel
+            };
+
+            channel.FlowControl += (sender, eventArgs) =>
+            {
+
+            };
+
+            channel.ModelShutdown += (sender, eventArgs) =>
+            {
+
+            };
+
+            #endregion
+
+            //channel.WaitForConfirms();
+
+            //channel.ExchangeDeclare("testExchange", ExchangeType.Direct);
+            //channel.QueueDeclare("hello", false, false, false, null);
+
+            //channel.QueueBind("testQueue", "testExchange", "testRoutingKey");
+
+            //一个接一个处理，别一次性给多个
+
+            channel.ExchangeDeclare("DefaultTopic2", ExchangeType.Topic, true, false);
+
+            channel.BasicQos(0, 1, false);
+
+
+            
+
+            EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
+
+            consumer.Received += (sender, eventArgs) =>
+            {
+                byte[] data = eventArgs.Body;
+
+                string message = Encoding.UTF8.GetString(data);
+
+                Console.WriteLine($"Consumer {name} : Received {message}");
+
+                if (eventArgs.Redelivered)
+                {
+                    //log, we have found a redelivered.
+                    Console.WriteLine(" we have found a redelivered");
+                }
+
+                channel.BasicAck(eventArgs.DeliveryTag, false);
+            };
+
+            string queueName = channel.QueueDeclare().QueueName;
+
+            channel.QueueBind(queueName, "DefaultTopic2", "a.b.c");
+
+            string consumerTag = channel.BasicConsume(queueName, false, consumer);
+
+            //channel.BasicCancel(consumerTag);
+
+            //channel.Close();
         }
 
         private static void Pub(IConnection connection, string pubName)
@@ -229,11 +248,13 @@ namespace RabbitMQDemo
             channel.ConfirmSelect();
 
 
-            //channel.ExchangeDeclare("DefaultTopic", ExchangeType.Topic, true, false);
+            channel.ExchangeDeclare("DefaultTopic2", ExchangeType.Topic, true, false);
+            //channel.QueueDeclare("DefaultTopicQueue2");
+            //channel.QueueBind("DefaultTopicQueue2", "DefaultTopic2", "DefaultTopicRK2");
 
             Thread.Sleep(5 * 1000);
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 byte[] data = Encoding.UTF8.GetBytes($"{pubName} Publisher : hello, there. This is {i} th times.");
 
@@ -244,7 +265,7 @@ namespace RabbitMQDemo
                 ulong number = channel.NextPublishSeqNo;
                 Console.WriteLine($"{pubName} 接下来的序号：{number}");
 
-                channel.BasicPublish("DefaultTopic", "a.b.c", true, basicProperties, data);
+                channel.BasicPublish("DefaultTopic2", "a.b.c", true, basicProperties, data);
 
                 //channel.BasicPublish("", "testRoutingKey", basicProperties, Encoding.UTF8.GetBytes($"Publisher : hello, there. This is {i} th times."));
 
