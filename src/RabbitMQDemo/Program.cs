@@ -163,6 +163,7 @@ namespace RabbitMQDemo
 
 
             
+            
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
 
