@@ -8,28 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.Infrastructure.RabbitMQ
 {
-    public class HistoryTaskManager
+    public class HistoryTaskManager : RabbitMQAndDistributedQueueDynamicTaskManager
     {
-        private ILogger _logger;
-        private RabbitMQConnectionSetting _connectionSetting;
-        private IRabbitMQConnectionManager _connectionManager;
-        private IDistributedQueue _distributedQueue;
-
-        private ulong _inCommingCount = 0;
-        private object _taskNodesLocker = new object();
-        private LinkedList<TaskNode> _taskNodes = new LinkedList<TaskNode>();
-
         public HistoryTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
-        {
-            _logger = logger;
-            _connectionManager = connectionManager;
-            _distributedQueue = distributedQueue;
-            _connectionSetting = connectionSetting;
+            : base(connectionSetting, connectionManager, distributedQueue, logger) { }
 
-            AddTask(InitialTaskNumber);
-        }
-
-        private void TaskProcedure()
+        protected override void TaskProcedure()
         {
             _logger.LogTrace($"ScanHistory Task Start, ThreadID:{Thread.CurrentThread.ManagedThreadId}");
 
@@ -37,7 +21,10 @@ namespace HB.Infrastructure.RabbitMQ
             {
                 while (true)
                 {
-                    IDistributedQueueResult result = _distributedQueue.PopHistoryToQueueIfNotExistInHash<EventMessageEntity>(historyQueue: DistributedHistoryQueueName, queue: DistributedQueueName, hash: DistributedConfirmIdHashName);
+                    IDistributedQueueResult result = _distributedQueue.PopHistoryToQueueIfNotExistInHash<EventMessageEntity>(
+                        historyQueue: DistributedHistoryQueueName, 
+                        queue: DistributedQueueName, 
+                        hash: DistributedConfirmIdHashName);
 
                     if (result.HistoryDeleted)
                     {
@@ -64,113 +51,14 @@ namespace HB.Infrastructure.RabbitMQ
             }
         }
 
-        private ulong PerThreadFacingCount
+        protected override ulong PerThreadFacingCount()
         {
-            get { return _connectionSetting.PerThreadFacingHistoryEventCount; }
+            return _connectionSetting.PerThreadFacingHistoryEventCount;
         }
 
-        public void NotifyInComming()
+        protected override string CurrentWorkloadQueueName()
         {
-            //管理
-            //控制Task的数量
-
-            _inCommingCount++;
-
-            if (_inCommingCount > PerThreadFacingCount)
-            {
-                CoordinateTask();
-                _inCommingCount = 0;
-            }
+            return DistributedHistoryQueueName;
         }
-
-        private int InitialTaskNumber
-        {
-            get
-            {
-                //根据初始队列长度，确定线程数量
-                ulong length = _distributedQueue.Length(queueName: DistributedHistoryQueueName);
-
-                if (length == 0)
-                {
-                    return 0;
-                }
-
-                int taskNumber = (int)(length / PerThreadFacingCount) + 1;
-
-                return taskNumber;
-            }
-        }
-
-        private void AddTask(int count)
-        {
-            for (int i = 0; i < count; ++i)
-            {
-                lock (_taskNodesLocker)
-                {
-                    CancellationTokenSource cs = new CancellationTokenSource();
-
-                    Task task = Task.Factory.StartNew(TaskProcedure, cs.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
-                    TaskNode taskNode = new TaskNode() { Task = task, CancellationTokenSource = cs };
-
-                    _taskNodes.AddLast(taskNode);
-                }
-            }
-        }
-
-        private void CoordinateTask()
-        {
-            lock (_taskNodesLocker)
-            {
-                //first clean finished tasks
-                LinkedListNode<TaskNode> node = _taskNodes.First;
-
-                while (node != null)
-                {
-                    LinkedListNode<TaskNode> nextNode = node.Next;
-
-                    if (node.Value.Task.IsCompleted)
-                    {
-                        _taskNodes.Remove(node);
-                    }
-
-                    node = nextNode;
-                }
-
-                //caculate task number
-                if (InitialTaskNumber > _taskNodes.Count)
-                {
-                    int toAddNumber = InitialTaskNumber - _taskNodes.Count;
-
-                    AddTask(toAddNumber);
-                }
-            }
-        }
-
-        private void OnTaskFinished()
-        {
-            _logger.LogTrace($"HistoryToRabbitMQ Task End, ThreadID:{Thread.CurrentThread.ManagedThreadId}");
-
-            CoordinateTask();
-        }
-
-        #region DistributedQueue
-
-        private string DistributedQueueName
-        {
-            get { return _connectionSetting.BrokerName; }
-        }
-
-        private string DistributedHistoryQueueName
-        {
-            get { return _connectionSetting.BrokerName + "_History"; }
-        }
-
-        private string DistributedConfirmIdHashName
-        {
-            get { return _connectionSetting.BrokerName + "_ConfirmSet"; }
-        }
-
-        #endregion
     }
 }
