@@ -12,7 +12,6 @@ using HB.Framework.EventBus.Abstractions;
 
 namespace HB.Framework.EventBus
 {
-
     /// <summary>
     /// 单例启动
     /// </summary>
@@ -28,7 +27,6 @@ namespace HB.Framework.EventBus
             _engine = eventBusEngine;
             _logger = logger;
         }
-
       
         public async Task<bool> PublishAsync(EventMessage eventMessage)
         {
@@ -39,7 +37,6 @@ namespace HB.Framework.EventBus
 
                 throw ex;
             }
-
 
             return await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
         }

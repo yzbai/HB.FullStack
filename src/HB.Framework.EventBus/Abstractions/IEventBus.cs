@@ -9,6 +9,8 @@ namespace HB.Framework.EventBus.Abstractions
     /// 需要保证事件的不丢失，每一个event都有追溯，都有因果
     /// 
     /// 同一个事件，只支持被处理一次，即同一个type的事件，只有一个handler对应
+    /// 
+    /// EventType 全局唯一
     /// </summary>
     public interface IEventBus
     {
