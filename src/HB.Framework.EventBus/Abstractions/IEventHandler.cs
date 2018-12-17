@@ -8,6 +8,8 @@ namespace HB.Framework.EventBus.Abstractions
     {
         string Id { get; set; }
 
-        void Handle(EventMessage eventMessage);
+        string EventType { get; set; }
+
+        void Handle(byte[] body);
     }
 }

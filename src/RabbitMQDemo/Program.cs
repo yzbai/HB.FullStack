@@ -10,13 +10,15 @@ namespace RabbitMQDemo
 {
     class Program
     {
+        static string consumerTag;
+
         static void Main(string[] args)
         {
             //应该Retry
             ConnectionFactory connectionFactory = new ConnectionFactory();
 
-            connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
-            //connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
+            //connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
+            connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
             connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             connectionFactory.AutomaticRecoveryEnabled = true;
 
@@ -76,10 +78,10 @@ namespace RabbitMQDemo
                 Sub(connection, 1);
             });
 
-            Task.Run(() =>
-            {
-                Sub(connection, 2);
-            });
+            //Task.Run(() =>
+            //{
+            //    Sub(connection, 2);
+            //});
 
             //Task.Run(() =>
             //{
@@ -91,13 +93,25 @@ namespace RabbitMQDemo
             //    Publish(connection, 4);
             //});
 
+
+            //Task.Run(() => {
+            //    Sub(connection, 10);
+            //});
+
             while (true)
             {
-                char c = Console.ReadKey().KeyChar; 
+                char c = Console.ReadKey().KeyChar;
 
-                if(c.Equals('q'))
+                if (c.Equals('q'))
                 {
                     break;
+                }
+
+                if (c.Equals('c'))
+                {
+                    IModel channel = connection.CreateModel();
+
+                    channel.BasicCancel(consumerTag);
                 }
             }
 
@@ -188,11 +202,15 @@ namespace RabbitMQDemo
 
             channel.QueueBind(queueName, "DefaultTopic2", "a.b.c");
 
-            string consumerTag = channel.BasicConsume(queueName, false, consumer);
+            consumerTag = channel.BasicConsume(queueName, false, consumer);
+
+           
 
             //channel.BasicCancel(consumerTag);
 
             //channel.Close();
+
+            Console.WriteLine("Leave");
         }
 
         private static void Pub(IConnection connection, string pubName)
@@ -238,6 +256,8 @@ namespace RabbitMQDemo
 
             #endregion
 
+            //channel.QueueDeclarePassive("xxxxxxxxxxxxxxxxxx");
+
             //channel.WaitForConfirms();
 
             //channel.ExchangeDeclare("testExchange", ExchangeType.Direct);
@@ -246,7 +266,7 @@ namespace RabbitMQDemo
             //channel.QueueBind("testQueue", "testExchange", "testRoutingKey");
             //Thread.Sleep(5000);
 
-            channel.ConfirmSelect();
+            //channel.ConfirmSelect();
 
 
             channel.ExchangeDeclare("DefaultTopic2", ExchangeType.Topic, true, false);
@@ -255,7 +275,7 @@ namespace RabbitMQDemo
 
             Thread.Sleep(5 * 1000);
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 1000000; i++)
             {
                 byte[] data = Encoding.UTF8.GetBytes($"{pubName} Publisher : hello, there. This is {i} th times.");
 
@@ -267,6 +287,9 @@ namespace RabbitMQDemo
                 Console.WriteLine($"{pubName} 接下来的序号：{number}");
 
                 channel.BasicPublish("DefaultTopic2", "a.b.c", true, basicProperties, data);
+
+
+                Thread.Sleep(1000);
 
                 //channel.BasicPublish("", "testRoutingKey", basicProperties, Encoding.UTF8.GetBytes($"Publisher : hello, there. This is {i} th times."));
 

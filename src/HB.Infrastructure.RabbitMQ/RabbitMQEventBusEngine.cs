@@ -130,13 +130,8 @@ namespace HB.Infrastructure.RabbitMQ
             return true;
         }
 
-        public bool UnSubscribeHandler(string brokerName, string eventyType, string handlerId)
+        public bool UnSubscribeHandler(string eventyType, string handlerId)
         {
-            if (!IsBrokerExists(brokerName))
-            {
-                throw new ArgumentException($"当前没有broker为{brokerName}的RabbitMQ。");
-            }
-
             if (!_consumeManager.ContainsKey(eventyType))
             {
                 _logger.LogCritical($"没有这个类型的EventHandler， eventType:{eventyType}");
