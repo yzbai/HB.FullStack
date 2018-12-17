@@ -21,6 +21,11 @@ namespace HB.Infrastructure.RabbitMQ
         public ulong PerThreadFacingEventCount { get; set; } = 10;
 
         public ulong PerThreadFacingHistoryEventCount { get; set; } = 100;
+
+        /// <summary>
+        /// IModel.BasicQos参数
+        /// </summary>
+        public ushort ConsumePerTimeNumber { get; set; } = 100;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>
