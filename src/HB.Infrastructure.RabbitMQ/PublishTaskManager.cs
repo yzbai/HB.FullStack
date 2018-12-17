@@ -180,13 +180,13 @@ namespace HB.Infrastructure.RabbitMQ
                     }
 
                     //Declare Queue & Binding
-                    DeclareEventType(channel, eventEntity);
+                    DeclareRabbitMQ(channel, eventEntity);
                     
                     //publish
                     IBasicProperties basicProperties = channel.CreateBasicProperties();
                     basicProperties.DeliveryMode = 2;
 
-                    channel.BasicPublish(_connectionSetting.ExchangeName, EventTypeToRoutingKey(eventEntity.Type), true, basicProperties, eventEntity.Body);
+                    channel.BasicPublish(_connectionSetting.ExchangeName, EventTypeToRabbitRoutingKey(eventEntity.Type), true, basicProperties, eventEntity.Body);
 
                     //Confirm
                     confirmEventIdList.Add(eventEntity.Id);
@@ -278,7 +278,7 @@ namespace HB.Infrastructure.RabbitMQ
             };
         }
         
-        private void DeclareEventType(IModel channel, EventMessageEntity message)
+        private void DeclareRabbitMQ(IModel channel, EventMessageEntity message)
         {
             if (message == null)
             {
@@ -290,8 +290,8 @@ namespace HB.Infrastructure.RabbitMQ
                 return;
             }
 
-            string queueName = EventTypeToQueueName(message.Type);
-            string routingKey = EventTypeToRoutingKey(message.Type);
+            string queueName = EventTypeToRabbitQueueName(message.Type);
+            string routingKey = EventTypeToRabbitRoutingKey(message.Type);
 
             //Queue
             channel.QueueDeclare(queueName, true, false, false);
@@ -302,17 +302,17 @@ namespace HB.Infrastructure.RabbitMQ
             _eventDeclareDict.TryAdd(message.Type, true);
         }
 
-        private string RoutingKeyToEventType(string routingKey)
+        private string RabbitRoutingKeyToEventType(string routingKey)
         {
             return routingKey;
         }
 
-        private string EventTypeToRoutingKey(string eventType)
+        private string EventTypeToRabbitRoutingKey(string eventType)
         {
             return eventType;
         }
 
-        private string EventTypeToQueueName(string eventType)
+        private string EventTypeToRabbitQueueName(string eventType)
         {
             return eventType;
         }

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using HB.Framework.DistributedQueue;
+using System.Text;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace HB.Infrastructure.RabbitMQ
 {
@@ -19,13 +18,10 @@ namespace HB.Infrastructure.RabbitMQ
         private RabbitMQConnectionSetting _connectionSetting;
         private IRabbitMQConnectionManager _connectionManager;
 
-        //eventType : Handler
         private IEventHandler _handler;
 
-        private Task _task;
-        private CancellationTokenSource _cts;
-
-        public bool AutoReStartOver { get; set; } = true;
+        private IModel _channel;
+        private string _consumeTag;
 
         public ConsumeTaskManager(string eventType, RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, ILogger logger)
         {
@@ -34,109 +30,55 @@ namespace HB.Infrastructure.RabbitMQ
             _connectionManager = connectionManager;
             _connectionSetting = connectionSetting;
 
-            StartNewTask();
+            Restart();
         }
 
-        private void StartNewTask()
+        public void Cancel()
         {
-            _cts = new CancellationTokenSource();
-            _task = Task.Factory.StartNew(TaskProcedure, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            if (_channel != null && _channel.CloseReason == null && !string.IsNullOrEmpty(_consumeTag))
+            {
+                _channel.BasicCancel(_consumeTag);
+            }
+
+            _channel?.Close();
         }
 
-        private void TaskProcedure()
+        public void Restart()
         {
-            _logger.LogTrace($"Consum Task Start, ThreadID:{Thread.CurrentThread.ManagedThreadId}");
-
-            IModel channel = null;
+            Cancel();
 
             try
             {
-                channel = CreateChannel(_connectionSetting.BrokerName, false);
-                channel.BasicQos(0, _connectionSetting.ConsumePerTimeNumber, false);
-                
-                string queueName = EventTypeToQueueName()
+                _channel = CreateChannel(_connectionSetting.BrokerName, false);
 
-                while(true)
+                string queueName = EventTypeToRabbitQueueName(_eventType);
+
+                _channel.QueueDeclarePassive(queueName);
+
+                _channel.BasicQos(0, _connectionSetting.ConsumePerTimeNumber, false);
+
+                EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
+
+                consumer.Received += (sender, eventArgs) =>
                 {
+                    byte[] data = eventArgs.Body;
 
-                }
+                    _handler.Handle(data);
+
+                    _channel.BasicAck(eventArgs.DeliveryTag, false);
+                };
+
+                _consumeTag = _channel.BasicConsume(queueName, false, consumer);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogCritical(ex, $"在Consume RabbitMQ {_connectionSetting.BrokerName} 中，Thread Id : {Thread.CurrentThread.ManagedThreadId}, Exceptions: {ex.Message}");
+                _logger.LogCritical(ex, $"在Consume RabbitMQ {_connectionSetting.BrokerName} 中，Exceptions: {ex.Message}");
             }
             finally
             {
-                channel?.Close();
-
-                OnTaskFinished();
+                _channel?.Close();
             }
         }
-
-        private void OnTaskFinished()
-        {
-            if (AutoReStartOver)
-            {
-                StartNewTask();
-            }
-        }
-
-        public void ReStart()
-        {
-            if (!_task.IsCompleted)
-            {
-                _cts.Cancel();
-            }
-
-            StartNewTask();
-        }
-
-        public bool AddEventHandler(string eventType, IEventHandler eventHandler)
-        {
-            lock(_handlersLocker)
-            {
-                if (_handlers.ContainsKey(eventType))
-                {
-                    return false;
-                }
-
-                _handlers.Add(eventType, eventHandler);
-
-                return true;
-            }
-        }
-
-        public bool UpdateEventHandler(string eventType, IEventHandler eventHandler)
-        {
-            lock(_handlersLocker)
-            {
-                if (!_handlers.ContainsKey(eventType))
-                {
-                    return false;
-                }
-
-                _handlers[eventType] = eventHandler;
-
-                return true;
-            }
-        }
-
-        public bool RemoveEventHandler(string eventyType, string handlerId)
-        {
-            lock(_handlersLocker)
-            {
-                if (!_handlers.ContainsKey(eventyType))
-                {
-                    return false;
-                }
-
-                _handlers.Remove(eventyType);
-
-                return true;
-            }
-        }
-
-        #region Channel
 
         private IModel CreateChannel(string brokerName, bool isPublish)
         {
@@ -144,7 +86,6 @@ namespace HB.Infrastructure.RabbitMQ
 
             //Events
             SettingUpChannelEvents(channel);
-
 
             return channel;
         }
@@ -173,50 +114,9 @@ namespace HB.Infrastructure.RabbitMQ
             };
         }
 
-        private void DeclareEventType(IModel channel, EventMessageEntity message)
-        {
-            if (message == null)
-            {
-                return;
-            }
-
-            if (_eventDeclareDict.ContainsKey(message.Type))
-            {
-                return;
-            }
-
-            string queueName = EventTypeToQueueName(message.Type);
-            string routingKey = EventTypeToRoutingKey(message.Type);
-
-            //Queue
-            channel.QueueDeclare(queueName, true, false, false);
-
-            //Bind
-            channel.QueueBind(queueName, _connectionSetting.ExchangeName, routingKey);
-
-            _eventDeclareDict.TryAdd(message.Type, true);
-        }
-
-        internal void Cancel()
-        {
-            throw new NotImplementedException();
-        }
-
-        private string RoutingKeyToEventType(string routingKey)
-        {
-            return routingKey;
-        }
-
-        private string EventTypeToRoutingKey(string eventType)
+        private string EventTypeToRabbitQueueName(string eventType)
         {
             return eventType;
         }
-
-        private string EventTypeToQueueName(string eventType)
-        {
-            return eventType;
-        }
-
-        #endregion
     }
 }
