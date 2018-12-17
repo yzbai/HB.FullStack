@@ -26,14 +26,16 @@ namespace HB.Infrastructure.RabbitMQ
         private IRabbitMQConnectionManager _connectionManager;
         private IDistributedQueue _queue;
 
+        private ILogger _consumeTaskManagerLogger;
+
         //brokerName : PublishTaskManager
-        private IDictionary<string, PublishTaskManager> _publishManagers;
+        private IDictionary<string, PublishTaskManager> _publishManagers = new Dictionary<string, PublishTaskManager>();
 
         //brokerName : HistoryTaskManager
-        private IDictionary<string, HistoryTaskManager> _historyManager;
+        private IDictionary<string, HistoryTaskManager> _historyManager = new Dictionary<string, HistoryTaskManager>();
 
-        //brokerName : ConsumeTaskManager
-        private IDictionary<string, ConsumeTaskManager> _consumeManager;
+        //eventType : ConsumeTaskManager
+        private IDictionary<string, ConsumeTaskManager> _consumeManager = new Dictionary<string, ConsumeTaskManager>();
         
         public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue)
         {
@@ -41,9 +43,6 @@ namespace HB.Infrastructure.RabbitMQ
             _options = options.Value;
             _connectionManager = connectionManager;
             _queue = queue;
-
-            _publishManagers = new Dictionary<string, PublishTaskManager>();
-            _historyManager = new Dictionary<string, HistoryTaskManager>();
 
             //publish
             ILogger publishTaskManagerLogger = loggerFactory.CreateLogger<PublishTaskManager>();
@@ -62,12 +61,8 @@ namespace HB.Infrastructure.RabbitMQ
             }
 
             //Consume 
-            ILogger consumeTaskManagerLogger = loggerFactory.CreateLogger<ConsumeTaskManager>();
+            _consumeTaskManagerLogger = loggerFactory.CreateLogger<ConsumeTaskManager>();
 
-            foreach(RabbitMQConnectionSetting connectionSetting in _options.ConnectionSettings)
-            {
-                _consumeManager.Add(connectionSetting.BrokerName, new ConsumeTaskManager(connectionSetting, _connectionManager, _queue, consumeTaskManagerLogger));
-            }
         }
 
         #region Publish
@@ -112,24 +107,49 @@ namespace HB.Infrastructure.RabbitMQ
 
         #region Subscribe
 
-        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public bool SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
         {
             if (!IsBrokerExists(brokerName))
             {
                 throw new ArgumentException($"当前没有broker为{brokerName}的RabbitMQ。");
             }
 
-            _consumeManager[brokerName].AddEventHandler(eventType, eventHandler);
+            if (_consumeManager.ContainsKey(eventType))
+            {
+                _logger.LogCritical($"已经存在相同类型的EventHandler了，eventType : {eventType}");
+
+                return false;
+            }
+
+            RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
+
+            ConsumeTaskManager manager = new ConsumeTaskManager(eventType, connectionSetting, _connectionManager, _consumeTaskManagerLogger);
+
+            _consumeManager.Add(eventType, manager);
+
+            return true;
         }
 
-        public void UnSubscribeHandler(string brokerName, string eventyType, string handlerId)
+        public bool UnSubscribeHandler(string brokerName, string eventyType, string handlerId)
         {
             if (!IsBrokerExists(brokerName))
             {
                 throw new ArgumentException($"当前没有broker为{brokerName}的RabbitMQ。");
             }
 
-            _consumeManager[brokerName].RemoveEventHandler(eventyType, handlerId);
+            if (!_consumeManager.ContainsKey(eventyType))
+            {
+                _logger.LogCritical($"没有这个类型的EventHandler， eventType:{eventyType}");
+                return false;
+            }
+
+            ConsumeTaskManager manager = _consumeManager[eventyType];
+
+            manager.Cancel();
+
+            _consumeManager.Remove(eventyType);
+
+            return true;
         }
 
         #endregion
