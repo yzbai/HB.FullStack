@@ -26,6 +26,7 @@ namespace HB.Infrastructure.RabbitMQ
         /// IModel.BasicQos参数
         /// </summary>
         public ushort ConsumePerTimeNumber { get; set; } = 100;
+        public int ConsumerAutoRecoveryIntervalSeconds { get; set; } = 5;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>
