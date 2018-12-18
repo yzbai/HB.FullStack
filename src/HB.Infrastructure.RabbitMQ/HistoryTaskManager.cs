@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.Framework.DistributedQueue;
+using HB.Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 
 namespace HB.Infrastructure.RabbitMQ
 {
     public class HistoryTaskManager : RabbitMQAndDistributedQueueDynamicTaskManager
     {
-        public HistoryTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
-            : base(connectionSetting, connectionManager, distributedQueue, logger) { }
+        public HistoryTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisEngine redis, ILogger logger)
+            : base(connectionSetting, connectionManager, redis, logger) { }
 
         protected override void TaskProcedure()
         {
@@ -21,7 +21,8 @@ namespace HB.Infrastructure.RabbitMQ
             {
                 while (true)
                 {
-                    IDistributedQueueResult result = _distributedQueue.PopHistoryToQueueIfNotExistInHash<EventMessageEntity>(
+                    RedisEngineResult result = _redis.PopHistoryToQueueIfNotExistInHash<EventMessageEntity>(
+                        redisInstanceName: _connectionSetting.RedisInstanceName,
                         historyQueue: DistributedHistoryQueueName, 
                         queue: DistributedQueueName, 
                         hash: DistributedConfirmIdHashName);

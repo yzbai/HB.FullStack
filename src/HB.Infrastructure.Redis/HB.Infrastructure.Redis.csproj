@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.DistributedQueue\HB.Framework.DistributedQueue.csproj" />
     <ProjectReference Include="..\HB.Framework.KVStore\HB.Framework.KVStore.csproj" />
   </ItemGroup>
 

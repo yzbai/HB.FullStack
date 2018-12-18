@@ -10,23 +10,23 @@ namespace Microsoft.Extensions.Caching.Distributed
 
         public static void Set<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options)
         {
-            cache.Set(key, DataConverter.Serialize(value), options);
+            cache.Set(key, DataConverter.SerializeUseMsgPack(value), options);
         }
 
         public static Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options)
         {
-            return cache.SetAsync(key, DataConverter.Serialize(value), options);
+            return cache.SetAsync(key, DataConverter.SerializeUseMsgPack(value), options);
         }
 
         public static T Get<T>(this IDistributedCache cache, string key)
         {
             byte[] bytes = cache.Get(key);
-            return DataConverter.DeSerialize<T>(bytes);
+            return DataConverter.DeSerializeUseMsgPack<T>(bytes);
         }
 
         public static Task<T> GetAsync<T>(this IDistributedCache cache, string key)
         {
-            return cache.GetAsync(key).ContinueWith(t => { return DataConverter.DeSerialize<T>(t.Result); }, TaskScheduler.Default);
+            return cache.GetAsync(key).ContinueWith(t => { return DataConverter.DeSerializeUseMsgPack<T>(t.Result); }, TaskScheduler.Default);
         }
 
         public static void SetInt(this IDistributedCache cache, string key, int value, DistributedCacheEntryOptions options)

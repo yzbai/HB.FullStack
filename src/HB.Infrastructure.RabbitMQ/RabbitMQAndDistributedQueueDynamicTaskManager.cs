@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.Framework.DistributedQueue;
+using HB.Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 
 namespace HB.Infrastructure.RabbitMQ
@@ -13,17 +13,17 @@ namespace HB.Infrastructure.RabbitMQ
         protected ILogger _logger;
         protected RabbitMQConnectionSetting _connectionSetting;
         protected IRabbitMQConnectionManager _connectionManager;
-        protected IDistributedQueue _distributedQueue;
+        protected IRedisEngine _redis;
 
         private ulong _inCommingCount = 0;
         private readonly object _taskNodesLocker = new object();
         private LinkedList<TaskNode> _taskNodes = new LinkedList<TaskNode>();
 
-        protected RabbitMQAndDistributedQueueDynamicTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
+        protected RabbitMQAndDistributedQueueDynamicTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisEngine redis, ILogger logger)
         {
             _logger = logger;
             _connectionManager = connectionManager;
-            _distributedQueue = distributedQueue;
+            _redis = redis;
             _connectionSetting = connectionSetting;
 
             AddTaskAndStart(EstimatedTaskNumber);
@@ -78,7 +78,7 @@ namespace HB.Infrastructure.RabbitMQ
             get
             {
                 //根据初始队列长度，确定线程数量
-                ulong length = _distributedQueue.Length(queueName: CurrentWorkloadQueueName());
+                ulong length = _redis.QueueLength(redisInstanceName: _connectionSetting.RedisInstanceName, queueName: CurrentWorkloadQueueName());
 
                 if (length == 0)
                 {
