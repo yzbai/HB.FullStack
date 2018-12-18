@@ -128,15 +128,15 @@ namespace RabbitMQDemo
         {
             EventMessage eventMessage = new EventMessage("xxx", DataConverter.GetUTF8Bytes("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
 
-            byte[] result = DataConverter.Serialize<EventMessage>(eventMessage);
+            byte[] result = DataConverter.SerializeUseMsgPack<EventMessage>(eventMessage);
 
             EventMessage event2 = new EventMessage("yyy", result);
 
-            byte[] result2 = DataConverter.Serialize<EventMessage>(event2);
+            byte[] result2 = DataConverter.SerializeUseMsgPack<EventMessage>(event2);
 
-            EventMessage e22 = DataConverter.DeSerialize<EventMessage>(result2);
+            EventMessage e22 = DataConverter.DeSerializeUseMsgPack<EventMessage>(result2);
 
-            EventMessage e11 = DataConverter.DeSerialize<EventMessage>(e22.Body);
+            EventMessage e11 = DataConverter.DeSerializeUseMsgPack<EventMessage>(e22.Body);
 
             string message = DataConverter.GetUTF8String(e11.Body);
 

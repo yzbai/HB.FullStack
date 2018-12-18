@@ -76,22 +76,22 @@ namespace HB.Framework.KVStore
 
         private static byte[] EntityValue<T>(T item) where T : KVStoreEntity, new()
         {
-            return DataConverter.Serialize<T>(item);
+            return DataConverter.SerializeUseMsgPack<T>(item);
         }
 
         private static IEnumerable<byte[]> EntityValue<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            return items.Select(t => DataConverter.Serialize<T>(t));
+            return items.Select(t => DataConverter.SerializeUseMsgPack<T>(t));
         }
 
         private static T DeSerialize<T>(byte[] value) where T : KVStoreEntity, new()
         {
-            return DataConverter.DeSerialize<T>(value);
+            return DataConverter.DeSerializeUseMsgPack<T>(value);
         }
 
         private static IEnumerable<T> DeSerialize<T>(IEnumerable<byte[]> values) where T : KVStoreEntity, new()
         {
-            return values?.Select(bytes => DataConverter.DeSerialize<T>(bytes));
+            return values?.Select(bytes => DataConverter.DeSerializeUseMsgPack<T>(bytes));
         }
 
         private static bool CheckEntities<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
