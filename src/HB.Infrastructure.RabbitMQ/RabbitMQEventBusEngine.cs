@@ -10,23 +10,14 @@ using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.RabbitMQ
 {
-    public class EventHandlerTaskNode
-    {
-        public string EventHandlerId { get; set; }
-
-        public Task Task { get; set; }
-
-        public CancellationTokenSource CancellationTokenSource { get; set; }
-    }
-
     public class RabbitMQEventBusEngine : IEventBusEngine
     {
         private ILogger _logger;
         private RabbitMQEngineOptions _options;
-        private IRabbitMQConnectionManager _connectionManager;
+        private readonly IRabbitMQConnectionManager _connectionManager;
         private IDistributedQueue _queue;
 
-        private ILogger _consumeTaskManagerLogger;
+        private readonly ILogger _consumeTaskManagerLogger;
 
         //brokerName : PublishTaskManager
         private IDictionary<string, PublishTaskManager> _publishManagers = new Dictionary<string, PublishTaskManager>();
@@ -80,9 +71,9 @@ namespace HB.Infrastructure.RabbitMQ
 
             EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.Body);
 
-            IDistributedQueueResult queueResult = await _queue.Push(queueName: brokerName, data: eventEntity);
+            IDistributedQueueResult queueResult = await _queue.PushAsync(queueName: brokerName, data: eventEntity);
 
-            if (queueResult.IsSucceeded())
+            if (queueResult.IsSucceeded)
             {
                 NotifyPublishToRabbitMQ(brokerName);
 
@@ -123,7 +114,7 @@ namespace HB.Infrastructure.RabbitMQ
 
             RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
 
-            ConsumeTaskManager manager = new ConsumeTaskManager(eventType, connectionSetting, _connectionManager, _consumeTaskManagerLogger);
+            ConsumeTaskManager manager = new ConsumeTaskManager(eventType, eventHandler, connectionSetting, _connectionManager, _consumeTaskManagerLogger);
 
             _consumeManager.Add(eventType, manager);
 

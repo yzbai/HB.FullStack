@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using HB.Framework.Common;
 using HB.Framework.DistributedQueue;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Queue
 {
     public class RedisQueue : RedisEngineBase, IDistributedQueue
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public RedisQueue(RedisEngineOptions options, ILogger<RedisQueue> logger) : base(options, logger)
         {
@@ -18,12 +20,6 @@ namespace HB.Infrastructure.Redis.Queue
 
         public IDistributedQueueResult AddIntToHash(string hashName, IList<string> fields, IList<int> values)
         {
-            throw new NotImplementedException();
-        }
-
-        public IDistributedQueueResult InsertFront<T>(string queueName, T data)
-        {
-            //TODO: 要用polly来确保吗?
             throw new NotImplementedException();
         }
 
@@ -42,9 +38,17 @@ namespace HB.Infrastructure.Redis.Queue
             throw new NotImplementedException();
         }
 
-        public Task<IDistributedQueueResult> Push<T>(string queueName, T data)
+        public async Task<IDistributedQueueResult> PushAsync<T>(string queueName, T data)
         {
-            throw new NotImplementedException();
+            RedisValue redisValue = DataConverter.Serialize<T>(data);
+            IDatabase database = GetQueueDatabase();
+
+            long length = await database.ListLeftPushAsync(queueName, DataConverter.Serialize(data), When.Always).ConfigureAwait(false);
+
+            IDistributedQueueResult result = IDistributedQueueResult.Succeed;
+            result.QueueLength = length;
+
+            return result;
         }
     }
 }
