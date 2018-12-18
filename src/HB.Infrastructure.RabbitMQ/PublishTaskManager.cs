@@ -7,10 +7,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HB.Framework.Common;
-using HB.Framework.DistributedQueue;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using HB.Infrastructure.Redis;
 
 namespace HB.Infrastructure.RabbitMQ
 {
@@ -23,8 +23,8 @@ namespace HB.Infrastructure.RabbitMQ
         //EventMessageEntity.Type
         private ConcurrentDictionary<string, bool> _eventDeclareDict = new ConcurrentDictionary<string, bool>();
 
-        public PublishTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
-            : base(connectionSetting, connectionManager, distributedQueue, logger) { }
+        public PublishTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisEngine redis, ILogger logger)
+            : base(connectionSetting, connectionManager, redis, logger) { }
 
         protected override void TaskProcedure()
         {
@@ -100,14 +100,14 @@ namespace HB.Infrastructure.RabbitMQ
                         valueList.Add(1);
                     }
 
-                    IDistributedQueueResult result = _distributedQueue.AddIntToHash(hashName: DistributedConfirmIdHashName, fields: deleteIds, values: valueList);
+                    _redis.HashSetInt(redisInstanceName: _connectionSetting.RedisInstanceName, hashName: DistributedConfirmIdHashName, fields: deleteIds, values: valueList);
                 };
 
                 channel.BasicNacks += (sender, eventArgs) =>
                 {
-                    List<string> deleteIds = new List<string>();
+                    //List<string> deleteIds = new List<string>();
 
-                    //那就在history里待着吧，等待回收
+                    ////那就在history里待着吧，等待回收
                     lock (confirmEventIdListLocker)
                     {
                         ulong seqno = eventArgs.DeliveryTag;
@@ -117,40 +117,41 @@ namespace HB.Infrastructure.RabbitMQ
                         {
                             for (int i = 0; i < index; i++)
                             {
-                                deleteIds.Add(confirmEventIdList[i]);
+                                //deleteIds.Add(confirmEventIdList[i]);
                                 confirmEventIdList[i] = null;
                             }
                         }
                         else
                         {
-                            deleteIds.Add(confirmEventIdList[index]);
+                            //deleteIds.Add(confirmEventIdList[index]);
                             confirmEventIdList[index] = null;
                         }
                     }
 
                     //将deleteIds放入 DistributedConfirmEventIdSet
 
-                    List<int> valueList = new List<int>();
+                    //List<int> valueList = new List<int>();
 
-                    foreach (string id in deleteIds)
-                    {
-                        valueList.Add(0);
-                    }
+                    //foreach (string id in deleteIds)
+                    //{
+                    //    valueList.Add(0);
+                    //}
 
-                    IDistributedQueueResult result = _distributedQueue.AddIntToHash(hashName: DistributedConfirmIdHashName, fields: deleteIds, values: valueList);
+                    //_redis.HashSetInt(redisInstanceName: _connectionSetting.RedisInstanceName, hashName: DistributedConfirmIdHashName, fields: deleteIds, values: valueList);
                 };
 
                 while (true)
                 {
                     //获取数据.用同步方法，不能用await，避免前后线程不一致
-                    IDistributedQueueResult queueResult = _distributedQueue.PopAndPush<EventMessageEntity>(fromQueueName: DistributedQueueName, toQueueName: DistributedHistoryQueueName);
+                    EventMessageEntity eventEntity = _redis.PopAndPush<EventMessageEntity>(
+                        redisInstanceName: _connectionSetting.RedisInstanceName, 
+                        fromQueueName: DistributedQueueName, 
+                        toQueueName: DistributedHistoryQueueName
+                    );
 
-                    //没有数据，queue为空，直接推出
-                    if (!queueResult.IsSucceeded || !EventMessageEntity.IsValid(queueResult.ResultData))
+                    //没有数据，queue为空，直接推出,结束Thread
+                    if (eventEntity == null)
                     {
-                        //可能性1：Queue挂掉，取不到；可能性2：Queue已空
-                        //退出循环, 结束Thread
-
                         bool allAcks = channel.WaitForConfirms(TimeSpan.FromSeconds(_connectionSetting.MaxSecondsWaitForConfirms), out bool timedOut);
 
                         if (allAcks && !timedOut)
@@ -168,8 +169,6 @@ namespace HB.Infrastructure.RabbitMQ
 
                         break;
                     }
-
-                    EventMessageEntity eventEntity = queueResult.ResultData as EventMessageEntity;
 
                     //Channel 不可用，直接结束Thread
                     if (channel == null || channel.CloseReason != null)
@@ -191,7 +190,7 @@ namespace HB.Infrastructure.RabbitMQ
                         EventTypeToRabbitRoutingKey(eventEntity.Type), 
                         true, 
                         basicProperties, 
-                        DataConverter.Serialize(eventEntity)
+                        DataConverter.SerializeUseMsgPack(eventEntity)
                     );
 
                     //Confirm

@@ -33,7 +33,7 @@ namespace HB.Framework.Common
             convertFunDict[typeof(DateTime)] = o => { return Convert.ToDateTime(o, GlobalSettings.Culture); };
             convertFunDict[typeof(DateTimeOffset)] = o => { return (DateTimeOffset)DateTime.SpecifyKind(Convert.ToDateTime(o, GlobalSettings.Culture), DateTimeKind.Utc); };
             convertFunDict[typeof(TimeSpan)] = o => { return Convert.ToDateTime(o, GlobalSettings.Culture); };
-            convertFunDict[typeof(byte[])] = o => { return Serialize(o); };
+            convertFunDict[typeof(byte[])] = o => { return SerializeUseMsgPack(o); };
             convertFunDict[typeof(byte?)] = o => { return o == null ? null : (object)Convert.ToByte(o, GlobalSettings.Culture); };
             convertFunDict[typeof(sbyte?)] = o => { return o == null ? null : (object)Convert.ToSByte(o, GlobalSettings.Culture); };
             convertFunDict[typeof(short?)] = o => { return o == null ? null : (object)Convert.ToInt16(o, GlobalSettings.Culture); };
@@ -521,7 +521,7 @@ namespace HB.Framework.Common
             return BitConverter.ToInt32(value, 0);
         }
 
-        public static T DeSerialize<T>(byte[] buffer)
+        public static T DeSerializeUseMsgPack<T>(byte[] buffer)
         {
             if (buffer == null)
             {
@@ -531,7 +531,7 @@ namespace HB.Framework.Common
             return MsgPack.Serialization.MessagePackSerializer.Get<T>().UnpackSingleObject(buffer);
         }
 
-        public static object DeSerialize(Type type, byte[] buffer)
+        public static object DeSerializeUseMsgPack(Type type, byte[] buffer)
         {
             if (buffer == null)
             {
@@ -542,7 +542,7 @@ namespace HB.Framework.Common
         }
 
 
-        public static byte[] Serialize<T>(T item)
+        public static byte[] SerializeUseMsgPack<T>(T item)
         {
             if (item == null)
             {
@@ -552,7 +552,7 @@ namespace HB.Framework.Common
             return MsgPack.Serialization.MessagePackSerializer.Get<T>().PackSingleObject(item);
         }
 
-        public static byte[] Serialize(Type type, object item)
+        public static byte[] SerializeUseMsgPack(Type type, object item)
         {
             if (item == null)
             {

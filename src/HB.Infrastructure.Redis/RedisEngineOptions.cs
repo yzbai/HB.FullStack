@@ -12,7 +12,6 @@ namespace HB.Infrastructure.Redis
         public bool IsMaster { get; set; }
 
         //TODO:更改appsettings
-        public bool ProvideQueue { get; set; }
     }
 
     public class RedisEngineOptions : IOptions<RedisEngineOptions>
@@ -26,9 +25,9 @@ namespace HB.Infrastructure.Redis
             ConnectionSettings = new List<RedisConnectionSetting>();
         }
 
-        public RedisConnectionSetting GetQueueConnectionSetting()
+        public RedisConnectionSetting GetConnectionSetting(string instanceName)
         {
-            return ConnectionSettings.FirstOrDefault(s => s.ProvideQueue = true);
+            return ConnectionSettings.FirstOrDefault(s => s.InstanceName.Equals(instanceName, GlobalSettings.Comparison));
         }
     }
 }
