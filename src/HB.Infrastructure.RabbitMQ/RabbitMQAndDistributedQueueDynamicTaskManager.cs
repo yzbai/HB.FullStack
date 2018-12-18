@@ -16,10 +16,10 @@ namespace HB.Infrastructure.RabbitMQ
         protected IDistributedQueue _distributedQueue;
 
         private ulong _inCommingCount = 0;
-        private object _taskNodesLocker = new object();
+        private readonly object _taskNodesLocker = new object();
         private LinkedList<TaskNode> _taskNodes = new LinkedList<TaskNode>();
 
-        public RabbitMQAndDistributedQueueDynamicTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
+        protected RabbitMQAndDistributedQueueDynamicTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue distributedQueue, ILogger logger)
         {
             _logger = logger;
             _connectionManager = connectionManager;

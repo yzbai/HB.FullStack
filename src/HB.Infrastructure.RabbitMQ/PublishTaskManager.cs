@@ -146,7 +146,7 @@ namespace HB.Infrastructure.RabbitMQ
                     IDistributedQueueResult queueResult = _distributedQueue.PopAndPush<EventMessageEntity>(fromQueueName: DistributedQueueName, toQueueName: DistributedHistoryQueueName);
 
                     //没有数据，queue为空，直接推出
-                    if (!queueResult.IsSucceeded() || !EventMessageEntity.IsValid(queueResult.Data))
+                    if (!queueResult.IsSucceeded || !EventMessageEntity.IsValid(queueResult.ResultData))
                     {
                         //可能性1：Queue挂掉，取不到；可能性2：Queue已空
                         //退出循环, 结束Thread
@@ -169,7 +169,7 @@ namespace HB.Infrastructure.RabbitMQ
                         break;
                     }
 
-                    EventMessageEntity eventEntity = queueResult.Data as EventMessageEntity;
+                    EventMessageEntity eventEntity = queueResult.ResultData as EventMessageEntity;
 
                     //Channel 不可用，直接结束Thread
                     if (channel == null || channel.CloseReason != null)
@@ -186,7 +186,13 @@ namespace HB.Infrastructure.RabbitMQ
                     IBasicProperties basicProperties = channel.CreateBasicProperties();
                     basicProperties.DeliveryMode = 2;
 
-                    channel.BasicPublish(_connectionSetting.ExchangeName, EventTypeToRabbitRoutingKey(eventEntity.Type), true, basicProperties, eventEntity.Body);
+                    channel.BasicPublish(
+                        _connectionSetting.ExchangeName, 
+                        EventTypeToRabbitRoutingKey(eventEntity.Type), 
+                        true, 
+                        basicProperties, 
+                        DataConverter.Serialize(eventEntity)
+                    );
 
                     //Confirm
                     confirmEventIdList.Add(eventEntity.Id);
@@ -302,17 +308,17 @@ namespace HB.Infrastructure.RabbitMQ
             _eventDeclareDict.TryAdd(message.Type, true);
         }
 
-        private string RabbitRoutingKeyToEventType(string routingKey)
+        private static string RabbitRoutingKeyToEventType(string routingKey)
         {
             return routingKey;
         }
 
-        private string EventTypeToRabbitRoutingKey(string eventType)
+        private static string EventTypeToRabbitRoutingKey(string eventType)
         {
             return eventType;
         }
 
-        private string EventTypeToRabbitQueueName(string eventType)
+        private static string EventTypeToRabbitQueueName(string eventType)
         {
             return eventType;
         }

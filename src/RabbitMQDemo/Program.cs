@@ -2,6 +2,8 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HB.Framework.Common;
+using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,11 +16,14 @@ namespace RabbitMQDemo
 
         static void Main(string[] args)
         {
+
+            testSerilize();
+
             //应该Retry
             ConnectionFactory connectionFactory = new ConnectionFactory();
 
-            //connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
-            connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
+            connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
+            //connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
             connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             connectionFactory.AutomaticRecoveryEnabled = true;
 
@@ -53,10 +58,10 @@ namespace RabbitMQDemo
             #endregion
 
             //start Pub
-            Task.Run(() =>
-            {
-                Pub(connection, "11111111111111");
-            });
+            //Task.Run(() =>
+            //{
+            //    Pub(connection, "11111111111111");
+            //});
 
             //Task.Run(() =>
             //{
@@ -73,10 +78,10 @@ namespace RabbitMQDemo
             //    Pub(connection, "22222222222222222");
             //});
 
-            Task.Run(() =>
-            {
-                Sub(connection, 1);
-            });
+            //Task.Run(() =>
+            //{
+            //    Sub(connection, 1);
+            //});
 
             //Task.Run(() =>
             //{
@@ -117,6 +122,25 @@ namespace RabbitMQDemo
 
             connection.Close();
 
+        }
+
+        private static void testSerilize()
+        {
+            EventMessage eventMessage = new EventMessage("xxx", DataConverter.GetUTF8Bytes("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
+
+            byte[] result = DataConverter.Serialize<EventMessage>(eventMessage);
+
+            EventMessage event2 = new EventMessage("yyy", result);
+
+            byte[] result2 = DataConverter.Serialize<EventMessage>(event2);
+
+            EventMessage e22 = DataConverter.DeSerialize<EventMessage>(result2);
+
+            EventMessage e11 = DataConverter.DeSerialize<EventMessage>(e22.Body);
+
+            string message = DataConverter.GetUTF8String(e11.Body);
+
+            Console.WriteLine(message);
         }
 
         private static void Sub(IConnection connection, int name)

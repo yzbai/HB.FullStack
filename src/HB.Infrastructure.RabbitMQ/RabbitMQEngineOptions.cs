@@ -27,6 +27,11 @@ namespace HB.Infrastructure.RabbitMQ
         /// </summary>
         public ushort ConsumePerTimeNumber { get; set; } = 100;
         public int ConsumerAutoRecoveryIntervalSeconds { get; set; } = 5;
+
+        /// <summary>
+        /// 一条消息存活的事件，超过这个事件，将被丢弃
+        /// </summary>
+        public long AliveSeconds { get; set; } = 86400;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>

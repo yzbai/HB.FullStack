@@ -23,13 +23,16 @@ namespace HB.Framework.EventBus.Abstractions
 
             Type = type;
 
-            Body = new byte[body.Length];
+            //Body = new byte[body.Length];
 
-            body.CopyTo(Body, 0);
+            //body.CopyTo(Body, 0);
+
+            Body = body;
         }
 
         public string Type { get; set; }
 
+        //For Serilize ,do not modify
         public byte[] Body { get; set; }
 
         public static bool IsValid(EventMessage msg)
