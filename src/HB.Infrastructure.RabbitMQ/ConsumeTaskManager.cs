@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HB.Framework.Common;
+using HB.Framework.DistributedQueue;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -13,22 +15,27 @@ namespace HB.Infrastructure.RabbitMQ
     /// </summary>
     public class ConsumeTaskManager
     {
-        private string _eventType;
+        private readonly string _eventType;
         private ILogger _logger;
         private RabbitMQConnectionSetting _connectionSetting;
         private IRabbitMQConnectionManager _connectionManager;
+        private IDistributedQueue _distributedQueue;
 
         private IEventHandler _handler;
 
         private IModel _channel;
         private string _consumeTag;
 
-        public ConsumeTaskManager(string eventType, RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, ILogger logger)
+        public bool AutoRecovery { get; set; } = true;
+
+        public ConsumeTaskManager(string eventType, IEventHandler eventHandler, RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue, ILogger logger)
         {
-            _eventType = eventType;
-            _logger = logger;
-            _connectionManager = connectionManager;
-            _connectionSetting = connectionSetting;
+            _distributedQueue = queue;
+            _eventType = eventType.ThrowIfNull(nameof(eventType));
+            _handler = eventHandler.ThrowIfNull(nameof(eventHandler));
+            _logger = logger.ThrowIfNull(nameof(logger));
+            _connectionManager = connectionManager.ThrowIfNull(nameof(connectionManager));
+            _connectionSetting = connectionSetting.ThrowIfNull(nameof(connectionSetting));
 
             Restart();
         }
@@ -37,7 +44,14 @@ namespace HB.Infrastructure.RabbitMQ
         {
             if (_channel != null && _channel.CloseReason == null && !string.IsNullOrEmpty(_consumeTag))
             {
-                _channel.BasicCancel(_consumeTag);
+                try
+                {
+                    _channel.BasicCancel(_consumeTag);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, $"Basic Cancel Error. consumeTag : {_consumeTag}, message:{ex.Message}");
+                }
             }
 
             _channel?.Close();
@@ -61,9 +75,27 @@ namespace HB.Infrastructure.RabbitMQ
 
                 consumer.Received += (sender, eventArgs) =>
                 {
-                    byte[] data = eventArgs.Body;
+                    EventMessageEntity entity = DataConverter.DeSerialize<EventMessageEntity>(eventArgs.Body);
 
-                    _handler.Handle(data);
+                    //时间戳检测
+                    if (CheckTimestamp(entity))
+                    {
+                        //防重检测
+                        if (CheckRepetition(entity))
+                        {
+                            _handler.Handle(entity.Body);
+
+                            _distributedQueue.AddGuid(entity.Id, expireSeconds: _connectionSetting.AliveSeconds);
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"找到一个重复EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"找到一个过期EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
+                    }
 
                     _channel.BasicAck(eventArgs.DeliveryTag, false);
                 };
@@ -76,8 +108,32 @@ namespace HB.Infrastructure.RabbitMQ
             }
             finally
             {
-                _channel?.Close();
+                Cancel();
+
+                if (AutoRecovery)
+                {
+                    Restart();
+                }
             }
+        }
+
+        private bool CheckTimestamp(EventMessageEntity entity)
+        {
+            long seconds = DataConverter.CurrentTimestampSeconds() - entity.Timestamp;
+
+            if (seconds <= _connectionSetting.AliveSeconds)
+            {
+                return true;
+            }
+
+            _logger.LogCritical($"找到一个过期的EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
+
+            return false;
+        }
+
+        private bool CheckRepetition(EventMessageEntity entity)
+        {
+            return !_distributedQueue.ExistGuid(entity.Id);
         }
 
         private IModel CreateChannel(string brokerName, bool isPublish)
@@ -114,7 +170,7 @@ namespace HB.Infrastructure.RabbitMQ
             };
         }
 
-        private string EventTypeToRabbitQueueName(string eventType)
+        private static string EventTypeToRabbitQueueName(string eventType)
         {
             return eventType;
         }

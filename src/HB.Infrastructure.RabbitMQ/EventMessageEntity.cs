@@ -9,12 +9,13 @@ namespace HB.Infrastructure.RabbitMQ
     {
         public string Id { get; set; } = SecurityHelper.CreateUniqueToken();
 
-        public double Timestamp { get; set; } = DataConverter.ToTimestamp(DateTimeOffset.UtcNow);
+        public long Timestamp { get; set; } = DataConverter.CurrentTimestampSeconds();
 
         public string Type { get; set; }
 
+        //For Serilize, do not modify
         public byte[] Body { get; set; }
-
+        
         public EventMessageEntity(string type, byte[] body)
         {
             Type = type;

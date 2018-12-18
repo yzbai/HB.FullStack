@@ -125,10 +125,12 @@ namespace HB.Infrastructure.RabbitMQ
             //TODO: add polly here, make sure the connection is established, or just keep trying
             //TODO: add log here
 
-            ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.Uri = new Uri(connectionSetting.ConnectionString);
-            connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(_options.NetworkRecoveryIntervalSeconds);
-            connectionFactory.AutomaticRecoveryEnabled = true;
+            ConnectionFactory connectionFactory = new ConnectionFactory
+            {
+                Uri = new Uri(connectionSetting.ConnectionString),
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(_options.NetworkRecoveryIntervalSeconds),
+                AutomaticRecoveryEnabled = true
+            };
 
             connection = connectionFactory.CreateConnection();
 
