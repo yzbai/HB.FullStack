@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.Framework.DistributedQueue;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
+using HB.Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +15,7 @@ namespace HB.Infrastructure.RabbitMQ
         private ILogger _logger;
         private RabbitMQEngineOptions _options;
         private readonly IRabbitMQConnectionManager _connectionManager;
-        private IDistributedQueue _queue;
+        private IRedisEngine _redis;
 
         private readonly ILogger _consumeTaskManagerLogger;
 
@@ -28,19 +28,19 @@ namespace HB.Infrastructure.RabbitMQ
         //eventType : ConsumeTaskManager
         private IDictionary<string, ConsumeTaskManager> _consumeManager = new Dictionary<string, ConsumeTaskManager>();
         
-        public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue)
+        public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IRedisEngine redis)
         {
             _logger = loggerFactory.CreateLogger<RabbitMQEventBusEngine>();
             _options = options.Value;
             _connectionManager = connectionManager;
-            _queue = queue;
+            _redis = redis;
 
             //publish
             ILogger publishTaskManagerLogger = loggerFactory.CreateLogger<PublishTaskManager>();
 
             foreach (RabbitMQConnectionSetting connectionSetting in _options.ConnectionSettings)
             {
-                _publishManagers.Add(connectionSetting.BrokerName, new PublishTaskManager(connectionSetting, _connectionManager, _queue, publishTaskManagerLogger));
+                _publishManagers.Add(connectionSetting.BrokerName, new PublishTaskManager(connectionSetting, _connectionManager, _redis, publishTaskManagerLogger));
             }
 
             //publish history
@@ -48,7 +48,7 @@ namespace HB.Infrastructure.RabbitMQ
 
             foreach(RabbitMQConnectionSetting connectionSetting in _options.ConnectionSettings)
             {
-                _historyManager.Add(connectionSetting.BrokerName, new HistoryTaskManager(connectionSetting, _connectionManager, _queue, historyTaskManagerLogger));
+                _historyManager.Add(connectionSetting.BrokerName, new HistoryTaskManager(connectionSetting, _connectionManager, _redis, historyTaskManagerLogger));
             }
 
             //Consume 
@@ -70,17 +70,13 @@ namespace HB.Infrastructure.RabbitMQ
             }
 
             EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.Body);
+            RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
 
-            IDistributedQueueResult queueResult = await _queue.PushAsync(queueName: brokerName, data: eventEntity);
+            await _redis.PushAsync(redisInstanceName: connectionSetting.RedisInstanceName, queueName: brokerName, data: eventEntity);
 
-            if (queueResult.IsSucceeded)
-            {
-                NotifyPublishToRabbitMQ(brokerName);
+            NotifyPublishToRabbitMQ(brokerName);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         private void NotifyPublishToRabbitMQ(string brokerName)
@@ -114,7 +110,7 @@ namespace HB.Infrastructure.RabbitMQ
 
             RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
 
-            ConsumeTaskManager manager = new ConsumeTaskManager(eventType, eventHandler, connectionSetting, _connectionManager, _consumeTaskManagerLogger);
+            ConsumeTaskManager manager = new ConsumeTaskManager(eventType, eventHandler, connectionSetting, _connectionManager, _redis, _consumeTaskManagerLogger);
 
             _consumeManager.Add(eventType, manager);
 

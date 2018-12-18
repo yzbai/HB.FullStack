@@ -38,17 +38,17 @@ namespace HB.Infrastructure.Redis
             _connectionDict = new Dictionary<string, RedisWrapper>();
         }
 
-        protected IDatabase GetDatabase(string dbName, int dbIndex, bool isMaster)
+        protected IDatabase GetDatabase(string instanceName, int dbIndex, bool isMaster)
         {
-            string key = string.Format(GlobalSettings.Culture, "{0}:{1}:{2}", dbName, dbIndex, isMaster ? 1 : 0);
+            string key = string.Format(GlobalSettings.Culture, "{0}:{1}:{2}", instanceName, dbIndex, isMaster ? 1 : 0);
 
             if (!_connectionDict.ContainsKey(key))
             {
-                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
+                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
 
                 if (rss.Count() == 0 && isMaster == false)
                 {
-                    rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(dbName, GlobalSettings.Comparison) && rs.IsMaster);
+                    rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster);
                 }
 
                 if (rss.Count() == 0)
@@ -103,32 +103,14 @@ namespace HB.Infrastructure.Redis
             
         }
 
-        protected IDatabase GetReadDatabase(string dbName, int dbIndex)
+        protected IDatabase GetReadDatabase(string instanceName, int dbIndex)
         {
-            return GetDatabase(dbName, dbIndex, false);
+            return GetDatabase(instanceName, dbIndex, false);
         }
 
-        protected IDatabase GetWriteDatabase(string dbName, int dbIndex)
+        protected IDatabase GetWriteDatabase(string instanceName, int dbIndex)
         {
-            return GetDatabase(dbName, dbIndex, true);
-        }
-
-        protected IDatabase GetQueueDatabase()
-        {
-            RedisConnectionSetting connectionSetting = Options.GetQueueConnectionSetting();
-
-            if (connectionSetting == null)
-            {
-                string msg = "没有支持Queue的Redis实例";
-                Exception ex = new Exception(msg);
-
-                _logger.LogCritical(ex, msg);
-
-                throw ex;
-            }
-
-            return GetDatabase(connectionSetting.InstanceName, 0, true);
-
+            return GetDatabase(instanceName, dbIndex, true);
         }
 
         #region Dispose Support

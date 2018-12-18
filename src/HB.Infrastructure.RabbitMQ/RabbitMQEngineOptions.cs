@@ -32,6 +32,8 @@ namespace HB.Infrastructure.RabbitMQ
         /// 一条消息存活的事件，超过这个事件，将被丢弃
         /// </summary>
         public long AliveSeconds { get; set; } = 86400;
+
+        public string RedisInstanceName { get; set; }
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Common;
-using HB.Framework.DistributedQueue;
 using HB.Framework.EventBus.Abstractions;
+using HB.Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -19,7 +19,7 @@ namespace HB.Infrastructure.RabbitMQ
         private ILogger _logger;
         private RabbitMQConnectionSetting _connectionSetting;
         private IRabbitMQConnectionManager _connectionManager;
-        private IDistributedQueue _distributedQueue;
+        private IRedisEngine _redis;
 
         private IEventHandler _handler;
 
@@ -28,9 +28,9 @@ namespace HB.Infrastructure.RabbitMQ
 
         public bool AutoRecovery { get; set; } = true;
 
-        public ConsumeTaskManager(string eventType, IEventHandler eventHandler, RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IDistributedQueue queue, ILogger logger)
+        public ConsumeTaskManager(string eventType, IEventHandler eventHandler, RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisEngine redis, ILogger logger)
         {
-            _distributedQueue = queue;
+            _redis = redis;
             _eventType = eventType.ThrowIfNull(nameof(eventType));
             _handler = eventHandler.ThrowIfNull(nameof(eventHandler));
             _logger = logger.ThrowIfNull(nameof(logger));
@@ -75,17 +75,17 @@ namespace HB.Infrastructure.RabbitMQ
 
                 consumer.Received += (sender, eventArgs) =>
                 {
-                    EventMessageEntity entity = DataConverter.DeSerialize<EventMessageEntity>(eventArgs.Body);
+                    EventMessageEntity entity = DataConverter.DeSerializeUseMsgPack<EventMessageEntity>(eventArgs.Body);
 
                     //时间戳检测
                     if (CheckTimestamp(entity))
                     {
                         //防重检测
-                        if (CheckRepetition(entity))
+                        bool setted = _redis.KeySetIfNotExist(_connectionSetting.RedisInstanceName, entity.Id, expireSeconds: _connectionSetting.AliveSeconds);
+                        
+                        if (setted)
                         {
                             _handler.Handle(entity.Body);
-
-                            _distributedQueue.AddGuid(entity.Id, expireSeconds: _connectionSetting.AliveSeconds);
                         }
                         else
                         {
@@ -129,11 +129,6 @@ namespace HB.Infrastructure.RabbitMQ
             _logger.LogCritical($"找到一个过期的EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
 
             return false;
-        }
-
-        private bool CheckRepetition(EventMessageEntity entity)
-        {
-            return !_distributedQueue.ExistGuid(entity.Id);
         }
 
         private IModel CreateChannel(string brokerName, bool isPublish)
