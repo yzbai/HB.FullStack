@@ -55,7 +55,7 @@ namespace HB.Framework.EventBus
             eventType.ThrowIfNull(nameof(eventType));
             handlerId.ThrowIfNull(nameof(handlerId));
 
-            _engine.UnSubscribeHandler(brokerName: GetBrokerName(eventType), eventyType: eventType, handlerId: handlerId);
+            _engine.UnSubscribeHandler(eventyType: eventType, handlerId: handlerId);
         }
 
         private string GetBrokerName(string eventType)

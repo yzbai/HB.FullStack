@@ -7,22 +7,15 @@ namespace HB.Framework.DistributedQueue
 {
     public interface IDistributedQueue
     {
-        Task<IDistributedQueueResult> Push<T>(string queueName, T data);
+        Task<IDistributedQueueResult> PushAsync<T>(string queueName, T data);
 
         ulong Length(string queueName);
 
 
-        /// <summary>
-        /// 不能保证一定是在最前面
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="queueName"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        IDistributedQueueResult InsertFront<T>(string queueName, T data);
-
         IDistributedQueueResult PopAndPush<T>(string fromQueueName, string toQueueName);
         IDistributedQueueResult AddIntToHash(string hashName, IList<string> fields, IList<int> values);
         IDistributedQueueResult PopHistoryToQueueIfNotExistInHash<T>(string historyQueue, string queue, string hash);
+        void AddGuid(string id, long expireSeconds);
+        bool ExistGuid(string id);
     }
 }

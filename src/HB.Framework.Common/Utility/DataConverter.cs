@@ -622,15 +622,19 @@ namespace HB.Framework.Common
 
         //TODO: 对系统中的DateTime, DateTimeOffset,DateTime.UtcNow做出梳理和清理
 
-        public static double ToTimestamp(DateTimeOffset dt)
+        public static long CurrentTimestampSeconds()
         {
-            TimeSpan ts = dt - new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
-            return ts.TotalSeconds;
+            return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
-        public static DateTimeOffset ToDateTimeOffset(double timestamp)
+        public static long ToTimestampSeconds(DateTimeOffset dt)
         {
-            return new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero).AddSeconds(timestamp);
+            return dt.ToUnixTimeSeconds();
+        }
+
+        public static DateTimeOffset ToDateTimeOffset(long timestampSeconds)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(timestampSeconds);
         }
 
         #endregion
