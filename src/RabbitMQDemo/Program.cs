@@ -38,7 +38,7 @@ namespace RabbitMQDemo
         {
             //testRedis();
             //testRedis2();
-            testRedis3();
+            testRedis();
             //testSerilize();
 
             //应该Retry
@@ -146,118 +146,25 @@ namespace RabbitMQDemo
 
         }
 
-        private static void testRedis2()
-        {
-            //var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
-            var connection = ConnectionMultiplexer.Connect("192.168.0.112:6379,password=_admin");
-
-            IDatabase database = connection.GetDatabase();
-
-            Cart cart = new Cart() { Name = "yuzhaobai"};
-
-            cart.Products.Add("shoes");
-            cart.Products.Add("hat");
-            cart.Products.Add("coat");
-
-            cart.Data = Encoding.UTF8.GetBytes("Hello");
-
-            byte[] data = DataConverter.Serialize(cart);
-
-            for (int i = 0; i < 1000; ++i)
-            {
-                database.ListLeftPush("history", data);
-            }
-
-            byte[] rtData = database.ListLeftPop("history");
-
-            Cart rtCart = DataConverter.DeSerialize<Cart>(rtData);
-
-            Console.WriteLine(Encoding.UTF8.GetString(rtCart.Data));
-        }
-
-        private static void testRedis3()
-        {
-            //var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
-            var connection = ConnectionMultiplexer.Connect("192.168.0.112:6379,password=_admin");
-
-            IDatabase database = connection.GetDatabase();
-
-            Cart cart = new Cart() { Name = "yuzhaobai" };
-
-            cart.Products.Add("shoes");
-            cart.Products.Add("hat");
-            cart.Products.Add("coat");
-
-            cart.Data = Encoding.UTF8.GetBytes("Hello");
-
-            //byte[] data = DataConverter.SerializeUseMsgPack<Cart>(cart);
-            string jsonString = DataConverter.ToJson(cart);
-
-            for (int i = 0; i < 1000; ++i)
-            {
-                database.ListLeftPush("history", jsonString);
-            }
-
-            //byte[] rtData = database.ListLeftPop("history");
-            string rtJson = database.ListLeftPop("history");
-            Cart rtCart = DataConverter.FromJson<Cart>(rtJson);
-            //Cart rtCart = DataConverter.DeSerializeUseMsgPack<Cart>(rtData);
-
-            Console.WriteLine(Encoding.UTF8.GetString(rtCart.Data));
-        }
-
 
         private static void testRedis()
         {
 
-            var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
+            var connection = ConnectionMultiplexer.Connect("192.168.0.112:6379,password=_admin");
 
             IDatabase database = connection.GetDatabase();
 
-            Cart cart = new Cart() { Name = "yuzhaobai" };
+            
 
-            cart.Products.Add("shoes");
-            cart.Products.Add("hat");
-            cart.Products.Add("coat");
-
-            byte[] data = DataConverter.Serialize(cart);
-
-            EventMessageEntity entity = new EventMessageEntity("event.shopping", data);
-
-            byte[] redisData = DataConverter.Serialize(entity);
-
-            for (int i = 0; i < 1000; ++i)
+            for (int i = 0; i < 10000; ++i)
             {
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
-                database.ListLeftPush("history", redisData);
+                EventMessageEntity entity = new EventMessageEntity("user.upload.headimage", "xxxx");
+
+                database.ListLeftPush("history", DataConverter.ToJson(entity));
             }
-
         }
 
-        private static void testSerilize()
-        {
-            EventMessage eventMessage = new EventMessage("xxx", DataConverter.GetUTF8Bytes("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
-
-            byte[] result = DataConverter.Serialize(eventMessage);
-
-            EventMessage event2 = new EventMessage("yyy", result);
-
-            byte[] result2 = DataConverter.Serialize(event2);
-
-            EventMessage e22 = DataConverter.DeSerialize<EventMessage>(result2);
-
-            EventMessage e11 = DataConverter.DeSerialize<EventMessage>(e22.Body);
-
-            string message = DataConverter.GetUTF8String(e11.Body);
-
-            Console.WriteLine(message);
-        }
+        
 
         private static void Sub(IConnection connection, int name)
         {

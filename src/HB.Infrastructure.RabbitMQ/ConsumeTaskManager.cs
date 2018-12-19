@@ -85,16 +85,16 @@ namespace HB.Infrastructure.RabbitMQ
                         
                         if (setted)
                         {
-                            _handler.Handle(entity.Body);
+                            _handler.Handle(entity.JsonData);
                         }
                         else
                         {
-                            _logger.LogWarning($"找到一个重复EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
+                            _logger.LogWarning($"找到一个重复EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, Data:{entity.JsonData}");
                         }
                     }
                     else
                     {
-                        _logger.LogWarning($"找到一个过期EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
+                        _logger.LogWarning($"找到一个过期EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, Data:{entity.JsonData}");
                     }
 
                     _channel.BasicAck(eventArgs.DeliveryTag, false);
@@ -126,7 +126,7 @@ namespace HB.Infrastructure.RabbitMQ
                 return true;
             }
 
-            _logger.LogCritical($"找到一个过期的EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, HexStringData:{DataConverter.ToHexString(entity.Body)}");
+            _logger.LogCritical($"找到一个过期的EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, Data:{entity.JsonData}");
 
             return false;
         }

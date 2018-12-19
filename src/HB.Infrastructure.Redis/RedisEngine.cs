@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HB.Framework.Common;
 using Microsoft.Extensions.Logging;
@@ -69,19 +70,22 @@ namespace HB.Infrastructure.Redis
         #endregion
 
         #region Script
-        
-       
-        
+
+        //TODO: use LoadedLuaScript
+        public int ScriptEvaluate(string redisInstanceName, string script, string[] keys, string[] argvs)
+        {
+            IDatabase database = GetDatabase(redisInstanceName);
+
+            RedisResult result = database.ScriptEvaluate(script, keys.Select<string, RedisKey>(t=>t).ToArray(), argvs.Select<string, RedisValue>(t=>t).ToArray());
+
+            return (int)result;
+        }
+
         #endregion
 
         private IDatabase GetDatabase(string redisInstanceName)
         {
             return GetDatabase(redisInstanceName, 0, true);
-        }
-
-        public RedisEngineResult PopAndPushIfNotExist<T>(string redisInstanceName, string historyQueue, string queue, string hashName)
-        {
-            return null;
         }
     }
 }

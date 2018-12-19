@@ -15,9 +15,6 @@ namespace HB.Infrastructure.Redis
 
         ulong QueueLength(string redisInstanceName, string queueName);
 
-
-
-        //TODO: 提到RabbitMQ去，太业务化了
-        RedisEngineResult PopAndPushIfNotExist<T>(string redisInstanceName, string historyQueue, string queue, string hashName);
+        int ScriptEvaluate(string redisInstanceName, string script, string[] keys, string[] argvs);
     }
 }
