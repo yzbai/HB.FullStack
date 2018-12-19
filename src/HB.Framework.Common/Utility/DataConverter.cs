@@ -33,7 +33,7 @@ namespace HB.Framework.Common
             convertFunDict[typeof(DateTime)] = o => { return Convert.ToDateTime(o, GlobalSettings.Culture); };
             convertFunDict[typeof(DateTimeOffset)] = o => { return (DateTimeOffset)DateTime.SpecifyKind(Convert.ToDateTime(o, GlobalSettings.Culture), DateTimeKind.Utc); };
             convertFunDict[typeof(TimeSpan)] = o => { return Convert.ToDateTime(o, GlobalSettings.Culture); };
-            convertFunDict[typeof(byte[])] = o => { return SerializeUseMsgPack(o); };
+            convertFunDict[typeof(byte[])] = o => { return Serialize(o); };
             convertFunDict[typeof(byte?)] = o => { return o == null ? null : (object)Convert.ToByte(o, GlobalSettings.Culture); };
             convertFunDict[typeof(sbyte?)] = o => { return o == null ? null : (object)Convert.ToSByte(o, GlobalSettings.Culture); };
             convertFunDict[typeof(short?)] = o => { return o == null ? null : (object)Convert.ToInt16(o, GlobalSettings.Culture); };
@@ -511,55 +511,35 @@ namespace HB.Framework.Common
 
         #region object to bytes
 
-        public static byte[] SerializeInt(int value)
-        {
-            return BitConverter.GetBytes(value);
-        }
-
-        public static int DeserializeInt(byte[] value)
-        {
-            return BitConverter.ToInt32(value, 0);
-        }
-
-        public static T DeSerializeUseMsgPack<T>(byte[] buffer)
+        public static T DeSerialize<T>(byte[] buffer)
         {
             if (buffer == null)
             {
                 return default(T);
             }
 
-            return MsgPack.Serialization.MessagePackSerializer.Get<T>().UnpackSingleObject(buffer);
+            return FromJson<T>(Encoding.UTF8.GetString(buffer));
         }
 
-        public static object DeSerializeUseMsgPack(Type type, byte[] buffer)
+        public static object DeSerialize(Type type, byte[] buffer)
         {
             if (buffer == null)
             {
                 return null;
             }
 
-            return MsgPack.Serialization.MessagePackSerializer.Get(type).UnpackSingleObject(buffer);
+            return FromJson(type, Encoding.UTF8.GetString(buffer));
         }
 
 
-        public static byte[] SerializeUseMsgPack<T>(T item)
+        public static byte[] Serialize(object item)
         {
             if (item == null)
             {
                 return null;
             }
-
-            return MsgPack.Serialization.MessagePackSerializer.Get<T>().PackSingleObject(item);
-        }
-
-        public static byte[] SerializeUseMsgPack(Type type, object item)
-        {
-            if (item == null)
-            {
-                return null;
-            }
-
-            return MsgPack.Serialization.MessagePackSerializer.Get(type).PackSingleObject(item);
+          
+            return Encoding.UTF8.GetBytes(ToJson(item));
         }
 
         #endregion
@@ -614,6 +594,16 @@ namespace HB.Framework.Common
             }
 
             return JsonConvert.DeserializeObject<T>(jsonString);
+        }
+
+        public static object FromJson(Type type, string jsonString)
+        {
+            if (string.IsNullOrWhiteSpace(jsonString))
+            {
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject(jsonString, type);
         }
 
         #endregion
