@@ -34,6 +34,9 @@ namespace HB.Infrastructure.RabbitMQ
         public long AliveSeconds { get; set; } = 86400;
 
         public string RedisInstanceName { get; set; }
+
+        //history队列里的event，等待多少秒后，才能被扫描
+        public int WaitSecondsToBeAHistory { get; set; } = 5 * 60;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>

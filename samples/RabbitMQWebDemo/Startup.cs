@@ -85,7 +85,7 @@ namespace RabbitMQWebDemo
 
             //Publish Done Event
 
-            var eventMsg = new EventMessage(type: "Framework.RabbitMQWebDemo.DoSomework.Done", body: Encoding.UTF8.GetBytes($"true,  {str}"));
+            var eventMsg = new EventMessage(type: "Framework.RabbitMQWebDemo.DoSomework.Done", jsonData: $"true,  {str}");
 
             _eventBus.PublishAsync(eventMsg);
 
