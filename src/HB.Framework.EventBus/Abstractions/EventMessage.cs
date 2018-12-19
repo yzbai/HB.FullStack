@@ -9,57 +9,26 @@ namespace HB.Framework.EventBus.Abstractions
     public class EventMessage
     {
 
-        public EventMessage(string type, byte[] body)
-        {
-            if (string.IsNullOrEmpty(type))
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            if (body == null)
-            {
-                throw new ArgumentNullException(nameof(body));
-            }
-
-            Type = type;
-
-            //Body = new byte[body.Length];
-
-            //body.CopyTo(Body, 0);
-
-            Body = body;
-        }
-
         public string Type { get; set; }
 
-        //For Serilize ,do not modify
-        public byte[] Body { get; set; }
+        public string JsonData { get; set; }
 
-        public static bool IsValid(EventMessage msg)
+        public EventMessage() { }
+
+        public EventMessage(string type, string jsonData)
         {
-            if (msg == null)
-            {
-                return false;
-            }
-
-            return !(string.IsNullOrEmpty(msg.Type) || msg.Body == null);
+            Type = type;
+            JsonData = jsonData;
         }
 
-        public static bool IsValid(object data)
+        public static bool IsValid(EventMessage eventMessage)
         {
-            if (data == null)
+            if (eventMessage == null || string.IsNullOrEmpty(eventMessage.Type))
             {
                 return false;
             }
 
-            EventMessage ev = (EventMessage)data;
-
-            if (ev == null)
-            {
-                return false;
-            }
-
-            return IsValid(ev);
+            return true;
         }
     }
 }
