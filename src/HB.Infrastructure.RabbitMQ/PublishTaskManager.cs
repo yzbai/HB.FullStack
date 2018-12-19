@@ -190,7 +190,7 @@ namespace HB.Infrastructure.RabbitMQ
                         EventTypeToRabbitRoutingKey(eventEntity.Type), 
                         true, 
                         basicProperties, 
-                        DataConverter.SerializeUseMsgPack(eventEntity)
+                        DataConverter.Serialize(eventEntity)
                     );
 
                     //Confirm

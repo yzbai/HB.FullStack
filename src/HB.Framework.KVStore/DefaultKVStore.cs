@@ -74,25 +74,19 @@ namespace HB.Framework.KVStore
             return keyValues.Select(obj => DataConverter.GetObjectValueStringStatement(obj));
         }
 
-        private static byte[] EntityValue<T>(T item) where T : KVStoreEntity, new()
-        {
-            return DataConverter.SerializeUseMsgPack<T>(item);
-        }
+       
 
-        private static IEnumerable<byte[]> EntityValue<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
-        {
-            return items.Select(t => DataConverter.SerializeUseMsgPack<T>(t));
-        }
+        
 
-        private static T DeSerialize<T>(byte[] value) where T : KVStoreEntity, new()
-        {
-            return DataConverter.DeSerializeUseMsgPack<T>(value);
-        }
+        //private static T DeSerialize<T>(byte[] value) where T : KVStoreEntity, new()
+        //{
+        //    return DataConverter.DeSerialize<T>(value);
+        //}
 
-        private static IEnumerable<T> DeSerialize<T>(IEnumerable<byte[]> values) where T : KVStoreEntity, new()
-        {
-            return values?.Select(bytes => DataConverter.DeSerializeUseMsgPack<T>(bytes));
-        }
+        //private static IEnumerable<T> DeSerialize<T>(IEnumerable<byte[]> values) where T : KVStoreEntity, new()
+        //{
+        //    return values?.Select(bytes => DataConverter.DeSerialize<T>(bytes));
+        //}
 
         private static bool CheckEntities<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
@@ -122,66 +116,64 @@ namespace HB.Framework.KVStore
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            byte[] value = _engine.EntityGet(
+            string jsonValue = _engine.EntityGet(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValue));
 
-            return DeSerialize<T>(value);
+            return DataConverter.FromJson<T>(jsonValue);
         }
 
         public T GetById<T>(T t) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            byte[] value = _engine.EntityGet(
+            string jsonValue = _engine.EntityGet(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(t, entityDef));
 
-            return DeSerialize<T>(value);
-
-
+            return DataConverter.FromJson<T>(jsonValue);
         }
 
         public IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            IEnumerable<byte[]> values = _engine.EntityGet(
+            IEnumerable<string> values = _engine.EntityGet(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues));
 
-            return DeSerialize<T>(values);
+            return values.Select(json => DataConverter.FromJson<T>(json));
         }
 
         public IEnumerable<T> GetByIds<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            IEnumerable<byte[]> values = _engine.EntityGet(
+            IEnumerable<string> values = _engine.EntityGet(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef));
 
-            return DeSerialize<T>(values);
+            return values.Select(json => DataConverter.FromJson<T>(json));
         }
 
         public IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            IEnumerable<byte[]> values = _engine.EntityGetAll(
+            IEnumerable<string> values = _engine.EntityGetAll(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef));
 
-            return DeSerialize<T>(values);
+            return values.Select(json => DataConverter.FromJson<T>(json));
         }
 
         public KVStoreResult Add<T>(T item) where T : KVStoreEntity, new()
@@ -208,7 +200,7 @@ namespace HB.Framework.KVStore
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                EntityValue(items)
+                items.Select(t=>DataConverter.ToJson(t))
                 );
         }
 
@@ -238,7 +230,7 @@ namespace HB.Framework.KVStore
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                EntityValue(items),
+                items.Select(t=>DataConverter.ToJson(t)),
                 originalVersions
                 );
 
@@ -293,60 +285,68 @@ namespace HB.Framework.KVStore
 
         #region async
 
-        public Task<T> GetByIdAsync<T>(object keyValue) where T : KVStoreEntity, new()
+        public async Task<T> GetByIdAsync<T>(object keyValue) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return _engine.EntityGetAsync(
+            string json = await _engine.EntityGetAsync(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
-                EntityKey(keyValue)).ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+                EntityKey(keyValue)).ConfigureAwait(false);
+
+            return DataConverter.FromJson<T>(json);
         }
 
-        public Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new()
+        public async Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return _engine.EntityGetAsync(
+            string json = await _engine.EntityGetAsync(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
-                EntityKey(t, entityDef)).ContinueWith(tt=>DeSerialize<T>(tt.Result), TaskScheduler.Default);
+                EntityKey(t, entityDef)).ConfigureAwait(false);
+
+            return DataConverter.FromJson<T>(json);
         }
 
-        public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return _engine.EntityGetAsync(
+            IEnumerable<string> jsons = await _engine.EntityGetAsync(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
-                EntityKey(keyValues)).ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+                EntityKey(keyValues)).ConfigureAwait(false);
+
+            return jsons.Select(t => DataConverter.FromJson<T>(t));
         }
 
-        public Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return _engine.EntityGetAsync(
+            IEnumerable<string> jsons = await _engine.EntityGetAsync(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
                 EntityName(entityDef),
-                EntityKey(keyValues, entityDef)).ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+                EntityKey(keyValues, entityDef)).ConfigureAwait(false);
 
+            return jsons.Select(t => DataConverter.FromJson<T>(t));
         }
 
-        public Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return _engine.EntityGetAllAsync(
+            IEnumerable<string> jsons = await _engine.EntityGetAllAsync(
                 StoreName(entityDef),
                 StoreIndex(entityDef),
-                EntityName(entityDef))
-                .ContinueWith(t=>DeSerialize<T>(t.Result), TaskScheduler.Default);
+                EntityName(entityDef)).ConfigureAwait(false);
+
+            return jsons.Select(t => DataConverter.FromJson<T>(t));
         }
 
         public Task<KVStoreResult> AddAsync<T>(T item) where T : KVStoreEntity, new()
@@ -373,7 +373,7 @@ namespace HB.Framework.KVStore
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                EntityValue(items)
+                items.Select(t=>DataConverter.ToJson(t))
                 );
         }
 
@@ -403,7 +403,7 @@ namespace HB.Framework.KVStore
                 StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                EntityValue(items),
+                items.Select(t=>DataConverter.ToJson(t)),
                 originalVersions)
                 .ContinueWith(t=> {
                     if (!t.Result.IsSucceeded())

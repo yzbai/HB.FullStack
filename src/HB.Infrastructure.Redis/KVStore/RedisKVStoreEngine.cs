@@ -111,42 +111,42 @@ namespace HB.Infrastructure.Redis.KVStore
             return stringBuilder.ToString();
         }
 
-        public byte[] EntityGet(string storeName, int storeIndex, string entityName, string entityKey)
+        public string EntityGet(string storeName, int storeIndex, string entityName, string entityKey)
         {
             IDatabase db = GetReadDatabase(storeName, storeIndex);
 
             return db.HashGet(entityName, entityKey);
         }
 
-        public IEnumerable<byte[]> EntityGet(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys)
+        public IEnumerable<string> EntityGet(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys)
         {
             IDatabase db = GetReadDatabase(storeName, storeIndex);
 
             RedisValue[] result = db.HashGet(entityName, entityKeys.Select(str=>(RedisValue)str).ToArray());
 
-            return result.Select(rs => (byte[])rs);
+            return result.Select(rs => rs.ToString());
         }
 
-        public IEnumerable<byte[]> EntityGetAll(string storeName, int storeIndex, string entityName)
+        public IEnumerable<string> EntityGetAll(string storeName, int storeIndex, string entityName)
         {
             IDatabase db = GetReadDatabase(storeName, storeIndex);
 
-            return db.HashGetAll(entityName).Select<HashEntry, byte[]>(t => t.Value);
+            return db.HashGetAll(entityName).Select<HashEntry, string>(t => t.Value);
         }
 
-        public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, string entityKey, byte[] entityValue)
+        public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, string entityKey, string entityJson)
         {
-            return EntityAdd(storeName, storeIndex, entityName, new string[] { entityKey }, new List<byte[]> { entityValue });
+            return EntityAdd(storeName, storeIndex, entityName, new string[] { entityKey }, new List<string> { entityJson });
         }
 
-        public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<byte[]> entityValues)
+        public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
         {
             string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
 
             RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
 
 
-            RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityValues.Select(bytes=>(RedisValue)bytes)).ToArray();
+            RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityJsons.Select(t=>(RedisValue)t)).ToArray();
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
 
@@ -156,18 +156,18 @@ namespace HB.Infrastructure.Redis.KVStore
 
         }
 
-        public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, string entityKey, byte[] entityValue, int entityVersion)
+        public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, string entityKey, string entityJson, int entityVersion)
         {
-            return EntityUpdate(storeName, storeIndex, entityName, new string[] { entityKey }, new List<byte[]>() { entityValue }, new int[] { entityVersion });
+            return EntityUpdate(storeName, storeIndex, entityName, new string[] { entityKey }, new List<string>() { entityJson }, new int[] { entityVersion });
         }
 
-        public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<byte[]> entityValues, IEnumerable<int> entityVersions)
+        public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
         {
             string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
 
             RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t)
-                .Concat(entityValues.Select(t=>(RedisValue)t))
+                .Concat(entityJsons.Select(t=>(RedisValue)t))
                 .Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
             IDatabase db = GetWriteDatabase(storeName, storeIndex);
@@ -204,5 +204,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             return result ? KVStoreResult.Succeeded() : KVStoreResult.Failed();
         }
+
+        
     }
 }

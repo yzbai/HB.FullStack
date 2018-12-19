@@ -37,7 +37,7 @@ namespace HB.Framework.Common
                 throw new ArgumentNullException(nameof(item));
             }
 
-            byte[] result = HashAlgorithm.Create().ComputeHash(DataConverter.SerializeUseMsgPack<T>(item));
+            byte[] result = HashAlgorithm.Create().ComputeHash(DataConverter.Serialize(item));
 
 
             return Convert.ToBase64String(result);
