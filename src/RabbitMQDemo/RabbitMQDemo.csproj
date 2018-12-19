@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.Framework.EventBus\HB.Framework.EventBus.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure.RabbitMQ\HB.Infrastructure.RabbitMQ.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
   </ItemGroup>
 
 </Project>
