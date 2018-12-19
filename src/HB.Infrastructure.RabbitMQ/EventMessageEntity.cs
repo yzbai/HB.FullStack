@@ -13,40 +13,16 @@ namespace HB.Infrastructure.RabbitMQ
 
         public string Type { get; set; }
 
-        //For Serilize, do not modify
-        public byte[] Body { get; set; }
-        
-        public EventMessageEntity(string type, byte[] body)
+        public string JsonData { get; set; }
+
+        public EventMessageEntity() { }
+
+        public EventMessageEntity(string type, string jsonData)
         {
             Type = type;
-            Body = body;
+            JsonData = jsonData;
         }
 
-        public static bool IsValid(EventMessageEntity entity)
-        {
-            if (entity == null)
-            {
-                return false;
-            }
-
-            return !(string.IsNullOrEmpty(entity.Id) || string.IsNullOrEmpty(entity.Type) || entity.Body == null);
-        }
-
-        public static bool IsValid(object data)
-        {
-            if (data == null)
-            {
-                return false;
-            }
-
-            EventMessageEntity ev = (EventMessageEntity)data;
-
-            if (ev == null)
-            {
-                return false;
-            }
-
-            return IsValid(ev);
-        }
     }
+        
 }

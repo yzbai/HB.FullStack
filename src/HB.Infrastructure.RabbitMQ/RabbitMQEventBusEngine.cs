@@ -69,7 +69,7 @@ namespace HB.Infrastructure.RabbitMQ
                 return false;
             }
 
-            EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.Body);
+            EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
             RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
 
             await _redis.PushAsync(redisInstanceName: connectionSetting.RedisInstanceName, queueName: brokerName, data: eventEntity);

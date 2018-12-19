@@ -10,6 +10,6 @@ namespace HB.Framework.EventBus.Abstractions
 
         string EventType { get; set; }
 
-        void Handle(byte[] body);
+        void Handle(string jsonData);
     }
 }

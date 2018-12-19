@@ -3,13 +3,29 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HB.Framework.Common;
 using HB.Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 
 namespace HB.Infrastructure.RabbitMQ
 {
+
+
+    //public RedisEngineResult PopAndPushIfNotExist<T>(string redisInstanceName, string historyQueue, string queue, string hashName)
+    //{
+    //    IDatabase database = GetDatabase(redisInstanceName);
+
+    //    RedisKey[] keys = new RedisKey[] { historyQueue, hashName, queue };
+    //    RedisValue[] args = new RedisValue[] { DataConverter.CurrentTimestampSeconds(), };
+
+    //    database.ScriptEvaluate("", )
+    //    }
+
+
     public class HistoryTaskManager : RabbitMQAndDistributedQueueDynamicTaskManager
     {
+        private const string _popAndPushIfNotExistInHashScript = "local rawEvent = redis.call('rpop', KEYS[1]) local event = cjson.decode(rawEvent) local diffTime = ARGV[1] - event[\"Timestamp\"] local eid = event[\"Id\"] if (diffTime < ARGV[2] + 0) then redis.call('rpush', KEYS[1], rawEvent) return 1 end if (redis.call('hexists', KEYS[2], eid) == 1) then redis.call('hdel', KEYS[2], eid) return 2 end redis.call('rpush', KEYS[3], rawEvent) return 3";
+
         public HistoryTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisEngine redis, ILogger logger)
             : base(connectionSetting, connectionManager, redis, logger) { }
 
@@ -21,23 +37,33 @@ namespace HB.Infrastructure.RabbitMQ
             {
                 while (true)
                 {
-                    RedisEngineResult result = _redis.PopAndPushIfNotExist<EventMessageEntity>(
+                    string[] redisKeys = new string[] { DistributedHistoryQueueName, DistributedConfirmIdHashName, DistributedQueueName };
+                    string[] redisArgvs = new string[] { DataConverter.CurrentTimestampSeconds().ToString(), _connectionSetting.WaitSecondsToBeAHistory.ToString() };
+
+                    int result = _redis.ScriptEvaluate(
                         redisInstanceName: _connectionSetting.RedisInstanceName,
-                        historyQueue: DistributedHistoryQueueName, 
-                        queue: DistributedQueueName, 
-                        hashName: DistributedConfirmIdHashName);
+                        script: _popAndPushIfNotExistInHashScript,
+                        keys: redisKeys,
+                        argvs: redisArgvs);
 
-                    if (result.HistoryDeleted)
+                    //TODO: add logs
+
+                    if (result == 1)
                     {
-
+                        //时间太早，等会再检查
+                        Thread.Sleep(10000);
                     }
-                    else if (result.HistoryReback)
+                    else if (result == 2)
                     {
-
+                        //成功
                     }
-                    else if (result.HistoryShouldWait)
+                    else if (result == 3)
                     {
-
+                        //重新放入队列再发送
+                    }
+                    else
+                    {
+                        //出错
                     }
                 }
             }
