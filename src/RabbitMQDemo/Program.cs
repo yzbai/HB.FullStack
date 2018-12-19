@@ -1,61 +1,83 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HB.Framework.Common;
 using HB.Framework.EventBus.Abstractions;
+using HB.Infrastructure.RabbitMQ;
 using Microsoft.Extensions.Hosting;
+using MsgPack.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using StackExchange.Redis;
 
 namespace RabbitMQDemo
 {
+    public class Cart
+    {
+        public string Name { get; set; }
+
+        public List<string> Products { get; set; } = new List<string>();
+
+        public byte[] Data { get; set; }
+    }
+
+    public class Cart2
+    {
+        public string Name { get; set; }
+
+        public string Address { get; set; }
+    }
+
     class Program
     {
         static string consumerTag;
 
         static void Main(string[] args)
         {
-
-            testSerilize();
+            //testRedis();
+            testRedis2();
+            //testSerilize();
 
             //应该Retry
-            ConnectionFactory connectionFactory = new ConnectionFactory();
+            //ConnectionFactory connectionFactory = new ConnectionFactory();
 
-            connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
-            //connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
-            connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
-            connectionFactory.AutomaticRecoveryEnabled = true;
+            //connectionFactory.Uri = new Uri("amqp://admin:_admin@127.0.0.1:5672/");
+            ////connectionFactory.Uri = new Uri("amqp://admin:_admin@192.168.0.112:5672/");
+            //connectionFactory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
+            //connectionFactory.AutomaticRecoveryEnabled = true;
 
-            //单例
-            IConnection connection = connectionFactory.CreateConnection();
+            ////单例
+            //IConnection connection = connectionFactory.CreateConnection();
 
-            #region connection event
-            connection.CallbackException += (sender, eventArgs) => 
-            { 
-                /*Try reconnect*/
-            };
-            connection.ConnectionBlocked += (sender, eventArgs) =>
-            {
-                /*Try reconnect*/
-            };
-            connection.ConnectionRecoveryError += (sender, eventArgs) =>
-            {
-                /*Try reconnect*/
-            };
-            connection.ConnectionShutdown += (sender, eventArgs) =>
-            {
-                /*Try reconnect*/
-            };
-            connection.ConnectionUnblocked += (sender, eventArgs) =>
-            {
-                /*Try reconnect*/
-            };
-            connection.RecoverySucceeded += (sender, eventArgs) =>
-            {
-                /*Try reconnect*/
-            };
-            #endregion
+            //#region connection event
+            //connection.CallbackException += (sender, eventArgs) => 
+            //{ 
+            //    /*Try reconnect*/
+            //};
+            //connection.ConnectionBlocked += (sender, eventArgs) =>
+            //{
+            //    /*Try reconnect*/
+            //};
+            //connection.ConnectionRecoveryError += (sender, eventArgs) =>
+            //{
+            //    /*Try reconnect*/
+            //};
+            //connection.ConnectionShutdown += (sender, eventArgs) =>
+            //{
+            //    /*Try reconnect*/
+            //};
+            //connection.ConnectionUnblocked += (sender, eventArgs) =>
+            //{
+            //    /*Try reconnect*/
+            //};
+            //connection.RecoverySucceeded += (sender, eventArgs) =>
+            //{
+            //    /*Try reconnect*/
+            //};
+            //#endregion
 
             //start Pub
             //Task.Run(() =>
@@ -114,13 +136,76 @@ namespace RabbitMQDemo
 
                 if (c.Equals('c'))
                 {
-                    IModel channel = connection.CreateModel();
+                    //IModel channel = connection.CreateModel();
 
-                    channel.BasicCancel(consumerTag);
+                    //channel.BasicCancel(consumerTag);
                 }
             }
 
-            connection.Close();
+            //connection.Close();
+
+        }
+
+        private static void testRedis2()
+        {
+            var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
+
+            IDatabase database = connection.GetDatabase();
+
+            Cart cart = new Cart() { Name = "yuzhaobai"};
+
+            cart.Products.Add("shoes");
+            cart.Products.Add("hat");
+            cart.Products.Add("coat");
+
+            cart.Data = Encoding.UTF8.GetBytes("Hello");
+
+            byte[] data = DataConverter.SerializeUseMsgPack<Cart>(cart);
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history4", data);
+            }
+        }
+        
+
+        private static void testRedis()
+        {
+
+            var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
+
+            IDatabase database = connection.GetDatabase();
+
+            Cart cart = new Cart() { Name = "yuzhaobai" };
+
+            cart.Products.Add("shoes");
+            cart.Products.Add("hat");
+            cart.Products.Add("coat");
+
+            byte[] data = DataConverter.SerializeUseMsgPack<Cart>(cart);
+
+            EventMessageEntity entity = new EventMessageEntity("event.shopping", data);
+
+            byte[] redisData = DataConverter.SerializeUseMsgPack(entity);
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+                database.ListLeftPush("history", redisData);
+            }
 
         }
 

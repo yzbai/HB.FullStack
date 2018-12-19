@@ -21,11 +21,11 @@ namespace HB.Infrastructure.RabbitMQ
             {
                 while (true)
                 {
-                    RedisEngineResult result = _redis.PopHistoryToQueueIfNotExistInHash<EventMessageEntity>(
+                    RedisEngineResult result = _redis.PopAndPushIfNotExist<EventMessageEntity>(
                         redisInstanceName: _connectionSetting.RedisInstanceName,
                         historyQueue: DistributedHistoryQueueName, 
                         queue: DistributedQueueName, 
-                        hash: DistributedConfirmIdHashName);
+                        hashName: DistributedConfirmIdHashName);
 
                     if (result.HistoryDeleted)
                     {
