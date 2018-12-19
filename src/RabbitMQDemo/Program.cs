@@ -8,7 +8,6 @@ using HB.Framework.Common;
 using HB.Framework.EventBus.Abstractions;
 using HB.Infrastructure.RabbitMQ;
 using Microsoft.Extensions.Hosting;
-using MsgPack.Serialization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using StackExchange.Redis;
@@ -38,7 +37,8 @@ namespace RabbitMQDemo
         static void Main(string[] args)
         {
             //testRedis();
-            testRedis2();
+            //testRedis2();
+            testRedis3();
             //testSerilize();
 
             //应该Retry
@@ -148,7 +148,8 @@ namespace RabbitMQDemo
 
         private static void testRedis2()
         {
-            var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
+            //var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
+            var connection = ConnectionMultiplexer.Connect("192.168.0.112:6379,password=_admin");
 
             IDatabase database = connection.GetDatabase();
 
@@ -160,21 +161,51 @@ namespace RabbitMQDemo
 
             cart.Data = Encoding.UTF8.GetBytes("Hello");
 
-            byte[] data = DataConverter.SerializeUseMsgPack<Cart>(cart);
+            byte[] data = DataConverter.Serialize(cart);
 
             for (int i = 0; i < 1000; ++i)
             {
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
-                database.ListLeftPush("history4", data);
+                database.ListLeftPush("history", data);
             }
+
+            byte[] rtData = database.ListLeftPop("history");
+
+            Cart rtCart = DataConverter.DeSerialize<Cart>(rtData);
+
+            Console.WriteLine(Encoding.UTF8.GetString(rtCart.Data));
         }
-        
+
+        private static void testRedis3()
+        {
+            //var connection = ConnectionMultiplexer.Connect("127.0.0.1:6379,password=_admin");
+            var connection = ConnectionMultiplexer.Connect("192.168.0.112:6379,password=_admin");
+
+            IDatabase database = connection.GetDatabase();
+
+            Cart cart = new Cart() { Name = "yuzhaobai" };
+
+            cart.Products.Add("shoes");
+            cart.Products.Add("hat");
+            cart.Products.Add("coat");
+
+            cart.Data = Encoding.UTF8.GetBytes("Hello");
+
+            //byte[] data = DataConverter.SerializeUseMsgPack<Cart>(cart);
+            string jsonString = DataConverter.ToJson(cart);
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                database.ListLeftPush("history", jsonString);
+            }
+
+            //byte[] rtData = database.ListLeftPop("history");
+            string rtJson = database.ListLeftPop("history");
+            Cart rtCart = DataConverter.FromJson<Cart>(rtJson);
+            //Cart rtCart = DataConverter.DeSerializeUseMsgPack<Cart>(rtData);
+
+            Console.WriteLine(Encoding.UTF8.GetString(rtCart.Data));
+        }
+
 
         private static void testRedis()
         {
@@ -189,11 +220,11 @@ namespace RabbitMQDemo
             cart.Products.Add("hat");
             cart.Products.Add("coat");
 
-            byte[] data = DataConverter.SerializeUseMsgPack<Cart>(cart);
+            byte[] data = DataConverter.Serialize(cart);
 
             EventMessageEntity entity = new EventMessageEntity("event.shopping", data);
 
-            byte[] redisData = DataConverter.SerializeUseMsgPack(entity);
+            byte[] redisData = DataConverter.Serialize(entity);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -213,15 +244,15 @@ namespace RabbitMQDemo
         {
             EventMessage eventMessage = new EventMessage("xxx", DataConverter.GetUTF8Bytes("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
 
-            byte[] result = DataConverter.SerializeUseMsgPack<EventMessage>(eventMessage);
+            byte[] result = DataConverter.Serialize(eventMessage);
 
             EventMessage event2 = new EventMessage("yyy", result);
 
-            byte[] result2 = DataConverter.SerializeUseMsgPack<EventMessage>(event2);
+            byte[] result2 = DataConverter.Serialize(event2);
 
-            EventMessage e22 = DataConverter.DeSerializeUseMsgPack<EventMessage>(result2);
+            EventMessage e22 = DataConverter.DeSerialize<EventMessage>(result2);
 
-            EventMessage e11 = DataConverter.DeSerializeUseMsgPack<EventMessage>(e22.Body);
+            EventMessage e11 = DataConverter.DeSerialize<EventMessage>(e22.Body);
 
             string message = DataConverter.GetUTF8String(e11.Body);
 
