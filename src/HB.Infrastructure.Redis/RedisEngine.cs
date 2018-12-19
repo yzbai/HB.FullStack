@@ -81,7 +81,7 @@ namespace HB.Infrastructure.Redis
 
         public RedisEngineResult PopAndPushIfNotExist<T>(string redisInstanceName, string historyQueue, string queue, string hashName)
         {
-
+            return null;
         }
     }
 }
