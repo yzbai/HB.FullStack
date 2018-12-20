@@ -1,17 +1,16 @@
 ﻿using HB.Component.Resource.Sms;
-using HB.Infrastructure.Aliyun.Test;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace HB.PresentFish.Tools
+namespace HB.Infrastructure.Aliyun.Test
 {
-    public class SmsTest : IClassFixture<TestFixture>
+    public class SmsTest : IClassFixture<ServiceFixture>
     {
         private ISmsService _smsBiz;
-        private TestFixture _fixture;
+        private ServiceFixture _fixture;
         private ITestOutputHelper _output;
 
-        public SmsTest(ITestOutputHelper output, TestFixture testFixture)
+        public SmsTest(ITestOutputHelper output, ServiceFixture testFixture)
         {
             _output = output;
             _fixture = testFixture;
