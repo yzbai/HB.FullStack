@@ -30,6 +30,8 @@ namespace HB.Framework.EventBus
       
         public async Task<bool> PublishAsync(EventMessage eventMessage)
         {
+            _logger.LogTrace("Publish Begin");
+
             if (!EventMessage.IsValid(eventMessage))
             {
                 Exception ex = new ArgumentException("不符合要求", nameof(eventMessage));

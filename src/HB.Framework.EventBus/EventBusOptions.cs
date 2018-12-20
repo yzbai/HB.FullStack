@@ -18,11 +18,11 @@ namespace HB.Framework.EventBus
     {
         public EventBusOptions Value => this;
 
-        public IList<EventSchema> TopicShemas { get; set; } = new List<EventSchema>();
+        public IList<EventSchema> EventSchemas { get; set; } = new List<EventSchema>();
 
         public EventSchema GetTopicSchema(string topic)
         {
-            return TopicShemas.FirstOrDefault(t => t.EventType.Equals(topic, GlobalSettings.Comparison));
+            return EventSchemas.FirstOrDefault(t => t.EventType.Equals(topic, GlobalSettings.Comparison));
         }
     }
 }
