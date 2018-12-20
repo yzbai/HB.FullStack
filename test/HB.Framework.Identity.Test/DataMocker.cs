@@ -19,7 +19,9 @@ namespace HB.Component.Identity.Test
                     SecurityStamp = SecurityHelper.CreateUniqueToken(),
                     UserName = $"{prefix}_{SecurityHelper.CreateUniqueToken()}",
                     Mobile = $"1{SecurityHelper.CreateRandomNumbericString(10)}",
-                    IsActivated = true
+                    IsActivated = true,
+                    UserType = "TestUsers"
+                    
                 };
 
                 list.Add(user);

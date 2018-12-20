@@ -29,7 +29,7 @@ namespace HB.Infrastructure.RabbitMQ
         public int ConsumerAutoRecoveryIntervalSeconds { get; set; } = 5;
 
         /// <summary>
-        /// 一条消息存活的事件，超过这个事件，将被丢弃
+        /// 一条消息存活的时间，超过这个时间，将被丢弃
         /// </summary>
         public long AliveSeconds { get; set; } = 86400;
 

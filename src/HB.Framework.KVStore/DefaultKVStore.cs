@@ -54,11 +54,16 @@ namespace HB.Framework.KVStore
         private static string EntityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
         {
             StringBuilder builder = new StringBuilder();
+            int count = entityDef.KeyPropertyInfos.Count;
 
-            for (int i = 0; i < entityDef.KeyPropertyInfos.Count; ++i)
+            for (int i = 0; i < count; ++i)
             {
                 builder.Append(DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfos[i].GetValue(item)));
-                builder.Append("_");
+
+                if (i != count - 1)
+                {
+                    builder.Append("_");
+                }
             }
 
             return builder.ToString();
