@@ -6,18 +6,19 @@ using System;
 
 namespace HB.Infrastructure.Aliyun.Test
 {
-    public class TestFixture
+    public class ServiceFixture
     {
         public static IConfiguration Configuration { get; private set; }
 
         public static IServiceProvider Services { get; private set; }
 
-        public TestFixture()
+        public ServiceFixture()
         {
             var configurationBuilder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("appsettings.json", optional: false);
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional:true);
 
 
             Configuration = configurationBuilder.Build();
