@@ -1,18 +1,20 @@
-﻿using HB.Component.Resource.Sms;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using HB.Framework.KVStore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 
-namespace HB.Infrastructure.Aliyun.Test
+namespace HB.Infrastructure.Redis.Test
 {
-    public class TestFixture
+    public class ServiceFixture
     {
-        public static IConfiguration Configuration { get; private set; }
+        public IConfiguration Configuration { get; private set; }
 
-        public static IServiceProvider Services { get; private set; }
+        public IServiceProvider Services { get; private set; }
 
-        public TestFixture()
+        public ServiceFixture()
         {
             var configurationBuilder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
@@ -30,14 +32,14 @@ namespace HB.Infrastructure.Aliyun.Test
                 builder.AddConsole();
             });
 
-            serviceCollection.AddDistributedMemoryCache();
 
-            serviceCollection.AddAliyunService(Configuration.GetSection("Aliyun"));
-            serviceCollection.AddAliyunSms(Configuration.GetSection("AliyunSms"));
+            serviceCollection.AddRedisEngine(Configuration.GetSection("RedisEngine"));
 
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public ISmsService SmsService => Services.GetRequiredService<ISmsService>();
+        public IRedisEngine RedisEngine => this.Services.GetRequiredService<IRedisEngine>();
+
+        public IKVStore KVStore => this.Services.GetRequiredService<IKVStore>();
     }
 }

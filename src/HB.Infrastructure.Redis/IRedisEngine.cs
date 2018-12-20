@@ -5,9 +5,11 @@ namespace HB.Infrastructure.Redis
 {
     public interface IRedisEngine
     {
-        bool KeySetIfNotExist(string redisInstanceName, string id, long expireSeconds);
+        bool KeySetIfNotExist(string redisInstanceName, string key, long expireSeconds);
 
-        void HashSetInt(string redisInstanceName, string hashName, IList<string> fields, IList<int> values);
+        void HashSetInt(string redisInstanceName, string hashName, IEnumerable<string> fields, IEnumerable<int> values);
+
+        IEnumerable<int> HashGetInt(string redisInstanceName, string hashName, IEnumerable<string> fields);
 
         Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data);
 
