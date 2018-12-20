@@ -7,18 +7,18 @@ using System;
 
 namespace HB.Component.Identity.Test
 {
-    public class DatabaseTestFixture
+    public class ServiceFixture
     {
         public static IConfiguration Configuration { get; private set; }
 
         public static IServiceProvider Services { get; private set; }
 
-        public DatabaseTestFixture()
+        public ServiceFixture()
         {
             var configurationBuilder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("Test.json", optional: false);
+                .AddJsonFile("appsettings.json", optional: false);
 
 
             Configuration = configurationBuilder.Build();

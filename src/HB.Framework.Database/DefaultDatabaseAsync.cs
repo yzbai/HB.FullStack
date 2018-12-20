@@ -490,7 +490,8 @@ namespace HB.Framework.Database
         {
             if (!item.IsValid())
             {
-                return DatabaseResult.Fail("entity check failed.");
+                //TODO: 给所有使用到IsValid（）方法的地方，都加上GetValidateErrorMessage输出
+                return DatabaseResult.Fail($"entity check failed.{item.GetValidateErrorMessage()}");
             }
 
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();

@@ -22,8 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\HB.Framework.KVStore\HB.Framework.KVStore.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
   </ItemGroup>
+
+ 
 
   <ItemGroup>
     <None Update="appsettings.json">
