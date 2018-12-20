@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace HB.Framework.Common.Entity
 {
@@ -12,7 +13,7 @@ namespace HB.Framework.Common.Entity
     {
         #region Validation
 
-        private readonly IList<ValidationResult> __validateResults = null;
+        private IList<ValidationResult> __validateResults = new List<ValidationResult>();
 
         public bool IsValid()
         {
@@ -26,6 +27,18 @@ namespace HB.Framework.Common.Entity
                 __performValidate();
             }
             return __validateResults;
+        }
+
+        public string GetValidateErrorMessage()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            foreach (ValidationResult result in __validateResults)
+            {
+                builder.AppendLine(result.ErrorMessage);
+            }
+
+            return builder.ToString();
         }
 
         private bool __performValidate()

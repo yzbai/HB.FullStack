@@ -11,16 +11,16 @@ using Xunit.Abstractions;
 namespace HB.Component.Identity.Test
 {
 
-    public class DatabaseTest : IClassFixture<DatabaseTestFixture>
+    public class DatabaseTest : IClassFixture<ServiceFixture>
     {
         private ITestOutputHelper _output;
-        private DatabaseTestFixture _fixture;
+        private ServiceFixture _fixture;
         private IDatabase _db;
         private IDatabaseTransaction _dbTransaction;
         private IList<User> _userList;
         private readonly IList<Role> _roleList;
 
-        public DatabaseTest(ITestOutputHelper output, DatabaseTestFixture databaseTestFixture)
+        public DatabaseTest(ITestOutputHelper output, ServiceFixture databaseTestFixture)
         {
             _output = output;
             _fixture = databaseTestFixture;
