@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure<RabbitMQEngineOptions>(configuration);
 
+            services.AddSingleton<IRabbitMQConnectionManager, RabbitMQConnectionManager>();
             services.AddSingleton<IEventBusEngine, RabbitMQEventBusEngine>();
 
             return services;
