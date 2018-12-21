@@ -87,5 +87,10 @@ namespace HB.Infrastructure.RabbitMQ
         {
             return DistributedHistoryQueueName;
         }
+
+        protected override int MaxWorkerThread()
+        {
+            return _connectionSetting.MaxHistoryWorkerThread;
+        }
     }
 }

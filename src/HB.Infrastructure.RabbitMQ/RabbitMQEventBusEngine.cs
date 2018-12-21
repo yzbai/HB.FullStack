@@ -72,23 +72,26 @@ namespace HB.Infrastructure.RabbitMQ
             EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
             RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
 
+            //推送到一个以broker命名的队列中
             await _redis.PushAsync(redisInstanceName: connectionSetting.RedisInstanceName, queueName: brokerName, data: eventEntity);
 
-            NotifyPublishToRabbitMQ(brokerName);
+            //NotifyPublishToRabbitMQ(brokerName);
 
             return true;
         }
+        //TODO: 考虑让PublishManager和HistoryManager独立
+        //TODO： 考虑用redis替代rabbitmq
 
-        private void NotifyPublishToRabbitMQ(string brokerName)
-        {
-            //让 broker 名字为brokerName的 publishmanager开始工作
-            //publishmanager开始创建Task, publishmanager
+        //private void NotifyPublishToRabbitMQ(string brokerName)
+        //{
+        //    //让 broker 名字为brokerName的 publishmanager开始工作
+        //    //publishmanager开始创建Task, publishmanager
 
-            //这里已经确保brokerName是存在的了,之前再PublishAsync里已经检查过
+        //    //这里已经确保brokerName是存在的了,之前再PublishAsync里已经检查过
 
-            _publishManagers[brokerName].NotifyInComming();
-            _historyManager[brokerName].NotifyInComming();
-        }
+        //    _publishManagers[brokerName].NotifyInComming();
+        //    _historyManager[brokerName].NotifyInComming();
+        //}
 
         #endregion
 
