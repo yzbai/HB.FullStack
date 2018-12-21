@@ -37,6 +37,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         //history队列里的event，等待多少秒后，才能被扫描
         public int WaitSecondsToBeAHistory { get; set; } = 5 * 60;
+        public int MaxHistoryWorkerThread { get; set; } = 10;
     }
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>

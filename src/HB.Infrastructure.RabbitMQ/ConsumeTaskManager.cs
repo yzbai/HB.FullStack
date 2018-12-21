@@ -81,6 +81,7 @@ namespace HB.Infrastructure.RabbitMQ
                     if (CheckTimestamp(entity))
                     {
                         //防重检测
+                        //TODO: 不是太重要的话，可以考虑放到内存中来
                         bool setted = _redis.KeySetIfNotExist(_connectionSetting.RedisInstanceName, entity.Id, expireSeconds: _connectionSetting.AliveSeconds);
                         
                         if (setted)

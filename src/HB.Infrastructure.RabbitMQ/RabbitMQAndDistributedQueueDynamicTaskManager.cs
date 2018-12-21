@@ -26,7 +26,9 @@ namespace HB.Infrastructure.RabbitMQ
             _redis = redis;
             _connectionSetting = connectionSetting;
 
-            AddTaskAndStart(EstimatedTaskNumber);
+            int taskCount = EstimatedTaskNumber;
+
+            AddTaskAndStart(taskCount > MaxWorkerThread() ? MaxWorkerThread() : taskCount);
         }
 
         public void NotifyInComming()
@@ -36,7 +38,7 @@ namespace HB.Infrastructure.RabbitMQ
 
             _inCommingCount++;
 
-            if (_inCommingCount > PerThreadFacingCount())
+            if (_inCommingCount > PerThreadFacingCount() || _taskNodes.Count == 0)
             {
                 CoordinateTask();
                 _inCommingCount = 0;
@@ -49,6 +51,8 @@ namespace HB.Infrastructure.RabbitMQ
 
         protected abstract string CurrentWorkloadQueueName();
 
+        protected abstract int MaxWorkerThread();
+
         protected void OnTaskFinished()
         {
             _logger.LogTrace($"Task End, ThreadID:{Thread.CurrentThread.ManagedThreadId}");
@@ -58,6 +62,8 @@ namespace HB.Infrastructure.RabbitMQ
 
         private void AddTaskAndStart(int count)
         {
+            _logger.LogTrace($"将要开启{count}个线程, 线程总数量:{_taskNodes.Count}");
+
             for (int i = 0; i < count; ++i)
             {
                 lock (_taskNodesLocker)
@@ -115,7 +121,10 @@ namespace HB.Infrastructure.RabbitMQ
                 {
                     int toAddNumber = EstimatedTaskNumber - _taskNodes.Count;
 
-                    AddTaskAndStart(toAddNumber);
+                    if (toAddNumber + _taskNodes.Count <= MaxWorkerThread())
+                    {
+                        AddTaskAndStart(toAddNumber);
+                    }
                 }
             }
         }

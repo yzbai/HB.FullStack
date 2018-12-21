@@ -5,6 +5,13 @@ namespace HB.Infrastructure.Redis
 {
     public interface IRedisEngine
     {
+        /// <summary>
+        /// 可以用来防重,一定时间内
+        /// </summary>
+        /// <param name="redisInstanceName"></param>
+        /// <param name="key"></param>
+        /// <param name="expireSeconds"></param>
+        /// <returns></returns>
         bool KeySetIfNotExist(string redisInstanceName, string key, long expireSeconds);
 
         void HashSetInt(string redisInstanceName, string hashName, IEnumerable<string> fields, IEnumerable<int> values);
