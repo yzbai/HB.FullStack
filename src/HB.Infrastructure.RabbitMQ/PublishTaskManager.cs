@@ -46,6 +46,8 @@ namespace HB.Infrastructure.RabbitMQ
 
                 channel.BasicAcks += (sender, eventArgs) =>
                 {
+                    _logger.LogTrace($"Ack: {eventArgs.DeliveryTag}, Multiple:{eventArgs.Multiple}");
+
                     List<string> deleteIds = new List<string>();
 
                     lock (confirmEventIdListLocker)
@@ -53,23 +55,31 @@ namespace HB.Infrastructure.RabbitMQ
                         ulong seqno = eventArgs.DeliveryTag;
                         int index = (int)(seqno - fs);
 
-                        if (eventArgs.Multiple)
+                        if (index >= 0 && index < confirmEventIdList.Count)
                         {
-                            for (int i = 0; i < index; i++)
+                            if (eventArgs.Multiple)
                             {
-                                deleteIds.Add(confirmEventIdList[i]);
-                                confirmEventIdList[i] = null;
+                                for (int i = 0; i < index; i++)
+                                {
+                                    if (confirmEventIdList[i] != null)
+                                    {
+                                        deleteIds.Add(confirmEventIdList[i]);
+                                        confirmEventIdList[i] = null;
+                                    }
+                                }
                             }
-                        }
-                        else
-                        {
-                            deleteIds.Add(confirmEventIdList[index]);
-                            confirmEventIdList[index] = null;
+                            else
+                            {
+                                deleteIds.Add(confirmEventIdList[index]);
+                                confirmEventIdList[index] = null;
+                            }
                         }
 
                         // 收缩,每100次，收缩一次
                         if (seqno % 100 == 0 && confirmEventIdList.Count > 100)
                         {
+                            _logger.LogTrace($"开始收缩：TheadID:{Thread.CurrentThread.ManagedThreadId}, count:{confirmEventIdList.Count}, fs:{fs}");
+
                             //奇点处理,直接当成nack
                             confirmEventIdList[0] = null;
 
@@ -105,6 +115,8 @@ namespace HB.Infrastructure.RabbitMQ
 
                 channel.BasicNacks += (sender, eventArgs) =>
                 {
+                    _logger.LogWarning($"NooooAck: {eventArgs.DeliveryTag}, Multiple:{eventArgs.Multiple}");
+
                     //List<string> deleteIds = new List<string>();
 
                     ////那就在history里待着吧，等待回收
@@ -117,8 +129,11 @@ namespace HB.Infrastructure.RabbitMQ
                         {
                             for (int i = 0; i < index; i++)
                             {
-                                //deleteIds.Add(confirmEventIdList[i]);
-                                confirmEventIdList[i] = null;
+                                if (confirmEventIdList[i] != null)
+                                {
+                                    //deleteIds.Add(confirmEventIdList[i]);
+                                    confirmEventIdList[i] = null;
+                                }
                             }
                         }
                         else
@@ -143,6 +158,7 @@ namespace HB.Infrastructure.RabbitMQ
                 while (true)
                 {
                     //获取数据.用同步方法，不能用await，避免前后线程不一致
+                    
                     EventMessageEntity eventEntity = _redis.PopAndPush<EventMessageEntity>(
                         redisInstanceName: _connectionSetting.RedisInstanceName, 
                         fromQueueName: DistributedQueueName, 
@@ -193,6 +209,8 @@ namespace HB.Infrastructure.RabbitMQ
                         DataConverter.Serialize(eventEntity)
                     );
 
+                    //_logger.LogTrace($"event published. Type:{eventEntity.Type}, Data:{eventEntity.JsonData}, Id:{eventEntity.Id}, Timestamp:{eventEntity.Timestamp}");
+
                     //Confirm
                     confirmEventIdList.Add(eventEntity.Id);
                 }
@@ -203,6 +221,10 @@ namespace HB.Infrastructure.RabbitMQ
             }
             finally
             {
+                bool? allAcks = channel?.WaitForConfirms(TimeSpan.FromSeconds(_connectionSetting.MaxSecondsWaitForConfirms));
+
+                _logger.LogTrace($"Tread ID {Thread.CurrentThread.ManagedThreadId} de channel waiting end. begin to close. allAkcs? {allAcks}");
+
                 channel?.Close();
 
                 OnTaskFinished();
@@ -219,11 +241,18 @@ namespace HB.Infrastructure.RabbitMQ
             return DistributedQueueName;
         }
 
+        protected override int MaxWorkerThread()
+        {
+            return _connectionSetting.MaxPublishWorkerThread;
+        }
+
         #region Channel
 
         private IModel CreateChannel(string brokerName, bool isPublish)
         {
             IModel channel = _connectionManager.CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
+
+            _logger.LogTrace($"Channel Created. BrokerName :{brokerName}, isPublishChannel:{isPublish}");
 
             //Events
             SettingUpChannelEvents(channel);
@@ -321,6 +350,8 @@ namespace HB.Infrastructure.RabbitMQ
         {
             return eventType;
         }
+
+        
 
         #endregion
     }
