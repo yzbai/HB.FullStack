@@ -18,21 +18,18 @@ namespace HB.Framework.TestAll
         public EventBusTest(ITestOutputHelper outputHelper, ServiceFixture service)
         {
             _output = outputHelper;
-            _eventBus = service.EventBus;
+            //_eventBus = service.EventBus;
             _logger = service.LoggerFactory.CreateLogger<EventBusTest>();
         }
 
         [Fact]
         public async Task PublistAndSubscribeTestAsync()
         {
-
-            _logger.LogError("Test Message From Test");
-
             bool publishResult = true;
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
-                publishResult = await _eventBus.PublishAsync(new EventMessage("test.test1", "Hello, I publish this."));
+                //publishResult = await _eventBus.PublishAsync(new EventMessage("test.test1", $"Hello, I publish this. {i}"));
 
                 if (!publishResult)
                 {
@@ -42,9 +39,9 @@ namespace HB.Framework.TestAll
 
             Assert.True(publishResult);
 
-            _eventBus.Subscribe("test.test1", new EventHandler(_output));
+            //_eventBus.Subscribe("test.test1", new EventHandler(_logger));
 
-            Thread.Sleep(10 * 1000);
+            Thread.Sleep(1000 * 1000);
         }
     }
 
@@ -52,16 +49,16 @@ namespace HB.Framework.TestAll
     {
         public string Id { get; } = SecurityHelper.CreateUniqueToken();
         public string EventType { get; } = "test.test1";
-        public ITestOutputHelper _output;
 
-        public EventHandler(ITestOutputHelper output)
+        private ILogger _logger;
+
+        public EventHandler(ILogger logger)
         {
-            _output = output;
+            _logger = logger;
         }
-
         public void Handle(string jsonData)
         {
-            _output.WriteLine(jsonData);
+            _logger.LogInformation(jsonData);
         }
     }
 }
