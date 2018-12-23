@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HB.Infrastructure.Redis
+namespace HB.Infrastructure.Redis.Direct
 {
-    public interface IRedisEngine
+    public interface IRedisDatabase
     {
         /// <summary>
         /// 可以用来防重,一定时间内

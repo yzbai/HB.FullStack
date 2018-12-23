@@ -7,11 +7,19 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
-namespace HB.Infrastructure.Redis
+namespace HB.Infrastructure.Redis.Direct
 {
-    public class RedisEngine : RedisEngineBase, IRedisEngine
+    public class RedisDatabase : IRedisDatabase
     {
-        public RedisEngine(IOptions<RedisEngineOptions> options, ILogger<RedisEngine> logger) : base(options.Value, logger) { }
+        private IRedisConnectionManager _redisConnectionManager;
+
+        private ILogger<RedisDatabase> _logger;
+
+        public RedisDatabase(IRedisConnectionManager redisConnectionManager, ILogger<RedisDatabase> logger)
+        {
+            _redisConnectionManager = redisConnectionManager;
+            _logger = logger;
+        }
 
         #region Key
 
@@ -36,7 +44,7 @@ namespace HB.Infrastructure.Redis
             {
                 hashEntries[i] = new HashEntry(fields.ElementAt(i), values.ElementAt(i));
             }
-
+           
             database.HashSet(hashName, hashEntries);
         }
 
@@ -95,7 +103,7 @@ namespace HB.Infrastructure.Redis
 
         private IDatabase GetDatabase(string redisInstanceName)
         {
-            return GetDatabase(redisInstanceName, 0, true);
+            return _redisConnectionManager.GetDatabase(redisInstanceName, 0, true);
         }
     }
 }
