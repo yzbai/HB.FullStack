@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using HB.Framework.KVStore;
+using HB.Infrastructure.Redis.Direct;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,7 @@ namespace HB.Infrastructure.Redis.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IRedisEngine RedisEngine => this.Services.GetRequiredService<IRedisEngine>();
+        public IRedisDatabase RedisEngine => this.Services.GetRequiredService<IRedisDatabase>();
 
         public IKVStore KVStore => this.Services.GetRequiredService<IKVStore>();
     }
