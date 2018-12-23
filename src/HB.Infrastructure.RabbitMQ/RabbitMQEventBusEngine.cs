@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
-using HB.Infrastructure.Redis;
+using HB.Infrastructure.Redis.Direct;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +15,7 @@ namespace HB.Infrastructure.RabbitMQ
         private ILogger _logger;
         private RabbitMQEngineOptions _options;
         private readonly IRabbitMQConnectionManager _connectionManager;
-        private IRedisEngine _redis;
+        private IRedisDatabase _redis;
 
         private readonly ILogger _consumeTaskManagerLogger;
 
@@ -28,7 +28,7 @@ namespace HB.Infrastructure.RabbitMQ
         //eventType : ConsumeTaskManager
         private IDictionary<string, ConsumeTaskManager> _consumeManager = new Dictionary<string, ConsumeTaskManager>();
         
-        public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IRedisEngine redis)
+        public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IRedisDatabase redis)
         {
             _logger = loggerFactory.CreateLogger<RabbitMQEventBusEngine>();
             _options = options.Value;

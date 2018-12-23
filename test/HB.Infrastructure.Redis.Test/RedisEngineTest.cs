@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using HB.Framework.Common;
+using HB.Infrastructure.Redis.Direct;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,7 +16,7 @@ namespace HB.Infrastructure.Redis.Test
 
         private ITestOutputHelper _output;
 
-        private IRedisEngine _redis;
+        private IRedisDatabase _redis;
 
         public RedisEngineTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {

@@ -14,7 +14,7 @@ using System.Globalization;
 
 namespace HB.Infrastructure.Redis.KVStore
 {
-    public partial class RedisKVStoreEngine : RedisEngineBase, IKVStoreEngine
+    public partial class RedisKVStoreEngine : IKVStoreEngine
     {
         //private static readonly string luaAddScript = @"if redis.call('HSETNX',KEYS[1], ARGV[1], ARGV[2]) == 1 then redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) return 1 else return 9 end";
         //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";
@@ -33,7 +33,15 @@ namespace HB.Infrastructure.Redis.KVStore
         private const string luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
         private const string luaBatchDeleteReturnTemplate = @"return 1";
 
-        public RedisKVStoreEngine(IOptions<RedisEngineOptions> options, ILogger<RedisKVStoreEngine> logger) : base(options.Value, logger) { }
+        private ILogger _logger;
+        private IRedisConnectionManager _redisConnectionManager;
+
+        public RedisKVStoreEngine(IRedisConnectionManager redisConnectionManager, ILogger<RedisKVStoreEngine> logger)
+        {
+            _logger = logger;
+            _redisConnectionManager = redisConnectionManager;
+        }
+        
 
         private static string EntityVersionName(string entityName)
         {
@@ -113,14 +121,14 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public string EntityGet(string storeName, int storeIndex, string entityName, string entityKey)
         {
-            IDatabase db = GetReadDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetReadDatabase(storeName, storeIndex);
 
             return db.HashGet(entityName, entityKey);
         }
 
         public IEnumerable<string> EntityGet(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys)
         {
-            IDatabase db = GetReadDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetReadDatabase(storeName, storeIndex);
 
             RedisValue[] result = db.HashGet(entityName, entityKeys.Select(str=>(RedisValue)str).ToArray());
 
@@ -129,7 +137,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public IEnumerable<string> EntityGetAll(string storeName, int storeIndex, string entityName)
         {
-            IDatabase db = GetReadDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetReadDatabase(storeName, storeIndex);
 
             return db.HashGetAll(entityName).Select<HashEntry, string>(t => t.Value);
         }
@@ -148,7 +156,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityJsons.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
 
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
@@ -170,7 +178,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 .Concat(entityJsons.Select(t=>(RedisValue)t))
                 .Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
 
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
@@ -189,7 +197,7 @@ namespace HB.Infrastructure.Redis.KVStore
             RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
 
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
@@ -198,7 +206,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public KVStoreResult EntityDeleteAll(string storeName, int storeIndex, string entityName)
         {
-            IDatabase db = GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
 
             bool result = db.KeyDelete(entityName);
 

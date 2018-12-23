@@ -9,36 +9,22 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis
 {
-    internal class RedisWrapper
-    {
-        public string ConnectionString { get; set; }
-        public ConnectionMultiplexer Connection { get; set; }
-        public IDatabase Database { get; set; }
-
-        public RedisWrapper(string connectionString)
-        {
-            ConnectionString = connectionString;
-            Connection = null;
-            Database = null;
-        }
-    }
-
-    public class RedisEngineBase : IDisposable
+    public class RedisConnectionManager : IRedisConnectionManager
     {      
         private ILogger _logger;
-        private Dictionary<string, RedisWrapper> _connectionDict;
+        private Dictionary<string, RedisConnection> _connectionDict;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
-        protected RedisEngineOptions Options { get; private set; }
+        protected RedisOptions Options { get; private set; }
 
-        public RedisEngineBase(RedisEngineOptions options, ILogger logger)
+        public RedisConnectionManager(RedisOptions options, ILogger<RedisConnectionManager> logger)
         {
             _logger = logger;
             Options = options;
-            _connectionDict = new Dictionary<string, RedisWrapper>();
+            _connectionDict = new Dictionary<string, RedisConnection>();
         }
 
-        protected IDatabase GetDatabase(string instanceName, int dbIndex, bool isMaster)
+        public IDatabase GetDatabase(string instanceName, int dbIndex, bool isMaster)
         {
             string key = string.Format(GlobalSettings.Culture, "{0}:{1}:{2}", instanceName, dbIndex, isMaster ? 1 : 0);
 
@@ -56,10 +42,10 @@ namespace HB.Infrastructure.Redis
                     return null;
                 }
 
-                _connectionDict[key] = new RedisWrapper(rss.ElementAt(0).ConnectionString);
+                _connectionDict[key] = new RedisConnection(rss.ElementAt(0).ConnectionString);
             }
 
-            RedisWrapper redisWrapper = _connectionDict[key];
+            RedisConnection redisWrapper = _connectionDict[key];
 
             if (redisWrapper.Connection != null && !redisWrapper.Connection.IsConnected)
             {
@@ -98,19 +84,19 @@ namespace HB.Infrastructure.Redis
             return redisWrapper.Database;
         }
 
-        private void Connection_ConnectionFailed(object sender, ConnectionFailedEventArgs e)
-        {
-            
-        }
-
-        protected IDatabase GetReadDatabase(string instanceName, int dbIndex)
+        public IDatabase GetReadDatabase(string instanceName, int dbIndex)
         {
             return GetDatabase(instanceName, dbIndex, false);
         }
 
-        protected IDatabase GetWriteDatabase(string instanceName, int dbIndex)
+        public IDatabase GetWriteDatabase(string instanceName, int dbIndex)
         {
             return GetDatabase(instanceName, dbIndex, true);
+        }
+
+        private void Connection_ConnectionFailed(object sender, ConnectionFailedEventArgs e)
+        {
+            
         }
 
         #region Dispose Support
@@ -139,9 +125,9 @@ namespace HB.Infrastructure.Redis
                 {
                     if (_connectionDict != null)
                     {
-                        foreach (KeyValuePair<string, RedisWrapper> pair in _connectionDict)
+                        foreach (KeyValuePair<string, RedisConnection> pair in _connectionDict)
                         {
-                            pair.Value?.Connection?.Dispose();
+                            pair.Value?.Connection?.Close();
                         }
                     }
                 }
@@ -153,7 +139,7 @@ namespace HB.Infrastructure.Redis
             _disposed = true;
         }
 
-        ~RedisEngineBase()
+        ~RedisConnectionManager()
         {
             Dispose(false);
         }

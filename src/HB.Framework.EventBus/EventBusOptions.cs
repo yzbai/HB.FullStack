@@ -18,6 +18,8 @@ namespace HB.Framework.EventBus
     {
         public EventBusOptions Value => this;
 
+        
+
         public IList<EventSchema> EventSchemas { get; set; } = new List<EventSchema>();
 
         public EventSchema GetTopicSchema(string topic)
