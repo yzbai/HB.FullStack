@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Engine
 {
-    public interface IKVStoreEngineAsync : IDisposable
+    public interface IKVStoreEngineAsync
     {
         Task<string>                EntityGetAsync(string storeName, int storeIndex, string entityName, string entityKey);
         Task<IEnumerable<string>>   EntityGetAsync(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys);
