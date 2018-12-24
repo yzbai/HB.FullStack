@@ -2,6 +2,7 @@
 using HB.Framework.KVStore.Engine;
 using HB.Infrastructure.Redis;
 using HB.Infrastructure.Redis.Direct;
+using HB.Infrastructure.Redis.DuplicateCheck;
 using HB.Infrastructure.Redis.EventBus;
 using HB.Infrastructure.Redis.KVStore;
 using Microsoft.Extensions.Configuration;
@@ -17,9 +18,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<RedisOptions>(configuration);
 
-            serviceCollection.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
+            serviceCollection.AddSingleton<IRedisInstanceManager, RedisInstanceManager>();
 
             serviceCollection.AddSingleton<IRedisDatabase, RedisDatabase>();
+
+            serviceCollection.AddSingleton<IDuplicateChecker, DuplicateChecker>();
 
             serviceCollection.AddSingleton<IKVStoreEngine, RedisKVStoreEngine>();
 
@@ -34,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<RedisOptions>(redisOptionsSetup);
 
-            serviceCollection.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
+            serviceCollection.AddSingleton<IRedisInstanceManager, RedisInstanceManager>();
 
             serviceCollection.AddSingleton<IRedisDatabase, RedisDatabase>();
 
