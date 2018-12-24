@@ -1,174 +1,163 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using HB.Framework.Common;
 using HB.Framework.EventBus.Abstractions;
-using HB.Infrastructure.Redis.Direct;
+using HB.Infrastructure.Redis.DuplicateCheck;
 using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+using StackExchange.Redis;
 
-namespace HB.Infrastructure.RabbitMQ
+namespace HB.Infrastructure.Redis.EventBus
 {
     /// <summary>
-    /// 一个EventType，对应一个线程的Consumer，用BasicQos来控制速度
+    /// TODO: 未来使用多线程
     /// </summary>
-    public class ConsumeTaskManager
+    public class ConsumeTaskManager : IDisposable
     {
-        private readonly string _eventType;
+        private const int CONSUME_INTERVAL_SECONDS = 5;
+
+        private string _brokerName;
+        private string _eventType;
         private ILogger _logger;
-        private RabbitMQConnectionSetting _connectionSetting;
-        private IRabbitMQConnectionManager _connectionManager;
-        private IRedisDatabase _redis;
+        private IRedisInstanceManager _connectionManager;
+        private RedisInstanceSetting _redisInstanceSetting;
+        private IEventHandler _eventHandler;
 
-        private IEventHandler _handler;
+        private Task _consumeTask;
+        private CancellationTokenSource _consumeTaskCTS;
 
-        private IModel _channel;
-        private string _consumeTag;
+        private Task _historyTask;
+        private CancellationTokenSource _historyTaskCTS;
 
-        public bool AutoRecovery { get; set; } = true;
+        private IDuplicateChecker _duplicateChecker;
 
-        public ConsumeTaskManager(string eventType, IEventHandler eventHandler, RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisDatabase redis, ILogger logger)
+        public ConsumeTaskManager(string brokerName, IRedisInstanceManager connectionManager, string eventType, IEventHandler eventHandler, IDuplicateChecker duplicateChecker, ILogger consumeTaskManagerLogger)
         {
-            _redis = redis;
-            _eventType = eventType.ThrowIfNull(nameof(eventType));
-            _handler = eventHandler.ThrowIfNull(nameof(eventHandler));
-            _logger = logger.ThrowIfNull(nameof(logger));
-            _connectionManager = connectionManager.ThrowIfNull(nameof(connectionManager));
-            _connectionSetting = connectionSetting.ThrowIfNull(nameof(connectionSetting));
+            _brokerName = brokerName;
+            _connectionManager = connectionManager;
+            _redisInstanceSetting = _connectionManager.GetInstanceSetting(brokerName, true);
+            _eventType = eventType;
+            _eventHandler = eventHandler;
+            _logger = consumeTaskManagerLogger;
 
-            Restart();
+            _consumeTaskCTS = new CancellationTokenSource();
+            _consumeTask = new Task(CosumeTaskProcedure, _consumeTaskCTS.Token, TaskCreationOptions.LongRunning);
+
+            _historyTaskCTS = new CancellationTokenSource();
+            _historyTask = new Task(HistoryTaskProcedure, _historyTaskCTS.Token, TaskCreationOptions.LongRunning);
+
+            _duplicateChecker = duplicateChecker;
+        }
+
+        private void HistoryTaskProcedure()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void CosumeTaskProcedure()
+        {
+            while (true)
+            {
+                //1, Get Entity
+                IDatabase database = GetDatabase(_brokerName);
+
+                RedisValue redisValue = database.ListRightPopLeftPush(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType));
+
+                if (redisValue.IsNullOrEmpty)
+                {
+                    _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_brokerName}, eventType:{_eventType}");
+
+                    Thread.Sleep(CONSUME_INTERVAL_SECONDS * 1000);
+
+                    continue;
+                }
+
+                EventMessageEntity entity = DataConverter.To<EventMessageEntity>(redisValue);
+
+                //2, 过期检查
+
+                double spendHours = (DataConverter.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
+
+                if (spendHours > _redisInstanceSetting.EventBusEventMessageExpiredHours)
+                {
+                    _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{DataConverter.ToJson(entity)}");
+                    continue;
+                }
+
+                //3, 防重检查
+
+                //4, Handle Entity
+                try
+                {
+                    _eventHandler.Handle(entity.JsonData);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {DataConverter.ToJson(entity)}");
+                }
+
+                
+
+                //5, Acks
+                database.SetAdd()
+            }
         }
 
         public void Cancel()
         {
-            if (_channel != null && _channel.CloseReason == null && !string.IsNullOrEmpty(_consumeTag))
-            {
-                try
-                {
-                    _channel.BasicCancel(_consumeTag);
-                }
-                catch(Exception ex)
-                {
-                    _logger.LogError(ex, $"Basic Cancel Error. consumeTag : {_consumeTag}, message:{ex.Message}");
-                }
-            }
-
-            _channel?.Close();
+            _consumeTaskCTS.Cancel();
         }
 
-        public void Restart()
+        public void Start()
         {
-            Cancel();
-
-            try
-            {
-                _channel = CreateChannel(_connectionSetting.BrokerName, false);
-
-                string queueName = EventTypeToRabbitQueueName(_eventType);
-
-                _channel.QueueDeclarePassive(queueName);
-
-                _channel.BasicQos(0, _connectionSetting.ConsumePerTimeNumber, false);
-
-                EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
-
-                consumer.Received += (sender, eventArgs) =>
-                {
-                    EventMessageEntity entity = DataConverter.DeSerialize<EventMessageEntity>(eventArgs.Body);
-
-                    //时间戳检测
-                    if (CheckTimestamp(entity))
-                    {
-                        //防重检测
-                        //TODO: 不是太重要的话，可以考虑放到内存中来
-                        bool setted = _redis.KeySetIfNotExist(_connectionSetting.RedisInstanceName, entity.Id, expireSeconds: _connectionSetting.AliveSeconds);
-                        
-                        if (setted)
-                        {
-                            _handler.Handle(entity.JsonData);
-                        }
-                        else
-                        {
-                            _logger.LogWarning($"找到一个重复EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, Data:{entity.JsonData}");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning($"找到一个过期EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, Data:{entity.JsonData}");
-                    }
-
-                    _channel.BasicAck(eventArgs.DeliveryTag, false);
-                };
-
-                _consumeTag = _channel.BasicConsume(queueName, false, consumer);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, $"在Consume RabbitMQ {_connectionSetting.BrokerName} 中，Exceptions: {ex.Message}");
-            }
-            finally
-            {
-                Cancel();
-
-                if (AutoRecovery)
-                {
-                    Restart();
-                }
-            }
+            _consumeTask.Start(TaskScheduler.Default);
         }
 
-        private bool CheckTimestamp(EventMessageEntity entity)
+        private IDatabase GetDatabase(string brokerName)
         {
-            long seconds = DataConverter.CurrentTimestampSeconds() - entity.Timestamp;
-
-            if (seconds <= _connectionSetting.AliveSeconds)
-            {
-                return true;
-            }
-
-            _logger.LogCritical($"找到一个过期的EventMessage, Type : {entity.Type}, Timestamp:{entity.Timestamp}, Data:{entity.JsonData}");
-
-            return false;
+            return _connectionManager.GetDatabase(brokerName, 0, true);
         }
 
-        private IModel CreateChannel(string brokerName, bool isPublish)
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
         {
-            IModel channel = _connectionManager.CreateChannel(brokerName: _connectionSetting.BrokerName, isPublish: true);
-
-            //Events
-            SettingUpChannelEvents(channel);
-
-            return channel;
-        }
-
-        private void SettingUpChannelEvents(IModel channel)
-        {
-            channel.CallbackException += (sender, eventArgs) =>
+            if (!disposedValue)
             {
-                string detailMessage = "RabbitMQ Channel Exception:";
-
-                if (eventArgs != null & eventArgs.Detail != null)
+                if (disposing)
                 {
-                    StringBuilder stringBuilder = new StringBuilder();
+                    _consumeTaskCTS?.Cancel();
+                    _consumeTaskCTS.Dispose();
+                    _consumeTask.Dispose();
 
-                    stringBuilder.AppendLine(detailMessage);
-
-                    foreach (KeyValuePair<string, object> pair in eventArgs.Detail)
-                    {
-                        stringBuilder.AppendLine($"{pair.Key} : {pair.Value.ToString()}");
-                    }
-
-                    detailMessage = stringBuilder.ToString();
                 }
 
-                _logger.LogError($"RabbitMQ Broker : {_connectionSetting.BrokerName}, Detail:{detailMessage}");
-            };
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
         }
 
-        private static string EventTypeToRabbitQueueName(string eventType)
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        ~ConsumeTaskManager()
         {
-            return eventType;
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
         }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }

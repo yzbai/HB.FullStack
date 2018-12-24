@@ -41,6 +41,11 @@ namespace HB.Framework.EventBus
             return await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
         }
 
+        public void StartHandle(string eventType)
+        {
+            _engine.StartHandle(eventType);
+        }
+
         public void Subscribe(string eventType, IEventHandler handler)
         {
             eventType.ThrowIfNull(nameof(eventType));
@@ -50,12 +55,11 @@ namespace HB.Framework.EventBus
             _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
         }
 
-        public void UnSubscribe(string eventType, string handlerId)
+        public void UnSubscribe(string eventType)
         {
             eventType.ThrowIfNull(nameof(eventType));
-            handlerId.ThrowIfNull(nameof(handlerId));
 
-            _engine.UnSubscribeHandler(eventyType: eventType, handlerId: handlerId);
+            _engine.UnSubscribeHandler(eventyType: eventType);
         }
 
         private string GetBrokerName(string eventType)

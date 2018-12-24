@@ -34,9 +34,9 @@ namespace HB.Infrastructure.Redis.KVStore
         private const string luaBatchDeleteReturnTemplate = @"return 1";
 
         private ILogger _logger;
-        private IRedisConnectionManager _redisConnectionManager;
+        private IRedisInstanceManager _redisConnectionManager;
 
-        public RedisKVStoreEngine(IRedisConnectionManager redisConnectionManager, ILogger<RedisKVStoreEngine> logger)
+        public RedisKVStoreEngine(IRedisInstanceManager redisConnectionManager, ILogger<RedisKVStoreEngine> logger)
         {
             _logger = logger;
             _redisConnectionManager = redisConnectionManager;

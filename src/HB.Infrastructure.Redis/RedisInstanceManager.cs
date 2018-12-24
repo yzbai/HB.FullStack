@@ -5,22 +5,24 @@ using System.Linq;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis
 {
-    public class RedisConnectionManager : IRedisConnectionManager
+    public class RedisInstanceManager : IRedisInstanceManager
     {      
         private ILogger _logger;
         private Dictionary<string, RedisConnection> _connectionDict;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
-        protected RedisOptions Options { get; private set; }
+        private RedisOptions _options;
 
-        public RedisConnectionManager(RedisOptions options, ILogger<RedisConnectionManager> logger)
+        public RedisInstanceManager(IOptions<RedisOptions> options, ILogger<RedisInstanceManager> logger)
         {
             _logger = logger;
-            Options = options;
+            _options = options.Value;
+
             _connectionDict = new Dictionary<string, RedisConnection>();
         }
 
@@ -30,11 +32,11 @@ namespace HB.Infrastructure.Redis
 
             if (!_connectionDict.ContainsKey(key))
             {
-                IEnumerable<RedisConnectionSetting> rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
+                IEnumerable<RedisInstanceSetting> rss = _options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
 
                 if (rss.Count() == 0 && isMaster == false)
                 {
-                    rss = Options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster);
+                    rss = _options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster);
                 }
 
                 if (rss.Count() == 0)
@@ -94,6 +96,11 @@ namespace HB.Infrastructure.Redis
             return GetDatabase(instanceName, dbIndex, true);
         }
 
+        public RedisInstanceSetting GetInstanceSetting(string brokerName, bool isMaster)
+        {
+            return _options.GetInstanceSetting(brokerName, isMaster);
+        }
+
         private void Connection_ConnectionFailed(object sender, ConnectionFailedEventArgs e)
         {
             
@@ -139,7 +146,7 @@ namespace HB.Infrastructure.Redis
             _disposed = true;
         }
 
-        ~RedisConnectionManager()
+        ~RedisInstanceManager()
         {
             Dispose(false);
         }
