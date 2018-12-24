@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,6 +12,8 @@ namespace HB.Framework.EventBus.Abstractions
     /// 同一个事件，只支持被处理一次，即同一个type的事件，只有一个handler对应
     /// 
     /// EventType 全局唯一
+    /// 
+    /// One EventType, One Queue, One Handler
     /// </summary>
     public interface IEventBus
     {
@@ -23,6 +26,8 @@ namespace HB.Framework.EventBus.Abstractions
 
         void Subscribe(string eventType, IEventHandler handler);
 
-        void UnSubscribe(string eventType, string handlerId);
+        void UnSubscribe(string eventType);
+
+        void StartHandle(string eventType);
     }
 }
