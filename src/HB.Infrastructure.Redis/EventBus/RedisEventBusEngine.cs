@@ -13,10 +13,10 @@ namespace HB.Infrastructure.Redis.EventBus
     public class RedisEventBusEngine : IEventBusEngine
     {
         private IRedisInstanceManager _instanceManager;
-        private ILogger _logger;
-        private ILogger _consumeTaskManagerLogger;
+        private readonly ILogger _logger;
+        private readonly ILogger _consumeTaskManagerLogger;
 
-        private object _consumeTaskManagerLocker;
+        private readonly object _consumeTaskManagerLocker;
         //eventType : ConsumeTaskManager
         private IDictionary<string, ConsumeTaskManager> _consumeTaskManagers;
 

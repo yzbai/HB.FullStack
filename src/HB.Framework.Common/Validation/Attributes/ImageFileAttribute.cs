@@ -26,9 +26,7 @@ namespace HB.Framework.Common.Validation.Attributes
 
         public override bool IsValid(object value)
         {
-            IFormFile file = value as IFormFile;
-
-            if (file == null)
+            if (!(value is IFormFile file))
             {
                 ErrorMessage = "不是图片文件";
                 return false;
