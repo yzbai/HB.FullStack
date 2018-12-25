@@ -12,7 +12,7 @@ namespace HB.Infrastructure.Redis.EventBus
 {
     public class RedisEventBusEngine : IEventBusEngine
     {
-        private IRedisInstanceManager _connectionManager;
+        private IRedisInstanceManager _instanceManager;
         private ILogger _logger;
         private ILogger _consumeTaskManagerLogger;
 
@@ -22,7 +22,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         public RedisEventBusEngine(IRedisInstanceManager connectionManager, ILoggerFactory loggerFactory)
         {
-            _connectionManager = connectionManager;
+            _instanceManager = connectionManager;
             _logger = loggerFactory.CreateLogger<RedisEventBusEngine>();
             _consumeTaskManagerLogger = loggerFactory.CreateLogger<ConsumeTaskManager>();
             _consumeTaskManagers = new Dictionary<string, ConsumeTaskManager>();
@@ -31,7 +31,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         public async Task<bool> PublishAsync(string brokerName, EventMessage eventMessage)
         {
-            IDatabase database = GetDatabase(brokerName);
+            IDatabase database = _instanceManager.GetDatabase(brokerName);
 
             if (database == null)
             {
@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
             EventMessageEntity entity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
 
-            await database.ListLeftPushAsync(entity.QueueName(), DataConverter.ToJson(entity)).ConfigureAwait(false);
+            await database.ListLeftPushAsync(QueueName(entity.Type), DataConverter.ToJson(entity)).ConfigureAwait(false);
 
             return true;
         }
@@ -62,7 +62,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// </summary>
         public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
         {
-            IDatabase database = GetDatabase(brokerName);
+            IDatabase database = _instanceManager.GetDatabase(brokerName);
 
             if (database == null)
             {
@@ -76,7 +76,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     throw new ArgumentException($"已经存在{eventType}的处理程序.");
                 }
 
-                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(brokerName, _connectionManager, eventType, eventHandler, _consumeTaskManagerLogger);
+                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(brokerName,  _instanceManager, eventType, eventHandler, _consumeTaskManagerLogger);
 
                 _consumeTaskManagers.Add(eventType, consumeTaskManager);
             }
@@ -112,9 +112,9 @@ namespace HB.Infrastructure.Redis.EventBus
             return eventType + "_History";
         }
 
-        private IDatabase GetDatabase(string brokerName)
+        public static string AcksSetName(string eventType)
         {
-            return _connectionManager.GetDatabase(brokerName, 0, true);
+            return eventType + "_Acks";
         }
 
         #region IDisposable Support

@@ -25,7 +25,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         public bool KeySetIfNotExist(string redisInstanceName, string key, long expireSeconds)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             return database.StringSet(key, "", TimeSpan.FromSeconds(expireSeconds), When.NotExists);
         }
@@ -36,7 +36,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         public void HashSetInt(string redisInstanceName, string hashName, IEnumerable<string> fields, IEnumerable<int> values)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             HashEntry[] hashEntries = new HashEntry[fields.Count()];
 
@@ -50,7 +50,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         public IEnumerable<int> HashGetInt(string redisInstanceName, string hashName, IEnumerable<string> fields)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             RedisValue[] values = database.HashGet(hashName, fields.Select<string, RedisValue>(t => t).ToArray());
 
@@ -63,7 +63,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         public T PopAndPush<T>(string redisInstanceName, string fromQueueName, string toQueueName)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             byte[] data = database.ListRightPopLeftPush(fromQueueName, toQueueName);
 
@@ -73,14 +73,14 @@ namespace HB.Infrastructure.Redis.Direct
 
         public async Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             return await database.ListLeftPushAsync(queueName, DataConverter.ToJson(data)).ConfigureAwait(false);
         }
 
         public ulong QueueLength(string redisInstanceName, string queueName)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             return Convert.ToUInt64(database.ListLength(queueName));
         }
@@ -92,7 +92,7 @@ namespace HB.Infrastructure.Redis.Direct
         //TODO: use LoadedLuaScript
         public int ScriptEvaluate(string redisInstanceName, string script, string[] keys, string[] argvs)
         {
-            IDatabase database = GetDatabase(redisInstanceName);
+            IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
             RedisResult result = database.ScriptEvaluate(script, keys.Select<string, RedisKey>(t=>t).ToArray(), argvs.Select<string, RedisValue>(t=>t).ToArray());
 
@@ -100,10 +100,5 @@ namespace HB.Infrastructure.Redis.Direct
         }
 
         #endregion
-
-        private IDatabase GetDatabase(string redisInstanceName)
-        {
-            return _redisConnectionManager.GetDatabase(redisInstanceName, 0, true);
-        }
     }
 }

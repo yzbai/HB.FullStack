@@ -35,7 +35,7 @@ namespace HB.Infrastructure.Redis.Test
             });
 
 
-            serviceCollection.AddRedisEngine(Configuration.GetSection("RedisEngine"));
+            serviceCollection.AddRedis(Configuration.GetSection("RedisEngine"));
 
             Services = serviceCollection.BuildServiceProvider();
         }
