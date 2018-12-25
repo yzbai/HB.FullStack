@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,9 +19,9 @@ namespace HB.Infrastructure.Redis.EventBus
     public class ConsumeTaskManager : IDisposable
     {
         private const int CONSUME_INTERVAL_SECONDS = 5;
-
-        private string _instanceName;
-        private string _eventType;
+        private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Id\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
+        private readonly string _instanceName;
+        private readonly string _eventType;
         private ILogger _logger;
         private IRedisInstanceManager _instanceManager;
         private RedisInstanceSetting _instanceSetting;
@@ -29,7 +30,7 @@ namespace HB.Infrastructure.Redis.EventBus
         private Task _consumeTask;
         private CancellationTokenSource _consumeTaskCTS;
 
-        private Task _historyTask;
+        private readonly Task _historyTask;
         private CancellationTokenSource _historyTaskCTS;
 
         private DuplicateChecker _duplicateChecker;
@@ -59,7 +60,72 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private void HistoryTaskProcedure()
         {
-            
+            while(true)
+            {
+                try
+                {
+                    /*
+                    -- keys = {history_queue, acks_sortedset, queue}
+                    -- argvs={currentTimestampSeconds, waitSecondsToBeHistory}
+
+                    local rawEvent = redis.call('rpop', KEYS[1])
+                    local event = cjson.decode(rawEvent)
+                    local aliveTime = ARGV [1] - event["Timestamp"]
+                    local eid = event["Id"]
+
+                    --如果太新，就直接放回去，然后返回
+                    if (aliveTime < ARGV [2] + 0)
+                    then
+                        redis.call('rpush', KEYS [1], rawEvent)
+                        return 1
+                    end
+
+                    --如果已存在acks set中，则直接返回
+                    if (redis.call('zrank', KEYS [2], eid) ~= nil)
+                    then
+                        return 2
+                    end
+
+                    --说明还没有被处理，遗忘了，放回处理队列
+                    redis.call('rpush', KEYS [3], rawEvent)
+                    return 3
+                    */
+
+                    string[] redisKeys = new string[] { RedisEventBusEngine.HistoryQueueName(_eventType), RedisEventBusEngine.AcksSetName(_eventType), RedisEventBusEngine.QueueName(_eventType) };
+                    string[] redisArgvs = new string[] { DataConverter.CurrentTimestampSeconds().ToString(GlobalSettings.Culture), _instanceSetting.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture) };
+
+                    IDatabase database = _instanceManager.GetDatabase(_instanceName);
+
+                    int result = (int)database.ScriptEvaluate(
+                        HISTORY_REDIS_SCRIPT,
+                        redisKeys.Select<string, RedisKey>(t => t).ToArray(),
+                        redisArgvs.Select<string, RedisValue>(t => t).ToArray());
+
+                    //TODO: add logs
+
+                    if (result == 1)
+                    {
+                        //时间太早，等会再检查
+                        Thread.Sleep(10 * 1000);
+                    }
+                    else if (result == 2)
+                    {
+                        //成功
+                    }
+                    else if (result == 3)
+                    {
+                        //重新放入队列再发送
+                    }
+                    else
+                    {
+                        //出错
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogCritical(ex, $"ScanHistory {_instanceName} 中，EventType:{_eventType}, Exceptions: {ex.Message}");
+                }
+            }
         }
 
         private void CosumeTaskProcedure()
@@ -181,3 +247,4 @@ namespace HB.Infrastructure.Redis.EventBus
         #endregion
     }
 }
+
