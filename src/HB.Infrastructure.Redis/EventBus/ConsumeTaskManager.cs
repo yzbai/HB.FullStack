@@ -7,22 +7,23 @@ using HB.Framework.Common;
 using HB.Framework.EventBus.Abstractions;
 using HB.Infrastructure.Redis.DuplicateCheck;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
     /// <summary>
-    /// TODO: 未来使用多线程
+    /// TODO: 未来使用多线程, 对于_consumeTask 和 _historyTask
     /// </summary>
     public class ConsumeTaskManager : IDisposable
     {
         private const int CONSUME_INTERVAL_SECONDS = 5;
 
-        private string _brokerName;
+        private string _instanceName;
         private string _eventType;
         private ILogger _logger;
-        private IRedisInstanceManager _connectionManager;
-        private RedisInstanceSetting _redisInstanceSetting;
+        private IRedisInstanceManager _instanceManager;
+        private RedisInstanceSetting _instanceSetting;
         private IEventHandler _eventHandler;
 
         private Task _consumeTask;
@@ -31,13 +32,18 @@ namespace HB.Infrastructure.Redis.EventBus
         private Task _historyTask;
         private CancellationTokenSource _historyTaskCTS;
 
-        private IDuplicateChecker _duplicateChecker;
+        private DuplicateChecker _duplicateChecker;
 
-        public ConsumeTaskManager(string brokerName, IRedisInstanceManager connectionManager, string eventType, IEventHandler eventHandler, IDuplicateChecker duplicateChecker, ILogger consumeTaskManagerLogger)
+        public ConsumeTaskManager(
+            string brokerName, 
+            IRedisInstanceManager instanceManager, 
+            string eventType, 
+            IEventHandler eventHandler, 
+            ILogger consumeTaskManagerLogger)
         {
-            _brokerName = brokerName;
-            _connectionManager = connectionManager;
-            _redisInstanceSetting = _connectionManager.GetInstanceSetting(brokerName, true);
+            _instanceName = brokerName;
+            _instanceManager = instanceManager;
+            _instanceSetting = _instanceManager.GetInstanceSetting(brokerName);
             _eventType = eventType;
             _eventHandler = eventHandler;
             _logger = consumeTaskManagerLogger;
@@ -48,12 +54,12 @@ namespace HB.Infrastructure.Redis.EventBus
             _historyTaskCTS = new CancellationTokenSource();
             _historyTask = new Task(HistoryTaskProcedure, _historyTaskCTS.Token, TaskCreationOptions.LongRunning);
 
-            _duplicateChecker = duplicateChecker;
+            _duplicateChecker = new DuplicateChecker(_instanceManager, _instanceName, _instanceSetting.EventBusEventMessageExpiredHours * 60 * 60);
         }
 
         private void HistoryTaskProcedure()
         {
-            throw new NotImplementedException();
+            
         }
 
         private void CosumeTaskProcedure()
@@ -61,13 +67,13 @@ namespace HB.Infrastructure.Redis.EventBus
             while (true)
             {
                 //1, Get Entity
-                IDatabase database = GetDatabase(_brokerName);
+                IDatabase database = _instanceManager.GetDatabase(_instanceName);
 
                 RedisValue redisValue = database.ListRightPopLeftPush(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType));
 
                 if (redisValue.IsNullOrEmpty)
                 {
-                    _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_brokerName}, eventType:{_eventType}");
+                    _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceName}, eventType:{_eventType}");
 
                     Thread.Sleep(CONSUME_INTERVAL_SECONDS * 1000);
 
@@ -80,13 +86,33 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 double spendHours = (DataConverter.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
 
-                if (spendHours > _redisInstanceSetting.EventBusEventMessageExpiredHours)
+                if (spendHours > _instanceSetting.EventBusEventMessageExpiredHours)
                 {
                     _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{DataConverter.ToJson(entity)}");
                     continue;
                 }
 
                 //3, 防重检查
+
+                string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
+                string token = string.Empty;
+
+                if (!_duplicateChecker.Lock(AcksSetName, entity.Id, out token))
+                {
+                    //竟然有人在检查entity.Id,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
+                    continue;  
+                }
+
+                bool? isExist = _duplicateChecker.IsExist(AcksSetName, entity.Id, token);
+
+                if (isExist == null || isExist.Value)
+                {
+                    _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{DataConverter.ToJson(entity)}");
+
+                    _duplicateChecker.Release(AcksSetName, entity.Id, token);
+
+                    continue;
+                }
 
                 //4, Handle Entity
                 try
@@ -98,10 +124,9 @@ namespace HB.Infrastructure.Redis.EventBus
                     _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {DataConverter.ToJson(entity)}");
                 }
 
-                
-
                 //5, Acks
-                database.SetAdd()
+                _duplicateChecker.Add(AcksSetName, entity.Id, entity.Timestamp, token);
+                _duplicateChecker.Release(AcksSetName, entity.Id, token);
             }
         }
 
@@ -113,11 +138,6 @@ namespace HB.Infrastructure.Redis.EventBus
         public void Start()
         {
             _consumeTask.Start(TaskScheduler.Default);
-        }
-
-        private IDatabase GetDatabase(string brokerName)
-        {
-            return _connectionManager.GetDatabase(brokerName, 0, true);
         }
 
         #region IDisposable Support

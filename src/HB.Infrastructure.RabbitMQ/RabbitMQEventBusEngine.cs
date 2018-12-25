@@ -66,7 +66,7 @@ namespace HB.Infrastructure.RabbitMQ
 
             if (!IsBrokerExists(brokerName))
             {
-                return false;
+                throw new Exception($"Not exist rabbit broker:{brokerName}");
             }
 
             EventMessageEntity eventEntity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
@@ -78,6 +78,7 @@ namespace HB.Infrastructure.RabbitMQ
             //NotifyPublishToRabbitMQ(brokerName);
 
             return true;
+
         }
         //TODO: 考虑让PublishManager和HistoryManager独立
         //TODO： 考虑用redis替代rabbitmq
@@ -97,7 +98,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         #region Subscribe
 
-        public bool SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
         {
             if (!IsBrokerExists(brokerName))
             {
@@ -106,9 +107,10 @@ namespace HB.Infrastructure.RabbitMQ
 
             if (_consumeManager.ContainsKey(eventType))
             {
-                _logger.LogCritical($"已经存在相同类型的EventHandler了，eventType : {eventType}");
+                string message = $"已经存在相同类型的EventHandler了，eventType : {eventType}";
+                _logger.LogCritical(message);
 
-                return false;
+                throw new Exception(message);
             }
 
             RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
@@ -116,16 +118,14 @@ namespace HB.Infrastructure.RabbitMQ
             ConsumeTaskManager manager = new ConsumeTaskManager(eventType, eventHandler, connectionSetting, _connectionManager, _redis, _consumeTaskManagerLogger);
 
             _consumeManager.Add(eventType, manager);
-
-            return true;
         }
 
-        public bool UnSubscribeHandler(string eventyType, string handlerId)
+        public void UnSubscribeHandler(string eventyType)
         {
             if (!_consumeManager.ContainsKey(eventyType))
             {
-                _logger.LogCritical($"没有这个类型的EventHandler， eventType:{eventyType}");
-                return false;
+                string message = $"没有这个类型的EventHandler， eventType:{eventyType}";
+                _logger.LogCritical(message);
             }
 
             ConsumeTaskManager manager = _consumeManager[eventyType];
@@ -133,8 +133,6 @@ namespace HB.Infrastructure.RabbitMQ
             manager.Cancel();
 
             _consumeManager.Remove(eventyType);
-
-            return true;
         }
 
         #endregion
@@ -152,5 +150,47 @@ namespace HB.Infrastructure.RabbitMQ
 
             return true;
         }
+
+        public void StartHandle(string eventType)
+        {
+            
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        ~RabbitMQEventBusEngine()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }

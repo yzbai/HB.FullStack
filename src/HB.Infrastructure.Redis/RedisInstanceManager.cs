@@ -13,6 +13,8 @@ namespace HB.Infrastructure.Redis
     public class RedisInstanceManager : IRedisInstanceManager
     {      
         private ILogger _logger;
+
+        //instanceName : RedisConnection
         private Dictionary<string, RedisConnection> _connectionDict;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
@@ -26,28 +28,21 @@ namespace HB.Infrastructure.Redis
             _connectionDict = new Dictionary<string, RedisConnection>();
         }
 
-        public IDatabase GetDatabase(string instanceName, int dbIndex, bool isMaster)
+        public IDatabase GetDatabase(string instanceName)
         {
-            string key = string.Format(GlobalSettings.Culture, "{0}:{1}:{2}", instanceName, dbIndex, isMaster ? 1 : 0);
-
-            if (!_connectionDict.ContainsKey(key))
+            if (!_connectionDict.ContainsKey(instanceName))
             {
-                IEnumerable<RedisInstanceSetting> rss = _options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster == isMaster);
+                RedisInstanceSetting setting = _options.GetInstanceSetting(instanceName);
 
-                if (rss.Count() == 0 && isMaster == false)
-                {
-                    rss = _options.ConnectionSettings.Where(rs => rs.InstanceName.Equals(instanceName, GlobalSettings.Comparison) && rs.IsMaster);
-                }
-
-                if (rss.Count() == 0)
+                if (setting == null)
                 {
                     return null;
                 }
 
-                _connectionDict[key] = new RedisConnection(rss.ElementAt(0).ConnectionString);
+                _connectionDict[instanceName] = new RedisConnection(setting.ConnectionString);
             }
 
-            RedisConnection redisWrapper = _connectionDict[key];
+            RedisConnection redisWrapper = _connectionDict[instanceName];
 
             if (redisWrapper.Connection != null && !redisWrapper.Connection.IsConnected)
             {
@@ -72,10 +67,10 @@ namespace HB.Infrastructure.Redis
                     //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
 
                     redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);
-                    redisWrapper.Database = redisWrapper.Connection.GetDatabase(dbIndex);
+                    redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
                     //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
-                    _logger.LogInformation("Redis KVStoreEngine Connection ReConnected : " + key);
+                    _logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {instanceName}");
                 }
                 finally
                 {
@@ -86,24 +81,9 @@ namespace HB.Infrastructure.Redis
             return redisWrapper.Database;
         }
 
-        public IDatabase GetReadDatabase(string instanceName, int dbIndex)
+        public RedisInstanceSetting GetInstanceSetting(string instanceName)
         {
-            return GetDatabase(instanceName, dbIndex, false);
-        }
-
-        public IDatabase GetWriteDatabase(string instanceName, int dbIndex)
-        {
-            return GetDatabase(instanceName, dbIndex, true);
-        }
-
-        public RedisInstanceSetting GetInstanceSetting(string brokerName, bool isMaster)
-        {
-            return _options.GetInstanceSetting(brokerName, isMaster);
-        }
-
-        private void Connection_ConnectionFailed(object sender, ConnectionFailedEventArgs e)
-        {
-            
+            return _options.GetInstanceSetting(instanceName);
         }
 
         #region Dispose Support
@@ -145,6 +125,7 @@ namespace HB.Infrastructure.Redis
 
             _disposed = true;
         }
+
 
         ~RedisInstanceManager()
         {

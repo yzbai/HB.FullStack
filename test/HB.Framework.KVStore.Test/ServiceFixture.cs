@@ -34,7 +34,7 @@ namespace HB.Framework.KVStore.Test
             });
 
             serviceCollection.AddKVStore(Configuration.GetSection("KVStore"));
-            serviceCollection.AddRedisEngine(Configuration.GetSection("RedisEngine"));
+            serviceCollection.AddRedis(Configuration.GetSection("RedisEngine"));
 
             Services = serviceCollection.BuildServiceProvider();
         }
