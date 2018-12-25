@@ -99,6 +99,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         private void CoordinateTask()
         {
+            //TODO: 可以用Timer，来定期调整
             lock (_taskNodesLocker)
             {
                 //first clean finished tasks

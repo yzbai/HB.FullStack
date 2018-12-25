@@ -119,14 +119,14 @@ namespace HB.Infrastructure.Redis.KVStore
             return stringBuilder.ToString();
         }
 
-        public string EntityGet(string storeName, int storeIndex, string entityName, string entityKey)
+        public string EntityGet(string storeName, string entityName, string entityKey)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return db.HashGet(entityName, entityKey);
         }
 
-        public IEnumerable<string> EntityGet(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys)
+        public IEnumerable<string> EntityGet(string storeName, string entityName, IEnumerable<string> entityKeys)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
@@ -135,19 +135,19 @@ namespace HB.Infrastructure.Redis.KVStore
             return result.Select(rs => rs.ToString());
         }
 
-        public IEnumerable<string> EntityGetAll(string storeName, int storeIndex, string entityName)
+        public IEnumerable<string> EntityGetAll(string storeName, string entityName)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return db.HashGetAll(entityName).Select<HashEntry, string>(t => t.Value);
         }
 
-        public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, string entityKey, string entityJson)
+        public KVStoreResult EntityAdd(string storeName, string entityName, string entityKey, string entityJson)
         {
-            return EntityAdd(storeName, storeIndex, entityName, new string[] { entityKey }, new List<string> { entityJson });
+            return EntityAdd(storeName, entityName, new string[] { entityKey }, new List<string> { entityJson });
         }
 
-        public KVStoreResult EntityAdd(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
+        public KVStoreResult EntityAdd(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
         {
             string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
 
@@ -164,12 +164,12 @@ namespace HB.Infrastructure.Redis.KVStore
 
         }
 
-        public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, string entityKey, string entityJson, int entityVersion)
+        public KVStoreResult EntityUpdate(string storeName, string entityName, string entityKey, string entityJson, int entityVersion)
         {
-            return EntityUpdate(storeName, storeIndex, entityName, new string[] { entityKey }, new List<string>() { entityJson }, new int[] { entityVersion });
+            return EntityUpdate(storeName, entityName, new string[] { entityKey }, new List<string>() { entityJson }, new int[] { entityVersion });
         }
 
-        public KVStoreResult EntityUpdate(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
+        public KVStoreResult EntityUpdate(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
         {
             string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
 
@@ -185,12 +185,12 @@ namespace HB.Infrastructure.Redis.KVStore
             return MapResult(result);
         }
 
-        public KVStoreResult EntityDelete(string storeName, int storeIndex, string entityName, string entityKey, int entityVersion)
+        public KVStoreResult EntityDelete(string storeName, string entityName, string entityKey, int entityVersion)
         {
-            return EntityDelete(storeName, storeIndex, entityName, new string[] { entityKey }, new int[] { entityVersion });
+            return EntityDelete(storeName, entityName, new string[] { entityKey }, new int[] { entityVersion });
         }
 
-        public KVStoreResult EntityDelete(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
+        public KVStoreResult EntityDelete(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
         {
             string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
 
@@ -204,7 +204,7 @@ namespace HB.Infrastructure.Redis.KVStore
             return MapResult(result);
         }
 
-        public KVStoreResult EntityDeleteAll(string storeName, int storeIndex, string entityName)
+        public KVStoreResult EntityDeleteAll(string storeName, string entityName)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 

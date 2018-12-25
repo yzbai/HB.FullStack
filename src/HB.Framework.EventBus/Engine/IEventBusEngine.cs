@@ -13,7 +13,7 @@ namespace HB.Framework.EventBus
         /// </summary>
         /// <param name="eventMessage"></param>
         Task<bool> PublishAsync(string brokerName, EventMessage eventMessage);
-        void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler);
+        void SubscribeHandler(string brokerName, IEventHandler eventHandler);
         void UnSubscribeHandler(string eventyType);
         void StartHandle(string eventType);
     }

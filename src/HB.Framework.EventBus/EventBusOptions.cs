@@ -22,7 +22,7 @@ namespace HB.Framework.EventBus
 
         public IList<EventSchema> EventSchemas { get; set; } = new List<EventSchema>();
 
-        public EventSchema GetTopicSchema(string topic)
+        public EventSchema GetEventSchema(string topic)
         {
             return EventSchemas.FirstOrDefault(t => t.EventType.Equals(topic, GlobalSettings.Comparison));
         }

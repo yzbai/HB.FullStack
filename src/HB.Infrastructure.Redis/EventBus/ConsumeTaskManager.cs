@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Redis.EventBus
     public class ConsumeTaskManager : IDisposable
     {
         private const int CONSUME_INTERVAL_SECONDS = 5;
-        private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Id\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
+        private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Id\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
         private readonly string _instanceName;
         private readonly string _eventType;
         private ILogger _logger;
@@ -60,7 +60,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private void HistoryTaskProcedure()
         {
-            while(true)
+            while(!_historyTaskCTS.IsCancellationRequested)
             {
                 try
                 {
@@ -69,6 +69,13 @@ namespace HB.Infrastructure.Redis.EventBus
                     -- argvs={currentTimestampSeconds, waitSecondsToBeHistory}
 
                     local rawEvent = redis.call('rpop', KEYS[1])
+                    
+                    --还没有数据
+                    if (not rawEvent)
+                    then
+                        return 0
+                    end
+
                     local event = cjson.decode(rawEvent)
                     local aliveTime = ARGV [1] - event["Timestamp"]
                     local eid = event["Id"]
@@ -91,30 +98,46 @@ namespace HB.Infrastructure.Redis.EventBus
                     return 3
                     */
 
-                    string[] redisKeys = new string[] { RedisEventBusEngine.HistoryQueueName(_eventType), RedisEventBusEngine.AcksSetName(_eventType), RedisEventBusEngine.QueueName(_eventType) };
-                    string[] redisArgvs = new string[] { DataConverter.CurrentTimestampSeconds().ToString(GlobalSettings.Culture), _instanceSetting.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture) };
+                    string[] redisKeys = new string[] {
+                        RedisEventBusEngine.HistoryQueueName(_eventType),
+                        RedisEventBusEngine.AcksSetName(_eventType),
+                        RedisEventBusEngine.QueueName(_eventType)
+                    };
+
+                    string[] redisArgvs = new string[] {
+                        DataConverter.CurrentTimestampSeconds().ToString(GlobalSettings.Culture),
+                        _instanceSetting.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
+                    };
 
                     IDatabase database = _instanceManager.GetDatabase(_instanceName);
 
+                    //TODO: Use LoadedScript
                     int result = (int)database.ScriptEvaluate(
                         HISTORY_REDIS_SCRIPT,
                         redisKeys.Select<string, RedisKey>(t => t).ToArray(),
                         redisArgvs.Select<string, RedisValue>(t => t).ToArray());
 
-                    //TODO: add logs
-
-                    if (result == 1)
+                    if (result == 0)
+                    {
+                        //还没有数据，等会吧
+                        _logger.LogTrace($"ScanHistory {_instanceName} 中,还没有数据，，EventType:{_eventType}");
+                        Thread.Sleep(10 * 1000);
+                    }
+                    else if (result == 1)
                     {
                         //时间太早，等会再检查
+                        _logger.LogTrace($"ScanHistory {_instanceName} 中,数据还太新，一会再检查，，EventType:{_eventType}");
                         Thread.Sleep(10 * 1000);
                     }
                     else if (result == 2)
                     {
                         //成功
+                        _logger.LogTrace($"ScanHistory {_instanceName} 中,消息已被处理，现在移出History，EventType:{_eventType}");
                     }
                     else if (result == 3)
                     {
                         //重新放入队列再发送
+                        _logger.LogWarning($"ScanHistory {_instanceName} 中,消息可能被遗漏， 重新放入队列，，EventType:{_eventType}");
                     }
                     else
                     {
@@ -130,7 +153,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private void CosumeTaskProcedure()
         {
-            while (true)
+            while (!_consumeTaskCTS.IsCancellationRequested)
             {
                 //1, Get Entity
                 IDatabase database = _instanceManager.GetDatabase(_instanceName);
@@ -146,7 +169,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     continue;
                 }
 
-                EventMessageEntity entity = DataConverter.To<EventMessageEntity>(redisValue);
+                EventMessageEntity entity = DataConverter.FromJson<EventMessageEntity>(redisValue);
 
                 //2, 过期检查
 
@@ -199,11 +222,13 @@ namespace HB.Infrastructure.Redis.EventBus
         public void Cancel()
         {
             _consumeTaskCTS.Cancel();
+            _historyTaskCTS.Cancel();
         }
 
         public void Start()
         {
             _consumeTask.Start(TaskScheduler.Default);
+            _historyTask.Start(TaskScheduler.Default);
         }
 
         #region IDisposable Support
@@ -216,9 +241,24 @@ namespace HB.Infrastructure.Redis.EventBus
                 if (disposing)
                 {
                     _consumeTaskCTS?.Cancel();
-                    _consumeTaskCTS.Dispose();
-                    _consumeTask.Dispose();
 
+                    while (!_consumeTask.IsCompleted)
+                    {
+                        Thread.Sleep(1 * 1000);
+                    }
+
+                    _consumeTask.Dispose();
+                    _consumeTaskCTS?.Dispose();
+
+                    _historyTaskCTS?.Cancel();
+
+                    while(!_historyTask.IsCompleted)
+                    {
+                        Thread.Sleep(1 * 1000);
+                    }
+
+                    _historyTask.Dispose();
+                    _historyTaskCTS?.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

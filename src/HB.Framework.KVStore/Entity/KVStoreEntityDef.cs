@@ -8,8 +8,6 @@ namespace HB.Framework.KVStore.Entity
     {
         public string KVStoreName { get; set; }
 
-        public int KVStoreIndex { get; set; }
-
         public Type EntityType { get; set; }
 
         public string EntityFullName { get; set; }
