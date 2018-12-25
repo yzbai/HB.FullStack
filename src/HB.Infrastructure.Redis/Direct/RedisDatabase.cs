@@ -13,7 +13,7 @@ namespace HB.Infrastructure.Redis.Direct
     {
         private IRedisInstanceManager _redisConnectionManager;
 
-        private ILogger<RedisDatabase> _logger;
+        private readonly ILogger<RedisDatabase> _logger;
 
         public RedisDatabase(IRedisInstanceManager redisConnectionManager, ILogger<RedisDatabase> logger)
         {
