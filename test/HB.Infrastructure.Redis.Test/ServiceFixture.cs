@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HB.Framework.EventBus.Abstractions;
 using HB.Framework.KVStore;
 using HB.Infrastructure.Redis.Direct;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace HB.Infrastructure.Redis.Test
 {
@@ -17,6 +19,8 @@ namespace HB.Infrastructure.Redis.Test
 
         public ServiceFixture()
         {
+            NLog.LogManager.LoadConfiguration("nlog.config");
+
             var configurationBuilder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(Environment.CurrentDirectory)
@@ -31,17 +35,22 @@ namespace HB.Infrastructure.Redis.Test
             serviceCollection.AddOptions();
 
             serviceCollection.AddLogging(builder => {
-                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Trace);
+                builder.AddNLog();
             });
 
 
-            serviceCollection.AddRedis(Configuration.GetSection("RedisEngine"));
+            serviceCollection.AddKVStore(Configuration.GetSection("KVStore"));
+            serviceCollection.AddEventBus(Configuration.GetSection("EventBus"));
+            serviceCollection.AddRedis(Configuration.GetSection("Redis"));
 
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IRedisDatabase RedisEngine => this.Services.GetRequiredService<IRedisDatabase>();
+        public IRedisDatabase Redis => Services.GetRequiredService<IRedisDatabase>();
 
-        public IKVStore KVStore => this.Services.GetRequiredService<IKVStore>();
+        public IKVStore KVStore => Services.GetRequiredService<IKVStore>();
+
+        public IEventBus EventBus => Services.GetRequiredService<IEventBus>();
     }
 }

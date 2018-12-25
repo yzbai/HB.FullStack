@@ -46,13 +46,13 @@ namespace HB.Framework.EventBus
             _engine.StartHandle(eventType);
         }
 
-        public void Subscribe(string eventType, IEventHandler handler)
+        public void Subscribe(IEventHandler handler)
         {
-            eventType.ThrowIfNull(nameof(eventType));
-
             handler.ThrowIfNull(nameof(handler));
 
-            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
+            handler.EventType.ThrowIfNull(nameof(handler.EventType));
+
+            _engine.SubscribeHandler(brokerName: GetBrokerName(handler.EventType), eventHandler: handler);
         }
 
         public void UnSubscribe(string eventType)
@@ -64,7 +64,7 @@ namespace HB.Framework.EventBus
 
         private string GetBrokerName(string eventType)
         {
-            string brokerName = _options.GetTopicSchema(eventType)?.BrokerName;
+            string brokerName = _options.GetEventSchema(eventType)?.BrokerName;
 
             if (string.IsNullOrEmpty(brokerName))
             {

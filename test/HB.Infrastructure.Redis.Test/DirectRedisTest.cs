@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace HB.Infrastructure.Redis.Test
 {
-    public class RedisEngineTest : IClassFixture<ServiceFixture>
+    public class DirectRedisTest : IClassFixture<ServiceFixture>
     {
         private Fixture _fixture = new Fixture();
 
@@ -18,14 +18,14 @@ namespace HB.Infrastructure.Redis.Test
 
         private IRedisDatabase _redis;
 
-        public RedisEngineTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public DirectRedisTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
-            _redis = serviceFixture.RedisEngine;
+            _redis = serviceFixture.Redis;
         }
 
         [Theory]
-        [InlineData("Instance1")]
+        [InlineData("Direct_Redis")]
         public void KeySetIfNotExist_SetKeyTwice_FirstReturnTrueAndSecondReturnFalse(string instanceName)
         {
             string key = SecurityHelper.CreateUniqueToken();
@@ -38,7 +38,7 @@ namespace HB.Infrastructure.Redis.Test
         }
 
         [Theory]
-        [InlineData("Instance1")]
+        [InlineData("Direct_Redis")]
         public void HashSetInt_SetAndGet_ReturnSameTrue(string instanceName)
         {
             string hashName = _fixture.Create<string>();

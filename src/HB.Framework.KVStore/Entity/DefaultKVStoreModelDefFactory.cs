@@ -66,7 +66,6 @@ namespace HB.Framework.KVStore.Entity
 
             KVStoreSchema schema = _options.GetKVStoreSchema(entityDef.EntityFullName);
             entityDef.KVStoreName = schema.InstanceName;
-            entityDef.KVStoreIndex = schema.KVStoreIndex;
 
             return entityDef;
         }

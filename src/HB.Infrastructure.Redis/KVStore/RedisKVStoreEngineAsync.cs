@@ -13,7 +13,7 @@ namespace HB.Infrastructure.Redis.KVStore
 {
     public partial class RedisKVStoreEngine : IKVStoreEngineAsync
     {
-        public async Task<string> EntityGetAsync(string storeName, int storeIndex, string entityName, string entityKey)
+        public async Task<string> EntityGetAsync(string storeName, string entityName, string entityKey)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
@@ -21,7 +21,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         }
 
-        public async Task<IEnumerable<string>> EntityGetAsync(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys)
+        public async Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
@@ -32,7 +32,7 @@ namespace HB.Infrastructure.Redis.KVStore
             return redisValues.Select<RedisValue, string>(t => t);
         }
 
-        public async Task<IEnumerable<string>> EntityGetAllAsync(string storeName, int storeIndex, string entityName)
+        public async Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
@@ -41,12 +41,12 @@ namespace HB.Infrastructure.Redis.KVStore
             return results.Select<HashEntry, string>(t => t.Value);
         }
 
-        public Task<KVStoreResult> EntityAddAsync(string storeName, int storeIndex, string entityName, string entityKey, string entityJson)
+        public Task<KVStoreResult> EntityAddAsync(string storeName, string entityName, string entityKey, string entityJson)
         {
-            return EntityAddAsync(storeName, storeIndex, entityName, new string[] { entityKey }, new List<string> { entityJson });
+            return EntityAddAsync(storeName, entityName, new string[] { entityKey }, new List<string> { entityJson });
         }
 
-        public Task<KVStoreResult> EntityAddAsync(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
+        public Task<KVStoreResult> EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
         {
             string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
 
@@ -62,12 +62,12 @@ namespace HB.Infrastructure.Redis.KVStore
             return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t=>MapResult(t.Result), TaskScheduler.Default);
         }
 
-        public Task<KVStoreResult> EntityUpdateAsync(string storeName, int storeIndex, string entityName, string entityKey, string entityJson, int entityVersion)
+        public Task<KVStoreResult> EntityUpdateAsync(string storeName, string entityName, string entityKey, string entityJson, int entityVersion)
         {
-            return EntityUpdateAsync(storeName, storeIndex, entityName, new string[] { entityKey }, new List<string>() { entityJson }, new int[] { entityVersion });
+            return EntityUpdateAsync(storeName, entityName, new string[] { entityKey }, new List<string>() { entityJson }, new int[] { entityVersion });
         }
 
-        public Task<KVStoreResult> EntityUpdateAsync(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
+        public Task<KVStoreResult> EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
         {
             string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
 
@@ -81,12 +81,12 @@ namespace HB.Infrastructure.Redis.KVStore
             return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
         }
 
-        public Task<KVStoreResult> EntityDeleteAsync(string storeName, int storeIndex, string entityName, string entityKey, int entityVersion)
+        public Task<KVStoreResult> EntityDeleteAsync(string storeName, string entityName, string entityKey, int entityVersion)
         {
-            return EntityDeleteAsync(storeName, storeIndex, entityName, new string[] { entityKey }, new int[] { entityVersion });
+            return EntityDeleteAsync(storeName, entityName, new string[] { entityKey }, new int[] { entityVersion });
         }
 
-        public Task<KVStoreResult> EntityDeleteAsync(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
+        public Task<KVStoreResult> EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
         {
             string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
 
@@ -98,7 +98,7 @@ namespace HB.Infrastructure.Redis.KVStore
             return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
         }
 
-        public Task<KVStoreResult> EntityDeleteAllAsync(string storeName, int storeIndex, string entityName)
+        public Task<KVStoreResult> EntityDeleteAllAsync(string storeName, string entityName)
         {
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 

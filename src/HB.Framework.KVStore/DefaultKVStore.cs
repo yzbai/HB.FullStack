@@ -36,11 +36,6 @@ namespace HB.Framework.KVStore
             return entityDef.KVStoreName;
         }
 
-        private static int StoreIndex(KVStoreEntityDef entityDef)
-        {
-            return entityDef.KVStoreIndex;
-        }
-
         private static string EntityName(KVStoreEntityDef entityDef)
         {
             return entityDef.EntityFullName;
@@ -123,7 +118,6 @@ namespace HB.Framework.KVStore
 
             string jsonValue = _engine.EntityGet(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValue));
 
@@ -136,7 +130,6 @@ namespace HB.Framework.KVStore
 
             string jsonValue = _engine.EntityGet(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(t, entityDef));
 
@@ -149,7 +142,6 @@ namespace HB.Framework.KVStore
 
             IEnumerable<string> values = _engine.EntityGet(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues));
 
@@ -162,7 +154,6 @@ namespace HB.Framework.KVStore
 
             IEnumerable<string> values = _engine.EntityGet(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef));
 
@@ -175,7 +166,6 @@ namespace HB.Framework.KVStore
 
             IEnumerable<string> values = _engine.EntityGetAll(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef));
 
             return values.Select(json => DataConverter.FromJson<T>(json));
@@ -202,7 +192,6 @@ namespace HB.Framework.KVStore
 
             return _engine.EntityAdd(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
                 items.Select(t=>DataConverter.ToJson(t))
@@ -232,7 +221,6 @@ namespace HB.Framework.KVStore
 
             KVStoreResult result = _engine.EntityUpdate(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
                 items.Select(t=>DataConverter.ToJson(t)),
@@ -263,7 +251,6 @@ namespace HB.Framework.KVStore
 
             return _engine.EntityDeleteAll(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef)
                 );
         }
@@ -279,7 +266,6 @@ namespace HB.Framework.KVStore
 
             return _engine.EntityDelete(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues),
                 versions
@@ -296,7 +282,6 @@ namespace HB.Framework.KVStore
 
             string json = await _engine.EntityGetAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValue)).ConfigureAwait(false);
 
@@ -309,7 +294,6 @@ namespace HB.Framework.KVStore
 
             string json = await _engine.EntityGetAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(t, entityDef)).ConfigureAwait(false);
 
@@ -322,7 +306,6 @@ namespace HB.Framework.KVStore
 
             IEnumerable<string> jsons = await _engine.EntityGetAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues)).ConfigureAwait(false);
 
@@ -335,7 +318,6 @@ namespace HB.Framework.KVStore
 
             IEnumerable<string> jsons = await _engine.EntityGetAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef)).ConfigureAwait(false);
 
@@ -348,7 +330,6 @@ namespace HB.Framework.KVStore
 
             IEnumerable<string> jsons = await _engine.EntityGetAllAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef)).ConfigureAwait(false);
 
             return jsons.Select(t => DataConverter.FromJson<T>(t));
@@ -375,7 +356,6 @@ namespace HB.Framework.KVStore
 
             return  _engine.EntityAddAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
                 items.Select(t=>DataConverter.ToJson(t))
@@ -405,7 +385,6 @@ namespace HB.Framework.KVStore
 
             return _engine.EntityUpdateAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
                 items.Select(t=>DataConverter.ToJson(t)),
@@ -441,7 +420,6 @@ namespace HB.Framework.KVStore
 
             return _engine.EntityDeleteAllAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef)
                 );
         }
@@ -457,7 +435,6 @@ namespace HB.Framework.KVStore
 
             return _engine.EntityDeleteAsync(
                 StoreName(entityDef),
-                StoreIndex(entityDef),
                 EntityName(entityDef),
                 EntityKey(keyValues),
                 versions
