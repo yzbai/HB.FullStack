@@ -22,8 +22,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddSingleton<IRedisDatabase, RedisDatabase>();
 
-            serviceCollection.AddSingleton<IDuplicateChecker, DuplicateChecker>();
-
             serviceCollection.AddSingleton<IKVStoreEngine, RedisKVStoreEngine>();
 
             serviceCollection.AddSingleton<IEventBusEngine, RedisEventBusEngine>();

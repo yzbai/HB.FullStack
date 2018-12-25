@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Redis.KVStore
     {
         public async Task<string> EntityGetAsync(string storeName, int storeIndex, string entityName, string entityKey)
         {
-            IDatabase db = _redisConnectionManager.GetReadDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return await db.HashGetAsync(entityName, entityKey).ConfigureAwait(false);
 
@@ -23,7 +23,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public async Task<IEnumerable<string>> EntityGetAsync(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys)
         {
-            IDatabase db = _redisConnectionManager.GetReadDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             RedisValue[] values = entityKeys.Select(str => (RedisValue)str).ToArray();
 
@@ -34,7 +34,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public async Task<IEnumerable<string>> EntityGetAllAsync(string storeName, int storeIndex, string entityName)
         {
-            IDatabase db = _redisConnectionManager.GetReadDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             HashEntry[] results = await db.HashGetAllAsync(entityName).ConfigureAwait(false);
 
@@ -57,7 +57,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             RedisValue[] argvs = argvs1.Concat(argvs2).ToArray();
 
-            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t=>MapResult(t.Result), TaskScheduler.Default);
         }
@@ -76,7 +76,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 .Concat(entityJsons.Select(t=>(RedisValue)t))
                 .Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
         }
@@ -93,14 +93,14 @@ namespace HB.Infrastructure.Redis.KVStore
             RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ContinueWith(t => MapResult(t.Result), TaskScheduler.Default);
         }
 
         public Task<KVStoreResult> EntityDeleteAllAsync(string storeName, int storeIndex, string entityName)
         {
-            IDatabase db = _redisConnectionManager.GetWriteDatabase(storeName, storeIndex);
+            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
 
             return db.KeyDeleteAsync(entityName).ContinueWith(t=>t.Result? KVStoreResult.Succeeded() : KVStoreResult.Failed(), TaskScheduler.Default);
         }

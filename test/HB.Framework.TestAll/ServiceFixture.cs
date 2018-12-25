@@ -37,7 +37,7 @@ namespace HB.Framework.TestAll
                 builder.AddNLog();
             });
 
-            serviceCollection.AddRedisEngine(Configuration.GetSection("RedisEngine"));
+            serviceCollection.AddRedis(Configuration.GetSection("RedisEngine"));
             serviceCollection.AddEventBus(Configuration.GetSection("EventBus"));
             serviceCollection.AddRabbitMQEngine(Configuration.GetSection("RabbitMQ"));
 

@@ -9,8 +9,6 @@ namespace HB.Infrastructure.Redis
     {
         public string InstanceName { get; set; }
         public string ConnectionString { get; set; }
-        public bool IsMaster { get; set; }
-
         //TODO:更改appsettings
 
         /// <summary>
@@ -36,9 +34,9 @@ namespace HB.Infrastructure.Redis
             ConnectionSettings = new List<RedisInstanceSetting>();
         }
 
-        public RedisInstanceSetting GetInstanceSetting(string instanceName, bool isMaster)
+        public RedisInstanceSetting GetInstanceSetting(string instanceName)
         {
-            return ConnectionSettings.FirstOrDefault(s => s.IsMaster == isMaster && s.InstanceName.Equals(instanceName, GlobalSettings.Comparison));
+            return ConnectionSettings.FirstOrDefault(s => s.InstanceName.Equals(instanceName, GlobalSettings.Comparison));
         }
     }
 }
