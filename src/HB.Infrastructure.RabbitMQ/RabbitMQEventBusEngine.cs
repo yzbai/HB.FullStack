@@ -98,16 +98,16 @@ namespace HB.Infrastructure.RabbitMQ
 
         #region Subscribe
 
-        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public void SubscribeHandler(string brokerName, IEventHandler eventHandler)
         {
             if (!IsBrokerExists(brokerName))
             {
                 throw new ArgumentException($"当前没有broker为{brokerName}的RabbitMQ。");
             }
 
-            if (_consumeManager.ContainsKey(eventType))
+            if (_consumeManager.ContainsKey(eventHandler.EventType))
             {
-                string message = $"已经存在相同类型的EventHandler了，eventType : {eventType}";
+                string message = $"已经存在相同类型的EventHandler了，eventType : {eventHandler.EventType}";
                 _logger.LogCritical(message);
 
                 throw new Exception(message);
@@ -115,9 +115,9 @@ namespace HB.Infrastructure.RabbitMQ
 
             RabbitMQConnectionSetting connectionSetting = _options.GetConnectionSetting(brokerName);
 
-            ConsumeTaskManager manager = new ConsumeTaskManager(eventType, eventHandler, connectionSetting, _connectionManager, _redis, _consumeTaskManagerLogger);
+            ConsumeTaskManager manager = new ConsumeTaskManager(eventHandler.EventType, eventHandler, connectionSetting, _connectionManager, _redis, _consumeTaskManagerLogger);
 
-            _consumeManager.Add(eventType, manager);
+            _consumeManager.Add(eventHandler.EventType, manager);
         }
 
         public void UnSubscribeHandler(string eventyType)

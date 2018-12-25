@@ -60,7 +60,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 每一种事件，只有一次SubscribeHandler的机会。之后再订阅，就报错了。
         /// 开始处理
         /// </summary>
-        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public void SubscribeHandler(string brokerName, IEventHandler eventHandler)
         {
             IDatabase database = _instanceManager.GetDatabase(brokerName);
 
@@ -71,14 +71,14 @@ namespace HB.Infrastructure.Redis.EventBus
 
             lock (_consumeTaskManagerLocker)
             {
-                if (_consumeTaskManagers.ContainsKey(eventType))
+                if (_consumeTaskManagers.ContainsKey(eventHandler.EventType))
                 {
-                    throw new ArgumentException($"已经存在{eventType}的处理程序.");
+                    throw new ArgumentException($"已经存在{eventHandler.EventType}的处理程序.");
                 }
 
-                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(brokerName,  _instanceManager, eventType, eventHandler, _consumeTaskManagerLogger);
+                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(brokerName,  _instanceManager, eventHandler.EventType, eventHandler, _consumeTaskManagerLogger);
 
-                _consumeTaskManagers.Add(eventType, consumeTaskManager);
+                _consumeTaskManagers.Add(eventHandler.EventType, consumeTaskManager);
             }
         }
         /// <summary>

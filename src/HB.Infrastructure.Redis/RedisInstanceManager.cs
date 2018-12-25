@@ -64,6 +64,14 @@ namespace HB.Infrastructure.Redis
                     redisWrapper.Connection?.Dispose();
 
                     ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(redisWrapper.ConnectionString);
+
+                    //TODO: add into configure file
+                    configurationOptions.AbortOnConnectFail = false;
+                    configurationOptions.KeepAlive = 60;
+                    configurationOptions.ConnectTimeout = 10 * 1000;
+                    configurationOptions.ResponseTimeout = 100 * 1000;
+                    configurationOptions.SyncTimeout = 100 * 1000;
+
                     //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
 
                     redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);

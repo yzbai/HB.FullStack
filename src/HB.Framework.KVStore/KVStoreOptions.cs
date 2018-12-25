@@ -9,7 +9,6 @@ namespace HB.Framework.KVStore
     {
         public string EntityTypeFullName { get; set; }
         public string InstanceName { get; set; }
-        public int  KVStoreIndex { get; set; } = 0;
         public string Description { get; set; } = "";
     }
 
