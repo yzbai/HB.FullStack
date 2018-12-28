@@ -14,6 +14,15 @@ namespace OssDemo
 {
     public class Startup
     {
+        string endpoint = "oss-cn-hangzhou.aliyuncs.com";
+        string accessKeyName = "";
+        string accessKeyId = "LTAIWPNZ6b5oYNA6";
+        string accessKeySecret = "1ENmo2T9dLLxPYP20j3QFrLN72iXI7";
+
+        string accessKeyName2 = "oss_ahbait_readonly";
+        string accessKeyId2 = "LTAIiO0pMHQ2zaO8";
+        string accessKeySecret2 = "3LRMnAgoSp4s4ZgH4gRVbAmmCkE4eu";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
