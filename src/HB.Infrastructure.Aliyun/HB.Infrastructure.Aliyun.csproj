@@ -6,6 +6,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>HB.Infrastructure.Aliyun.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>HB.Infrastructure.Aliyun.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\aliyun-net-sdk-dysmsapi\aliyun-net-sdk-dysmsapi.vs2017.csproj" />
     <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-sts\aliyun-net-sdk-sts.vs2017.csproj" />
@@ -18,10 +26,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Sts\" />
   </ItemGroup>
 
 </Project>
