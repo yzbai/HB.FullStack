@@ -8,13 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\aliyun-net-sdk-dysmsapi\aliyun-net-sdk-dysmsapi.vs2017.csproj" />
+    <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-sts\aliyun-net-sdk-sts.vs2017.csproj" />
     <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-vod\aliyun-net-sdk-vod.vs2017.csproj" />
     <ProjectReference Include="..\HB.Component.Resource\HB.Component.Resource.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Oss\" />
-    <Folder Include="Sts\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +18,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Sts\" />
   </ItemGroup>
 
 </Project>
