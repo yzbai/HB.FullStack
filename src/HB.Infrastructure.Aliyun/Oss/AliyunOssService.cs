@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Aliyun.Acs.Core;
 using Aliyun.Acs.Core.Auth.Sts;
 using Aliyun.Acs.Core.Http;
+using HB.Framework.Common;
 using HB.Infrastructure.Aliyun.Sts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,7 +14,7 @@ namespace HB.Infrastructure.Aliyun.Oss
 {
     public class AliyunOssService : IAliyunOssService
     {
-        private static readonly string READ_ROLE_POLICY_TEMPLATE = "{ \"Version\":\"1\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}]}";
+        private static readonly string READ_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
         private static readonly string WRITE_ROLE_POLICY_TEMPLATE = "{ \"Version\":\"1\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}]}";
 
         private AliyunOssOptions _options;
@@ -27,36 +28,20 @@ namespace HB.Infrastructure.Aliyun.Oss
             _logger = logger;
         }
 
-        public Task<StsRoleCredential> GetUserReadRoleCredentialAsync(string bucket, string userGuid)
+        public Task<StsRoleCredential> GetUserRoleCredentialAsync(string bucket, string userGuid, bool isRead)
         {
-            return GetDirectoryReadRoleCredentialAsync(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(bucket, userGuid));
+            return GetDirectoryRoleCredentialAsync(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(userGuid), isRead);
         }
 
-
-        public Task<StsRoleCredential> GetUserWriteRoleCredentialAsync(string bucket, string userGuid)
-        {
-            return GetDirectoryWriteRoleCredentialAsync(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(bucket, userGuid));
-        }
-
-        public Task<StsRoleCredential> GetDirectoryReadRoleCredentialAsync(string bucket, string directory, string roleSessionName)
+        public Task<StsRoleCredential> GetDirectoryRoleCredentialAsync(string bucket, string directory, string roleSessionName, bool isRead)
         {
             string path = bucket + "/" + directory;
-            string policy = string.Format(GlobalSettings.Culture, READ_ROLE_POLICY_TEMPLATE, path);
+            string policy = isRead ? string.Format(GlobalSettings.Culture, READ_ROLE_POLICY_TEMPLATE, path) 
+                : string.Format(GlobalSettings.Culture, WRITE_ROLE_POLICY_TEMPLATE, path);
 
             BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
 
-            return GetStsRoleCredentialAsync(bucketSettings.ReadArn, roleSessionName, policy, bucketSettings.StsExpireSeconds);
-        }
-
-        public Task<StsRoleCredential> GetDirectoryWriteRoleCredentialAsync(string bucket, string directory, string roleSessionName)
-        {
-
-            string path = bucket + "/" + directory;
-            string policy = string.Format(GlobalSettings.Culture, WRITE_ROLE_POLICY_TEMPLATE, path);
-
-            BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
-
-            return GetStsRoleCredentialAsync(bucketSettings.ReadArn, roleSessionName, policy, bucketSettings.StsExpireSeconds);
+            return GetStsRoleCredentialAsync(isRead ? bucketSettings.ReadArn : bucketSettings.WriteArn, roleSessionName, policy, bucketSettings.StsExpireSeconds);
         }
 
         private Task<StsRoleCredential> GetStsRoleCredentialAsync(string roleArn, string roleSessionName, string policy, int expireSeconds = 3600)
@@ -70,6 +55,7 @@ namespace HB.Infrastructure.Aliyun.Oss
             request.Policy = policy;
 
             return PolicyManager.Default(_logger).ExecuteAsync(async ()=> {
+
                 Task<AssumeRoleResponse> task = new Task<AssumeRoleResponse>(()=>_acsClient.GetAcsResponse(request));
                 task.Start(TaskScheduler.Default);
 
@@ -98,9 +84,16 @@ namespace HB.Infrastructure.Aliyun.Oss
             return directory;
         }
 
-        private static string GetRoleSessionName(string bucket, string userGuid)
+        private static string GetRoleSessionName(string userGuid)
         {
-            return $"{bucket}-{userGuid}";
+            return userGuid.Replace("-", "");
+        }
+
+        public int GetExpireSeconds(string bucket)
+        {
+            BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
+
+            return bucketSettings.StsExpireSeconds;
         }
     }
 }
