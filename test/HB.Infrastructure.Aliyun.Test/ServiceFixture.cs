@@ -1,4 +1,5 @@
 ﻿using HB.Component.Resource.Sms;
+using HB.Infrastructure.Aliyun.Oss;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,10 +36,13 @@ namespace HB.Infrastructure.Aliyun.Test
 
             serviceCollection.AddAliyunService(Configuration.GetSection("Aliyun"));
             serviceCollection.AddAliyunSms(Configuration.GetSection("AliyunSms"));
+            serviceCollection.AddAliyunOss(Configuration.GetSection("AliyunOss"));
 
             Services = serviceCollection.BuildServiceProvider();
         }
 
         public ISmsService SmsService => Services.GetRequiredService<ISmsService>();
+
+        public IAliyunOssService AliyunOssService => Services.GetRequiredService<IAliyunOssService>();
     }
 }
