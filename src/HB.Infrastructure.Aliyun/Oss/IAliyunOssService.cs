@@ -8,5 +8,9 @@ namespace HB.Infrastructure.Aliyun.Oss
         Task<StsRoleCredential> GetDirectoryRoleCredentialAsync(string bucket, string directory, string roleSessionName, bool isRead);
         Task<StsRoleCredential> GetUserRoleCredentialAsync(string bucket, string userGuid, bool isRead);
         int GetExpireSeconds(string bucket);
+
+        string GetEndpoint();
+
+        string GetRegion();
     }
 }
