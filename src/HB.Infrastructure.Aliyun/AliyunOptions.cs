@@ -9,13 +9,11 @@ namespace HB.Infrastructure.Aliyun
     {
         public AliyunOptions Value => this;
 
-        public IList<AliyunAccessOptions> Accesses { get; set; }
+        public IList<AliyunAccessSetting> Accesses { get; set; }
     }
 
-    public class AliyunAccessOptions : IOptions<AliyunAccessOptions>
+    public class AliyunAccessSetting
     {
-        public AliyunAccessOptions Value => this;
-
         public string ProductName { get; set; }
 
         public string RegionId { get; set; }
