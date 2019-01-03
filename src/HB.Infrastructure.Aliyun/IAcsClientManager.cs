@@ -5,7 +5,8 @@ namespace HB.Infrastructure.Aliyun
 {
     public interface IAcsClientManager
     {
-        void AddProfile(string productName, IClientProfile profile);
+        void AddClient(AliyunAccessSetting accessSetting, IClientProfile profile);
         IAcsClient GetAcsClient(string productName);
+        AliyunAccessSetting GetAcessSetting(string productName);
     }
 }
