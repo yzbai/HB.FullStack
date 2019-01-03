@@ -18,6 +18,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         private static readonly string WRITE_ROLE_POLICY_TEMPLATE = "{ \"Version\":\"1\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}]}";
 
         private AliyunOssOptions _options;
+        private AliyunAccessSetting _accessSetting;
         private IAcsClient _acsClient;
         private ILogger _logger;
 
@@ -25,6 +26,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         {
             _options = options.Value;
             _acsClient = acsClientManager.GetAcsClient(_options.ProductName);
+            _accessSetting = acsClientManager.GetAcessSetting(_options.ProductName);
             _logger = logger;
         }
 
@@ -95,6 +97,18 @@ namespace HB.Infrastructure.Aliyun.Oss
 
             return bucketSettings.StsExpireSeconds;
         }
+
+        public string GetEndpoint()
+        {
+            return _accessSetting.Endpoint;
+        }
+
+        public string GetRegion()
+        {
+            return _accessSetting.RegionId;
+        }
+
+
     }
 }
 
