@@ -113,7 +113,7 @@ namespace HB.Infrastructure.MongoDB
                 return null;
             }
 
-            IMongoCollection<T> collection = db.GetCollection<T>(nameof(T));
+            IMongoCollection<T> collection = db.GetCollection<T>(schema.CollectionName);
 
             if (collection != null)
             {

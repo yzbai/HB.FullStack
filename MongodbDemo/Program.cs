@@ -39,7 +39,13 @@ namespace MongodbDemo
                 cm.MapIdMember(c => c.Guid);
             });
 
-            MongoClient client = new MongoClient("mongodb://admin:_admin@192.168.0.112:27017");
+
+
+
+
+
+
+            MongoClient client = new MongoClient("mongodb://127.0.0.1:27017");
 
 
             IMongoDatabase database = client.GetDatabase("AHabit");
