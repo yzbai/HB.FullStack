@@ -8,7 +8,7 @@ namespace HB.Component.Authorization
     {
         public TimeSpan RefreshTokenLongExpireTimeSpan { get; set; } = TimeSpan.FromDays(365);
         public TimeSpan RefreshTokenShortExpireTimeSpan { get; set; } = TimeSpan.FromDays(1);
-        public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromMinutes(30);
         public TimeSpan LockoutTimeSpan { get; set; } = TimeSpan.FromHours(6);
         public bool RequiredMaxFailedCountCheck { get; set; } = false;
         public bool RequiredLockoutCheck { get; set; } = false;
