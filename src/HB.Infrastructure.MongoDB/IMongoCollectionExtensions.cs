@@ -18,11 +18,28 @@ namespace HB.Infrastructure.MongoDB
             return cursor.FirstOrDefault();
         }
 
+        /// <summary>
+        /// TODO:坑，得到的结果，不是按传入id顺序排列的. 解决效率问题
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         public static async Task<IList<T>> GetByIdsAsync<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
         {
             IAsyncCursor<T> cursor = await collection.FindAsync(Builders<T>.Filter.In(t => t.Id, ids)).ConfigureAwait(false);
 
-            return cursor.ToEnumerable().ToList();
+            IList<T> list = cursor.ToEnumerable().ToList();
+
+            // tidy the order
+            List<T> newList = new List<T>();
+
+            foreach(string id in ids)
+            {
+                newList.Add(list.First(t => t.Id == id));
+            }
+
+            return newList;
         }
 
         public static T GetById<T>(this IMongoCollection<T> collection, string id) where T : DocumentStoreEntity, new()
@@ -34,7 +51,16 @@ namespace HB.Infrastructure.MongoDB
         {
             IFindFluent<T, T> fluent = collection.Find(Builders<T>.Filter.In(t => t.Id, ids));
 
-            return fluent.ToEnumerable().ToList();
+            IList<T> list = fluent.ToEnumerable().ToList();
+
+            List<T> newList = new List<T>();
+
+            foreach (string id in ids)
+            {
+                newList.Add(list.First(t => t.Id == id));
+            }
+
+            return newList;
         }
     }
 }
