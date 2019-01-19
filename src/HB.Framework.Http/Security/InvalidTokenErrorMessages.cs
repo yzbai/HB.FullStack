@@ -10,7 +10,7 @@ namespace HB.Framework.Http.Security
     public static class InvalidTokenErrorMessages
     {
         private const string ErrorMessage_AUDIENCE_INVALID = "ErrorMessage_AUDIENCE_INVALID";
-        private const string ErrorMessage_EXPIRED = "ErrorMessage_EXPIRED";
+        private const string ErrorMessage_EXPIRED = "ACCESSTOKEN_EXPIRED";
         private const string ErrorMessage_ISSUER_INVALID = "ErrorMessage_ISSUER_INVALID";
         private const string ErrorMessage_LIFETIME_INVALID = "ErrorMessage_LIFETIME_INVALID";
         private const string ErrorMessage_NO_EXPIRATION = "ErrorMessage_NO_EXPIRATION";
