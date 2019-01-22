@@ -36,7 +36,11 @@ namespace HB.Infrastructure.MongoDB
 
             foreach(string id in ids)
             {
-                newList.Add(list.First(t => t.Id == id));
+                T tt = list.FirstOrDefault(t => t.Id == id);
+                if (tt != null)
+                {
+                    newList.Add(tt);
+                }
             }
 
             return newList;
@@ -57,7 +61,12 @@ namespace HB.Infrastructure.MongoDB
 
             foreach (string id in ids)
             {
-                newList.Add(list.First(t => t.Id == id));
+                T tt = list.FirstOrDefault(t => t.Id == id);
+
+                if (tt != null)
+                {
+                    newList.Add(tt);
+                }
             }
 
             return newList;
