@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HB.Framework.Common;
+using HB.Framework.Common.Utility;
 using HB.Infrastructure.Redis.Direct;
 using Microsoft.Extensions.Logging;
 
@@ -38,7 +39,7 @@ namespace HB.Infrastructure.RabbitMQ
                 while (true)
                 {
                     string[] redisKeys = new string[] { DistributedHistoryQueueName, DistributedConfirmIdHashName, DistributedQueueName };
-                    string[] redisArgvs = new string[] { DataConverter.CurrentTimestampSeconds().ToString(), _connectionSetting.WaitSecondsToBeAHistory.ToString() };
+                    string[] redisArgvs = new string[] { TimeUtil.CurrentTimestampSeconds().ToString(), _connectionSetting.WaitSecondsToBeAHistory.ToString() };
 
                     int result = _redis.ScriptEvaluate(
                         redisInstanceName: _connectionSetting.RedisInstanceName,
