@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Common;
+using HB.Framework.Common.Utility;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DuplicateCheck
@@ -78,7 +79,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
 
         private void ClearTimeout(string setName)
         {
-            long stopTimestamp = DataConverter.CurrentTimestampSeconds() - _aliveSeconds;
+            long stopTimestamp = TimeUtil.CurrentTimestampSeconds() - _aliveSeconds;
 
             IDatabase database = _redisInstanceManager.GetDatabase(_instanceName);
 

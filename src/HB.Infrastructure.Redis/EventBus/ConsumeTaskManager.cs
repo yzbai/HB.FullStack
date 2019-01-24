@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HB.Framework.Common;
+using HB.Framework.Common.Utility;
 using HB.Framework.EventBus.Abstractions;
 using HB.Infrastructure.Redis.DuplicateCheck;
 using Microsoft.Extensions.Logging;
@@ -105,7 +106,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     };
 
                     string[] redisArgvs = new string[] {
-                        DataConverter.CurrentTimestampSeconds().ToString(GlobalSettings.Culture),
+                        TimeUtil.CurrentTimestampSeconds().ToString(GlobalSettings.Culture),
                         _instanceSetting.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
                     };
 
@@ -173,7 +174,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 //2, 过期检查
 
-                double spendHours = (DataConverter.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
+                double spendHours = (TimeUtil.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
 
                 if (spendHours > _instanceSetting.EventBusEventMessageExpiredHours)
                 {
