@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Common;
+using HB.Framework.Common.Utility;
 using HB.Framework.EventBus.Abstractions;
 using HB.Infrastructure.Redis.Direct;
 using Microsoft.Extensions.Logging;
@@ -120,7 +121,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         private bool CheckTimestamp(EventMessageEntity entity)
         {
-            long seconds = DataConverter.CurrentTimestampSeconds() - entity.Timestamp;
+            long seconds = TimeUtil.CurrentTimestampSeconds() - entity.Timestamp;
 
             if (seconds <= _connectionSetting.AliveSeconds)
             {

@@ -24,7 +24,7 @@ namespace HB.Infrastructure.Aliyun.Test
         [InlineData("ahabit", "12345678-1234-1234-1234-123456789ABC")]
         public async Task UserReadSts_TestAsync(string bucket, string userGuid)
         {
-            StsRoleCredential credential = await _oss.GetUserReadRoleCredentialAsync(bucket, userGuid);
+            StsRoleCredential credential = await _oss.GetUserRoleCredentialAsync(bucket, userGuid, true);
 
             Assert.NotNull(credential.SecurityToken);
         }

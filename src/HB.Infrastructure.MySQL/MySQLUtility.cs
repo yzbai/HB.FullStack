@@ -83,7 +83,7 @@ namespace HB.Infrastructure.MySQL
 
             return map;
         }
-        
+
         public static bool IsValueNeedQuoted(Type type)
         {
             if (type.GetTypeInfo().IsEnum)
@@ -91,7 +91,12 @@ namespace HB.Infrastructure.MySQL
                 return false;
             }
 
-            return dbTypeInfoMap[type].IsValueQuoted;
+            if (dbTypeInfoMap.ContainsKey(type))
+            {
+                return dbTypeInfoMap[type].IsValueQuoted;
+            }
+
+            return false;
         }
 
         public static DbType GetDbType(Type type)
