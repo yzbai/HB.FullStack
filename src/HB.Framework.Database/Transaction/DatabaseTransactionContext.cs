@@ -5,7 +5,6 @@ using System.Text;
 
 namespace HB.Framework.Database.Transaction
 {
-
     public class DatabaseTransactionContext
     {
         public IDbTransaction Transaction { get; set; }

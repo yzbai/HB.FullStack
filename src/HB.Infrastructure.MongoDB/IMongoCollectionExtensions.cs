@@ -51,6 +51,9 @@ namespace HB.Infrastructure.MongoDB
             return collection.Find(t => t.Id == id).FirstOrDefault();
         }
 
+        /// <summary>
+        /// TODO:坑，得到的结果，不是按传入id顺序排列的. 解决效率问题
+        /// </summary>
         public static IList<T> GetByIds<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
         {
             IFindFluent<T, T> fluent = collection.Find(Builders<T>.Filter.In(t => t.Id, ids));
