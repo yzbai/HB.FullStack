@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Common.Utility
+namespace System
 {
     public static class TimeUtil
     {

@@ -28,7 +28,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
         public string GenerateNewSmsCode(int codeLength)
         {
-            return SecurityHelper.CreateRandomNumbericString(codeLength);
+            return SecurityUtil.CreateRandomNumbericString(codeLength);
         }
 
         private static string GetCachedKey(string mobile)

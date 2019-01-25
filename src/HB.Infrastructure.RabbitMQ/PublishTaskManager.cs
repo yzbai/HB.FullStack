@@ -206,7 +206,7 @@ namespace HB.Infrastructure.RabbitMQ
                         EventTypeToRabbitRoutingKey(eventEntity.Type), 
                         true, 
                         basicProperties, 
-                        DataConverter.Serialize(eventEntity)
+                        JsonUtil.Serialize(eventEntity)
                     );
 
                     //_logger.LogTrace($"event published. Type:{eventEntity.Type}, Data:{eventEntity.JsonData}, Id:{eventEntity.Id}, Timestamp:{eventEntity.Timestamp}");

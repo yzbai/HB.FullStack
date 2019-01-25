@@ -67,7 +67,7 @@ namespace HB.Infrastructure.Redis.Direct
 
             byte[] data = database.ListRightPopLeftPush(fromQueueName, toQueueName);
 
-            return DataConverter.DeSerialize<T>(data);
+            return JsonUtil.DeSerialize<T>(data);
             
         }
 
@@ -75,7 +75,7 @@ namespace HB.Infrastructure.Redis.Direct
         {
             IDatabase database = _redisConnectionManager.GetDatabase(redisInstanceName);
 
-            return await database.ListLeftPushAsync(queueName, DataConverter.ToJson(data)).ConfigureAwait(false);
+            return await database.ListLeftPushAsync(queueName, JsonUtil.ToJson(data)).ConfigureAwait(false);
         }
 
         public ulong QueueLength(string redisInstanceName, string queueName)

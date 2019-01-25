@@ -30,6 +30,8 @@ namespace HB.Framework.Database.Entity
         /// </summary>
         public bool Unique { get; set; }
 
+        public Type ConverterType { get; set; } = null;
+
         public DatabaseEntityPropertyAttribute()
         {
 
@@ -39,6 +41,5 @@ namespace HB.Framework.Database.Entity
         {
             Description = desc;
         }
-
     }
 }

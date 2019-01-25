@@ -11,25 +11,25 @@ namespace Microsoft.Extensions.Caching.Distributed
 
         public static void Set<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options)
         {
-            cache.Set(key, DataConverter.Serialize(value), options);
+            cache.Set(key, JsonUtil.Serialize(value), options);
         }
 
         public static Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options)
         {
-            return cache.SetAsync(key, DataConverter.Serialize(value), options);
+            return cache.SetAsync(key, JsonUtil.Serialize(value), options);
         }
 
         public static T Get<T>(this IDistributedCache cache, string key)
         {
             byte[] bytes = cache.Get(key);
-            return DataConverter.DeSerialize<T>(bytes);
+            return JsonUtil.DeSerialize<T>(bytes);
         }
 
         public static Task<T> GetAsync<T>(this IDistributedCache cache, string key)
         {
             return cache.GetAsync(key).ContinueWith(t => {
 
-                return DataConverter.DeSerialize<T>(t.Result);
+                return JsonUtil.DeSerialize<T>(t.Result);
             }, TaskScheduler.Default);
         }
 

@@ -49,7 +49,7 @@ namespace HB.Component.Authorization
                 }
             };
 
-            string jsonString = DataConverter.ToJson(new { Keys = jsonWebKeys });
+            string jsonString = JsonUtil.ToJson(new { Keys = jsonWebKeys });
 
             _jsonWebKeySet = new JsonWebKeySet(jsonString);
         }
