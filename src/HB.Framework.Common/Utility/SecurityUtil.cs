@@ -5,9 +5,9 @@ using System.Text;
 using System.Linq;
 using System.Globalization;
 
-namespace HB.Framework.Common
+namespace System
 {
-    public static class SecurityHelper
+    public static class SecurityUtil
     {
         //public static string GetSHA1(string str)
         //{
@@ -37,7 +37,7 @@ namespace HB.Framework.Common
                 throw new ArgumentNullException(nameof(item));
             }
 
-            byte[] result = HashAlgorithm.Create().ComputeHash(DataConverter.Serialize(item));
+            byte[] result = HashAlgorithm.Create().ComputeHash(JsonUtil.Serialize(item));
 
 
             return Convert.ToBase64String(result);

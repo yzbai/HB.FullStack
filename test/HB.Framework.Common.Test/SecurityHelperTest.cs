@@ -35,7 +35,7 @@ namespace HB.Framework.Common.Test
         {
             _output.WriteLine($"xxxxxxxxxxxxxxxxxxxxxxxxxxxxlength : {length}");
 
-            string result = SecurityHelper.CreateRandomNumbericString(length).Trim();
+            string result = SecurityUtil.CreateRandomNumbericString(length).Trim();
 
             Assert.Equal(result.Length, length);
         }

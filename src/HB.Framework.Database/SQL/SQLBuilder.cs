@@ -357,7 +357,12 @@ namespace HB.Framework.Database.SQL
                     else
                     {
                         values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false), info.DbFieldType));
+
+                        string dbValueStatement = info.TypeConverter == null ?
+                            _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false) :
+                            info.TypeConverter.TypeValueToDbValue(info.GetValue(domain));
+
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, dbValueStatement, info.DbFieldType));
                     }
                 }
             }
@@ -426,7 +431,11 @@ namespace HB.Framework.Database.SQL
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false), info.DbFieldType));
+                        string dbValueStatement = info.TypeConverter == null ? 
+                            _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false) :
+                            info.TypeConverter.TypeValueToDbValue(info.GetValue(domain));
+
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, dbValueStatement, info.DbFieldType));
                     }
                 }
             }
@@ -446,7 +455,12 @@ namespace HB.Framework.Database.SQL
 
             for (int i = 0; i < length; i++)
             {
-                args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement(keys[i]), _databaseEngine.GetDbValueStatement(values[i], needQuoted: true));
+                string key = keys[i];
+                DatabaseEntityPropertyDef info = modelDef.GetProperty(key);
+                string dbValueStatement = info.TypeConverter == null ? 
+                    _databaseEngine.GetDbValueStatement(values[i], needQuoted: true) :
+                    _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(values[i]));
+                args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement(key), dbValueStatement);
             }
 
             args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement("Version"), _databaseEngine.GetReservedStatement("Version") + " + 1");
@@ -528,7 +542,11 @@ namespace HB.Framework.Database.SQL
                         }
                         else
                         {
-                            values.AppendFormat(GlobalSettings.Culture, " {0},", _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: true));
+                            string dbValueStatement = info.TypeConverter == null ? 
+                                _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: true) : 
+                                _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(info.GetValue(domain)));
+
+                            values.AppendFormat(GlobalSettings.Culture, " {0},", dbValueStatement);
                         }
                     }
                 }
@@ -589,7 +607,11 @@ namespace HB.Framework.Database.SQL
                         }
                         else
                         {
-                            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true));
+                            string dbValueStatement = info.TypeConverter == null ?
+                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true) :
+                                _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(info.GetValue(entity)));
+
+                            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, dbValueStatement);
                         }
                     }
                 }
@@ -653,7 +675,8 @@ namespace HB.Framework.Database.SQL
 
                 if (info.DbLength == null || info.DbLength == 0)
                 {
-                    if (info.PropertyType == typeof(string)
+                    if (info.DbFieldType == DbType.String
+                        || info.PropertyType == typeof(string)
                         || info.PropertyType == typeof(char)
                         || info.PropertyType.IsEnum
                         || info.PropertyType.IsAssignableFrom(typeof(IList<string>))
@@ -674,9 +697,13 @@ namespace HB.Framework.Database.SQL
                     binary = "";
                 }
 
+                string dbTypeStatement = info.TypeConverter == null 
+                    ? _databaseEngine.GetDbTypeStatement(info.PropertyType) 
+                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyType);
+
                 sql.AppendFormat(GlobalSettings.Culture, " {0} {1}{2} {6} {3} {4} {5},",
                     info.DbReservedName,
-                    length >= 21845 ? "TEXT" : _databaseEngine.GetDbTypeStatement(info.PropertyType),
+                    length >= 21845 ? "TEXT" : dbTypeStatement,
                     length == 0 ? "" : "(" + length + ")",
                     info.IsNullable == true ? "" : " NOT NULL ",
                     string.IsNullOrEmpty(info.DbDefaultValue) ? "" : "DEFAULT " + info.DbDefaultValue,

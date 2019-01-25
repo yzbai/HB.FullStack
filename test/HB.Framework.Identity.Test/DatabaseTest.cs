@@ -1,6 +1,7 @@
 using HB.Component.Identity.Entity;
 using HB.Framework.Common;
 using HB.Framework.Database;
+using HB.Framework.Database.Entity;
 using HB.Framework.Database.SQL;
 using HB.Framework.Database.Transaction;
 using System;
@@ -141,7 +142,7 @@ namespace HB.Component.Identity.Test
 
                 foreach (User item in resultList)
                 {
-                    _output.WriteLine(DataConverter.ToJson(item));
+                    _output.WriteLine(JsonUtil.ToJson(item));
 
                     var lst = _db.Retrieve<UserRole>(ur => ur.UserId == item.Id && ur.RoleId == adminRole.Id);
 
@@ -160,7 +161,7 @@ namespace HB.Component.Identity.Test
 
             foreach (var item in resultList)
             {
-                _output.WriteLine(DataConverter.ToJson(item));
+                _output.WriteLine(JsonUtil.ToJson(item));
             }
 
             Assert.NotEmpty(resultList);
@@ -305,7 +306,7 @@ namespace HB.Component.Identity.Test
 
             foreach (var item in resultList)
             {
-                _output.WriteLine(DataConverter.ToJson(item));
+                _output.WriteLine(JsonUtil.ToJson(item));
             }
 
             Assert.NotEmpty(resultList);

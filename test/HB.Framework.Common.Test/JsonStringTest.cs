@@ -48,7 +48,7 @@ namespace HB.Framework.Common.Test
                 { new MapKey { KeyName = "key5", KeyDescription = "key5__" }, new MapValue { Value = "value5", ValueDescription = "value5__" } }
             };
 
-            string json = DataConverter.ToJson(map);
+            string json = JsonUtil.ToJson(map);
 
             _output.WriteLine(json);
 
@@ -67,7 +67,7 @@ namespace HB.Framework.Common.Test
                 { "key5", new MapValue { Value = "value5", ValueDescription = "value5__" } }
             };
 
-            string json = DataConverter.ToJson(map);
+            string json = JsonUtil.ToJson(map);
 
             _output.WriteLine(json);
 
@@ -91,7 +91,7 @@ namespace HB.Framework.Common.Test
             map.Add("key4", new MapMapValue { Value = "value4", ValueDescription = "value4__", MapValue = mapValue1 });
             map.Add("key5", new MapMapValue { Value = "value5", ValueDescription = "value5__", MapValue = mapValue1 });
 
-            string json = DataConverter.ToJson(map);
+            string json = JsonUtil.ToJson(map);
 
             _output.WriteLine(json);
 
@@ -125,7 +125,7 @@ namespace HB.Framework.Common.Test
 
             });
 
-            string jsonString = DataConverter.ToJson(optoins);
+            string jsonString = JsonUtil.ToJson(optoins);
 
             _output.WriteLine(jsonString);
 

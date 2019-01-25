@@ -32,8 +32,8 @@ namespace HB.Component.Authorization
             SignInToken token = new SignInToken
             {
                 UserId = userId,
-                SignInTokenIdentifier = SecurityHelper.CreateUniqueToken(),
-                RefreshToken = SecurityHelper.CreateUniqueToken(),
+                SignInTokenIdentifier = SecurityUtil.CreateUniqueToken(),
+                RefreshToken = SecurityUtil.CreateUniqueToken(),
                 RefreshCount = 0,
                 Blacked = false,
                 ClientId = clientId,

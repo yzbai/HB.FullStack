@@ -8,7 +8,7 @@ namespace HB.Infrastructure.RabbitMQ
 {
     public class EventMessageEntity
     {
-        public string Id { get; set; } = SecurityHelper.CreateUniqueToken();
+        public string Id { get; set; } = SecurityUtil.CreateUniqueToken();
 
         public long Timestamp { get; set; } = TimeUtil.CurrentTimestampSeconds();
 

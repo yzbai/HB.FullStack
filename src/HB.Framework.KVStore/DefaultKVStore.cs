@@ -43,7 +43,7 @@ namespace HB.Framework.KVStore
 
         private static string EntityKey(object keyValue)
         {
-            return DataConverter.GetObjectValueStringStatement(keyValue);
+            return DefaultTypeConverter.TypeValueToDbValue(keyValue);
         }
 
         private static string EntityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
@@ -53,7 +53,7 @@ namespace HB.Framework.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                builder.Append(DataConverter.GetObjectValueStringStatement(entityDef.KeyPropertyInfos[i].GetValue(item)));
+                builder.Append(DefaultTypeConverter.TypeValueToDbValue(entityDef.KeyPropertyInfos[i].GetValue(item)));
 
                 if (i != count - 1)
                 {
@@ -71,7 +71,7 @@ namespace HB.Framework.KVStore
 
         private static IEnumerable<string> EntityKey(IEnumerable<object> keyValues)
         {
-            return keyValues.Select(obj => DataConverter.GetObjectValueStringStatement(obj));
+            return keyValues.Select(obj => DefaultTypeConverter.TypeValueToDbValue(obj));
         }
 
        
@@ -121,7 +121,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValue));
 
-            return DataConverter.FromJson<T>(jsonValue);
+            return JsonUtil.FromJson<T>(jsonValue);
         }
 
         public T GetById<T>(T t) where T : KVStoreEntity, new()
@@ -133,7 +133,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(t, entityDef));
 
-            return DataConverter.FromJson<T>(jsonValue);
+            return JsonUtil.FromJson<T>(jsonValue);
         }
 
         public IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -145,7 +145,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues));
 
-            return values.Select(json => DataConverter.FromJson<T>(json));
+            return values.Select(json => JsonUtil.FromJson<T>(json));
         }
 
         public IEnumerable<T> GetByIds<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
@@ -157,7 +157,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef));
 
-            return values.Select(json => DataConverter.FromJson<T>(json));
+            return values.Select(json => JsonUtil.FromJson<T>(json));
         }
 
         public IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new()
@@ -168,7 +168,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef));
 
-            return values.Select(json => DataConverter.FromJson<T>(json));
+            return values.Select(json => JsonUtil.FromJson<T>(json));
         }
 
         public KVStoreResult Add<T>(T item) where T : KVStoreEntity, new()
@@ -194,7 +194,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=>DataConverter.ToJson(t))
+                items.Select(t=> JsonUtil.ToJson(t))
                 );
         }
 
@@ -223,7 +223,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=>DataConverter.ToJson(t)),
+                items.Select(t=> JsonUtil.ToJson(t)),
                 originalVersions
                 );
 
@@ -285,7 +285,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValue)).ConfigureAwait(false);
 
-            return DataConverter.FromJson<T>(json);
+            return JsonUtil.FromJson<T>(json);
         }
 
         public async Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new()
@@ -297,7 +297,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(t, entityDef)).ConfigureAwait(false);
 
-            return DataConverter.FromJson<T>(json);
+            return JsonUtil.FromJson<T>(json);
         }
 
         public async Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -309,7 +309,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues)).ConfigureAwait(false);
 
-            return jsons.Select(t => DataConverter.FromJson<T>(t));
+            return jsons.Select(t => JsonUtil.FromJson<T>(t));
         }
 
         public async Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
@@ -321,7 +321,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef)).ConfigureAwait(false);
 
-            return jsons.Select(t => DataConverter.FromJson<T>(t));
+            return jsons.Select(t => JsonUtil.FromJson<T>(t));
         }
 
         public async Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
@@ -332,7 +332,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef)).ConfigureAwait(false);
 
-            return jsons.Select(t => DataConverter.FromJson<T>(t));
+            return jsons.Select(t => JsonUtil.FromJson<T>(t));
         }
 
         public Task<KVStoreResult> AddAsync<T>(T item) where T : KVStoreEntity, new()
@@ -358,7 +358,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=>DataConverter.ToJson(t))
+                items.Select(t=> JsonUtil.ToJson(t))
                 );
         }
 
@@ -387,7 +387,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=>DataConverter.ToJson(t)),
+                items.Select(t=>JsonUtil.ToJson(t)),
                 originalVersions)
                 .ContinueWith(t=> {
                     if (!t.Result.IsSucceeded())
