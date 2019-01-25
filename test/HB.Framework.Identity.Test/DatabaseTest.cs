@@ -11,7 +11,6 @@ using Xunit.Abstractions;
 
 namespace HB.Component.Identity.Test
 {
-
     public class DatabaseTest : IClassFixture<ServiceFixture>
     {
         private ITestOutputHelper _output;
