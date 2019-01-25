@@ -22,7 +22,7 @@ namespace HB.Framework.Database.Entity
 
         public string TypeValueToDbValue(object value)
         {
-            return TypeValueToDbValue(value);
+            return TypeValueToStringDbValue(value);
         }
 
         public object DbValueToTypeValue(object value)
