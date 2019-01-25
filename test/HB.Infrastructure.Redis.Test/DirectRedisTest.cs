@@ -25,7 +25,7 @@ namespace HB.Infrastructure.Redis.Test
         }
 
         [Theory]
-        [InlineData("Direct_Redis")]
+        [InlineData("AHabit_Direct_Redis")]
         public void KeySetIfNotExist_SetKeyTwice_FirstReturnTrueAndSecondReturnFalse(string instanceName)
         {
             string key = SecurityUtil.CreateUniqueToken();
@@ -38,7 +38,7 @@ namespace HB.Infrastructure.Redis.Test
         }
 
         [Theory]
-        [InlineData("Direct_Redis")]
+        [InlineData("AHabit_Direct_Redis")]
         public void HashSetInt_SetAndGet_ReturnSameTrue(string instanceName)
         {
             string hashName = _fixture.Create<string>();
