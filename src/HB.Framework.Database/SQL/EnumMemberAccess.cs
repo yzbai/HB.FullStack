@@ -14,7 +14,7 @@ namespace HB.Framework.Database.SQL
         public EnumMemberAccess(string text, Type enumType)
             : base(text)
         {
-            if (!enumType.GetTypeInfo().IsEnum)
+            if (!enumType.IsEnum)
             {
                 throw new ArgumentException("Type not valid", nameof(enumType));
             }

@@ -254,7 +254,7 @@ namespace HB.Framework.Database.SQL
                     prefix = entityDef.DbTableReservedName + ".";
                 }
 
-                if (propertyDef.PropertyType.GetTypeInfo().IsEnum)
+                if (propertyDef.PropertyType.IsEnum)
                     return new EnumMemberAccess(prefix + propertyDef.DbReservedName, propertyDef.PropertyType);
 
                 return new PartialSqlString(prefix + propertyDef.DbReservedName);
