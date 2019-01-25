@@ -106,6 +106,16 @@ namespace HB.Infrastructure.MySQL
                 return DbType.Int32;
             }
 
+            if (type.IsAssignableFrom(typeof(IList<string>)))
+            {
+                return dbTypeInfoMap[typeof(string)].DatabaseType;
+            }
+
+            if (type.IsAssignableFrom(typeof(IDictionary<string, string>)))
+            {
+                return dbTypeInfoMap[typeof(string)].DatabaseType;
+            }
+
             return dbTypeInfoMap[type].DatabaseType;
         }
 
@@ -114,6 +124,16 @@ namespace HB.Infrastructure.MySQL
             if (type.GetTypeInfo().IsEnum)
             {
                 return "INTEGER";
+            }
+
+            if (type.IsAssignableFrom(typeof(IList<string>)))
+            {
+                return dbTypeInfoMap[typeof(string)].Statement;
+            }
+
+            if (type.IsAssignableFrom(typeof(IDictionary<string, string>)))
+            {
+                return dbTypeInfoMap[typeof(string)].Statement;
             }
 
             return dbTypeInfoMap[type].Statement;
