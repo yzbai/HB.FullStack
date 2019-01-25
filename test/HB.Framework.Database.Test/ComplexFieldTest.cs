@@ -51,6 +51,7 @@ namespace HB.Framework.Database.Test
         public void Test_Add_TestEntity()
         {
             TestEntity entity = new TestEntity();
+            entity.Type = TestType.Hahaha;
             entity.Name = "EntityName";
             entity.Books = new List<string>() { "Cat", "Dog" };
             entity.BookAuthors = new Dictionary<string, string>() { { "Cat", "XMan" }, { "Dog", "YMan" } };

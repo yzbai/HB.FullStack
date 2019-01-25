@@ -15,5 +15,16 @@ namespace HB.Framework.Database.Test
 
         [DatabaseEntityProperty]
         public IDictionary<string, string> BookAuthors { get; set; }
+
+        [DatabaseEntityProperty]
+        public TestType Type { get; set; }
+    }
+
+    public enum TestType
+    {
+        Type1,
+        Type2,
+        Type3,
+        Hahaha
     }
 }

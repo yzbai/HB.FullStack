@@ -422,10 +422,10 @@ namespace HB.Framework.Common
 
         public static object To(Type type, object value)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
-            if (typeInfo.IsEnum)
+            if (type.IsEnum)
             {
-                return Convert.ToInt32(value, GlobalSettings.Culture);
+                return Enum.Parse(type, value.ToString(), true);
+                //return Convert.ToInt32(value, GlobalSettings.Culture);
             }
 
             if (value.GetType() == typeof(DBNull))
@@ -456,9 +456,8 @@ namespace HB.Framework.Common
         public static T To<T>(object value)
         {
             Type type = typeof(T);
-            TypeInfo typeInfo = type.GetTypeInfo();
 
-            if (typeInfo.IsEnum)
+            if (type.IsEnum)
             {
                 return (T)Enum.Parse(type, value.ToString());
             }
@@ -477,11 +476,11 @@ namespace HB.Framework.Common
             if (value != null)
             {
                 Type type = value.GetType();
-                TypeInfo typeInfo = type.GetTypeInfo();
 
-                if (typeInfo.IsEnum)
+                if (type.IsEnum)
                 {
-                    valueStr = ((Int32)value).ToString(GlobalSettings.Culture);
+                    valueStr = value.ToString();
+                    //valueStr = ((Int32)value).ToString(GlobalSettings.Culture);
                 }
                 else if (typeof(IList<string>).IsAssignableFrom(type))
                 {
