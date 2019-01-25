@@ -15,7 +15,7 @@ namespace HB.Framework.Database.Test
         [DatabaseEntityProperty]
         public IList<string> Books { get; set; }
 
-        [DatabaseEntityProperty]
+        [DatabaseEntityProperty(ConverterType = typeof(TestEntityTypeConventer))]
         public IDictionary<string, Author> BookAuthors { get; set; }
 
         [DatabaseEntityProperty]
