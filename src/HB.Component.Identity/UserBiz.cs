@@ -168,7 +168,7 @@ namespace HB.Component.Identity
             {
                 return IdentityResult.NotFound();
             }
-            user.PasswordHash = SecurityHelper.EncryptPwdWithSalt(newPassword, user.Guid);
+            user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
 
             await ChangeSecurityStampAsync(user).ConfigureAwait(false);
 
@@ -177,7 +177,7 @@ namespace HB.Component.Identity
 
         private async Task ChangeSecurityStampAsync(User user)
         {
-            user.SecurityStamp = SecurityHelper.CreateUniqueToken();
+            user.SecurityStamp = SecurityUtil.CreateUniqueToken();
 
             if (_identityOptions.Events != null)
             {
@@ -196,8 +196,8 @@ namespace HB.Component.Identity
             {
                 UserType = userType,
                 Mobile = mobile,
-                Guid = SecurityHelper.CreateUniqueToken(),
-                SecurityStamp = SecurityHelper.CreateUniqueToken(),
+                Guid = SecurityUtil.CreateUniqueToken(),
+                SecurityStamp = SecurityUtil.CreateUniqueToken(),
                 IsActivated = true,
                 AccessFailedCount = 0,
                 UserName = userName,
@@ -205,7 +205,7 @@ namespace HB.Component.Identity
                 //ImageUrl = string.Empty
             };
 
-            user.PasswordHash = SecurityHelper.EncryptPwdWithSalt(password, user.Guid);
+            user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
 
             return user;
         }
@@ -267,7 +267,7 @@ namespace HB.Component.Identity
                 return result;
             }
 
-            _logger.LogDebug("In User Adding, Failed, User :" + DataConverter.ToJson(user));
+            _logger.LogDebug("In User Adding, Failed, User :" + JsonUtil.ToJson(user));
 
             return result;
         }

@@ -8,6 +8,6 @@ namespace HB.Framework.DocumentStore
 {
     public class DocumentStoreEntity : CommonEntity
     {
-        public string Id { get; set; } = SecurityHelper.CreateUniqueToken();
+        public string Id { get; set; } = SecurityUtil.CreateUniqueToken();
     }
 }

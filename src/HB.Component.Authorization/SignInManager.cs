@@ -239,7 +239,7 @@ namespace HB.Component.Authorization
 
         private static bool PassowrdCheck(User user, string password)
         {
-            string passwordHash = SecurityHelper.EncryptPwdWithSalt(password, user.Guid);
+            string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
             return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 

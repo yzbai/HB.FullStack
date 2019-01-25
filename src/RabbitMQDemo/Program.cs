@@ -160,7 +160,7 @@ namespace RabbitMQDemo
             {
                 EventMessageEntity entity = new EventMessageEntity("user.upload.headimage", "xxxx");
 
-                database.ListLeftPush("history", DataConverter.ToJson(entity));
+                database.ListLeftPush("history", JsonUtil.ToJson(entity));
             }
         }
 

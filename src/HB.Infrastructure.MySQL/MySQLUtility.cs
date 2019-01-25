@@ -1,4 +1,6 @@
 ﻿using HB.Framework.Common;
+using HB.Framework.Common.Entity;
+using HB.Framework.Database.Entity;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -162,7 +164,7 @@ namespace HB.Infrastructure.MySQL
         /// <returns>数据库类型值的表达</returns>
         public static string GetDbValueStatement(object value, bool needQuoted)
         {
-            string valueStr = DataConverter.GetObjectValueStringStatement(value);
+            string valueStr = DefaultTypeConverter.TypeValueToDbValue(value);
 
             valueStr = SafeDbStatement(valueStr);
 

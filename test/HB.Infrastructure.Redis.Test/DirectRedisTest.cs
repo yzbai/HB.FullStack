@@ -28,7 +28,7 @@ namespace HB.Infrastructure.Redis.Test
         [InlineData("Direct_Redis")]
         public void KeySetIfNotExist_SetKeyTwice_FirstReturnTrueAndSecondReturnFalse(string instanceName)
         {
-            string key = SecurityHelper.CreateUniqueToken();
+            string key = SecurityUtil.CreateUniqueToken();
 
             bool first = _redis.KeySetIfNotExist(instanceName, key, 100);
 

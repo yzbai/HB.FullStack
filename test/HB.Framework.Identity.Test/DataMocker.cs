@@ -1,5 +1,6 @@
 ﻿using HB.Component.Identity.Entity;
 using HB.Framework.Common;
+using System;
 using System.Collections.Generic;
 
 namespace HB.Component.Identity.Test
@@ -8,17 +9,17 @@ namespace HB.Component.Identity.Test
     {
         public static IList<User> MockUsers()
         {
-            string prefix = SecurityHelper.CreateRandomString(6);
+            string prefix = SecurityUtil.CreateRandomString(6);
 
             IList<User> list = new List<User>();
 
             for (int i = 0; i < 1000; ++i)
             {
                 User user = new User() {
-                    Guid = SecurityHelper.CreateUniqueToken(),
-                    SecurityStamp = SecurityHelper.CreateUniqueToken(),
-                    UserName = $"{prefix}_{SecurityHelper.CreateUniqueToken()}",
-                    Mobile = $"1{SecurityHelper.CreateRandomNumbericString(10)}",
+                    Guid = SecurityUtil.CreateUniqueToken(),
+                    SecurityStamp = SecurityUtil.CreateUniqueToken(),
+                    UserName = $"{prefix}_{SecurityUtil.CreateUniqueToken()}",
+                    Mobile = $"1{SecurityUtil.CreateRandomNumbericString(10)}",
                     IsActivated = true,
                     UserType = "TestUsers"
                     

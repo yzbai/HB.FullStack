@@ -54,7 +54,7 @@ namespace HB.Framework.Database.Test
             entity.Type = TestType.Hahaha;
             entity.Name = "EntityName";
             entity.Books = new List<string>() { "Cat", "Dog" };
-            entity.BookAuthors = new Dictionary<string, string>() { { "Cat", "XMan" }, { "Dog", "YMan" } };
+            //entity.BookAuthors = new Dictionary<string, string>() { { "Cat", "XMan" }, { "Dog", "YMan" } };
 
             DatabaseResult result = database.Add<TestEntity>(entity);
 
@@ -71,7 +71,7 @@ namespace HB.Framework.Database.Test
             TestEntity entity = testEntities[0];
 
             entity.Books.Add("New Book");
-            entity.BookAuthors.Add("New Book", "Yuzhaobai");
+            //entity.BookAuthors.Add("New Book", "Yuzhaobai");
 
             DatabaseResult result = database.Update(entity);
 

@@ -28,7 +28,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
 
         public bool Lock(string setName, string id, out string token)
         {
-            token = SecurityHelper.CreateUniqueToken();
+            token = SecurityUtil.CreateUniqueToken();
 
             string tokenDictKey = TokenDictKey(setName, id);
 
