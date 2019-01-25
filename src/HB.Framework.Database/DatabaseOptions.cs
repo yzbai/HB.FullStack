@@ -19,7 +19,7 @@ namespace HB.Framework.Database
     {
         public DatabaseOptions Value { get { return this; } }
 
-        public int DefaultVarcharLength { get; set; } = 144;
+        public int DefaultVarcharLength { get; set; } = 2048;
 
         public IList<DatabaseSchema> DatabaseSchemas { get; set; }
 

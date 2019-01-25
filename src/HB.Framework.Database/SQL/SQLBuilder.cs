@@ -653,7 +653,10 @@ namespace HB.Framework.Database.SQL
 
                 if (info.DbLength == null || info.DbLength == 0)
                 {
-                    if (info.PropertyType == typeof(string) || info.PropertyType == typeof(char))
+                    if (info.PropertyType == typeof(string) 
+                        || info.PropertyType == typeof(char) 
+                        || info.PropertyType.IsAssignableFrom(typeof(IList<string>))
+                        || info.PropertyType.IsAssignableFrom(typeof(IDictionary<string, string>)))
                     {
                         length = _entityDefFactory.GetVarcharDefaultLength();
                     }

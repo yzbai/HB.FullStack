@@ -433,6 +433,16 @@ namespace HB.Framework.Common
                 return DefaultForType(type);
             }
 
+            if (type.IsAssignableFrom(typeof(IList<string>)))
+            {
+                return StringToList(value.ToString());
+            }
+
+            if (type.IsAssignableFrom(typeof(IDictionary<string, string>)))
+            {
+                return StringToDictionary(value.ToString());
+            }
+
             Func<object, object> convertFn = convertFunDict[type];
             return convertFn(value);
         }
@@ -473,7 +483,14 @@ namespace HB.Framework.Common
                 {
                     valueStr = ((Int32)value).ToString(GlobalSettings.Culture);
                 }
-
+                else if (typeof(IList<string>).IsAssignableFrom(type))
+                {
+                    valueStr = ListToString(value as IList<string>);
+                }
+                else if (typeof(IDictionary<string, string>).IsAssignableFrom(type))
+                {
+                    valueStr = DictionaryToString(value as IDictionary<string, string>);
+                }
                 else if (type == typeof(string))
                 {
                     valueStr = (string)value;

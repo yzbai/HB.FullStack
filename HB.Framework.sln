@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28516.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FA6E769E-482A-4A98-85B1-39CFEF3ABE79}"
 	ProjectSection(SolutionItems) = preProject
@@ -89,6 +89,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OssDemo", "samples\OssDemo\OssDemo.csproj", "{50E187B9-C6D0-41FE-9145-12403743ADD6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aliyun-net-sdk-sts.vs2017", "..\aliyun-openapi-net-sdk\aliyun-net-sdk-sts\aliyun-net-sdk-sts.vs2017.csproj", "{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.Database.Test", "test\HB.Framework.Database.Test\HB.Framework.Database.Test.csproj", "{29066F3E-62B4-46E2-A549-A4BF95F0EF97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -213,6 +215,10 @@ Global
 		{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -251,6 +257,7 @@ Global
 		{036D89D9-8120-4DE2-A465-910FA2335042} = {E3F87ADC-8DCC-435B-869F-90DD5A88896A}
 		{50E187B9-C6D0-41FE-9145-12403743ADD6} = {DFFFDEC7-B203-40D6-9DA0-B79D9378FDFF}
 		{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE} = {E3F87ADC-8DCC-435B-869F-90DD5A88896A}
+		{29066F3E-62B4-46E2-A549-A4BF95F0EF97} = {28ADE730-B02D-4910-9311-1F1088C69829}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {81307950-DF5A-4A8D-B3B9-6724112D8232}
