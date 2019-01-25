@@ -86,7 +86,7 @@ namespace HB.Infrastructure.MySQL
 
         public static bool IsValueNeedQuoted(Type type)
         {
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 return false;
             }
@@ -101,9 +101,9 @@ namespace HB.Infrastructure.MySQL
 
         public static DbType GetDbType(Type type)
         {
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
-                return DbType.Int32;
+                return DbType.String;
             }
 
             if (type.IsAssignableFrom(typeof(IList<string>)))
@@ -121,9 +121,9 @@ namespace HB.Infrastructure.MySQL
 
         public static string GetDbTypeStatement(Type type)
         {
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
-                return "INTEGER";
+                return dbTypeInfoMap[typeof(string)].Statement;
             }
 
             if (type.IsAssignableFrom(typeof(IList<string>)))

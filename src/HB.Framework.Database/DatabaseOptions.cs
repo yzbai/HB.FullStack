@@ -19,6 +19,8 @@ namespace HB.Framework.Database
     {
         public DatabaseOptions Value { get { return this; } }
 
+        //TODO: 调整
+        //TODO: 调整所有Entity每一个字段的长度
         public int DefaultVarcharLength { get; set; } = 2048;
 
         public IList<DatabaseSchema> DatabaseSchemas { get; set; }
