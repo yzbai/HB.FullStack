@@ -74,7 +74,7 @@ namespace HB.Component.Authorization
 
             if (userId <= 0)
             {
-                _logger.LogWarning("Refresh token error. UserId should > 0. Context : {0}", DataConverter.ToJson(context));
+                _logger.LogWarning("Refresh token error. UserId should > 0. Context : {0}", JsonUtil.ToJson(context));
                 return RefreshResult.InvalideUserId();
             }
 
@@ -91,7 +91,7 @@ namespace HB.Component.Authorization
 
             if (signInToken == null || signInToken.Blacked)
             {
-                _logger.LogWarning("Refresh token error. signInToken not saved in db. Context : {0}", DataConverter.ToJson(context));
+                _logger.LogWarning("Refresh token error. signInToken not saved in db. Context : {0}", JsonUtil.ToJson(context));
                 return RefreshResult.NoTokenInStore();
             }
 
@@ -105,7 +105,7 @@ namespace HB.Component.Authorization
             {
                 await BlackSignInTokenAsync(signInToken).ConfigureAwait(false);
 
-                _logger.LogWarning("Refresh token error. User SecurityStamp Changed. Context : {0}", DataConverter.ToJson(context));
+                _logger.LogWarning("Refresh token error. User SecurityStamp Changed. Context : {0}", JsonUtil.ToJson(context));
 
                 return RefreshResult.UserSecurityStampChanged();
             }
@@ -120,7 +120,7 @@ namespace HB.Component.Authorization
 
             if (!authorizationServerResult.IsSucceeded())
             {
-                _logger.LogError("Refresh token error. Update SignIn Error. Context : {0}", DataConverter.ToJson(context));
+                _logger.LogError("Refresh token error. Update SignIn Error. Context : {0}", JsonUtil.ToJson(context));
                 return RefreshResult.UpdateSignInTokenError();
             }
 
@@ -163,7 +163,7 @@ namespace HB.Component.Authorization
             }
             catch(Exception ex)
             {
-                _logger.LogWarning(ex, "wrong token to refren.Context : {0}", DataConverter.ToJson(context));
+                _logger.LogWarning(ex, "wrong token to refren.Context : {0}", JsonUtil.ToJson(context));
                 return null;
             }
         }

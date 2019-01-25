@@ -1,6 +1,8 @@
-﻿using HB.Framework.Database.Entity;
+﻿using HB.Framework.Common;
+using HB.Framework.Database.Entity;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace HB.Framework.Database.Test
@@ -14,7 +16,7 @@ namespace HB.Framework.Database.Test
         public IList<string> Books { get; set; }
 
         [DatabaseEntityProperty]
-        public IDictionary<string, string> BookAuthors { get; set; }
+        public IDictionary<string, Author> BookAuthors { get; set; }
 
         [DatabaseEntityProperty]
         public TestType Type { get; set; }
@@ -26,5 +28,27 @@ namespace HB.Framework.Database.Test
         Type2,
         Type3,
         Hahaha
+    }
+
+    public class Author
+    {
+        public string Name { get; set; }
+
+        public string Mobile { get; set; }
+    }
+
+    public class TestEntityTypeConventer : TypeConverter
+    {
+        public TestEntityTypeConventer() { }
+
+        protected override object StringDbValueToTypeValue(string stringValue)
+        {
+            return JsonUtil.FromJson<IDictionary<string, Author>>(stringValue);
+        }
+
+        protected override string TypeValueToStringDbValue(object typeValue)
+        {
+            return JsonUtil.ToJson(typeValue);
+        }
     }
 }

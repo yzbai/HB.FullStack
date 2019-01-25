@@ -97,6 +97,8 @@ namespace HB.Framework.Database.Entity
 
         #endregion
 
+        public TypeConverter TypeConverter { get; set; }
+
         public DatabaseEntityPropertyDef() { }
         /// <summary>
         /// 获取值

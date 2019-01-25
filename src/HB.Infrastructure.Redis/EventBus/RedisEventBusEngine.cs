@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
             EventMessageEntity entity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
 
-            await database.ListLeftPushAsync(QueueName(entity.Type), DataConverter.ToJson(entity)).ConfigureAwait(false);
+            await database.ListLeftPushAsync(QueueName(entity.Type), JsonUtil.ToJson(entity)).ConfigureAwait(false);
 
             return true;
         }

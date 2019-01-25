@@ -21,6 +21,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{DFFFDEC7-B203-40D6-9DA0-B79D9378FDFF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E12F2693-2E5B-45FA-95DD-02EB2CF03740}"
+	ProjectSection(SolutionItems) = preProject
+		src\HB.Framework.Database\Entity\DefaultTypeConverter.cs = src\HB.Framework.Database\Entity\DefaultTypeConverter.cs
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Common", "src\HB.Framework.Common\HB.Framework.Common.csproj", "{2B949516-F173-42A1-B148-88B761283CE9}"
 EndProject

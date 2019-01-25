@@ -21,13 +21,15 @@ namespace HB.Framework.Database.Entity
         private readonly object _lockObj;
         private DatabaseOptions _options;
         private IDatabaseEngine _databaseEngine;
+        private ITypeConverterFactory typeConverterFactory;
 
-        public DefaultDatabaseEntityDefFactory(IOptions<DatabaseOptions> options, IDatabaseEngine databaseEngine)
+        public DefaultDatabaseEntityDefFactory(IOptions<DatabaseOptions> options, IDatabaseEngine databaseEngine, ITypeConverterFactory typeConverterFactory)
         {
             _options = options.Value;
             _databaseEngine = databaseEngine;
             _defDict = new ConcurrentDictionary<Type, DatabaseEntityDef>();
             _lockObj = new object();
+            this.typeConverterFactory = typeConverterFactory;
         }
 
         public DatabaseEntityDef GetDef<T>()
@@ -164,6 +166,12 @@ namespace HB.Framework.Database.Entity
                         propertyDef.DbLength = cur.Length > 0 ? (Nullable<int>)cur.Length : null;
                         propertyDef.DbDefaultValue = string.IsNullOrEmpty(cur.DefaultValue) ? null : cur.DefaultValue;
                         propertyDef.DbDescription = cur.Description;
+                        propertyDef.TypeConverter = null;
+
+                        if (cur.ConverterType != null)
+                        {
+                            propertyDef.TypeConverter = typeConverterFactory.GetTypeConverter(cur.ConverterType);
+                        }
                     }
                 }
             }
@@ -172,7 +180,15 @@ namespace HB.Framework.Database.Entity
             {
                 propertyDef.DbReservedName = _databaseEngine.GetReservedStatement(propertyDef.PropertyName);
                 propertyDef.DbParameterizedName = _databaseEngine.GetParameterizedStatement(propertyDef.PropertyName);
-                propertyDef.DbFieldType = _databaseEngine.GetDbType(propertyDef.PropertyType);
+
+                if (propertyDef.TypeConverter != null)
+                {
+                    propertyDef.DbFieldType = propertyDef.TypeConverter.TypeToDbType(propertyDef.PropertyType);
+                }
+                else
+                {
+                    propertyDef.DbFieldType = _databaseEngine.GetDbType(propertyDef.PropertyType);
+                }
             }
 
             #endregion

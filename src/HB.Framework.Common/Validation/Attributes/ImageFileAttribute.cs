@@ -44,7 +44,7 @@ namespace HB.Framework.Common.Validation.Attributes
                 return false;
             }
 
-            string fileType = DataConverter.GetFileTypeByMediaType(mediaType: file.ContentType);
+            string fileType = MediaUtil.GetFileTypeByMediaType(mediaType: file.ContentType);
 
             if (!fileType.IsIn(ImageType))
             {

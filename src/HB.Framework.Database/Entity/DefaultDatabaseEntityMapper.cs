@@ -1,4 +1,5 @@
 ﻿using HB.Framework.Common;
+using HB.Framework.Common.Entity;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -48,7 +49,9 @@ namespace HB.Framework.Database.Entity
                 {
                     DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i]);
 
-                    object value = DataConverter.To(property.PropertyType, reader[i]);
+                    object value = property.TypeConverter == null ? 
+                        DefaultTypeConverter.DbValueToTypeValue(property.PropertyType, reader[i]) : 
+                        property.TypeConverter.DbValueToTypeValue(reader[i]);
 
                     property.SetValue(item, value);
                 }
@@ -102,7 +105,11 @@ namespace HB.Framework.Database.Entity
 
                     if (pDef != null)
                     {
-                        pDef.SetValue(t1, DataConverter.To(pDef.PropertyType, reader[j]));
+                        object value = pDef.TypeConverter == null ?
+                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+
+                        pDef.SetValue(t1, value);
                     }
                 }
 
@@ -112,7 +119,11 @@ namespace HB.Framework.Database.Entity
 
                     if (pDef != null)
                     {
-                        pDef.SetValue(t2, DataConverter.To(pDef.PropertyType, reader[j]));
+                        object value = pDef.TypeConverter == null ?
+                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+
+                        pDef.SetValue(t2, value);
                     }
                 }
 
@@ -173,7 +184,11 @@ namespace HB.Framework.Database.Entity
 
                     if (pDef != null)
                     {
-                        pDef.SetValue(t1, DataConverter.To(pDef.PropertyType, reader[j]));
+                        object value = pDef.TypeConverter == null ?
+                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+
+                        pDef.SetValue(t1, value);
                     }
                 }
 
@@ -183,7 +198,11 @@ namespace HB.Framework.Database.Entity
 
                     if (pDef != null)
                     {
-                        pDef.SetValue(t2, DataConverter.To(pDef.PropertyType, reader[j]));
+                        object value = pDef.TypeConverter == null ?
+                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+
+                        pDef.SetValue(t2, value);
                     }
                 }
 
@@ -193,7 +212,11 @@ namespace HB.Framework.Database.Entity
 
                     if (pDef != null)
                     {
-                        pDef.SetValue(t3, DataConverter.To(pDef.PropertyType, reader[j]));
+                        object value = pDef.TypeConverter == null ?
+                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+
+                        pDef.SetValue(t3, value);
                     }
                 }
 
@@ -225,7 +248,12 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < len; ++i)
                 {
                     DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i]);
-                    property.SetValue(item, DataConverter.To(property.PropertyType, reader[i]));
+
+                    object value = property.TypeConverter == null ?
+                        DefaultTypeConverter.DbValueToTypeValue(property.PropertyType, reader[i]) :
+                        property.TypeConverter.DbValueToTypeValue(reader[i]);
+
+                    property.SetValue(item, value);
                 }
             }
         }

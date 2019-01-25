@@ -76,7 +76,7 @@ namespace HB.Infrastructure.RabbitMQ
 
                 consumer.Received += (sender, eventArgs) =>
                 {
-                    EventMessageEntity entity = DataConverter.DeSerialize<EventMessageEntity>(eventArgs.Body);
+                    EventMessageEntity entity = JsonUtil.DeSerialize<EventMessageEntity>(eventArgs.Body);
 
                     //时间戳检测
                     if (CheckTimestamp(entity))

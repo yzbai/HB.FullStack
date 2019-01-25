@@ -170,7 +170,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     continue;
                 }
 
-                EventMessageEntity entity = DataConverter.FromJson<EventMessageEntity>(redisValue);
+                EventMessageEntity entity = JsonUtil.FromJson<EventMessageEntity>(redisValue);
 
                 //2, 过期检查
 
@@ -178,7 +178,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 if (spendHours > _instanceSetting.EventBusEventMessageExpiredHours)
                 {
-                    _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{DataConverter.ToJson(entity)}");
+                    _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{JsonUtil.ToJson(entity)}");
                     continue;
                 }
 
@@ -197,7 +197,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 if (isExist == null || isExist.Value)
                 {
-                    _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{DataConverter.ToJson(entity)}");
+                    _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{JsonUtil.ToJson(entity)}");
 
                     _duplicateChecker.Release(AcksSetName, entity.Id, token);
 
@@ -211,7 +211,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 }
                 catch(Exception ex)
                 {
-                    _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {DataConverter.ToJson(entity)}");
+                    _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {JsonUtil.ToJson(entity)}");
                 }
 
                 //5, Acks

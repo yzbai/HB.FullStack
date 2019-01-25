@@ -35,6 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddDatabase(IServiceCollection services)
         {
+            services.AddSingleton<ITypeConverterFactory, TypeConverterFactory>();
             services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
             services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
             services.AddSingleton<ISQLBuilder, SQLBuilder>();
