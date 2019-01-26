@@ -9,7 +9,7 @@ namespace HB.Component.Identity.Test
     {
         public static IList<User> MockUsers()
         {
-            string prefix = SecurityUtil.CreateRandomString(6);
+            string prefix = SecurityUtil.CreateRandomString(6) + "测试用户";
 
             IList<User> list = new List<User>();
 

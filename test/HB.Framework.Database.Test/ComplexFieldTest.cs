@@ -27,7 +27,7 @@ namespace HB.Framework.Database.Test
 
             output.WriteLine(sql);
 
-            database.DatabaseEngine.ExecuteSqlNonQuery(null, "ahabit", sql);
+            database.DatabaseEngine.ExecuteSqlNonQuery(null, "test", sql);
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace HB.Framework.Database.Test
         {
             TestEntity entity = new TestEntity();
             entity.Type = TestType.Hahaha;
-            entity.Name = "EntityName";
+            entity.Name = "ÖÐÎÄÃû×Ö";
             entity.Books = new List<string>() { "Cat", "Dog" };
             entity.BookAuthors = new Dictionary<string, Author>() 
             {
@@ -62,7 +62,7 @@ namespace HB.Framework.Database.Test
                 { "Dog", new Author() { Mobile="222", Name="sx" } }
             };
 
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < 10; ++i)
             {
                 DatabaseResult result = database.Add<TestEntity>(entity);
 
