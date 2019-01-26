@@ -10,6 +10,13 @@ namespace HB.Framework.Database.SQL
     {
         #region 表达
 
+        /// <summary>
+        /// 请务必在使用前，检查list，不要为空
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
         public static bool In<T>(T value, params object[] list)
         {
             if (value == null)

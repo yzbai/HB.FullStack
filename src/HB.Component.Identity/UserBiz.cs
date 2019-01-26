@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entity;
 using HB.Framework.Database.Transaction;
+using System.Linq;
 
 namespace HB.Component.Identity
 {
@@ -88,6 +89,10 @@ namespace HB.Component.Identity
 
         public Task<IList<User>> GetUsersByIdsAsync(IEnumerable<long> userIds, DatabaseTransactionContext transContext = null)
         {
+            if (userIds == null || userIds.Count() == 0)
+            {
+                return Task.FromResult<IList<User>>(new List<User>());
+            }
             return _db.RetrieveAsync<User>(u => SQLUtil.In(u.Id, userIds), transContext);
         }
 

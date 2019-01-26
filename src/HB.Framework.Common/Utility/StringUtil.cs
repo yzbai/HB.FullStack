@@ -48,14 +48,20 @@ namespace System
         public static string ListToString(IEnumerable<string> list)
         {
             StringBuilder builder = new StringBuilder();
+            bool added = false;
 
             foreach (string str in list)
             {
                 builder.Append(str);
                 builder.Append(",");
+
+                added = true;
             }
 
-            builder.Remove(builder.Length - 1, 1);
+            if (added)
+            {
+                builder.Remove(builder.Length - 1, 1);
+            }
 
             return builder.ToString();
         }
@@ -87,6 +93,7 @@ namespace System
             }
 
             StringBuilder builder = new StringBuilder();
+            bool added = false;
 
             foreach (KeyValuePair<string, string> kv in subjectNodeSetIds)
             {
@@ -94,9 +101,14 @@ namespace System
                 builder.Append(",");
                 builder.Append(kv.Value);
                 builder.Append(",");
+
+                added = true;
             }
 
-            builder.Remove(builder.Length - 1, 1);
+            if (added)
+            {
+                builder.Remove(builder.Length - 1, 1);
+            }
 
             return builder.ToString();
         }
