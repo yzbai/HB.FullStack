@@ -6,7 +6,7 @@ namespace HB.Framework.Database.SQL
     /// <summary>
     /// SQL语句辅助、工具类
     /// </summary>
-    public static class SQLUtility
+    public static class SQLUtil
     {
         #region 表达
 

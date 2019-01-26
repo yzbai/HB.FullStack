@@ -350,7 +350,7 @@ namespace HB.Framework.Database.SQL
 
         protected virtual object VisitMethodCall(MethodCallExpression m)
         {
-            if (m.Method.DeclaringType == typeof(SQLUtility))
+            if (m.Method.DeclaringType == typeof(SQLUtil))
                 return VisitSqlMethodCall(m);
 
             if (IsArrayMethod(m))
