@@ -215,7 +215,7 @@ namespace HB.Component.Identity.Test
 
                 if (transContext.Status == DatabaseTransactionStatus.Commited)
                 {
-                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtility.In(u.Id, ids));
+                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids));
 
                     foreach (User u in updatedUsers)
                     {
@@ -278,7 +278,7 @@ namespace HB.Component.Identity.Test
 
                 if (transContext.Status == DatabaseTransactionStatus.Commited)
                 {
-                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtility.In(u.Id, ids));
+                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids));
 
                     if (updatedUsers.Count == 0)
                     {
