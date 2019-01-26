@@ -23,9 +23,11 @@ namespace HB.Framework.Database.Test
         [Fact]
         public void Test_Create_Sql_For_TestEntity()
         {
-            string sql = sqlBuilder.GetCreateStatement(typeof(TestEntity), false);
+            string sql = sqlBuilder.GetCreateStatement(typeof(TestEntity), true);
 
             output.WriteLine(sql);
+
+            database.DatabaseEngine.ExecuteSqlNonQuery(null, "ahabit", sql);
         }
 
         [Fact]
@@ -60,9 +62,13 @@ namespace HB.Framework.Database.Test
                 { "Dog", new Author() { Mobile="222", Name="sx" } }
             };
 
-            DatabaseResult result = database.Add<TestEntity>(entity);
+            for (int i = 0; i < 100; ++i)
+            {
+                DatabaseResult result = database.Add<TestEntity>(entity);
 
-            Assert.True(result.IsSucceeded());
+                Assert.True(result.IsSucceeded());
+
+            }
         }
 
         [Fact]
