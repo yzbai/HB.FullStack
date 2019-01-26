@@ -88,7 +88,7 @@ namespace HB.Component.Identity
 
         public Task<IList<User>> GetUsersByIdsAsync(IEnumerable<long> userIds, DatabaseTransactionContext transContext = null)
         {
-            return _db.RetrieveAsync<User>(u => SQLUtility.In(u.Id, userIds), transContext);
+            return _db.RetrieveAsync<User>(u => SQLUtil.In(u.Id, userIds), transContext);
         }
 
         #endregion
