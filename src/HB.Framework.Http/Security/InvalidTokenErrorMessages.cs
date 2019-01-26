@@ -20,6 +20,11 @@ namespace HB.Framework.Http.Security
 
         public static string GetErrorMessage(Exception authFailure)
         {
+            if (authFailure == null)
+            {
+                return "";
+            }
+
             IEnumerable<Exception> exceptions;
 
             if (authFailure is AggregateException)
@@ -74,6 +79,11 @@ namespace HB.Framework.Http.Security
             else if (ex is SecurityTokenInvalidSignatureException)
             {
                 message = ErrorMessage_SIGNATURE_INVALID;
+            }
+
+            if (string.IsNullOrEmpty(message))
+            {
+                message = authFailure.Message;
             }
 
             return message;
