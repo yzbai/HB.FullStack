@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HB.Component.Identity.Entity;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,6 +29,10 @@ namespace HB.Component.Authorization.Abstractions
         public RefreshResultStatus Status { get; set; }
 
         public string AccessToken { get; set; }
+
+        public string RefreshToken { get; set; }
+
+        public User CurrentUser { get; set; }
 
         public bool IsSucceeded()
         {
