@@ -7,6 +7,7 @@ namespace System
     public static class TimeUtil
     {
         private const string YearMonthDayFormat = "yyyy-MM-dd";
+        private const string YearMonthDayHourMinuteSecondFormat = "yyyy-MM-dd HH:mm:ss";
 
         public static string GetYearMonthDay(DateTime dateTime)
         {
@@ -69,6 +70,15 @@ namespace System
 
             return Convert.ToInt32(inputResult[2], GlobalSettings.Culture)
                 .CompareTo(Convert.ToInt32(todayResult[2], GlobalSettings.Culture));
+        }
+
+        public static string GetDateTimeString(DateTime dateTime)
+        {
+            return dateTime.ToString(YearMonthDayHourMinuteSecondFormat, GlobalSettings.Culture);
+        }
+        public static string GetNowString()
+        {
+            return GetDateTimeString(DateTime.Now);
         }
     }
 }
