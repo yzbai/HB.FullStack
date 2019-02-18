@@ -9,7 +9,7 @@ namespace HB.Infrastructure.Aliyun
 {
     public static class PolicyManager
     {
-        public static Policy Default(ILogger logger)
+        public static AsyncPolicy Default(ILogger logger)
         {
             return Policy
                 .Handle<ServerException>()
