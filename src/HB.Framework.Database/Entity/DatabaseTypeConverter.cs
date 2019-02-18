@@ -8,7 +8,7 @@ namespace HB.Framework.Database.Entity
     /// <summary>
     /// 把复杂类型变成字符串
     /// </summary>
-    public abstract class TypeConverter
+    public abstract class DatabaseTypeConverter
     {
         public virtual DbType TypeToDbType(Type type)
         {

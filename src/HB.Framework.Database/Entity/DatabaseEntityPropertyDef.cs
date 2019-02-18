@@ -97,7 +97,7 @@ namespace HB.Framework.Database.Entity
 
         #endregion
 
-        public TypeConverter TypeConverter { get; set; }
+        public DatabaseTypeConverter TypeConverter { get; set; }
 
         public DatabaseEntityPropertyDef() { }
         /// <summary>

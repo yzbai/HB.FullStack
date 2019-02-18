@@ -21,9 +21,9 @@ namespace HB.Framework.Database.Entity
         private readonly object _lockObj;
         private DatabaseOptions _options;
         private IDatabaseEngine _databaseEngine;
-        private ITypeConverterFactory typeConverterFactory;
+        private IDatabaseTypeConverterFactory typeConverterFactory;
 
-        public DefaultDatabaseEntityDefFactory(IOptions<DatabaseOptions> options, IDatabaseEngine databaseEngine, ITypeConverterFactory typeConverterFactory)
+        public DefaultDatabaseEntityDefFactory(IOptions<DatabaseOptions> options, IDatabaseEngine databaseEngine, IDatabaseTypeConverterFactory typeConverterFactory)
         {
             _options = options.Value;
             _databaseEngine = databaseEngine;
