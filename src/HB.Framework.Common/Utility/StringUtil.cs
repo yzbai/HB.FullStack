@@ -29,7 +29,7 @@ namespace System
 
         public static string ToHexString(byte[] bytes)
         {
-            var hex = new StringBuilder();
+            StringBuilder hex = new StringBuilder();
 
             foreach (byte b in bytes)
             {
@@ -43,7 +43,7 @@ namespace System
 
         #region Collection to String
 
-        private static char[] CommonSeparator = new char[] { ',', '-', '_', '/', '.', '$', '#', '@' };
+        private static readonly char[] CommonSeparator = new char[] { ',', '-', '_', '/', '.', '$', '#', '@' };
 
         public static string ListToString(IEnumerable<string> list)
         {
@@ -178,7 +178,7 @@ namespace System
 
             foreach (char c in str)
             {
-                if (!Char.IsUpper(c))
+                if (!char.IsUpper(c))
                 {
                     return false;
                 }
@@ -201,7 +201,7 @@ namespace System
 
             foreach (char c in str)
             {
-                if (!Char.IsLower(c))
+                if (!char.IsLower(c))
                 {
                     return false;
                 }

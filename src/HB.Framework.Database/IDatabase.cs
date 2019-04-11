@@ -12,7 +12,7 @@ namespace HB.Framework.Database
 {
     public interface IDatabase : IDatabaseAsync
     {
-        IDatabaseEngine DatabaseEngine { get; }
+        //IDatabaseEngine DatabaseEngine { get; }
 
         IList<TSelect> Retrieve<TSelect, TFrom, TWhere>(
             SelectExpression<TSelect> selectCondition, 

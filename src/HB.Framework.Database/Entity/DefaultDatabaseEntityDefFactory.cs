@@ -17,11 +17,11 @@ namespace HB.Framework.Database.Entity
     {
         private readonly int DEFAULT_STRING_LENGTH = 1024;
 
-        private ConcurrentDictionary<Type, DatabaseEntityDef> _defDict;
+        private readonly ConcurrentDictionary<Type, DatabaseEntityDef> _defDict;
         private readonly object _lockObj;
-        private DatabaseOptions _options;
-        private IDatabaseEngine _databaseEngine;
-        private IDatabaseTypeConverterFactory typeConverterFactory;
+        private readonly DatabaseOptions _options;
+        private readonly IDatabaseEngine _databaseEngine;
+        private readonly IDatabaseTypeConverterFactory typeConverterFactory;
 
         public DefaultDatabaseEntityDefFactory(IOptions<DatabaseOptions> options, IDatabaseEngine databaseEngine, IDatabaseTypeConverterFactory typeConverterFactory)
         {
@@ -153,17 +153,17 @@ namespace HB.Framework.Database.Entity
                 else
                 {
                     //判断是否TableProperty
-                    IEnumerable<Attribute> atts3 = info.GetCustomAttributes(typeof(DatabaseEntityPropertyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
+                    IEnumerable<Attribute> atts3 = info.GetCustomAttributes(typeof(DatabaseEntityPropertyAttribute), false).Select(o => (Attribute)o);
                     if (atts3 != null && atts3.Count() > 0)
                     {
-                        var cur = atts3.ElementAt(0) as DatabaseEntityPropertyAttribute;
+                        DatabaseEntityPropertyAttribute cur = atts3.ElementAt(0) as DatabaseEntityPropertyAttribute;
 
                         propertyDef.IsTableProperty = true;
                         propertyDef.IsPrimaryKey = false;
                         propertyDef.IsForeignKey = false;
                         propertyDef.IsNullable = !cur.NotNull;
                         propertyDef.IsUnique = cur.Unique;
-                        propertyDef.DbLength = cur.Length > 0 ? (Nullable<int>)cur.Length : null;
+                        propertyDef.DbLength = cur.Length > 0 ? (int?)cur.Length : null;
                         propertyDef.DbDefaultValue = string.IsNullOrEmpty(cur.DefaultValue) ? null : cur.DefaultValue;
                         propertyDef.DbDescription = cur.Description;
                         propertyDef.TypeConverter = null;
