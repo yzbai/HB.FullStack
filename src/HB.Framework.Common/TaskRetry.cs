@@ -13,12 +13,12 @@ namespace HB.Framework.Common
     [Obsolete]
     internal static class TaskRetryOldxx
     {
-        private static Func<int, TimeSpan> defaultSleepDurationProvider = retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+        public static Func<int, TimeSpan> DefaultSleepDurationProvider = retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
 
-        private static Func<int, TimeSpan> zeroSleepDurationProvider = retryAttempt => TimeSpan.Zero;
+        public static Func<int, TimeSpan> ZeroSleepDurationProvider = retryAttempt => TimeSpan.Zero;
 
-        public static Func<int, TimeSpan> DefaultSleepDurationProvider { get => defaultSleepDurationProvider; set => defaultSleepDurationProvider = value; }
-        public static Func<int, TimeSpan> ZeroSleepDurationProvider { get => zeroSleepDurationProvider; set => zeroSleepDurationProvider = value; }
+        //public static Func<int, TimeSpan> DefaultSleepDurationProvider { get => defaultSleepDurationProvider; set => defaultSleepDurationProvider = value; }
+        //public static Func<int, TimeSpan> ZeroSleepDurationProvider { get => zeroSleepDurationProvider; set => zeroSleepDurationProvider = value; }
 
         public static Task Retry(int retryCount, Func<Task> taskAction, Action<Task, AggregateException> exceptionAction, Func<int, TimeSpan> sleepDurationProvider = null)
         {
@@ -81,7 +81,7 @@ namespace HB.Framework.Common
                     {
                         exceptionAction(t, t.Exception);
 
-                        return default(T);
+                        return default;
                     }
 
                     return t.Result;

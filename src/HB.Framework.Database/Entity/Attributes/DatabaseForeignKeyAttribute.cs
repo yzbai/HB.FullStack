@@ -9,10 +9,6 @@ namespace HB.Framework.Database.Entity
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class DatabaseForeignKeyAttribute : DatabaseEntityPropertyAttribute
     {
-        /// <summary>
-        /// 引用的表类
-        /// </summary>
-        private readonly Type baseType;
 
         /// <summary>
         /// 
@@ -22,7 +18,9 @@ namespace HB.Framework.Database.Entity
         public DatabaseForeignKeyAttribute(string desc, Type baseType)
             : base(desc)
         {
-            this.baseType = baseType;
+            BaseType = baseType;
         }
+
+        public Type BaseType { get; }
     }
 }

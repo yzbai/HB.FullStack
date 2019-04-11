@@ -50,7 +50,7 @@ namespace HB.Framework.Common.Entity
             convertFunDict[typeof(DateTime?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o, GlobalSettings.Culture); };
             convertFunDict[typeof(DateTimeOffset?)] = o => { return o == null ? null : (DateTimeOffset?)DateTime.SpecifyKind(Convert.ToDateTime(o, GlobalSettings.Culture), DateTimeKind.Utc); };
             convertFunDict[typeof(TimeSpan?)] = o => { return o == null ? null : (object)Convert.ToDateTime(o, GlobalSettings.Culture); };
-            convertFunDict[typeof(Object)] = o => { return o ?? null; };
+            convertFunDict[typeof(object)] = o => { return o ?? null; };
             convertFunDict[typeof(DBNull)] = o => { return o == null ? null : DBNull.Value; };
 
             #endregion
@@ -85,7 +85,7 @@ namespace HB.Framework.Common.Entity
 
         public static string TypeValueToDbValue(object value)
         {
-            string valueStr = string.Empty;
+            string valueStr;
 
             if (value != null)
             {

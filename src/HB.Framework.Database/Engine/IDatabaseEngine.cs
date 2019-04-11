@@ -29,21 +29,6 @@ namespace HB.Framework.Database.Engine
 
         #endregion
 
-        #region SQL执行功能
-
-        /// <summary>
-        /// 使用后必须Dispose，必须使用using. 在MySql中，IDataReader.Close工作不正常。解决之前不要用
-        /// </summary>
-        IDataReader ExecuteSqlReader(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
-
-        object ExecuteSqlScalar(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
-
-        int ExecuteSqlNonQuery(IDbTransaction trans, string dbName, string SQL);
-
-        DataTable ExecuteSqlDataTable(IDbTransaction trans, string dbName, string SQL);
-
-        #endregion
-
         #region Command执行功能
 
         int ExecuteCommandNonQuery(IDbTransaction trans, string dbName, IDbCommand dbCommand);
@@ -78,12 +63,7 @@ namespace HB.Framework.Database.Engine
         /// </summary>
         /// <returns></returns>
         IDbCommand CreateEmptyCommand();
-        /// <summary>
-        /// 创建 空白DataTable
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <returns></returns>
-        DataTable CreateEmptyDataTable(string dbName, string tableName);
+
         /// <summary>
         /// 创建 事务
         /// </summary>
@@ -155,3 +135,23 @@ namespace HB.Framework.Database.Engine
         #endregion
     }
 }
+///// <summary>
+///// 创建 空白DataTable
+///// </summary>
+///// <param name="tableName"></param>
+///// <returns></returns>
+////DataTable CreateEmptyDataTable(string dbName, string tableName);
+//#region SQL执行功能 - Unsafe
+
+///// <summary>
+///// 使用后必须Dispose，必须使用using. 在MySql中，IDataReader.Close工作不正常。解决之前不要用
+///// </summary>
+//IDataReader ExecuteSqlReader(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+
+//object ExecuteSqlScalar(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+
+//int ExecuteSqlNonQuery(IDbTransaction trans, string dbName, string SQL);
+
+//DataTable ExecuteSqlDataTable(IDbTransaction trans, string dbName, string SQL);
+
+//#endregion

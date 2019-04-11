@@ -110,62 +110,6 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region SQL执行功能
-
-        /// <summary>
-        /// 使用后必须Dispose，必须使用using. 在MySql中，IDataReader.Close工作不正常。解决之前不要用
-        /// </summary>
-        public IDataReader ExecuteSqlReader(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
-        {
-
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlReader(GetConnectionString(dbName, useMaster), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlReader((MySqlTransaction)Transaction, SQL);
-            }
-        }
-
-        public object ExecuteSqlScalar(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlScalar(GetConnectionString(dbName, useMaster), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlScalar((MySqlTransaction)Transaction, SQL);
-            }
-        }
-
-        public int ExecuteSqlNonQuery(IDbTransaction Transaction, string dbName, string SQL)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlNonQuery(GetConnectionString(dbName, true), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlNonQuery((MySqlTransaction)Transaction, SQL);
-            }
-        }
-
-        public DataTable ExecuteSqlDataTable(IDbTransaction transaction, string dbName, string SQL)
-        {
-            if (transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlDataTable(GetConnectionString(dbName, true), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlDataTable((MySqlTransaction)transaction, SQL);
-            }
-        }
-
-        #endregion
-
         #region Command执行功能
 
         public int ExecuteCommandNonQuery(IDbTransaction Transaction, string dbName, IDbCommand dbCommand)
@@ -194,7 +138,7 @@ namespace HB.Infrastructure.MySQL
             }
             else
             {
-                return MySQLExecuter.ExecuteSqlReader((MySqlTransaction)Transaction, dbCommand);
+                return MySQLExecuter.ExecuteCommandReader((MySqlTransaction)Transaction, dbCommand);
             }
         }
 
@@ -241,10 +185,7 @@ namespace HB.Infrastructure.MySQL
             return command;
         }
 
-        public DataTable CreateEmptyDataTable(string dbName, string tableName)
-        {
-            return MySQLTableCache.CreateEmptyDataTable(GetConnectionString(dbName, true), tableName);
-        }
+
 
         public IDbTransaction CreateTransaction(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -302,3 +243,62 @@ namespace HB.Infrastructure.MySQL
         #endregion
     }
 }
+//public DataTable CreateEmptyDataTable(string dbName, string tableName)
+//{
+//    return MySQLTableCache.CreateEmptyDataTable(GetConnectionString(dbName, true), tableName);
+//}
+//#region SQL执行功能-Unsafe
+
+///// <summary>
+///// 使用后必须Dispose，必须使用using. 在MySql中，IDataReader.Close工作不正常。解决之前不要用
+///// </summary>
+//public IDataReader ExecuteSqlReader(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
+//{
+
+//    if (Transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlReader(GetConnectionString(dbName, useMaster), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlReader((MySqlTransaction)Transaction, SQL);
+//    }
+//}
+
+//public object ExecuteSqlScalar(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
+//{
+//    if (Transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlScalar(GetConnectionString(dbName, useMaster), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlScalar((MySqlTransaction)Transaction, SQL);
+//    }
+//}
+
+//public int ExecuteSqlNonQuery(IDbTransaction Transaction, string dbName, string SQL)
+//{
+//    if (Transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlNonQuery(GetConnectionString(dbName, true), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlNonQuery((MySqlTransaction)Transaction, SQL);
+//    }
+//}
+
+//public DataTable ExecuteSqlDataTable(IDbTransaction transaction, string dbName, string SQL)
+//{
+//    if (transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlDataTable(GetConnectionString(dbName, true), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlDataTable((MySqlTransaction)transaction, SQL);
+//    }
+//}
+
+//#endregion
