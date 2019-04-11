@@ -18,7 +18,7 @@ namespace System
         {
             if (string.IsNullOrWhiteSpace(jsonString))
             {
-                return default(T);
+                return default;
             }
 
             return JsonConvert.DeserializeObject<T>(jsonString);
@@ -42,7 +42,7 @@ namespace System
         {
             if (buffer == null)
             {
-                return default(T);
+                return default;
             }
 
             return FromJson<T>(Encoding.UTF8.GetString(buffer));

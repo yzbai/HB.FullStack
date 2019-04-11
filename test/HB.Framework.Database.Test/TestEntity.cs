@@ -37,7 +37,7 @@ namespace HB.Framework.Database.Test
         public string Mobile { get; set; }
     }
 
-    public class TestEntityTypeConventer : TypeConverter
+    public class TestEntityTypeConventer : DatabaseTypeConverter
     {
         public TestEntityTypeConventer() { }
 

@@ -27,7 +27,7 @@ namespace HB.Framework.Database.Test
 
             output.WriteLine(sql);
 
-            database.DatabaseEngine.ExecuteSqlNonQuery(null, "test", sql);
+            //database.DatabaseEngine.ExecuteSqlNonQuery(null, "test", sql);
         }
 
         [Fact]

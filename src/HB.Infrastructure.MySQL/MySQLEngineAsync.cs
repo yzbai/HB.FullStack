@@ -10,7 +10,6 @@ namespace HB.Infrastructure.MySQL
 {
     public partial class MySQLEngine : IDatabaseEngineAsync
     {
-
         #region SP 能力
 
         public Task<IDataReader> ExecuteSPReaderAsync(IDbTransaction Transaction, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster = false)
@@ -51,58 +50,6 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region SQL 能力
-
-        public Task<IDataReader> ExecuteSqlReaderAsync(IDbTransaction Transaction, string dbName, string SQL, bool useMaster = false)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlReaderAsync(GetConnectionString(dbName, useMaster), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlReaderAsync((MySqlTransaction)Transaction, SQL);
-            }
-        }
-
-        public Task<object> ExecuteSqlScalarAsync(IDbTransaction Transaction, string dbName, string SQL, bool useMaster = false)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlScalarAsync(GetConnectionString(dbName, useMaster), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlScalarAsync((MySqlTransaction)Transaction, SQL);
-            }
-        }
-
-        public Task<int> ExecuteSqlNonQueryAsync(IDbTransaction Transaction, string dbName, string SQL)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlNonQueryAsync(GetConnectionString(dbName, true), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlNonQueryAsync((MySqlTransaction)Transaction, SQL);
-            }
-        }
-
-        public Task<DataTable> ExecuteSqlDataTableAsync(IDbTransaction transaction, string dbName, string SQL)
-        {
-            if (transaction == null)
-            {
-                return MySQLExecuter.ExecuteSqlDataTableAsync(GetConnectionString(dbName, true), SQL);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSqlDataTableAsync((MySqlTransaction)transaction, SQL);
-            }
-        }
-
-        #endregion
-
         #region Command 能力
 
         public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction Transaction, string dbName, IDbCommand dbCommand)
@@ -125,7 +72,7 @@ namespace HB.Infrastructure.MySQL
             }
             else
             {
-                return MySQLExecuter.ExecuteSqlReaderAsync((MySqlTransaction)Transaction, dbCommand);
+                return MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)Transaction, dbCommand);
             }
         }
 
@@ -144,3 +91,55 @@ namespace HB.Infrastructure.MySQL
         #endregion
     }
 }
+
+//#region SQL 能力
+
+//public Task<IDataReader> ExecuteSqlReaderAsync(IDbTransaction Transaction, string dbName, string SQL, bool useMaster = false)
+//{
+//    if (Transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlReaderAsync(GetConnectionString(dbName, useMaster), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlReaderAsync((MySqlTransaction)Transaction, SQL);
+//    }
+//}
+
+//public Task<object> ExecuteSqlScalarAsync(IDbTransaction Transaction, string dbName, string SQL, bool useMaster = false)
+//{
+//    if (Transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlScalarAsync(GetConnectionString(dbName, useMaster), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlScalarAsync((MySqlTransaction)Transaction, SQL);
+//    }
+//}
+
+//public Task<int> ExecuteSqlNonQueryAsync(IDbTransaction Transaction, string dbName, string SQL)
+//{
+//    if (Transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlNonQueryAsync(GetConnectionString(dbName, true), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlNonQueryAsync((MySqlTransaction)Transaction, SQL);
+//    }
+//}
+
+//public Task<DataTable> ExecuteSqlDataTableAsync(IDbTransaction transaction, string dbName, string SQL)
+//{
+//    if (transaction == null)
+//    {
+//        return MySQLExecuter.ExecuteSqlDataTableAsync(GetConnectionString(dbName, true), SQL);
+//    }
+//    else
+//    {
+//        return MySQLExecuter.ExecuteSqlDataTableAsync((MySqlTransaction)transaction, SQL);
+//    }
+//}
+
+//#endregion

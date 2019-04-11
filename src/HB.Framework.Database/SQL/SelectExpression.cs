@@ -9,11 +9,11 @@ namespace HB.Framework.Database.SQL
     public class SelectExpression<T> : SQLExpression
         where T : DatabaseEntity, new()
     {
-        private StringBuilder _statementBuilder;
+        private readonly StringBuilder _statementBuilder;
 
         private bool _firstAssign;
 
-        private readonly DatabaseEntityDef _sourceModelDef;
+        //private readonly DatabaseEntityDef _sourceModelDef;
         private readonly IDatabaseEngine _databaseEngine;
 
         public bool WithSelectString { get; set; }
@@ -31,7 +31,7 @@ namespace HB.Framework.Database.SQL
         public SelectExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
         {
             EntityDefFactory = modelDefFactory;
-            _sourceModelDef = EntityDefFactory.GetDef<T>();
+            //_sourceModelDef = EntityDefFactory.GetDef<T>();
             _databaseEngine = databaseEngine;
 
             Seperator = " ";

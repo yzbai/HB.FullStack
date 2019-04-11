@@ -2,7 +2,6 @@ using HB.Framework.Database.Engine;
 using HB.Framework.Database.Entity;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -14,9 +13,9 @@ namespace HB.Framework.Database.SQL
     /// <typeparam name="T"></typeparam>
     public class WhereExpression<T> : SQLExpression
     {
-        private IDatabaseEngine _databaseEngine;
+        private readonly IDatabaseEngine _databaseEngine;
         private Expression<Func<T, bool>> _whereExpression;
-        private List<string> _orderByProperties;
+        private readonly List<string> _orderByProperties;
 
         private string _whereString;
         private string _orderByString;
@@ -32,10 +31,10 @@ namespace HB.Framework.Database.SQL
         public WhereExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
         {
             EntityDefFactory = modelDefFactory;
-            DatabaseEntityDef modelDef = EntityDefFactory.GetDef<T>();
+            //DatabaseEntityDef modelDef = EntityDefFactory.GetDef<T>();
             _databaseEngine = databaseEngine;
-            base.PrefixFieldWithTableName = true;
-            base.ParamPlaceHolderPrefix = _databaseEngine.ParameterizedChar + "wPARAM__";
+            PrefixFieldWithTableName = true;
+            ParamPlaceHolderPrefix = _databaseEngine.ParameterizedChar + "wPARAM__";
 
             _whereExpression = null;
             _whereString = string.Empty;
@@ -148,9 +147,9 @@ namespace HB.Framework.Database.SQL
 
         public string SqlFormat(IDatabaseEngine dbEngine, string sqlText, params object[] sqlParams)
         {
-            var escapedParams = new List<string>();
+            List<string> escapedParams = new List<string>();
 
-            foreach (var sqlParam in sqlParams)
+            foreach (object sqlParam in sqlParams)
             {
                 if (sqlParam == null)
                 {
@@ -297,7 +296,7 @@ namespace HB.Framework.Database.SQL
         {
             Seperator = string.Empty;
             _orderByProperties.Clear();
-            var property = Visit(keySelector).ToString();
+            string property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " ASC");
             UpdateOrderByString();
             return this;
@@ -306,7 +305,7 @@ namespace HB.Framework.Database.SQL
         public virtual WhereExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             Seperator = string.Empty;
-            var property = Visit(keySelector).ToString();
+            string property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " ASC");
             UpdateOrderByString();
             return this;
@@ -316,7 +315,7 @@ namespace HB.Framework.Database.SQL
         {
             Seperator = string.Empty;
             _orderByProperties.Clear();
-            var property = Visit(keySelector).ToString();
+            string property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " DESC");
             UpdateOrderByString();
             return this;
@@ -325,7 +324,7 @@ namespace HB.Framework.Database.SQL
         public virtual WhereExpression<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             Seperator = string.Empty;
-            var property = Visit(keySelector).ToString();
+            string property = Visit(keySelector).ToString();
             _orderByProperties.Add(property + " DESC");
             UpdateOrderByString();
             return this;
@@ -337,7 +336,7 @@ namespace HB.Framework.Database.SQL
             {
                 _orderByString = "ORDER BY ";
 
-                foreach (var prop in _orderByProperties)
+                foreach (string prop in _orderByProperties)
                 {
                     _orderByString += prop + ",";
                 }

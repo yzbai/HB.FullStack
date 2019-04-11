@@ -7,13 +7,11 @@ using System.Text;
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.Engine;
 using System.Reflection;
-using System.Globalization;
 
 namespace HB.Framework.Database.SQL
 {
     public abstract class SQLExpression
     {
-
         protected string Seperator { get; set; }
 
         protected int ParamCounter { get; set; }
@@ -125,7 +123,7 @@ namespace HB.Framework.Database.SQL
                         return r.ToString();
                     }
 
-                    return $"{r}={GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)}";
+                    return $"{r}={GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)}";
                 }
 
             }
@@ -136,7 +134,7 @@ namespace HB.Framework.Database.SQL
         {
             object left, right;
             bool rightIsNull;
-            var operand = BindOperant(b.NodeType);   //sep= " " ??
+            string operand = BindOperant(b.NodeType);   //sep= " " ??
             if (operand == "AND" || operand == "OR")
             {
 
@@ -153,7 +151,7 @@ namespace HB.Framework.Database.SQL
 
                 if (m != null && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    right = new PartialSqlString(string.Format(GlobalSettings.Culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted:true)));
+                    right = new PartialSqlString(string.Format(GlobalSettings.Culture, "{0}={1}", VisitMemberAccess(m), GetDatabaseEngine().GetDbValueStatement(true, needQuoted: true)));
                 }
                 else
                 {
@@ -162,8 +160,8 @@ namespace HB.Framework.Database.SQL
 
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
-                    var result = Expression.Lambda(b).Compile().DynamicInvoke();
-                    return new PartialSqlString(GetDatabaseEngine().GetDbValueStatement(result, needQuoted:true));
+                    object result = Expression.Lambda(b).Compile().DynamicInvoke();
+                    return new PartialSqlString(GetDatabaseEngine().GetDbValueStatement(result, needQuoted: true));
                 }
 
                 if (left as PartialSqlString == null)
@@ -184,12 +182,12 @@ namespace HB.Framework.Database.SQL
 
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
-                    var result = Expression.Lambda(b).Compile().DynamicInvoke();
+                    object result = Expression.Lambda(b).Compile().DynamicInvoke();
                     return result;
                 }
                 else if (left as PartialSqlString == null)
                 {
-                    left = GetDatabaseEngine().GetDbValueStatement(left, needQuoted:true);
+                    left = GetDatabaseEngine().GetDbValueStatement(left, needQuoted: true);
                 }
                 else if (right as PartialSqlString == null)
                 {
@@ -206,7 +204,7 @@ namespace HB.Framework.Database.SQL
                 }
 
             }
-            //TODO: Test this. switch InvariantCultureIgnoreCase to OrdinalIgnoreCase
+            //TODO: Test  switch InvariantCultureIgnoreCase to OrdinalIgnoreCase
             rightIsNull = right.ToString().Equals("null", GlobalSettings.ComparisonIgnoreCase);
             if (operand == "=" && rightIsNull) operand = "is";
             else if (operand == "<>" && rightIsNull) operand = "is not";
@@ -223,7 +221,7 @@ namespace HB.Framework.Database.SQL
 
         protected virtual object VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert ))
+            if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
                 string memberName = m.Member.Name;
                 Type modelType = m.Expression.Type;
@@ -261,7 +259,7 @@ namespace HB.Framework.Database.SQL
             }
 
             var member = Expression.Convert(m, typeof(object));
-            var lambda = Expression.Lambda<Func<object>>(member);
+            Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
             return getter();
         }
@@ -275,17 +273,17 @@ namespace HB.Framework.Database.SQL
         {
             // TODO : check !
             var member = Expression.Convert(nex, typeof(object));
-            var lambda = Expression.Lambda<Func<object>>(member);
+            Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
             try
             {
                 var getter = lambda.Compile();
                 return getter();
             }
-            catch (System.InvalidOperationException)
+            catch (InvalidOperationException)
             { // FieldName ?
-                List<Object> exprs = VisitExpressionList(nex.Arguments);
+                List<object> exprs = VisitExpressionList(nex.Arguments);
                 StringBuilder r = new StringBuilder();
-                foreach (Object e in exprs)
+                foreach (object e in exprs)
                 {
                     r.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                    r.Length > 0 ? "," : "",
@@ -329,7 +327,7 @@ namespace HB.Framework.Database.SQL
             switch (u.NodeType)
             {
                 case ExpressionType.Not:
-                    var o = Visit(u.Operand);
+                    object o = Visit(u.Operand);
 
                     if (o as PartialSqlString == null)
                         return !((bool)o);
@@ -362,9 +360,9 @@ namespace HB.Framework.Database.SQL
             return Expression.Lambda(m).Compile().DynamicInvoke();
         }
 
-        protected virtual List<Object> VisitExpressionList(ReadOnlyCollection<Expression> original)
+        protected virtual List<object> VisitExpressionList(ReadOnlyCollection<Expression> original)
         {
-            List<Object> list = new List<Object>();
+            List<object> list = new List<object>();
             for (int i = 0, n = original.Count; i < n; i++)
             {
                 if (original[i].NodeType == ExpressionType.NewArrayInit ||
@@ -383,9 +381,9 @@ namespace HB.Framework.Database.SQL
         protected virtual object VisitNewArray(NewArrayExpression na)
         {
 
-            List<Object> exprs = VisitExpressionList(na.Expressions);
+            List<object> exprs = VisitExpressionList(na.Expressions);
             StringBuilder r = new StringBuilder();
-            foreach (Object e in exprs)
+            foreach (object e in exprs)
             {
                 r.Append(r.Length > 0 ? "," + e : e);
             }
@@ -393,10 +391,10 @@ namespace HB.Framework.Database.SQL
             return r.ToString();
         }
 
-        protected virtual List<Object> VisitNewArrayFromExpressionList(NewArrayExpression na)
+        protected virtual List<object> VisitNewArrayFromExpressionList(NewArrayExpression na)
         {
 
-            List<Object> exprs = VisitExpressionList(na.Expressions);
+            List<object> exprs = VisitExpressionList(na.Expressions);
             return exprs;
         }
 
@@ -407,7 +405,7 @@ namespace HB.Framework.Database.SQL
             switch (m.Method.Name)
             {
                 case "Contains":
-                    List<Object> args = this.VisitExpressionList(m.Arguments);
+                    List<object> args = VisitExpressionList(m.Arguments);
                     object quotedColName = args[1];
 
                     var memberExpr = m.Arguments[0];
@@ -415,13 +413,13 @@ namespace HB.Framework.Database.SQL
                         memberExpr = (m.Arguments[0] as MemberExpression);
 
                     var member = Expression.Convert(memberExpr, typeof(object));
-                    var lambda = Expression.Lambda<Func<object>>(member);
+                    Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
                     var getter = lambda.Compile();
 
-                    var inArgs = getter() as object[];
+                    object[] inArgs = getter() as object[];
 
                     StringBuilder sIn = new StringBuilder();
-                    foreach (Object e in inArgs)
+                    foreach (object e in inArgs)
                     {
                         if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
                         {
@@ -431,8 +429,8 @@ namespace HB.Framework.Database.SQL
                         }
                         else
                         {
-                            var listArgs = e as IList<Object>;
-                            foreach (Object el in listArgs)
+                            IList<object> listArgs = e as IList<object>;
+                            foreach (object el in listArgs)
                             {
                                 sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
@@ -453,7 +451,7 @@ namespace HB.Framework.Database.SQL
 
         protected virtual object VisitSqlMethodCall(MethodCallExpression m)
         {
-            List<Object> args = this.VisitExpressionList(m.Arguments);
+            List<object> args = VisitExpressionList(m.Arguments);
             object quotedColName = args[0];
             args.RemoveAt(0);
 
@@ -464,13 +462,13 @@ namespace HB.Framework.Database.SQL
                 case "In":
 
                     var member = Expression.Convert(m.Arguments[1], typeof(object));
-                    var lambda = Expression.Lambda<Func<object>>(member);
+                    Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
                     var getter = lambda.Compile();
 
-                    var inArgs = getter() as object[];
+                    object[] inArgs = getter() as object[];
 
                     StringBuilder sIn = new StringBuilder();
-                    foreach (Object e in inArgs)
+                    foreach (object e in inArgs)
                     {
                         if (!typeof(ICollection).GetTypeInfo().IsAssignableFrom(e.GetType()))
                         {
@@ -480,8 +478,8 @@ namespace HB.Framework.Database.SQL
                         }
                         else
                         {
-                            var listArgs = e as ICollection;
-                            foreach (Object el in listArgs)
+                            ICollection listArgs = e as ICollection;
+                            foreach (object el in listArgs)
                             {
                                 sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
@@ -526,8 +524,8 @@ namespace HB.Framework.Database.SQL
             //TODO: Mysql,其他数据库可能需要重写
             if (m.Method.Name == "StartsWith")
             {
-                List<Object> args0 = this.VisitExpressionList(m.Arguments);
-                var quotedColName0 = Visit(m.Object);
+                List<object> args0 = VisitExpressionList(m.Arguments);
+                object quotedColName0 = Visit(m.Object);
                 return new PartialSqlString(string.Format(GlobalSettings.Culture, "LEFT( {0},{1})= {2} ", quotedColName0
                                                           , args0[0].ToString().Length,
                                                           GetDatabaseEngine().GetDbValueStatement(args0[0], needQuoted: true)));
@@ -535,9 +533,9 @@ namespace HB.Framework.Database.SQL
 
             #endregion
 
-            List<Object> args = this.VisitExpressionList(m.Arguments);
-            var quotedColName = Visit(m.Object);
-            var statement = "";
+            List<object> args = VisitExpressionList(m.Arguments);
+            object quotedColName = Visit(m.Object);
+            string statement;
 
             switch (m.Method.Name)
             {
@@ -566,10 +564,10 @@ namespace HB.Framework.Database.SQL
                     statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName, GetDatabaseEngine().GetQuotedStatement("%" + args[0].ToString().ToUpper(GlobalSettings.Culture) + "%"));
                     break;
                 case "Substring":
-                    var startIndex = Int32.Parse(args[0].ToString(), GlobalSettings.Culture) + 1;
+                    int startIndex = int.Parse(args[0].ToString(), GlobalSettings.Culture) + 1;
                     if (args.Count == 2)
                     {
-                        var length = Int32.Parse(args[1].ToString(), GlobalSettings.Culture);
+                        int length = int.Parse(args[1].ToString(), GlobalSettings.Culture);
                         statement = string.Format(GlobalSettings.Culture, "substring({0} from {1} for {2})",
                                                   quotedColName,
                                                   startIndex,
@@ -599,7 +597,6 @@ namespace HB.Framework.Database.SQL
 
         protected virtual string BindOperant(ExpressionType e)
         {
-
             switch (e)
             {
                 case ExpressionType.Equal:

@@ -5,8 +5,6 @@ using System.Data;
 using System.Text;
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.Engine;
-using HB.Framework.Common;
-using System.Globalization;
 
 namespace HB.Framework.Database.SQL
 {
@@ -27,11 +25,9 @@ namespace HB.Framework.Database.SQL
         /// <summary>
         /// sql字典. 数据库名:TableName:操作-SQL语句
         /// </summary>
-        private ConcurrentDictionary<string, string> _sqlStatementDict;
-        private IDatabaseEntityDefFactory _entityDefFactory;
-        private IDatabaseEngine _databaseEngine;
-
-        
+        private readonly ConcurrentDictionary<string, string> _sqlStatementDict;
+        private readonly IDatabaseEntityDefFactory _entityDefFactory;
+        private readonly IDatabaseEngine _databaseEngine;
 
         public SQLBuilder(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
         {
@@ -46,14 +42,14 @@ namespace HB.Framework.Database.SQL
         {
             IDbCommand command = _databaseEngine.CreateEmptyCommand();
 
-            command.CommandType = System.Data.CommandType.Text;
+            command.CommandType = CommandType.Text;
             command.CommandText = selectClause;
 
             if (isRetrieve)
             {
                 if (fromCondition == null)
                 {
-                    fromCondition = this.NewFrom<TFrom>();
+                    fromCondition = NewFrom<TFrom>();
                 }
 
                 command.CommandText += fromCondition.ToString();
@@ -316,7 +312,7 @@ namespace HB.Framework.Database.SQL
             #region 获取Add Template
 
             string cacheKey = modelDef.DatabaseName + ":" + modelDef.TableName + ":ADD";
-            string addTemplate = string.Empty;
+            string addTemplate;
 
             if (_sqlStatementDict.ContainsKey(cacheKey))
             {
@@ -475,7 +471,7 @@ namespace HB.Framework.Database.SQL
         {
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
         
-            List<IDataParameter> parameters = new List<IDataParameter>();
+            //List<IDataParameter> parameters = new List<IDataParameter>();
 
             string updateKeyStatement = GetUpdateKeyStatement(definition, keys, values, lastUser);
 
@@ -488,7 +484,7 @@ namespace HB.Framework.Database.SQL
 
         public IDbCommand GetDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new()
         {
-            return CreateUpdateKeyCommand<T>(condition, new string[] { "Deleted" }, new object[] { 1 }, lastUser);
+            return CreateUpdateKeyCommand(condition, new string[] { "Deleted" }, new object[] { 1 }, lastUser);
         }
 
         #endregion
@@ -504,13 +500,11 @@ namespace HB.Framework.Database.SQL
 
             StringBuilder innerBuilder = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
-            StringBuilder args = null;
-            StringBuilder values = null;
 
             foreach (T domain in domains)
             {
-                args = new StringBuilder();
-                values = new StringBuilder();
+                StringBuilder args = new StringBuilder();
+                StringBuilder values = new StringBuilder();
 
                 foreach (DatabaseEntityPropertyDef info in definition.Properties)
                 {
@@ -578,12 +572,10 @@ namespace HB.Framework.Database.SQL
 
             StringBuilder innerBuilder = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
-            StringBuilder args = null;
 
             foreach (T entity in entities)
             {
-                args = new StringBuilder();
-
+                StringBuilder args = new StringBuilder();
                 foreach (DatabaseEntityPropertyDef info in definition.Properties)
                 {
                     if (info.IsTableProperty)

@@ -5,14 +5,10 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using HB.Framework.Database.Entity;
-using HB.Framework.Common;
-using HB.Framework.Common.Entity;
-using System.Threading.Tasks;
 using HB.Framework.Database.Engine;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Globalization;
 using HB.Framework.Database.Transaction;
+using System.Data.Common;
 
 namespace HB.Framework.Database
 {
@@ -34,7 +30,7 @@ namespace HB.Framework.Database
         private ISQLBuilder _sqlBuilder;
         private ILogger<DefaultDatabase> _logger;
 
-        public IDatabaseEngine DatabaseEngine { get { return _databaseEngine; } }
+        //public IDatabaseEngine DatabaseEngine { get { return _databaseEngine; } }
 
         public DefaultDatabase(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory, IDatabaseEntityMapper modelMapper, ISQLBuilder sqlBuilder, ILogger<DefaultDatabase> logger)
         {
@@ -88,16 +84,15 @@ namespace HB.Framework.Database
 
             try
             {
-                IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(selectCondition, fromCondition, whereCondition);
+                IDbCommand command = _sqlBuilder.CreateRetrieveCommand(selectCondition, fromCondition, whereCondition);
 
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, selectDef.DatabaseName, command, useMaster);
                 result = _modelMapper.ToList<TSelect>(reader);
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 result = new List<TSelect>();
-                _logger.LogError(ex.Message);
-
+                _logger.LogCritical(ex.Message);
             }
             finally
             {
@@ -159,10 +154,10 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
                 result = _modelMapper.ToList<T>(reader);
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 result = new List<T>();
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
             }
             finally
             {
@@ -223,13 +218,13 @@ namespace HB.Framework.Database
 			DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
             try
             {
-                IDbCommand command = _sqlBuilder.CreateCountCommand<T>(fromCondition, whereCondition);
+                IDbCommand command = _sqlBuilder.CreateCountCommand(fromCondition, whereCondition);
                 object countObj = _databaseEngine.ExecuteCommandScalar(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
                 count = Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
             }
 
             return count;
@@ -242,25 +237,25 @@ namespace HB.Framework.Database
         public T Scalar<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            return Scalar<T>(null, fromCondition, whereCondition, transContext, useMaster);
+            return Scalar(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
         public IList<T> Retrieve<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            return Retrieve<T>(null, fromCondition, whereCondition, transContext, useMaster);
+            return Retrieve(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
         public  IList<T> Page<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            return Page<T>(null, fromCondition, whereCondition, pageNumber, perPageCount, transContext, useMaster);
+            return Page(null, fromCondition, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
         public  long Count<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            return Count<T>(null, fromCondition, whereCondition, transContext, useMaster);
+            return Count(null, fromCondition, whereCondition, transContext, useMaster);
         }
 
         #endregion
@@ -276,19 +271,19 @@ namespace HB.Framework.Database
         public T Scalar<T>(WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster)
             where T : DatabaseEntity, new()
         {
-            return Scalar<T>(null, null, whereCondition, transContext, useMaster);
+            return Scalar(null, null, whereCondition, transContext, useMaster);
         }
 
         public IList<T> Retrieve<T>(WhereExpression<T> whereCondition, DatabaseTransactionContext transContext, bool useMaster) 
             where T : DatabaseEntity, new()
         {
-            return Retrieve<T>(null, null, whereCondition, transContext, useMaster);
+            return Retrieve(null, null, whereCondition, transContext, useMaster);
         }
 
         public IList<T> Page<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster) 
             where T : DatabaseEntity, new()
         {
-            return Page<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
+            return Page(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
         public IList<T> Page<T>(long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
@@ -300,7 +295,7 @@ namespace HB.Framework.Database
         public long Count<T>(WhereExpression<T> condition, DatabaseTransactionContext transContext, bool useMaster) 
             where T : DatabaseEntity, new()
         {
-            return Count<T>(null, null, condition, transContext, useMaster);
+            return Count(null, null, condition, transContext, useMaster);
         }
 
         public long Count<T>(DatabaseTransactionContext transContext, bool useMaster)
@@ -325,7 +320,7 @@ namespace HB.Framework.Database
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
             whereCondition.Where(whereExpr);
 
-            return Scalar<T>(null, null, whereCondition, transContext, useMaster);
+            return Scalar(null, null, whereCondition, transContext, useMaster);
         }
 
         public IList<T> Retrieve<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext, bool useMaster)
@@ -334,7 +329,7 @@ namespace HB.Framework.Database
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
             whereCondition.Where(whereExpr);
 
-            return Retrieve<T>(null, null, whereCondition, transContext, useMaster);
+            return Retrieve(null, null, whereCondition, transContext, useMaster);
         }
 
         public IList<T> Page<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, DatabaseTransactionContext transContext, bool useMaster)
@@ -342,7 +337,7 @@ namespace HB.Framework.Database
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(whereExpr);
 
-            return Page<T>(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
+            return Page(null, null, whereCondition, pageNumber, perPageCount, transContext, useMaster);
         }
 
         public long Count<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext, bool useMaster)
@@ -351,7 +346,7 @@ namespace HB.Framework.Database
             WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
             whereCondition.Where(whereExpr);
 
-            return Count<T>(null, null, whereCondition, transContext, useMaster);
+            return Count(null, null, whereCondition, transContext, useMaster);
         }
 
         #endregion
@@ -379,11 +374,11 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
                 result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 result = new List<Tuple<TSource, TTarget>>();
 
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
             }
             finally
             {
@@ -460,11 +455,11 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, useMaster);
                 result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 result = new List<Tuple<TSource, TTarget1, TTarget2>>();
 
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
             }
             finally
             {
@@ -539,15 +534,15 @@ namespace HB.Framework.Database
 
             try
             {
-                reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateAddCommand<T>(item, "default"), true);
+                reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateAddCommand(item, "default"), true);
 
                 _modelMapper.ToObject(reader, item);
 
                 return DatabaseResult.Succeeded();
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -582,7 +577,7 @@ namespace HB.Framework.Database
 
             try
             {
-                long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.GetDeleteCommand<T>(condition, "default"));
+                long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.GetDeleteCommand(condition, "default"));
 
                 if (rows == 1)
                 {
@@ -595,9 +590,9 @@ namespace HB.Framework.Database
 
                 throw new Exception("Multiple Rows Affected instead of one. Something go wrong.");
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
         }    
@@ -632,7 +627,7 @@ namespace HB.Framework.Database
 
             try
             {
-                long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateUpdateCommand<T>(condition, item, "default"));
+                long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateUpdateCommand(condition, item, "default"));
 
                 if (rows == 1)
                 {
@@ -646,9 +641,9 @@ namespace HB.Framework.Database
 
                 throw new Exception("Multiple Rows Affected instead of one. Something go wrong.");
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
         }
