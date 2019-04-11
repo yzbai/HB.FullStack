@@ -17,14 +17,14 @@ namespace HB.Framework.Common.Entity
 
         public bool IsValid()
         {
-            return __performValidate();
+            return PerformValidate();
         }
 
         public IList<ValidationResult> GetValidateResults()
         {
             if (__validateResults == null)
             {
-                __performValidate();
+                PerformValidate();
             }
             return __validateResults;
         }
@@ -41,7 +41,7 @@ namespace HB.Framework.Common.Entity
             return builder.ToString();
         }
 
-        private bool __performValidate()
+        private bool PerformValidate()
         {
             ValidationContext vContext = new ValidationContext(this);
             return Validator.TryValidateObject(this, vContext, __validateResults, true);

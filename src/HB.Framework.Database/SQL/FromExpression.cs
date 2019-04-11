@@ -13,9 +13,9 @@ namespace HB.Framework.Database.SQL
     public class FromExpression<T> : SQLExpression
         where T : DatabaseEntity, new()
     {
-        private StringBuilder _statementBuilder;
+        private readonly StringBuilder _statementBuilder;
 
-        private DatabaseEntityDef _sourceEntityDef;
+        private readonly DatabaseEntityDef _sourceEntityDef;
 
         private readonly IDatabaseEngine _databaseEngine;
 

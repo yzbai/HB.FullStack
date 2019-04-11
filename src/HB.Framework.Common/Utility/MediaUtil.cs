@@ -6,7 +6,7 @@ namespace System
 {
     public static class MediaUtil
     {
-        private static Dictionary<string, string> mediaType2FileTypeDict = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> mediaType2FileTypeDict = new Dictionary<string, string>();
 
         static MediaUtil()
         {

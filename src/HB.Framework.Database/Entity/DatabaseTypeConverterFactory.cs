@@ -6,7 +6,7 @@ namespace HB.Framework.Database.Entity
 {
     public class DatabaseTypeConverterFactory : IDatabaseTypeConverterFactory
     {
-        private IDictionary<Type, DatabaseTypeConverter> converterDict = new Dictionary<Type, DatabaseTypeConverter>();
+        private readonly IDictionary<Type, DatabaseTypeConverter> converterDict = new Dictionary<Type, DatabaseTypeConverter>();
 
         public DatabaseTypeConverterFactory()
         {

@@ -8,33 +8,9 @@ namespace HB.Infrastructure.MySQL
 {
     public partial class MySQLExecuter
     {
-        #region Reader
+        #region Command Reader
 
-        public static Task<IDataReader> ExecuteSqlReaderAsync(string connectionString, string sqlString)
-        {
-            MySqlConnection conn = new MySqlConnection(connectionString);
-
-            MySqlCommand command = new MySqlCommand
-            {
-                CommandType = CommandType.Text,
-                CommandText = sqlString
-            };
-
-            return ExecuteCommandReaderAsync(conn, true, command);
-        }
-
-        public static Task<IDataReader> ExecuteSqlReaderAsync(MySqlTransaction mySqlTransaction, string sqlString)
-        {
-            MySqlCommand command = new MySqlCommand
-            {
-                CommandType = CommandType.Text,
-                CommandText = sqlString
-            };
-
-            return ExecuteCommandReaderAsync(mySqlTransaction.Connection, false, command);
-        }
-
-        public static Task<IDataReader> ExecuteSqlReaderAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
+        public static Task<IDataReader> ExecuteCommandReaderAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
             return ExecuteCommandReaderAsync(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
@@ -87,7 +63,7 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region Scalar
+        #region Command Scalar
 
         public static Task<object> ExecuteCommandScalarAsync(string connectString, IDbCommand dbCommand)
         {
@@ -98,30 +74,6 @@ namespace HB.Infrastructure.MySQL
         public static Task<object> ExecuteCommandScalarAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
             return ExecuteCommandScalarAsync(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
-        }
-
-        public static Task<object> ExecuteSqlScalarAsync(string connectionString, string sqlString)
-        {
-            MySqlConnection conn = new MySqlConnection(connectionString);
-
-            MySqlCommand command = new MySqlCommand
-            {
-                CommandType = CommandType.Text,
-                CommandText = sqlString
-            };
-
-            return ExecuteCommandScalarAsync(conn, true, command);
-        }
-
-        public static Task<object> ExecuteSqlScalarAsync(MySqlTransaction mySqlTransaction, string sqlString)
-        {
-            MySqlCommand command = new MySqlCommand
-            {
-                CommandType = CommandType.Text,
-                CommandText = sqlString
-            };
-
-            return ExecuteCommandScalarAsync(mySqlTransaction.Connection, false, command);
         }
 
         private static async Task<object> ExecuteCommandScalarAsync(MySqlConnection connection, bool isOwnedConnection, MySqlCommand command)
@@ -156,7 +108,7 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region NonQuery
+        #region Comand NonQuery
 
         public static Task<int> ExecuteCommandNonQueryAsync(string connectString, IDbCommand dbCommand)
         {
@@ -168,30 +120,6 @@ namespace HB.Infrastructure.MySQL
         public static Task<int> ExecuteCommandNonQueryAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
             return ExecuteCommandNonQueryAsync(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
-        }
-
-        public static Task<int> ExecuteSqlNonQueryAsync(string connectionString, string sqlString)
-        {
-            MySqlConnection conn = new MySqlConnection(connectionString);
-
-            MySqlCommand command = new MySqlCommand
-            {
-                CommandType = CommandType.Text,
-                CommandText = sqlString
-            };
-
-            return ExecuteCommandNonQueryAsync(conn, true, command);
-        }
-
-        public static Task<int> ExecuteSqlNonQueryAsync(MySqlTransaction mySqlTransaction, string sqlString)
-        {
-            MySqlCommand command = new MySqlCommand
-            {
-                CommandType = CommandType.Text,
-                CommandText = sqlString
-            };
-
-            return ExecuteCommandNonQueryAsync(mySqlTransaction.Connection, false, command);
         }
 
         private static async Task<int> ExecuteCommandNonQueryAsync(MySqlConnection conn, bool isOwnedConnection, MySqlCommand command)
@@ -226,9 +154,7 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region SP
-
-        #region NonQuery
+        #region SP NonQuery
 
         public static Task<int> ExecuteSPNonQueryAsync(string connectString, string spName, IList<IDataParameter> parameters)
         {
@@ -271,7 +197,7 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region scalar
+        #region SP Scalar
 
         public static Task<object> ExecuteSPScalarAsync(MySqlTransaction mySqlTransaction, string spName, IList<IDataParameter> parameters)
         {
@@ -313,7 +239,7 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #region reader
+        #region SP Reader
 
         public static Task<IDataReader> ExecuteSPReaderAsync(string connectString, string spName, IList<IDataParameter> dbParameters)
         {
@@ -368,32 +294,99 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        #endregion
-
-        #region DataTable
-
-        public static Task<DataTable> ExecuteSqlDataTableAsync(string connectString, string sqlString)
-        {
-            MySqlConnection conn = new MySqlConnection(connectString);
-            return ExecuteSqlDataTableAsync(conn, sqlString, true);
-        }
-
-        public static Task<DataTable> ExecuteSqlDataTableAsync(MySqlTransaction mySqlTransaction, string sqlString)
-        {
-            if (mySqlTransaction == null)
-            {
-                throw new ArgumentNullException(nameof(mySqlTransaction), "ExecuteSqlReader方法不接收NULL参数");
-            }
-
-            return ExecuteSqlDataTableAsync(mySqlTransaction.Connection, sqlString, false);
-        }
-
-        private static Task<DataTable> ExecuteSqlDataTableAsync(MySqlConnection connection, string sqlString, bool isOwndConnection)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
     }
 }
+
+//public static Task<IDataReader> ExecuteSqlReaderAsync(string connectionString, string sqlString)
+//{
+//    MySqlConnection conn = new MySqlConnection(connectionString);
+
+//    MySqlCommand command = new MySqlCommand
+//    {
+//        CommandType = CommandType.Text,
+//        CommandText = sqlString
+//    };
+
+//    return ExecuteCommandReaderAsync(conn, true, command);
+//}
+
+//public static Task<IDataReader> ExecuteSqlReaderAsync(MySqlTransaction mySqlTransaction, string sqlString)
+//{
+//    MySqlCommand command = new MySqlCommand
+//    {
+//        CommandType = CommandType.Text,
+//        CommandText = sqlString
+//    };
+
+//    return ExecuteCommandReaderAsync(mySqlTransaction.Connection, false, command);
+//}
+//public static Task<object> ExecuteSqlScalarAsync(string connectionString, string sqlString)
+//{
+//    MySqlConnection conn = new MySqlConnection(connectionString);
+
+//    MySqlCommand command = new MySqlCommand
+//    {
+//        CommandType = CommandType.Text,
+//        CommandText = sqlString
+//    };
+
+//    return ExecuteCommandScalarAsync(conn, true, command);
+//}
+
+//public static Task<object> ExecuteSqlScalarAsync(MySqlTransaction mySqlTransaction, string sqlString)
+//{
+//    MySqlCommand command = new MySqlCommand
+//    {
+//        CommandType = CommandType.Text,
+//        CommandText = sqlString
+//    };
+
+//    return ExecuteCommandScalarAsync(mySqlTransaction.Connection, false, command);
+//}
+//public static Task<int> ExecuteSqlNonQueryAsync(string connectionString, string sqlString)
+//{
+//    MySqlConnection conn = new MySqlConnection(connectionString);
+
+//    MySqlCommand command = new MySqlCommand
+//    {
+//        CommandType = CommandType.Text,
+//        CommandText = sqlString
+//    };
+
+//    return ExecuteCommandNonQueryAsync(conn, true, command);
+//}
+
+//public static Task<int> ExecuteSqlNonQueryAsync(MySqlTransaction mySqlTransaction, string sqlString)
+//{
+//    MySqlCommand command = new MySqlCommand
+//    {
+//        CommandType = CommandType.Text,
+//        CommandText = sqlString
+//    };
+
+//    return ExecuteCommandNonQueryAsync(mySqlTransaction.Connection, false, command);
+//}
+//#region DataTable
+
+//public static Task<DataTable> ExecuteSqlDataTableAsync(string connectString, string sqlString)
+//{
+//    MySqlConnection conn = new MySqlConnection(connectString);
+//    return ExecuteSqlDataTableAsync(conn, sqlString, true);
+//}
+
+//public static Task<DataTable> ExecuteSqlDataTableAsync(MySqlTransaction mySqlTransaction, string sqlString)
+//{
+//    if (mySqlTransaction == null)
+//    {
+//        throw new ArgumentNullException(nameof(mySqlTransaction), "ExecuteSqlReader方法不接收NULL参数");
+//    }
+
+//    return ExecuteSqlDataTableAsync(mySqlTransaction.Connection, sqlString, false);
+//}
+
+//private static Task<DataTable> ExecuteSqlDataTableAsync(MySqlConnection connection, string sqlString, bool isOwndConnection)
+//{
+//    throw new NotImplementedException();
+//}
+
+////#endregion

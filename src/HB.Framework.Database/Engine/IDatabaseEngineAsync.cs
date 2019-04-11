@@ -29,20 +29,6 @@ namespace HB.Framework.Database.Engine
 
         #endregion
 
-        #region SQL执行功能
-
-        /// <summary>
-        /// 使用后必须Dispose，必须使用using
-        /// </summary>
-        Task<IDataReader> ExecuteSqlReaderAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
-
-        Task<object> ExecuteSqlScalarAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
-
-        Task<int> ExecuteSqlNonQueryAsync(IDbTransaction trans, string dbName, string SQL);
-
-        Task<DataTable> ExecuteSqlDataTableAsync(IDbTransaction trans, string dbName, string SQL);
-
-        #endregion
 
         #region Command执行功能
 
@@ -58,3 +44,18 @@ namespace HB.Framework.Database.Engine
         #endregion
     }
 }
+
+//#region SQL执行功能
+
+///// <summary>
+///// 使用后必须Dispose，必须使用using
+///// </summary>
+//Task<IDataReader> ExecuteSqlReaderAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+
+//Task<object> ExecuteSqlScalarAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+
+//Task<int> ExecuteSqlNonQueryAsync(IDbTransaction trans, string dbName, string SQL);
+
+//Task<DataTable> ExecuteSqlDataTableAsync(IDbTransaction trans, string dbName, string SQL);
+
+//#endregion
