@@ -17,9 +17,9 @@ namespace HB.Framework.EventBus
     /// </summary>
     public class DefaultEventBus : IEventBus
     {
-        private EventBusOptions _options;
-        private IEventBusEngine _engine;
-        private ILogger _logger;
+        private readonly EventBusOptions _options;
+        private readonly IEventBusEngine _engine;
+        private readonly ILogger _logger;
 
         public DefaultEventBus(IEventBusEngine eventBusEngine, IOptions<EventBusOptions> options, ILogger<DefaultEventBus> logger)
         {
