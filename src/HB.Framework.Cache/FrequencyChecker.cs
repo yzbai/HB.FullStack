@@ -10,7 +10,7 @@ namespace HB.Framework.Cache
     {
         private const string Frequency_Check_Key_Prefix = "Freq_C";
 
-        private IDistributedCache _cache;
+        private readonly IDistributedCache _cache;
 
         public FrequencyChecker(IDistributedCache cache)
         {

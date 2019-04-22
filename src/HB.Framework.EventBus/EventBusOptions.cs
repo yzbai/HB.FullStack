@@ -16,9 +16,11 @@ namespace HB.Framework.EventBus
 
     public class EventBusOptions : IOptions<EventBusOptions>
     {
-        public EventBusOptions Value => this;
-
-        
+        public EventBusOptions Value {
+            get {
+                return this;
+            }
+        }
 
         public IList<EventSchema> EventSchemas { get; set; } = new List<EventSchema>();
 
