@@ -18,7 +18,7 @@ namespace HB.Framework.DocumentStore
 
     public class DocumentStoreOptions : IOptions<DocumentStoreOptions>
     {
-        public DocumentStoreOptions Value => this;
+        public DocumentStoreOptions Value { get { return this; } }
 
         public IList<DocumentStoreSchema> Schemas { get; set; } = new List<DocumentStoreSchema>();
 

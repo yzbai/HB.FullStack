@@ -24,7 +24,7 @@ namespace HB.Framework.Database
     /// <typeparam name="T"></typeparam>
     public partial class DefaultDatabase : IDatabase
     {
-        private IDatabaseEngine _databaseEngine;
+        private readonly IDatabaseEngine _databaseEngine;
         private IDatabaseEntityDefFactory _entityDefFactory;
         private IDatabaseEntityMapper _modelMapper;
         private ISQLBuilder _sqlBuilder;
