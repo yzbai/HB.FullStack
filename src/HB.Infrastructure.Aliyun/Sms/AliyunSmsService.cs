@@ -19,9 +19,9 @@ namespace HB.Infrastructure.Aliyun.Sms
 {
     public class AliyunSmsService : ISmsService
     {
-        private AliyunSmsOptions _options;
-        private IAcsClient _client;
-        private ISmsCodeBiz _smsCodeBiz;
+        private readonly AliyunSmsOptions _options;
+        private readonly IAcsClient _client;
+        private readonly ISmsCodeBiz _smsCodeBiz;
         private readonly ILogger _logger;
 
         public AliyunSmsService(IAcsClientManager acsClientManager, ISmsCodeBiz smsCodeBiz, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger) 

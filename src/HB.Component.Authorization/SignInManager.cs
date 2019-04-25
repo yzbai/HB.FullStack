@@ -14,12 +14,12 @@ namespace HB.Component.Authorization
 {
     public class SignInManager : ISignInManager
     {
-        private AuthorizationServerOptions _options;
-        private SignInOptions _signInOptions;
+        private readonly AuthorizationServerOptions _options;
+        private readonly SignInOptions _signInOptions;
         //private IUserBiz _userBiz;
-        private IIdentityManager _identityManager;
-        private ISignInTokenBiz _signInTokenBiz;
-        private IJwtBuilder _jwtBuilder;
+        private readonly IIdentityManager _identityManager;
+        private readonly ISignInTokenBiz _signInTokenBiz;
+        private readonly IJwtBuilder _jwtBuilder;
 
         public SignInManager(IOptions<AuthorizationServerOptions> options, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, IJwtBuilder jwtBuilder) 
         {

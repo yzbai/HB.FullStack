@@ -15,8 +15,8 @@ namespace HB.Component.Identity
     {
         private readonly IDatabase _db;
         private readonly ILogger _logger;
-        private IRoleBiz _roleBiz;
-        private IUserClaimBiz _userClaimBiz;
+        private readonly IRoleBiz _roleBiz;
+        private readonly IUserClaimBiz _userClaimBiz;
 
         public ClaimsPrincipalFactory(IDatabase database, ILogger<ClaimsPrincipalFactory> logger, IUserClaimBiz userClaims, IRoleBiz roleBiz)
         {

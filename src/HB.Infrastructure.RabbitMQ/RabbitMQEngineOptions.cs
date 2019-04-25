@@ -42,7 +42,11 @@ namespace HB.Infrastructure.RabbitMQ
 
     public class RabbitMQEngineOptions : IOptions<RabbitMQEngineOptions>
     {
-        public RabbitMQEngineOptions Value => this;
+        public RabbitMQEngineOptions Value {
+            get {
+                return this;
+            }
+        }
 
         public IList<RabbitMQConnectionSetting> ConnectionSettings { get; set; } = new List<RabbitMQConnectionSetting>();
 

@@ -11,7 +11,7 @@ namespace HB.Infrastructure.Redis.Direct
 {
     public class RedisDatabase : IRedisDatabase
     {
-        private IRedisInstanceManager _redisConnectionManager;
+        private readonly IRedisInstanceManager _redisConnectionManager;
 
         private readonly ILogger<RedisDatabase> _logger;
 

@@ -10,7 +10,7 @@ namespace HB.Component.Identity
 {
     public class UserClaimBiz : IUserClaimBiz
     {
-        private IDatabase _db;
+        private readonly IDatabase _db;
         private readonly ILogger _logger;
 
         public UserClaimBiz(IDatabase database, ILogger<UserClaimBiz> logger)

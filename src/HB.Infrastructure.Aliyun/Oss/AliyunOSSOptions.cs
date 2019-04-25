@@ -21,7 +21,11 @@ namespace HB.Infrastructure.Aliyun.Oss
 
     public class AliyunOssOptions : IOptions<AliyunOssOptions>
     {
-        public AliyunOssOptions Value => this;
+        public AliyunOssOptions Value {
+            get {
+                return this;
+            }
+        }
 
         public string ProductName { get; set; }
 

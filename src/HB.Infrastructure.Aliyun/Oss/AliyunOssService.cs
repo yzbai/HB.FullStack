@@ -17,10 +17,10 @@ namespace HB.Infrastructure.Aliyun.Oss
         private static readonly string READ_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
         private static readonly string WRITE_ROLE_POLICY_TEMPLATE = "{ \"Version\":\"1\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}]}";
 
-        private AliyunOssOptions _options;
-        private AliyunAccessSetting _accessSetting;
-        private IAcsClient _acsClient;
-        private ILogger _logger;
+        private readonly AliyunOssOptions _options;
+        private readonly AliyunAccessSetting _accessSetting;
+        private readonly IAcsClient _acsClient;
+        private readonly ILogger _logger;
 
         public AliyunOssService(IOptions<AliyunOssOptions> options, IAcsClientManager acsClientManager, ILogger<AliyunOssService> logger)
         {
@@ -38,7 +38,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         public Task<StsRoleCredential> GetDirectoryRoleCredentialAsync(string bucket, string directory, string roleSessionName, bool isRead)
         {
             string path = bucket + "/" + directory;
-            string policy = isRead ? string.Format(GlobalSettings.Culture, READ_ROLE_POLICY_TEMPLATE, path) 
+            string policy = isRead ? string.Format(GlobalSettings.Culture, READ_ROLE_POLICY_TEMPLATE, path)
                 : string.Format(GlobalSettings.Culture, WRITE_ROLE_POLICY_TEMPLATE, path);
 
             BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
@@ -48,17 +48,17 @@ namespace HB.Infrastructure.Aliyun.Oss
 
         private Task<StsRoleCredential> GetStsRoleCredentialAsync(string roleArn, string roleSessionName, string policy, int expireSeconds = 3600)
         {
-            AssumeRoleRequest request = new AssumeRoleRequest();
+            AssumeRoleRequest request = new AssumeRoleRequest {
+                AcceptFormat = FormatType.JSON,
+                RoleArn = roleArn,
+                RoleSessionName = roleSessionName,
+                DurationSeconds = expireSeconds,
+                Policy = policy
+            };
 
-            request.AcceptFormat = FormatType.JSON;
-            request.RoleArn = roleArn;
-            request.RoleSessionName = roleSessionName;
-            request.DurationSeconds = expireSeconds;
-            request.Policy = policy;
+            return PolicyManager.Default(_logger).ExecuteAsync(async () => {
 
-            return PolicyManager.Default(_logger).ExecuteAsync(async ()=> {
-
-                Task<AssumeRoleResponse> task = new Task<AssumeRoleResponse>(()=>_acsClient.GetAcsResponse(request));
+                Task<AssumeRoleResponse> task = new Task<AssumeRoleResponse>(() => _acsClient.GetAcsResponse(request));
                 task.Start(TaskScheduler.Default);
 
                 AssumeRoleResponse response = await task.ConfigureAwait(false);

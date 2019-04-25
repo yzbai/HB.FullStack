@@ -15,9 +15,9 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
     {
         private readonly string _instanceName;
         private readonly long _aliveSeconds;
-        private IRedisInstanceManager _redisInstanceManager;
+        private readonly IRedisInstanceManager _redisInstanceManager;
 
-        private ConcurrentDictionary<string, string> _tokenDict = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _tokenDict = new ConcurrentDictionary<string, string>();
 
         public DuplicateChecker(IRedisInstanceManager redisInstanceManager, string instanceName, long aliveSeconds)
         {

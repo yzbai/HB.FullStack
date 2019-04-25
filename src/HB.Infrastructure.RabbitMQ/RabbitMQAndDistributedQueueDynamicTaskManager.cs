@@ -17,7 +17,7 @@ namespace HB.Infrastructure.RabbitMQ
 
         private ulong _inCommingCount = 0;
         private readonly object _taskNodesLocker = new object();
-        private LinkedList<TaskNode> _taskNodes = new LinkedList<TaskNode>();
+        private readonly LinkedList<TaskNode> _taskNodes = new LinkedList<TaskNode>();
 
         protected RabbitMQAndDistributedQueueDynamicTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisDatabase redis, ILogger logger)
         {

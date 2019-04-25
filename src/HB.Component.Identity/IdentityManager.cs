@@ -11,7 +11,7 @@ namespace HB.Component.Identity
     public class IdentityManager : IIdentityManager
     {
         private readonly IdentityOptions _options;
-        private IUserBiz _userBiz;
+        private readonly IUserBiz _userBiz;
 
         public IdentityManager(IOptions<IdentityOptions> options, IUserBiz userBiz)
         {

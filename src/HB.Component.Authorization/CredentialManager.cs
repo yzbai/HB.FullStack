@@ -15,9 +15,9 @@ namespace HB.Component.Authorization
 {
     public class CredentialManager : ICredentialManager
     {
-        private AuthorizationServerOptions _options;
+        private readonly AuthorizationServerOptions _options;
         private readonly SigningCredentials _signingCredentials;
-        private JsonWebKeySet _jsonWebKeySet;
+        private readonly JsonWebKeySet _jsonWebKeySet;
         private readonly ILogger _logger;
 
         public CredentialManager(IOptions<AuthorizationServerOptions> options, ILogger<CredentialManager> logger)
