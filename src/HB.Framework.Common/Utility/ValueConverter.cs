@@ -6,11 +6,11 @@ using System.Text;
 
 namespace HB.Framework.Common.Entity
 {
-    public static class DefaultTypeConverter
+    public static class ValueConverter
     {
         private static readonly Dictionary<Type, Func<object, object>> convertFunDict = new Dictionary<Type, Func<object, object>>();
 
-        static DefaultTypeConverter()
+        static ValueConverter()
         {
             #region type to type
 
@@ -56,6 +56,12 @@ namespace HB.Framework.Common.Entity
             #endregion
         }
 
+        /// <summary>
+        /// 将数据库的值转换为内存C#值
+        /// </summary>
+        /// <returns>The value to type value.</returns>
+        /// <param name="type">Type.</param>
+        /// <param name="dbValue">Db value.</param>
         public static object DbValueToTypeValue(Type type, object dbValue)
         {
             if (type.IsEnum)
@@ -83,6 +89,11 @@ namespace HB.Framework.Common.Entity
             return convertFn(dbValue);
         }
 
+        /// <summary>
+        /// 将C#值转换为字符串，便于Database存放
+        /// </summary>
+        /// <returns>The value to db value.</returns>
+        /// <param name="value">Value.</param>
         public static string TypeValueToDbValue(object value)
         {
             string valueStr;
