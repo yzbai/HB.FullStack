@@ -10,12 +10,12 @@ namespace HB.Infrastructure.RabbitMQ
 {
     public class RabbitMQConnectionManager : IRabbitMQConnectionManager
     {
-        private RabbitMQEngineOptions _options;
-        private ILogger _logger;
+        private readonly RabbitMQEngineOptions _options;
+        private readonly ILogger _logger;
 
         //brokerName:Connection Dictionary
-        private IDictionary<string, IConnection> _pubConnectionDict = new Dictionary<string, IConnection>();
-        private IDictionary<string, IConnection> _subConnectionDict = new Dictionary<string, IConnection>();
+        private readonly IDictionary<string, IConnection> _pubConnectionDict = new Dictionary<string, IConnection>();
+        private readonly IDictionary<string, IConnection> _subConnectionDict = new Dictionary<string, IConnection>();
         
         public RabbitMQConnectionManager(IOptions<RabbitMQEngineOptions> options, ILogger<RabbitMQConnectionManager> logger)
         {

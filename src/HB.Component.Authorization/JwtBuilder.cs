@@ -17,10 +17,10 @@ namespace HB.Component.Authorization
 {
     public class JwtBuilder : IJwtBuilder
     {
-        private SignInOptions _signInOptions;
-        private AuthorizationServerOptions _options;
-        private IClaimsPrincipalFactory _claimsPrincipalFactory;
-        private ICredentialManager _credentialManager;
+        private readonly SignInOptions _signInOptions;
+        private readonly AuthorizationServerOptions _options;
+        private readonly IClaimsPrincipalFactory _claimsPrincipalFactory;
+        private readonly ICredentialManager _credentialManager;
         private readonly SigningCredentials _signingCredentials;
 
         public JwtBuilder(IOptions<AuthorizationServerOptions> options, IClaimsPrincipalFactory claimsPrincipalFactory, ICredentialManager credentialManager)

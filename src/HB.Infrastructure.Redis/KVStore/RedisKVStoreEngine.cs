@@ -33,8 +33,8 @@ namespace HB.Infrastructure.Redis.KVStore
         private const string luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
         private const string luaBatchDeleteReturnTemplate = @"return 1";
 
-        private ILogger _logger;
-        private IRedisInstanceManager _redisConnectionManager;
+        private readonly ILogger _logger;
+        private readonly IRedisInstanceManager _redisConnectionManager;
 
         public RedisKVStoreEngine(IRedisInstanceManager redisConnectionManager, ILogger<RedisKVStoreEngine> logger)
         {

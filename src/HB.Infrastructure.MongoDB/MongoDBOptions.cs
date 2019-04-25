@@ -16,7 +16,11 @@ namespace HB.Infrastructure.MongoDB
     {
         public IList<MongoDBConnectionSetting> ConnectionSettings { get; set; } = new List<MongoDBConnectionSetting>();
 
-        public MongoDBOptions Value => this;
+        public MongoDBOptions Value {
+            get {
+                return this;
+            }
+        }
 
         public string GetConnectionString(string instanceName)
         {

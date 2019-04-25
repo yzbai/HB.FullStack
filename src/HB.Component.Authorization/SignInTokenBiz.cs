@@ -18,8 +18,8 @@ namespace HB.Component.Authorization
 {
     public class SignInTokenBiz : ISignInTokenBiz
     {
-        private IDatabase _db;
-        private ILogger _logger;
+        private readonly IDatabase _db;
+        private readonly ILogger _logger;
 
         public SignInTokenBiz(IDatabase database, ILogger<SignInTokenBiz> logger)
         {

@@ -12,21 +12,21 @@ namespace HB.Infrastructure.RabbitMQ
 {
     public class RabbitMQEventBusEngine : IEventBusEngine
     {
-        private ILogger _logger;
-        private RabbitMQEngineOptions _options;
+        private readonly ILogger _logger;
+        private readonly RabbitMQEngineOptions _options;
         private readonly IRabbitMQConnectionManager _connectionManager;
-        private IRedisDatabase _redis;
+        private readonly IRedisDatabase _redis;
 
         private readonly ILogger _consumeTaskManagerLogger;
 
         //brokerName : PublishTaskManager
-        private IDictionary<string, PublishTaskManager> _publishManagers = new Dictionary<string, PublishTaskManager>();
+        private readonly IDictionary<string, PublishTaskManager> _publishManagers = new Dictionary<string, PublishTaskManager>();
 
         //brokerName : HistoryTaskManager
-        private IDictionary<string, HistoryTaskManager> _historyManager = new Dictionary<string, HistoryTaskManager>();
+        private readonly IDictionary<string, HistoryTaskManager> _historyManager = new Dictionary<string, HistoryTaskManager>();
 
         //eventType : ConsumeTaskManager
-        private IDictionary<string, ConsumeTaskManager> _consumeManager = new Dictionary<string, ConsumeTaskManager>();
+        private readonly IDictionary<string, ConsumeTaskManager> _consumeManager = new Dictionary<string, ConsumeTaskManager>();
         
         public RabbitMQEventBusEngine(IOptions<RabbitMQEngineOptions> options, ILoggerFactory loggerFactory, IRabbitMQConnectionManager connectionManager, IRedisDatabase redis)
         {

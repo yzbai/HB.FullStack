@@ -12,13 +12,13 @@ namespace HB.Infrastructure.Redis
 {
     public class RedisInstanceManager : IRedisInstanceManager
     {      
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         //instanceName : RedisConnection
-        private Dictionary<string, RedisConnection> _connectionDict;
+        private readonly Dictionary<string, RedisConnection> _connectionDict;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
-        private RedisOptions _options;
+        private readonly RedisOptions _options;
 
         public RedisInstanceManager(IOptions<RedisOptions> options, ILogger<RedisInstanceManager> logger)
         {
@@ -118,6 +118,11 @@ namespace HB.Infrastructure.Redis
 
                 lock (_disposeLocker)
                 {
+                    if (_connectionLock != null)
+                    {
+                        _connectionLock.Dispose();
+                    }
+
                     if (_connectionDict != null)
                     {
                         foreach (KeyValuePair<string, RedisConnection> pair in _connectionDict)

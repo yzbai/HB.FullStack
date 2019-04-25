@@ -15,7 +15,7 @@ namespace HB.Infrastructure.MySQL
     {
         #region 自身 & 构建
 
-        private MySQLEngineOptions _options;
+        private readonly MySQLEngineOptions _options;
         private Dictionary<string, string> _connectionStringDict;
 
         private MySQLEngine() { }

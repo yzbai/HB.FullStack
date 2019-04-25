@@ -7,8 +7,8 @@ namespace HB.Framework.KVStore.Entity
 {
     public class DefaultKVStoreModelDefFactory : IKVStoreEntityDefFactory
     {
-        private KVStoreOptions _options;
-        private ConcurrentDictionary<Type, KVStoreEntityDef> _defDict;
+        private readonly KVStoreOptions _options;
+        private readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict;
         private readonly object _lockObj;
 
         public DefaultKVStoreModelDefFactory(IOptions<KVStoreOptions> options)

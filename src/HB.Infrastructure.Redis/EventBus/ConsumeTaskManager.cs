@@ -23,18 +23,18 @@ namespace HB.Infrastructure.Redis.EventBus
         private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Id\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
         private readonly string _instanceName;
         private readonly string _eventType;
-        private ILogger _logger;
-        private IRedisInstanceManager _instanceManager;
-        private RedisInstanceSetting _instanceSetting;
-        private IEventHandler _eventHandler;
+        private readonly ILogger _logger;
+        private readonly IRedisInstanceManager _instanceManager;
+        private readonly RedisInstanceSetting _instanceSetting;
+        private readonly IEventHandler _eventHandler;
 
-        private Task _consumeTask;
-        private CancellationTokenSource _consumeTaskCTS;
+        private readonly Task _consumeTask;
+        private readonly CancellationTokenSource _consumeTaskCTS;
 
         private readonly Task _historyTask;
-        private CancellationTokenSource _historyTaskCTS;
+        private readonly CancellationTokenSource _historyTaskCTS;
 
-        private DuplicateChecker _duplicateChecker;
+        private readonly DuplicateChecker _duplicateChecker;
 
         public ConsumeTaskManager(
             string brokerName, 
@@ -148,6 +148,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 catch(Exception ex)
                 {
                     _logger.LogCritical(ex, $"ScanHistory {_instanceName} 中，EventType:{_eventType}, Exceptions: {ex.Message}");
+                    throw;
                 }
             }
         }
@@ -212,6 +213,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 catch(Exception ex)
                 {
                     _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {JsonUtil.ToJson(entity)}");
+                    throw;
                 }
 
                 //5, Acks
