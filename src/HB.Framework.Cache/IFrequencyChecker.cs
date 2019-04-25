@@ -7,6 +7,6 @@ namespace HB.Framework.Cache
 {
     public interface IFrequencyChecker
     {
-        Task<bool> CheckAsync(string clientId, TimeSpan aliveTimeSpan);
+        Task<bool> CheckAsync(string resource, TimeSpan aliveTimeSpan);
     }
 }
