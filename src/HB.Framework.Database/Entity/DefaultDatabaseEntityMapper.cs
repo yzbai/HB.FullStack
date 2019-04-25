@@ -50,7 +50,7 @@ namespace HB.Framework.Database.Entity
                     DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i]);
 
                     object value = property.TypeConverter == null ? 
-                        DefaultTypeConverter.DbValueToTypeValue(property.PropertyType, reader[i]) : 
+                        ValueConverter.DbValueToTypeValue(property.PropertyType, reader[i]) : 
                         property.TypeConverter.DbValueToTypeValue(reader[i]);
 
                     property.SetValue(item, value);
@@ -106,7 +106,7 @@ namespace HB.Framework.Database.Entity
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
                             pDef.TypeConverter.DbValueToTypeValue(reader[j]);
 
                         pDef.SetValue(t1, value);
@@ -120,7 +120,7 @@ namespace HB.Framework.Database.Entity
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
                             pDef.TypeConverter.DbValueToTypeValue(reader[j]);
 
                         pDef.SetValue(t2, value);
@@ -185,7 +185,7 @@ namespace HB.Framework.Database.Entity
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
                             pDef.TypeConverter.DbValueToTypeValue(reader[j]);
 
                         pDef.SetValue(t1, value);
@@ -199,7 +199,7 @@ namespace HB.Framework.Database.Entity
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
                             pDef.TypeConverter.DbValueToTypeValue(reader[j]);
 
                         pDef.SetValue(t2, value);
@@ -213,7 +213,7 @@ namespace HB.Framework.Database.Entity
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            DefaultTypeConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
                             pDef.TypeConverter.DbValueToTypeValue(reader[j]);
 
                         pDef.SetValue(t3, value);
@@ -250,7 +250,7 @@ namespace HB.Framework.Database.Entity
                     DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i]);
 
                     object value = property.TypeConverter == null ?
-                        DefaultTypeConverter.DbValueToTypeValue(property.PropertyType, reader[i]) :
+                        ValueConverter.DbValueToTypeValue(property.PropertyType, reader[i]) :
                         property.TypeConverter.DbValueToTypeValue(reader[i]);
 
                     property.SetValue(item, value);
