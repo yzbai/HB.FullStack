@@ -81,15 +81,16 @@ namespace Microsoft.AspNetCore.Session
                 CryptoRandom.GetBytes(guidBytes);
                 sessionKey = new Guid(guidBytes).ToString();
 
-                var establisher = new SessionEstablisher(context, sessionKey, _options);
+                SessionEstablisher establisher = new SessionEstablisher(context, sessionKey, _options);
                 tryEstablishSession = establisher.TryEstablishSession;
                 isNewSessionKey = true;
             }
 
-            var feature = new SessionFeature
+            SessionFeature feature = new SessionFeature
             {
                 Session = _sessionStore.Create(sessionKey, _options.IdleTimeout, _options.IOTimeout, tryEstablishSession, isNewSessionKey)
             };
+
             context.Features.Set<ISessionFeature>(feature);
 
             try
@@ -106,9 +107,9 @@ namespace Microsoft.AspNetCore.Session
                     {
                         await feature.Session.CommitAsync().ConfigureAwait(true);
                     }
-                    catch (Exception ex)
+                    catch (OperationCanceledException ex)
                     {
-                        _logger.LogError("Error closing the session.", ex);
+                        _logger.SessionCommitCanceled(ex);
                     }
                 }
             }
@@ -163,7 +164,7 @@ namespace Microsoft.AspNetCore.Session
 
             private static Task OnStartingCallback(object state)
             {
-                var establisher = (SessionEstablisher)state;
+                SessionEstablisher establisher = (SessionEstablisher)state;
                 if (establisher._shouldEstablishSession)
                 {
                     establisher.SetCookie();
@@ -173,7 +174,7 @@ namespace Microsoft.AspNetCore.Session
 
             private void SetCookie()
             {
-                var cookieOptions = new CookieOptions
+                CookieOptions cookieOptions = new CookieOptions
                 {
                     SameSite = _options.SameSiteMode,
                     Secure = _options.CookieSecure == CookieSecurePolicy.Always || (_options.CookieSecure == CookieSecurePolicy.SameAsRequest && _context.Request.IsHttps),

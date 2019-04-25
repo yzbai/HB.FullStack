@@ -19,9 +19,9 @@ namespace HB.Component.Identity
     /// </summary>
     internal class UserBiz : IUserBiz
     {
-        private IDatabase _db;
-        private ILogger _logger;
-        private IdentityOptions _identityOptions;
+        private readonly IDatabase _db;
+        private readonly ILogger _logger;
+        private readonly IdentityOptions _identityOptions;
 
         public UserBiz(IOptions<IdentityOptions> identityOptions, IDatabase database, ILogger<UserBiz> logger)
         {

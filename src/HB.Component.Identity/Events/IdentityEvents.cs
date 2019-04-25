@@ -9,6 +9,9 @@ namespace HB.Component.Identity
     {
         public Func<IdentitySecurityStampChangeContext, Task> OnSecurityStampChanged { get; set; } = context => Task.CompletedTask;
 
-        public virtual Task SecurityStampChanged(IdentitySecurityStampChangeContext context) => OnSecurityStampChanged(context);
+        public virtual Task SecurityStampChanged(IdentitySecurityStampChangeContext context)
+        {
+            return OnSecurityStampChanged(context);
+        }
     }
 }

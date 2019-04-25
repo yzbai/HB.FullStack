@@ -8,8 +8,8 @@ namespace HB.Infrastructure.Aliyun
 {
     public class DefaultAcsClientManager : IAcsClientManager
     {
-        private IDictionary<string, IAcsClient> _clients;
-        private IDictionary<string, AliyunAccessSetting> _accessSettings;
+        private readonly IDictionary<string, IAcsClient> _clients;
+        private readonly IDictionary<string, AliyunAccessSetting> _accessSettings;
 
         public DefaultAcsClientManager()
         {

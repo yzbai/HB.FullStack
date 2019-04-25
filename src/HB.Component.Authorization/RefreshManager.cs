@@ -23,15 +23,15 @@ namespace HB.Component.Authorization
 {
     public class RefreshManager : IRefreshManager
     {
-        private ISignInTokenBiz _signInTokenBiz;
-        private ICredentialManager _credentialManager;
-        private AuthorizationServerOptions _options;
+        private readonly ISignInTokenBiz _signInTokenBiz;
+        private readonly ICredentialManager _credentialManager;
+        private readonly AuthorizationServerOptions _options;
         //private IUserBiz _userBiz;
-        private IIdentityManager _identityManager;
-        private IJwtBuilder _jwtBuilder;
-        private IFrequencyChecker _frequencyChecker;
+        private readonly IIdentityManager _identityManager;
+        private readonly IJwtBuilder _jwtBuilder;
+        private readonly IFrequencyChecker _frequencyChecker;
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public RefreshManager(IOptions<AuthorizationServerOptions> options, ILogger<RefreshManager> logger, 
             IFrequencyChecker frequencyChecker, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, 
@@ -163,7 +163,7 @@ namespace HB.Component.Authorization
 
                 return new JwtSecurityTokenHandler().ValidateToken(context.AccessToken, parameters, out SecurityToken validatedToken);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogWarning(ex, "wrong token to refren.Context : {0}", JsonUtil.ToJson(context));
                 return null;
