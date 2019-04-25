@@ -15,7 +15,7 @@ namespace HB.Framework.KVStore
     {
         private readonly KVStoreOptions _options;
         private IKVStoreEngine _engine;
-        private IKVStoreEntityDefFactory _entityDefFactory;
+        private readonly IKVStoreEntityDefFactory _entityDefFactory;
 
         public DefaultKVStore(IOptions<KVStoreOptions> options, IKVStoreEngine kvstoreEngine, IKVStoreEntityDefFactory kvstoreEntityDefFactory)
         {

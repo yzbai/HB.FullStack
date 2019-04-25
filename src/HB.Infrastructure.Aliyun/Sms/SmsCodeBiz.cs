@@ -8,7 +8,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 {
     public class SmsCodeBiz : ISmsCodeBiz
     {
-        private IDistributedCache _cache;
+        private readonly IDistributedCache _cache;
 
         public SmsCodeBiz(IDistributedCache cache)
         {

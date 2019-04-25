@@ -16,8 +16,8 @@ namespace HB.Infrastructure.Aliyun.Vod
 {
     public class AliyunVodService : IVodService
     {
-        private IAcsClient _acsClient;
-        private AliyunVodOptions _options;
+        private readonly IAcsClient _acsClient;
+        private readonly AliyunVodOptions _options;
         private readonly ILogger _logger;
 
         public AliyunVodService(IAcsClientManager acsClientManager, IOptions<AliyunVodOptions> options, ILogger<AliyunVodService> logger)

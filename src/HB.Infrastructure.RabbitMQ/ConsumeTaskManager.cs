@@ -17,12 +17,12 @@ namespace HB.Infrastructure.RabbitMQ
     public class ConsumeTaskManager
     {
         private readonly string _eventType;
-        private ILogger _logger;
-        private RabbitMQConnectionSetting _connectionSetting;
-        private IRabbitMQConnectionManager _connectionManager;
-        private IRedisDatabase _redis;
+        private readonly ILogger _logger;
+        private readonly RabbitMQConnectionSetting _connectionSetting;
+        private readonly IRabbitMQConnectionManager _connectionManager;
+        private readonly IRedisDatabase _redis;
 
-        private IEventHandler _handler;
+        private readonly IEventHandler _handler;
 
         private IModel _channel;
         private string _consumeTag;

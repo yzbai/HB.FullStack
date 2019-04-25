@@ -7,7 +7,11 @@ namespace HB.Infrastructure.Aliyun.Vod
 {
     public class AliyunVodOptions : IOptions<AliyunVodOptions>
     {
-        public AliyunVodOptions Value => this;
+        public AliyunVodOptions Value {
+            get {
+                return this;
+            }
+        }
 
         public string ProductName { get; set; }
     }

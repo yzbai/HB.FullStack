@@ -10,25 +10,25 @@ namespace HB.Infrastructure.MongoDB
 {
     public class DefaultMongoDB : IMongoDB
     {
-        private DocumentStoreOptions _documentOptions;
-        private MongoDBOptions _mongoOptions;
+        private readonly DocumentStoreOptions _documentOptions;
+        private readonly MongoDBOptions _mongoOptions;
 
         private readonly ILogger _logger;
 
         /// <summary>
         /// key:InstanceName
         /// </summary>
-        private IDictionary<string, IMongoClient> _clientDict;
+        private readonly IDictionary<string, IMongoClient> _clientDict;
 
         /// <summary>
         /// key:InstanceName_DatabaseName
         /// </summary>
-        private IDictionary<string, IMongoDatabase> _dbDict;
+        private readonly IDictionary<string, IMongoDatabase> _dbDict;
 
         /// <summary>
         /// key:InstanceName_DatabaseName_CollectionName
         /// </summary>
-        private IDictionary<string, object> _collectionDict;
+        private readonly IDictionary<string, object> _collectionDict;
 
         public DefaultMongoDB(IOptions<DocumentStoreOptions> documentOptions, IOptions<MongoDBOptions> mongoOptions, ILogger<DefaultMongoDB> logger)
         {

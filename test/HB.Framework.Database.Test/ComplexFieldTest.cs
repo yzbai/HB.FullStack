@@ -9,9 +9,9 @@ namespace HB.Framework.Database.Test
 {
     public class ComplexFieldTest : IClassFixture<ServiceFixture>
     {
-        private IDatabase database;
-        private ISQLBuilder sqlBuilder;
-        private ITestOutputHelper output;
+        private readonly IDatabase database;
+        private readonly ISQLBuilder sqlBuilder;
+        private readonly ITestOutputHelper output;
 
         public ComplexFieldTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {

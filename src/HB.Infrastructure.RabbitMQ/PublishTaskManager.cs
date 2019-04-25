@@ -21,7 +21,7 @@ namespace HB.Infrastructure.RabbitMQ
     public class PublishTaskManager : RabbitMQAndDistributedQueueDynamicTaskManager
     {
         //EventMessageEntity.Type
-        private ConcurrentDictionary<string, bool> _eventDeclareDict = new ConcurrentDictionary<string, bool>();
+        private readonly ConcurrentDictionary<string, bool> _eventDeclareDict = new ConcurrentDictionary<string, bool>();
 
         public PublishTaskManager(RabbitMQConnectionSetting connectionSetting, IRabbitMQConnectionManager connectionManager, IRedisDatabase redis, ILogger logger)
             : base(connectionSetting, connectionManager, redis, logger) { }
@@ -94,7 +94,7 @@ namespace HB.Infrastructure.RabbitMQ
                                 }
                             }
 
-                            fs = fs + (ulong)nextIndex;
+                            fs += (ulong)nextIndex;
 
                             confirmEventIdList.RemoveRange(0, nextIndex);
                             confirmEventIdList.TrimExcess();

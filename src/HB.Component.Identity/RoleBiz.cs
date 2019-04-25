@@ -13,7 +13,7 @@ namespace HB.Component.Identity
 {
     public class RoleBiz : IRoleBiz
     {
-        private IDatabase _database;
+        private readonly IDatabase _database;
         private readonly ILogger _logger;
 
         public RoleBiz(IDatabase database, ILogger<RoleBiz> logger)
