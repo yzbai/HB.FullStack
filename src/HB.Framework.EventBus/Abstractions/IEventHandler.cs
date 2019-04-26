@@ -6,7 +6,7 @@ namespace HB.Framework.EventBus.Abstractions
 {
     public interface IEventHandler //: IDisposable
     {
-        string EventType { get; }
+        //string EventType { get; }
 
         void Handle(string jsonData);
     }
