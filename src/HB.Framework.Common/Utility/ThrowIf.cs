@@ -13,5 +13,15 @@ namespace System
 
             return o;
         }
+
+        public static string ThrowIfNullOrEmpty(this string o, string paramName)
+        {
+            if(string.IsNullOrEmpty(o))
+            {
+                throw new ArgumentNullException(paramName);
+            }
+
+            return o;
+        }
     }
 }

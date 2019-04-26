@@ -19,8 +19,6 @@ namespace HB.Infrastructure.Redis.Test
             _eventBus = serviceFixture.EventBus;
         }
 
-        public string EventType { get; set; }
-
         public void Handle(string jsonData)
         {
             _output.WriteLine(jsonData);
@@ -29,23 +27,22 @@ namespace HB.Infrastructure.Redis.Test
         [Fact]
         public void TestEventBus()
         {
-            //set handler
-            EventType = "User.Upload.HeadImage";
+            string eventType = "User.Upload.HeadImage";
 
-            _eventBus.Subscribe(this);
+            _eventBus.Subscribe(eventType, this);
 
-            _eventBus.StartHandle(EventType);
+            _eventBus.StartHandle(eventType);
 
             Thread.Sleep(2 * 1000);
 
             for(int i = 0; i < 100; ++i)
             {
-                _eventBus.PublishAsync(new EventMessage(EventType, $"Hello, Just say {i} times."));
+                _eventBus.PublishAsync(new EventMessage(eventType, $"Hello, Just say {i} times."));
             }
 
             Thread.Sleep(1 * 60 * 1000);
 
-            _eventBus.UnSubscribe(EventType);
+            _eventBus.UnSubscribe(eventType);
         }
     }
 }
