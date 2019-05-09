@@ -23,5 +23,15 @@ namespace System
 
             return o;
         }
+
+        public static string ThrowIfNotEqual(this string a, string b, string paramName)
+        {
+            if (( a == null && b != null) || !a.Equals(b, GlobalSettings.Comparison))
+            {
+                throw new ArgumentException("参数值应该一样", paramName);
+            }
+
+            return a;
+        }
     }
 }
