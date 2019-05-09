@@ -117,7 +117,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                result = new List<T>();
+                result = null;
                 _logger.LogCritical(ex.Message);
             }
             finally
