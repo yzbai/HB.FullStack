@@ -722,7 +722,7 @@ namespace HB.Framework.Database.SQL
                 "`Version` bigint(20) NOT NULL DEFAULT '0'," + Environment.NewLine +
                 " {1} " + 
                 " PRIMARY KEY (`Id`) " + Environment.NewLine +
-                " ) ENGINE=InnoDB   DEFAULT CHARSET=utf8;",
+                " ) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;",
                 definition.DbTableReservedName, sql.ToString(), dropStatement);
         }
 
