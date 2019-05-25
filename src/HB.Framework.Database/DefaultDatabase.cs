@@ -362,7 +362,23 @@ namespace HB.Framework.Database
                 whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
-            whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
+            switch(fromCondition.JoinType)
+            {
+                case SqlJoinType.LEFT:
+                    whereCondition.And(t => t.Deleted == false);
+                    break;
+                case SqlJoinType.RIGHT:
+                    whereCondition.And<TTarget>(t => t.Deleted == false);
+                    break;
+                case SqlJoinType.INNER:
+                    whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
+                    break;
+                case SqlJoinType.FULL:
+                    break;
+                case SqlJoinType.CROSS:
+                    whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
+                    break;
+            }
 
             IList<Tuple<TSource, TTarget>> result = null;
             IDataReader reader = null;
@@ -439,9 +455,23 @@ namespace HB.Framework.Database
                 whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
             }
 
-            whereCondition.And(t => t.Deleted == false)
-                .And<TTarget1>(t => t.Deleted == false)
-                .And<TTarget2>(t => t.Deleted == false);
+            switch (fromCondition.JoinType)
+            {
+                case SqlJoinType.LEFT:
+                    whereCondition.And(t => t.Deleted == false);
+                    break;
+                case SqlJoinType.RIGHT:
+                    whereCondition.And<TTarget2>(t => t.Deleted == false);
+                    break;
+                case SqlJoinType.INNER:
+                    whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
+                    break;
+                case SqlJoinType.FULL:
+                    break;
+                case SqlJoinType.CROSS:
+                    whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
+                    break;
+            }
 
 
             IList<Tuple<TSource, TTarget1, TTarget2>>  result = null;
