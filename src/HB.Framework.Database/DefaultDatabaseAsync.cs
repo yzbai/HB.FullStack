@@ -24,13 +24,13 @@ namespace HB.Framework.Database
 
                     if (lst == null || lst.Count == 0)
                     {
-                        return default;
+                        return default(T);
                     }
 
                     if (lst.Count > 1)
                     {
                         _logger.LogCritical(0, "retrieve result not one, but many." + typeof(T).FullName, null);
-                        return default;
+                        return default(T);
                     }
 
                     return lst[0];
