@@ -43,7 +43,7 @@ namespace System
 
         #region Collection to String
 
-        private static readonly string[] separator = new string[] { "-)#@$(-" };
+        private static readonly string[] separator = { "-)#@$(-" };
 
         public static string ListToString(IEnumerable<string> list)
         {
