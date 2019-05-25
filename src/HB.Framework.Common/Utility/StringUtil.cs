@@ -43,7 +43,7 @@ namespace System
 
         #region Collection to String
 
-        private static readonly char[] CommonSeparator = new char[] { ',', '-', '_', '/', '.', '$', '#', '@' };
+        private static readonly string[] separator = new string[] { "-)#@$(-" };
 
         public static string ListToString(IEnumerable<string> list)
         {
@@ -53,7 +53,7 @@ namespace System
             foreach (string str in list)
             {
                 builder.Append(str);
-                builder.Append(",");
+                builder.Append(separator[0]);
 
                 added = true;
             }
@@ -75,7 +75,7 @@ namespace System
                 return list;
             }
 
-            string[] results = longStr.Split(CommonSeparator);
+            string[] results = longStr.Split(separator, StringSplitOptions.None);
 
             foreach (string str in results)
             {
@@ -98,9 +98,9 @@ namespace System
             foreach (KeyValuePair<string, string> kv in subjectNodeSetIds)
             {
                 builder.Append(kv.Key);
-                builder.Append(",");
+                builder.Append(separator[0]);
                 builder.Append(kv.Value);
-                builder.Append(",");
+                builder.Append(separator[0]);
 
                 added = true;
             }
@@ -122,7 +122,7 @@ namespace System
                 return dict;
             }
 
-            string[] result = jointSubjectNodeSetIds.Split(CommonSeparator);
+            string[] result = jointSubjectNodeSetIds.Split(separator, StringSplitOptions.None);
 
             if (result.Length % 2 != 0)
             {
