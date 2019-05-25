@@ -646,6 +646,7 @@ namespace HB.Framework.Database.SQL
         #region Create
 
         //TODO: 目前只适用Mysql，需要后期改造
+        //TODO: 处理长文本 Text， MediumText， LongText
         public string GetCreateStatement(Type type, bool addDropStatement)
         {
             StringBuilder sql = new StringBuilder();

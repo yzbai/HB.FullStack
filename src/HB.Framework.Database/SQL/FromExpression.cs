@@ -6,6 +6,15 @@ using System.Text;
 
 namespace HB.Framework.Database.SQL
 {
+    public enum SqlJoinType
+    {
+        INNER = 1,
+        LEFT = 2,
+        RIGHT = 3,
+        FULL = 4,
+        CROSS = 5
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -20,6 +29,8 @@ namespace HB.Framework.Database.SQL
         private readonly IDatabaseEngine _databaseEngine;
 
         public bool WithFromString { get; set; }
+
+        public SqlJoinType? JoinType { get; set; }
 
         public override string ToString()
         {
@@ -51,26 +62,61 @@ namespace HB.Framework.Database.SQL
 
         public FromExpression<T> InnerJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
+            if (JoinType != null && JoinType != SqlJoinType.INNER)
+            {
+                throw new ArgumentException("DO NOT MIX JOIN UP");
+            }
+
+            JoinType = SqlJoinType.INNER;
+
             return InternalJoin<TTarget>("INNER JOIN", joinExpr);
         }
 
         public FromExpression<T> LeftJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
+            if (JoinType != null && JoinType != SqlJoinType.LEFT)
+            {
+                throw new ArgumentException("DO NOT MIX JOIN UP");
+            }
+
+            JoinType = SqlJoinType.LEFT;
+
             return InternalJoin<TTarget>("LEFT JOIN", joinExpr);
         }
 
         public FromExpression<T> RightJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
+            if (JoinType != null && JoinType != SqlJoinType.RIGHT)
+            {
+                throw new ArgumentException("DO NOT MIX JOIN UP");
+            }
+
+            JoinType = SqlJoinType.RIGHT;
+
             return InternalJoin<TTarget>("RIGHT JOIN", joinExpr);
         }
 
         public FromExpression<T> FullJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
+            if (JoinType != null && JoinType != SqlJoinType.FULL)
+            {
+                throw new ArgumentException("DO NOT MIX JOIN UP");
+            }
+
+            JoinType = SqlJoinType.FULL;
+
             return InternalJoin<TTarget>("FULL JOIN", joinExpr);
         }
 
         public FromExpression<T> CrossJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
+            if (JoinType != null && JoinType != SqlJoinType.CROSS)
+            {
+                throw new ArgumentException("DO NOT MIX JOIN UP");
+            }
+
+            JoinType = SqlJoinType.CROSS;
+
             return InternalJoin<TTarget>("CROSS JOIN", joinExpr);
         }
 

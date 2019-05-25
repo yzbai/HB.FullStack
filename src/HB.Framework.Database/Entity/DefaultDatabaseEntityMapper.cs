@@ -7,7 +7,7 @@ using System.Data;
 namespace HB.Framework.Database.Entity
 {
     /// <summary>
-    /// 單例
+    /// 单例
     /// </summary>
     public class DefaultDatabaseEntityMapper : IDatabaseEntityMapper
     {
@@ -32,7 +32,7 @@ namespace HB.Framework.Database.Entity
 
             int len = reader.FieldCount;
             string[] propertyNames = new string[len];
-            
+
 
             DatabaseEntityDef definition = _modelDefFactory.GetDef<T>();
 
@@ -49,8 +49,8 @@ namespace HB.Framework.Database.Entity
                 {
                     DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i]);
 
-                    object value = property.TypeConverter == null ? 
-                        ValueConverter.DbValueToTypeValue(property.PropertyType, reader[i]) : 
+                    object value = property.TypeConverter == null ?
+                        ValueConverter.DbValueToTypeValue(property.PropertyType, reader[i]) :
                         property.TypeConverter.DbValueToTypeValue(reader[i]);
 
                     property.SetValue(item, value);
@@ -127,7 +127,21 @@ namespace HB.Framework.Database.Entity
                     }
                 }
 
-                lst.Add(new Tuple<TSource, TTarget>(t1, t2));
+                //TODO: 解决Deleted=true的情况
+                if (t1.Deleted)
+                {
+                    t1 = new TSource();
+                }
+                if (t2.Deleted)
+                {
+                    t2 = new TTarget();
+                }
+
+                //删除全为空
+                if (!t1.Deleted || !t2.Deleted)
+                {
+                    lst.Add(new Tuple<TSource, TTarget>(t1, t2));
+                }
             }
 
             return lst;
@@ -220,7 +234,25 @@ namespace HB.Framework.Database.Entity
                     }
                 }
 
-                lst.Add(new Tuple<TSource, TTarget2, TTarget3>(t1, t2, t3));
+                if (t1.Deleted)
+                {
+                    t1 = new TSource();
+                }
+
+                if (t2.Deleted)
+                {
+                    t2 = new TTarget2();
+                }
+
+                if (t3.Deleted)
+                {
+                    t3 = new TTarget3();
+                }
+
+                if (!t1.Deleted || !t2.Deleted || !t3.Deleted)
+                {
+                    lst.Add(new Tuple<TSource, TTarget2, TTarget3>(t1, t2, t3));
+                }
             }
 
             return lst;
