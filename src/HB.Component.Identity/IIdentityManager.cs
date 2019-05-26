@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.Component.Identity.Entity;
 
-namespace HB.Component.Identity.Abstractions
+namespace HB.Component.Identity
 {
     public interface IIdentityManager
     {

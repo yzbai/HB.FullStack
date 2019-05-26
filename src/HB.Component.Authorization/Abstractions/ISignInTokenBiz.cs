@@ -14,8 +14,8 @@ namespace HB.Component.Authorization.Abstractions
         Task<SignInToken> CreateAsync(string userGuid, string clientId, string clientType, string clientVersion, string clientAddress, string ipAddress, TimeSpan expireTimeSpan, DatabaseTransactionContext transContext = null);
         Task<AuthorizationServerResult> DeleteByUserGuidAsync(string userGuid, DatabaseTransactionContext transContext = null);
         Task<AuthorizationServerResult> DeleteAppClientTokenByUserGuidAsync(string userGuid, DatabaseTransactionContext transContext = null);
-        Task<AuthorizationServerResult> DeleteAsync(string signInTokenIdentifier, DatabaseTransactionContext transContext = null);
-        Task<SignInToken> GetAsync(string signInTokenIdentifier, string refreshToken, string clientId, string userGuid, DatabaseTransactionContext transContext = null);
+        Task<AuthorizationServerResult> DeleteAsync(string signInTokenGuid, DatabaseTransactionContext transContext = null);
+        Task<SignInToken> GetAsync(string signInTokenGuid, string refreshToken, string clientId, string userGuid, DatabaseTransactionContext transContext = null);
         Task<AuthorizationServerResult> UpdateAsync(SignInToken signInToken, DatabaseTransactionContext transContext = null);
     }
 }
