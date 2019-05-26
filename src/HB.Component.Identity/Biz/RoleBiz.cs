@@ -22,19 +22,12 @@ namespace HB.Component.Identity
             _logger = logger;
         }
 
-        public Task<IEnumerable<string>> GetUserRoleNamesAsync(string userGuid, DatabaseTransactionContext transContext = null)
+        public Task<IList<Role>> GetByUserGuidAsync(string userGuid, DatabaseTransactionContext transContext = null)
         {
             FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Guid == ru.RoleGuid);
             WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserGuid == userGuid);
 
-            return _database.RetrieveAsync<Role>(from, where, transContext)
-                .ContinueWith(o=>o.Result.Select(r=>r.Name), TaskScheduler.Default);
-        }
-
-        public Task<int> GetRoleByNameAsync(string roleName, DatabaseTransactionContext transContext = null)
-        {
-            //动用Cache
-            return Task.FromResult(0);
+            return _database.RetrieveAsync<Role>(from, where, transContext);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace HB.Component.Identity
 {
@@ -32,6 +33,7 @@ namespace HB.Component.Identity
 
             IList<Claim> claims = new List<Claim>
             {
+                //TODO: 检验是否要加所有的信息
                 new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
                 //new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
                 new Claim(ClaimExtensionTypes.UserName, user.UserName??""),
@@ -44,12 +46,15 @@ namespace HB.Component.Identity
 
             foreach (UserClaim item in userClaims)
             {
-                claims.Add(new Claim(item.ClaimType, item.ClaimValue));
+                if (item.AddToJwt)
+                {
+                    claims.Add(new Claim(item.ClaimType, item.ClaimValue));
+                }
             }
 
-            IEnumerable<string> roleNames = await _roleBiz.GetUserRoleNamesAsync(user.Guid, transContext).ConfigureAwait(false);
+            IList<Role> roles = await _roleBiz.GetByUserGuidAsync(user.Guid, transContext).ConfigureAwait(false);
 
-            foreach (string roleName in roleNames)
+            foreach (string roleName in roles.Select(r=>r.Name))
             {
                 claims.Add(new Claim(ClaimExtensionTypes.Role, roleName));
             }
