@@ -31,11 +31,11 @@ namespace HB.Component.Authorization
             _jwtBuilder = jwtBuilder;
         }
 
-        public async Task SignOutAsync(string userTokenIdentifier)
+        public async Task SignOutAsync(string signInTokenGuid)
         {
-            if (!string.IsNullOrEmpty(userTokenIdentifier))
+            if (!string.IsNullOrEmpty(signInTokenGuid))
             {
-                await _signInTokenBiz.DeleteAsync(userTokenIdentifier).ConfigureAwait(false);
+                await _signInTokenBiz.DeleteAsync(signInTokenGuid).ConfigureAwait(false);
             }
         }
 

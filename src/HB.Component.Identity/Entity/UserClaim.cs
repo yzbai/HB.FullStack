@@ -17,5 +17,8 @@ namespace HB.Component.Identity.Entity
 
         [EntityProperty("ClaimValue", Length = 65530)]
         public string ClaimValue { get; set; }
+
+        [EntityProperty]
+        public bool AddToJwt { get; set; } = false;
     }
 }
