@@ -6,11 +6,11 @@ namespace HB.Component.Identity
 {
     public class IdentitySecurityStampChangeContext
     {
-        public long UserId { get; set; }
+        public string UserGuid { get; set; }
 
-        public IdentitySecurityStampChangeContext(long userId)
+        public IdentitySecurityStampChangeContext(string userGuid)
         {
-            UserId = userId;
+            UserGuid = userGuid;
         }
     }
 }

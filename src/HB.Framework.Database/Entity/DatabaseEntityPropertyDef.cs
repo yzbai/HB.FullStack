@@ -38,7 +38,7 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 是否是数据库表字段
         /// </summary>
-        public bool IsTableProperty { get; set; }
+        public bool IsTableProperty { get; set; } = false;
         /// <summary>
         /// 数据库引号化后的名称
         /// IsTableProperty为false时无意义
@@ -58,27 +58,28 @@ namespace HB.Framework.Database.Entity
         /// 是否是主键
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsPrimaryKey { get; set; }
+        public bool IsPrimaryKey { get; set; } = false;
         /// <summary>
         /// 是否是外键
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsForeignKey { get; set; }
+        public bool IsForeignKey { get; set; } = false;
         /// <summary>
         /// 是否唯一值
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsUnique { get; set; }
-        /// <summary>
-        /// 是否自增长
-        /// IsTableProperty为false时无意义
-        /// </summary>
-        public bool AutoIncrement { get { return IsPrimaryKey; } }
+        public bool IsUnique { get; set; } = false;
+
         /// <summary>
         /// 是否可空
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsNullable { get; set; }
+        public bool IsNullable { get; set; } = true;
+
+        /// <summary>
+        /// 长度是否限定
+        /// </summary>
+        public bool IsLengthFixed { get; set; } = false;
         /// <summary>
         /// 数据库字段长度
         /// IsTableProperty为false时无意义

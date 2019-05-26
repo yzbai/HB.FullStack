@@ -10,13 +10,13 @@ namespace HB.Framework.KVStore
 {
     public interface IKVStore : IKVStoreAsync
     {
-        T GetById<T>(object keyValue) where T : KVStoreEntity, new();
+        T GetByGuid<T>(object keyValue) where T : KVStoreEntity, new();
 
-        T GetById<T>(T t) where T : KVStoreEntity, new();
+        T GetByGuid<T>(T t) where T : KVStoreEntity, new();
 
-        IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
+        IEnumerable<T> GetByGuids<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
 
-        IEnumerable<T> GetByIds<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
+        IEnumerable<T> GetByGuids<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
 
         IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new();
 
@@ -32,8 +32,8 @@ namespace HB.Framework.KVStore
 
         KVStoreResult DeleteAll<T>() where T : KVStoreEntity, new();
 
-        KVStoreResult DeleteById<T>(object keyValue, int version) where T : KVStoreEntity, new();
+        KVStoreResult DeleteByGuid<T>(object keyValue, int version) where T : KVStoreEntity, new();
 
-        KVStoreResult DeleteByIds<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new();
+        KVStoreResult DeleteByGuids<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new();
     }
 }

@@ -19,9 +19,9 @@ namespace HB.Component.Identity
             _logger = logger;
         }
 
-        public Task<IList<UserClaim>> GetUserClaimsByUserIdAsync(long userId, DatabaseTransactionContext transContext = null)
+        public Task<IList<UserClaim>> GetAsync(string userGuid, DatabaseTransactionContext transContext = null)
         {
-            return _db.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
+            return _db.RetrieveAsync<UserClaim>(uc => uc.UserGuid == userGuid, transContext);
         }
     }
 }

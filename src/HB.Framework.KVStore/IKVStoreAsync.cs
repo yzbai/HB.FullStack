@@ -8,13 +8,13 @@ namespace HB.Framework.KVStore
 {
     public interface IKVStoreAsync
     {
-        Task<T> GetByIdAsync<T>(object keyValue) where T : KVStoreEntity, new();
+        Task<T> GetByGuidAsync<T>(object keyValue) where T : KVStoreEntity, new();
 
-        Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new();
+        Task<T> GetByGuidAsync<T>(T t) where T : KVStoreEntity, new();
 
-        Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
+        Task<IEnumerable<T>> GetByGuidsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
 
-        Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
+        Task<IEnumerable<T>> GetByGuidsAsync<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
 
         Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new();
 
@@ -42,9 +42,9 @@ namespace HB.Framework.KVStore
 
         Task<KVStoreResult> DeleteAllAsync<T>() where T : KVStoreEntity, new();
 
-        Task<KVStoreResult> DeleteByIdAsync<T>(object keyValue, int version) where T : KVStoreEntity, new();
+        Task<KVStoreResult> DeleteByGuidAsync<T>(object keyValue, int version) where T : KVStoreEntity, new();
 
-        Task<KVStoreResult> DeleteByIdsAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new();
+        Task<KVStoreResult> DeleteByGuidsAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new();
 
     }
 }
