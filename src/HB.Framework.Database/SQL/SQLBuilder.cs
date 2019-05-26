@@ -277,7 +277,7 @@ namespace HB.Framework.Database.SQL
                 {
                     selectArgs.AppendFormat(GlobalSettings.Culture, "{0},", info.DbReservedName);
 
-                    if (info.AutoIncrement || info.IsPrimaryKey || info.PropertyName == "LastTime")
+                    if (info.IsPrimaryKey || info.PropertyName == "LastTime")
                     {
                         continue;
                     }
@@ -330,7 +330,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    if (info.AutoIncrement || info.IsPrimaryKey || info.PropertyName == "LastTime")
+                    if (info.IsPrimaryKey || info.PropertyName == "LastTime")
                     {
                         continue;
                     }
@@ -382,7 +382,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    if (info.IsPrimaryKey || info.AutoIncrement || info.PropertyName == "LastTime" || info.PropertyName == "Deleted")
+                    if (info.IsPrimaryKey || info.PropertyName == "LastTime" || info.PropertyName == "Deleted")
                     {
                         continue;
                     }
@@ -412,7 +412,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    if (info.IsPrimaryKey || info.AutoIncrement || info.PropertyName == "LastTime" || info.PropertyName == "Deleted")
+                    if (info.IsPrimaryKey || info.PropertyName == "LastTime" || info.PropertyName == "Deleted")
                     {
                         continue;
                     }
@@ -510,7 +510,7 @@ namespace HB.Framework.Database.SQL
                 {
                     if (info.IsTableProperty)
                     {
-                        if (info.AutoIncrement || info.IsPrimaryKey)
+                        if (info.IsPrimaryKey)
                         {
                             continue;
                         }
@@ -582,7 +582,7 @@ namespace HB.Framework.Database.SQL
                     {
                         if (info.IsPrimaryKey) continue;
 
-                        if (info.AutoIncrement) continue;
+                        //if (info.AutoIncrement) continue;
 
                         if (info.PropertyName == "LastTime") continue;
 
@@ -696,11 +696,11 @@ namespace HB.Framework.Database.SQL
 
                 sql.AppendFormat(GlobalSettings.Culture, " {0} {1}{2} {6} {3} {4} {5},",
                     info.DbReservedName,
-                    length >= 21845 ? "TEXT" : dbTypeStatement,
+                    info.IsLengthFixed ? "CHAR" : length >= 21845 ? "TEXT" : dbTypeStatement,
                     length == 0 ? "" : "(" + length + ")",
                     info.IsNullable == true ? "" : " NOT NULL ",
                     string.IsNullOrEmpty(info.DbDefaultValue) ? "" : "DEFAULT " + info.DbDefaultValue,
-                    info.IsUnique ? " UNIQUE " : "",
+                    !info.IsPrimaryKey && !info.IsForeignKey && info.IsUnique ? " UNIQUE " : "",
                     binary
                     );
                 sql.AppendLine();              

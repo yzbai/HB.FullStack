@@ -7,44 +7,44 @@ namespace HB.Component.Authorization.Entity
 {
     public class SignInToken : DatabaseEntity
     {
+        [UniqueGuidEntityProperty]
+        public string Guid { get; set; }
 
-        [DatabaseEntityProperty("")]
-        public string SignInTokenIdentifier { get; set; }
-
-        [DatabaseForeignKey("", typeof(User))]
-        public long UserId { get; set; }
+        [ForeignKey(typeof(User))]
+        [GuidEntityProperty]
+        public string UserGuid { get; set; }
 
         [Required]
-        [DatabaseEntityProperty("RefreshToken")]
+        [EntityProperty("RefreshToken")]
         public string RefreshToken { get; set; }
 
-        [DatabaseEntityProperty("ExpireAt")]
+        [EntityProperty("ExpireAt")]
         public DateTimeOffset? ExpireAt { get; set; }
 
-        [DatabaseEntityProperty("RefreshCount")]
+        [EntityProperty("RefreshCount")]
         public long RefreshCount { get; set; } = 0;
 
-        [DatabaseEntityProperty("Blacked")]
+        [EntityProperty("Blacked")]
         public bool Blacked { get; set; } = false;
 
 
         #region Client
 
         [Required]
-        [DatabaseEntityProperty("ClientId")]
+        [EntityProperty("ClientId")]
         public string ClientId { get; set; }
 
         [Required]
-        [DatabaseEntityProperty("ClientType")]
+        [EntityProperty("ClientType")]
         public string ClientType { get; set; }
 
-        [DatabaseEntityProperty("ClientVersion")]
+        [EntityProperty("ClientVersion")]
         public string ClientVersion { get; set; }
 
-        [DatabaseEntityProperty("Address")]
+        [EntityProperty("Address")]
         public string ClientAddress { get; set; }
 
-        [DatabaseEntityProperty("Client IP")]
+        [EntityProperty("Client IP")]
         public string ClientIp { get; set; }
 
         #endregion

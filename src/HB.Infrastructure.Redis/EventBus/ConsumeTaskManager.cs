@@ -20,7 +20,7 @@ namespace HB.Infrastructure.Redis.EventBus
     public class ConsumeTaskManager : IDisposable
     {
         private const int CONSUME_INTERVAL_SECONDS = 5;
-        private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Id\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
+        private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
         private readonly string _instanceName;
         private readonly string _eventType;
         private readonly ILogger _logger;
@@ -79,7 +79,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                     local event = cjson.decode(rawEvent)
                     local aliveTime = ARGV [1] - event["Timestamp"]
-                    local eid = event["Id"]
+                    local eid = event["Guid"]
 
                     --如果太新，就直接放回去，然后返回
                     if (aliveTime < ARGV [2] + 0)
@@ -188,19 +188,19 @@ namespace HB.Infrastructure.Redis.EventBus
                 string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
                 string token = string.Empty;
 
-                if (!_duplicateChecker.Lock(AcksSetName, entity.Id, out token))
+                if (!_duplicateChecker.Lock(AcksSetName, entity.Guid, out token))
                 {
-                    //竟然有人在检查entity.Id,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
+                    //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
                     continue;  
                 }
 
-                bool? isExist = _duplicateChecker.IsExist(AcksSetName, entity.Id, token);
+                bool? isExist = _duplicateChecker.IsExist(AcksSetName, entity.Guid, token);
 
                 if (isExist == null || isExist.Value)
                 {
                     _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{JsonUtil.ToJson(entity)}");
 
-                    _duplicateChecker.Release(AcksSetName, entity.Id, token);
+                    _duplicateChecker.Release(AcksSetName, entity.Guid, token);
 
                     continue;
                 }
@@ -217,8 +217,8 @@ namespace HB.Infrastructure.Redis.EventBus
                 }
 
                 //5, Acks
-                _duplicateChecker.Add(AcksSetName, entity.Id, entity.Timestamp, token);
-                _duplicateChecker.Release(AcksSetName, entity.Id, token);
+                _duplicateChecker.Add(AcksSetName, entity.Guid, entity.Timestamp, token);
+                _duplicateChecker.Release(AcksSetName, entity.Guid, token);
             }
         }
 

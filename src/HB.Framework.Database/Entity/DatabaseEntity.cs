@@ -13,19 +13,20 @@ namespace HB.Framework.Database.Entity
     //[Serializable]
     public class DatabaseEntity : CommonEntity
     {
-        [DatabaseMainKey("Id")]
+        [PrimaryKey]
+        [EntityProperty("Id")]
         public long Id { get; set; } = -1;
 
-        [DatabaseEntityProperty("Version")]
+        [EntityProperty("Version")]
         public long Version { get; set; } = 0;
 
-        [DatabaseEntityProperty("上一次更改者", Length = 10)]
+        [EntityProperty("上一次更改者", Length = 10)]
         public string LastUser { get; set; } = string.Empty;
 
-        [DatabaseEntityProperty("上一次更改时间")]
+        [EntityProperty("上一次更改时间")]
         public DateTimeOffset? LastTime { get; set; }
 
-        [DatabaseEntityProperty("逻辑删除标志")]
+        [EntityProperty("逻辑删除标志")]
         public bool Deleted { get; set; } = false;
     }
 }

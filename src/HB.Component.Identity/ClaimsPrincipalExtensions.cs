@@ -20,12 +20,7 @@ namespace System.Security.Claims
 
         public static string GetUserGuid(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.UserGUID);
-        }
-
-        public static string GetUserTokenIdentifier(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.SignInTokenIdentifier);
+            return principal.GetClaimValue(ClaimExtensionTypes.UserGuid);
         }
 
         public static string GetAuthtoken(this ClaimsPrincipal principal)
@@ -38,21 +33,14 @@ namespace System.Security.Claims
             return principal.GetClaimValue(ClaimExtensionTypes.SecurityStamp);
         }
 
-        public static long GetUserId(this ClaimsPrincipal principal)
-        {
-            string value = principal.GetClaimValue(ClaimExtensionTypes.UserId);
-
-            return string.IsNullOrEmpty(value) ? 0 : Convert.ToInt64(value, GlobalSettings.Culture);
-        }
-
         public static string GetAudience(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.Audience);
         }
 
-        public static string GetSignInTokenIdentifier(this ClaimsPrincipal principal)
+        public static string GetSignInTokenGuid(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.SignInTokenIdentifier);
+            return principal.GetClaimValue(ClaimExtensionTypes.SignInTokenGuid);
         }
 
         public static string GetUserName(this ClaimsPrincipal principal)

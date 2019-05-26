@@ -11,9 +11,9 @@ namespace HB.Infrastructure.MongoDB
     public static class IMongoCollectionExtensions
     {
 
-        public static async Task<T> GetByIdAsync<T>(this IMongoCollection<T> collection, string id) where T : DocumentStoreEntity, new()
+        public static async Task<T> GetByGuidAsync<T>(this IMongoCollection<T> collection, string id) where T : DocumentStoreEntity, new()
         {
-            IAsyncCursor<T> cursor = await collection.FindAsync(t => t.Id == id).ConfigureAwait(false);
+            IAsyncCursor<T> cursor = await collection.FindAsync(t => t.Guid == id).ConfigureAwait(false);
 
             return cursor.FirstOrDefault();
         }
@@ -25,9 +25,9 @@ namespace HB.Infrastructure.MongoDB
         /// <param name="collection"></param>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public static async Task<IList<T>> GetByIdsAsync<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
+        public static async Task<IList<T>> GetByGuidsAsync<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
         {
-            IAsyncCursor<T> cursor = await collection.FindAsync(Builders<T>.Filter.In(t => t.Id, ids)).ConfigureAwait(false);
+            IAsyncCursor<T> cursor = await collection.FindAsync(Builders<T>.Filter.In(t => t.Guid, ids)).ConfigureAwait(false);
 
             IList<T> list = cursor.ToEnumerable().ToList();
 
@@ -36,7 +36,7 @@ namespace HB.Infrastructure.MongoDB
 
             foreach(string id in ids)
             {
-                T tt = list.FirstOrDefault(t => t.Id == id);
+                T tt = list.FirstOrDefault(t => t.Guid == id);
                 if (tt != null)
                 {
                     newList.Add(tt);
@@ -46,17 +46,17 @@ namespace HB.Infrastructure.MongoDB
             return newList;
         }
 
-        public static T GetById<T>(this IMongoCollection<T> collection, string id) where T : DocumentStoreEntity, new()
+        public static T GetByGuid<T>(this IMongoCollection<T> collection, string id) where T : DocumentStoreEntity, new()
         {
-            return collection.Find(t => t.Id == id).FirstOrDefault();
+            return collection.Find(t => t.Guid == id).FirstOrDefault();
         }
 
         /// <summary>
         /// TODO:坑，得到的结果，不是按传入id顺序排列的. 解决效率问题
         /// </summary>
-        public static IList<T> GetByIds<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
+        public static IList<T> GetByGuids<T>(this IMongoCollection<T> collection, IEnumerable<string> ids) where T : DocumentStoreEntity, new()
         {
-            IFindFluent<T, T> fluent = collection.Find(Builders<T>.Filter.In(t => t.Id, ids));
+            IFindFluent<T, T> fluent = collection.Find(Builders<T>.Filter.In(t => t.Guid, ids));
 
             IList<T> list = fluent.ToEnumerable().ToList();
 
@@ -64,7 +64,7 @@ namespace HB.Infrastructure.MongoDB
 
             foreach (string id in ids)
             {
-                T tt = list.FirstOrDefault(t => t.Id == id);
+                T tt = list.FirstOrDefault(t => t.Guid == id);
 
                 if (tt != null)
                 {
