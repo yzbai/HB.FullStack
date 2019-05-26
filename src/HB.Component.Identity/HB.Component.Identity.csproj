@@ -12,4 +12,7 @@
     <ProjectReference Include="..\HB.Framework.KVStore\HB.Framework.KVStore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Biz\" />
+  </ItemGroup>
 </Project>
