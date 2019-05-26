@@ -70,23 +70,23 @@ namespace HB.Component.Authorization
                 return RefreshResult.InvalideAccessToken();
             }
 
-            long userId = claimsPrincipal.GetUserId();
+            string userGuid = claimsPrincipal.GetUserGuid();
 
-            if (userId <= 0)
+            if (string.IsNullOrEmpty(userGuid))
             {
                 _logger.LogWarning("Refresh token error. UserId should > 0. Context : {0}", JsonUtil.ToJson(context));
-                return RefreshResult.InvalideUserId();
+                return RefreshResult.InvalideUserGuid();
             }
 
             #endregion
 
             #region SignInToken 验证
 
-            SignInToken signInToken = await _signInTokenBiz.RetrieveByAsync(
-                claimsPrincipal.GetSignInTokenIdentifier(),
+            SignInToken signInToken = await _signInTokenBiz.GetAsync(
+                claimsPrincipal.GetSignInTokenGuid(),
                 context.RefreshToken,
                 context.ClientId,
-                userId
+                userGuid
                 ).ConfigureAwait(false);
 
             if (signInToken == null || signInToken.Blacked)
@@ -99,7 +99,7 @@ namespace HB.Component.Authorization
 
             #region User 信息变动验证
 
-            User user = await _identityManager.ValidateSecurityStampAsync(userId, claimsPrincipal.GetUserSecurityStamp()).ConfigureAwait(false);
+            User user = await _identityManager.ValidateSecurityStampAsync(userGuid, claimsPrincipal.GetUserSecurityStamp()).ConfigureAwait(false);
 
             if (user == null)
             {
@@ -141,11 +141,11 @@ namespace HB.Component.Authorization
 
         private async Task BlackSignInTokenAsync(SignInToken signInToken)
         {
-            AuthorizationServerResult result = await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(signInToken.SignInTokenIdentifier).ConfigureAwait(false);
+            AuthorizationServerResult result = await _signInTokenBiz.DeleteAsync(signInToken.Guid).ConfigureAwait(false);
 
             if (!result.IsSucceeded())
             {
-                _logger.LogCritical($"SignInToken delete failure. Identifier:{signInToken.SignInTokenIdentifier}");
+                _logger.LogCritical($"SignInToken delete failure. Identifier:{signInToken.Guid}");
             }
         }
 

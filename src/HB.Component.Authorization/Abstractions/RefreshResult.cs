@@ -10,7 +10,7 @@ namespace HB.Component.Authorization.Abstractions
         Succeeded,
         TooFrequent,
         InvalideAccessToken,
-        InvalideUserId,
+        InvalideUserGuid,
         NoTokenInStore,
         UserSecurityStampChanged,
         UpdateSignInTokenError
@@ -49,9 +49,9 @@ namespace HB.Component.Authorization.Abstractions
             return new RefreshResult { Status = RefreshResultStatus.InvalideAccessToken };
         }
 
-        public static RefreshResult InvalideUserId()
+        public static RefreshResult InvalideUserGuid()
         {
-            return new RefreshResult { Status = RefreshResultStatus.InvalideUserId };
+            return new RefreshResult { Status = RefreshResultStatus.InvalideUserGuid };
         }
 
         public static RefreshResult NoTokenInStore()

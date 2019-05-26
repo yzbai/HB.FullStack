@@ -7,8 +7,9 @@ namespace HB.Framework.Database.Entity
     /// 对TableDomain中的属性的数据库表字段描述
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class DatabaseEntityPropertyAttribute : Attribute
+    public class EntityPropertyAttribute : Attribute
     {
+        public bool FixedLength { get; set; } = false;
         /// <summary>
         /// 字段长度
         /// </summary>
@@ -32,12 +33,12 @@ namespace HB.Framework.Database.Entity
 
         public Type ConverterType { get; set; } = null;
 
-        public DatabaseEntityPropertyAttribute()
+        public EntityPropertyAttribute()
         {
 
         }
 
-        public DatabaseEntityPropertyAttribute(string desc)
+        public EntityPropertyAttribute(string desc)
         {
             Description = desc;
         }

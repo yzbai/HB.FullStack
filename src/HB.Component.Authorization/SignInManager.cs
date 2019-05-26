@@ -35,7 +35,7 @@ namespace HB.Component.Authorization
         {
             if (!string.IsNullOrEmpty(userTokenIdentifier))
             {
-                await _signInTokenBiz.DeleteBySignInTokenIdentifierAsync(userTokenIdentifier).ConfigureAwait(false);
+                await _signInTokenBiz.DeleteAsync(userTokenIdentifier).ConfigureAwait(false);
             }
         }
 
@@ -147,15 +147,15 @@ namespace HB.Component.Authorization
 
             if (context.ClientType != ClientType.Web && _signInOptions.AllowOnlyOneAppClient)
             {
-                await _signInTokenBiz.DeleteAppClientTokenByUserIdAsync(user.Id).ConfigureAwait(false);
+                await _signInTokenBiz.DeleteAppClientTokenByUserGuidAsync(user.Guid).ConfigureAwait(false);
             }
 
             #endregion
 
             #region Create User Token
 
-            SignInToken userToken = await _signInTokenBiz.CreateNewTokenAsync(
-                user.Id, 
+            SignInToken userToken = await _signInTokenBiz.CreateAsync(
+                user.Guid, 
                 context.ClientId, 
                 context.ClientType.GetDescription(), 
                 context.ClientVersion, 
@@ -221,12 +221,12 @@ namespace HB.Component.Authorization
 
             if (_signInOptions.RequiredLockoutCheck)
             {
-                await _identityManager.SetLockoutAsync(user.Id, false).ConfigureAwait(false);
+                await _identityManager.SetLockoutAsync(user.Guid, false).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                await _identityManager.SetAccessFailedCountAsync(user.Id, 0).ConfigureAwait(false);
+                await _identityManager.SetAccessFailedCountAsync(user.Guid, 0).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
@@ -247,14 +247,14 @@ namespace HB.Component.Authorization
         {
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                await _identityManager.SetAccessFailedCountAsync(user.Id, user.AccessFailedCount + 1).ConfigureAwait(false);
+                await _identityManager.SetAccessFailedCountAsync(user.Guid, user.AccessFailedCount + 1).ConfigureAwait(false);
             }
 
             if (_signInOptions.RequiredLockoutCheck)
             {
                 if (user.AccessFailedCount + 1 > _signInOptions.LockoutAfterAccessFailedCount)
                 {
-                    await _identityManager.SetLockoutAsync(user.Id, true, _signInOptions.LockoutTimeSpan).ConfigureAwait(false);
+                    await _identityManager.SetLockoutAsync(user.Guid, true, _signInOptions.LockoutTimeSpan).ConfigureAwait(false);
                 }
             }
 

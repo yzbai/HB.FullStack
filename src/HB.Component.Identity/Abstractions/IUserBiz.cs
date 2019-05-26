@@ -10,19 +10,17 @@ namespace HB.Component.Identity.Abstractions
 {
     public interface IUserBiz
     {
-        Task<IdentityResult> CreateUserByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed, DatabaseTransactionContext transContext = null);
-        Task<long?> GetIdByUserNameAsync(string userName, DatabaseTransactionContext transContext = null);
-        Task<User> GetUserByEmailAsync(string email, DatabaseTransactionContext transContext = null);
-        Task<User> GetUserByIdAsync(long userId, DatabaseTransactionContext transContext = null);
-        Task<User> GetUserByGuidAsync(string guidStr, DatabaseTransactionContext transContext = null);
-        Task<User> GetUserByMobileAsync(string mobile, DatabaseTransactionContext transContext = null);
-        Task<User> GetUserByUserNameAsync(string userName, DatabaseTransactionContext transContext = null);
-        Task<IList<User>> GetUsersByIdsAsync(IEnumerable<long> userIds, DatabaseTransactionContext transContext = null);
-        Task<IdentityResult> SetAccessFailedCountAsync(long userId, long count, DatabaseTransactionContext transContext = null);
-        Task<IdentityResult> SetLockoutAsync(long userId, bool lockout, TimeSpan? lockoutTimeSpan = null, DatabaseTransactionContext transContext = null);
-        Task<IdentityResult> SetUserNameAsync(long userId, string userName, DatabaseTransactionContext transContext = null);
-        Task<IdentityResult> SetUserPasswordByMobileAsync(string mobile, string newPassword, DatabaseTransactionContext transContext = null);
-        Task<User> ValidateSecurityStampAsync(long userId, string securityStamp, DatabaseTransactionContext transContext = null);
+        Task<IdentityResult> CreateByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed, DatabaseTransactionContext transContext = null);
+        Task<User> GetByEmailAsync(string email, DatabaseTransactionContext transContext = null);
+        Task<User> GetAsync(string userGuid, DatabaseTransactionContext transContext = null);
+        Task<User> GetByMobileAsync(string mobile, DatabaseTransactionContext transContext = null);
+        Task<User> GetByUserNameAsync(string userName, DatabaseTransactionContext transContext = null);
+        Task<IList<User>> GetAsync(IEnumerable<string> userGuids, DatabaseTransactionContext transContext = null);
+        Task<IdentityResult> SetAccessFailedCountAsync(string userGuid, long count, DatabaseTransactionContext transContext = null);
+        Task<IdentityResult> SetLockoutAsync(string userGuid, bool lockout, TimeSpan? lockoutTimeSpan = null, DatabaseTransactionContext transContext = null);
+        Task<IdentityResult> SetUserNameAsync(string userGuid, string userName, DatabaseTransactionContext transContext = null);
+        Task<IdentityResult> SetPasswordByMobileAsync(string mobile, string newPassword, DatabaseTransactionContext transContext = null);
+        Task<User> ValidateSecurityStampAsync(string userGuid, string securityStamp, DatabaseTransactionContext transContext = null);
     }
 
 

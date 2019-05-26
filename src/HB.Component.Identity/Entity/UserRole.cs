@@ -8,11 +8,16 @@ namespace HB.Component.Identity.Entity
     /// </summary>
     public class UserRole : DatabaseEntity
     {
-        [DatabaseForeignKey("用户ID", typeof(User))]
-        public long UserId { get; set; }
+        [UniqueGuidEntityProperty]
+        public string Guid { get; set; }
+
+        [ForeignKey(typeof(User))]
+        [GuidEntityProperty]
+        public string UserGuid { get; set; }
 
 
-        [DatabaseForeignKey("角色ID", typeof(Role))]
-        public long RoleId { get; set; }
+        [ForeignKey(typeof(Role))]
+        [GuidEntityProperty]
+        public string RoleGuid { get; set; }
     }
 }

@@ -89,7 +89,7 @@ namespace HB.Framework.Database.Entity
 
             foreach (PropertyInfo info in modelType.GetTypeInfo().GetProperties())
             {
-                IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(DatabaseEntityPropertyIgnoreAttribute), false).Select<object, Attribute>(o=>(Attribute)o);
+                IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(EntityPropertyIgnoreAttribute), false).Select<object, Attribute>(o=>(Attribute)o);
 
                 if (atts2 == null || atts2.Count() == 0)
                 {
@@ -122,23 +122,39 @@ namespace HB.Framework.Database.Entity
 
             #region 数据库
 
+            IEnumerable<Attribute> propertyAttrs = info.GetCustomAttributes(typeof(EntityPropertyAttribute), false).Select(o => (Attribute)o);
+            if (propertyAttrs != null && propertyAttrs.Count() > 0)
+            {
+                EntityPropertyAttribute propertyAttr = propertyAttrs.ElementAt(0) as EntityPropertyAttribute;
+
+                propertyDef.IsTableProperty = true;
+                propertyDef.IsNullable = !propertyAttr.NotNull;
+                propertyDef.IsUnique = propertyAttr.Unique;
+                propertyDef.DbLength = propertyAttr.Length > 0 ? (int?)propertyAttr.Length : null;
+                propertyDef.IsLengthFixed = propertyAttr.FixedLength;
+                propertyDef.DbDefaultValue = string.IsNullOrEmpty(propertyAttr.DefaultValue) ? null : propertyAttr.DefaultValue;
+                propertyDef.DbDescription = propertyAttr.Description;
+
+                if (propertyAttr.ConverterType != null)
+                {
+                    propertyDef.TypeConverter = typeConverterFactory.GetTypeConverter(propertyAttr.ConverterType);
+                }
+            }
+
             //判断是否是主键
-            IEnumerable<Attribute> atts1 = info.GetCustomAttributes(typeof(DatabaseMainKeyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
+            IEnumerable<Attribute> atts1 = info.GetCustomAttributes(typeof(PrimaryKeyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
             if (atts1 != null && atts1.Count() > 0)
             {
                 propertyDef.IsTableProperty = true;
                 propertyDef.IsPrimaryKey = true;
                 propertyDef.IsNullable = false;
                 propertyDef.IsForeignKey = false;
-                propertyDef.IsUnique = false;
-                propertyDef.DbDescription = (atts1.ElementAt(0) as DatabaseMainKeyAttribute).Description;
-                propertyDef.DbDefaultValue = null;
-                propertyDef.DbLength = null;
+                propertyDef.IsUnique = true;
             }
             else
             {
                 //判断是否外键
-                IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(DatabaseForeignKeyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
+                IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(ForeignKeyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
                 if (atts2 != null && atts2.Count() > 0)
                 {
                     propertyDef.IsTableProperty = true;
@@ -146,33 +162,6 @@ namespace HB.Framework.Database.Entity
                     propertyDef.IsForeignKey = true;
                     propertyDef.IsNullable = false;
                     propertyDef.IsUnique = false;
-                    propertyDef.DbDescription = (atts2.ElementAt(0) as DatabaseForeignKeyAttribute).Description;
-                    propertyDef.DbDefaultValue = null;
-                    propertyDef.DbLength = null;
-                }
-                else
-                {
-                    //判断是否TableProperty
-                    IEnumerable<Attribute> atts3 = info.GetCustomAttributes(typeof(DatabaseEntityPropertyAttribute), false).Select(o => (Attribute)o);
-                    if (atts3 != null && atts3.Count() > 0)
-                    {
-                        DatabaseEntityPropertyAttribute cur = atts3.ElementAt(0) as DatabaseEntityPropertyAttribute;
-
-                        propertyDef.IsTableProperty = true;
-                        propertyDef.IsPrimaryKey = false;
-                        propertyDef.IsForeignKey = false;
-                        propertyDef.IsNullable = !cur.NotNull;
-                        propertyDef.IsUnique = cur.Unique;
-                        propertyDef.DbLength = cur.Length > 0 ? (int?)cur.Length : null;
-                        propertyDef.DbDefaultValue = string.IsNullOrEmpty(cur.DefaultValue) ? null : cur.DefaultValue;
-                        propertyDef.DbDescription = cur.Description;
-                        propertyDef.TypeConverter = null;
-
-                        if (cur.ConverterType != null)
-                        {
-                            propertyDef.TypeConverter = typeConverterFactory.GetTypeConverter(cur.ConverterType);
-                        }
-                    }
                 }
             }
 
