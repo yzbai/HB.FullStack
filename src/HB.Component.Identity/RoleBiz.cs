@@ -22,10 +22,10 @@ namespace HB.Component.Identity
             _logger = logger;
         }
 
-        public Task<IEnumerable<string>> GetUserRoleNamesAsync(long userId, DatabaseTransactionContext transContext = null)
+        public Task<IEnumerable<string>> GetUserRoleNamesAsync(string userGuid, DatabaseTransactionContext transContext = null)
         {
-            FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
-            WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserId == userId);
+            FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Guid == ru.RoleGuid);
+            WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserGuid == userGuid);
 
             return _database.RetrieveAsync<Role>(from, where, transContext)
                 .ContinueWith(o=>o.Result.Select(r=>r.Name), TaskScheduler.Default);

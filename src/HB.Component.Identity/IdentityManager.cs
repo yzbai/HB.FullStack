@@ -21,32 +21,32 @@ namespace HB.Component.Identity
 
         public Task<IdentityResult> CreateUserByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed)
         {
-            return _userBiz.CreateUserByMobileAsync(userType, mobile, userName, password, mobileConfirmed);
+            return _userBiz.CreateByMobileAsync(userType, mobile, userName, password, mobileConfirmed);
         }
 
         public Task<User> GetUserByMobileAsync(string mobile)
         {
-            return _userBiz.GetUserByMobileAsync(mobile);
+            return _userBiz.GetByMobileAsync(mobile);
         }
 
         public Task<User> GetUserByUserNameAsync(string userName)
         {
-            return _userBiz.GetUserByUserNameAsync(userName);
+            return _userBiz.GetByUserNameAsync(userName);
         }
 
-        public Task<IdentityResult> SetAccessFailedCountAsync(long userId, long count)
+        public Task<IdentityResult> SetAccessFailedCountAsync(string userGuid, long count)
         {
-            return _userBiz.SetAccessFailedCountAsync(userId, count);
+            return _userBiz.SetAccessFailedCountAsync(userGuid, count);
         }
 
-        public Task<IdentityResult> SetLockoutAsync(long userId, bool lockout, TimeSpan? lockoutTimeSpan = null)
+        public Task<IdentityResult> SetLockoutAsync(string userGuid, bool lockout, TimeSpan? lockoutTimeSpan = null)
         {
-            return _userBiz.SetLockoutAsync(userId, lockout, lockoutTimeSpan);
+            return _userBiz.SetLockoutAsync(userGuid, lockout, lockoutTimeSpan);
         }
 
-        public Task<User> ValidateSecurityStampAsync(long userId, string securityStamp)
+        public Task<User> ValidateSecurityStampAsync(string userGuid, string securityStamp)
         {
-            return _userBiz.ValidateSecurityStampAsync(userId, securityStamp);
+            return _userBiz.ValidateSecurityStampAsync(userGuid, securityStamp);
         }
     }
 }

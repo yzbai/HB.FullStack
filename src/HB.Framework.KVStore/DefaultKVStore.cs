@@ -112,7 +112,7 @@ namespace HB.Framework.KVStore
 
         #region sync
 
-        public T GetById<T>(object keyValue) where T : KVStoreEntity, new()
+        public T GetByGuid<T>(object keyValue) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -124,7 +124,7 @@ namespace HB.Framework.KVStore
             return JsonUtil.FromJson<T>(jsonValue);
         }
 
-        public T GetById<T>(T t) where T : KVStoreEntity, new()
+        public T GetByGuid<T>(T t) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -136,7 +136,7 @@ namespace HB.Framework.KVStore
             return JsonUtil.FromJson<T>(jsonValue);
         }
 
-        public IEnumerable<T> GetByIds<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
+        public IEnumerable<T> GetByGuids<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -148,7 +148,7 @@ namespace HB.Framework.KVStore
             return values.Select(json => JsonUtil.FromJson<T>(json));
         }
 
-        public IEnumerable<T> GetByIds<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
+        public IEnumerable<T> GetByGuids<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -242,7 +242,7 @@ namespace HB.Framework.KVStore
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return DeleteByIds<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
+            return DeleteByGuids<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
         }
 
         public KVStoreResult DeleteAll<T>() where T : KVStoreEntity, new()
@@ -255,12 +255,12 @@ namespace HB.Framework.KVStore
                 );
         }
 
-        public KVStoreResult DeleteById<T>(object keyValue, int version) where T : KVStoreEntity, new()
+        public KVStoreResult DeleteByGuid<T>(object keyValue, int version) where T : KVStoreEntity, new()
         {
-            return DeleteByIds<T>(new List<object>() { keyValue }, new List<int> { version });
+            return DeleteByGuids<T>(new List<object>() { keyValue }, new List<int> { version });
         }
 
-        public KVStoreResult DeleteByIds<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
+        public KVStoreResult DeleteByGuids<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -276,7 +276,7 @@ namespace HB.Framework.KVStore
 
         #region async
 
-        public async Task<T> GetByIdAsync<T>(object keyValue) where T : KVStoreEntity, new()
+        public async Task<T> GetByGuidAsync<T>(object keyValue) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -288,7 +288,7 @@ namespace HB.Framework.KVStore
             return JsonUtil.FromJson<T>(json);
         }
 
-        public async Task<T> GetByIdAsync<T>(T t) where T : KVStoreEntity, new()
+        public async Task<T> GetByGuidAsync<T>(T t) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -300,7 +300,7 @@ namespace HB.Framework.KVStore
             return JsonUtil.FromJson<T>(json);
         }
 
-        public async Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T>> GetByGuidsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -312,7 +312,7 @@ namespace HB.Framework.KVStore
             return jsons.Select(t => JsonUtil.FromJson<T>(t));
         }
 
-        public async Task<IEnumerable<T>> GetByIdsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T>> GetByGuidsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
@@ -411,7 +411,7 @@ namespace HB.Framework.KVStore
 
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return DeleteByIdsAsync<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
+            return DeleteByGuidsAsync<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
         }
 
         public Task<KVStoreResult> DeleteAllAsync<T>() where T : KVStoreEntity, new()
@@ -424,12 +424,12 @@ namespace HB.Framework.KVStore
                 );
         }
 
-        public Task<KVStoreResult> DeleteByIdAsync<T>(object keyValue, int version) where T : KVStoreEntity, new()
+        public Task<KVStoreResult> DeleteByGuidAsync<T>(object keyValue, int version) where T : KVStoreEntity, new()
         {
-            return DeleteByIdsAsync<T>(new object[] { keyValue }, new int[] { version });
+            return DeleteByGuidsAsync<T>(new object[] { keyValue }, new int[] { version });
         }
 
-        public Task<KVStoreResult> DeleteByIdsAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
+        public Task<KVStoreResult> DeleteByGuidsAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 

@@ -11,88 +11,89 @@ namespace HB.Component.Identity.Entity
     public class User : DatabaseEntity
     {
         [Required]
-        [DatabaseEntityProperty("UserType", NotNull = true, Length = 100)]
-        public string UserType { get; set; }
-
-        //TODO: 建立索引
-        [Required]
-        [DatabaseEntityProperty("Guid", NotNull=true, Length=50, Unique = true)]
+        [UniqueGuidEntityProperty]
         public string Guid { get; set; }
 
+
         [Required]
-        [DatabaseEntityProperty("SecurityStamp", NotNull = true, Length = 50)]
+        [EntityProperty("UserType", NotNull = true, Length = 100)]
+        public string UserType { get; set; }
+
+
+        [Required]
+        [GuidEntityProperty]
         public string SecurityStamp { get; set; }
 
         /// <summary>
         /// 唯一, 可为空，一旦不为空后不可修改
         /// </summary>
         [UserName]
-        [DatabaseEntityProperty("用户名称", Length = 100, Unique = true)]
+        [EntityProperty("用户名称", Length = 100, Unique = true)]
         public string UserName { get; set; }
         /// <summary>
         /// 唯一
         /// </summary>
         [Phone]
-        [DatabaseEntityProperty("手机号", Unique = true)]
+        [EntityProperty("手机号", Unique = true, Length = 14)]
         public string Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [DatabaseEntityProperty("邮箱", Unique = true)]
+        [EntityProperty("邮箱", Unique = true, Length = 256)]
         public string Email { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [Password]
-        [DatabaseEntityProperty("密码")]
+        [EntityProperty("密码")]
         public string PasswordHash { get; set; }
 
         /// <summary>
         /// 未激活，可以进行注册，潜在用户
         /// </summary>
-        [DatabaseEntityProperty("潜在用户")]
+        [EntityProperty("潜在用户")]
         public bool IsActivated { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [DatabaseEntityProperty("手机号码是否验证")]
+        [EntityProperty("手机号码是否验证")]
         public bool MobileConfirmed { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [DatabaseEntityProperty("邮箱是否验证")]
+        [EntityProperty("邮箱是否验证")]
         public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [DatabaseEntityProperty("Two Factor")]
+        [EntityProperty("Two Factor")]
         public bool TwoFactorEnabled { get; set; }
         
         /// <summary>
         /// 
         /// </summary>
-        [DatabaseEntityProperty("Lockout enabled")]
+        [EntityProperty("Lockout enabled")]
         public bool LockoutEnabled { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [DatabaseEntityProperty("LockendDatae")]
+        [EntityProperty("LockendDatae")]
         public DateTimeOffset? LockoutEndDate { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [DatabaseEntityProperty("Accessfailed count")]
+        [EntityProperty("Accessfailed count")]
         public long AccessFailedCount { get; set; }
 
-        [DatabaseEntityProperty("Accessfailed last time")]
+        [EntityProperty("Accessfailed last time")]
         public DateTimeOffset? AccessFailedLastTime { get; set; }
 
         //[DatabaseEntityProperty("ImageUrl")]

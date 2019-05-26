@@ -7,7 +7,7 @@ namespace HB.Framework.Database.Entity
     /// 标识字段为外键
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class DatabaseForeignKeyAttribute : DatabaseEntityPropertyAttribute
+    public sealed class ForeignKeyAttribute : Attribute
     {
 
         /// <summary>
@@ -15,8 +15,7 @@ namespace HB.Framework.Database.Entity
         /// </summary>
         /// <param name="desc"></param>
         /// <param name="baseType">引用表的类类型</param>
-        public DatabaseForeignKeyAttribute(string desc, Type baseType)
-            : base(desc)
+        public ForeignKeyAttribute(Type baseType)
         {
             BaseType = baseType;
         }

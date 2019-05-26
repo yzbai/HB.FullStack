@@ -8,7 +8,7 @@ namespace HB.Infrastructure.Redis.EventBus
 {
     public class EventMessageEntity
     {
-        public string Id { get; set; } = SecurityUtil.CreateUniqueToken();
+        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
         public long Timestamp { get; set; } = TimeUtil.CurrentTimestampSeconds();
 

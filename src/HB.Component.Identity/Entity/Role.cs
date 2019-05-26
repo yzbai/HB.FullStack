@@ -9,17 +9,19 @@ namespace HB.Component.Identity.Entity
     /// </summary>
     public class Role : DatabaseEntity
     {
-        [Required]
-        [DatabaseEntityProperty("角色名", Unique = true, NotNull = true)]
+        [UniqueGuidEntityProperty]
+        public string Guid { get; set; }
+
+        [EntityProperty("角色名", Unique = true, NotNull = true)]
         public string Name { get; set; }
 
-        [DatabaseEntityProperty("DisplayName", Length=500)]
+        [EntityProperty("DisplayName", Length=500)]
         public string DisplayName { get; set; }
 
-        [DatabaseEntityProperty("是否激活")]
+        [EntityProperty("是否激活")]
         public bool IsActivated { get; set; }
 
-        [DatabaseEntityProperty("说明", Length=1024)]
+        [EntityProperty("说明", Length=1024)]
         public string Comment { get; set; }
     }
 

@@ -32,22 +32,22 @@ namespace HB.Component.Identity
 
             IList<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimExtensionTypes.UserGUID, user.Guid),
-                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
+                new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
+                //new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
                 new Claim(ClaimExtensionTypes.UserName, user.UserName??""),
                 new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
                 new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
             };
 
-            IList<UserClaim> userClaims = await _userClaimBiz.GetUserClaimsByUserIdAsync(user.Id, transContext).ConfigureAwait(false);
+            IList<UserClaim> userClaims = await _userClaimBiz.GetAsync(user.Guid, transContext).ConfigureAwait(false);
 
             foreach (UserClaim item in userClaims)
             {
                 claims.Add(new Claim(item.ClaimType, item.ClaimValue));
             }
 
-            IEnumerable<string> roleNames = await _roleBiz.GetUserRoleNamesAsync(user.Id, transContext).ConfigureAwait(false);
+            IEnumerable<string> roleNames = await _roleBiz.GetUserRoleNamesAsync(user.Guid, transContext).ConfigureAwait(false);
 
             foreach (string roleName in roleNames)
             {

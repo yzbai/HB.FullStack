@@ -38,7 +38,7 @@ namespace HB.Component.Authorization
 
             IList<Claim> claims = await _claimsPrincipalFactory.CreateClaimsAsync(user).ConfigureAwait(false);
 
-            claims.Add(new Claim(ClaimExtensionTypes.SignInTokenIdentifier, signInToken.SignInTokenIdentifier));
+            claims.Add(new Claim(ClaimExtensionTypes.SignInTokenGuid, signInToken.Guid));
 
             //这个JWT只能在当前ClientId上使用
             claims.Add(new Claim(ClaimExtensionTypes.ClientId, signInToken.ClientId));
