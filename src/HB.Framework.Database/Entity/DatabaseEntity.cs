@@ -13,7 +13,7 @@ namespace HB.Framework.Database.Entity
     //[Serializable]
     public class DatabaseEntity : CommonEntity
     {
-        [PrimaryKey]
+        [AutoIncrementPrimaryKey]
         [EntityProperty("Id")]
         public long Id { get; set; } = -1;
 

@@ -651,149 +651,183 @@ namespace HB.Framework.Database
 
         #endregion
 
-        #region 批量更改(Write), 无版本控制
+        #region 批量更改(Write)
 
-        //TODO: 加锁
+        public async Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
+        {
+            if (!CheckEntities<T>(items))
+            {
+                return DatabaseResult.Fail("entities not valid.");
+            }
+
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            if (!entityDef.DatabaseWriteable)
+            {
+                return DatabaseResult.NotWriteable();
+            }
+
+            IDataReader reader = null;
+
+            try
+            {
+                DatabaseResult result = DatabaseResult.Succeeded();
+
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(
+                    transContext?.Transaction,
+                    entityDef.DatabaseName,
+                    _sqlBuilder.CreateBatchAddStatement(items, lastUser),
+                    true);
+
+                while (reader.Read())
+                {
+                    int newId = reader.GetInt32(0);
+
+                    if (newId <= 0)
+                    {
+                        throw new DatabaseException("BatchAdd wrong new id return.");
+                    }
+
+                    result.AddId(newId);
+                }
+
+                if (result.Ids.Count != items.Count)
+                    throw new DatabaseException("BatchAdd wrong new id number return.");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                return DatabaseResult.Fail(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+            }
+        }
 
         /// <summary>
-        /// 批量添加,返回新产生的ID列表
+        /// 批量更改
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
-            throw new NotImplementedException();
-            //if (!checkEntities<T>(items))
-            //{
-            //    return DatabaseResult.Fail("entities not valid.");
-            //}
+            if (!CheckEntities<T>(items))
+            {
+                return DatabaseResult.Fail("entities not valid.");
+            }
 
-            //DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            //if (!entityDef.DatabaseWriteable)
-            //{
-            //    return DatabaseResult.NotWriteable;
-            //}
+            if (!entityDef.DatabaseWriteable)
+            {
+                return DatabaseResult.NotWriteable();
+            }
 
-            //IDataReader reader = null;
-            //DatabaseResult result = DatabaseResult.Succeeded;
+            IDataReader reader = null;
 
-            //try
-            //{
-            //    string sql = _sqlBuilder.GetBatchAddStatement<T>(items, lastUser);
+            try
+            {
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(
+                    transContext?.Transaction,
+                    entityDef.DatabaseName,
+                    _sqlBuilder.CreateBatchUpdateStatement(items, lastUser),
+                    true);
 
-            //    reader = await _databaseEngine.ExecuteSqlReaderAsync(trans, entityDef.DatabaseName, sql, true);
+                int count = 0;
 
-            //    while (reader.Read())
-            //    {
-            //        result.AddId(reader.GetInt32(0));
-            //    }
+                while (reader.Read())
+                {
+                    int matched = reader.GetInt32(0);
 
-            //    return result;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
+                    if (matched != 1)
+                    {
+                        throw new DatabaseException("BatchUpdate wrong, no match the {" + count + "}th data item. ");
+                    }
 
-            //    return DatabaseResult.Fail(ex);
-            //}
-            //finally
-            //{
-            //    if (reader != null)
-            //    {
-            //        reader.Dispose();
-            //    }
-            //}
+                    count++;
+                }
+
+                if (count != items.Count)
+                    throw new DatabaseException("BatchUpdate wrong number return.");
+
+                return DatabaseResult.Succeeded();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                return DatabaseResult.Fail(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+            }
         }
 
-        /// <summary>
-        /// 批量更改,返回影响行数列表
-        /// </summary>
-        /// <param name="items"></param>
-        /// <returns></returns>
-        public Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
-            throw new NotImplementedException();
-            //updatedIds = new List<long>();
+            if (!CheckEntities<T>(items))
+            {
+                return DatabaseResult.Fail("Entities not valid");
+            }
 
-            //if (!checkEntities<T>(items))
-            //{
-            //    return DatabaseResult.Fail("entities not valid.");
-            //}
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            //DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            if (!entityDef.DatabaseWriteable)
+            {
+                return DatabaseResult.NotWriteable();
+            }
 
-            //if (!entityDef.DatabaseWriteable)
-            //{
-            //    return DatabaseResult.NotWriteable;
-            //}
+            IDataReader reader = null;
 
-            //try
-            //{
-            //    string sql = _sqlBuilder.GetBatchUpdateStatement<T>(items, lastUser);
-            //    using (IDataReader reader = _databaseEngine.ExecuteSqlReader(trans, entityDef.DatabaseName, sql, true))
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            updatedIds.Add(reader.GetInt32(0));
-            //        }
-            //    }
+            try
+            {
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(
+                    transContext?.Transaction,
+                    entityDef.DatabaseName,
+                    _sqlBuilder.CreateBatchDeleteStatement(items, lastUser),
+                    true);
 
-            //    return DatabaseResult.Succeeded;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
+                int count = 0;
 
-            //    return DatabaseResult.Fail(ex);
-            //}
+                while (reader.Read())
+                {
+                    int affected = reader.GetInt32(0);
+
+                    if (affected != 1)
+                    {
+                        throw new DatabaseException("BatchDelete wrong, no affected the {" + count + "}th data item. ");
+                    }
+
+                    count++;
+                }
+
+                if (count != items.Count)
+                    throw new DatabaseException("BatchDelete wrong number return.");
+
+                return DatabaseResult.Succeeded();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                return DatabaseResult.Fail(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+            }
         }
-
-        /// <summary>
-        /// 批量删除,返回影响行数列表
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        public Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
-        {
-            throw new NotImplementedException();
-            //deletedIds = new List<long>();
-
-            //if (!checkEntities<T>(items))
-            //{
-            //    return DatabaseResult.Fail("Entities not valid");
-            //}
-
-            //DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
-
-            //if (!entityDef.DatabaseWriteable)
-            //{
-            //    return DatabaseResult.NotWriteable;
-            //}
-
-            //try
-            //{
-            //    string sql = _sqlBuilder.GetBatchDeleteStatement<T>(items, lastUser);
-
-            //    using (IDataReader reader = _databaseEngine.ExecuteSqlReader(trans, entityDef.DatabaseName, sql, true))
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            deletedIds.Add(reader.GetInt32(0));
-            //        }
-            //    }
-
-            //    return DatabaseResult.Succeeded;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
-
-            //    return DatabaseResult.Fail(ex);
-            //}
-        }
-
-        
 
         #endregion
     }

@@ -54,7 +54,7 @@ namespace HB.Framework.Database.Entity
         }
 
         private DatabaseEntityDef CreateModelDef(Type modelType)
-        {            
+        {
             DatabaseEntityDef modelDef = new DatabaseEntityDef();
 
             #region 自身
@@ -68,7 +68,7 @@ namespace HB.Framework.Database.Entity
             #region 数据库
 
             DatabaseSchema dbSchema = _options.GetDatabaseSchema(modelType.FullName);
-            
+
             if (dbSchema == null)
             {
                 modelDef.IsTableModel = false;
@@ -89,7 +89,7 @@ namespace HB.Framework.Database.Entity
 
             foreach (PropertyInfo info in modelType.GetTypeInfo().GetProperties())
             {
-                IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(EntityPropertyIgnoreAttribute), false).Select<object, Attribute>(o=>(Attribute)o);
+                IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(EntityPropertyIgnoreAttribute), false).Select<object, Attribute>(o => (Attribute)o);
 
                 if (atts2 == null || atts2.Count() == 0)
                 {
@@ -142,11 +142,11 @@ namespace HB.Framework.Database.Entity
             }
 
             //判断是否是主键
-            IEnumerable<Attribute> atts1 = info.GetCustomAttributes(typeof(PrimaryKeyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
+            IEnumerable<Attribute> atts1 = info.GetCustomAttributes(typeof(AutoIncrementPrimaryKeyAttribute), false).Select<object, Attribute>(o => (Attribute)o);
             if (atts1 != null && atts1.Count() > 0)
             {
                 propertyDef.IsTableProperty = true;
-                propertyDef.IsPrimaryKey = true;
+                propertyDef.IsAutoIncrementPrimaryKey = true;
                 propertyDef.IsNullable = false;
                 propertyDef.IsForeignKey = false;
                 propertyDef.IsUnique = true;
@@ -158,7 +158,7 @@ namespace HB.Framework.Database.Entity
                 if (atts2 != null && atts2.Count() > 0)
                 {
                     propertyDef.IsTableProperty = true;
-                    propertyDef.IsPrimaryKey = false;
+                    propertyDef.IsAutoIncrementPrimaryKey = false;
                     propertyDef.IsForeignKey = true;
                     propertyDef.IsNullable = false;
                     propertyDef.IsUnique = false;

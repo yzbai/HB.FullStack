@@ -12,10 +12,28 @@ namespace HB.Framework.Database.SQL
         
         IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T entity, string lastUser) where T : DatabaseEntity, new();
         IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new();
-        string GetBatchAddStatement<T>(IList<T> entities) where T : DatabaseEntity;
-        string GetBatchDeleteStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity;
-        string GetBatchUpdateStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity;
-        string GetCreateStatement(Type type, bool addDropStatement);
+
+
+        IDbCommand CreateBatchAddStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new();
+
+        /// <summary>
+        /// 不允许重复删除
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entities"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        IDbCommand CreateBatchDeleteStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new();
+
+        /// <summary>
+        /// 允许重复更新
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entities"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        IDbCommand CreateBatchUpdateStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new();
+        string GetTableCreateStatement(Type type, bool addDropStatement);
         IDbCommand GetDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new();
 
         SelectExpression<T> NewSelect<T>() where T : DatabaseEntity, new();
