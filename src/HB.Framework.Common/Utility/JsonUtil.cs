@@ -9,9 +9,9 @@ namespace System
     {
         #region Json
 
-        public static string ToJson(object domain)
+        public static string ToJson(object entity)
         {
-            return JsonConvert.SerializeObject(domain);
+            return JsonConvert.SerializeObject(entity);
         }
 
         public static T FromJson<T>(string jsonString)
