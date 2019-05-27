@@ -58,7 +58,7 @@ namespace HB.Framework.Database.Entity
         /// 是否是主键
         /// IsTableProperty为false时无意义
         /// </summary>
-        public bool IsPrimaryKey { get; set; } = false;
+        public bool IsAutoIncrementPrimaryKey { get; set; } = false;
         /// <summary>
         /// 是否是外键
         /// IsTableProperty为false时无意义
