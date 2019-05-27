@@ -37,20 +37,20 @@ namespace HB.Framework.Database.Entity
             return GetDef(typeof(T));
         }
 
-        public DatabaseEntityDef GetDef(Type domainType)
+        public DatabaseEntityDef GetDef(Type entityType)
         {
-            if (!_defDict.ContainsKey(domainType))
+            if (!_defDict.ContainsKey(entityType))
             {
                 lock (_lockObj)
                 {
-                    if (!_defDict.ContainsKey(domainType))
+                    if (!_defDict.ContainsKey(entityType))
                     {
-                        _defDict[domainType] = CreateModelDef(domainType);
+                        _defDict[entityType] = CreateModelDef(entityType);
                     }
                 }
             }
 
-            return _defDict[domainType];
+            return _defDict[entityType];
         }
 
         private DatabaseEntityDef CreateModelDef(Type modelType)

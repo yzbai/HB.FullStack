@@ -7,14 +7,14 @@ namespace HB.Framework.Database.SQL
 {
     public interface ISQLBuilder
     {
-        IDbCommand CreateAddCommand<T>(T domain, string lastUser) where T : DatabaseEntity, new();
+        IDbCommand CreateAddCommand<T>(T entity, string lastUser) where T : DatabaseEntity, new();
         IDbCommand CreateCountCommand<T>(FromExpression<T> fromCondition = null, WhereExpression<T> whereCondition = null) where T : DatabaseEntity, new();
         
-        IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T domain, string lastUser) where T : DatabaseEntity, new();
+        IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T entity, string lastUser) where T : DatabaseEntity, new();
         IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new();
-        string GetBatchAddStatement<T>(IList<T> domains, string lastUser) where T : DatabaseEntity;
-        string GetBatchDeleteStatement<T>(IList<T> domains, string lastUser) where T : DatabaseEntity;
-        string GetBatchUpdateStatement<T>(IList<T> domains, string lastUser) where T : DatabaseEntity;
+        string GetBatchAddStatement<T>(IList<T> entities) where T : DatabaseEntity;
+        string GetBatchDeleteStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity;
+        string GetBatchUpdateStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity;
         string GetCreateStatement(Type type, bool addDropStatement);
         IDbCommand GetDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new();
 
