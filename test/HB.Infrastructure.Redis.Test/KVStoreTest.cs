@@ -84,11 +84,11 @@ namespace HB.Infrastructure.Redis.Test
         [Fact]
         public void AddAndFetch()
         {
-            UserEntity fetched = _kvStore.GetById<UserEntity>(_userEntity1.Id);
+            UserEntity fetched = _kvStore.GetByGuid<UserEntity>(_userEntity1.Id);
 
             if (fetched != null)
             {
-                KVStoreResult r = _kvStore.DeleteById<UserEntity>(fetched.Id, fetched.Version);
+                KVStoreResult r = _kvStore.DeleteByGuid<UserEntity>(fetched.Id, fetched.Version);
                 Assert.True(r.IsSucceeded());
             }
 
@@ -96,7 +96,7 @@ namespace HB.Infrastructure.Redis.Test
 
             Assert.True(result.IsSucceeded());
 
-            UserEntity fetchedAgain = _kvStore.GetByIdAsync<UserEntity>(_userEntity1.Id).Result;
+            UserEntity fetchedAgain = _kvStore.GetByGuidAsync<UserEntity>(_userEntity1.Id).Result;
 
             Assert.Equal<UserEntity>(_userEntity1, fetchedAgain, new UserEntityComparer());
         }
@@ -106,7 +106,7 @@ namespace HB.Infrastructure.Redis.Test
         {
             KVStoreResult result = KVStoreResult.Succeeded();
 
-            UserEntity fetched = _kvStore.GetByIdAsync<UserEntity>(_userEntity2.Id).Result;
+            UserEntity fetched = _kvStore.GetByGuidAsync<UserEntity>(_userEntity2.Id).Result;
 
             if (fetched == null)
             {
@@ -114,7 +114,7 @@ namespace HB.Infrastructure.Redis.Test
 
                 Assert.True(result.IsSucceeded());
 
-                fetched = _kvStore.GetByIdAsync<UserEntity>(_userEntity2.Id).Result;
+                fetched = _kvStore.GetByGuidAsync<UserEntity>(_userEntity2.Id).Result;
 
                 Assert.True(fetched != null);
             }
@@ -125,11 +125,11 @@ namespace HB.Infrastructure.Redis.Test
 
             Assert.True(result.IsSucceeded());
 
-            UserEntity fetchedAgain = _kvStore.GetByIdAsync<UserEntity>(_userEntity2.Id).Result;
+            UserEntity fetchedAgain = _kvStore.GetByGuidAsync<UserEntity>(_userEntity2.Id).Result;
 
             Assert.True(fetched.Version == fetchedAgain.Version);
 
-            result = _kvStore.DeleteByIdAsync<UserEntity>(_userEntity2.Id, fetchedAgain.Version).Result;
+            result = _kvStore.DeleteByGuidAsync<UserEntity>(_userEntity2.Id, fetchedAgain.Version).Result;
 
             Assert.True(result.IsSucceeded());
         }

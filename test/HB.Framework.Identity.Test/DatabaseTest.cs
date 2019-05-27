@@ -91,7 +91,7 @@ namespace HB.Component.Identity.Test
 
             for (int i = 1; i < userCount; i += 39)
             {
-                UserClaim uc = new UserClaim() { UserId = i, ClaimValue = "Nothing", ClaimType = "HB.Nothing" };
+                UserClaim uc = new UserClaim() { UserGuid = i.ToString(), ClaimValue = "Nothing", ClaimType = "HB.Nothing" };
                 result = _db.AddAsync(uc).Result;
             }
 
@@ -108,7 +108,7 @@ namespace HB.Component.Identity.Test
 
             for (int i = 1; i < userCount; i += 7)
             {
-                UserRole ur = new UserRole() { RoleId = roleId++, UserId = i };
+                UserRole ur = new UserRole() { RoleGuid = roleId++.ToString(), UserGuid = i.ToString() };
 
                 if (roleId == 5) { roleId = 1; }
 
@@ -124,8 +124,8 @@ namespace HB.Component.Identity.Test
             SelectExpression<User> select = _db.NewSelect<User>().Select(u => u.UserName).Select(u => u.Mobile);
 
             FromExpression<UserRole> from = _db.NewFrom<UserRole>()
-                                          .LeftJoin<Role>((ur, r) => ur.RoleId == r.Id)
-                                          .LeftJoin<User>((ur, u) => ur.UserId == u.Id);
+                                          .LeftJoin<Role>((ur, r) => ur.RoleGuid == r.Guid)
+                                          .LeftJoin<User>((ur, u) => ur.UserGuid == u.Guid);
 
             WhereExpression<UserRole> where = _db.NewWhere<UserRole>().And<Role>(r => r.Name == "Admin");
 
@@ -143,7 +143,7 @@ namespace HB.Component.Identity.Test
                 {
                     _output.WriteLine(JsonUtil.ToJson(item));
 
-                    var lst = _db.Retrieve<UserRole>(ur => ur.UserId == item.Id && ur.RoleId == adminRole.Id);
+                    var lst = _db.Retrieve<UserRole>(ur => ur.UserGuid == item.Guid && ur.RoleGuid == adminRole.Guid);
 
                     Assert.True(lst.Count >= 1);
                 }
@@ -153,7 +153,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetWhoHasClaims()
         {
-            FromExpression<UserClaim> from = _db.NewFrom<UserClaim>().LeftJoin<User>((uc, u) => uc.UserId == u.Id);
+            FromExpression<UserClaim> from = _db.NewFrom<UserClaim>().LeftJoin<User>((uc, u) => uc.UserGuid == u.Guid);
 
 
             var resultList = _db.RetrieveAsync<UserClaim, User>(from, null).Result;
@@ -299,7 +299,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetWhoHasRoles()
         {
-            FromExpression<UserRole> from = _db.NewFrom<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleId == r.Id).LeftJoin<User>((ur, u) => ur.UserId == u.Id);
+            FromExpression<UserRole> from = _db.NewFrom<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleGuid == r.Guid).LeftJoin<User>((ur, u) => ur.UserGuid == u.Guid);
 
             var resultList = _db.RetrieveAsync<UserRole, User, Role>(from, null).Result;
 

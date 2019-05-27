@@ -7,9 +7,9 @@ namespace HB.Framework.Database.Entity
     /// 标识字段为主键
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class PrimaryKeyAttribute : Attribute
+    public sealed class AutoIncrementPrimaryKeyAttribute : Attribute
     {
-        public PrimaryKeyAttribute()
+        public AutoIncrementPrimaryKeyAttribute()
         {
 
         }
