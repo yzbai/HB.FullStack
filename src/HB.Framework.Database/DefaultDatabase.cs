@@ -688,43 +688,42 @@ namespace HB.Framework.Database
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public DatabaseResult BatchAdd<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
+        public DatabaseResult BatchAdd<T>(IList<T> items, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
-            throw new NotImplementedException();
-            //if (!CheckEntities<T>(items))
-            //{
-            //    return DatabaseResult.Fail("entities not valid.");
-            //}
+            if (!CheckEntities<T>(items))
+            {
+                return DatabaseResult.Fail("entities not valid.");
+            }
 
-            //DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            //if (!entityDef.DatabaseWriteable)
-            //{
-            //    return DatabaseResult.NotWriteable;
-            //}
+            if (!entityDef.DatabaseWriteable)
+            {
+                return DatabaseResult.NotWriteable();
+            }
 
-            //try
-            //{
-            //    DatabaseResult result = DatabaseResult.Succeeded;
+            try
+            {
+                DatabaseResult result = DatabaseResult.Succeeded();
 
-            //    string sql = _sqlBuilder.GetBatchAddStatement<T>(items, lastUser);
+                string sql = _sqlBuilder.GetBatchAddStatement<T>(items);
 
-            //    using (IDataReader reader = _databaseEngine.ExecuteSqlReader(transContext?.Transaction, entityDef.DatabaseName, sql, true))
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            result.AddId(reader.GetInt32(0));
-            //        }
-            //    }
+                using (IDataReader reader = _databaseEngine.ExecuteSqlReader(transContext?.Transaction, entityDef.DatabaseName, sql, true))
+                {
+                    while (reader.Read())
+                    {
+                        result.AddId(reader.GetInt32(0));
+                    }
+                }
 
-            //    return result;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
 
-            //    return DatabaseResult.Fail(ex);
-            //}
+                return DatabaseResult.Fail(ex);
+            }
         }
         
         /// <summary>
