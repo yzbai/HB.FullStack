@@ -21,7 +21,6 @@ namespace HB.Framework.Database
     /// 乐观锁用在写操作上，交由各个数据库执行者实施，Version方式。
     /// 批量操作，采用事务方式，也交由各个数据库执行者实施。
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public partial class DefaultDatabase : IDatabase
     {
         private readonly IDatabaseEngine _databaseEngine;
@@ -680,7 +679,7 @@ namespace HB.Framework.Database
 
         #endregion
 
-        #region 批量更改(Write), 无版本控制
+        #region 批量更改(Write)
 
 
         /// <summary>
@@ -688,7 +687,7 @@ namespace HB.Framework.Database
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public DatabaseResult BatchAdd<T>(IList<T> items, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
+        public DatabaseResult BatchAdd<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
             if (!CheckEntities<T>(items))
             {
@@ -702,114 +701,166 @@ namespace HB.Framework.Database
                 return DatabaseResult.NotWriteable();
             }
 
+            IDataReader reader = null;
+
             try
             {
                 DatabaseResult result = DatabaseResult.Succeeded();
 
-                string sql = _sqlBuilder.GetBatchAddStatement<T>(items);
+                reader = _databaseEngine.ExecuteCommandReader(
+                    transContext?.Transaction,
+                    entityDef.DatabaseName,
+                    _sqlBuilder.CreateBatchAddStatement(items, lastUser),
+                    true);
 
-                using (IDataReader reader = _databaseEngine.ExecuteSqlReader(transContext?.Transaction, entityDef.DatabaseName, sql, true))
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    int newId = reader.GetInt32(0);
+
+                    if (newId <= 0)
                     {
-                        result.AddId(reader.GetInt32(0));
+                        throw new DatabaseException("BatchAdd wrong new id return.");
                     }
+
+                    result.AddId(newId);
                 }
+
+                if (result.Ids.Count != items.Count)
+                    throw new DatabaseException("BatchAdd wrong new id number return.");
 
                 return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-
+                _logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
             }
         }
         
         /// <summary>
-        /// 批量更改,无版本控制
+        /// 批量更改
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
         public DatabaseResult BatchUpdate<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
-            throw new NotImplementedException();
-            //if (!checkEntities<T>(items))
-            //{
-            //    return DatabaseResult.Fail("entities not valid.");
-            //}
+            if (!CheckEntities<T>(items))
+            {
+                return DatabaseResult.Fail("entities not valid.");
+            }
 
-            //DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            //if (!entityDef.DatabaseWriteable)
-            //{
-            //    return DatabaseResult.NotWriteable;
-            //}
+            if (!entityDef.DatabaseWriteable)
+            {
+                return DatabaseResult.NotWriteable();
+            }
 
-            //try
-            //{
-            //    DatabaseResult result = DatabaseResult.Succeeded;
-            //    string sql = _sqlBuilder.GetBatchUpdateStatement<T>(items, lastUser);
+            IDataReader reader = null;
 
-            //    using (IDataReader reader = _databaseEngine.ExecuteSqlReader(trans, entityDef.DatabaseName, sql, true))
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            result.AddId(reader.GetInt32(0));
-            //        }
-            //    }
+            try
+            {
+                reader = _databaseEngine.ExecuteCommandReader(
+                    transContext?.Transaction,
+                    entityDef.DatabaseName,
+                    _sqlBuilder.CreateBatchUpdateStatement(items, lastUser),
+                    true);
 
-            //    return result;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
+                int count = 0;
 
-            //    return DatabaseResult.Fail(ex);
-            //}
+                while (reader.Read())
+                {
+                    int matched = reader.GetInt32(0);
+
+                    if (matched != 1)
+                    {
+                        throw new DatabaseException("BatchUpdate wrong, no match the {" + count +"}th data item. ");
+                    }
+
+                    count++;
+                }
+
+                if (count != items.Count)
+                    throw new DatabaseException("BatchUpdate wrong number return.");
+
+                return DatabaseResult.Succeeded();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                return DatabaseResult.Fail(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+            }
         }
-        
-        /// <summary>
-        /// 批量删除,返回影响行数列表,无版本控制
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
+       
         public DatabaseResult BatchDelete<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
-            throw new NotImplementedException();
-            //if (!checkEntities<T>(items))
-            //{
-            //    return DatabaseResult.Fail("Entities not valid");
-            //}
+            if (!CheckEntities<T>(items))
+            {
+                return DatabaseResult.Fail("Entities not valid");
+            }
 
-            //DatabaseEntityDef entityDef = _entityDefFactory.Get<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            //if (!entityDef.DatabaseWriteable)
-            //{
-            //    return DatabaseResult.NotWriteable;
-            //}
+            if (!entityDef.DatabaseWriteable)
+            {
+                return DatabaseResult.NotWriteable();
+            }
 
-            //try
-            //{
-            //    DatabaseResult result = DatabaseResult.Succeeded;
-            //    string sql = _sqlBuilder.GetBatchDeleteStatement<T>(items, lastUser);
+            IDataReader reader = null;
 
-            //    using (IDataReader reader = _databaseEngine.ExecuteSqlReader(trans, entityDef.DatabaseName, sql, true))
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            result.AddId(reader.GetInt32(0));
-            //        }
-            //    }
+            try
+            {
+                reader = _databaseEngine.ExecuteCommandReader(
+                    transContext?.Transaction,
+                    entityDef.DatabaseName,
+                    _sqlBuilder.CreateBatchDeleteStatement(items, lastUser),
+                    true);
 
-            //    return DatabaseResult.Succeeded;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
+                int count = 0;
 
-            //    return DatabaseResult.Fail(ex);
-            //}
+                while (reader.Read())
+                {
+                    int affected = reader.GetInt32(0);
+
+                    if (affected != 1)
+                    {
+                        throw new DatabaseException("BatchDelete wrong, no affected the {" + count + "}th data item. ");
+                    }
+
+                    count++;
+                }
+
+                if (count != items.Count)
+                    throw new DatabaseException("BatchDelete wrong number return.");
+
+                return DatabaseResult.Succeeded();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                return DatabaseResult.Fail(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+            }
         }
 
         #endregion

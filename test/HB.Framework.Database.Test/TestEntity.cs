@@ -9,16 +9,19 @@ namespace HB.Framework.Database.Test
 {
     public class TestEntity : DatabaseEntity
     {
-        [DatabaseEntityProperty]
+        [UniqueGuidEntityProperty]
+        public string Guid { get; set; }
+
+        [EntityProperty]
         public string Name { get; set; }
 
-        [DatabaseEntityProperty]
+        [EntityProperty]
         public IList<string> Books { get; set; }
 
-        [DatabaseEntityProperty(ConverterType = typeof(TestEntityTypeConventer))]
+        [EntityProperty(ConverterType = typeof(TestEntityTypeConventer))]
         public IDictionary<string, Author> BookAuthors { get; set; }
 
-        [DatabaseEntityProperty]
+        [EntityProperty]
         public TestType Type { get; set; }
     }
 
