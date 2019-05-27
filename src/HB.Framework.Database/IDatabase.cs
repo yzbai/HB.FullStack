@@ -113,6 +113,8 @@ namespace HB.Framework.Database
         DatabaseResult Delete<T>(T item, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
         DatabaseResult Update<T>(T item, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
 
+        //DatabaseResult Set<T>(T item, DatabaseTransactionContext transactionContext = null) where T : DatabaseEntity, new();
+
         DatabaseResult BatchAdd<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
         DatabaseResult BatchDelete<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
         DatabaseResult BatchUpdate<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();

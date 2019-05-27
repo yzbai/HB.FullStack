@@ -303,7 +303,7 @@ namespace HB.Framework.Database.SQL
             return statement;
         }
 
-        public IDbCommand CreateAddCommand<T>(T domain, string lastUser) where T : DatabaseEntity, new()
+        public IDbCommand CreateAddCommand<T>(T entity, string lastUser) where T : DatabaseEntity, new()
         {
             DatabaseEntityDef modelDef = _entityDefFactory.GetDef<T>();
             StringBuilder values = new StringBuilder();
@@ -338,7 +338,7 @@ namespace HB.Framework.Database.SQL
                     if (info.PropertyName == "Version")
                     {
                         values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, domain.Version + 1, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, entity.Version + 1, info.DbFieldType));
                     }
                     else if (info.PropertyName == "Deleted")
                     {
@@ -355,8 +355,8 @@ namespace HB.Framework.Database.SQL
                         values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
 
                         string dbValueStatement = info.TypeConverter == null ?
-                            _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false) :
-                            info.TypeConverter.TypeValueToDbValue(info.GetValue(domain));
+                            _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) :
+                            info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
 
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, dbValueStatement, info.DbFieldType));
                     }
@@ -401,7 +401,7 @@ namespace HB.Framework.Database.SQL
             return statement;
         }
 
-        public IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T domain, string lastUser) where T : DatabaseEntity, new()
+        public IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T entity, string lastUser) where T : DatabaseEntity, new()
         {
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
             List<IDataParameter> parameters = new List<IDataParameter>();
@@ -419,7 +419,7 @@ namespace HB.Framework.Database.SQL
 
                     if (info.PropertyName == "Version")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, domain.Version + 1, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, entity.Version + 1, info.DbFieldType));
                     }
                     else if (info.PropertyName == "LastUser")
                     {
@@ -428,8 +428,8 @@ namespace HB.Framework.Database.SQL
                     else
                     {
                         string dbValueStatement = info.TypeConverter == null ? 
-                            _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: false) :
-                            info.TypeConverter.TypeValueToDbValue(info.GetValue(domain));
+                            _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) :
+                            info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
 
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, dbValueStatement, info.DbFieldType));
                     }
@@ -491,17 +491,17 @@ namespace HB.Framework.Database.SQL
 
         #region Batch
 
-        public string GetBatchAddStatement<T>(IList<T> domains, string lastUser) where T : DatabaseEntity
+        public string GetBatchAddStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity
         {
-            if (domains == null || domains.Count == 0)
+            if (entities == null || entities.Count == 0)
             {
-                throw new ArgumentNullException(nameof(domains));
+                throw new ArgumentNullException(nameof(entities));
             }
 
             StringBuilder innerBuilder = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
 
-            foreach (T domain in domains)
+            foreach (T entity in entities)
             {
                 StringBuilder args = new StringBuilder();
                 StringBuilder values = new StringBuilder();
@@ -524,7 +524,7 @@ namespace HB.Framework.Database.SQL
 
                         if (info.PropertyName == "Version")
                         {
-                            values.AppendFormat(GlobalSettings.Culture, " {0},", domain.Version + 1);
+                            values.AppendFormat(GlobalSettings.Culture, " {0},", entity.Version + 1);
                         }
                         else if (info.PropertyName == "Deleted")
                         {
@@ -537,8 +537,8 @@ namespace HB.Framework.Database.SQL
                         else
                         {
                             string dbValueStatement = info.TypeConverter == null ? 
-                                _databaseEngine.GetDbValueStatement(info.GetValue(domain), needQuoted: true) : 
-                                _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(info.GetValue(domain)));
+                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true) : 
+                                _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(info.GetValue(entity)));
 
                             values.AppendFormat(GlobalSettings.Culture, " {0},", dbValueStatement);
                         }
@@ -621,20 +621,20 @@ namespace HB.Framework.Database.SQL
                 innerBuilder.ToString());
         }       
 
-        public string GetBatchDeleteStatement<T>(IList<T> domains, string lastUser) where T : DatabaseEntity
+        public string GetBatchDeleteStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity
         {
-            if (domains == null || domains.Count == 0)
+            if (entities == null || entities.Count == 0)
             {
-                throw new ArgumentNullException(nameof(domains));
+                throw new ArgumentNullException(nameof(entities));
             }
 
             StringBuilder innerBuilder = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
 
-            foreach (T domain in domains)
+            foreach (T entity in entities)
             {
                 innerBuilder.AppendFormat(GlobalSettings.Culture, "UPDATE {0} set `Deleted` = 1, `LastUser` = {1}, `Version` = {2}  WHERE `Id`={3} AND `Version`={4};insert into tb_tmp_batchDeleteCount(AffectedRowCount) values(row_count());",
-                    definition.DbTableReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true), domain.Version + 1, domain.Id, domain.Version);
+                    definition.DbTableReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true), entity.Version + 1, entity.Id, entity.Version);
             }
 
             return string.Format(GlobalSettings.Culture, "drop temporary table if exists `tb_tmp_batchDeleteCount`;create temporary table `tb_tmp_batchDeleteCount`( `AffectedRowCount` int not null);start transaction;{0}commit;select `AffectedRowCount` from `tb_tmp_batchDeleteCount`;drop temporary table `tb_tmp_batchDeleteCount`;",

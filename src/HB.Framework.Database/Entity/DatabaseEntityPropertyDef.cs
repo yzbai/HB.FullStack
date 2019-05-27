@@ -104,31 +104,31 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 获取值
         /// </summary>
-        /// <param name="domain"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public object GetValue(object domain)
+        public object GetValue(object entity)
         {
-            return GetMethod.Invoke(domain, null);
+            return GetMethod.Invoke(entity, null);
         }
         ///// <summary>
         ///// 获取数据库值表达
         ///// </summary>
-        ///// <param name="domain"></param>
+        ///// <param name="entity"></param>
         ///// <returns></returns>
-        //public string GetDbValueStatement(object domain)
+        //public string GetDbValueStatement(object entity)
         //{
-        //    object value = GetMethod.Invoke(domain, null);
+        //    object value = GetMethod.Invoke(entity, null);
         //    return DatabaseEngine.GetDbValueStatement(value);
         //}
 
         /// <summary>
         /// 赋值
         /// </summary>
-        /// <param name="domain"></param>
+        /// <param name="entity"></param>
         /// <param name="value"></param>
-        public void SetValue(object domain, object value)
+        public void SetValue(object entity, object value)
         {
-            SetMethod.Invoke(domain, new object[] { value });
+            SetMethod.Invoke(entity, new object[] { value });
         }
     }
 }
