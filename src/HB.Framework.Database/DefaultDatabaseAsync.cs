@@ -655,6 +655,11 @@ namespace HB.Framework.Database
 
         public async Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
+            if (transContext == null)
+            {
+                return DatabaseResult.Fail(new ArgumentNullException(nameof(transContext)));
+            }
+
             if (!CheckEntities<T>(items))
             {
                 return DatabaseResult.Fail("entities not valid.");
@@ -674,7 +679,7 @@ namespace HB.Framework.Database
                 DatabaseResult result = DatabaseResult.Succeeded();
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext?.Transaction,
+                    transContext.Transaction,
                     entityDef.DatabaseName,
                     _sqlBuilder.CreateBatchAddStatement(items, lastUser),
                     true);
@@ -717,6 +722,11 @@ namespace HB.Framework.Database
         /// <returns></returns>
         public async Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
+            if (transContext == null)
+            {
+                return DatabaseResult.Fail(new ArgumentNullException(nameof(transContext)));
+            }
+
             if (!CheckEntities<T>(items))
             {
                 return DatabaseResult.Fail("entities not valid.");
@@ -734,7 +744,7 @@ namespace HB.Framework.Database
             try
             {
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext?.Transaction,
+                    transContext.Transaction,
                     entityDef.DatabaseName,
                     _sqlBuilder.CreateBatchUpdateStatement(items, lastUser),
                     true);
@@ -774,6 +784,11 @@ namespace HB.Framework.Database
 
         public async Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
+            if (transContext == null)
+            {
+                return DatabaseResult.Fail(new ArgumentNullException(nameof(transContext)));
+            }
+
             if (!CheckEntities<T>(items))
             {
                 return DatabaseResult.Fail("Entities not valid");
@@ -791,7 +806,7 @@ namespace HB.Framework.Database
             try
             {
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext?.Transaction,
+                    transContext.Transaction,
                     entityDef.DatabaseName,
                     _sqlBuilder.CreateBatchDeleteStatement(items, lastUser),
                     true);

@@ -689,6 +689,11 @@ namespace HB.Framework.Database
         /// <returns></returns>
         public DatabaseResult BatchAdd<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
+            if (transContext == null)
+            {
+                return DatabaseResult.Fail(new ArgumentNullException(nameof(transContext)));
+            }
+
             if (!CheckEntities<T>(items))
             {
                 return DatabaseResult.Fail("entities not valid.");
@@ -708,7 +713,7 @@ namespace HB.Framework.Database
                 DatabaseResult result = DatabaseResult.Succeeded();
 
                 reader = _databaseEngine.ExecuteCommandReader(
-                    transContext?.Transaction,
+                    transContext.Transaction,
                     entityDef.DatabaseName,
                     _sqlBuilder.CreateBatchAddStatement(items, lastUser),
                     true);
@@ -751,6 +756,11 @@ namespace HB.Framework.Database
         /// <returns></returns>
         public DatabaseResult BatchUpdate<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
+            if (transContext == null)
+            {
+                return DatabaseResult.Fail(new ArgumentNullException(nameof(transContext)));
+            }
+
             if (!CheckEntities<T>(items))
             {
                 return DatabaseResult.Fail("entities not valid.");
@@ -768,7 +778,7 @@ namespace HB.Framework.Database
             try
             {
                 reader = _databaseEngine.ExecuteCommandReader(
-                    transContext?.Transaction,
+                    transContext.Transaction,
                     entityDef.DatabaseName,
                     _sqlBuilder.CreateBatchUpdateStatement(items, lastUser),
                     true);
@@ -808,6 +818,11 @@ namespace HB.Framework.Database
        
         public DatabaseResult BatchDelete<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new()
         {
+            if (transContext == null)
+            {
+                return DatabaseResult.Fail(new ArgumentNullException(nameof(transContext)));
+            }
+
             if (!CheckEntities<T>(items))
             {
                 return DatabaseResult.Fail("Entities not valid");
@@ -825,7 +840,7 @@ namespace HB.Framework.Database
             try
             {
                 reader = _databaseEngine.ExecuteCommandReader(
-                    transContext?.Transaction,
+                    transContext.Transaction,
                     entityDef.DatabaseName,
                     _sqlBuilder.CreateBatchDeleteStatement(items, lastUser),
                     true);
@@ -867,11 +882,86 @@ namespace HB.Framework.Database
 
         #region 事务
 
-        public IDbTransaction CreateTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
+        public DatabaseTransactionContext BeginTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
         {
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return _databaseEngine.CreateTransaction(entityDef.DatabaseName, isolationLevel);
+            IDbTransaction dbTransaction = _databaseEngine.CreateTransaction(entityDef.DatabaseName, isolationLevel);
+
+            return new DatabaseTransactionContext() {
+                Transaction = dbTransaction,
+                Status = DatabaseTransactionStatus.InTransaction
+            };
+        }
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
+        public void Commit(DatabaseTransactionContext context)
+        {
+            if (context == null || context.Transaction == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status != DatabaseTransactionStatus.InTransaction)
+            {
+                throw new DatabaseException("use a already finished transactioncontenxt");
+            }
+
+            try
+            {
+                IDbConnection conn = context.Transaction.Connection;
+                context.Transaction.Commit();
+                context.Transaction.Dispose();
+
+                if (conn != null && conn.State != ConnectionState.Closed)
+                {
+                    conn.Dispose();
+                }
+
+                context.Status = DatabaseTransactionStatus.Commited;
+            }
+            catch
+            {
+                context.Status = DatabaseTransactionStatus.Failed;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 回滚事务
+        /// </summary>
+        public void Rollback(DatabaseTransactionContext context)
+        {
+            if (context == null || context.Transaction == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status != DatabaseTransactionStatus.InTransaction)
+            {
+                throw new DatabaseException("use a already finished transactioncontenxt");
+            }
+
+            try
+            {
+                IDbConnection conn = context.Transaction.Connection;
+                context.Transaction.Rollback();
+                context.Transaction.Dispose();
+
+                if (conn != null && conn.State != ConnectionState.Closed)
+                {
+                    conn.Dispose();
+                }
+
+                context.Status = DatabaseTransactionStatus.Rollbacked;
+            }
+            catch
+            {
+                context.Status = DatabaseTransactionStatus.Failed;
+                throw;
+            }
         }
 
         #endregion

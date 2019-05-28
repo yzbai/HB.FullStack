@@ -1,4 +1,5 @@
 using HB.Framework.Database.SQL;
+using HB.Framework.Database.Transaction;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,56 +21,6 @@ namespace HB.Framework.Database.Test
             sqlBuilder = serviceFixture.SQLBuilder;
         }
 
-        [Fact]
-        public void Test_Create_Sql_For_TestEntity()
-        {
-            string sql = sqlBuilder.GetTableCreateStatement(typeof(TestEntity), true);
-
-            output.WriteLine(sql);
-
-            //database.DatabaseEngine.ExecuteSqlNonQuery(null, "test", sql);
-        }
-
-        [Fact]
-        public void Test_Select_Sql_For_TestEntity()
-        {
-            IDbCommand command = sqlBuilder.CreateRetrieveCommand<TestEntity>();
-
-            output.WriteLine(command.CommandText);
-
-        }
-
-        [Fact]
-        public void Test_Retrieve_TestEntity()
-        {
-            IList<TestEntity> testEntities = database.RetrieveAll<TestEntity>();
-
-            Assert.NotEmpty(testEntities);
-            Assert.NotEmpty(testEntities[0].Books);
-            Assert.NotEmpty(testEntities[0].BookAuthors);
-        }
-
-        [Fact]
-        public void Test_Add_TestEntity()
-        {
-            TestEntity entity = new TestEntity();
-            entity.Type = TestType.Hahaha;
-            entity.Name = "中文名字";
-            entity.Books = new List<string>() { "Cat", "Dog" };
-            entity.BookAuthors = new Dictionary<string, Author>()
-            {
-                { "Cat", new Author() { Mobile="111", Name="BB" } },
-                { "Dog", new Author() { Mobile="222", Name="sx" } }
-            };
-
-            for (int i = 0; i < 10; ++i)
-            {
-                DatabaseResult result = database.Add<TestEntity>(entity);
-
-                Assert.True(result.IsSucceeded());
-
-            }
-        }
 
         [Fact]
         public void Test_Batch_Add_TestEntity()
@@ -92,8 +43,25 @@ namespace HB.Framework.Database.Test
                 lst.Add(entity);
             }
 
+            var transaction = database.BeginTransaction<TestEntity>();
 
-            DatabaseResult result = database.BatchAdd<TestEntity>(lst, "tester");
+            DatabaseResult result = DatabaseResult.Failed();
+            try
+            {
+                result = database.BatchAdd<TestEntity>(lst, "tester", transaction);
+
+                if (!result.IsSucceeded())
+                {
+                    throw new Exception();
+                }
+
+                database.Commit(transaction);
+
+            }
+            catch (Exception ex)
+            {
+                database.Rollback(transaction);
+            }
 
             Assert.True(result.IsSucceeded());
         }
@@ -101,15 +69,16 @@ namespace HB.Framework.Database.Test
         [Fact]
         public void Test_Batch_Update_TestEntity()
         {
+
             IList<TestEntity> lst = database.RetrieveAll<TestEntity>();
 
-            for (int i = 0; i < lst.Count; i+=2)
+            for (int i = 0; i < lst.Count; i += 2)
             {
                 TestEntity entity = lst[i];
                 //entity.Guid = Guid.NewGuid().ToString();
                 entity.Type = TestType.Hahaha;
-                entity.Name = "中文名字";
-                entity.Books = new List<string>() { "Cat", "Dog" };
+                entity.Name = "中sfasfaf文名字";
+                entity.Books = new List<string>() { "xxx", "tttt" };
                 entity.BookAuthors = new Dictionary<string, Author>()
                 {
                     { "Cat", new Author() { Mobile="111", Name="BB" } },
@@ -117,8 +86,18 @@ namespace HB.Framework.Database.Test
                 };
             }
 
+            DatabaseTransactionContext transContext = database.BeginTransaction<TestEntity>();
+            DatabaseResult result = DatabaseResult.Failed();
+            try
+            {
+                result = database.BatchUpdate<TestEntity>(lst, "tester", transContext);
 
-            DatabaseResult result = database.BatchUpdate<TestEntity>(lst, "tester");
+                database.Commit(transContext);
+            }
+            catch (Exception ex)
+            {
+                database.Rollback(transContext);
+            }
 
             Assert.True(result.IsSucceeded());
         }
@@ -128,10 +107,31 @@ namespace HB.Framework.Database.Test
         {
             IList<TestEntity> lst = database.RetrieveAll<TestEntity>();
 
-            for (int i = 0; i < lst.Count; i += 2)
+            DatabaseTransactionContext transactionContext = database.BeginTransaction<TestEntity>();
+
+            DatabaseResult result = DatabaseResult.Failed();
+
+            try
             {
-                TestEntity entity = lst[i];
-                //entity.Guid = Guid.NewGuid().ToString();
+                result = database.BatchDelete<TestEntity>(lst, "deleter", transactionContext);
+
+                database.Commit(transactionContext);
+            }
+            catch (Exception ex)
+            {
+                database.Rollback(transactionContext);
+            }
+
+            Assert.True(result.IsSucceeded());
+        }
+
+        [Fact]
+        public void Test_Add_TestEntity()
+        {
+            for (int i = 0; i < 10; ++i)
+            {
+                TestEntity entity = new TestEntity();
+                entity.Guid = Guid.NewGuid().ToString();
                 entity.Type = TestType.Hahaha;
                 entity.Name = "中文名字";
                 entity.Books = new List<string>() { "Cat", "Dog" };
@@ -140,12 +140,12 @@ namespace HB.Framework.Database.Test
                     { "Cat", new Author() { Mobile="111", Name="BB" } },
                     { "Dog", new Author() { Mobile="222", Name="sx" } }
                 };
+
+                DatabaseResult result = database.Add<TestEntity>(entity);
+
+                Assert.True(result.IsSucceeded());
+
             }
-
-
-            DatabaseResult result = database.BatchUpdate<TestEntity>(lst, "tester");
-
-            Assert.True(result.IsSucceeded());
         }
 
         [Fact]
