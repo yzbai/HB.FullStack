@@ -115,20 +115,28 @@ namespace HB.Framework.Database
 
         //DatabaseResult Set<T>(T item, DatabaseTransactionContext transactionContext = null) where T : DatabaseEntity, new();
 
-        DatabaseResult BatchAdd<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
-        DatabaseResult BatchDelete<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
-        DatabaseResult BatchUpdate<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
+        DatabaseResult BatchAdd<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new();
+        DatabaseResult BatchDelete<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new();
+        DatabaseResult BatchUpdate<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new();
         
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T">as long as in the db that you want</typeparam>
-        /// <param name="isolationLevel"></param>
-        /// <returns></returns>
-        IDbTransaction CreateTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
-
         SelectExpression<T> NewSelect<T>() where T : DatabaseEntity, new();
         FromExpression<T> NewFrom<T>() where T : DatabaseEntity, new();
         WhereExpression<T> NewWhere<T>() where T : DatabaseEntity, new();
+
+        #region 事务
+
+        DatabaseTransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
+        void Commit(DatabaseTransactionContext context);
+
+        /// <summary>
+        /// 回滚事务
+        /// </summary>
+        void Rollback(DatabaseTransactionContext context);
+
+        #endregion
     }
 }
