@@ -11,6 +11,6 @@ namespace HB.Component.Identity.Abstractions
 {
     public interface IUserClaimBiz
     {
-        Task<IList<UserClaim>> GetAsync(string userGuid, DatabaseTransactionContext transContext = null);
+        Task<IList<UserClaim>> GetAsync(string userGuid, TransactionContext transContext = null);
     }
 }

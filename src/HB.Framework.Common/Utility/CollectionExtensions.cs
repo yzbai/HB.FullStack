@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace System.Collections.Generic
@@ -8,6 +9,11 @@ namespace System.Collections.Generic
     {
         public static IDictionary<TKey, TValue> CloningWithValues<TKey, TValue> (this IDictionary<TKey, TValue> original) where TValue : ICloneable
         {
+            if (original == null)
+            {
+                return null;
+            }
+
             IDictionary<TKey, TValue> ret = new Dictionary<TKey, TValue>();
 
             foreach (KeyValuePair<TKey, TValue> entry in original)
@@ -27,6 +33,11 @@ namespace System.Collections.Generic
 
         public static IDictionary<TKey, TNewValue> ConvertValue<TKey, TValue, TNewValue>(this IDictionary<TKey, TValue> original, Func<TValue, TNewValue> converter)
         {
+            if (original == null)
+            {
+                return null;
+            }
+
             IDictionary<TKey, TNewValue> ret = new Dictionary<TKey, TNewValue>();
 
             foreach (var pair in original)
@@ -39,6 +50,11 @@ namespace System.Collections.Generic
 
         public static IList<T> CloneWithValues<T>(this IList<T> lst) where T : ICloneable
         {
+            if (lst == null)
+            {
+                return null;
+            }
+
             List<T> retList = new List<T>();
 
             foreach (var item in lst)
@@ -47,6 +63,11 @@ namespace System.Collections.Generic
             }
 
             return retList;
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> ts)
+        {
+            return ts == null || ts.Count() == 0;
         }
     }
 }
