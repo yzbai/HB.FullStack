@@ -42,7 +42,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IDatabase, DefaultDatabase>();
 
-            services.AddSingleton<IDatabaseTransaction, DatabaseTransaction>();
         }
     }
 }

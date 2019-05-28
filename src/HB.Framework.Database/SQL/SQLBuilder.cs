@@ -531,26 +531,26 @@ namespace HB.Framework.Database.SQL
                         if (info.PropertyName == "Version")
                         {
                             values.AppendFormat(GlobalSettings.Culture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1, info.DbFieldType));
                         }
                         else if (info.PropertyName == "Deleted")
                         {
                             values.AppendFormat(GlobalSettings.Culture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0, info.DbFieldType));
                         }
                         else if (info.PropertyName == "LastUser")
                         {
                             values.AppendFormat(GlobalSettings.Culture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true)));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, lastUser, info.DbFieldType));
                         }
                         else
                         {
                             string dbValueStatement = info.TypeConverter == null ? 
-                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true) : 
-                                _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(info.GetValue(entity)));
+                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) : 
+                                info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
 
                             values.AppendFormat(GlobalSettings.Culture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, dbValueStatement));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, dbValueStatement, info.DbFieldType));
                         }
                     }
                 }
@@ -612,22 +612,22 @@ namespace HB.Framework.Database.SQL
                         if (info.PropertyName == "Version")
                         {
                             args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1, info.DbFieldType));
                             
                         }
                         else if(info.PropertyName == "LastUser")
                         {
                             args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true)));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, lastUser, info.DbFieldType));
                         }
                         else
                         {
                             string dbValueStatement = info.TypeConverter == null ?
-                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: true) :
-                                _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(info.GetValue(entity)));
+                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) :
+                                info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
 
                             args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, dbValueStatement));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, dbValueStatement, info.DbFieldType));
                         }
                     }
                 }
@@ -662,8 +662,8 @@ namespace HB.Framework.Database.SQL
 
             foreach (T entity in entities)
             {
-                innerBuilder.AppendFormat(GlobalSettings.Culture, "UPDATE {0} set `Deleted` = 1, `LastUser` = {1}, `Version` = {2}  WHERE `Id`={3} AND `Version`={4};insert into tb_tmp_batchDeleteCount(`c`) values(row_count());",
-                    definition.DbTableReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true), entity.Version + 1, entity.Id, entity.Version);
+                innerBuilder.AppendFormat(GlobalSettings.Culture, "UPDATE {0} set `Deleted` = 1, `LastUser` = {1}, `Version` = {2}  WHERE `Id`={3} AND `Version`={4};insert into {5}(`c`) values(row_count());",
+                    definition.DbTableReservedName, _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true), entity.Version + 1, entity.Id, entity.Version, tempTableName);
             }
 
             string sql = string.Format(GlobalSettings.Culture, "drop temporary table if exists `{0}`;create temporary table `{0}`( `c` int not null);{1}select `c` from `{0}`;drop temporary table `{0}`;",
