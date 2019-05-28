@@ -210,6 +210,11 @@ namespace System
             return true;
         }
 
+        public static bool IsNullOrEmpty(this string str)
+        {
+            return string.IsNullOrEmpty(str);
+        }
+
         #endregion
     }
 }

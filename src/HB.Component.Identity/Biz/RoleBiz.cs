@@ -22,7 +22,7 @@ namespace HB.Component.Identity
             _logger = logger;
         }
 
-        public Task<IList<Role>> GetByUserGuidAsync(string userGuid, DatabaseTransactionContext transContext = null)
+        public Task<IList<Role>> GetByUserGuidAsync(string userGuid, TransactionContext transContext = null)
         {
             FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Guid == ru.RoleGuid);
             WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserGuid == userGuid);
