@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HB.Framework.Database.Transaction
 {
-    public enum DatabaseTransactionStatus
+    public enum TransactionStatus
     {
         InTransaction,
         Rollbacked,
@@ -13,10 +13,10 @@ namespace HB.Framework.Database.Transaction
         Failed
     }
 
-    public class DatabaseTransactionContext
+    public class TransactionContext
     {
         public IDbTransaction Transaction { get; set; }
 
-        public DatabaseTransactionStatus Status { get; set; }
+        public TransactionStatus Status { get; set; }
     }
 }

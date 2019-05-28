@@ -25,7 +25,7 @@ namespace HB.Component.Identity
             _roleBiz = roleBiz;
         }
 
-        public async Task<IList<Claim>> CreateClaimsAsync(User user, DatabaseTransactionContext transContext = null)
+        public async Task<IList<Claim>> CreateClaimsAsync(User user, TransactionContext transContext = null)
         {
             if (user == null) { return null; }
 

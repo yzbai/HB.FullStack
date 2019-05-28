@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -491,9 +492,9 @@ namespace HB.Framework.Database.SQL
 
         #region Batch
 
-        public IDbCommand CreateBatchAddStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new()
+        public IDbCommand CreateBatchAddStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new()
         {
-            if (entities == null || entities.Count == 0)
+            if (entities == null || entities.Count() == 0)
             {
                 throw new ArgumentNullException(nameof(entities));
             }
@@ -580,9 +581,9 @@ namespace HB.Framework.Database.SQL
             return AssembleCommand<T,T>(false, sql, null, null, parameters);
         }
 
-        public IDbCommand CreateBatchUpdateStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new()
+        public IDbCommand CreateBatchUpdateStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new()
         {
-            if (entities == null || entities.Count == 0)
+            if (entities == null || entities.Count() == 0)
             {
                 throw new ArgumentNullException(nameof(entities));
             }
@@ -649,9 +650,9 @@ namespace HB.Framework.Database.SQL
             return AssembleCommand<T, T>(false, sql, null, null, parameters);
         }       
 
-        public IDbCommand CreateBatchDeleteStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new()
+        public IDbCommand CreateBatchDeleteStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new()
         {
-            if (entities == null || entities.Count == 0)
+            if (entities == null || entities.Count() == 0)
             {
                 throw new ArgumentNullException(nameof(entities));
             }

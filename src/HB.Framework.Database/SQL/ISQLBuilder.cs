@@ -14,7 +14,7 @@ namespace HB.Framework.Database.SQL
         IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new();
 
 
-        IDbCommand CreateBatchAddStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new();
+        IDbCommand CreateBatchAddStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new();
 
         /// <summary>
         /// 不允许重复删除
@@ -23,7 +23,7 @@ namespace HB.Framework.Database.SQL
         /// <param name="entities"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        IDbCommand CreateBatchDeleteStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new();
+        IDbCommand CreateBatchDeleteStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new();
 
         /// <summary>
         /// 允许重复更新
@@ -32,7 +32,7 @@ namespace HB.Framework.Database.SQL
         /// <param name="entities"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        IDbCommand CreateBatchUpdateStatement<T>(IList<T> entities, string lastUser) where T : DatabaseEntity, new();
+        IDbCommand CreateBatchUpdateStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new();
         string GetTableCreateStatement(Type type, bool addDropStatement);
         IDbCommand GetDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new();
 

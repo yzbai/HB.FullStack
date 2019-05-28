@@ -21,9 +21,9 @@ namespace HB.Framework.Database.Engine
         /// <param name="spName"></param>
         /// <param name="dbParameters"></param>
         /// <returns></returns>
-        Task<IDataReader> ExecuteSPReaderAsync(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster = false);
+        Task<IDataReader> ExecuteSPReaderAsync(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster );
 
-        Task<object> ExecuteSPScalarAsync(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster = false);
+        Task<object> ExecuteSPScalarAsync(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster );
 
         Task<int> ExecuteSPNonQueryAsync(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> parameters);
 
@@ -37,9 +37,9 @@ namespace HB.Framework.Database.Engine
         /// <summary>
         /// 使用后必须Dispose，必须使用using
         /// </summary>
-        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster = false);
+        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster );
 
-        Task<object> ExecuteCommandScalarAsync(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster = false);
+        Task<object> ExecuteCommandScalarAsync(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster );
 
         #endregion
     }
@@ -50,9 +50,9 @@ namespace HB.Framework.Database.Engine
 ///// <summary>
 ///// 使用后必须Dispose，必须使用using
 ///// </summary>
-//Task<IDataReader> ExecuteSqlReaderAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+//Task<IDataReader> ExecuteSqlReaderAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster );
 
-//Task<object> ExecuteSqlScalarAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+//Task<object> ExecuteSqlScalarAsync(IDbTransaction trans, string dbName, string SQL, bool useMaster );
 
 //Task<int> ExecuteSqlNonQueryAsync(IDbTransaction trans, string dbName, string SQL);
 

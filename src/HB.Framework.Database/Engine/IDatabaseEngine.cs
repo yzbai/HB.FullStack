@@ -21,9 +21,9 @@ namespace HB.Framework.Database.Engine
         /// <param name="spName"></param>
         /// <param name="dbParameters"></param>
         /// <returns></returns>
-        IDataReader ExecuteSPReader(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster = false);
+        IDataReader ExecuteSPReader(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster);
 
-        object ExecuteSPScalar(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster = false);
+        object ExecuteSPScalar(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster);
 
         int ExecuteSPNonQuery(IDbTransaction trans, string dbName, string spName, IList<IDataParameter> parameters);
 
@@ -36,9 +36,9 @@ namespace HB.Framework.Database.Engine
         /// <summary>
         /// 使用后必须Dispose，必须使用using
         /// </summary>
-        IDataReader ExecuteCommandReader(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster = false);
+        IDataReader ExecuteCommandReader(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster);
 
-        object ExecuteCommandScalar(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster = false);
+        object ExecuteCommandScalar(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster);
 
         #endregion
 
@@ -146,9 +146,9 @@ namespace HB.Framework.Database.Engine
 ///// <summary>
 ///// 使用后必须Dispose，必须使用using. 在MySql中，IDataReader.Close工作不正常。解决之前不要用
 ///// </summary>
-//IDataReader ExecuteSqlReader(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+//IDataReader ExecuteSqlReader(IDbTransaction trans, string dbName, string SQL, bool useMaster);
 
-//object ExecuteSqlScalar(IDbTransaction trans, string dbName, string SQL, bool useMaster = false);
+//object ExecuteSqlScalar(IDbTransaction trans, string dbName, string SQL, bool useMaster);
 
 //int ExecuteSqlNonQuery(IDbTransaction trans, string dbName, string SQL);
 

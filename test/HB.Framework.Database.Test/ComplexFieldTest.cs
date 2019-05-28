@@ -86,7 +86,7 @@ namespace HB.Framework.Database.Test
                 };
             }
 
-            DatabaseTransactionContext transContext = database.BeginTransaction<TestEntity>();
+            TransactionContext transContext = database.BeginTransaction<TestEntity>();
             DatabaseResult result = DatabaseResult.Failed();
             try
             {
@@ -107,7 +107,7 @@ namespace HB.Framework.Database.Test
         {
             IList<TestEntity> lst = database.RetrieveAll<TestEntity>();
 
-            DatabaseTransactionContext transactionContext = database.BeginTransaction<TestEntity>();
+            TransactionContext transactionContext = database.BeginTransaction<TestEntity>();
 
             DatabaseResult result = DatabaseResult.Failed();
 
