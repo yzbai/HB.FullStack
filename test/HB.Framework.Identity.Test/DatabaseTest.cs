@@ -34,7 +34,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void AddUsers()
         {
-            DatabaseTransactionContext transContext = _db.BeginTransaction<User>();
+            TransactionContext transContext = _db.BeginTransaction<User>();
             DatabaseResult result = DatabaseResult.Failed();
 
             foreach (User item in _userList)
@@ -56,7 +56,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void AddRole()
         {
-            DatabaseTransactionContext transContext = _db.BeginTransaction<Role>();
+            TransactionContext transContext = _db.BeginTransaction<Role>();
             DatabaseResult result = DatabaseResult.Succeeded();
 
             foreach (Role item in _roleList)
@@ -168,7 +168,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void RandomUpdateSomeUserAsync()
         {
-            DatabaseTransactionContext transContext = _db.BeginTransaction<User>();
+            TransactionContext transContext = _db.BeginTransaction<User>();
 
             string userNamePrefix = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
 
@@ -210,9 +210,9 @@ namespace HB.Component.Identity.Test
 
                 _db.Commit(transContext);
 
-                Assert.Equal(DatabaseTransactionStatus.Commited, transContext.Status);
+                Assert.Equal(TransactionStatus.Commited, transContext.Status);
 
-                if (transContext.Status == DatabaseTransactionStatus.Commited)
+                if (transContext.Status == TransactionStatus.Commited)
                 {
                     IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids));
 
@@ -236,7 +236,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void RandomDeleteSomeUserAsync()
         {
-            DatabaseTransactionContext transContext = _db.BeginTransaction<User>();
+            TransactionContext transContext = _db.BeginTransaction<User>();
 
             List<long> ids = new List<long>();
 
@@ -273,9 +273,9 @@ namespace HB.Component.Identity.Test
 
                 _db.Commit(transContext);
 
-                Assert.True(transContext.Status == DatabaseTransactionStatus.Commited);
+                Assert.True(transContext.Status == TransactionStatus.Commited);
 
-                if (transContext.Status == DatabaseTransactionStatus.Commited)
+                if (transContext.Status == TransactionStatus.Commited)
                 {
                     IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids));
 
