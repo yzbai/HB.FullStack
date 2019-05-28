@@ -65,9 +65,9 @@ namespace HB.Framework.Database
         Task<DatabaseResult> DeleteAsync<T>(T item, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
         Task<DatabaseResult> UpdateAsync<T>(T item, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
 
-        Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
-        Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
-        Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext = null) where T : DatabaseEntity, new();
+        Task<DatabaseResult> BatchAddAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new();
+        Task<DatabaseResult> BatchDeleteAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new();
+        Task<DatabaseResult> BatchUpdateAsync<T>(IList<T> items, string lastUser, DatabaseTransactionContext transContext) where T : DatabaseEntity, new();
         
     }
 }
