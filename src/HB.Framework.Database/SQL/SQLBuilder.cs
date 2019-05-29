@@ -684,6 +684,11 @@ namespace HB.Framework.Database.SQL
             StringBuilder sql = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef(type);
 
+            if (definition.DbTableReservedName.IsNullOrEmpty())
+            {
+                return null;
+            }
+
             foreach (DatabaseEntityPropertyDef info in definition.Properties)
             {
                 if (!info.IsTableProperty)
