@@ -15,7 +15,7 @@ namespace HB.Framework.Database.Entity
     /// </summary>
     public class DefaultDatabaseEntityDefFactory : IDatabaseEntityDefFactory
     {
-        private readonly int DEFAULT_STRING_LENGTH = 1024;
+        private readonly int DEFAULT_STRING_LENGTH = 200;
 
         private readonly ConcurrentDictionary<Type, DatabaseEntityDef> _defDict;
         private readonly object _lockObj;
