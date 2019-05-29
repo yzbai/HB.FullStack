@@ -70,7 +70,7 @@ namespace HB.Framework.Database.Test
         public void Test_Batch_Update_TestEntity()
         {
 
-            IList<TestEntity> lst = database.RetrieveAll<TestEntity>();
+            IList<TestEntity> lst = database.RetrieveAll<TestEntity>(null);
 
             for (int i = 0; i < lst.Count; i += 2)
             {
@@ -105,7 +105,7 @@ namespace HB.Framework.Database.Test
         [Fact]
         public void Test_Batch_Delete_TestEntity()
         {
-            IList<TestEntity> lst = database.RetrieveAll<TestEntity>();
+            IList<TestEntity> lst = database.RetrieveAll<TestEntity>(null);
 
             TransactionContext transactionContext = database.BeginTransaction<TestEntity>();
 
@@ -141,7 +141,7 @@ namespace HB.Framework.Database.Test
                     { "Dog", new Author() { Mobile="222", Name="sx" } }
                 };
 
-                DatabaseResult result = database.Add<TestEntity>(entity);
+                DatabaseResult result = database.Add<TestEntity>(entity, null);
 
                 Assert.True(result.IsSucceeded());
 
@@ -151,7 +151,7 @@ namespace HB.Framework.Database.Test
         [Fact]
         public void Test_Update_TestEntity()
         {
-            IList<TestEntity> testEntities = database.RetrieveAll<TestEntity>();
+            IList<TestEntity> testEntities = database.RetrieveAll<TestEntity>(null);
 
             Assert.NotEmpty(testEntities);
 
@@ -160,7 +160,7 @@ namespace HB.Framework.Database.Test
             entity.Books.Add("New Book");
             entity.BookAuthors.Add("New Book", new Author() { Mobile = "15190208956", Name = "Yuzhaobai" });
 
-            DatabaseResult result = database.Update(entity);
+            DatabaseResult result = database.Update(entity, null);
 
             Assert.True(result.IsSucceeded());
         }
@@ -168,13 +168,13 @@ namespace HB.Framework.Database.Test
         [Fact]
         public void Test_Delete_TestEntity()
         {
-            IList<TestEntity> testEntities = database.RetrieveAll<TestEntity>();
+            IList<TestEntity> testEntities = database.RetrieveAll<TestEntity>(null);
 
             Assert.NotEmpty(testEntities);
 
             TestEntity entity = testEntities[0];
 
-            DatabaseResult result = database.Delete(entity);
+            DatabaseResult result = database.Delete(entity, null);
 
             Assert.True(result.IsSucceeded());
         }

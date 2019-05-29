@@ -91,7 +91,7 @@ namespace HB.Component.Identity.Test
             for (int i = 1; i < userCount; i += 39)
             {
                 UserClaim uc = new UserClaim() { UserGuid = i.ToString(), ClaimValue = "Nothing", ClaimType = "HB.Nothing" };
-                result = _db.AddAsync(uc).Result;
+                result = _db.AddAsync(uc, null).Result;
             }
 
             Assert.True(result.IsSucceeded());
@@ -111,7 +111,7 @@ namespace HB.Component.Identity.Test
 
                 if (roleId == 5) { roleId = 1; }
 
-                result = _db.AddAsync(ur).Result;
+                result = _db.AddAsync(ur, null).Result;
             }
 
             Assert.True(result.IsSucceeded());
@@ -128,11 +128,11 @@ namespace HB.Component.Identity.Test
 
             WhereExpression<UserRole> where = _db.NewWhere<UserRole>().And<Role>(r => r.Name == "Admin");
 
-            IList<User> resultList = _db.RetrieveAsync(select, from, where).Result;
+            IList<User> resultList = _db.RetrieveAsync(select, from, where, null).Result;
 
             if (resultList.Count > 0)
             {
-                var roleList = _db.Retrieve<Role>(r => r.Name == "Admin");
+                var roleList = _db.Retrieve<Role>(r => r.Name == "Admin", null);
 
                 Assert.True(roleList.Count == 1);
 
@@ -142,7 +142,7 @@ namespace HB.Component.Identity.Test
                 {
                     _output.WriteLine(JsonUtil.ToJson(item));
 
-                    var lst = _db.Retrieve<UserRole>(ur => ur.UserGuid == item.Guid && ur.RoleGuid == adminRole.Guid);
+                    var lst = _db.Retrieve<UserRole>(ur => ur.UserGuid == item.Guid && ur.RoleGuid == adminRole.Guid, null);
 
                     Assert.True(lst.Count >= 1);
                 }
@@ -155,7 +155,7 @@ namespace HB.Component.Identity.Test
             FromExpression<UserClaim> from = _db.NewFrom<UserClaim>().LeftJoin<User>((uc, u) => uc.UserGuid == u.Guid);
 
 
-            var resultList = _db.RetrieveAsync<UserClaim, User>(from, null).Result;
+            var resultList = _db.RetrieveAsync<UserClaim, User>(from, null, null).Result;
 
             foreach (var item in resultList)
             {
@@ -214,7 +214,7 @@ namespace HB.Component.Identity.Test
 
                 if (transContext.Status == TransactionStatus.Commited)
                 {
-                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids));
+                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids), null);
 
                     foreach (User u in updatedUsers)
                     {
@@ -277,7 +277,7 @@ namespace HB.Component.Identity.Test
 
                 if (transContext.Status == TransactionStatus.Commited)
                 {
-                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids));
+                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids), null);
 
                     if (updatedUsers.Count == 0)
                     {
@@ -300,7 +300,7 @@ namespace HB.Component.Identity.Test
         {
             FromExpression<UserRole> from = _db.NewFrom<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleGuid == r.Guid).LeftJoin<User>((ur, u) => ur.UserGuid == u.Guid);
 
-            var resultList = _db.RetrieveAsync<UserRole, User, Role>(from, null).Result;
+            var resultList = _db.RetrieveAsync<UserRole, User, Role>(from, null, null).Result;
 
             foreach (var item in resultList)
             {
