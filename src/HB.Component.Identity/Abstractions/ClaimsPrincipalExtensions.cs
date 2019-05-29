@@ -23,11 +23,6 @@ namespace System.Security.Claims
             return principal.GetClaimValue(ClaimExtensionTypes.UserGuid);
         }
 
-        public static string GetAuthtoken(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.Authtoken);
-        }
-
         public static string GetUserSecurityStamp(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.SecurityStamp);
@@ -43,38 +38,44 @@ namespace System.Security.Claims
             return principal.GetClaimValue(ClaimExtensionTypes.SignInTokenGuid);
         }
 
-        public static string GetUserName(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.UserName);
-        }
-
-        public static string GetMobile(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.MobilePhone);
-        }
-
-        public static string GetEmail(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.Email);
-        }
-
-        public static bool GetIsEmailConfirmed(this ClaimsPrincipal principal)
-        {
-            string value = principal.GetClaimValue(ClaimExtensionTypes.IsEmailConfirmed);
-
-            return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
-        }
-
-        public static bool GetIsMobileConfirmed(this ClaimsPrincipal principal)
-        {
-            string value = principal.GetClaimValue(ClaimExtensionTypes.IsMobileConfirmed);
-
-            return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
-        }
-
         public static string GetClientId(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.ClientId);
         }
+        
+        //public static string GetAuthtoken(this ClaimsPrincipal principal)
+        //{
+        //    return principal.GetClaimValue(ClaimExtensionTypes.Authtoken);
+        //}
+
+        //public static string GetUserName(this ClaimsPrincipal principal)
+        //{
+        //    return principal.GetClaimValue(ClaimExtensionTypes.UserName);
+        //}
+
+        //public static string GetMobile(this ClaimsPrincipal principal)
+        //{
+        //    return principal.GetClaimValue(ClaimExtensionTypes.MobilePhone);
+        //}
+
+        //public static string GetEmail(this ClaimsPrincipal principal)
+        //{
+        //    return principal.GetClaimValue(ClaimExtensionTypes.Email);
+        //}
+
+        //public static bool GetIsEmailConfirmed(this ClaimsPrincipal principal)
+        //{
+        //    string value = principal.GetClaimValue(ClaimExtensionTypes.IsEmailConfirmed);
+
+        //    return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
+        //}
+
+        //public static bool GetIsMobileConfirmed(this ClaimsPrincipal principal)
+        //{
+        //    string value = principal.GetClaimValue(ClaimExtensionTypes.IsMobileConfirmed);
+
+        //    return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
+        //}
+
     }
 }

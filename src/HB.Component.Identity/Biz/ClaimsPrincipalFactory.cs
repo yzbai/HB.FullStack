@@ -31,13 +31,12 @@ namespace HB.Component.Identity
 
             IList<Claim> claims = new List<Claim>
             {
-                //TODO: 检验是否要加所有的信息
                 new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
                 //new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
-                new Claim(ClaimExtensionTypes.UserName, user.UserName??""),
-                new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
+                //new Claim(ClaimExtensionTypes.UserName, user.UserName??""),
+                //new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
-                new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
+                //new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
             };
 
             IList<UserClaim> userClaims = await _userClaimBiz.GetAsync(user.Guid, transContext).ConfigureAwait(false);
