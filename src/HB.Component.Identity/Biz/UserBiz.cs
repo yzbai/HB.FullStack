@@ -75,7 +75,7 @@ namespace HB.Component.Identity
             {
                 return Task.FromResult<IList<User>>(new List<User>());
             }
-            return _db.RetrieveAsync<User>(u => SQLUtil.In(u.Guid, userGuids), transContext);
+            return _db.RetrieveAsync<User>(u => SQLUtil.In(u.Guid, userGuids.ToArray()), transContext);
         }
 
         #endregion
