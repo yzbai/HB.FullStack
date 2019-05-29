@@ -69,5 +69,13 @@ namespace System.Collections.Generic
         {
             return ts == null || ts.Count() == 0;
         }
+
+        public static void RequireNotNullOrEmpty<T>(this IEnumerable<T> ts)
+        {
+            if (ts == null || ts.Count() == 0)
+            {
+                throw new ArgumentNullException();
+            }
+        }
     }
 }
