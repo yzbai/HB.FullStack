@@ -215,6 +215,14 @@ namespace System
             return string.IsNullOrEmpty(str);
         }
 
+        public static void RequireNotNullOrEmpty(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException();
+            }
+        }
+
         #endregion
     }
 }
