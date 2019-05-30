@@ -34,11 +34,21 @@ namespace HB.Component.Identity
 
         public async Task<User> ValidateSecurityStampAsync(string userGuid, string securityStamp, TransactionContext transContext = null)
         {
+            if (userGuid.IsNullOrEmpty() || securityStamp.IsNullOrEmpty())
+            {
+                return null;
+            }
+
             return await _db.ScalarAsync<User>(u => u.Guid == userGuid && u.SecurityStamp == securityStamp, transContext).ConfigureAwait(false);
         }
 
         public Task<User> GetAsync(string userGuid, TransactionContext transContext = null)
         {
+            if (userGuid.IsNullOrEmpty())
+            {
+                return null;
+            }
+
             return _db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
         }
 
@@ -164,6 +174,8 @@ namespace HB.Component.Identity
 
         private async Task ChangeSecurityStampAsync(User user)
         {
+            user.RequireNotNull();
+
             user.SecurityStamp = SecurityUtil.CreateUniqueToken();
 
             if (_identityOptions.Events != null)
