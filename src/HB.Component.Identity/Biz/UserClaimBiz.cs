@@ -21,6 +21,10 @@ namespace HB.Component.Identity
 
         public Task<IList<UserClaim>> GetAsync(string userGuid, TransactionContext transContext = null)
         {
+            if (userGuid.IsNullOrEmpty())
+            {
+                return Task.FromResult((IList<UserClaim>)new List<UserClaim>());
+            }
             return _db.RetrieveAsync<UserClaim>(uc => uc.UserGuid == userGuid, transContext);
         }
     }

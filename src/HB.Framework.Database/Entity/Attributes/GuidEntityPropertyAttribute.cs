@@ -5,7 +5,7 @@
         public GuidEntityPropertyAttribute()
         {
             FixedLength = true;
-            Length = 36;
+            Length = 32;
             NotNull = true;
         }
     }
