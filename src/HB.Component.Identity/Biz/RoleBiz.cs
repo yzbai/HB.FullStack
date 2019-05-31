@@ -11,7 +11,7 @@ using HB.Framework.Database.Transaction;
 
 namespace HB.Component.Identity
 {
-    public class RoleBiz : IRoleBiz
+    internal class RoleBiz : IRoleBiz
     {
         private readonly IDatabase _database;
         private readonly ILogger _logger;

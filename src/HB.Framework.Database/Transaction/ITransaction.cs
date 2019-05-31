@@ -1,0 +1,12 @@
+﻿using System.Data;
+using HB.Framework.Database.Entity;
+
+namespace HB.Framework.Database.Transaction
+{
+    public interface ITransaction
+    {
+        TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity;
+        void Commit(TransactionContext context);
+        void Rollback(TransactionContext context);
+    }
+}

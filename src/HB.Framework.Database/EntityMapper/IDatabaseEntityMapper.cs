@@ -4,7 +4,7 @@ using System.Data;
 
 namespace HB.Framework.Database.Entity
 {
-    public interface IDatabaseEntityMapper
+    internal interface IDatabaseEntityMapper
     {
         IList<T> ToList<T>(IDataReader reader) where T : DatabaseEntity, new();
 

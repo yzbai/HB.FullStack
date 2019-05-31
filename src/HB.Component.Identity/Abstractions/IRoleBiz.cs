@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity.Abstractions
 {
-    public interface IRoleBiz
+    internal interface IRoleBiz
     {
 
         //ErrCode AddRole(Role role, string lastUser);

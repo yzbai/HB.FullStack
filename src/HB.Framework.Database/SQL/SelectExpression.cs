@@ -6,17 +6,16 @@ using System.Text;
 
 namespace HB.Framework.Database.SQL
 {
-    public class SelectExpression<T> : SQLExpression
-        where T : DatabaseEntity, new()
+    public class SelectExpression<T> where T : DatabaseEntity, new()
     {
-        private readonly StringBuilder _statementBuilder;
+        private StringBuilder _statementBuilder = new StringBuilder();
 
-        private bool _firstAssign;
+        private bool _firstAssign = true;
 
-        //private readonly DatabaseEntityDef _sourceModelDef;
         private readonly IDatabaseEngine _databaseEngine;
+        private SQLExpressionVisitorContenxt expressionContext = null;
 
-        public bool WithSelectString { get; set; }
+        public bool WithSelectString { get; set; } = true;
 
         public override string ToString()
         {
@@ -28,37 +27,10 @@ namespace HB.Framework.Database.SQL
             return resultBuilder.ToString();
         }
 
-        public SelectExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory) : base(modelDefFactory)
+        internal SelectExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
         {
-            EntityDefFactory = modelDefFactory;
-            //_sourceModelDef = EntityDefFactory.GetDef<T>();
             _databaseEngine = databaseEngine;
-
-            Seperator = " ";
-            PrefixFieldWithTableName = true;
-            WithSelectString = true;
-
-            _statementBuilder = new StringBuilder();
-            _firstAssign = true;
-
-            //DefaultInvolved();
-
-        }
-
-        /*这部分逻辑应该放在DefaultDatabase中去
-        private void DefaultInvolved()
-        {
-            this.select(item=>item.Id)
-                .select(item=>item.Deleted)
-                .select(item=>item.LastTime)
-                .select(item=>item.LastUser)
-                .select(item=>item.Version);
-        }
-        */
-
-        protected override IDatabaseEngine GetDatabaseEngine()
-        {
-            return _databaseEngine;
+            expressionContext = new SQLExpressionVisitorContenxt(databaseEngine, entityDefFactory);
         }
 
         public SelectExpression<T> Select<TTarget>(Expression<Func<T, TTarget>> expr)
@@ -72,7 +44,7 @@ namespace HB.Framework.Database.SQL
                 _firstAssign = false;
             }
 
-            _statementBuilder.Append(Visit(expr));
+            _statementBuilder.Append(expr.ToStatement(expressionContext));
 
             return this;
         }

@@ -8,7 +8,7 @@ namespace HB.Framework.Database.SQL
     /// <summary>
     /// Enables the efficient, dynamic composition of query predicates.
     /// </summary>
-    public static class PredicateBuilder
+    internal static class ExpressionComposer
     {
         /// <summary>
         /// Creates a predicate that evaluates to true.

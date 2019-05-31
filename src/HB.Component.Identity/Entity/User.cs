@@ -33,7 +33,7 @@ namespace HB.Component.Identity.Entity
         /// <summary>
         /// 唯一
         /// </summary>
-        [Phone]
+        [Mobile]
         [EntityProperty("手机号", Unique = true, Length = 14)]
         public string Mobile { get; set; }
 

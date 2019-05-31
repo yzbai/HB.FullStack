@@ -9,7 +9,7 @@ namespace HB.Framework.Database.SQL
     /// </summary>
     /// 
 
-    public class EnumMemberAccess : PartialSqlString
+    internal class EnumMemberAccess : PartialSqlString
     {
         public EnumMemberAccess(string text, Type enumType)
             : base(text)

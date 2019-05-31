@@ -21,7 +21,7 @@ namespace HB.Framework.Database.SQL
     /// Version： 新增为0，更改时加1，删除时加1.
     /// 单例
     /// </summary>
-    public class SQLBuilder : ISQLBuilder
+    internal class SQLBuilder : ISQLBuilder
     {
         /// <summary>
         /// sql字典. 数据库名:TableName:操作-SQL语句
@@ -60,7 +60,7 @@ namespace HB.Framework.Database.SQL
             {           
                 command.CommandText += whereCondition.ToString();
 
-                foreach (KeyValuePair<string, object> pair in whereCondition.Params)
+                foreach (KeyValuePair<string, object> pair in whereCondition.GetParameters())
                 {
                     IDataParameter param = _databaseEngine.CreateParameter(pair.Key, pair.Value);
                     command.Parameters.Add(param);
@@ -782,8 +782,6 @@ namespace HB.Framework.Database.SQL
         {
             return new WhereExpression<T>(_databaseEngine, _entityDefFactory);
         }
-
-        
 
         #endregion
     }

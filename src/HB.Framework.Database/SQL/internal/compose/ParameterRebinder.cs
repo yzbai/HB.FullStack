@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace HB.Framework.Database.SQL
 {
     //http://blogs.msdn.com/b/meek/archive/2008/05/02/linq-to-entities-combining-predicates.aspx
-    public class ParameterRebinder : ExpressionVisitor
+    internal class ParameterRebinder : ExpressionVisitor
     {
         private readonly Dictionary<ParameterExpression, ParameterExpression> map;
 

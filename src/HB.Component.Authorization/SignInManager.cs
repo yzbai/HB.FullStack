@@ -17,11 +17,11 @@ namespace HB.Component.Authorization
         private readonly AuthorizationServerOptions _options;
         private readonly SignInOptions _signInOptions;
         //private IUserBiz _userBiz;
-        private readonly IIdentityManager _identityManager;
+        private readonly IIdentityService _identityManager;
         private readonly ISignInTokenBiz _signInTokenBiz;
         private readonly IJwtBuilder _jwtBuilder;
 
-        public SignInManager(IOptions<AuthorizationServerOptions> options, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, IJwtBuilder jwtBuilder) 
+        public SignInManager(IOptions<AuthorizationServerOptions> options, ISignInTokenBiz signInTokenBiz, IIdentityService identityManager, IJwtBuilder jwtBuilder) 
         {
             _options = options.Value;
             _signInOptions = _options.SignInOptions;
