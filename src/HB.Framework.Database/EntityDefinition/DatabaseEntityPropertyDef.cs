@@ -7,7 +7,7 @@ namespace HB.Framework.Database.Entity
     /// <summary>
     /// 实体内属性定义（一个）
     /// </summary>
-    public class DatabaseEntityPropertyDef
+    internal class DatabaseEntityPropertyDef
     {
         #region 自身描述
         /// <summary>

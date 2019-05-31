@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.Framework.Database.Entity
 {
-    public class DatabaseTypeConverterFactory : IDatabaseTypeConverterFactory
+    internal class DatabaseTypeConverterFactory : IDatabaseTypeConverterFactory
     {
         private readonly IDictionary<Type, DatabaseTypeConverter> converterDict = new Dictionary<Type, DatabaseTypeConverter>();
 

@@ -13,7 +13,7 @@ namespace HB.Framework.Database.Entity
     /// 多线程公用
     /// 单例
     /// </summary>
-    public class DefaultDatabaseEntityDefFactory : IDatabaseEntityDefFactory
+    internal class DefaultDatabaseEntityDefFactory : IDatabaseEntityDefFactory
     {
         private readonly int DEFAULT_STRING_LENGTH = 200;
 

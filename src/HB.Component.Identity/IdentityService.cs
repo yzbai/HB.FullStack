@@ -1,5 +1,6 @@
 ﻿using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entity;
+using HB.Framework.Database.Transaction;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    public class IdentityManager : IIdentityManager
+    internal class IdentityService : IIdentityService
     {
         private readonly IdentityOptions _options;
         private readonly IUserBiz _userBiz;
 
-        public IdentityManager(IOptions<IdentityOptions> options, IUserBiz userBiz)
+        public IdentityService(IOptions<IdentityOptions> options, IUserBiz userBiz)
         {
             _options = options.Value;
             _userBiz = userBiz;
@@ -21,6 +22,7 @@ namespace HB.Component.Identity
 
         public Task<IdentityResult> CreateUserByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed)
         {
+            TransactionContext transactionContext = 
             return _userBiz.CreateByMobileAsync(userType, mobile, userName, password, mobileConfirmed);
         }
 
