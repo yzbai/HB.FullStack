@@ -19,16 +19,17 @@ namespace HB.Framework.Database.SQL
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class FromExpression<T> : SQLExpression
-        where T : DatabaseEntity, new()
+    public class FromExpression<T> where T : DatabaseEntity, new()
     {
-        private readonly StringBuilder _statementBuilder;
+        private readonly StringBuilder _statementBuilder = new StringBuilder();
 
-        private readonly DatabaseEntityDef _sourceEntityDef;
+        private readonly IDatabaseEntityDefFactory entityDefFactory;
 
         private readonly IDatabaseEngine _databaseEngine;
 
-        public bool WithFromString { get; set; }
+        private SQLExpressionVisitorContenxt expressionContext = null;
+
+        public bool WithFromString { get; set; } = true;
 
         public SqlJoinType? JoinType { get; set; }
 
@@ -36,28 +37,17 @@ namespace HB.Framework.Database.SQL
         {
             StringBuilder resultBuilder = WithFromString ? new StringBuilder(" FROM ") : new StringBuilder(" ");
 
-            resultBuilder.Append(_sourceEntityDef.DbTableReservedName);
+            resultBuilder.Append(entityDefFactory.GetDef<T>().DbTableReservedName);
             resultBuilder.Append(_statementBuilder);
 
             return resultBuilder.ToString();
         }
 
-        public FromExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory) : base(entityDefFactory)
+        internal FromExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
         {
-            EntityDefFactory = entityDefFactory;
-            _sourceEntityDef = EntityDefFactory.GetDef<T>();
+            this.entityDefFactory = entityDefFactory;
             _databaseEngine = databaseEngine;
-
-            Seperator = " ";
-            PrefixFieldWithTableName = true;
-            WithFromString = true;
-
-            _statementBuilder = new StringBuilder();
-        }
-
-        protected override IDatabaseEngine GetDatabaseEngine()
-        {
-            return _databaseEngine;
+            expressionContext = new SQLExpressionVisitorContenxt(databaseEngine, entityDefFactory);
         }
 
         public FromExpression<T> InnerJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
@@ -122,14 +112,14 @@ namespace HB.Framework.Database.SQL
 
         private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr)
         {
-            DatabaseEntityDef targetDef = EntityDefFactory.GetDef(typeof(Target));
+            DatabaseEntityDef targetDef = entityDefFactory.GetDef(typeof(Target));
 
             _statementBuilder.Append(" ");
             _statementBuilder.Append(joinType);
             _statementBuilder.Append(" ");
             _statementBuilder.Append(targetDef.DbTableReservedName);
             _statementBuilder.Append(" ON ");
-            _statementBuilder.Append(Visit(joinExpr));
+            _statementBuilder.Append(joinExpr.ToStatement(expressionContext));
             _statementBuilder.Append(" ");
 
             return this;

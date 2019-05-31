@@ -7,8 +7,8 @@ using HB.Framework.Database.Transaction;
 
 namespace HB.Component.Identity.Abstractions
 {
-    public interface IClaimsPrincipalFactory
+    internal interface IClaimsPrincipalFactory
     {
-        Task<IList<Claim>> CreateClaimsAsync(User user, TransactionContext transContext = null);
+        Task<IList<Claim>> CreateClaimsAsync(User user, TransactionContext transContext);
     }
 }

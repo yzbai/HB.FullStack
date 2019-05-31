@@ -27,14 +27,14 @@ namespace HB.Component.Authorization
         private readonly ICredentialManager _credentialManager;
         private readonly AuthorizationServerOptions _options;
         //private IUserBiz _userBiz;
-        private readonly IIdentityManager _identityManager;
+        private readonly IIdentityService _identityManager;
         private readonly IJwtBuilder _jwtBuilder;
         private readonly IFrequencyChecker _frequencyChecker;
 
         private readonly ILogger _logger;
 
         public RefreshManager(IOptions<AuthorizationServerOptions> options, ILogger<RefreshManager> logger, 
-            IFrequencyChecker frequencyChecker, ISignInTokenBiz signInTokenBiz, IIdentityManager identityManager, 
+            IFrequencyChecker frequencyChecker, ISignInTokenBiz signInTokenBiz, IIdentityService identityManager, 
             ICredentialManager credentialManager,  IJwtBuilder jwtBuilder)
         {
             _options = options.Value;

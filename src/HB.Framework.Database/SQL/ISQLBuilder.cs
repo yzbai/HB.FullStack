@@ -5,7 +5,7 @@ using System.Data;
 
 namespace HB.Framework.Database.SQL
 {
-    public interface ISQLBuilder
+    internal interface ISQLBuilder
     {
         IDbCommand CreateAddCommand<T>(T entity, string lastUser) where T : DatabaseEntity, new();
         IDbCommand CreateCountCommand<T>(FromExpression<T> fromCondition = null, WhereExpression<T> whereCondition = null) where T : DatabaseEntity, new();

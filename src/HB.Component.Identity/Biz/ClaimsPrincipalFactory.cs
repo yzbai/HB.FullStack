@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace HB.Component.Identity
 {
-    public class ClaimsPrincipalFactory : IClaimsPrincipalFactory
+    internal class ClaimsPrincipalFactory : IClaimsPrincipalFactory
     {
         private readonly ILogger _logger;
         private readonly IRoleBiz _roleBiz;
@@ -25,17 +25,19 @@ namespace HB.Component.Identity
             _roleBiz = roleBiz;
         }
 
-        public async Task<IList<Claim>> CreateClaimsAsync(User user, TransactionContext transContext = null)
+        public async Task<IList<Claim>> CreateClaimsAsync(User user, TransactionContext transContext)
         {
+            transContext.RequireNotNull();
+
             if (user == null) { return null; }
 
             IList<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
+                new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
                 //new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
                 //new Claim(ClaimExtensionTypes.UserName, user.UserName??""),
                 //new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
-                new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
                 //new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
             };
 

@@ -11,8 +11,4 @@
     <ProjectReference Include="..\HB.Framework.Database\HB.Framework.Database.csproj" />
     <ProjectReference Include="..\HB.Framework.KVStore\HB.Framework.KVStore.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Biz\" />
-  </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class IdentityServiceCollectionExtensions
+    public static class ServiceRegister
     {
         public static IServiceCollection AddIdentity(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
         {
@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IRoleBiz, RoleBiz>();
             services.AddSingleton<IClaimsPrincipalFactory, ClaimsPrincipalFactory>();
 
-            services.AddSingleton<IIdentityManager, IdentityManager>();
+            services.AddSingleton<IIdentityService, IdentityService>();
 
             return services;
         }

@@ -63,6 +63,10 @@ namespace HB.Component.Identity
         {
             return Status == IdentityResultStatus.Succeeded;
         }
+        public static IdentityResult Succeeded()
+        {
+            return new IdentityResult { Status = IdentityResultStatus.Succeeded };
+        }
 
         public static IdentityResult UserNameAlreadyTaken()
         {

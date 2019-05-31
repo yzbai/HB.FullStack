@@ -21,7 +21,7 @@ namespace HB.Framework.Database
     /// 乐观锁用在写操作上，交由各个数据库执行者实施，Version方式。
     /// 批量操作，采用事务方式，也交由各个数据库执行者实施。
     /// </summary>
-    public partial class DefaultDatabase : IDatabase
+    internal partial class DefaultDatabase : IDatabase
     {
         private readonly IDatabaseEngine _databaseEngine;
         private readonly IDatabaseEntityDefFactory _entityDefFactory;
@@ -70,7 +70,7 @@ namespace HB.Framework.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TWhere>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<TWhere>();
             }
 
             whereCondition.And(t => t.Deleted == false).And<TSelect>(ts=>ts.Deleted == false).And<TFrom>(tf=>tf.Deleted == false);
@@ -135,7 +135,7 @@ namespace HB.Framework.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<T>();
             }
 
             whereCondition.And(t => t.Deleted == false);
@@ -181,7 +181,7 @@ namespace HB.Framework.Database
 
 			if (whereCondition == null)
 			{
-				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+				whereCondition = NewWhere<T>();
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -205,7 +205,7 @@ namespace HB.Framework.Database
 
 			if (whereCondition == null)
 			{
-				whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<T>();
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -316,7 +316,7 @@ namespace HB.Framework.Database
         public T Scalar<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            WhereExpression<T> whereCondition = NewWhere<T>();
             whereCondition.Where(whereExpr);
 
             return Scalar(null, null, whereCondition, transContext);
@@ -325,7 +325,7 @@ namespace HB.Framework.Database
         public IList<T> Retrieve<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            WhereExpression<T> whereCondition = NewWhere<T>();
             whereCondition.Where(whereExpr);
 
             return Retrieve(null, null, whereCondition, transContext);
@@ -334,7 +334,7 @@ namespace HB.Framework.Database
         public IList<T> Page<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(whereExpr);
+            WhereExpression<T> whereCondition = NewWhere<T>().Where(whereExpr);
 
             return Page(null, null, whereCondition, pageNumber, perPageCount, transContext);
         }
@@ -342,7 +342,7 @@ namespace HB.Framework.Database
         public long Count<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            WhereExpression<T> whereCondition = NewWhere<T>();
             whereCondition.Where(whereExpr);
 
             return Count(null, null, whereCondition, transContext);
@@ -358,7 +358,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<TSource>();
             }
 
             switch(fromCondition.JoinType)
@@ -412,7 +412,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<TSource>();
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -451,7 +451,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<TSource>();
             }
 
             switch (fromCondition.JoinType)
@@ -509,7 +509,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TSource>(_databaseEngine, _entityDefFactory);
+                whereCondition = NewWhere<TSource>();
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -602,7 +602,7 @@ namespace HB.Framework.Database
 
             long id = item.Id;
             long version = item.Version;
-            WhereExpression<T> condition = new WhereExpression<T>(_databaseEngine, _entityDefFactory).Where(t => t.Id == id && t.Deleted == false && t.Version == version);
+            WhereExpression<T> condition = NewWhere<T>().Where(t => t.Id == id && t.Deleted == false && t.Version == version);
 
             try
             {
@@ -644,7 +644,7 @@ namespace HB.Framework.Database
                 return DatabaseResult.NotWriteable();
             }
 
-            WhereExpression<T> condition = new WhereExpression<T>(_databaseEngine, _entityDefFactory);
+            WhereExpression<T> condition = NewWhere<T>();
 
             long id = item.Id;
             long version = item.Version;
@@ -880,92 +880,7 @@ namespace HB.Framework.Database
 
         #endregion
 
-        #region 事务
-
-        public TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
-        {
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
-
-            IDbTransaction dbTransaction = _databaseEngine.CreateTransaction(entityDef.DatabaseName, isolationLevel);
-
-            return new TransactionContext() {
-                Transaction = dbTransaction,
-                Status = TransactionStatus.InTransaction
-            };
-        }
-
-        /// <summary>
-        /// 提交事务
-        /// </summary>
-        public void Commit(TransactionContext context)
-        {
-            if (context == null || context.Transaction == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (context.Status != TransactionStatus.InTransaction)
-            {
-                throw new DatabaseException("use a already finished transactioncontenxt");
-            }
-
-            try
-            {
-                IDbConnection conn = context.Transaction.Connection;
-                context.Transaction.Commit();
-                context.Transaction.Dispose();
-
-                if (conn != null && conn.State != ConnectionState.Closed)
-                {
-                    conn.Dispose();
-                }
-
-                context.Status = TransactionStatus.Commited;
-            }
-            catch
-            {
-                context.Status = TransactionStatus.Failed;
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// 回滚事务
-        /// </summary>
-        public void Rollback(TransactionContext context)
-        {
-            if (context == null || context.Transaction == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (context.Status != TransactionStatus.InTransaction)
-            {
-                throw new DatabaseException("use a already finished transactioncontenxt");
-            }
-
-            try
-            {
-                IDbConnection conn = context.Transaction.Connection;
-                context.Transaction.Rollback();
-                context.Transaction.Dispose();
-
-                if (conn != null && conn.State != ConnectionState.Closed)
-                {
-                    conn.Dispose();
-                }
-
-                context.Status = TransactionStatus.Rollbacked;
-            }
-            catch
-            {
-                context.Status = TransactionStatus.Failed;
-                throw;
-            }
-        }
-
-        #endregion
-
+       
         #region 条件构造
 
         public SelectExpression<T> NewSelect<T>() where T : DatabaseEntity, new()

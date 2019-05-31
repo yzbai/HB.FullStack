@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity.Abstractions
 {
-    public interface IUserClaimBiz
+    internal interface IUserClaimBiz
     {
         Task<IList<UserClaim>> GetAsync(string userGuid, TransactionContext transContext = null);
     }
