@@ -2,7 +2,7 @@
 
 namespace HB.Framework.Database.Entity
 {
-    public interface IDatabaseTypeConverterFactory
+    internal interface IDatabaseTypeConverterFactory
     {
         DatabaseTypeConverter GetTypeConverter(Type type);
     }

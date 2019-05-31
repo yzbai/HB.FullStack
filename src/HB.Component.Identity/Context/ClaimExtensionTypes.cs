@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace System.Security.Claims
 {
-    public static class ClaimExtensionTypes
+    internal static class ClaimExtensionTypes
     {
         public const string Role = ClaimsIdentity.DefaultRoleClaimType;
 

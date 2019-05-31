@@ -8,7 +8,7 @@ using HB.Framework.Database.Transaction;
 
 namespace HB.Component.Identity
 {
-    public class UserClaimBiz : IUserClaimBiz
+    internal class UserClaimBiz : IUserClaimBiz
     {
         private readonly IDatabase _db;
         private readonly ILogger _logger;
@@ -25,6 +25,7 @@ namespace HB.Component.Identity
             {
                 return Task.FromResult((IList<UserClaim>)new List<UserClaim>());
             }
+
             return _db.RetrieveAsync<UserClaim>(uc => uc.UserGuid == userGuid, transContext);
         }
     }

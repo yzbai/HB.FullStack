@@ -38,8 +38,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IDatabaseTypeConverterFactory, DatabaseTypeConverterFactory>();
             services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
             services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
-            services.AddSingleton<ISQLBuilder, SQLBuilder>();
 
+            services.AddSingleton<ISQLBuilder, SQLBuilder>();
+            services.AddSingleton<ITransaction, Transaction>();
             services.AddSingleton<IDatabase, DefaultDatabase>();
 
         }

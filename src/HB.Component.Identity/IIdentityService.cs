@@ -6,7 +6,7 @@ using HB.Component.Identity.Entity;
 
 namespace HB.Component.Identity
 {
-    public interface IIdentityManager
+    public interface IIdentityService
     {
         Task<User> ValidateSecurityStampAsync(string userGuid, string securityStamp);
         Task<User> GetUserByMobileAsync(string mobile);

@@ -3,7 +3,7 @@
     /// <summary>
     /// Wrapper of the String
     /// </summary>
-    public class PartialSqlString
+    internal class PartialSqlString
     {
         public PartialSqlString(string text)
         {

@@ -6,7 +6,7 @@ namespace HB.Framework.Database.Entity
     /// <summary>
     /// 实体定义
     /// </summary>
-    public class DatabaseEntityDef
+    internal class DatabaseEntityDef
     {
         #region 自身描述
 

@@ -52,7 +52,7 @@ namespace HB.Component.Identity
             return _db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
         }
 
-        public Task<User> GetByMobileAsync(string mobile, TransactionContext transContext)
+        public Task<User> GetByMobileAsync(string mobile, TransactionContext transContext = null)
         {
             if (!ValidationMethods.IsMobilePhone(mobile))
             {
@@ -62,7 +62,7 @@ namespace HB.Component.Identity
             return _db.ScalarAsync<User>(u => u.Mobile == mobile, transContext);
         }
 
-        public Task<User> GetByUserNameAsync(string userName, TransactionContext transContext)
+        public Task<User> GetByUserNameAsync(string userName, TransactionContext transContext = null)
         {
             if (!ValidationMethods.IsUserName(userName)) { return null; }
 
@@ -92,8 +92,10 @@ namespace HB.Component.Identity
 
         #region Update
 
-        public async Task<IdentityResult> SetLockoutAsync(string userGuid, bool lockout, TimeSpan? lockoutTimeSpan = null, TransactionContext transContext = null)
+        public async Task<IdentityResult> SetLockoutAsync(string userGuid, bool lockout, TransactionContext transContext, TimeSpan? lockoutTimeSpan = null)
         {
+            transContext.RequireNotNull();
+
             User user = await GetAsync(userGuid, transContext).ConfigureAwait(false);
 
             if (user == null)
@@ -105,7 +107,7 @@ namespace HB.Component.Identity
 
             if (lockout)
             {
-                user.LockoutEndDate = DateTimeOffset.UtcNow + (lockoutTimeSpan == null ?lockoutTimeSpan.Value:TimeSpan.FromDays(1));
+                user.LockoutEndDate = DateTimeOffset.UtcNow + (lockoutTimeSpan == null ? lockoutTimeSpan.Value : TimeSpan.FromDays(1));
             }
 
             return (await _db.UpdateAsync(user, transContext).ConfigureAwait(false)).ToIdentityResult();
@@ -113,6 +115,8 @@ namespace HB.Component.Identity
 
         public async Task<IdentityResult> SetAccessFailedCountAsync(string userGuid, long count, TransactionContext transContext)
         {
+            transContext.RequireNotNull();
+
             User user = await GetAsync(userGuid, transContext).ConfigureAwait(false);
 
             if (user == null)
@@ -132,6 +136,13 @@ namespace HB.Component.Identity
 
         public async Task<IdentityResult> SetUserNameAsync(string userGuid, string userName, TransactionContext transContext)
         {
+            transContext.RequireNotNull();
+
+            if (userName.IsNullOrEmpty())
+            {
+                return IdentityResult.ArgumentError();
+            }
+
             User user = await GetAsync(userGuid, transContext).ConfigureAwait(false);
 
             if (user == null)
@@ -146,14 +157,20 @@ namespace HB.Component.Identity
 
             user.UserName = userName;
 
-            await ChangeSecurityStampAsync(user).ConfigureAwait(false);
-            //ResetUserAuthtoken(userId);
+            IdentityResult result = await ChangeSecurityStampAsync(user).ConfigureAwait(false);
+
+            if (!result.IsSucceeded())
+            {
+                return result;
+            }
 
             return (await _db.UpdateAsync(user, transContext).ConfigureAwait(false)).ToIdentityResult();
         }
 
         public async Task<IdentityResult> SetPasswordByMobileAsync(string mobile, string newPassword, TransactionContext transContext)
         {
+            transContext.RequireNotNull();
+
             if (!ValidationMethods.IsMobilePhone(mobile) || !ValidationMethods.IsPassword(newPassword))
             {
                 return IdentityResult.ArgumentError();
@@ -165,16 +182,25 @@ namespace HB.Component.Identity
             {
                 return IdentityResult.NotFound();
             }
+
             user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
 
-            await ChangeSecurityStampAsync(user).ConfigureAwait(false);
+            IdentityResult result = await ChangeSecurityStampAsync(user).ConfigureAwait(false);
+
+            if (!result.IsSucceeded())
+            {
+                return result;
+            }
 
             return (await _db.UpdateAsync(user, transContext).ConfigureAwait(false)).ToIdentityResult();
         }
 
-        private async Task ChangeSecurityStampAsync(User user)
+        private async Task<IdentityResult> ChangeSecurityStampAsync(User user)
         {
-            user.RequireNotNull();
+            if (user == null)
+            {
+                return IdentityResult.ArgumentError();
+            }
 
             user.SecurityStamp = SecurityUtil.CreateUniqueToken();
 
@@ -183,6 +209,8 @@ namespace HB.Component.Identity
                 IdentitySecurityStampChangeContext context = new IdentitySecurityStampChangeContext(user.Guid);
                 await _identityOptions.Events.SecurityStampChanged(context).ConfigureAwait(false);
             }
+
+            return IdentityResult.Succeeded();
         }
 
         #endregion
@@ -191,8 +219,7 @@ namespace HB.Component.Identity
 
         private User InitNew(string userType, string mobile, string userName, string password)
         {
-            User user = new User
-            {
+            User user = new User {
                 UserType = userType,
                 Mobile = mobile,
                 Guid = SecurityUtil.CreateUniqueToken(),
@@ -209,8 +236,10 @@ namespace HB.Component.Identity
             return user;
         }
 
-        public async Task<IdentityResult> CreateByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed, TransactionContext transContext = null)
+        public async Task<IdentityResult> CreateByMobileAsync(string userType, string mobile, string userName, string password, bool mobileConfirmed, TransactionContext transContext)
         {
+            transContext.RequireNotNull();
+
             #region Argument Check
 
             if (string.IsNullOrEmpty(userType))
@@ -258,7 +287,7 @@ namespace HB.Component.Identity
             user.MobileConfirmed = mobileConfirmed;
 
             IdentityResult result = user.IsValid() ? (await _db.AddAsync(user, transContext).ConfigureAwait(false)).ToIdentityResult() : IdentityResult.ArgumentError();
-       
+
             if (result.IsSucceeded())
             {
                 result.User = user;

@@ -2,7 +2,7 @@
 
 namespace HB.Framework.Database.Entity
 {
-    public interface IDatabaseEntityDefFactory
+    internal interface IDatabaseEntityDefFactory
     {
         DatabaseEntityDef GetDef(Type entityType);
         DatabaseEntityDef GetDef<T>();

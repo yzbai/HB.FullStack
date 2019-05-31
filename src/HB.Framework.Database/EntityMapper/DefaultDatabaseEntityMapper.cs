@@ -9,7 +9,7 @@ namespace HB.Framework.Database.Entity
     /// <summary>
     /// 单例
     /// </summary>
-    public class DefaultDatabaseEntityMapper : IDatabaseEntityMapper
+    internal class DefaultDatabaseEntityMapper : IDatabaseEntityMapper
     {
         private readonly IDatabaseEntityDefFactory _modelDefFactory;
 

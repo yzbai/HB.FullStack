@@ -7,7 +7,7 @@ namespace HB.Framework.Database.SQL
     /// <summary>
     /// 工具类：输出 以逗号链接的值 字符串。（ex: value1,value2,value3）.
     /// </summary>
-    public class SQLInValues
+    internal class SQLInValues
     {
         private readonly IEnumerable values;
 

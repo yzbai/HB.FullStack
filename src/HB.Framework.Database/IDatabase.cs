@@ -122,20 +122,20 @@ namespace HB.Framework.Database
         FromExpression<T> NewFrom<T>() where T : DatabaseEntity, new();
         WhereExpression<T> NewWhere<T>() where T : DatabaseEntity, new();
 
-        #region 事务
+        //#region 事务
 
-        TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
+        //TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
 
-        /// <summary>
-        /// 提交事务
-        /// </summary>
-        void Commit(TransactionContext context);
+        ///// <summary>
+        ///// 提交事务
+        ///// </summary>
+        //void Commit(TransactionContext context);
 
-        /// <summary>
-        /// 回滚事务
-        /// </summary>
-        void Rollback(TransactionContext context);
+        ///// <summary>
+        ///// 回滚事务
+        ///// </summary>
+        //void Rollback(TransactionContext context);
 
-        #endregion
+        //#endregion
     }
 }

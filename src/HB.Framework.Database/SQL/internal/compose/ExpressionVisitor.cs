@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 namespace HB.Framework.Database.SQL
 {
     //http://blogs.msdn.com/b/mattwar/archive/2007/07/31/linq-building-an-iqueryable-provider-part-ii.aspx
-    public abstract class ExpressionVisitor
+    internal abstract class ExpressionVisitor
     {
         protected virtual Expression Visit(Expression exp)
         {
