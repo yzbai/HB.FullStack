@@ -7,7 +7,7 @@ using HB.Framework.KVStore.Engine;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class KVStoreServiceCollectionExtensions
+    public static class ServiceRegister
     {
         public static IServiceCollection AddKVStore(this IServiceCollection serviceCollection, Action<KVStoreOptions> kvstoreOptionsSetup)
         {
@@ -15,8 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<KVStoreOptions>(kvstoreOptionsSetup);
 
-            serviceCollection.AddSingleton<IKVStoreEntityDefFactory, DefaultKVStoreModelDefFactory>();
-            serviceCollection.AddSingleton<IKVStore, DefaultKVStore>();
+            AddService(serviceCollection);
 
             return serviceCollection;
         }
@@ -27,10 +26,15 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<KVStoreOptions>(configuration);
 
-            serviceCollection.AddSingleton<IKVStoreEntityDefFactory, DefaultKVStoreModelDefFactory>();
-            serviceCollection.AddSingleton<IKVStore, DefaultKVStore>();
+            AddService(serviceCollection);
 
             return serviceCollection;
+        }
+
+        private static void AddService(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddSingleton<IKVStoreEntityDefFactory, DefaultKVStoreModelDefFactory>();
+            serviceCollection.AddSingleton<IKVStore, DefaultKVStore>();
         }
     }
 }

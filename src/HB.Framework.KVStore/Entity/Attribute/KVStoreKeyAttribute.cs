@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Entity
 {
+    /// <summary>
+    /// 可以多个Key
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class KVStoreKeyAttribute : System.Attribute
     {

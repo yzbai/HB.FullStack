@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class EventBusServiceCollectionExtensions
+    public static class ServiceRegister
     {
         public static IServiceCollection AddEventBus(this IServiceCollection services, Action<EventBusOptions> action)
         {

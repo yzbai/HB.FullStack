@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace HB.Framework.KVStore.Entity
 {
-    public class DefaultKVStoreModelDefFactory : IKVStoreEntityDefFactory
+    internal class DefaultKVStoreModelDefFactory : IKVStoreEntityDefFactory
     {
         private readonly KVStoreOptions _options;
         private readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict;
