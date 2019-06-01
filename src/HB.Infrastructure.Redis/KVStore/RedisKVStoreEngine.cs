@@ -14,7 +14,7 @@ using System.Globalization;
 
 namespace HB.Infrastructure.Redis.KVStore
 {
-    public partial class RedisKVStoreEngine : IKVStoreEngine
+    internal partial class RedisKVStoreEngine : IKVStoreEngine
     {
         //private static readonly string luaAddScript = @"if redis.call('HSETNX',KEYS[1], ARGV[1], ARGV[2]) == 1 then redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) return 1 else return 9 end";
         //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";

@@ -10,7 +10,7 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
-    public class RedisEventBusEngine : IEventBusEngine
+    internal class RedisEventBusEngine : IEventBusEngine
     {
         private readonly IRedisInstanceManager _instanceManager;
         private readonly ILogger _logger;

@@ -11,7 +11,7 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.KVStore
 {
-    public partial class RedisKVStoreEngine : IKVStoreEngineAsync
+    internal partial class RedisKVStoreEngine : IKVStoreEngineAsync
     {
         public async Task<string> EntityGetAsync(string storeName, string entityName, string entityKey)
         {

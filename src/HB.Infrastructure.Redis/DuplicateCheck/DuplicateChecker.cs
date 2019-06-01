@@ -11,7 +11,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
     /// <summary>
     /// 使用方法：每次都要先Lock，最后Release
     /// </summary>
-    public class DuplicateChecker
+    internal class DuplicateChecker
     {
         private readonly string _instanceName;
         private readonly long _aliveSeconds;
