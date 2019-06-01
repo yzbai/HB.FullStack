@@ -11,7 +11,7 @@ using System.Text;
 
 namespace HB.Framework.KVStore
 {
-    public class DefaultKVStore : IKVStore
+    internal class DefaultKVStore : IKVStore
     {
         private readonly KVStoreOptions _options;
         private readonly IKVStoreEngine _engine;
