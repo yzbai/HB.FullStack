@@ -9,7 +9,7 @@ namespace HB.Infrastructure.MySQL
     /// 动态SQL和SP执行
     /// 具体执行步骤都要有异常捕捉，直接抛出给上一层
     /// </summary>
-    public static partial class MySQLExecuter
+    internal static partial class MySQLExecuter
     {
         #region private utility methods & constructors
 

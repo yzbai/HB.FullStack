@@ -5,7 +5,7 @@ namespace HB.Framework.Database.Transaction
 {
     public interface ITransaction
     {
-        TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity;
+        TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
         void Commit(TransactionContext context);
         void Rollback(TransactionContext context);
     }

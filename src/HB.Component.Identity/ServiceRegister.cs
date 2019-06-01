@@ -12,11 +12,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure(optionsSetup);
 
+            //internal
             services.AddSingleton<IUserBiz, UserBiz>();
             services.AddSingleton<IUserClaimBiz, UserClaimBiz>();
             services.AddSingleton<IRoleBiz, RoleBiz>();
             services.AddSingleton<IClaimsPrincipalFactory, ClaimsPrincipalFactory>();
 
+            //public interface
             services.AddSingleton<IIdentityService, IdentityService>();
 
             return services;

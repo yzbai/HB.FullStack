@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 
 namespace HB.Infrastructure.MySQL
 {
-    public partial class MySQLEngine : IDatabaseEngineAsync
+    internal partial class MySQLEngine : IDatabaseEngineAsync
     {
         #region SP 能力
 

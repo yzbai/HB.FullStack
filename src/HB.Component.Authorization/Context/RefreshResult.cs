@@ -13,7 +13,9 @@ namespace HB.Component.Authorization.Abstractions
         InvalideUserGuid,
         NoTokenInStore,
         UserSecurityStampChanged,
-        UpdateSignInTokenError
+        UpdateSignInTokenError,
+        ArgumentError,
+        ExceptionThrown
     }
 
     public class RefreshResult
@@ -67,6 +69,16 @@ namespace HB.Component.Authorization.Abstractions
         public static RefreshResult UpdateSignInTokenError()
         {
             return new RefreshResult { Status = RefreshResultStatus.UpdateSignInTokenError };
+        }
+
+        public static RefreshResult ArgumentError()
+        {
+            return new RefreshResult { Status = RefreshResultStatus.ArgumentError };
+        }
+
+        public static RefreshResult Throwed()
+        {
+            return new RefreshResult { Status = RefreshResultStatus.ExceptionThrown };
         }
 
         //public static bool operator ==(RefreshResult left, RefreshResult right)
