@@ -11,7 +11,7 @@ namespace HB.Component.Authorization.Abstractions
         Postman = 4
     }
 
-    public static class ClientTypeChecker
+    internal static class ClientTypeChecker
     {
         public static ClientType Check(string clientType)
         {

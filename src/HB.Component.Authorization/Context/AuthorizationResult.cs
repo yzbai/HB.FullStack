@@ -5,53 +5,65 @@ using System.Text;
 
 namespace HB.Component.Authorization
 {
-    public enum AuthorizationServerResultStatus
+    public enum AuthorizationResultStatus
     {
         Succeeded,
         NotFound,
-        Failed
+        Failed,
+        ArgumentError,
+        ExceptionThrown
     }
 
-    public class AuthorizationServerResult
+    public class AuthorizationResult
     {
         //public static readonly AuthorizationServerResult Succeeded = new AuthorizationServerResult() { Status = AuthorizationServerResultStatus.Succeeded };
         //public static readonly AuthorizationServerResult NotFound = new AuthorizationServerResult() { Status = AuthorizationServerResultStatus.NotFound };
         //public static readonly AuthorizationServerResult Failed = new AuthorizationServerResult() { Status = AuthorizationServerResultStatus.Failed };
 
-        public AuthorizationServerResult() { }
+        public AuthorizationResult() { }
 
-        public AuthorizationServerResult(DatabaseResult dbResult)
+        public AuthorizationResult(DatabaseResult dbResult)
         {
             switch (dbResult.Status)
             {
                 case DatabaseResultStatus.Failed:
-                    Status = AuthorizationServerResultStatus.Failed;
+                    Status = AuthorizationResultStatus.Failed;
                     break;
                 case DatabaseResultStatus.NotFound:
-                    Status = AuthorizationServerResultStatus.NotFound;
+                    Status = AuthorizationResultStatus.NotFound;
                     break;
                 case DatabaseResultStatus.NotWriteable:
-                    Status = AuthorizationServerResultStatus.Failed;
+                    Status = AuthorizationResultStatus.Failed;
                     break;
                 case DatabaseResultStatus.Succeeded:
-                    Status = AuthorizationServerResultStatus.Succeeded;
+                    Status = AuthorizationResultStatus.Succeeded;
                     break;
                 default:
-                    Status = AuthorizationServerResultStatus.Failed;
+                    Status = AuthorizationResultStatus.Failed;
                     break;
             }
         }
 
-        public AuthorizationServerResultStatus Status { get; set; }
+        public AuthorizationResultStatus Status { get; set; }
 
         public bool IsSucceeded()
         {
-            return Status == AuthorizationServerResultStatus.Succeeded;
+            return Status == AuthorizationResultStatus.Succeeded;
         }
 
-        public static AuthorizationServerResult Succeeded()
+        public static AuthorizationResult ArgumentError()
         {
-            return new AuthorizationServerResult { Status = AuthorizationServerResultStatus.Succeeded };
+            return new AuthorizationResult { Status = AuthorizationResultStatus.Succeeded };
+        }
+
+        public static AuthorizationResult Succeeded()
+        {
+            return new AuthorizationResult { Status = AuthorizationResultStatus.ArgumentError };
+        }
+
+        public static AuthorizationResult Throwed()
+        {
+            return new AuthorizationResult { Status = AuthorizationResultStatus.ExceptionThrown };
         }
 
         //public static bool operator ==(AuthorizationServerResult left, AuthorizationServerResult right)
@@ -89,9 +101,9 @@ namespace HB.Component.Authorization
 
     public static class DatabaseResultExtensions
     {
-        public static AuthorizationServerResult ToAuthorizationResult(this DatabaseResult dbResult)
+        public static AuthorizationResult ToAuthorizationResult(this DatabaseResult dbResult)
         {
-            return new AuthorizationServerResult(dbResult);
+            return new AuthorizationResult(dbResult);
         }
     }
 }

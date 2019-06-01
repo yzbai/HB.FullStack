@@ -6,7 +6,7 @@ using HB.Component.Identity.Entity;
 
 namespace HB.Component.Authorization.Abstractions
 {
-    public interface IJwtBuilder
+    internal interface IJwtBuilder
     {
         Task<string> BuildJwtAsync(User user, SignInToken signInToken, string audience);
         //string BuildJwt(User user, SignInToken signInToken, string audience);
