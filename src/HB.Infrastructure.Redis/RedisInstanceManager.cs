@@ -10,7 +10,7 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis
 {
-    public class RedisInstanceManager : IRedisInstanceManager
+    internal class RedisInstanceManager : IRedisInstanceManager
     {      
         private readonly ILogger _logger;
 

@@ -9,7 +9,7 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Direct
 {
-    public class RedisDatabase : IRedisDatabase
+    internal class RedisDatabase : IRedisDatabase
     {
         private readonly IRedisInstanceManager _redisConnectionManager;
 

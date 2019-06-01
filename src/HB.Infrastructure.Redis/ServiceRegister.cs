@@ -10,24 +10,19 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class RedisServiceCollectionExtensions
+    public static class ServiceRegister
     {
         public static IServiceCollection AddRedis(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddOptions();
 
             serviceCollection.Configure<RedisOptions>(configuration);
-
-            serviceCollection.AddSingleton<IRedisInstanceManager, RedisInstanceManager>();
-
-            serviceCollection.AddSingleton<IRedisDatabase, RedisDatabase>();
-
-            serviceCollection.AddSingleton<IKVStoreEngine, RedisKVStoreEngine>();
-
-            serviceCollection.AddSingleton<IEventBusEngine, RedisEventBusEngine>();
+            AddService(serviceCollection);
 
             return serviceCollection;
         }
+
+        
 
         public static IServiceCollection AddRedis(this IServiceCollection serviceCollection, Action<RedisOptions> redisOptionsSetup)
         {
@@ -35,6 +30,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.Configure<RedisOptions>(redisOptionsSetup);
 
+            AddService(serviceCollection);
+
+            return serviceCollection;
+        }
+
+        private static void AddService(IServiceCollection serviceCollection)
+        {
             serviceCollection.AddSingleton<IRedisInstanceManager, RedisInstanceManager>();
 
             serviceCollection.AddSingleton<IRedisDatabase, RedisDatabase>();
@@ -42,8 +44,6 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddSingleton<IKVStoreEngine, RedisKVStoreEngine>();
 
             serviceCollection.AddSingleton<IEventBusEngine, RedisEventBusEngine>();
-
-            return serviceCollection;
         }
 
     }

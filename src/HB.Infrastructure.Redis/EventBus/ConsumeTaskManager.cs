@@ -17,7 +17,7 @@ namespace HB.Infrastructure.Redis.EventBus
     /// <summary>
     /// TODO: 未来使用多线程, 对于_consumeTask 和 _historyTask
     /// </summary>
-    public class ConsumeTaskManager : IDisposable
+    internal class ConsumeTaskManager : IDisposable
     {
         private const int CONSUME_INTERVAL_SECONDS = 5;
         private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";

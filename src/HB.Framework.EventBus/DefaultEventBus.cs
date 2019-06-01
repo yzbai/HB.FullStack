@@ -15,7 +15,7 @@ namespace HB.Framework.EventBus
     /// <summary>
     /// 单例启动
     /// </summary>
-    public class DefaultEventBus : IEventBus
+    internal class DefaultEventBus : IEventBus
     {
         private readonly EventBusOptions _options;
         private readonly IEventBusEngine _engine;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Entity
 {
-    public interface IKVStoreEntityDefFactory
+    internal interface IKVStoreEntityDefFactory
     {
         KVStoreEntityDef GetDef<T>();
         KVStoreEntityDef GetDef(Type type);
