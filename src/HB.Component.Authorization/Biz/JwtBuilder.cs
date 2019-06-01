@@ -15,28 +15,27 @@ using System.Security;
 
 namespace HB.Component.Authorization
 {
-    public class JwtBuilder : IJwtBuilder
+    internal class JwtBuilder : IJwtBuilder
     {
         private readonly SignInOptions _signInOptions;
-        private readonly AuthorizationServerOptions _options;
-        private readonly IClaimsPrincipalFactory _claimsPrincipalFactory;
-        private readonly ICredentialManager _credentialManager;
+        private readonly AuthorizationOptions _options;
         private readonly SigningCredentials _signingCredentials;
 
-        public JwtBuilder(IOptions<AuthorizationServerOptions> options, IClaimsPrincipalFactory claimsPrincipalFactory, ICredentialManager credentialManager)
+        private readonly IIdentityService identityService;
+
+        public JwtBuilder(IOptions<AuthorizationOptions> options, ICredentialBiz credentialBiz, IIdentityService identityService)
         {
             _options = options.Value;
             _signInOptions = _options.SignInOptions;
-            _claimsPrincipalFactory = claimsPrincipalFactory;
-            _credentialManager = credentialManager;
-            _signingCredentials = _credentialManager.GetSigningCredentials();   
+            _signingCredentials = credentialBiz.GetSigningCredentials();
+            this.identityService = identityService;
         }
 
         public async Task<string> BuildJwtAsync(User user, SignInToken signInToken, string audience)
         {
             DateTime utcNow = DateTime.UtcNow;
 
-            IList<Claim> claims = await _claimsPrincipalFactory.CreateClaimsAsync(user).ConfigureAwait(false);
+            IList<Claim> claims = await identityService.GetUserClaimAsync(user).ConfigureAwait(false);
 
             claims.Add(new Claim(ClaimExtensionTypes.SignInTokenGuid, signInToken.Guid));
 

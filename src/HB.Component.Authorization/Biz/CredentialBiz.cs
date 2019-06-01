@@ -13,14 +13,14 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.Component.Authorization
 {
-    public class CredentialManager : ICredentialManager
+    internal class CredentialBiz : ICredentialBiz
     {
-        private readonly AuthorizationServerOptions _options;
+        private readonly AuthorizationOptions _options;
         private readonly SigningCredentials _signingCredentials;
         private readonly JsonWebKeySet _jsonWebKeySet;
         private readonly ILogger _logger;
 
-        public CredentialManager(IOptions<AuthorizationServerOptions> options, ILogger<CredentialManager> logger)
+        public CredentialBiz(IOptions<AuthorizationOptions> options, ILogger<CredentialBiz> logger)
         {
             _options = options.Value;
             _logger = logger;
@@ -29,7 +29,8 @@ namespace HB.Component.Authorization
 
             if (cert == null)
             {
-                logger.LogCritical("找不到证书 Subject:" + _options.CertificateSubject);
+                logger.LogCritical($"找不到证书 Subject:{_options.CertificateSubject}");
+                throw new FileNotFoundException(_options.CertificateSubject);
             }
 
             X509SecurityKey securityKey = new X509SecurityKey(cert);

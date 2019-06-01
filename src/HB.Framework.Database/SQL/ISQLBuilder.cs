@@ -13,7 +13,6 @@ namespace HB.Framework.Database.SQL
         IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T entity, string lastUser) where T : DatabaseEntity, new();
         IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new();
 
-
         IDbCommand CreateBatchAddStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new();
 
         /// <summary>
@@ -41,7 +40,6 @@ namespace HB.Framework.Database.SQL
         FromExpression<T> NewFrom<T>() where T : DatabaseEntity, new();
 
         WhereExpression<T> NewWhere<T>() where T : DatabaseEntity, new();
-
 
         IDbCommand CreateRetrieveCommand<T>(SelectExpression<T> selectCondition = null, FromExpression<T> fromCondition = null, WhereExpression<T> whereCondition = null) 
             where T : DatabaseEntity, new();

@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace HB.Infrastructure.MySQL
 {
-    class DbTypeInfo
+    internal class DbTypeInfo
     {
         /// <summary>
         /// 数据库类型
@@ -25,7 +25,7 @@ namespace HB.Infrastructure.MySQL
         public bool IsValueQuoted { get; set; }
     }
 
-    static class MySQLUtility
+    internal static class MySQLUtility
     {
         //参数化
         public const string ParameterizedChar = "@";

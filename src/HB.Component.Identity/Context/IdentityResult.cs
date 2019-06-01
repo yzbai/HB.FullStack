@@ -17,7 +17,8 @@ namespace HB.Component.Identity
         Failed,
         MobileAlreadyTaken,
         UserNameAlreadyTaken,
-        EmailAlreadyTaken
+        EmailAlreadyTaken,
+        ExceptionThrown
     }
 
     public class IdentityResult
@@ -55,6 +56,8 @@ namespace HB.Component.Identity
             }
         }
 
+        
+
         public IdentityResultStatus Status { get; private set; }
         
         public User User { get; set; }
@@ -91,6 +94,11 @@ namespace HB.Component.Identity
         public static IdentityResult NotFound()
         {
             return new IdentityResult { Status = IdentityResultStatus.NotFound };
+        }
+
+        public static IdentityResult Throwed()
+        {
+            return new IdentityResult { Status = IdentityResultStatus.ExceptionThrown };
         }
 
         public static IdentityResult AlreadyExists()

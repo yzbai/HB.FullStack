@@ -12,16 +12,12 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class AuthorizationServerServiceCollectionExtensions
     {
-        public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, Action<AuthorizationServerOptions> optionsSetup)
+        public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, Action<AuthorizationOptions> optionsSetup)
         {
             services.AddOptions();
             services.Configure(optionsSetup);
 
-            services.AddSingleton<ICredentialManager, CredentialManager>();
-            services.AddSingleton<IJwtBuilder, JwtBuilder>();
-            services.AddSingleton<IRefreshManager, RefreshManager>();
-            services.AddSingleton<ISignInManager, SignInManager>();
-            services.AddSingleton<ISignInTokenBiz, SignInTokenBiz>();
+            AddService(services);
 
             return services;
         }
@@ -29,15 +25,22 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddOptions();
-            services.Configure<AuthorizationServerOptions>(configuration);
+            services.Configure<AuthorizationOptions>(configuration);
 
-            services.AddSingleton<ICredentialManager, CredentialManager>();
-            services.AddSingleton<IJwtBuilder, JwtBuilder>();
-            services.AddSingleton<IRefreshManager, RefreshManager>();
-            services.AddSingleton<ISignInManager, SignInManager>();
-            services.AddSingleton<ISignInTokenBiz, SignInTokenBiz>();
+            AddService(services);
 
             return services;
+        }
+
+        private static void AddService(IServiceCollection services)
+        {
+            //internal
+            services.AddSingleton<ICredentialBiz, CredentialBiz>();
+            services.AddSingleton<IJwtBuilder, JwtBuilder>();
+            services.AddSingleton<ISignInTokenBiz, SignInTokenBiz>();
+
+            //public interface
+            services.AddSingleton<IAuthorizationService, AuthorizationService>();
         }
     }
 }
