@@ -6,7 +6,7 @@ using System.Data;
 
 namespace HB.Infrastructure.MySQL
 {
-    public partial class MySQLExecuter
+    internal partial class MySQLExecuter
     {
         #region Command Reader
 

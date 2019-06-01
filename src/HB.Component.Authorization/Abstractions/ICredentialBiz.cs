@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HB.Component.Authorization.Abstractions
 {
-    public interface ICredentialManager
+    internal interface ICredentialBiz
     {
         SigningCredentials GetSigningCredentials();
 

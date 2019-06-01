@@ -2,9 +2,7 @@
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.SQL;
 using System;
-using System.Linq;
 using Microsoft.Extensions.Configuration;
-using HB.Framework.Database.Engine;
 using HB.Framework.Database.Transaction;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -35,11 +33,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddDatabase(IServiceCollection services)
         {
+            //internal 
             services.AddSingleton<IDatabaseTypeConverterFactory, DatabaseTypeConverterFactory>();
             services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
             services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
-
             services.AddSingleton<ISQLBuilder, SQLBuilder>();
+
+            //public interface
             services.AddSingleton<ITransaction, Transaction>();
             services.AddSingleton<IDatabase, DefaultDatabase>();
 

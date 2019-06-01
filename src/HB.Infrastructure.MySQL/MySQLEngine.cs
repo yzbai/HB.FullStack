@@ -11,7 +11,7 @@ namespace HB.Infrastructure.MySQL
     /// <summary>
     /// MySql数据库
     /// </summary>
-    public partial class MySQLEngine : IDatabaseEngine
+    internal partial class MySQLEngine : IDatabaseEngine
     {
         #region 自身 & 构建
 

@@ -9,7 +9,7 @@ namespace HB.Component.Authorization.Abstractions
 {
     public enum SignInResultStatus
     {
-        Succeeded,
+        LogoffOtherClientFailed,
         NewUserCreateFailed,
         NewUserCreateFailedMobileAlreadyTaken,
         NewUserCreateFailedEmailAlreadyTaken,
@@ -22,7 +22,8 @@ namespace HB.Component.Authorization.Abstractions
         NoSuchUser,
         PasswordWrong,
         AuthtokenCreatedFailed,
-        ArgumentError
+        ArgumentError,
+        ExceptionThrown
     }
 
     public class SignInResult
@@ -51,7 +52,11 @@ namespace HB.Component.Authorization.Abstractions
 
         public bool IsSucceeded()
         {
-            return Status == SignInResultStatus.Succeeded;
+            return Status == SignInResultStatus.LogoffOtherClientFailed;
+        }
+        public static SignInResult Throwed()
+        {
+            return new SignInResult { Status = SignInResultStatus.ExceptionThrown };
         }
 
         public static SignInResult ArgumentError()
@@ -116,7 +121,12 @@ namespace HB.Component.Authorization.Abstractions
 
         public static SignInResult Succeeded()
         {
-            return new SignInResult { Status = SignInResultStatus.Succeeded };
+            return new SignInResult { Status = SignInResultStatus.LogoffOtherClientFailed };
+        }
+
+        public static SignInResult LogoffOtherClientFailed()
+        {
+            return new SignInResult { Status = SignInResultStatus.LogoffOtherClientFailed };
         }
 
         //public static bool operator ==(SignInResult left, SignInResult right)
