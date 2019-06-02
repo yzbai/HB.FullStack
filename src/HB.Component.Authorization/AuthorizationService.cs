@@ -179,7 +179,9 @@ namespace HB.Component.Authorization
 
                 #region Logoff App Client
 
-                if (context.ClientType != ClientType.Web && _signInOptions.AllowOnlyOneAppClient)
+                ClientType clientType = ClientTypeChecker.Check(context.ClientType);
+
+                if (clientType != ClientType.Web && _signInOptions.AllowOnlyOneAppClient)
                 {
                     AuthorizationResult authorizationResult = await _signInTokenBiz.DeleteAppClientTokenByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
 
@@ -197,7 +199,7 @@ namespace HB.Component.Authorization
                 SignInToken userToken = await _signInTokenBiz.CreateAsync(
                     user.Guid,
                     context.ClientId,
-                    context.ClientType.GetDescription(),
+                    clientType.GetDescription(),
                     context.ClientVersion,
                     context.ClientAddress,
                     context.ClientIp,
@@ -482,6 +484,11 @@ namespace HB.Component.Authorization
                 logger.LogWarning(ex, "wrong token to refren.Context : {0}", JsonUtil.ToJson(context));
                 return null;
             }
+        }
+
+        public JsonWebKeySet GetJsonWebKeySet()
+        {
+            return _credentialBiz.GetJsonWebKeySet();
         }
     }
 }

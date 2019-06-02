@@ -2,7 +2,7 @@
 
 namespace HB.Component.Authorization.Abstractions
 {
-    public enum ClientType
+    internal enum ClientType
     {
         None = 0,
         Android = 1,

@@ -899,5 +899,14 @@ namespace HB.Framework.Database
         }
 
         #endregion
+
+        #region 表创建SQL
+
+        public string GetTableCreateStatement(Type type, bool addDropStatement)
+        {
+            return _sqlBuilder.GetTableCreateStatement(type, addDropStatement);
+        }
+
+        #endregion
     }
 }
