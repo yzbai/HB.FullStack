@@ -29,7 +29,7 @@ namespace HB.Component.Authorization.Abstractions
         public bool RememberMe { get; set; }
 
         public string ClientId { get; set; }
-        public ClientType ClientType { get; set; }
+        public string ClientType { get; set; }
         public string ClientVersion { get; set; }
         public string ClientAddress { get; set; }
         public string ClientIp { get; set; }
