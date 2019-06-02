@@ -67,7 +67,7 @@ namespace HB.Framework.Database
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new();
-
+        string GetTableCreateStatement(Type type, bool addDropStatement);
 
         IList<T> RetrieveAll<T>(TransactionContext transContext ) where T : DatabaseEntity, new();
 
