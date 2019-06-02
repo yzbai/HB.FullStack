@@ -436,6 +436,7 @@ namespace HB.Framework.Database.SQL
                     object[] inArgs = getter() as object[];
 
                     StringBuilder sIn = new StringBuilder();
+
                     foreach (object e in inArgs)
                     {
                         if (!typeof(ICollection).GetTypeInfo().IsAssignableFrom(e.GetType()))
@@ -454,6 +455,12 @@ namespace HB.Framework.Database.SQL
                                          context.DatabaesEngine.GetDbValueStatement(el, needQuoted: true));
                             }
                         }
+                    }
+
+                    if (sIn.Length == 0)
+                    {
+                        //防止集合为空
+                        sIn.Append("null");
                     }
 
                     statement = string.Format(GlobalSettings.Culture, "{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
