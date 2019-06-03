@@ -16,6 +16,7 @@ namespace HB.Component.Identity.Test
         private ITestOutputHelper _output;
         private ServiceFixture _fixture;
         private IDatabase _db;
+        private ITransaction transaction;
         private IList<User> _userList;
         private readonly IList<Role> _roleList;
 
@@ -24,6 +25,7 @@ namespace HB.Component.Identity.Test
             _output = output;
             _fixture = databaseTestFixture;
             _db = _fixture.Database;
+            transaction = _fixture.Transaction;
             //_dbTransaction = _fixture.DatabaseTransaction;
 
             _userList = DataMocker.MockUsers();
@@ -34,7 +36,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void AddUsers()
         {
-            TransactionContext transContext = _db.BeginTransaction<User>();
+            TransactionContext transContext = transaction.BeginTransaction<User>();
             DatabaseResult result = DatabaseResult.Failed();
 
             foreach (User item in _userList)
@@ -43,12 +45,12 @@ namespace HB.Component.Identity.Test
 
                 if (!result.IsSucceeded())
                 {
-                    _db.Rollback(transContext);
+                    transaction.Rollback(transContext);
                     break;
                 }
             }
 
-            _db.Commit(transContext);
+            transaction.Commit(transContext);
 
             Assert.True(result.IsSucceeded());
         }
@@ -56,7 +58,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void AddRole()
         {
-            TransactionContext transContext = _db.BeginTransaction<Role>();
+            TransactionContext transContext = transaction.BeginTransaction<Role>();
             DatabaseResult result = DatabaseResult.Succeeded();
 
             foreach (Role item in _roleList)
@@ -72,12 +74,12 @@ namespace HB.Component.Identity.Test
 
                 if (!result.IsSucceeded())
                 {
-                    _db.Rollback(transContext);
+                    transaction.Rollback(transContext);
                     break;
                 }
             }
 
-            _db.Commit(transContext);
+            transaction.Commit(transContext);
 
             Assert.True(result.IsSucceeded());
         }
@@ -168,7 +170,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void RandomUpdateSomeUserAsync()
         {
-            TransactionContext transContext = _db.BeginTransaction<User>();
+            TransactionContext transContext = transaction.BeginTransaction<User>();
 
             string userNamePrefix = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
 
@@ -203,12 +205,12 @@ namespace HB.Component.Identity.Test
                     {
                         _output.WriteLine($"user id {userId} update failed.");
 
-                        _db.Rollback(transContext);
+                        transaction.Rollback(transContext);
                         break;
                     }
                 }
 
-                _db.Commit(transContext);
+                transaction.Commit(transContext);
 
                 Assert.Equal(TransactionStatus.Commited, transContext.Status);
 
@@ -225,7 +227,7 @@ namespace HB.Component.Identity.Test
             catch (Exception)
             {
 
-                _db.Rollback(transContext);
+                transaction.Rollback(transContext);
 
                 result = DatabaseResult.Failed();
             }
@@ -236,7 +238,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void RandomDeleteSomeUserAsync()
         {
-            TransactionContext transContext = _db.BeginTransaction<User>();
+            TransactionContext transContext = transaction.BeginTransaction<User>();
 
             List<long> ids = new List<long>();
 
@@ -266,12 +268,12 @@ namespace HB.Component.Identity.Test
                     if (!result.IsSucceeded())
                     {
 
-                        _db.Rollback(transContext);
+                        transaction.Rollback(transContext);
                         break;
                     }
                 }
 
-                _db.Commit(transContext);
+                transaction.Commit(transContext);
 
                 Assert.True(transContext.Status == TransactionStatus.Commited);
 
@@ -291,7 +293,7 @@ namespace HB.Component.Identity.Test
             }
             catch (Exception)
             {
-                _db.Rollback(transContext);
+                transaction.Rollback(transContext);
             }
         }
 

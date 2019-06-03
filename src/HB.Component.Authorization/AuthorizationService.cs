@@ -235,6 +235,7 @@ namespace HB.Component.Authorization
             }
         }
 
+        //TODO: 做好详细的历史纪录，各个阶段都要打log。一有风吹草动，就立马删除SignInToken
         public async Task<RefreshResult> RefreshAccessTokenAsync(RefreshContext context)
         {
             if (!context.IsValid())
@@ -255,10 +256,11 @@ namespace HB.Component.Authorization
 
             #region AccessToken, Claims 验证
 
-            ClaimsPrincipal claimsPrincipal = ValidateToken(context);
+            ClaimsPrincipal claimsPrincipal = ValidateTokenWithoutLifeCheck(context);
 
             if (claimsPrincipal == null)
             {
+                //TODO: Black concern SigninToken by RefreshToken
                 return RefreshResult.InvalideAccessToken();
             }
 
@@ -280,7 +282,6 @@ namespace HB.Component.Authorization
 
             try
             {
-
                 signInToken = await _signInTokenBiz.GetAsync(
                     claimsPrincipal.GetSignInTokenGuid(),
                     context.RefreshToken,
@@ -347,8 +348,6 @@ namespace HB.Component.Authorization
             RefreshResult result = new RefreshResult() { Status = RefreshResultStatus.Succeeded };
 
             result.AccessToken = await _jwtBuilder.BuildJwtAsync(user, signInToken, claimsPrincipal.GetAudience()).ConfigureAwait(false);
-            result.RefreshToken = context.RefreshToken;
-            result.CurrentUser = user;
 
             return result;
 
@@ -446,6 +445,7 @@ namespace HB.Component.Authorization
 
         private async Task BlackSignInTokenAsync(SignInToken signInToken)
         {
+            //TODO: 详细记录Black SiginInToken 的历史纪录
             TransactionContext transactionContext = transaction.BeginTransaction<SignInToken>();
             try
             {
@@ -466,7 +466,7 @@ namespace HB.Component.Authorization
             }
         }
 
-        private ClaimsPrincipal ValidateToken(RefreshContext context)
+        private ClaimsPrincipal ValidateTokenWithoutLifeCheck(RefreshContext context)
         {
             try
             {
