@@ -6,7 +6,7 @@
         {
             FixedLength = true;
             Length = 32;
-            NotNull = true;
+            //NotNull = true;
         }
     }
 }
