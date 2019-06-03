@@ -160,7 +160,7 @@ namespace HB.Framework.Database.Entity
                     propertyDef.IsTableProperty = true;
                     propertyDef.IsAutoIncrementPrimaryKey = false;
                     propertyDef.IsForeignKey = true;
-                    propertyDef.IsNullable = false;
+                    //propertyDef.IsNullable = false;
                     propertyDef.IsUnique = false;
                 }
             }

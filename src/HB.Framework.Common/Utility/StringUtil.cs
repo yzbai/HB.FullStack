@@ -44,7 +44,7 @@ namespace System
         #region Collection to String
 
         private static readonly string[] separator = { "-)#@$(-" };
-
+        private static readonly int separatorLength = separator[0].Length;
         public static string ListToString(IEnumerable<string> list)
         {
             StringBuilder builder = new StringBuilder();
@@ -60,7 +60,7 @@ namespace System
 
             if (added)
             {
-                builder.Remove(builder.Length - 1, 1);
+                builder.Remove(builder.Length - separatorLength, separatorLength);
             }
 
             return builder.ToString();
@@ -107,7 +107,7 @@ namespace System
 
             if (added)
             {
-                builder.Remove(builder.Length - 1, 1);
+                builder.Remove(builder.Length - separatorLength, separatorLength);
             }
 
             return builder.ToString();
