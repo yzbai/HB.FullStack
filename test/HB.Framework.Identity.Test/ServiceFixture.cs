@@ -40,5 +40,7 @@ namespace HB.Component.Identity.Test
 
         public IDatabase Database => Services.GetRequiredService<IDatabase>();
 
+        public ITransaction Transaction => Services.GetRequiredService<ITransaction>();
+
     }
 }
