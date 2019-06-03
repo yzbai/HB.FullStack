@@ -11,14 +11,15 @@ namespace HB.Framework.Database.Test
     public class ComplexFieldTest : IClassFixture<ServiceFixture>
     {
         private readonly IDatabase database;
-        private readonly ISQLBuilder sqlBuilder;
         private readonly ITestOutputHelper output;
+
+        private readonly ITransaction transaction;
 
         public ComplexFieldTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             output = testOutputHelper;
             database = serviceFixture.Database;
-            sqlBuilder = serviceFixture.SQLBuilder;
+            transaction = serviceFixture.Transaction;
         }
 
 
@@ -43,24 +44,24 @@ namespace HB.Framework.Database.Test
                 lst.Add(entity);
             }
 
-            var transaction = database.BeginTransaction<TestEntity>();
+            var transactionContext = transaction.BeginTransaction<TestEntity>();
 
             DatabaseResult result = DatabaseResult.Failed();
             try
             {
-                result = database.BatchAdd<TestEntity>(lst, "tester", transaction);
+                result = database.BatchAdd<TestEntity>(lst, "tester", transactionContext);
 
                 if (!result.IsSucceeded())
                 {
                     throw new Exception();
                 }
 
-                database.Commit(transaction);
+                transaction.Commit(transactionContext);
 
             }
             catch (Exception ex)
             {
-                database.Rollback(transaction);
+                transaction.Rollback(transactionContext);
             }
 
             Assert.True(result.IsSucceeded());
@@ -86,17 +87,17 @@ namespace HB.Framework.Database.Test
                 };
             }
 
-            TransactionContext transContext = database.BeginTransaction<TestEntity>();
+            TransactionContext transContext = transaction.BeginTransaction<TestEntity>();
             DatabaseResult result = DatabaseResult.Failed();
             try
             {
                 result = database.BatchUpdate<TestEntity>(lst, "tester", transContext);
 
-                database.Commit(transContext);
+                transaction.Commit(transContext);
             }
             catch (Exception ex)
             {
-                database.Rollback(transContext);
+                transaction.Rollback(transContext);
             }
 
             Assert.True(result.IsSucceeded());
@@ -107,7 +108,7 @@ namespace HB.Framework.Database.Test
         {
             IList<TestEntity> lst = database.RetrieveAll<TestEntity>(null);
 
-            TransactionContext transactionContext = database.BeginTransaction<TestEntity>();
+            TransactionContext transactionContext = transaction.BeginTransaction<TestEntity>();
 
             DatabaseResult result = DatabaseResult.Failed();
 
@@ -115,11 +116,11 @@ namespace HB.Framework.Database.Test
             {
                 result = database.BatchDelete<TestEntity>(lst, "deleter", transactionContext);
 
-                database.Commit(transactionContext);
+                transaction.Commit(transactionContext);
             }
             catch (Exception ex)
             {
-                database.Rollback(transactionContext);
+                transaction.Rollback(transactionContext);
             }
 
             Assert.True(result.IsSucceeded());
