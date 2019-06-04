@@ -69,6 +69,11 @@ namespace HB.Component.Authorization
 
             IList<SignInToken> resultList = await _db.RetrieveAsync(where, transContext).ConfigureAwait(false);
 
+            if (resultList.Count == 0)
+            {
+                return AuthorizationResult.Succeeded();
+            }
+
             DatabaseResult dbResult = await _db.BatchDeleteAsync(resultList, "default", transContext).ConfigureAwait(false);
 
             if (!dbResult.IsSucceeded())

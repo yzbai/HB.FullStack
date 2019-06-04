@@ -53,12 +53,12 @@ namespace HB.Component.Authorization
 
         public static AuthorizationResult ArgumentError()
         {
-            return new AuthorizationResult { Status = AuthorizationResultStatus.Succeeded };
+            return new AuthorizationResult { Status = AuthorizationResultStatus.ArgumentError };
         }
 
         public static AuthorizationResult Succeeded()
         {
-            return new AuthorizationResult { Status = AuthorizationResultStatus.ArgumentError };
+            return new AuthorizationResult { Status = AuthorizationResultStatus.Succeeded };
         }
 
         public static AuthorizationResult Throwed()
