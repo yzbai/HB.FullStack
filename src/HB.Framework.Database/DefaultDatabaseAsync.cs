@@ -833,7 +833,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
+                _logger.Error_BatchDelete_Thrown(ex, lastUser);
                 return DatabaseResult.Fail(ex);
             }
             finally

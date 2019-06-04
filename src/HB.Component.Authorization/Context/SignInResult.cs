@@ -9,6 +9,7 @@ namespace HB.Component.Authorization.Abstractions
 {
     public enum SignInResultStatus
     {
+        Success,
         LogoffOtherClientFailed,
         NewUserCreateFailed,
         NewUserCreateFailedMobileAlreadyTaken,
@@ -52,7 +53,7 @@ namespace HB.Component.Authorization.Abstractions
 
         public bool IsSucceeded()
         {
-            return Status == SignInResultStatus.LogoffOtherClientFailed;
+            return Status == SignInResultStatus.Success;
         }
         public static SignInResult Throwed()
         {
@@ -121,7 +122,7 @@ namespace HB.Component.Authorization.Abstractions
 
         public static SignInResult Succeeded()
         {
-            return new SignInResult { Status = SignInResultStatus.LogoffOtherClientFailed };
+            return new SignInResult { Status = SignInResultStatus.Success };
         }
 
         public static SignInResult LogoffOtherClientFailed()
