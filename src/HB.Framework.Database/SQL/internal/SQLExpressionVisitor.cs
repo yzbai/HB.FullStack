@@ -464,6 +464,8 @@ namespace HB.Framework.Database.SQL
                     }
 
                     statement = string.Format(GlobalSettings.Culture, "{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
+                    context.OrderByStatementBySQLUtilIn = string.Format(GlobalSettings.Culture, " ORDER BY FIELD({0}, {1}) ", quotedColName, sIn.ToString());
+
                     break;
                 case "Desc":
                     statement = string.Format(GlobalSettings.Culture, "{0} DESC", quotedColName);
