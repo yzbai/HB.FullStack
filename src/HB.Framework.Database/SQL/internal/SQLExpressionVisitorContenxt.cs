@@ -18,6 +18,8 @@ namespace HB.Framework.Database.SQL
 
         public bool PrefixFieldWithTableName { get; set; } = true;
 
+        public string OrderByStatementBySQLUtilIn { get; set; }
+
 
         public IDatabaseEngine DatabaesEngine { get; set; }
 

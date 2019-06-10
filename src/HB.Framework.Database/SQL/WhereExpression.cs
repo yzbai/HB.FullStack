@@ -83,9 +83,20 @@ namespace HB.Framework.Database.SQL
                        "" :
                        "\n" + _havingString);
 
-            sql.Append(string.IsNullOrEmpty(_orderByString) ?
-                       "" :
-                       "\n" + _orderByString);
+            if (!_orderByString.IsNullOrEmpty())
+            {
+                sql.AppendLine();
+                sql.Append(_orderByString);
+            }
+            else if (!expressionContext.OrderByStatementBySQLUtilIn.IsNullOrEmpty())
+            {
+                sql.AppendLine();
+                sql.Append(expressionContext.OrderByStatementBySQLUtilIn);
+            }
+
+            //sql.Append(string.IsNullOrEmpty(_orderByString) ?
+            //           "" :
+            //           "\n" + _orderByString);
 
             sql.Append(string.IsNullOrEmpty(_limitString) ?
                         "" :
