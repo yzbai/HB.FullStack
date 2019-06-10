@@ -66,6 +66,7 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand(selectCondition, fromCondition, whereCondition);
+                bindCommandTransaction(transContext, command);
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<TSelect>(reader);
@@ -85,6 +86,8 @@ namespace HB.Framework.Database
 
             return result;
         }
+
+        
 
         public async Task<IList<T>> RetrieveAsync<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext)
             where T : DatabaseEntity, new()
@@ -112,6 +115,8 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<T>(selectCondition, fromCondition, whereCondition);
+                bindCommandTransaction(transContext, command);
+                
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<T>(reader);
@@ -181,6 +186,7 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateCountCommand(fromCondition, whereCondition);
+                bindCommandTransaction(transContext, command);
                 object countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 count = Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
@@ -349,6 +355,7 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition);
+                bindCommandTransaction(transContext, command);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
@@ -449,7 +456,7 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition);
-
+                bindCommandTransaction(transContext, command);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
@@ -536,7 +543,10 @@ namespace HB.Framework.Database
 
             try
             {
-                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateAddCommand(item, "default"), true).ConfigureAwait(false);
+                IDbCommand dbCommand = _sqlBuilder.CreateAddCommand(item, "default");
+                bindCommandTransaction(transContext, dbCommand);
+
+                reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, dbCommand, true).ConfigureAwait(false);
 
                 _modelMapper.ToObject(reader, item);
 
@@ -579,7 +589,10 @@ namespace HB.Framework.Database
 
             try
             {
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.GetDeleteCommand(condition, "default")).ConfigureAwait(false);
+                IDbCommand dbCommand = _sqlBuilder.GetDeleteCommand(condition, "default");
+                bindCommandTransaction(transContext, dbCommand);
+
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, dbCommand).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -629,7 +642,9 @@ namespace HB.Framework.Database
 
             try
             {
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, _sqlBuilder.CreateUpdateCommand(condition, item, "default")).ConfigureAwait(false);
+                IDbCommand dbCommand = _sqlBuilder.CreateUpdateCommand(condition, item, "default");
+                bindCommandTransaction(transContext, dbCommand);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, dbCommand).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -679,10 +694,12 @@ namespace HB.Framework.Database
             {
                 DatabaseResult result = DatabaseResult.Succeeded();
 
+                IDbCommand dbCommand = _sqlBuilder.CreateBatchAddStatement(items, lastUser);
+                bindCommandTransaction(transContext, dbCommand);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext.Transaction,
                     entityDef.DatabaseName,
-                    _sqlBuilder.CreateBatchAddStatement(items, lastUser),
+                    dbCommand,
                     true);
 
                 while (reader.Read())
@@ -744,10 +761,12 @@ namespace HB.Framework.Database
 
             try
             {
+                IDbCommand dbCommand = _sqlBuilder.CreateBatchUpdateStatement(items, lastUser);
+                bindCommandTransaction(transContext, dbCommand);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext.Transaction,
                     entityDef.DatabaseName,
-                    _sqlBuilder.CreateBatchUpdateStatement(items, lastUser),
+                    dbCommand,
                     true);
 
                 int count = 0;
@@ -806,10 +825,12 @@ namespace HB.Framework.Database
 
             try
             {
+                IDbCommand dbCommand = _sqlBuilder.CreateBatchDeleteStatement(items, lastUser);
+                bindCommandTransaction(transContext, dbCommand);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext.Transaction,
                     entityDef.DatabaseName,
-                    _sqlBuilder.CreateBatchDeleteStatement(items, lastUser),
+                    dbCommand,
                     true);
 
                 int count = 0;
