@@ -29,8 +29,8 @@ namespace HB.Component.Identity
                 return TaskUtil.FromList<Role>();
             }
 
-            FromExpression<Role> from = _database.NewFrom<Role>().RightJoin<UserRole>((r, ru) => r.Guid == ru.RoleGuid);
-            WhereExpression<Role> where = _database.NewWhere<Role>().And<UserRole>(ru => ru.UserGuid == userGuid);
+            FromExpression<Role> from = _database.From<Role>().RightJoin<UserRole>((r, ru) => r.Guid == ru.RoleGuid);
+            WhereExpression<Role> where = _database.Where<Role>().And<UserRole>(ru => ru.UserGuid == userGuid);
 
             return _database.RetrieveAsync<Role>(from, where, transContext);
         }

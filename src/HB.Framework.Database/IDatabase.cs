@@ -118,9 +118,9 @@ namespace HB.Framework.Database
         DatabaseResult BatchDelete<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new();
         DatabaseResult BatchUpdate<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new();
 
-        SelectExpression<T> NewSelect<T>() where T : DatabaseEntity, new();
-        FromExpression<T> NewFrom<T>() where T : DatabaseEntity, new();
-        WhereExpression<T> NewWhere<T>() where T : DatabaseEntity, new();
+        SelectExpression<T> Select<T>() where T : DatabaseEntity, new();
+        FromExpression<T> From<T>() where T : DatabaseEntity, new();
+        WhereExpression<T> Where<T>() where T : DatabaseEntity, new();
 
         //#region 事务
 
