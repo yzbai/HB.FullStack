@@ -63,7 +63,7 @@ namespace HB.Component.Authorization
 
             transContext.RequireNotNull();
 
-            WhereExpression<SignInToken> where = _db.NewWhere<SignInToken>()
+            WhereExpression<SignInToken> where = _db.Where<SignInToken>()
                 .Where(at => at.ClientType != Enum.GetName(typeof(ClientType), ClientType.Web))
                 .And(at => at.UserGuid == userGuid);
 

@@ -52,7 +52,7 @@ namespace HB.Framework.Database
 
             if (whereCondition == null)
             {
-                whereCondition = NewWhere<TWhere>();
+                whereCondition = Where<TWhere>();
             }
 
             whereCondition.And(t => t.Deleted == false).And<TSelect>(ts=>ts.Deleted == false).And<TFrom>(tf=>tf.Deleted == false);
@@ -101,7 +101,7 @@ namespace HB.Framework.Database
 
 			if (whereCondition == null)
 			{
-				whereCondition = NewWhere<T>();
+				whereCondition = Where<T>();
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -149,7 +149,7 @@ namespace HB.Framework.Database
 
 			if (whereCondition == null)
 			{
-                whereCondition = NewWhere<T>();
+                whereCondition = Where<T>();
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -173,7 +173,7 @@ namespace HB.Framework.Database
 
 			if (whereCondition == null)
 			{
-                whereCondition = NewWhere<T>();
+                whereCondition = Where<T>();
 			}
 
 			whereCondition.And(t => t.Deleted == false);
@@ -285,7 +285,7 @@ namespace HB.Framework.Database
         //public Task<T> RetrieveScalaAsyncr<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext = false) where T : DatabaseEntity, new();
         public Task<T> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext) where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = NewWhere<T>();
+            WhereExpression<T> whereCondition = Where<T>();
             whereCondition.Where(whereExpr);
 
             return ScalarAsync(null, null, whereCondition, transContext);
@@ -294,7 +294,7 @@ namespace HB.Framework.Database
         public Task<IList<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = NewWhere<T>();
+            WhereExpression<T> whereCondition = Where<T>();
             whereCondition.Where(whereExpr);
 
             return RetrieveAsync(null, null, whereCondition, transContext);
@@ -303,7 +303,7 @@ namespace HB.Framework.Database
         public Task<IList<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = NewWhere<T>();
+            WhereExpression<T> whereCondition = Where<T>();
 
             return PageAsync(null, null, whereCondition, pageNumber, perPageCount, transContext);
         }
@@ -311,7 +311,7 @@ namespace HB.Framework.Database
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = NewWhere<T>();
+            WhereExpression<T> whereCondition = Where<T>();
             whereCondition.Where(whereExpr);
 
             return CountAsync(null, null, whereCondition, transContext);
@@ -327,7 +327,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = NewWhere<TSource>();
+                whereCondition = Where<TSource>();
             }
 
             switch (fromCondition.JoinType)
@@ -382,7 +382,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = NewWhere<TSource>();
+                whereCondition = Where<TSource>();
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -426,7 +426,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = NewWhere<TSource>();
+                whereCondition = Where<TSource>();
             }
 
 
@@ -485,7 +485,7 @@ namespace HB.Framework.Database
         {
             if (whereCondition == null)
             {
-                whereCondition = NewWhere<TSource>(); 
+                whereCondition = Where<TSource>(); 
             }
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
@@ -585,7 +585,7 @@ namespace HB.Framework.Database
 
             long id = item.Id;
             long version = item.Version;
-            WhereExpression<T> condition = NewWhere<T>().Where(t => t.Id == id && t.Deleted == false && t.Version == version);
+            WhereExpression<T> condition = Where<T>().Where(t => t.Id == id && t.Deleted == false && t.Version == version);
 
             try
             {
@@ -630,7 +630,7 @@ namespace HB.Framework.Database
                 return DatabaseResult.NotWriteable();
             }
 
-            WhereExpression<T> condition = NewWhere<T>();
+            WhereExpression<T> condition = Where<T>();
 
             long id = item.Id;
             long version = item.Version;
