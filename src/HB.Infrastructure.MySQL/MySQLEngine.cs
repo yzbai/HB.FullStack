@@ -185,16 +185,6 @@ namespace HB.Infrastructure.MySQL
             return command;
         }
 
-
-
-        public IDbTransaction CreateTransaction(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
-            conn.Open();
-
-            return conn.BeginTransaction(isolationLevel);
-        }
-
         #endregion
 
         #region 方言
@@ -238,6 +228,28 @@ namespace HB.Infrastructure.MySQL
         public bool IsValueNeedQuoted(Type type)
         {
             return MySQLUtility.IsValueNeedQuoted(type);
+        }
+
+        #endregion
+
+        #region 事务
+
+        public IDbTransaction BeginTransaction(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
+            conn.Open();
+
+            return conn.BeginTransaction(isolationLevel);
+        }
+
+        public void Commit(IDbTransaction transaction)
+        {
+            transaction.Commit();
+        }
+
+        public void Rollback(IDbTransaction transaction)
+        {
+            transaction.Rollback();
         }
 
         #endregion

@@ -1,5 +1,4 @@
-﻿using HB.Framework.Database.Engine;
-using HB.Framework.Database.Entity;
+﻿using HB.Framework.Database.Entity;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,20 +9,11 @@ namespace HB.Framework.Database.Transaction
 {
     internal partial class Transaction : ITransaction
     {
-        private IDatabaseEntityDefFactory entityDefFactory;
-        private IDatabaseEngine databaseEngine;
-
-        public Transaction(IDatabaseEntityDefFactory entityDefFactory, IDatabaseEngine databaseEngine)
-        {
-            this.entityDefFactory = entityDefFactory;
-            this.databaseEngine = databaseEngine;
-        }
-
-        public TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
+        public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
         {
             DatabaseEntityDef entityDef = entityDefFactory.GetDef<T>();
 
-            IDbTransaction dbTransaction = databaseEngine.BeginTransaction(entityDef.DatabaseName, isolationLevel);
+            IDbTransaction dbTransaction = await databaseEngine.BeginTransactionAsync(entityDef.DatabaseName, isolationLevel).ConfigureAwait(false);
 
             return new TransactionContext() {
                 Transaction = dbTransaction,
@@ -34,7 +24,7 @@ namespace HB.Framework.Database.Transaction
         /// <summary>
         /// 提交事务
         /// </summary>
-        public void Commit(TransactionContext context)
+        public async Task CommitAsync(TransactionContext context)
         {
             if (context == null || context.Transaction == null)
             {
@@ -49,8 +39,10 @@ namespace HB.Framework.Database.Transaction
             try
             {
                 IDbConnection conn = context.Transaction.Connection;
-                databaseEngine.Commit(context.Transaction);
+
+                await databaseEngine.CommitAsync(context.Transaction).ConfigureAwait(false);
                 //context.Transaction.Commit();
+
                 context.Transaction.Dispose();
 
                 if (conn != null && conn.State != ConnectionState.Closed)
@@ -70,7 +62,7 @@ namespace HB.Framework.Database.Transaction
         /// <summary>
         /// 回滚事务
         /// </summary>
-        public void Rollback(TransactionContext context)
+        public async Task RollbackAsync(TransactionContext context)
         {
             if (context == null || context.Transaction == null)
             {
@@ -86,9 +78,9 @@ namespace HB.Framework.Database.Transaction
             {
                 IDbConnection conn = context.Transaction.Connection;
 
-                databaseEngine.Rollback(context.Transaction);
-                
+                await databaseEngine.RollbackAsync(context.Transaction).ConfigureAwait(false);
                 //context.Transaction.Rollback();
+
                 context.Transaction.Dispose();
 
                 if (conn != null && conn.State != ConnectionState.Closed)

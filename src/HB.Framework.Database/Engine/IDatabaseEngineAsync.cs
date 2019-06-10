@@ -29,7 +29,6 @@ namespace HB.Framework.Database.Engine
 
         #endregion
 
-
         #region Command执行功能
 
         Task<int> ExecuteCommandNonQueryAsync(IDbTransaction trans, string dbName, IDbCommand dbCommand);
@@ -42,6 +41,22 @@ namespace HB.Framework.Database.Engine
         Task<object> ExecuteCommandScalarAsync(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster );
 
         #endregion
+
+        #region 事务功能
+
+        /// <summary>
+        /// 创建 事务
+        /// </summary>
+        /// <param name="isolationLevel"></param>
+        /// <returns></returns>
+        Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+        Task CommitAsync(IDbTransaction transaction);
+
+        Task RollbackAsync(IDbTransaction transaction);
+
+        #endregion
+
     }
 }
 

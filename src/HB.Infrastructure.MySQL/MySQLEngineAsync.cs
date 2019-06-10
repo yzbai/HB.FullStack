@@ -89,6 +89,32 @@ namespace HB.Infrastructure.MySQL
         }
 
         #endregion
+
+        #region 事务
+
+        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
+            await conn.OpenAsync();
+
+            return await conn.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
+        }
+
+        public Task CommitAsync(IDbTransaction transaction)
+        {
+            MySqlTransaction mySqlTransaction = transaction as MySqlTransaction;
+
+            return mySqlTransaction.CommitAsync();
+        }
+
+        public Task RollbackAsync(IDbTransaction transaction)
+        {
+            MySqlTransaction mySqlTransaction = transaction as MySqlTransaction;
+
+            return mySqlTransaction.RollbackAsync();
+        }
+
+        #endregion
     }
 }
 

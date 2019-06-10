@@ -64,12 +64,19 @@ namespace HB.Framework.Database.Engine
         /// <returns></returns>
         IDbCommand CreateEmptyCommand();
 
+        #endregion
+
+        #region 事务功能
+
         /// <summary>
         /// 创建 事务
         /// </summary>
         /// <param name="isolationLevel"></param>
         /// <returns></returns>
-        IDbTransaction CreateTransaction(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        IDbTransaction BeginTransaction(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+        void Commit(IDbTransaction transaction);
+        void Rollback(IDbTransaction transaction);
 
         #endregion
 
@@ -130,7 +137,8 @@ namespace HB.Framework.Database.Engine
         /// <param name="type"></param>
         /// <returns></returns>
         bool IsValueNeedQuoted(Type type);
-        
+
+
 
         #endregion
     }
