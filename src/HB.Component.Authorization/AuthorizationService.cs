@@ -48,24 +48,24 @@ namespace HB.Component.Authorization
 
         public async Task<AuthorizationResult> SignOutAsync(string signInTokenGuid)
         {
-            TransactionContext transactionContext = transaction.BeginTransaction<SignInToken>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
                 AuthorizationResult result = await _signInTokenBiz.DeleteAsync(signInTokenGuid, transactionContext).ConfigureAwait(false);
 
                 if (!result.IsSucceeded())
                 {
-                    transaction.Rollback(transactionContext);
+                    await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                     return result;
                 }
 
-                transaction.Commit(transactionContext);
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
                 return result;
             }
             catch (Exception ex)
             {
-                transaction.Rollback(transactionContext);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 logger.LogCritical(ex, $"SignInTokenGuid:{signInTokenGuid}");
                 return AuthorizationResult.Throwed();
             }
@@ -73,7 +73,7 @@ namespace HB.Component.Authorization
 
         public async Task<SignInResult> SignInAsync(SignInContext context)
         {
-            TransactionContext transactionContext = transaction.BeginTransaction<SignInToken>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -187,7 +187,7 @@ namespace HB.Component.Authorization
 
                     if (!authorizationResult.IsSucceeded())
                     {
-                        transaction.Rollback(transactionContext);
+                        await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                         return SignInResult.LogoffOtherClientFailed();
                     }
                 }
@@ -208,7 +208,7 @@ namespace HB.Component.Authorization
 
                 if (userToken == null)
                 {
-                    transaction.Rollback(transactionContext);
+                    await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                     return SignInResult.AuthtokenCreatedFailed();
                 }
 
@@ -221,7 +221,7 @@ namespace HB.Component.Authorization
                 result.NewUserCreated = newUserCreated;
                 result.CurrentUser = user;
 
-                transaction.Commit(transactionContext);
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
                 return result;
 
@@ -230,7 +230,7 @@ namespace HB.Component.Authorization
             catch (Exception ex)
             {
                 logger.LogCritical(ex, $"SignInContext:{JsonUtil.ToJson(context)}");
-                transaction.Rollback(transactionContext);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 return SignInResult.Throwed();
             }
         }
@@ -278,7 +278,7 @@ namespace HB.Component.Authorization
 
             User user;
             SignInToken signInToken;
-            TransactionContext transactionContext = transaction.BeginTransaction<SignInToken>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -292,7 +292,7 @@ namespace HB.Component.Authorization
 
                 if (signInToken == null || signInToken.Blacked)
                 {
-                    transaction.Rollback(transactionContext);
+                    await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                     logger.LogWarning("Refresh token error. signInToken not saved in db. Context : {0}", JsonUtil.ToJson(context));
                     return RefreshResult.NoTokenInStore();
                 }
@@ -305,7 +305,7 @@ namespace HB.Component.Authorization
 
                 if (user == null)
                 {
-                    transaction.Rollback(transactionContext);
+                    await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                     await BlackSignInTokenAsync(signInToken).ConfigureAwait(false);
 
@@ -324,7 +324,7 @@ namespace HB.Component.Authorization
 
                 if (!authorizationServerResult.IsSucceeded())
                 {
-                    transaction.Rollback(transactionContext);
+                    await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                     logger.LogError("Refresh token error. Update SignIn Error. Context : {0}", JsonUtil.ToJson(context));
                     return RefreshResult.UpdateSignInTokenError();
@@ -332,12 +332,12 @@ namespace HB.Component.Authorization
 
                 #endregion
 
-                transaction.Commit(transactionContext);
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
             }
             catch (Exception ex)
             {
-                transaction.Rollback(transactionContext);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 logger.LogCritical(ex, $"RefreshContext:{JsonUtil.ToJson(context)}");
 
                 return RefreshResult.Throwed();
@@ -446,22 +446,22 @@ namespace HB.Component.Authorization
         private async Task BlackSignInTokenAsync(SignInToken signInToken)
         {
             //TODO: 详细记录Black SiginInToken 的历史纪录
-            TransactionContext transactionContext = transaction.BeginTransaction<SignInToken>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
                 AuthorizationResult result = await _signInTokenBiz.DeleteAsync(signInToken.Guid, transactionContext).ConfigureAwait(false);
 
                 if (!result.IsSucceeded())
                 {
-                    transaction.Rollback(transactionContext);
+                    await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                     logger.LogCritical($"SignInToken delete failure. Identifier:{signInToken.Guid}");
                 }
 
-                transaction.Commit(transactionContext);
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                transaction.Rollback(transactionContext);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 logger.LogCritical(ex, $"SignInToken : {JsonUtil.ToJson(signInToken)}");
             }
         }
