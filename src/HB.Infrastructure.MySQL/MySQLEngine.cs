@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using MySqlConnector.Logging;
 
 namespace HB.Infrastructure.MySQL
 {
@@ -20,8 +22,10 @@ namespace HB.Infrastructure.MySQL
 
         private MySQLEngine() { }
 
-        public MySQLEngine(IOptions<MySQLEngineOptions> optionsAccessor) : this()
+        public MySQLEngine(ILoggerFactory loggerFactory, IOptions<MySQLEngineOptions> optionsAccessor) : this()
         {
+            MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+
             _options = optionsAccessor.Value;
 
             SetConnectionStrings();
