@@ -122,13 +122,13 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetAdminUsers()
         {
-            SelectExpression<User> select = _db.NewSelect<User>().Select(u => u.UserName).Select(u => u.Mobile);
+            SelectExpression<User> select = _db.Select<User>().Select(u => u.UserName).Select(u => u.Mobile);
 
-            FromExpression<UserRole> from = _db.NewFrom<UserRole>()
+            FromExpression<UserRole> from = _db.From<UserRole>()
                                           .LeftJoin<Role>((ur, r) => ur.RoleGuid == r.Guid)
                                           .LeftJoin<User>((ur, u) => ur.UserGuid == u.Guid);
 
-            WhereExpression<UserRole> where = _db.NewWhere<UserRole>().And<Role>(r => r.Name == "Admin");
+            WhereExpression<UserRole> where = _db.Where<UserRole>().And<Role>(r => r.Name == "Admin");
 
             IList<User> resultList = _db.RetrieveAsync(select, from, where, null).Result;
 
@@ -154,7 +154,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetWhoHasClaims()
         {
-            FromExpression<UserClaim> from = _db.NewFrom<UserClaim>().LeftJoin<User>((uc, u) => uc.UserGuid == u.Guid);
+            FromExpression<UserClaim> from = _db.From<UserClaim>().LeftJoin<User>((uc, u) => uc.UserGuid == u.Guid);
 
 
             var resultList = _db.RetrieveAsync<UserClaim, User>(from, null, null).Result;
@@ -300,7 +300,7 @@ namespace HB.Component.Identity.Test
         [Fact]
         public void GetWhoHasRoles()
         {
-            FromExpression<UserRole> from = _db.NewFrom<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleGuid == r.Guid).LeftJoin<User>((ur, u) => ur.UserGuid == u.Guid);
+            FromExpression<UserRole> from = _db.From<UserRole>().LeftJoin<Role>((ur, r) => ur.RoleGuid == r.Guid).LeftJoin<User>((ur, u) => ur.UserGuid == u.Guid);
 
             var resultList = _db.RetrieveAsync<UserRole, User, Role>(from, null, null).Result;
 
