@@ -56,7 +56,6 @@ namespace HB.Framework.Database.Engine
         Task RollbackAsync(IDbTransaction transaction);
 
         #endregion
-
     }
 }
 
