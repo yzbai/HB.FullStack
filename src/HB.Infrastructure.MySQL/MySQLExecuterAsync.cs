@@ -8,6 +8,43 @@ namespace HB.Infrastructure.MySQL
 {
     internal partial class MySQLExecuter
     {
+        #region Privates
+
+        private static async Task PrepareCommandAsync(MySqlCommand command, MySqlConnection connection, MySqlTransaction transaction,
+            CommandType commandType, string commandText, IEnumerable<IDataParameter> commandParameters)
+        {
+            //if the provided connection is not open, we will open it
+            if (connection.State != ConnectionState.Open)
+            {
+                await connection.OpenAsync().ConfigureAwait(false);
+            }
+
+            //associate the connection with the command
+            command.Connection = connection;
+
+            //if we were provided a transaction, assign it.
+            if (transaction != null)
+            {
+                command.Transaction = transaction;
+            }
+
+            //set the command type
+            command.CommandType = commandType;
+
+            //attach the command parameters if they are provided
+            if (commandParameters != null)
+            {
+                AttachParameters(command, commandParameters);
+            }
+
+            //set the command text (stored procedure name or SQL statement)
+            command.CommandText = commandText;
+
+            return;
+        }
+
+        #endregion
+
         #region Command Reader
 
         public static Task<IDataReader> ExecuteCommandReaderAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
@@ -29,7 +66,7 @@ namespace HB.Infrastructure.MySQL
             {
                 if (connection.State != ConnectionState.Open)
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
                 }
 
                 command.Connection = connection;
@@ -84,7 +121,7 @@ namespace HB.Infrastructure.MySQL
             {
                 if (connection.State != ConnectionState.Open)
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
                 }
 
                 command.Connection = connection;
@@ -130,7 +167,7 @@ namespace HB.Infrastructure.MySQL
             {
                 if (conn.State != ConnectionState.Open)
                 {
-                    conn.Open();
+                    await conn.OpenAsync().ConfigureAwait(false);
                 }
 
                 command.Connection = conn;
@@ -172,7 +209,7 @@ namespace HB.Infrastructure.MySQL
             int rtInt = -1;
             MySqlCommand command = new MySqlCommand();
 
-            PrepareCommand(command, conn, trans, CommandType.StoredProcedure, spName, parameters);
+            await PrepareCommandAsync(command, conn, trans, CommandType.StoredProcedure, spName, parameters).ConfigureAwait(false);
 
             try
             {
@@ -215,7 +252,7 @@ namespace HB.Infrastructure.MySQL
             object rtObj = null;
             MySqlCommand command = new MySqlCommand();
 
-            PrepareCommand(command, conn, trans, CommandType.StoredProcedure, spName, parameters);
+            await PrepareCommandAsync(command, conn, trans, CommandType.StoredProcedure, spName, parameters).ConfigureAwait(false);
 
             try
             {
@@ -241,12 +278,12 @@ namespace HB.Infrastructure.MySQL
 
         #region SP Reader
 
-        public static Task<IDataReader> ExecuteSPReaderAsync(string connectString, string spName, IList<IDataParameter> dbParameters)
+        public static async Task<IDataReader> ExecuteSPReaderAsync(string connectString, string spName, IList<IDataParameter> dbParameters)
         {
             MySqlConnection conn = new MySqlConnection(connectString);
-            conn.Open();
+            await conn.OpenAsync().ConfigureAwait(false);
 
-            return ExecuteSPReaderAsync(conn, null, true, spName, dbParameters);
+            return await ExecuteSPReaderAsync(conn, null, true, spName, dbParameters).ConfigureAwait(false);
         }
 
         public static Task<IDataReader> ExecuteSPReaderAsync(MySqlTransaction mySqlTransaction, string spName, IList<IDataParameter> dbParameters)
@@ -258,7 +295,7 @@ namespace HB.Infrastructure.MySQL
         {
             MySqlCommand command = new MySqlCommand();
 
-            PrepareCommand(command, connection, mySqlTransaction, CommandType.StoredProcedure, spName, dbParameters);
+            await PrepareCommandAsync(command, connection, mySqlTransaction, CommandType.StoredProcedure, spName, dbParameters).ConfigureAwait(false);
             MySqlDataReader reader = null;
 
             try
