@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class MySQLServiceCollectionExtensions
+    public static class ServiceRegister
     {
         public static IServiceCollection AddMySQLEngine(this IServiceCollection services, IConfiguration configuration)
         {
