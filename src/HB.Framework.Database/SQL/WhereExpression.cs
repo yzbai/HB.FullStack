@@ -314,6 +314,25 @@ namespace HB.Framework.Database.SQL
             return this;
         }
 
+        public WhereExpression<T> OrderBy<TTarget, TKey>(Expression<Func<TTarget, TKey>> keySelector)
+        {
+            string oldSeparator = expressionContext.Seperator;
+            expressionContext.Seperator = string.Empty;
+
+            _orderByProperties.Clear();
+
+            string property = keySelector.ToStatement(expressionContext);
+
+            expressionContext.Seperator = oldSeparator;
+
+            _orderByProperties.Add(property + " ASC");
+
+            UpdateOrderByString();
+
+            return this;
+        }
+
+
         public WhereExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             string oldSeparator = expressionContext.Seperator;
