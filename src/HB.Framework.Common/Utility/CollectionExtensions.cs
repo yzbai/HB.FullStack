@@ -31,6 +31,29 @@ namespace System.Collections.Generic
             return ret;
         }
 
+        public static IDictionary<TKey, int> CloningWithValues<TKey>(this IDictionary<TKey, int> original)
+        {
+            if (original == null)
+            {
+                return null;
+            }
+
+            IDictionary<TKey, int> ret = new Dictionary<TKey, int>();
+
+            foreach (KeyValuePair<TKey, int> entry in original)
+            {
+                try
+                {
+                    ret.Add(entry.Key, entry.Value);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            return ret;
+        }
+
         public static IDictionary<TKey, TNewValue> ConvertValue<TKey, TValue, TNewValue>(this IDictionary<TKey, TValue> original, Func<TValue, TNewValue> converter)
         {
             if (original == null)
