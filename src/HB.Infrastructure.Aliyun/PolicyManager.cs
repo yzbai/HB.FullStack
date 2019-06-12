@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Aliyun
                     (exception, timeSpan, retryCount, context) =>
                     {
                         ClientException cex = (ClientException)exception;
-                        logger.LogError(exception, "Code:{0}, Msg:{1}, Type:{2}, Msg:{3}", cex.ErrorCode, cex.ErrorMessage, cex.ErrorType.GetDescription(), cex.Message);
+                        logger.LogError(exception, "Code:{0}, Msg:{1}, Type:{2}, Msg:{3}", cex.ErrorCode, cex.ErrorMessage, cex.ErrorType.ToString(), cex.Message);
                     });
         }
     }

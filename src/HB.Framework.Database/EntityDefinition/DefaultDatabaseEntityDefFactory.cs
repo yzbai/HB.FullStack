@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.Extensions.Options;
 using HB.Framework.Database.Engine;
 using System.Linq;
+using HB.Framework.Common.Entity;
 
 namespace HB.Framework.Database.Entity
 {
@@ -132,7 +133,7 @@ namespace HB.Framework.Database.Entity
                 propertyDef.IsUnique = propertyAttr.Unique;
                 propertyDef.DbLength = propertyAttr.Length > 0 ? (int?)propertyAttr.Length : null;
                 propertyDef.IsLengthFixed = propertyAttr.FixedLength;
-                propertyDef.DbDefaultValue = string.IsNullOrEmpty(propertyAttr.DefaultValue) ? null : propertyAttr.DefaultValue;
+                propertyDef.DbDefaultValue = ValueConverter.TypeValueToDbValue(propertyAttr.DefaultValue);
                 propertyDef.DbDescription = propertyAttr.Description;
 
                 if (propertyAttr.ConverterType != null)

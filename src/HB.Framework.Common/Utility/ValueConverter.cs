@@ -64,15 +64,15 @@ namespace HB.Framework.Common.Entity
         /// <param name="dbValue">Db value.</param>
         public static object DbValueToTypeValue(Type type, object dbValue)
         {
+            if (dbValue.GetType() == typeof(DBNull))
+            {
+                return type.IsValueType ? Activator.CreateInstance(type) : null;
+            }
+
             if (type.IsEnum)
             {
                 return Enum.Parse(type, dbValue.ToString(), true);
                 //return Convert.ToInt32(value, GlobalSettings.Culture);
-            }
-
-            if (dbValue.GetType() == typeof(DBNull))
-            {
-                return type.IsValueType ? Activator.CreateInstance(type) : null;
             }
 
             if (type.IsAssignableFrom(typeof(IList<string>)))
@@ -104,7 +104,7 @@ namespace HB.Framework.Common.Entity
 
                 if (type.IsEnum)
                 {
-                    valueStr = value.ToString();
+                    valueStr = ((Enum)value).ToString();
                     //valueStr = ((Int32)value).ToString(GlobalSettings.Culture);
                 }
                 else if (typeof(IList<string>).IsAssignableFrom(type))

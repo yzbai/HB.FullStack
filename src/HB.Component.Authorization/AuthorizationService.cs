@@ -199,7 +199,7 @@ namespace HB.Component.Authorization
                 SignInToken userToken = await _signInTokenBiz.CreateAsync(
                     user.Guid,
                     context.ClientId,
-                    clientType.GetDescription(),
+                    clientType.ToString(),
                     context.ClientVersion,
                     context.ClientAddress,
                     context.ClientIp,
