@@ -48,16 +48,25 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < len; ++i)
                 {
                     DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i]);
+                    object fieldValue = reader[i];
+
+                    if (property.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    {
+                        item = null;
+                        break;
+                    }
 
                     object value = property.TypeConverter == null ?
-                        ValueConverter.DbValueToTypeValue(property.PropertyType, reader[i]) :
-                        property.TypeConverter.DbValueToTypeValue(reader[i]);
+                        ValueConverter.DbValueToTypeValue(property.PropertyType, fieldValue) :
+                        property.TypeConverter.DbValueToTypeValue(fieldValue);
 
                     property.SetValue(item, value);
                 }
 
-                lst.Add(item);
-
+                if (item != null && !item.Deleted)
+                {
+                    lst.Add(item);
+                }
             }
 
             return lst;
@@ -102,12 +111,19 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < definition1.FieldCount; ++i, ++j)
                 {
                     DatabaseEntityPropertyDef pDef = definition1.GetProperty(propertyNames1[i]);
+                    object fieldValue = reader[j];
+
+                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    {
+                        t1 = null;
+                        break;
+                    }
 
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
-                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, fieldValue) :
+                            pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         pDef.SetValue(t1, value);
                     }
@@ -116,29 +132,35 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < definition2.FieldCount; ++i, ++j)
                 {
                     DatabaseEntityPropertyDef pDef = definition2.GetProperty(propertyNames2[i]);
+                    object fieldValue = reader[j];
+
+                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    {
+                        t2 = null;
+                        break;
+                    }
 
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
-                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, fieldValue) :
+                            pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         pDef.SetValue(t2, value);
                     }
                 }
 
-                //TODO: 解决Deleted=true的情况
-                if (t1.Deleted)
+                if (t1 != null && t1.Deleted)
                 {
-                    t1 = new TSource();
+                    t1 = null;
                 }
-                if (t2.Deleted)
+                if (t2 != null && t2.Deleted)
                 {
-                    t2 = new TTarget();
+                    t2 = null;
                 }
 
                 //删除全为空
-                if (!t1.Deleted || !t2.Deleted)
+                if (t1 != null || t2 != null)
                 {
                     lst.Add(new Tuple<TSource, TTarget>(t1, t2));
                 }
@@ -195,12 +217,19 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < definition1.FieldCount; ++i, ++j)
                 {
                     DatabaseEntityPropertyDef pDef = definition1.GetProperty(propertyNames1[i]);
+                    object fieldValue = reader[j];
+
+                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    {
+                        t1 = null;
+                        break;
+                    }
 
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
-                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, fieldValue) :
+                            pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         pDef.SetValue(t1, value);
                     }
@@ -209,12 +238,19 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < definition2.FieldCount; ++i, ++j)
                 {
                     DatabaseEntityPropertyDef pDef = definition2.GetProperty(propertyNames2[i]);
+                    object fieldValue = reader[j];
+
+                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    {
+                        t2 = null;
+                        break;
+                    }
 
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
-                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, fieldValue) :
+                            pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         pDef.SetValue(t2, value);
                     }
@@ -223,33 +259,40 @@ namespace HB.Framework.Database.Entity
                 for (int i = 0; i < definition3.FieldCount; ++i, ++j)
                 {
                     DatabaseEntityPropertyDef pDef = definition3.GetProperty(propertyNames3[i]);
+                    object fieldValue = reader[j];
+
+                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    {
+                        t3 = null;
+                        break;
+                    }
 
                     if (pDef != null)
                     {
                         object value = pDef.TypeConverter == null ?
-                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, reader[j]) :
-                            pDef.TypeConverter.DbValueToTypeValue(reader[j]);
+                            ValueConverter.DbValueToTypeValue(pDef.PropertyType, fieldValue) :
+                            pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         pDef.SetValue(t3, value);
                     }
                 }
 
-                if (t1.Deleted)
+                if (t1 != null && t1.Deleted)
                 {
-                    t1 = new TSource();
+                    t1 = null;
                 }
 
-                if (t2.Deleted)
+                if (t2 != null && t2.Deleted)
                 {
-                    t2 = new TTarget2();
+                    t2 = null;
                 }
 
-                if (t3.Deleted)
+                if (t3 != null && t3.Deleted)
                 {
-                    t3 = new TTarget3();
+                    t3 = null;
                 }
 
-                if (!t1.Deleted || !t2.Deleted || !t3.Deleted)
+                if (t1 != null || t2 != null || t3 != null)
                 {
                     lst.Add(new Tuple<TSource, TTarget2, TTarget3>(t1, t2, t3));
                 }
