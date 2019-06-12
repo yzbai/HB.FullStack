@@ -17,7 +17,7 @@ namespace HB.Framework.Database.Entity
         /// <summary>
         /// 字段默认值，Null表示没有没有默认值
         /// </summary>
-        public string DefaultValue { get; set; }
+        public object DefaultValue { get; set; }
         /// <summary>
         /// 字段描述、备注
         /// </summary>
