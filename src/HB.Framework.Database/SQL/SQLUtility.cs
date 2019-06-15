@@ -17,7 +17,7 @@ namespace HB.Framework.Database.SQL
         /// <param name="value"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static bool In<T>(T value, params object[] list)
+        public static bool In<T>(T value, bool returnByOrder, params object[] list)
         {
             if (value == null)
             {
