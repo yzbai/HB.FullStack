@@ -10,7 +10,7 @@ using System.Reflection;
 namespace HB.Framework.Database.SQL
 {
     internal static class SQLExpressionVisitor
-    {        
+    {
         public static object Visit(Expression exp, SQLExpressionVisitorContenxt context)
         {
             if (exp == null) return string.Empty;
@@ -331,6 +331,7 @@ namespace HB.Framework.Database.SQL
         private static List<object> VisitExpressionList(ReadOnlyCollection<Expression> original, SQLExpressionVisitorContenxt context)
         {
             List<object> list = new List<object>();
+
             for (int i = 0, n = original.Count; i < n; i++)
             {
                 if (original[i].NodeType == ExpressionType.NewArrayInit ||
@@ -428,10 +429,9 @@ namespace HB.Framework.Database.SQL
             switch (m.Method.Name)
             {
                 case "In":
-
-                    var member = Expression.Convert(m.Arguments[1], typeof(object));
+                    UnaryExpression member = Expression.Convert(m.Arguments[2], typeof(object));
                     Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
-                    var getter = lambda.Compile();
+                    Func<object> getter = lambda.Compile();
 
                     object[] inArgs = getter() as object[];
 
@@ -465,8 +465,11 @@ namespace HB.Framework.Database.SQL
 
                     statement = string.Format(GlobalSettings.Culture, "{0} {1} ({2})", quotedColName, m.Method.Name, sIn.ToString());
 
-                    //TODO: only for mysql, others later
-                    context.OrderByStatementBySQLUtilIn = string.Format(GlobalSettings.Culture, " ORDER BY FIELD({0}, {1}) ", quotedColName, sIn.ToString());
+                    if (Convert.ToBoolean(args[0]))
+                    {
+                        //TODO: only for mysql, others later
+                        context.OrderByStatementBySQLUtilIn = string.Format(GlobalSettings.Culture, " ORDER BY FIELD({0}, {1}) ", quotedColName, sIn.ToString());
+                    }
 
                     break;
                 case "Desc":
@@ -642,15 +645,15 @@ namespace HB.Framework.Database.SQL
 
         private static object GetTrueExpression(SQLExpressionVisitorContenxt context)
         {
-            return new PartialSqlString(string.Format(GlobalSettings.Culture, "({0}={1})", 
-                context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true), 
+            return new PartialSqlString(string.Format(GlobalSettings.Culture, "({0}={1})",
+                context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true),
                 context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)));
         }
 
         private static object GetFalseExpression(SQLExpressionVisitorContenxt context)
         {
-            return new PartialSqlString(string.Format(GlobalSettings.Culture, "({0}={1})", 
-                context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true), 
+            return new PartialSqlString(string.Format(GlobalSettings.Culture, "({0}={1})",
+                context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true),
                 context.DatabaesEngine.GetDbValueStatement(false, needQuoted: true)));
         }
 
