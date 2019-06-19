@@ -25,5 +25,7 @@ namespace HB.Infrastructure.Aliyun
         public string AccessKeySecret { get; set; }
 
         public string Endpoint { get; set; }
+
+        public string StsEndpoint { get; set; }
     }
 }

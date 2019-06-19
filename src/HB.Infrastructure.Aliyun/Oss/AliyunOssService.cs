@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
-    public class AliyunOssService : IAliyunOssService
+    internal class AliyunOssService : IAliyunOssService
     {
         private static readonly string READ_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
         private static readonly string WRITE_ROLE_POLICY_TEMPLATE = "{ \"Version\":\"1\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}]}";
@@ -44,6 +44,23 @@ namespace HB.Infrastructure.Aliyun.Oss
             BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
 
             return GetStsRoleCredentialAsync(isRead ? bucketSettings.ReadArn : bucketSettings.WriteArn, roleSessionName, policy, bucketSettings.StsExpireSeconds);
+        }
+
+        public int GetExpireSeconds(string bucket)
+        {
+            BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
+
+            return bucketSettings.StsExpireSeconds;
+        }
+
+        public string GetEndpoint()
+        {
+            return _accessSetting.Endpoint;
+        }
+
+        public string GetRegion()
+        {
+            return _accessSetting.RegionId;
         }
 
         private Task<StsRoleCredential> GetStsRoleCredentialAsync(string roleArn, string roleSessionName, string policy, int expireSeconds = 3600)
@@ -90,25 +107,6 @@ namespace HB.Infrastructure.Aliyun.Oss
         {
             return userGuid.Replace("-", "");
         }
-
-        public int GetExpireSeconds(string bucket)
-        {
-            BucketSettings bucketSettings = _options.GetBucketSettings(bucket);
-
-            return bucketSettings.StsExpireSeconds;
-        }
-
-        public string GetEndpoint()
-        {
-            return _accessSetting.Endpoint;
-        }
-
-        public string GetRegion()
-        {
-            return _accessSetting.RegionId;
-        }
-
-
     }
 }
 
