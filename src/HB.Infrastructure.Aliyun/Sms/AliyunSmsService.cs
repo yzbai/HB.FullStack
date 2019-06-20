@@ -23,7 +23,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             _logger = logger;
             _cache = cache;
 
-            AliyunUtil.AddEndpoint("Dysms", _options.RegionId, _options.Endpoint);
+            AliyunUtil.AddEndpoint(ProductNames.SMS, _options.RegionId, _options.Endpoint);
             _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
         }
 
