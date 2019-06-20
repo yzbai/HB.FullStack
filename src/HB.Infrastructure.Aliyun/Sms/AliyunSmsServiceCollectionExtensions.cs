@@ -1,5 +1,4 @@
 ﻿using System;
-using HB.Component.Resource.Sms;
 using HB.Infrastructure.Aliyun.Sms;
 using Microsoft.Extensions.Configuration;
 
@@ -11,8 +10,8 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.Configure(optionSetup);
-            services.AddSingleton<ISmsCodeBiz, SmsCodeBiz>();
-            services.AddSingleton<ISmsService, AliyunSmsService>();
+
+            services.AddSingleton<IAliyunSmsService, AliyunSmsService>();
 
             return services;
         }
@@ -21,8 +20,8 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.Configure<AliyunSmsOptions>(configuration);
-            services.AddSingleton<ISmsCodeBiz, SmsCodeBiz>();
-            services.AddSingleton<ISmsService, AliyunSmsService>();
+
+            services.AddSingleton<IAliyunSmsService, AliyunSmsService>();
 
             return services;
         }

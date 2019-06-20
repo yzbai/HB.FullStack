@@ -1,12 +1,11 @@
-﻿using HB.Component.Resource.Sms.Entity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HB.Component.Resource.Sms
+namespace HB.Infrastructure.Aliyun.Sms
 {
-    public interface ISmsService
+    public interface IAliyunSmsService
     {
         /// <summary>
         /// 用于验证用户手机
@@ -14,7 +13,7 @@ namespace HB.Component.Resource.Sms
         /// <param name="mobile"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<SendResult> SendValidationCode(string mobile, out string code);
+        Task<SendResult> SendValidationCode(string mobile/*, out string code*/);
 
         bool Validate(string mobile, string code);
 
