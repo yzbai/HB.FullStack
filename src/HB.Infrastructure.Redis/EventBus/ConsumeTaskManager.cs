@@ -186,9 +186,8 @@ namespace HB.Infrastructure.Redis.EventBus
                 //3, 防重检查
 
                 string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
-                string token = string.Empty;
 
-                if (!_duplicateChecker.Lock(AcksSetName, entity.Guid, out token))
+                if (!_duplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
                 {
                     //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
                     continue;  

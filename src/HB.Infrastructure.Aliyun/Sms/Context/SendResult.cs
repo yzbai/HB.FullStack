@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Component.Resource.Sms.Entity
+namespace HB.Infrastructure.Aliyun.Sms
 {
     public class SendResult
     {

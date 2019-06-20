@@ -50,6 +50,7 @@ namespace HB.Framework.Http
                     _appsettingsHash = appsettingsHash;
                     _appsettingsEnvHash = appsettingsEnvHash;
 
+                    _logger.LogInformation(message);
                     _logger.LogInformation("appsettings.json 配置文件变动");
                     _logger.LogInformation("系统即将重启......");
 

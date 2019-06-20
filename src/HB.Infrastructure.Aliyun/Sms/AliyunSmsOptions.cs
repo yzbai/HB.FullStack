@@ -7,17 +7,22 @@ namespace HB.Infrastructure.Aliyun.Sms
 {
     public class AliyunSmsOptions : IOptions<AliyunSmsOptions>
     {
-        public string ProductName { get; set; }
-
         public AliyunSmsOptions Value { get { return this; } }
+
+        public string RegionId { get; set; }
+
+        public string Endpoint { get; set; }
+
+        public string AccessUserName { get; set; }
+
+        public string AccessKeyId { get; set; }
+
+        public string AccessKeySecret { get; set; }
 
         public string SignName { get; set; }
 
         public TemplateIdentityValidation TemplateIdentityValidation { get; set; }
 
-        //public string ParamSmsMobile { get; set; } = "Mobile";
-
-        //public string ParamSmsMobileValue { get; set; } = "MobileCode";
     }
 
     public class TemplateIdentityValidation
