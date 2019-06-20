@@ -18,7 +18,8 @@
     <ProjectReference Include="..\..\..\aliyun-net-sdk-dysmsapi\aliyun-net-sdk-dysmsapi.vs2017.csproj" />
     <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-sts\aliyun-net-sdk-sts.vs2017.csproj" />
     <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-vod\aliyun-net-sdk-vod.vs2017.csproj" />
-    <ProjectReference Include="..\HB.Component.Resource\HB.Component.Resource.csproj" />
+    <ProjectReference Include="..\HB.Framework.Cache\HB.Framework.Cache.csproj" />
+    <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
   </ItemGroup>
 
 </Project>

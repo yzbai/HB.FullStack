@@ -1,18 +1,19 @@
 ﻿using System.Threading.Tasks;
-using HB.Infrastructure.Aliyun.Sts;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
     public interface IAliyunOssService
     {
-        Task<StsRoleCredential> GetDirectoryRoleCredentialAsync(string bucket, string directory, string roleSessionName, bool isRead);
+        Task<AliyunStsToken> GetUserDirectoryTokenAsync(string bucket, string userGuid, bool isRead);
 
-        Task<StsRoleCredential> GetUserRoleCredentialAsync(string bucket, string userGuid, bool isRead);
+        Task<AliyunStsToken> GetDirectoryTokenAsync(string bucket, string directory, string roleSessionName, bool isRead);
 
-        int GetExpireSeconds(string bucket);
+        string GetOssEndpoint(string bucket);
 
-        string GetEndpoint();
+        string GetRegionId(string bucket);
 
-        string GetRegion();
+        string UserBucketName { get; }
+
+        string PublicBucketName { get; }
     }
 }

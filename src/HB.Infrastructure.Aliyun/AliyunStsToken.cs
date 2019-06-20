@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Infrastructure.Aliyun.Sts
+namespace HB.Infrastructure.Aliyun
 {
-    public class StsRoleCredential
+    public class AliyunStsToken
     {
         public string RequestId { get; set; }
 
@@ -14,7 +14,7 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         public string AccessKeySecret { get; set; }
 
-        public string Expiration { get; set; }
+        public string ExpirationAt { get; set; }
 
         public string AssumedRoleId { get; set; }
 
