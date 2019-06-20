@@ -20,11 +20,11 @@ namespace HB.Infrastructure.Aliyun.Vod
         private readonly AliyunVodOptions _options;
         private readonly ILogger _logger;
 
-        public AliyunVodService(IAcsClientManager acsClientManager, IOptions<AliyunVodOptions> options, ILogger<AliyunVodService> logger)
+        public AliyunVodService(IOptions<AliyunVodOptions> options, ILogger<AliyunVodService> logger)
         {
             _options = options.Value;
-            _acsClient = acsClientManager.GetAcsClient(_options.ProductName);
             _logger = logger;
+            _acsClient = AliyunUtil.CreateAcsClient(null, null, null);
         }
 
         public Task<PlayAuth> GetVideoPlayAuth(string vid, long timeout)

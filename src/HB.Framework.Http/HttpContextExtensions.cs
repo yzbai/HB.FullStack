@@ -141,7 +141,7 @@ namespace Microsoft.AspNetCore.Http
                 if (!string.IsNullOrEmpty(rawValues))
                     return (T)Convert.ChangeType(values.ToString(), typeof(T), GlobalSettings.Culture);
             }
-            return default(T);
+            return default;
         }
 
         //TODO: add requset info from cookie, form ,query etc.

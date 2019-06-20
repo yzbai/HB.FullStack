@@ -1,40 +1,35 @@
-﻿using System.Text;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Aliyun.Acs.Core;
-using HB.Framework.Common;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
 using Aliyun.Acs.Dysmsapi.Model.V20170525;
-using HB.Component.Resource.Sms.Entity;
-using System.Globalization;
-using Polly;
-using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Sms.Transform;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
-using HB.Component.Resource.Sms;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsService : ISmsService
+    internal class AliyunSmsService : IAliyunSmsService
     {
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;
-        private readonly ISmsCodeBiz _smsCodeBiz;
         private readonly ILogger _logger;
+        private readonly IDistributedCache _cache;
 
-        public AliyunSmsService(IAcsClientManager acsClientManager, ISmsCodeBiz smsCodeBiz, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger) 
+        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, IDistributedCache cache ) 
         {
             _options = options.Value;
-            _client = acsClientManager.GetAcsClient(_options.ProductName);
             _logger = logger;
-            _smsCodeBiz = smsCodeBiz;
+            _cache = cache;
+
+            AliyunUtil.AddEndpoint("Dysms", _options.RegionId, _options.Endpoint);
+            _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
         }
 
-        public Task<SendResult> SendValidationCode(string mobile, out string smsCode)
+        public Task<SendResult> SendValidationCode(string mobile/*, out string smsCode*/)
         {
-            smsCode = _smsCodeBiz.GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
+            string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
             
             SendSmsRequest request = new SendSmsRequest
             {
@@ -55,14 +50,14 @@ namespace HB.Infrastructure.Aliyun.Sms
                 Task<SendSmsResponse> task = new Task<SendSmsResponse>(() => _client.GetAcsResponse(request));
                 task.Start(TaskScheduler.Default);
 
-                SendSmsResponse result = await task.ConfigureAwait(false);
+                SendSmsResponse response = await task.ConfigureAwait(false);
 
-                if (result.Code == "OK")
+                if (response.Code == "OK")
                 {
-                    _smsCodeBiz.CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
+                    CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
 
-                return SendResultTransformer.Transform(result);
+                return response.ToResult();
             });
         }
 
@@ -73,11 +68,37 @@ namespace HB.Infrastructure.Aliyun.Sms
                 return false;
             }
 
-            string cachedSmsCode = _smsCodeBiz.GetSmsCodeFromCache(mobile);
+            string cachedSmsCode = GetSmsCodeFromCache(mobile);
 
             return string.Equals(code, cachedSmsCode, GlobalSettings.Comparison);
         }
 
-        
+        private void CacheSmsCode(string mobile, string cachedSmsCode, int expireMinutes)
+        {
+            _cache.SetString(
+                        GetCachedKey(mobile),
+                        cachedSmsCode,
+                        new DistributedCacheEntryOptions() {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
+                        });
+        }
+
+        private string GetSmsCodeFromCache(string mobile)
+        {
+            return _cache.GetString(GetCachedKey(mobile));
+        }
+
+        private string GenerateNewSmsCode(int codeLength)
+        {
+            return SecurityUtil.CreateRandomNumbericString(codeLength);
+        }
+
+        private static string GetCachedKey(string mobile)
+        {
+            return mobile + "_vlc";
+        }
+
+
+
     }
 }
