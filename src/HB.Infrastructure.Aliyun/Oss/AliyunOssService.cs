@@ -36,8 +36,8 @@ namespace HB.Infrastructure.Aliyun.Oss
 
             foreach (BucketSettings settings in _options.Buckets)
             {
-                AliyunUtil.AddEndpoint("oss", settings.RegionId, settings.Endpoint);
-                AliyunUtil.AddEndpoint("sts", settings.RegionId, settings.Sts.Endpoint);
+                AliyunUtil.AddEndpoint(ProductNames.OSS, settings.RegionId, settings.Endpoint);
+                AliyunUtil.AddEndpoint(ProductNames.STS, settings.RegionId, settings.Sts.Endpoint);
 
                 _acsClients.Add(settings.BucketName, AliyunUtil.CreateAcsClient(settings.RegionId, settings.AccessKeyId, settings.AccessKeySecret));
             }
