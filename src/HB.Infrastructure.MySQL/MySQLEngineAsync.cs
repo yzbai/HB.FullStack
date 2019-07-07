@@ -117,11 +117,6 @@ namespace HB.Infrastructure.MySQL
 
 
         #endregion
-
-        public Task<bool> IsTableExistAsync(string tableName)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 

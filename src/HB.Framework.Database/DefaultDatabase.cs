@@ -49,39 +49,71 @@ namespace HB.Framework.Database
 
         public void Initialize(IList<Migration> migrations = null)
         {
+            AutoCreateTablesIfBrandNew();
+
+            Migarate(migrations);
+        }
+
+        private void AutoCreateTablesIfBrandNew()
+        {
+            if (_databaseSettings.AutomaticCreateTable)
+            {
+                foreach (SystemInfo systemInfo in _databaseEngine.GetSystemInfos())
+                {
+                    //表明是新数据库
+                    if (systemInfo.Version == 0)
+                    {
+                        if (_databaseSettings.Version != 1)
+                        {
+                            throw new DatabaseException($"Database:{systemInfo.DatabaseName} does not exists, database Version must be 1");
+                        }
+
+                        CreateTablesByDatabase(systemInfo.DatabaseName);
+
+                        _databaseEngine.UpdateSystemVersion(systemInfo.DatabaseName, 1);
+                    }
+                }
+
+            }
+        }
+
+        private int CreateTable(DatabaseEntityDef def, TransactionContext transContext)
+        {
+            string sql = GetTableCreateStatement(def.EntityType, false);
+
+            return _databaseEngine.ExecuteSqlNonQuery(transContext.Transaction, def.DatabaseName, sql);
+        }
+
+        private void CreateTablesByDatabase(string databaseName)
+        {
+            IEnumerable<DatabaseEntityDef> defs = _entityDefFactory.GetAllDefsByDatabase(databaseName);
+
+            TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
+
+            try
+            {
+                foreach (DatabaseEntityDef def in defs)
+                {
+                    CreateTable(def, tContext);
+                }
+
+                Commit(tContext);
+            }
+            catch (Exception ex)
+            {
+                Rollback(tContext);
+                throw ex;
+            }
+        }
+
+        private void Migarate(IList<Migration> migrations)
+        {
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
             {
                 throw new DatabaseException($"oldVersion should always lower than newVersions in Database Migrations");
             }
 
-            #region 判断是否第一次初始化
-
-            IEnumerable<SystemInfo> systemInfos = _databaseEngine.GetSystemInfos();
-
-            foreach (SystemInfo systemInfo in systemInfos)
-            {
-                if (systemInfo.Version == 0)
-                {
-                    if (_databaseSettings.Version != 1)
-                    {
-                        throw new DatabaseException($"Database:{systemInfo.DatabaseName} does not exists, database Version must be 1");
-                    }
-
-                    //创建表
-                    CreateTablesByDatabase(systemInfo.DatabaseName);
-
-                    _databaseEngine.UpdateSystemVersion(1);
-
-                }
-            }
-
-            #endregion
-
-            #region Migrations
-
-            systemInfos = _databaseEngine.GetSystemInfos();
-
-            foreach (SystemInfo sys in systemInfos)
+            foreach (SystemInfo sys in _databaseEngine.GetSystemInfos())
             {
                 if (sys.Version < _databaseSettings.Version)
                 {
@@ -104,16 +136,14 @@ namespace HB.Framework.Database
                         throw new DatabaseException($"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
                     }
 
-                    perfomeMigration(sys.DatabaseName, curOrderedMigrations);
+                    PerfomeMigration(sys.DatabaseName, curOrderedMigrations);
 
-                    _databaseEngine.UpdateSystemVersion(_databaseSettings.Version);
+                    _databaseEngine.UpdateSystemVersion(sys.DatabaseName, _databaseSettings.Version);
                 }
             }
-
-            #endregion
         }
 
-        private void perfomeMigration(string databaseName, IOrderedEnumerable<Migration> curOrderedMigrations)
+        private void PerfomeMigration(string databaseName, IOrderedEnumerable<Migration> curOrderedMigrations)
         {
             TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
 
@@ -121,18 +151,12 @@ namespace HB.Framework.Database
             {
                 foreach (Migration migration in curOrderedMigrations)
                 {
-                    bool success = _databaseEngine.ExecuteSQL(databaseName, migration.SqlStatement, tContext);
-
-                    if (!success)
-                    {
-                        Rollback(tContext);
-                        throw new DatabaseException($"Database {databaseName} Migration From {migration.OldVersion} To {migration.NewVersion} Failed. SQL : {migration.SqlStatement}");
-                    }
+                    _databaseEngine.ExecuteSqlNonQuery(tContext.Transaction, databaseName, migration.SqlStatement);
                 }
 
                 Commit(tContext);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Rollback(tContext);
                 throw ex;
@@ -162,13 +186,13 @@ namespace HB.Framework.Database
 
         #region Private methods
 
-        private static void bindCommandTransaction(TransactionContext transContext, IDbCommand command)
-        {
-            if (transContext != null)
-            {
-                command.Transaction = transContext.Transaction;
-            }
-        }
+        //private static void bindCommandTransaction(TransactionContext transContext, IDbCommand command)
+        //{
+        //    if (transContext != null)
+        //    {
+        //        command.Transaction = transContext.Transaction;
+        //    }
+        //}
 
         private static bool CheckEntities<T>(IEnumerable<T> items) where T : DatabaseEntity, new()
         {
@@ -201,7 +225,7 @@ namespace HB.Framework.Database
                 whereCondition = Where<TWhere>();
             }
 
-            whereCondition.And(t => t.Deleted == false).And<TSelect>(ts=>ts.Deleted == false).And<TFrom>(tf=>tf.Deleted == false);
+            whereCondition.And(t => t.Deleted == false).And<TSelect>(ts => ts.Deleted == false).And<TFrom>(tf => tf.Deleted == false);
 
             #endregion
 
@@ -212,7 +236,6 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand(selectCondition, fromCondition, whereCondition);
-                bindCommandTransaction(transContext, command);
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, selectDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<TSelect>(reader);
             }
@@ -277,8 +300,7 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<T>(selectCondition, fromCondition, whereCondition);
-                bindCommandTransaction(transContext, command);
-                reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command , transContext != null);
+                reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<T>(reader);
             }
             //catch (DbException ex)
@@ -300,23 +322,23 @@ namespace HB.Framework.Database
         public IList<T> Page<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-			#region Argument Adjusting
+            #region Argument Adjusting
 
-			if (selectCondition != null)
-			{
-				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
-			}
+            if (selectCondition != null)
+            {
+                selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
+            }
 
-			if (whereCondition == null)
-			{
-				whereCondition = Where<T>();
-			}
+            if (whereCondition == null)
+            {
+                whereCondition = Where<T>();
+            }
 
-			whereCondition.And(t => t.Deleted == false);
+            whereCondition.And(t => t.Deleted == false);
 
-			#endregion
+            #endregion
 
-			whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
+            whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
 
             return Retrieve<T>(selectCondition, fromCondition, whereCondition, transContext);
         }
@@ -324,29 +346,28 @@ namespace HB.Framework.Database
         public long Count<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
-			#region Argument Adjusting
+            #region Argument Adjusting
 
-			if (selectCondition != null)
-			{
-				selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
-			}
+            if (selectCondition != null)
+            {
+                selectCondition.Select(t => t.Id).Select(t => t.Deleted).Select(t => t.LastTime).Select(t => t.LastUser).Select(t => t.Version);
+            }
 
-			if (whereCondition == null)
-			{
+            if (whereCondition == null)
+            {
                 whereCondition = Where<T>();
-			}
+            }
 
-			whereCondition.And(t => t.Deleted == false);
+            whereCondition.And(t => t.Deleted == false);
 
-			#endregion
+            #endregion
 
             long count = -1;
 
-			DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
             try
             {
                 IDbCommand command = _sqlBuilder.CreateCountCommand(fromCondition, whereCondition);
-                bindCommandTransaction(transContext, command);
                 object countObj = _databaseEngine.ExecuteCommandScalar(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null);
                 count = Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
@@ -374,13 +395,13 @@ namespace HB.Framework.Database
             return Retrieve(null, fromCondition, whereCondition, transContext);
         }
 
-        public  IList<T> Page<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext)
+        public IList<T> Page<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
             return Page(null, fromCondition, whereCondition, pageNumber, perPageCount, transContext);
         }
 
-        public  long Count<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext)
+        public long Count<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
             return Count(null, fromCondition, whereCondition, transContext);
@@ -402,13 +423,13 @@ namespace HB.Framework.Database
             return Scalar(null, null, whereCondition, transContext);
         }
 
-        public IList<T> Retrieve<T>(WhereExpression<T> whereCondition, TransactionContext transContext) 
+        public IList<T> Retrieve<T>(WhereExpression<T> whereCondition, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
             return Retrieve(null, null, whereCondition, transContext);
         }
 
-        public IList<T> Page<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext) 
+        public IList<T> Page<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
             return Page(null, null, whereCondition, pageNumber, perPageCount, transContext);
@@ -420,7 +441,7 @@ namespace HB.Framework.Database
             return Page<T>(null, null, null, pageNumber, perPageCount, transContext);
         }
 
-        public long Count<T>(WhereExpression<T> condition, TransactionContext transContext) 
+        public long Count<T>(WhereExpression<T> condition, TransactionContext transContext)
             where T : DatabaseEntity, new()
         {
             return Count(null, null, condition, transContext);
@@ -490,7 +511,7 @@ namespace HB.Framework.Database
                 whereCondition = Where<TSource>();
             }
 
-            switch(fromCondition.JoinType)
+            switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
                     whereCondition.And(t => t.Deleted == false);
@@ -515,7 +536,6 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition);
-                bindCommandTransaction(transContext, command);
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
@@ -604,14 +624,13 @@ namespace HB.Framework.Database
             }
 
 
-            IList<Tuple<TSource, TTarget1, TTarget2>>  result = null;
+            IList<Tuple<TSource, TTarget1, TTarget2>> result = null;
             IDataReader reader = null;
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<TSource>();
 
             try
             {
                 IDbCommand command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition);
-                bindCommandTransaction(transContext, command);
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
@@ -683,7 +702,7 @@ namespace HB.Framework.Database
             {
                 return DatabaseResult.Fail("entity check failed.");
             }
-  
+
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
@@ -696,7 +715,6 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand dbCommand = _sqlBuilder.CreateAddCommand(item, "default");
-                bindCommandTransaction(transContext, dbCommand);
 
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, dbCommand, true);
 
@@ -742,7 +760,6 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand dbCommand = _sqlBuilder.GetDeleteCommand(condition, "default");
-                bindCommandTransaction(transContext, dbCommand);
 
                 long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, dbCommand);
 
@@ -750,7 +767,7 @@ namespace HB.Framework.Database
                 {
                     return DatabaseResult.Succeeded();
                 }
-                else if(rows == 0)
+                else if (rows == 0)
                 {
                     return DatabaseResult.NotFound();
                 }
@@ -762,7 +779,7 @@ namespace HB.Framework.Database
                 //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
-        }    
+        }
 
         /// <summary>
         ///  修改，建议每次修改前先select，并放置在一个事务中。
@@ -788,14 +805,13 @@ namespace HB.Framework.Database
             long version = item.Version;
 
             condition.Where(t => t.Id == id).And(t => t.Deleted == false);
-            
+
             //版本控制
             condition.And(t => t.Version == version);
 
             try
             {
                 IDbCommand dbCommand = _sqlBuilder.CreateUpdateCommand(condition, item, "default");
-                bindCommandTransaction(transContext, dbCommand);
 
                 long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, dbCommand);
 
@@ -854,7 +870,6 @@ namespace HB.Framework.Database
                 DatabaseResult result = DatabaseResult.Succeeded();
 
                 IDbCommand dbCommand = _sqlBuilder.CreateBatchAddStatement(items, lastUser);
-                bindCommandTransaction(transContext, dbCommand);
 
                 reader = _databaseEngine.ExecuteCommandReader(
                     transContext.Transaction,
@@ -892,7 +907,7 @@ namespace HB.Framework.Database
                 }
             }
         }
-        
+
         /// <summary>
         /// 批量更改
         /// </summary>
@@ -922,7 +937,6 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand dbCommand = _sqlBuilder.CreateBatchUpdateStatement(items, lastUser);
-                bindCommandTransaction(transContext, dbCommand);
 
                 reader = _databaseEngine.ExecuteCommandReader(
                     transContext.Transaction,
@@ -938,7 +952,7 @@ namespace HB.Framework.Database
 
                     if (matched != 1)
                     {
-                        throw new DatabaseException("BatchUpdate wrong, no match the {" + count +"}th data item. ");
+                        throw new DatabaseException("BatchUpdate wrong, no match the {" + count + "}th data item. ");
                     }
 
                     count++;
@@ -962,7 +976,7 @@ namespace HB.Framework.Database
                 }
             }
         }
-       
+
         public DatabaseResult BatchDelete<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
         {
             if (transContext == null)
@@ -987,7 +1001,6 @@ namespace HB.Framework.Database
             try
             {
                 IDbCommand dbCommand = _sqlBuilder.CreateBatchDeleteStatement(items, lastUser);
-                bindCommandTransaction(transContext, dbCommand);
 
                 reader = _databaseEngine.ExecuteCommandReader(
                     transContext.Transaction,
@@ -1030,7 +1043,6 @@ namespace HB.Framework.Database
 
         #endregion
 
-       
         #region 条件构造
 
         public SelectExpression<T> Select<T>() where T : DatabaseEntity, new()
@@ -1055,40 +1067,6 @@ namespace HB.Framework.Database
         public string GetTableCreateStatement(Type type, bool addDropStatement)
         {
             return _sqlBuilder.GetTableCreateStatement(type, addDropStatement);
-        }
-
-        public DatabaseResult CreateTable(DatabaseEntityDef def, TransactionContext transContext)
-        {
-
-        }
-
-        private void CreateTablesByDatabase(string databaseName)
-        {
-            IEnumerable<DatabaseEntityDef> defs = _entityDefFactory.GetAllDefsByDatabase(databaseName);
-
-            TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
-
-            try
-            {
-                foreach (DatabaseEntityDef def in defs)
-                {
-                    DatabaseResult databaseResult = CreateTable(def, tContext);
-
-                    if (!databaseResult.IsSucceeded())
-                    {
-                        Rollback(tContext);
-
-                        throw new DatabaseException($"Create Table Error, Type:{def.EntityFullName}, Database:{def.DatabaseName}");
-                    }
-                }
-
-                Commit(tContext);
-            }
-            catch (Exception ex)
-            {
-                Rollback(tContext);
-                throw ex;
-            }
         }
 
         #endregion

@@ -19,36 +19,40 @@ namespace HB.Framework.Database.Entity
     {
         private readonly int DEFAULT_STRING_LENGTH = 200;
 
-        private readonly ConcurrentDictionary<Type, DatabaseEntityDef> _defDict;
-        private readonly object _lockObj;
+        private readonly object _lockObj = new object();
         private readonly IDatabaseSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly IDatabaseTypeConverterFactory typeConverterFactory;
+        private readonly IDatabaseTypeConverterFactory _typeConverterFactory;
 
+        private readonly IEnumerable<Type> _allEntityTypes;
         private readonly IDictionary<string, EntitySchema> _entitySchemaDict;
+        private readonly IDictionary<Type, DatabaseEntityDef> _defDict = new Dictionary<Type, DatabaseEntityDef>();
 
         public DefaultDatabaseEntityDefFactory(IDatabaseSettings databaseSettings, IDatabaseEngine databaseEngine, IDatabaseTypeConverterFactory typeConverterFactory)
         {
             _databaseSettings = databaseSettings;
             _databaseEngine = databaseEngine;
-            _defDict = new ConcurrentDictionary<Type, DatabaseEntityDef>();
-            _lockObj = new object();
-            this.typeConverterFactory = typeConverterFactory;
+            _typeConverterFactory = typeConverterFactory;
 
+            _allEntityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(DatabaseEntity)));
             _entitySchemaDict = ConstructeSchemaDict();
-            
+
+            WarmUp();
+        }
+
+        private void WarmUp()
+        {
+            _allEntityTypes.ForEach(t => _defDict[t] = CreateModelDef(t));
         }
 
         private IDictionary<string, EntitySchema> ConstructeSchemaDict()
         {
-            IEnumerable<Type> entityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(DatabaseEntity)));
-
             IDictionary<string, EntitySchema> fileConfiguredDict = _databaseSettings.Entities.ToDictionary(t => t.EntityTypeFullName);
 
             IDictionary<string, EntitySchema> resusltEntitySchemaDict = new Dictionary<string, EntitySchema>();
 
-            foreach (Type type in entityTypes)
-            {
+            _allEntityTypes.ForEach(type => {
+
                 EntitySchemaAttribute attribute = type.GetCustomAttribute<EntitySchemaAttribute>();
 
                 fileConfiguredDict.TryGetValue(type.FullName, out EntitySchema fileConfigured);
@@ -93,7 +97,7 @@ namespace HB.Framework.Database.Entity
                 }
 
                 resusltEntitySchemaDict.Add(type.FullName, entitySchema);
-            }
+            });
 
             return resusltEntitySchemaDict;
         }
@@ -201,7 +205,7 @@ namespace HB.Framework.Database.Entity
 
                 if (propertyAttr.ConverterType != null)
                 {
-                    propertyDef.TypeConverter = typeConverterFactory.GetTypeConverter(propertyAttr.ConverterType);
+                    propertyDef.TypeConverter = _typeConverterFactory.GetTypeConverter(propertyAttr.ConverterType);
                 }
             }
 
@@ -252,6 +256,11 @@ namespace HB.Framework.Database.Entity
         public int GetVarcharDefaultLength()
         {
             return _databaseSettings.DefaultVarcharLength == 0 ? DEFAULT_STRING_LENGTH : _databaseSettings.DefaultVarcharLength;
+        }
+
+        public IEnumerable<DatabaseEntityDef> GetAllDefsByDatabase(string databaseName)
+        {
+            return _defDict.Values.Where(def => def.DatabaseName.Equals(databaseName, GlobalSettings.ComparisonIgnoreCase));
         }
     }
 

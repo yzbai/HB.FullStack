@@ -49,6 +49,7 @@ namespace HB.Infrastructure.MySQL
 
         public static Task<IDataReader> ExecuteCommandReaderAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
+            dbCommand.Transaction = mySqlTransaction;
             return ExecuteCommandReaderAsync(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
 
@@ -110,6 +111,7 @@ namespace HB.Infrastructure.MySQL
 
         public static Task<object> ExecuteCommandScalarAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
+            dbCommand.Transaction = mySqlTransaction;
             return ExecuteCommandScalarAsync(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
 
@@ -156,6 +158,7 @@ namespace HB.Infrastructure.MySQL
 
         public static Task<int> ExecuteCommandNonQueryAsync(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
+            dbCommand.Transaction = mySqlTransaction;
             return ExecuteCommandNonQueryAsync(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
 
