@@ -6,7 +6,6 @@ using HB.Framework.Database.Entity;
 using HB.Framework.Database.SQL;
 using System.Threading.Tasks;
 using HB.Framework.Database.Engine;
-using HB.Framework.Database.Transaction;
 
 namespace HB.Framework.Database
 {
@@ -68,6 +67,12 @@ namespace HB.Framework.Database
         Task<DatabaseResult> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new();
         Task<DatabaseResult> BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new();
         Task<DatabaseResult> BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new();
-        
+
+        Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+        Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
+        Task CommitAsync(TransactionContext context);
+        Task RollbackAsync(TransactionContext context);
+
     }
 }

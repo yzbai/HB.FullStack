@@ -34,8 +34,7 @@ namespace HB.PresentFish.Tools
                 builder.AddConsole();
             });
 
-            serviceCollection.AddMySQLEngine(Configuration.GetSection("MySQL"));
-            serviceCollection.AddDatabase(Configuration.GetSection("Database"));
+            //serviceCollection.AddMySQL(Configuration.GetSection("MySQL"));
 
             serviceCollection.AddRedis(Configuration.GetSection("Redis"));
             serviceCollection.AddKVStore(Configuration.GetSection("KVStore"));

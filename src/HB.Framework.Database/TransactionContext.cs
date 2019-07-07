@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace HB.Framework.Database.Transaction
+namespace HB.Framework.Database
 {
     public enum TransactionStatus
     {

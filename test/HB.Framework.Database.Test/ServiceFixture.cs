@@ -6,7 +6,6 @@ using HB.Framework.Database.Transaction;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 
 namespace HB.Framework.Database.Test
 {
@@ -18,14 +17,10 @@ namespace HB.Framework.Database.Test
 
         public ServiceFixture()
         {
-            NLog.LogManager.LoadConfiguration("nlog.config");
-
             var configurationBuilder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("appsettings.json", optional: false)
-                .AddJsonFile($"appsettings.Development.json", optional: true);
-
+                .AddJsonFile("appsettings.json", optional: false);
 
             Configuration = configurationBuilder.Build();
 
@@ -35,13 +30,12 @@ namespace HB.Framework.Database.Test
 
             services.AddLogging(builder => {
                 builder.SetMinimumLevel(LogLevel.Trace);
-                builder.AddNLog();
+                builder.AddConsole();
+                builder.AddDebug();
             });
 
-
             //Database
-            services.AddMySQLEngine(Configuration.GetSection("MySQL"));
-            services.AddDatabase(Configuration.GetSection("Database"));
+            services.AddMySQL(Configuration.GetSection("MySQL"));
 
             Services = services.BuildServiceProvider();
         }

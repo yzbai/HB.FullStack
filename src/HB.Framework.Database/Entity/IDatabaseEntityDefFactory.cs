@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HB.Framework.Database.Entity
 {
@@ -7,5 +8,7 @@ namespace HB.Framework.Database.Entity
         DatabaseEntityDef GetDef(Type entityType);
         DatabaseEntityDef GetDef<T>();
         int GetVarcharDefaultLength();
+
+        IEnumerable<DatabaseEntityDef> GetAllDefsByDatabase(string databaseName);
     }
 }

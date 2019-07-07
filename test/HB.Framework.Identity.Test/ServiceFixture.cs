@@ -32,8 +32,7 @@ namespace HB.Component.Identity.Test
                 builder.AddConsole();
             });
 
-            serviceCollection.AddMySQLEngine(Configuration.GetSection("MySQL"));
-            serviceCollection.AddDatabase(Configuration.GetSection("Database"));
+            serviceCollection.AddMySQL(Configuration.GetSection("MySQL"));
 
             Services = serviceCollection.BuildServiceProvider();
         }

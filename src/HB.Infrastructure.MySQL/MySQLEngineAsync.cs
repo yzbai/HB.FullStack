@@ -114,7 +114,14 @@ namespace HB.Infrastructure.MySQL
             return mySqlTransaction.RollbackAsync();
         }
 
+
+
         #endregion
+
+        public Task<bool> IsTableExistAsync(string tableName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
