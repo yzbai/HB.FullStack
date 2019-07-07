@@ -6,13 +6,13 @@ using HB.Framework.Database.Entity;
 using HB.Framework.Database.SQL;
 using System.Threading.Tasks;
 using HB.Framework.Database.Engine;
-using HB.Framework.Database.Transaction;
 
 namespace HB.Framework.Database
 {
     public interface IDatabase : IDatabaseAsync
     {
-        //IDatabaseEngine DatabaseEngine { get; }
+
+        void Initialize(IList<Migration> migrations = null);
 
         IList<TSelect> Retrieve<TSelect, TFrom, TWhere>(
             SelectExpression<TSelect> selectCondition,
@@ -63,45 +63,45 @@ namespace HB.Framework.Database
             where TTarget : DatabaseEntity, new();
 
 
-        IList<Tuple<TSource, TTarget1, TTarget2>> Retrieve<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, TransactionContext transContext )
+        IList<Tuple<TSource, TTarget1, TTarget2>> Retrieve<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, TransactionContext transContext)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new();
         string GetTableCreateStatement(Type type, bool addDropStatement);
 
-        IList<T> RetrieveAll<T>(TransactionContext transContext ) where T : DatabaseEntity, new();
+        IList<T> RetrieveAll<T>(TransactionContext transContext) where T : DatabaseEntity, new();
 
 
-        long Count<T>(TransactionContext transContext ) where T : DatabaseEntity, new();
-        long Count<T>(WhereExpression<T> condition, TransactionContext transContext ) where T : DatabaseEntity, new();
-        long Count<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext ) where T : DatabaseEntity, new();
-        long Count<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext ) where T : DatabaseEntity, new();
-        long Count<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext ) where T : DatabaseEntity, new();
+        long Count<T>(TransactionContext transContext) where T : DatabaseEntity, new();
+        long Count<T>(WhereExpression<T> condition, TransactionContext transContext) where T : DatabaseEntity, new();
+        long Count<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext) where T : DatabaseEntity, new();
+        long Count<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext) where T : DatabaseEntity, new();
+        long Count<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext) where T : DatabaseEntity, new();
 
 
-        IList<T> Page<T>(long pageNumber, long perPageCount, TransactionContext transContext ) where T : DatabaseEntity, new();
-        IList<T> Page<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext ) where T : DatabaseEntity, new();
-        IList<T> Page<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext transContext ) where T : DatabaseEntity, new();
-        IList<T> Page<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext ) where T : DatabaseEntity, new();
+        IList<T> Page<T>(long pageNumber, long perPageCount, TransactionContext transContext) where T : DatabaseEntity, new();
+        IList<T> Page<T>(WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext) where T : DatabaseEntity, new();
+        IList<T> Page<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext transContext) where T : DatabaseEntity, new();
+        IList<T> Page<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext) where T : DatabaseEntity, new();
         IList<T> Page<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext) where T : DatabaseEntity, new();
         IList<Tuple<TSource, TTarget>> Page<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new();
-        IList<Tuple<TSource, TTarget1, TTarget2>> Page<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext )
+        IList<Tuple<TSource, TTarget1, TTarget2>> Page<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, long pageNumber, long perPageCount, TransactionContext transContext)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new();
 
 
-        T Scalar<T>(WhereExpression<T> whereCondition, TransactionContext transContext ) where T : DatabaseEntity, new();
-        T Scalar<T>(long id, TransactionContext transContext ) where T : DatabaseEntity, new();
-        T Scalar<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext ) where T : DatabaseEntity, new();
-        T Scalar<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext ) where T : DatabaseEntity, new();
-        T Scalar<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext ) where T : DatabaseEntity, new();
-        Tuple<TSource, TTarget> Scalar<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, TransactionContext transContext )
+        T Scalar<T>(WhereExpression<T> whereCondition, TransactionContext transContext) where T : DatabaseEntity, new();
+        T Scalar<T>(long id, TransactionContext transContext) where T : DatabaseEntity, new();
+        T Scalar<T>(Expression<Func<T, bool>> whereExpr, TransactionContext transContext) where T : DatabaseEntity, new();
+        T Scalar<T>(FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext) where T : DatabaseEntity, new();
+        T Scalar<T>(SelectExpression<T> selectCondition, FromExpression<T> fromCondition, WhereExpression<T> whereCondition, TransactionContext transContext) where T : DatabaseEntity, new();
+        Tuple<TSource, TTarget> Scalar<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, TransactionContext transContext)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new();
-        Tuple<TSource, TTarget1, TTarget2> Scalar<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, TransactionContext transContext )
+        Tuple<TSource, TTarget1, TTarget2> Scalar<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource> whereCondition, TransactionContext transContext)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new();
@@ -122,20 +122,13 @@ namespace HB.Framework.Database
         FromExpression<T> From<T>() where T : DatabaseEntity, new();
         WhereExpression<T> Where<T>() where T : DatabaseEntity, new();
 
-        //#region 事务
+        #region 事务
 
-        //TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
+        TransactionContext BeginTransaction(string databaseName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) where T : DatabaseEntity;
+        void Commit(TransactionContext context);
+        void Rollback(TransactionContext context);
 
-        ///// <summary>
-        ///// 提交事务
-        ///// </summary>
-        //void Commit(TransactionContext context);
-
-        ///// <summary>
-        ///// 回滚事务
-        ///// </summary>
-        //void Rollback(TransactionContext context);
-
-        //#endregion
+        #endregion
     }
 }

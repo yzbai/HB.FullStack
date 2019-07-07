@@ -5,13 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.DocumentStore\HB.Framework.DocumentStore.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
   </ItemGroup>
 
 </Project>

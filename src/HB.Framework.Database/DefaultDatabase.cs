@@ -6,8 +6,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.Engine;
-using Microsoft.Extensions.Logging;
-using HB.Framework.Database.Transaction;
 using System.Data.Common;
 
 namespace HB.Framework.Database
@@ -23,22 +21,144 @@ namespace HB.Framework.Database
     /// </summary>
     internal partial class DefaultDatabase : IDatabase
     {
+        private readonly IDatabaseSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
         private readonly IDatabaseEntityDefFactory _entityDefFactory;
         private IDatabaseEntityMapper _modelMapper;
         private ISQLBuilder _sqlBuilder;
-        private ILogger<DefaultDatabase> _logger;
+        //private ILogger<DefaultDatabase> _logger;
 
         //public IDatabaseEngine DatabaseEngine { get { return _databaseEngine; } }
 
-        public DefaultDatabase(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory, IDatabaseEntityMapper modelMapper, ISQLBuilder sqlBuilder, ILogger<DefaultDatabase> logger)
+        public DefaultDatabase(IDatabaseSettings databaseSettings, IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory modelDefFactory, IDatabaseEntityMapper modelMapper, ISQLBuilder sqlBuilder/*, ILogger<DefaultDatabase> logger*/)
         {
+            if (databaseSettings.Version < 0)
+            {
+                throw new ArgumentException("Database Version should greater than 0");
+            }
+
+            _databaseSettings = databaseSettings;
             _databaseEngine = databaseEngine;
             _entityDefFactory = modelDefFactory;
             _modelMapper = modelMapper;
             _sqlBuilder = sqlBuilder;
-            _logger = logger;
+            //_logger = logger;
         }
+
+        #region Initialize
+
+        public void Initialize(IList<Migration> migrations = null)
+        {
+            if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
+            {
+                throw new DatabaseException($"oldVersion should always lower than newVersions in Database Migrations");
+            }
+
+            #region 判断是否第一次初始化
+
+            IEnumerable<SystemInfo> systemInfos = _databaseEngine.GetSystemInfos();
+
+            foreach (SystemInfo systemInfo in systemInfos)
+            {
+                if (systemInfo.Version == 0)
+                {
+                    if (_databaseSettings.Version != 1)
+                    {
+                        throw new DatabaseException($"Database:{systemInfo.DatabaseName} does not exists, database Version must be 1");
+                    }
+
+                    //创建表
+                    CreateTablesByDatabase(systemInfo.DatabaseName);
+
+                    _databaseEngine.UpdateSystemVersion(1);
+
+                }
+            }
+
+            #endregion
+
+            #region Migrations
+
+            systemInfos = _databaseEngine.GetSystemInfos();
+
+            foreach (SystemInfo sys in systemInfos)
+            {
+                if (sys.Version < _databaseSettings.Version)
+                {
+                    if (migrations == null)
+                    {
+                        throw new DatabaseException($"Lack Migrations for {sys.DatabaseName}");
+                    }
+
+                    IOrderedEnumerable<Migration> curOrderedMigrations = migrations
+                        .Where(m => m.TargetSchema.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
+                        .OrderBy(m => m.OldVersion);
+
+                    if (curOrderedMigrations == null)
+                    {
+                        throw new DatabaseException($"Lack Migrations for {sys.DatabaseName}");
+                    }
+
+                    if (!CheckMigration(sys.Version, _databaseSettings.Version, curOrderedMigrations))
+                    {
+                        throw new DatabaseException($"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
+                    }
+
+                    perfomeMigration(sys.DatabaseName, curOrderedMigrations);
+
+                    _databaseEngine.UpdateSystemVersion(_databaseSettings.Version);
+                }
+            }
+
+            #endregion
+        }
+
+        private void perfomeMigration(string databaseName, IOrderedEnumerable<Migration> curOrderedMigrations)
+        {
+            TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
+
+            try
+            {
+                foreach (Migration migration in curOrderedMigrations)
+                {
+                    bool success = _databaseEngine.ExecuteSQL(databaseName, migration.SqlStatement, tContext);
+
+                    if (!success)
+                    {
+                        Rollback(tContext);
+                        throw new DatabaseException($"Database {databaseName} Migration From {migration.OldVersion} To {migration.NewVersion} Failed. SQL : {migration.SqlStatement}");
+                    }
+                }
+
+                Commit(tContext);
+            }
+            catch(Exception ex)
+            {
+                Rollback(tContext);
+                throw ex;
+            }
+        }
+
+        private bool CheckMigration(int startVersion, int endVersion, IOrderedEnumerable<Migration> curOrderedMigrations)
+        {
+            int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
+
+            if (curVersion != startVersion) { return false; }
+
+            foreach (Migration migration in curOrderedMigrations)
+            {
+                if (curVersion != migration.OldVersion)
+                {
+                    return false;
+                }
+
+                curVersion = migration.NewVersion;
+            }
+
+            return curVersion == endVersion;
+        }
+
+        #endregion
 
         #region Private methods
 
@@ -96,11 +216,10 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, selectDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<TSelect>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<TSelect>();
-                _logger.LogCritical(ex.Message);
-            }
+            //catch (DbException ex)
+            //{
+            //    throw ex;
+            //}
             finally
             {
                 if (reader != null)
@@ -124,8 +243,9 @@ namespace HB.Framework.Database
 
             if (result.Count > 1)
             {
-                _logger.LogCritical(0, "retrieve result not one, but many." + typeof(T).FullName, null);
-                return null;
+                //_logger.LogCritical(0, "retrieve result not one, but many." + typeof(T).FullName, null);
+
+                throw new DatabaseException($"Scalar retrieve return more than one result. Select:{selectCondition.ToString()}, From:{fromCondition.ToString()}, Where:{whereCondition.ToString()}");
             }
 
             return result[0];
@@ -161,11 +281,11 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command , transContext != null);
                 result = _modelMapper.ToList<T>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<T>();
-                _logger.LogCritical(ex.Message);
-            }
+            //catch (DbException ex)
+            //{
+            //    result = new List<T>();
+            //    _logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -232,7 +352,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                throw ex;// _logger.LogCritical(ex.Message);
             }
 
             return count;
@@ -399,12 +519,12 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<Tuple<TSource, TTarget>>();
+            //catch (DbException ex)
+            //{
+            //    result = new List<Tuple<TSource, TTarget>>();
 
-                _logger.LogCritical(ex.Message);
-            }
+            //    _logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -443,8 +563,9 @@ namespace HB.Framework.Database
 
             if (result.Count > 1)
             {
-                _logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
-                return null;
+                throw new DatabaseException($"Scalar retrieve return more than one result. From:{fromCondition.ToString()}, Where:{whereCondition.ToString()}");
+                //_logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
+                //return null;
             }
 
             return result[0];
@@ -494,12 +615,12 @@ namespace HB.Framework.Database
                 reader = _databaseEngine.ExecuteCommandReader(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null);
                 result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<Tuple<TSource, TTarget1, TTarget2>>();
+            //catch (DbException ex)
+            //{
+            //    result = new List<Tuple<TSource, TTarget1, TTarget2>>();
 
-                _logger.LogCritical(ex.Message);
-            }
+            //    _logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -541,8 +662,9 @@ namespace HB.Framework.Database
 
             if (result.Count > 1)
             {
-                _logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
-                return null;
+                throw new DatabaseException($"Scalar retrieve return more than one result. From:{fromCondition.ToString()}, Where:{whereCondition.ToString()}");
+                //_logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
+                //return null;
             }
 
             return result[0];
@@ -584,7 +706,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -637,7 +759,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
         }    
@@ -691,7 +813,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
         }
@@ -759,7 +881,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -829,7 +951,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -894,7 +1016,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -933,6 +1055,135 @@ namespace HB.Framework.Database
         public string GetTableCreateStatement(Type type, bool addDropStatement)
         {
             return _sqlBuilder.GetTableCreateStatement(type, addDropStatement);
+        }
+
+        public DatabaseResult CreateTable(DatabaseEntityDef def, TransactionContext transContext)
+        {
+
+        }
+
+        private void CreateTablesByDatabase(string databaseName)
+        {
+            IEnumerable<DatabaseEntityDef> defs = _entityDefFactory.GetAllDefsByDatabase(databaseName);
+
+            TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
+
+            try
+            {
+                foreach (DatabaseEntityDef def in defs)
+                {
+                    DatabaseResult databaseResult = CreateTable(def, tContext);
+
+                    if (!databaseResult.IsSucceeded())
+                    {
+                        Rollback(tContext);
+
+                        throw new DatabaseException($"Create Table Error, Type:{def.EntityFullName}, Database:{def.DatabaseName}");
+                    }
+                }
+
+                Commit(tContext);
+            }
+            catch (Exception ex)
+            {
+                Rollback(tContext);
+                throw ex;
+            }
+        }
+
+        #endregion
+
+        #region 事务
+
+        public TransactionContext BeginTransaction(string databaseName, IsolationLevel isolationLevel)
+        {
+            IDbTransaction dbTransaction = _databaseEngine.BeginTransaction(databaseName, isolationLevel);
+
+            return new TransactionContext() {
+                Transaction = dbTransaction,
+                Status = TransactionStatus.InTransaction
+            };
+        }
+
+        public TransactionContext BeginTransaction<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
+        {
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            return BeginTransaction(entityDef.DatabaseName, isolationLevel);
+        }
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
+        public void Commit(TransactionContext context)
+        {
+            if (context == null || context.Transaction == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status != TransactionStatus.InTransaction)
+            {
+                throw new DatabaseException("use a already finished transactioncontenxt");
+            }
+
+            try
+            {
+                IDbConnection conn = context.Transaction.Connection;
+                _databaseEngine.Commit(context.Transaction);
+                //context.Transaction.Commit();
+                context.Transaction.Dispose();
+
+                if (conn != null && conn.State != ConnectionState.Closed)
+                {
+                    conn.Dispose();
+                }
+
+                context.Status = TransactionStatus.Commited;
+            }
+            catch
+            {
+                context.Status = TransactionStatus.Failed;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 回滚事务
+        /// </summary>
+        public void Rollback(TransactionContext context)
+        {
+            if (context == null || context.Transaction == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status != TransactionStatus.InTransaction)
+            {
+                throw new DatabaseException("use a already finished transactioncontenxt");
+            }
+
+            try
+            {
+                IDbConnection conn = context.Transaction.Connection;
+
+                _databaseEngine.Rollback(context.Transaction);
+
+                //context.Transaction.Rollback();
+                context.Transaction.Dispose();
+
+                if (conn != null && conn.State != ConnectionState.Closed)
+                {
+                    conn.Dispose();
+                }
+
+                context.Status = TransactionStatus.Rollbacked;
+            }
+            catch
+            {
+                context.Status = TransactionStatus.Failed;
+                throw;
+            }
         }
 
         #endregion

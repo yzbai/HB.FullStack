@@ -4,30 +4,29 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace HB.Framework.Common.Utility
 {
     public static class FileHelper
     {
-        public static async Task<byte[]> ReadFormFileAsync(IFormFile file)
-        {
-            if (file == null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
+        //public static async Task<byte[]> ReadFormFileAsync(IFormFile file)
+        //{
+        //    if (file == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(file));
+        //    }
 
-            using (Stream stream = file.OpenReadStream())
-            {
-                byte[] buffer = new byte[stream.Length];
+        //    using (Stream stream = file.OpenReadStream())
+        //    {
+        //        byte[] buffer = new byte[stream.Length];
 
-                await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+        //        await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
 
-                stream.Close();
+        //        stream.Close();
 
-                return buffer;
-            }
-        }
+        //        return buffer;
+        //    }
+        //}
 
         public static void SaveToFile(byte[] buffer, string path)
         {

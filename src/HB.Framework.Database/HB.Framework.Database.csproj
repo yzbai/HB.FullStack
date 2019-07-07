@@ -7,14 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="DatabaseException.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
   </ItemGroup>
 </Project>

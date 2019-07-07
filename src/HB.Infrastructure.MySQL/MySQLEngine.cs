@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using MySqlConnector.Logging;
 
@@ -17,40 +16,40 @@ namespace HB.Infrastructure.MySQL
     {
         #region 自身 & 构建
 
-        private readonly MySQLEngineOptions _options;
+        private readonly MySQLOptions _options;
         private Dictionary<string, string> _connectionStringDict;
 
         private MySQLEngine() { }
 
-        public MySQLEngine(ILoggerFactory loggerFactory, IOptions<MySQLEngineOptions> optionsAccessor) : this()
+        public MySQLEngine(MySQLOptions options) : this()
         {
-            MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+            //MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
 
-            _options = optionsAccessor.Value;
+            _options = options;
 
             SetConnectionStrings();
         }
 
-        public MySQLEngineOptions Options { get { return _options; } }
+        public MySQLOptions Options { get { return _options; } }
 
         private void SetConnectionStrings()
         {
             _connectionStringDict = new Dictionary<string, string>();
 
-            foreach (MySQLDatabaseSetting ds in _options.DatabaseSettings)
+            foreach (SchemaInfo schemaInfo in _options.Schemas)
             {
-                if (ds.IsMaster)
+                if (schemaInfo.IsMaster)
                 {
-                    _connectionStringDict[ds.DatabaseName + "_1"] = ds.ConnectionString;
+                    _connectionStringDict[schemaInfo.SchemaName + "_1"] = schemaInfo.ConnectionString;
 
-                    if (!_connectionStringDict.ContainsKey(ds.DatabaseName + "_0"))
+                    if (!_connectionStringDict.ContainsKey(schemaInfo.SchemaName + "_0"))
                     {
-                        _connectionStringDict[ds.DatabaseName + "_0"] = ds.ConnectionString;
+                        _connectionStringDict[schemaInfo.SchemaName + "_0"] = schemaInfo.ConnectionString;
                     }
                 }
                 else
                 {
-                    _connectionStringDict[ds.DatabaseName + "_0"] = ds.ConnectionString;
+                    _connectionStringDict[schemaInfo.SchemaName + "_0"] = schemaInfo.ConnectionString;
                 }
             }
         }
@@ -256,7 +255,14 @@ namespace HB.Infrastructure.MySQL
             transaction.Rollback();
         }
 
+
+
         #endregion
+
+        public bool IsTableExist(string tableName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 //public DataTable CreateEmptyDataTable(string dbName, string tableName)
