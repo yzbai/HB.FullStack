@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Database.SQL;
-using HB.Framework.Database.Transaction;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,7 +40,6 @@ namespace HB.Framework.Database.Test
         }
 
         public IDatabase Database => Services.GetRequiredService<IDatabase>();
-        public ITransaction Transaction => Services.GetRequiredService<ITransaction>();
 
     }
 }

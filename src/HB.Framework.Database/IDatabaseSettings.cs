@@ -18,6 +18,8 @@ namespace HB.Framework.Database
     {
         int Version { get; }
 
+        bool AutomaticCreateTable { get; }
+
         int DefaultVarcharLength { get; }
 
         IList<EntitySchema> Entities { get;}

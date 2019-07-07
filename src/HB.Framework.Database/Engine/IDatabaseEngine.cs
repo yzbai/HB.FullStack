@@ -14,11 +14,9 @@ namespace HB.Framework.Database.Engine
     {
         #region 管理功能
 
-        bool IsTableExist(string tableName);
-
         IEnumerable<SystemInfo> GetSystemInfos();
 
-        void UpdateSystemVersion(int version);
+        void UpdateSystemVersion(string databaseName, int version);
 
         #endregion
 
@@ -49,6 +47,19 @@ namespace HB.Framework.Database.Engine
         IDataReader ExecuteCommandReader(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster);
 
         object ExecuteCommandScalar(IDbTransaction trans, string dbName, IDbCommand dbCommand, bool useMaster);
+
+        #endregion
+
+        #region SQL 执行能力
+
+        int ExecuteSqlNonQuery(IDbTransaction Transaction, string dbName, string SQL);
+
+        /// <summary>
+        /// 使用后必须Dispose，必须使用using.
+        /// </summary>
+        IDataReader ExecuteSqlReader(IDbTransaction Transaction, string dbName, string SQL, bool useMaster);
+
+        object ExecuteSqlScalar(IDbTransaction Transaction, string dbName, string SQL, bool useMaster);
 
         #endregion
 
@@ -148,10 +159,7 @@ namespace HB.Framework.Database.Engine
         /// <param name="type"></param>
         /// <returns></returns>
         bool IsValueNeedQuoted(Type type);
-        bool ExecuteSQL(string databaseName, string sqlStatement, TransactionContext tContext);
-
-
-
+        
         #endregion
     }
 }

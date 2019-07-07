@@ -7,6 +7,15 @@ namespace System.Collections.Generic
 {
     public static class CollectionExtensions
     {
+
+        public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
+        {
+            foreach (T t in enumerable)
+            {
+                action(t);
+            }
+        }
+
         public static IDictionary<TKey, TValue> CloningWithValues<TKey, TValue> (this IDictionary<TKey, TValue> original) where TValue : ICloneable
         {
             if (original == null)

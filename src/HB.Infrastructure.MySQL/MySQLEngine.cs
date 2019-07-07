@@ -6,6 +6,8 @@ using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MySqlConnector.Logging;
+using HB.Framework.Database;
+using System.Linq;
 
 namespace HB.Infrastructure.MySQL
 {
@@ -67,7 +69,7 @@ namespace HB.Infrastructure.MySQL
         #endregion
 
         #region SP执行功能
-        
+
         /// <summary>
         /// 使用完毕后必须Dispose
         /// </summary>
@@ -126,7 +128,7 @@ namespace HB.Infrastructure.MySQL
                 return MySQLExecuter.ExecuteCommandNonQuery((MySqlTransaction)Transaction, dbCommand);
             }
         }
-        
+
         /// <summary>
         /// 使用完毕后必须Dispose，必须使用using
         /// </summary>
@@ -159,12 +161,54 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
+        #region SQL 执行能力
+
+        public int ExecuteSqlNonQuery(IDbTransaction Transaction, string dbName, string SQL)
+        {
+            if (Transaction == null)
+            {
+                return MySQLExecuter.ExecuteSqlNonQuery(GetConnectionString(dbName, true), SQL);
+            }
+            else
+            {
+                return MySQLExecuter.ExecuteSqlNonQuery((MySqlTransaction)Transaction, SQL);
+            }
+        }
+
+        /// <summary>
+        /// 使用后必须Dispose，必须使用using.
+        /// </summary>
+        public IDataReader ExecuteSqlReader(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
+        {
+            if (Transaction == null)
+            {
+                return MySQLExecuter.ExecuteSqlReader(GetConnectionString(dbName, useMaster), SQL);
+            }
+            else
+            {
+                return MySQLExecuter.ExecuteSqlReader((MySqlTransaction)Transaction, SQL);
+            }
+        }
+
+        public object ExecuteSqlScalar(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
+        {
+            if (Transaction == null)
+            {
+                return MySQLExecuter.ExecuteSqlScalar(GetConnectionString(dbName, useMaster), SQL);
+            }
+            else
+            {
+                return MySQLExecuter.ExecuteSqlScalar((MySqlTransaction)Transaction, SQL);
+            }
+        }
+
+        #endregion
+
         #region 创建功能
 
         public IDataParameter CreateParameter(string name, object value, DbType dbType)
         {
-            MySqlParameter parameter = new MySqlParameter
-            {
+            MySqlParameter parameter = new MySqlParameter {
                 ParameterName = name,
                 Value = value,
                 DbType = dbType
@@ -174,8 +218,7 @@ namespace HB.Infrastructure.MySQL
 
         public IDataParameter CreateParameter(string name, object value)
         {
-            MySqlParameter parameter = new MySqlParameter
-            {
+            MySqlParameter parameter = new MySqlParameter {
                 ParameterName = name,
                 Value = value
             };
@@ -191,7 +234,7 @@ namespace HB.Infrastructure.MySQL
         #endregion
 
         #region 方言
-        
+
         public string ParameterizedChar { get { return MySQLUtility.ParameterizedChar; } }
 
         public string QuotedChar { get { return MySQLUtility.QuotedChar; } }
@@ -259,56 +302,82 @@ namespace HB.Infrastructure.MySQL
 
         #endregion
 
-        public bool IsTableExist(string tableName)
+        #region SystemInfo
+
+        private static string tbSysInfoCreate =
+@"CREATE TABLE `tb_sys_info` (
+	`Id` int (11) NOT NULL AUTO_INCREMENT, 
+	`Name` varchar(100) DEFAULT NULL, 
+	`Value` varchar(1024) DEFAULT NULL,
+	PRIMARY KEY(`Id`),
+	UNIQUE KEY `Name_UNIQUE` (`Name`)
+);
+INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('Version', '1');
+INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', '{0}');";
+
+        private static string tbSysInfoRetrieve = @"SELECT * FROM `tb_sys_info`;";
+
+        private static string tbSysInfoUpdateVersion = @"UPDATE `tb_sys_info` SET `Value` = '{0}' WHERE `Name` = 'Version';";
+
+        public IEnumerable<SystemInfo> GetSystemInfos()
         {
-            throw new NotImplementedException();
+            List<SystemInfo> infos = new List<SystemInfo>();
+
+            foreach (string databaseName in _options.Schemas.Select(s => s.SchemaName))
+            {
+                IDataReader reader = null;
+
+                try
+                {
+                    reader = ExecuteSqlReader(null, databaseName, tbSysInfoRetrieve, false);
+
+                    SystemInfo systemInfo = new SystemInfo { DatabaseName = databaseName };
+
+                    while(reader.Read())
+                    {
+                        systemInfo.Add(reader["Name"].ToString(), reader["Value"].ToString());
+                    }
+
+                    infos.Add(systemInfo);
+                }
+                catch (Exception)
+                {
+                    infos.Add(new SystemInfo {
+                        DatabaseName = databaseName,
+                        Version = 0
+                    });
+                }
+                finally
+                {
+                    if (reader != null)
+                    {
+                        reader.Close();
+                    }
+                }
+            }
+
+            return infos;
         }
+
+        public void UpdateSystemVersion(string databaseName, int version)
+        {
+            if (version == 1)
+            {
+                //创建SystemInfo
+                ExecuteSqlNonQuery(null, databaseName, string.Format(tbSysInfoCreate, databaseName));
+            }
+            else
+            {
+                ExecuteSqlNonQuery(null, databaseName, string.Format(tbSysInfoUpdateVersion, version));
+            }
+        }
+
+        #endregion
     }
 }
 //public DataTable CreateEmptyDataTable(string dbName, string tableName)
 //{
 //    return MySQLTableCache.CreateEmptyDataTable(GetConnectionString(dbName, true), tableName);
-//}
-//#region SQL执行功能-Unsafe
-
-///// <summary>
-///// 使用后必须Dispose，必须使用using. 在MySql中，IDataReader.Close工作不正常。解决之前不要用
-///// </summary>
-//public IDataReader ExecuteSqlReader(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
-//{
-
-//    if (Transaction == null)
-//    {
-//        return MySQLExecuter.ExecuteSqlReader(GetConnectionString(dbName, useMaster), SQL);
-//    }
-//    else
-//    {
-//        return MySQLExecuter.ExecuteSqlReader((MySqlTransaction)Transaction, SQL);
-//    }
-//}
-
-//public object ExecuteSqlScalar(IDbTransaction Transaction, string dbName, string SQL, bool useMaster)
-//{
-//    if (Transaction == null)
-//    {
-//        return MySQLExecuter.ExecuteSqlScalar(GetConnectionString(dbName, useMaster), SQL);
-//    }
-//    else
-//    {
-//        return MySQLExecuter.ExecuteSqlScalar((MySqlTransaction)Transaction, SQL);
-//    }
-//}
-
-//public int ExecuteSqlNonQuery(IDbTransaction Transaction, string dbName, string SQL)
-//{
-//    if (Transaction == null)
-//    {
-//        return MySQLExecuter.ExecuteSqlNonQuery(GetConnectionString(dbName, true), SQL);
-//    }
-//    else
-//    {
-//        return MySQLExecuter.ExecuteSqlNonQuery((MySqlTransaction)Transaction, SQL);
-//    }
 //}
 
 //public DataTable ExecuteSqlDataTable(IDbTransaction transaction, string dbName, string SQL)
