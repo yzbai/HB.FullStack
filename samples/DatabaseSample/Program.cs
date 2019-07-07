@@ -1,5 +1,4 @@
 ﻿using HB.Framework.Database;
-using HB.Framework.Database.Transaction;
 using HB.Infrastructure.MySQL;
 using System;
 using System.Collections.Generic;
@@ -11,22 +10,20 @@ namespace DatabaseSample
     {
         static async Task Main(string[] args)
         {
-            Tuple<IDatabase, ITransaction> dbTuple = GetDatabaseAndTransaction();
-            IDatabase database = dbTuple.Item1;
-            ITransaction transaction = dbTuple.Item2;
+            IDatabase database = GetDatabase();
 
             IList<BookEntity> books = MokeData.GetBooks();
 
-            TransactionContext tContext = await transaction.BeginTransactionAsync<BookEntity>();
+            TransactionContext tContext = await database.BeginTransactionAsync<BookEntity>();
 
             DatabaseResult databaseResult = await database.BatchAddAsync(books, "", tContext);
 
             if (!databaseResult.IsSucceeded())
             {
-                await transaction.RollbackAsync(tContext);
+                await database.RollbackAsync(tContext);
             }
 
-            await transaction.CommitAsync(tContext);
+            await database.CommitAsync(tContext);
 
             IEnumerable<BookEntity> retrieveResult = await database.RetrieveAllAsync<BookEntity>(null);
 
@@ -36,7 +33,7 @@ namespace DatabaseSample
             }
         }
 
-        private static Tuple<IDatabase, ITransaction> GetDatabaseAndTransaction()
+        private static IDatabase GetDatabase()
         {
             MySQLOptions mySQLOptions = new MySQLOptions();
 
@@ -49,16 +46,14 @@ namespace DatabaseSample
 
             MySQLBuilder mySQLBuilder = new MySQLBuilder().SetMySqlOptions(mySQLOptions).Build();
 
-            DatabaseBuilder databaseBuilder = new DatabaseBuilder()
+            IDatabase database = new DatabaseBuilder()
                 .SetDatabaseEngine(mySQLBuilder.DatabaseEngine)
                 .SetDatabaseSettings(mySQLBuilder.DatabaseSettings)
                 .Build();
 
-            IDatabase database = databaseBuilder.Database;
-
             database.Initialize();
 
-            return new Tuple<IDatabase, ITransaction>(database, databaseBuilder.Transaction);
+            return database;
         }
     }
 }
