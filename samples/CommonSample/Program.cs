@@ -44,7 +44,6 @@ namespace HB.PresentFish.Tools
                 Configuration.GetSection("RedisCache").Bind(o);
             });
 
-            serviceCollection.AddAliyunService(Configuration.GetSection("Aliyun"));
             serviceCollection.AddAliyunSms(Configuration.GetSection("AliyunSms"));
 
             serviceCollection.AddSingleton<IApplicationLifetime, Microsoft.Extensions.Hosting.Internal.ApplicationLifetime>();

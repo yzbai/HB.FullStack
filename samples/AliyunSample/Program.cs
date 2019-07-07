@@ -35,7 +35,6 @@ namespace AliyunSample
             });
 
         
-            serviceCollection.AddAliyunService(Configuration.GetSection("Aliyun"));
             serviceCollection.AddAliyunSms(Configuration.GetSection("AliyunSms"));
             serviceCollection.AddAliyunVod(Configuration.GetSection("AliyunVod"));
 
