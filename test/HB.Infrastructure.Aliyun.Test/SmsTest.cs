@@ -1,4 +1,4 @@
-﻿using HB.Component.Resource.Sms;
+﻿using HB.Infrastructure.Aliyun.Sms;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -6,7 +6,7 @@ namespace HB.Infrastructure.Aliyun.Test
 {
     public class SmsTest : IClassFixture<ServiceFixture>
     {
-        private ISmsService _smsBiz;
+        private IAliyunSmsService _smsBiz;
         private ServiceFixture _fixture;
         private ITestOutputHelper _output;
 
@@ -14,7 +14,7 @@ namespace HB.Infrastructure.Aliyun.Test
         {
             _output = output;
             _fixture = testFixture;
-            _smsBiz = _fixture.SmsService;
+            _smsBiz = _fixture.SmsService;  
         }
 
         [Theory]
@@ -22,7 +22,7 @@ namespace HB.Infrastructure.Aliyun.Test
         [InlineData("18015323958")]
         public void SendSms(string mobile)
         {
-            var result = _smsBiz.SendValidationCode(mobile, out string code).Result;
+            var result = _smsBiz.SendValidationCode(mobile).Result;
 
             _output.WriteLine(result.Message);
 

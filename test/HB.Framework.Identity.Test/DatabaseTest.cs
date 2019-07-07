@@ -206,7 +206,7 @@ namespace HB.Component.Identity.Test
                         _output.WriteLine($"user id {userId} update failed.");
 
                         transaction.Rollback(transContext);
-                        break;
+                        break;  
                     }
                 }
 
@@ -216,7 +216,7 @@ namespace HB.Component.Identity.Test
 
                 if (transContext.Status == TransactionStatus.Commited)
                 {
-                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids), null);
+                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, false, ids), null);
 
                     foreach (User u in updatedUsers)
                     {
@@ -279,7 +279,7 @@ namespace HB.Component.Identity.Test
 
                 if (transContext.Status == TransactionStatus.Commited)
                 {
-                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id, ids), null);
+                    IList<User> updatedUsers = _db.Retrieve<User>(u => SQLUtil.In(u.Id,false, ids), null);
 
                     if (updatedUsers.Count == 0)
                     {
