@@ -90,7 +90,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OssDemo", "samples\OssDemo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aliyun-net-sdk-sts.vs2017", "..\aliyun-openapi-net-sdk\aliyun-net-sdk-sts\aliyun-net-sdk-sts.vs2017.csproj", "{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.Database.Test", "test\HB.Framework.Database.Test\HB.Framework.Database.Test.csproj", "{29066F3E-62B4-46E2-A549-A4BF95F0EF97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Database.Test", "test\HB.Framework.Database.Test\HB.Framework.Database.Test.csproj", "{29066F3E-62B4-46E2-A549-A4BF95F0EF97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.Sqlite", "src\HB.Infrastructure.Sqlite\HB.Infrastructure.Sqlite.csproj", "{E5AF28BF-6774-4BFC-8102-4BDA5BFB1901}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -219,6 +221,10 @@ Global
 		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29066F3E-62B4-46E2-A549-A4BF95F0EF97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5AF28BF-6774-4BFC-8102-4BDA5BFB1901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5AF28BF-6774-4BFC-8102-4BDA5BFB1901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5AF28BF-6774-4BFC-8102-4BDA5BFB1901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5AF28BF-6774-4BFC-8102-4BDA5BFB1901}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -258,6 +264,7 @@ Global
 		{50E187B9-C6D0-41FE-9145-12403743ADD6} = {DFFFDEC7-B203-40D6-9DA0-B79D9378FDFF}
 		{6F49C6C0-0CAC-4B0D-BE31-E2336D438FCE} = {E3F87ADC-8DCC-435B-869F-90DD5A88896A}
 		{29066F3E-62B4-46E2-A549-A4BF95F0EF97} = {28ADE730-B02D-4910-9311-1F1088C69829}
+		{E5AF28BF-6774-4BFC-8102-4BDA5BFB1901} = {4281500B-4033-4BEF-8A05-C924EC564467}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {81307950-DF5A-4A8D-B3B9-6724112D8232}
