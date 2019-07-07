@@ -9,7 +9,6 @@ using Xunit.Sdk;
 
 namespace HB.Framework.Database.Test
 {
-    [TestCaseOrderer]
     public class ComplexFieldTest : IClassFixture<ServiceFixture>
     {
         private readonly IDatabase database;

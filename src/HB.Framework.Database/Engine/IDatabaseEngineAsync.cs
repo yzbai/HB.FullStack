@@ -12,6 +12,13 @@ namespace HB.Framework.Database.Engine
     /// </summary>
     public interface IDatabaseEngineAsync
     {
+
+        #region 管理功能
+
+        Task<bool> IsTableExistAsync(string tableName);
+
+        #endregion
+
         #region SP执行功能
 
         /// <summary>

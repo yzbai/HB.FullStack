@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Data.Common;
 using System.Runtime.Serialization;
 
 namespace HB.Framework.Database
 {
-    public class DatabaseException : Exception
+    public class DatabaseException : DbException
     {
         public DatabaseException()
         {
@@ -13,11 +14,15 @@ namespace HB.Framework.Database
         {
         }
 
+        public DatabaseException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
         public DatabaseException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        protected DatabaseException(SerializationInfo info, StreamingContext context) : base(info, context)
+        public DatabaseException(string message, int errorCode) : base(message, errorCode)
         {
         }
     }

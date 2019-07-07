@@ -2,10 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.Extensions.Options;
 using HB.Framework.Database.Engine;
 using System.Linq;
 using HB.Framework.Common.Entity;
+using System.IO;
+using HB.Framework.Common.Utility;
 
 namespace HB.Framework.Database.Entity
 {
@@ -20,17 +21,81 @@ namespace HB.Framework.Database.Entity
 
         private readonly ConcurrentDictionary<Type, DatabaseEntityDef> _defDict;
         private readonly object _lockObj;
-        private readonly DatabaseOptions _options;
+        private readonly IDatabaseSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
         private readonly IDatabaseTypeConverterFactory typeConverterFactory;
 
-        public DefaultDatabaseEntityDefFactory(IOptions<DatabaseOptions> options, IDatabaseEngine databaseEngine, IDatabaseTypeConverterFactory typeConverterFactory)
+        private readonly IDictionary<string, EntitySchema> _entitySchemaDict;
+
+        public DefaultDatabaseEntityDefFactory(IDatabaseSettings databaseSettings, IDatabaseEngine databaseEngine, IDatabaseTypeConverterFactory typeConverterFactory)
         {
-            _options = options.Value;
+            _databaseSettings = databaseSettings;
             _databaseEngine = databaseEngine;
             _defDict = new ConcurrentDictionary<Type, DatabaseEntityDef>();
             _lockObj = new object();
             this.typeConverterFactory = typeConverterFactory;
+
+            _entitySchemaDict = ConstructeSchemaDict();
+            
+        }
+
+        private IDictionary<string, EntitySchema> ConstructeSchemaDict()
+        {
+            IEnumerable<Type> entityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(DatabaseEntity)));
+
+            IDictionary<string, EntitySchema> fileConfiguredDict = _databaseSettings.Entities.ToDictionary(t => t.EntityTypeFullName);
+
+            IDictionary<string, EntitySchema> resusltEntitySchemaDict = new Dictionary<string, EntitySchema>();
+
+            foreach (Type type in entityTypes)
+            {
+                EntitySchemaAttribute attribute = type.GetCustomAttribute<EntitySchemaAttribute>();
+
+                fileConfiguredDict.TryGetValue(type.FullName, out EntitySchema fileConfigured);
+
+                if (attribute == null && fileConfigured == null)
+                {
+                    throw new Exception($"DatabaseEntity : {type.FullName} not configure neither appsettings.json or EntitySchemaAttribute.");
+                }
+
+                EntitySchema entitySchema = new EntitySchema();
+
+                if (attribute != null)
+                {
+                    entitySchema.EntityTypeFullName = type.FullName;
+                    entitySchema.DatabaseName = attribute.DatabaseName;
+                    entitySchema.TableName = attribute.TableName;
+                    entitySchema.Description = attribute.Description;
+                    entitySchema.Writeable = attribute.Writeable;
+                }
+
+                //文件配置可以覆盖代码中的配置
+                if (fileConfigured != null)
+                {
+                    entitySchema.EntityTypeFullName = type.FullName;
+
+                    if (!string.IsNullOrEmpty(fileConfigured.DatabaseName))
+                    {
+                        entitySchema.DatabaseName = fileConfigured.DatabaseName;
+                    }
+
+                    if (!string.IsNullOrEmpty(fileConfigured.TableName))
+                    {
+                        entitySchema.TableName = fileConfigured.TableName;
+                    }
+
+                    if (!string.IsNullOrEmpty(fileConfigured.Description))
+                    {
+                        entitySchema.Description = fileConfigured.Description;
+                    }
+
+                    entitySchema.Writeable = fileConfigured.Writeable;
+                }
+
+                resusltEntitySchemaDict.Add(type.FullName, entitySchema);
+            }
+
+            return resusltEntitySchemaDict;
         }
 
         public DatabaseEntityDef GetDef<T>()
@@ -68,20 +133,18 @@ namespace HB.Framework.Database.Entity
 
             #region 数据库
 
-            DatabaseSchema dbSchema = _options.GetDatabaseSchema(modelType.FullName);
-
-            if (dbSchema == null)
-            {
-                modelDef.IsTableModel = false;
-            }
-            else
+            if (_entitySchemaDict.TryGetValue(modelType.FullName, out EntitySchema dbSchema))
             {
                 modelDef.IsTableModel = true;
                 modelDef.DatabaseName = dbSchema.DatabaseName;
-                modelDef.TableName = dbSchema.TableName;
+                modelDef.TableName = dbSchema.TableName.IsNullOrEmpty() ? "tb_" + modelType.Name.ToLower() : dbSchema.TableName;
                 modelDef.DbTableDescription = dbSchema.Description;
                 modelDef.DbTableReservedName = _databaseEngine.GetReservedStatement(modelDef.TableName);
                 modelDef.DatabaseWriteable = dbSchema.Writeable;
+            }
+            else
+            {
+                modelDef.IsTableModel = false;
             }
 
             #endregion
@@ -188,7 +251,7 @@ namespace HB.Framework.Database.Entity
 
         public int GetVarcharDefaultLength()
         {
-            return _options.DefaultVarcharLength == 0 ? DEFAULT_STRING_LENGTH : _options.DefaultVarcharLength;
+            return _databaseSettings.DefaultVarcharLength == 0 ? DEFAULT_STRING_LENGTH : _databaseSettings.DefaultVarcharLength;
         }
     }
 
