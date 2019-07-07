@@ -66,6 +66,7 @@ namespace HB.Infrastructure.MySQL
 
         public static IDataReader ExecuteCommandReader(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
+            dbCommand.Transaction = mySqlTransaction;
             return ExecuteCommandReader(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
 
@@ -127,6 +128,7 @@ namespace HB.Infrastructure.MySQL
 
         public static object ExecuteCommandScalar(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
+            dbCommand.Transaction = mySqlTransaction;
             return ExecuteCommandScalar(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
 
@@ -173,6 +175,7 @@ namespace HB.Infrastructure.MySQL
 
         public static int ExecuteCommandNonQuery(MySqlTransaction mySqlTransaction, IDbCommand dbCommand)
         {
+            dbCommand.Transaction = mySqlTransaction;
             return ExecuteCommandNonQuery(mySqlTransaction.Connection, false, (MySqlCommand)dbCommand);
         }
 
@@ -348,7 +351,80 @@ namespace HB.Infrastructure.MySQL
         }
 
         #endregion
-        
+
+        #region SQL
+
+        public static int ExecuteSqlNonQuery(string connectionString, string sqlString)
+        {
+            MySqlConnection conn = new MySqlConnection(connectionString);
+
+            MySqlCommand command = new MySqlCommand {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
+
+            return ExecuteCommandNonQuery(conn, true, command);
+        }
+
+        public static int ExecuteSqlNonQuery(MySqlTransaction mySqlTransaction, string sqlString)
+        {
+            MySqlCommand command = new MySqlCommand {
+                CommandType = CommandType.Text,
+                CommandText = sqlString,
+                Transaction = mySqlTransaction
+            };
+
+            return ExecuteCommandNonQuery(mySqlTransaction.Connection, false, command);
+        }
+
+        public static IDataReader ExecuteSqlReader(string connectionString, string sqlString)
+        {
+            //TODO: do we need a connection manager, that retry and makesure connection is avalible?
+            MySqlConnection conn = new MySqlConnection(connectionString);
+
+            MySqlCommand command = new MySqlCommand {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
+
+            return ExecuteCommandReader(conn, true, command);
+        }
+
+        public static IDataReader ExecuteSqlReader(MySqlTransaction mySqlTransaction, string sqlString)
+        {
+            MySqlCommand command = new MySqlCommand {
+                CommandType = CommandType.Text,
+                CommandText = sqlString,
+                Transaction = mySqlTransaction
+            };
+
+            return ExecuteCommandReader(mySqlTransaction.Connection, false, command);
+        }
+        public static object ExecuteSqlScalar(string connectionString, string sqlString)
+        {
+            MySqlConnection conn = new MySqlConnection(connectionString);
+
+            MySqlCommand command = new MySqlCommand {
+                CommandType = CommandType.Text,
+                CommandText = sqlString
+            };
+
+            return ExecuteCommandScalar(conn, true, command);
+        }
+
+        public static object ExecuteSqlScalar(MySqlTransaction mySqlTransaction, string sqlString)
+        {
+            MySqlCommand command = new MySqlCommand {
+                CommandType = CommandType.Text,
+                CommandText = sqlString,
+                Transaction = mySqlTransaction
+            };
+
+            return ExecuteCommandScalar(mySqlTransaction.Connection, false, command);
+        }
+
+        #endregion
+
         //#region SqlDataTable
 
         //public static DataTable ExecuteSqlDataTable(string connectString, string sqlString)
@@ -373,7 +449,7 @@ namespace HB.Infrastructure.MySQL
         //    throw new NotImplementedException();
 
         //    //DataTable table = new DataTable();
-            
+
         //    //try
         //    //{
         //    //    if (connection.State != ConnectionState.Open)
@@ -409,78 +485,6 @@ namespace HB.Infrastructure.MySQL
 
         //#endregion
 
-        // UnSafe
-        // Unsafe
-        //UnSafe
-        //public static int ExecuteSqlNonQuery(string connectionString, string sqlString)
-        //{
-        //    MySqlConnection conn = new MySqlConnection(connectionString);
-
-        //    MySqlCommand command = new MySqlCommand
-        //    {
-        //        CommandType = CommandType.Text,
-        //        CommandText = sqlString
-        //    };
-
-        //    return ExecuteCommandNonQuery(conn, true, command);
-        //}
-
-        //public static int ExecuteSqlNonQuery(MySqlTransaction mySqlTransaction, string sqlString)
-        //{
-        //    MySqlCommand command = new MySqlCommand
-        //    {
-        //        CommandType = CommandType.Text,
-        //        CommandText = sqlString
-        //    };
-
-        //    return ExecuteCommandNonQuery(mySqlTransaction.Connection, false, command);
-        //}
-        //public static IDataReader ExecuteSqlReader(string connectionString, string sqlString)
-        //{
-        //    //TODO: do we need a connection manager, that retry and makesure connection is avalible?
-        //    MySqlConnection conn = new MySqlConnection(connectionString);
-
-        //    MySqlCommand command = new MySqlCommand
-        //    {
-        //        CommandType = CommandType.Text,
-        //        CommandText = sqlString
-        //    };
-
-        //    return ExecuteCommandReader(conn, true, command);
-        //}
-
-        //public static IDataReader ExecuteSqlReader(MySqlTransaction mySqlTransaction, string sqlString)
-        //{
-        //    MySqlCommand command = new MySqlCommand
-        //    {
-        //        CommandType = CommandType.Text,
-        //        CommandText = sqlString
-        //    };
-
-        //    return ExecuteCommandReader(mySqlTransaction.Connection, false, command);
-        //}
-        //public static object ExecuteSqlScalar(string connectionString, string sqlString)
-        //{
-        //    MySqlConnection conn = new MySqlConnection(connectionString);
-
-        //    MySqlCommand command = new MySqlCommand
-        //    {
-        //        CommandType = CommandType.Text,
-        //        CommandText = sqlString
-        //    };
-
-        //    return ExecuteCommandScalar(conn, true, command);
-        //}
-
-        //public static object ExecuteSqlScalar(MySqlTransaction mySqlTransaction, string sqlString)
-        //{
-        //    MySqlCommand command = new MySqlCommand
-        //    {
-        //        CommandType = CommandType.Text,
-        //        CommandText = sqlString
-        //    };
-
-        //    return ExecuteCommandScalar(mySqlTransaction.Connection, false, command);
-        //}
+       
     }
 }

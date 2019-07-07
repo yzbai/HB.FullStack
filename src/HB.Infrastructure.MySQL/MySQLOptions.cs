@@ -13,6 +13,7 @@ namespace HB.Infrastructure.MySQL
 
         public IList<EntitySchema> Entities { get; } = new List<EntitySchema>();
 
+        public bool AutomaticCreateTable => true;
     }
 
     public class SchemaInfo
