@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Data;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace HB.Framework.Database.Test
 {
+    [TestCaseOrderer]
     public class ComplexFieldTest : IClassFixture<ServiceFixture>
     {
         private readonly IDatabase database;
@@ -20,6 +22,7 @@ namespace HB.Framework.Database.Test
             output = testOutputHelper;
             database = serviceFixture.Database;
             transaction = serviceFixture.Transaction;
+
         }
 
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using HB.Infrastructure.Aliyun.Oss;
-using HB.Infrastructure.Aliyun.Sts;
 using Xunit;
 using Xunit.Abstractions;
 
