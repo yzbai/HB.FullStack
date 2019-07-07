@@ -7,8 +7,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using HB.Framework.Database.Entity;
 using HB.Framework.Database.SQL;
-using HB.Framework.Database.Transaction;
-using Microsoft.Extensions.Logging;
 
 namespace HB.Framework.Database
 {
@@ -30,8 +28,9 @@ namespace HB.Framework.Database
 
                     if (lst.Count > 1)
                     {
-                        _logger.LogCritical(0, "retrieve result not one, but many." + typeof(T).FullName, null);
-                        return default;
+                        throw new DatabaseException($"Scalar retrieve return more than one result. Select:{selectCondition.ToString()}, From:{fromCondition.ToString()}, Where:{whereCondition.ToString()}");
+                        //_logger.LogCritical(0, "retrieve result not one, but many." + typeof(T).FullName, null);
+                        //return default;
                     }
 
                     return lst[0];
@@ -71,11 +70,11 @@ namespace HB.Framework.Database
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<TSelect>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<TSelect>();
-                _logger.LogCritical(ex.Message);
-            }
+            //catch (DbException ex)
+            //{
+            //    result = new List<TSelect>();
+            //    _logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -121,11 +120,11 @@ namespace HB.Framework.Database
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<T>(reader);
             }
-            catch (DbException ex)
-            {
-                result = null;
-                _logger.LogCritical(ex.Message);
-            }
+            //catch (DbException ex)
+            //{
+            //    result = null;
+            //    //_logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -192,7 +191,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                throw ex;// _logger.LogCritical(ex.Message);
             }
 
             return count;
@@ -359,12 +358,12 @@ namespace HB.Framework.Database
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<TSource, TTarget>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<Tuple<TSource, TTarget>>();
+            //catch (DbException ex)
+            //{
+            //    result = new List<Tuple<TSource, TTarget>>();
 
-                _logger.LogCritical(ex.Message);
-            }
+            //    _logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -406,8 +405,9 @@ namespace HB.Framework.Database
 
                     if (lst.Count > 1)
                     {
-                        _logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
-                        return null;
+                        throw new DatabaseException($"Scalar retrieve return more than one result. From:{fromCondition.ToString()}, Where:{whereCondition.ToString()}");
+                        //_logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
+                        //return null;
                     }
 
                     return lst[0];
@@ -460,12 +460,12 @@ namespace HB.Framework.Database
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName, command, transContext != null).ConfigureAwait(false);
                 result = _modelMapper.ToList<TSource, TTarget1, TTarget2>(reader);
             }
-            catch (DbException ex)
-            {
-                result = new List<Tuple<TSource, TTarget1, TTarget2>>();
+            //catch (DbException ex)
+            //{
+            //    result = new List<Tuple<TSource, TTarget1, TTarget2>>();
 
-                _logger.LogCritical(ex.Message);
-            }
+            //    _logger.LogCritical(ex.Message);
+            //}
             finally
             {
                 if (reader != null)
@@ -509,8 +509,9 @@ namespace HB.Framework.Database
 
                     if (lst.Count > 1)
                     {
-                        _logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
-                        return null;
+                        throw new DatabaseException($"Scalar retrieve return more than one result. From:{fromCondition.ToString()}, Where:{whereCondition.ToString()}");
+                        //_logger.LogCritical(0, "retrieve result not one, but many." + typeof(TSource).FullName, null);
+                        //return null;
                     }
 
                     return lst[0];
@@ -554,7 +555,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -607,7 +608,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
         }
@@ -660,7 +661,7 @@ namespace HB.Framework.Database
             }
             catch (DbException ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
         }
@@ -721,7 +722,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -790,7 +791,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex.Message);
+                //_logger.LogCritical(ex.Message);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -854,7 +855,7 @@ namespace HB.Framework.Database
             }
             catch (Exception ex)
             {
-                _logger.Error_BatchDelete_Thrown(ex, lastUser);
+                //_logger.Error_BatchDelete_Thrown(ex, lastUser);
                 return DatabaseResult.Fail(ex);
             }
             finally
@@ -863,6 +864,103 @@ namespace HB.Framework.Database
                 {
                     reader.Dispose();
                 }
+            }
+        }
+
+        #endregion
+
+        #region 事务
+
+        public async Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel isolationLevel)
+        {
+            IDbTransaction dbTransaction = await _databaseEngine.BeginTransactionAsync(databaseName, isolationLevel).ConfigureAwait(false);
+
+            return new TransactionContext() {
+                Transaction = dbTransaction,
+                Status = TransactionStatus.InTransaction
+            };
+        }
+
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel isolationLevel) where T : DatabaseEntity
+        {
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            return BeginTransactionAsync(entityDef.DatabaseName, isolationLevel);
+        }
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
+        public async Task CommitAsync(TransactionContext context)
+        {
+            if (context == null || context.Transaction == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status != TransactionStatus.InTransaction)
+            {
+                throw new DatabaseException("use a already finished transactioncontenxt");
+            }
+
+            try
+            {
+                IDbConnection conn = context.Transaction.Connection;
+
+                await _databaseEngine.CommitAsync(context.Transaction).ConfigureAwait(false);
+                //context.Transaction.Commit();
+
+                context.Transaction.Dispose();
+
+                if (conn != null && conn.State != ConnectionState.Closed)
+                {
+                    conn.Dispose();
+                }
+
+                context.Status = TransactionStatus.Commited;
+            }
+            catch
+            {
+                context.Status = TransactionStatus.Failed;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 回滚事务
+        /// </summary>
+        public async Task RollbackAsync(TransactionContext context)
+        {
+            if (context == null || context.Transaction == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status != TransactionStatus.InTransaction)
+            {
+                throw new DatabaseException("use a already finished transactioncontenxt");
+            }
+
+            try
+            {
+                IDbConnection conn = context.Transaction.Connection;
+
+                await _databaseEngine.RollbackAsync(context.Transaction).ConfigureAwait(false);
+                //context.Transaction.Rollback();
+
+                context.Transaction.Dispose();
+
+                if (conn != null && conn.State != ConnectionState.Closed)
+                {
+                    conn.Dispose();
+                }
+
+                context.Status = TransactionStatus.Rollbacked;
+            }
+            catch
+            {
+                context.Status = TransactionStatus.Failed;
+                throw;
             }
         }
 

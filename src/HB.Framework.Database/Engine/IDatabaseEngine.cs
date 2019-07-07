@@ -12,6 +12,16 @@ namespace HB.Framework.Database.Engine
     /// </summary>
     public interface IDatabaseEngine : IDatabaseEngineAsync
     {
+        #region 管理功能
+
+        bool IsTableExist(string tableName);
+
+        IEnumerable<SystemInfo> GetSystemInfos();
+
+        void UpdateSystemVersion(int version);
+
+        #endregion
+
         #region SP执行功能
 
         /// <summary>
@@ -63,6 +73,7 @@ namespace HB.Framework.Database.Engine
         /// </summary>
         /// <returns></returns>
         IDbCommand CreateEmptyCommand();
+        
 
         #endregion
 
@@ -137,6 +148,7 @@ namespace HB.Framework.Database.Engine
         /// <param name="type"></param>
         /// <returns></returns>
         bool IsValueNeedQuoted(Type type);
+        bool ExecuteSQL(string databaseName, string sqlStatement, TransactionContext tContext);
 
 
 

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using HB.Framework.KVStore;
 using System.Text;
-using Microsoft.AspNetCore.Hosting;
 using System.Globalization;
 
 namespace HB.Infrastructure.Redis.KVStore
