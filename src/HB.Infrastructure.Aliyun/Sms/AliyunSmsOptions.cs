@@ -22,7 +22,6 @@ namespace HB.Infrastructure.Aliyun.Sms
         public string SignName { get; set; }
 
         public TemplateIdentityValidation TemplateIdentityValidation { get; set; }
-
     }
 
     public class TemplateIdentityValidation
