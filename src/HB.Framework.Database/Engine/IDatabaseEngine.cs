@@ -9,7 +9,7 @@ namespace HB.Framework.Database.Engine
     public enum DatabaseEngineType
     {
         MySQL,
-        Sqlite,
+        SQLite,
         MSSQLSERVER
     }
     /// <summary>

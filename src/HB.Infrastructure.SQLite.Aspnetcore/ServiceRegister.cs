@@ -1,9 +1,10 @@
 ﻿using HB.Framework.Database;
+using HB.Infrastructure.SQLite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace HB.Infrastructure.SQLite.Aspnetcore
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceRegister
     {

@@ -677,9 +677,109 @@ namespace HB.Framework.Database.SQL
 
         #region Create Table
 
+        public string GetTableCreateStatement(Type type, bool addDropStatement)
+        {
+            if (_databaseEngine.EngineType == DatabaseEngineType.MySQL)
+            {
+                return GetMySQLTableCreateStatement(type, addDropStatement);
+            }
+            else if (_databaseEngine.EngineType == DatabaseEngineType.SQLite)
+            {
+                return GetSQLiteTableCreateStatement(type, addDropStatement);
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private string GetSQLiteTableCreateStatement(Type type, bool addDropStatement)
+        {
+            StringBuilder sql = new StringBuilder();
+            DatabaseEntityDef definition = _entityDefFactory.GetDef(type);
+
+            if (definition.DbTableReservedName.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            foreach (DatabaseEntityPropertyDef info in definition.Properties)
+            {
+                if (!info.IsTableProperty)
+                {
+                    continue;
+                }
+
+                if (info.PropertyName.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
+                {
+                    continue;
+                }
+
+                int length = 0;
+
+                if (info.DbLength == null || info.DbLength == 0)
+                {
+                    if (info.DbFieldType == DbType.String
+                        || info.PropertyType == typeof(string)
+                        || info.PropertyType == typeof(char)
+                        || info.PropertyType.IsEnum
+                        || info.PropertyType.IsAssignableFrom(typeof(IList<string>))
+                        || info.PropertyType.IsAssignableFrom(typeof(IDictionary<string, string>)))
+                    {
+                        length = _entityDefFactory.GetVarcharDefaultLength();
+                    }
+                }
+                else
+                {
+                    length = info.DbLength.Value;
+                }
+
+                string binary = "";
+
+                if (info.PropertyType == typeof(string) || info.PropertyType == typeof(char) || info.PropertyType == typeof(char?))
+                {
+                    binary = "";
+                }
+
+                string dbTypeStatement = info.TypeConverter == null
+                    ? _databaseEngine.GetDbTypeStatement(info.PropertyType)
+                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyType);
+
+                sql.AppendFormat(GlobalSettings.Culture, " {0} {1}{2} {6} {3} {4} {5},",
+                    info.DbReservedName,
+                    info.IsLengthFixed ? "CHAR" : length >= 21845 ? "TEXT" : dbTypeStatement,
+                    length == 0 ? "" : "(" + length + ")",
+                    info.IsNullable == true ? "" : " NOT NULL ",
+                    string.IsNullOrEmpty(info.DbDefaultValue) ? "" : "DEFAULT " + info.DbDefaultValue,
+                    !info.IsAutoIncrementPrimaryKey && !info.IsForeignKey && info.IsUnique ? " UNIQUE " : "",
+                    binary
+                    );
+                sql.AppendLine();
+            }
+
+            string dropStatement = string.Empty;
+
+            if (addDropStatement)
+            {
+                dropStatement = string.Format(GlobalSettings.Culture, "Drop table if exists {0};" + Environment.NewLine, definition.DbTableReservedName);
+            }
+
+
+            return 
+$@"{dropStatement}
+CREATE TABLE {definition.DbTableReservedName} (
+    ""Id""    INTEGER PRIMARY KEY AUTOINCREMENT,
+    {sql.ToString()}
+    ""Deleted""   NUMERIC NOT NULL DEFAULT 0,
+    ""LastUser"" TEXT,
+	""LastTime"" NUMERIC,
+	""Version"" INTEGER NOT NULL
+);";
+        }
+
         //TODO: 目前只适用Mysql，需要后期改造
         //TODO: 处理长文本 Text， MediumText， LongText
-        public string GetTableCreateStatement(Type type, bool addDropStatement)
+        private string GetMySQLTableCreateStatement(Type type, bool addDropStatement)
         {
             StringBuilder sql = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef(type);
