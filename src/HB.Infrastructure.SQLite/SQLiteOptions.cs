@@ -1,11 +1,10 @@
-﻿using System;
+﻿using HB.Framework.Database;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using HB.Framework.Database;
 
-namespace HB.Infrastructure.MySQL
+namespace HB.Infrastructure.SQLite
 {
-    public class MySQLOptions
+    public class SQLiteOptions
     {
         public DatabaseSettings DatabaseSettings { get; set; } = new DatabaseSettings();
 

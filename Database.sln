@@ -19,9 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{6DFDEA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseSample", "samples\DatabaseSample\DatabaseSample.csproj", "{F0DAA7C5-8937-428C-8155-1B8E2AD31B1E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Sqlite", "src\HB.Infrastructure.Sqlite\HB.Infrastructure.Sqlite.csproj", "{D6CF2976-131F-4213-BE92-BB5E05C1EC1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.SQLite", "src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj", "{ECAA542C-3B00-4767-A807-2E2C95F27567}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.Sqlite.Aspnetcore", "src\HB.Infrastructure.Sqlite.Aspnetcore\HB.Infrastructure.Sqlite.Aspnetcore.csproj", "{216A36BB-1E1C-4CC8-8E1B-86184BD5FBFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.SQLite.Aspnetcore", "src\HB.Infrastructure.SQLite.Aspnetcore\HB.Infrastructure.SQLite.Aspnetcore.csproj", "{CE66FC0B-212D-486C-8BA9-4DE8A8898A27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,14 +53,14 @@ Global
 		{F0DAA7C5-8937-428C-8155-1B8E2AD31B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0DAA7C5-8937-428C-8155-1B8E2AD31B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0DAA7C5-8937-428C-8155-1B8E2AD31B1E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6CF2976-131F-4213-BE92-BB5E05C1EC1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6CF2976-131F-4213-BE92-BB5E05C1EC1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6CF2976-131F-4213-BE92-BB5E05C1EC1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6CF2976-131F-4213-BE92-BB5E05C1EC1B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{216A36BB-1E1C-4CC8-8E1B-86184BD5FBFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{216A36BB-1E1C-4CC8-8E1B-86184BD5FBFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{216A36BB-1E1C-4CC8-8E1B-86184BD5FBFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{216A36BB-1E1C-4CC8-8E1B-86184BD5FBFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECAA542C-3B00-4767-A807-2E2C95F27567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECAA542C-3B00-4767-A807-2E2C95F27567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECAA542C-3B00-4767-A807-2E2C95F27567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECAA542C-3B00-4767-A807-2E2C95F27567}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE66FC0B-212D-486C-8BA9-4DE8A8898A27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE66FC0B-212D-486C-8BA9-4DE8A8898A27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE66FC0B-212D-486C-8BA9-4DE8A8898A27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE66FC0B-212D-486C-8BA9-4DE8A8898A27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
