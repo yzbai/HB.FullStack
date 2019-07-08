@@ -13,7 +13,9 @@ namespace HB.Framework.Database.Entity
 
         public string Description { get; set; }
 
-        public bool Writeable { get; set; } = true;
+        public bool ReadOnly { get; set; }
+
+        public string SuffixToRemove = "Entity";
 
         public EntitySchemaAttribute(string databaseName)
         {

@@ -23,6 +23,10 @@ namespace HB.Infrastructure.MySQL
 
         private MySQLEngine() { }
 
+        public DatabaseEngineType EngineType => DatabaseEngineType.MySQL;
+
+        public string FirstDefaultDatabaseName { get; private set; }
+
         public MySQLEngine(MySQLOptions options) : this()
         {
             //MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
@@ -40,6 +44,11 @@ namespace HB.Infrastructure.MySQL
 
             foreach (SchemaInfo schemaInfo in _options.Schemas)
             {
+                if (FirstDefaultDatabaseName.IsNullOrEmpty())
+                {
+                    FirstDefaultDatabaseName = schemaInfo.SchemaName;
+                }
+
                 if (schemaInfo.IsMaster)
                 {
                     _connectionStringDict[schemaInfo.SchemaName + "_1"] = schemaInfo.ConnectionString;
@@ -319,56 +328,55 @@ INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', '{0}');";
 
         private static string tbSysInfoUpdateVersion = @"UPDATE `tb_sys_info` SET `Value` = '{0}' WHERE `Name` = 'Version';";
 
-        public IEnumerable<SystemInfo> GetSystemInfos()
+        public IEnumerable<string> GetDatabaseNames()
         {
-            List<SystemInfo> infos = new List<SystemInfo>();
-
-            foreach (string databaseName in _options.Schemas.Select(s => s.SchemaName))
-            {
-                IDataReader reader = null;
-
-                try
-                {
-                    reader = ExecuteSqlReader(null, databaseName, tbSysInfoRetrieve, false);
-
-                    SystemInfo systemInfo = new SystemInfo { DatabaseName = databaseName };
-
-                    while(reader.Read())
-                    {
-                        systemInfo.Add(reader["Name"].ToString(), reader["Value"].ToString());
-                    }
-
-                    infos.Add(systemInfo);
-                }
-                catch (Exception)
-                {
-                    infos.Add(new SystemInfo {
-                        DatabaseName = databaseName,
-                        Version = 0
-                    });
-                }
-                finally
-                {
-                    if (reader != null)
-                    {
-                        reader.Close();
-                    }
-                }
-            }
-
-            return infos;
+            return _options.Schemas.Select(s => s.SchemaName);
         }
 
-        public void UpdateSystemVersion(string databaseName, int version)
+        public SystemInfo GetSystemInfo(string databaseName, IDbTransaction transaction)
+        {
+            IDataReader reader = null;
+
+            try
+            {
+                reader = ExecuteSqlReader(transaction, databaseName, tbSysInfoRetrieve, false);
+
+                SystemInfo systemInfo = new SystemInfo { DatabaseName = databaseName };
+
+                while (reader.Read())
+                {
+                    systemInfo.Add(reader["Name"].ToString(), reader["Value"].ToString());
+                }
+
+                return systemInfo;
+            }
+            catch (Exception)
+            {
+                return new SystemInfo 
+                {
+                    DatabaseName = databaseName,
+                    Version = 0
+                };
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Close();
+                }
+            }
+        }
+
+        public void UpdateSystemVersion(string databaseName, int version, IDbTransaction transaction)
         {
             if (version == 1)
             {
                 //创建SystemInfo
-                ExecuteSqlNonQuery(null, databaseName, string.Format(tbSysInfoCreate, databaseName));
+                ExecuteSqlNonQuery(transaction, databaseName, string.Format(tbSysInfoCreate, databaseName));
             }
             else
             {
-                ExecuteSqlNonQuery(null, databaseName, string.Format(tbSysInfoUpdateVersion, version));
+                ExecuteSqlNonQuery(transaction, databaseName, string.Format(tbSysInfoUpdateVersion, version));
             }
         }
 
