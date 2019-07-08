@@ -7,7 +7,7 @@ using System.Text;
 
 namespace HB.Framework.Database.Test
 {
-    public class TestEntity : DatabaseEntity
+    public class PublisherEntity : DatabaseEntity
     {
         [UniqueGuidEntityProperty]
         public string Guid { get; set; }
@@ -18,19 +18,21 @@ namespace HB.Framework.Database.Test
         [EntityProperty]
         public IList<string> Books { get; set; }
 
-        [EntityProperty(ConverterType = typeof(TestEntityTypeConventer))]
+        [EntityProperty(ConverterType = typeof(PublisherBookAuthorsTypeConventer))]
         public IDictionary<string, Author> BookAuthors { get; set; }
 
+        [EntityProperty(Length = EntityPropertyLength.MediumLength)]
+        public IDictionary<string, string> BookNames { get; set; }
+
         [EntityProperty]
-        public TestType Type { get; set; }
+        public PublisherType Type { get; set; }
     }
 
-    public enum TestType
+    public enum PublisherType
     {
-        Type1,
-        Type2,
-        Type3,
-        Hahaha
+        Online,
+        Big,
+        Small
     }
 
     public class Author
@@ -40,9 +42,9 @@ namespace HB.Framework.Database.Test
         public string Mobile { get; set; }
     }
 
-    public class TestEntityTypeConventer : DatabaseTypeConverter
+    public class PublisherBookAuthorsTypeConventer : DatabaseTypeConverter
     {
-        public TestEntityTypeConventer() { }
+        public PublisherBookAuthorsTypeConventer() { }
 
         protected override object StringDbValueToTypeValue(string stringValue)
         {

@@ -57,27 +57,37 @@ namespace HB.Framework.Database.Entity
 
                 fileConfiguredDict.TryGetValue(type.FullName, out EntitySchema fileConfigured);
 
-                if (attribute == null && fileConfigured == null)
-                {
-                    throw new Exception($"DatabaseEntity : {type.FullName} not configure neither appsettings.json or EntitySchemaAttribute.");
-                }
-
-                EntitySchema entitySchema = new EntitySchema();
+                EntitySchema entitySchema = new EntitySchema { EntityTypeFullName = type.FullName };
 
                 if (attribute != null)
                 {
-                    entitySchema.EntityTypeFullName = type.FullName;
-                    entitySchema.DatabaseName = attribute.DatabaseName;
-                    entitySchema.TableName = attribute.TableName;
+                    entitySchema.DatabaseName = attribute.DatabaseName.IsNullOrEmpty() ? _databaseEngine.FirstDefaultDatabaseName : attribute.DatabaseName;
+
+                    if (attribute.TableName.IsNullOrEmpty())
+                    {
+                        entitySchema.TableName = "tb_";
+
+                        if(type.Name.EndsWith(attribute.SuffixToRemove))
+                        {
+                            entitySchema.TableName += type.Name.Substring(0, type.Name.Length - attribute.SuffixToRemove.Length).ToLower();
+                        }
+                        else
+                        {
+                            entitySchema.TableName += type.Name.ToLower();
+                        }
+                    }
+                    else
+                    {
+                        entitySchema.TableName = attribute.TableName;
+                    }
+
                     entitySchema.Description = attribute.Description;
-                    entitySchema.Writeable = attribute.Writeable;
+                    entitySchema.ReadOnly = attribute.ReadOnly;
                 }
 
                 //文件配置可以覆盖代码中的配置
                 if (fileConfigured != null)
                 {
-                    entitySchema.EntityTypeFullName = type.FullName;
-
                     if (!string.IsNullOrEmpty(fileConfigured.DatabaseName))
                     {
                         entitySchema.DatabaseName = fileConfigured.DatabaseName;
@@ -93,7 +103,18 @@ namespace HB.Framework.Database.Entity
                         entitySchema.Description = fileConfigured.Description;
                     }
 
-                    entitySchema.Writeable = fileConfigured.Writeable;
+                    entitySchema.ReadOnly = fileConfigured.ReadOnly;
+                }
+
+                //做最后的检查，有可能两者都没有定义
+                if (entitySchema.DatabaseName.IsNullOrEmpty())
+                {
+                    entitySchema.DatabaseName = _databaseEngine.FirstDefaultDatabaseName;
+                }
+
+                if (entitySchema.TableName.IsNullOrEmpty())
+                {
+                    entitySchema.TableName = "tb_" + type.Name.ToLower();
                 }
 
                 resusltEntitySchemaDict.Add(type.FullName, entitySchema);
@@ -141,10 +162,10 @@ namespace HB.Framework.Database.Entity
             {
                 modelDef.IsTableModel = true;
                 modelDef.DatabaseName = dbSchema.DatabaseName;
-                modelDef.TableName = dbSchema.TableName.IsNullOrEmpty() ? "tb_" + modelType.Name.ToLower() : dbSchema.TableName;
+                modelDef.TableName = dbSchema.TableName;
                 modelDef.DbTableDescription = dbSchema.Description;
                 modelDef.DbTableReservedName = _databaseEngine.GetReservedStatement(modelDef.TableName);
-                modelDef.DatabaseWriteable = dbSchema.Writeable;
+                modelDef.DatabaseWriteable = !dbSchema.ReadOnly;
             }
             else
             {

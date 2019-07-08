@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace System.Collections.Generic
 {
@@ -13,6 +14,14 @@ namespace System.Collections.Generic
             foreach (T t in enumerable)
             {
                 action(t);
+            }
+        }
+
+        public static async Task ForEachAsync<T>(this IEnumerable<T> enumerable, Func<T, Task> action)
+        {
+            foreach (T t in enumerable)
+            {
+                await action(t);
             }
         }
 
