@@ -32,7 +32,7 @@ namespace HB.Infrastructure.SQLite
         //引号化
         public const string QuotedChar = "'";
         //保留化
-        public const string ReservedChar = "`";
+        public const string ReservedChar = @"""";
 
         /// <summary>
         /// 类型与数据库类型映射字典
