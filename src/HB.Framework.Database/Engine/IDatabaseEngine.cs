@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 //
 namespace HB.Framework.Database.Engine
 {
+    public enum DatabaseEngineType
+    {
+        MySQL,
+        Sqlite,
+        MSSQLSERVER
+    }
     /// <summary>
     /// 数据库接口,是对数据库能力的表达. 
     /// 多线程复用..
@@ -14,9 +20,15 @@ namespace HB.Framework.Database.Engine
     {
         #region 管理功能
 
-        IEnumerable<SystemInfo> GetSystemInfos();
+        DatabaseEngineType EngineType { get; }
 
-        void UpdateSystemVersion(string databaseName, int version);
+        string FirstDefaultDatabaseName { get; }
+
+        IEnumerable<string> GetDatabaseNames();
+
+        SystemInfo GetSystemInfo(string databaseName, IDbTransaction transaction);
+
+        void UpdateSystemVersion(string databaseName, int version, IDbTransaction transaction);
 
         #endregion
 
