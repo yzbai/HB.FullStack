@@ -21,6 +21,10 @@ namespace HB.Framework.Database
     /// </summary>
     internal partial class DefaultDatabase : IDatabase
     {
+        private static object _lockerObj = new object();
+
+        private bool _initialized = false;
+
         private readonly IDatabaseSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
         private readonly IDatabaseEntityDefFactory _entityDefFactory;
@@ -49,32 +53,59 @@ namespace HB.Framework.Database
 
         public void Initialize(IList<Migration> migrations = null)
         {
-            AutoCreateTablesIfBrandNew();
+            if (!_initialized)
+            {
+                lock (_lockerObj)
+                {
+                    if (!_initialized)
+                    {
+                        _initialized = true;
 
-            Migarate(migrations);
+                        AutoCreateTablesIfBrandNew();
+
+                        Migarate(migrations);
+                    }
+                }
+            }
         }
 
         private void AutoCreateTablesIfBrandNew()
         {
-            if (_databaseSettings.AutomaticCreateTable)
+            if (!_databaseSettings.AutomaticCreateTable)
             {
-                foreach (SystemInfo systemInfo in _databaseEngine.GetSystemInfos())
+                return;
+            }
+
+            _databaseEngine.GetDatabaseNames().ForEach(databaseName => {
+
+                TransactionContext transactionContext = BeginTransaction(databaseName, IsolationLevel.Serializable);
+
+                try
                 {
+                    SystemInfo sys = _databaseEngine.GetSystemInfo(databaseName, transactionContext.Transaction);
                     //表明是新数据库
-                    if (systemInfo.Version == 0)
+                    if (sys.Version == 0)
                     {
                         if (_databaseSettings.Version != 1)
                         {
-                            throw new DatabaseException($"Database:{systemInfo.DatabaseName} does not exists, database Version must be 1");
+                            Rollback(transactionContext);
+                            throw new DatabaseException($"Database:{databaseName} does not exists, database Version must be 1");
                         }
 
-                        CreateTablesByDatabase(systemInfo.DatabaseName);
+                        CreateTablesByDatabase(databaseName, transactionContext);
 
-                        _databaseEngine.UpdateSystemVersion(systemInfo.DatabaseName, 1);
+                        _databaseEngine.UpdateSystemVersion(databaseName, 1, transactionContext.Transaction);
                     }
+
+                    Commit(transactionContext);
+                }
+                catch (Exception ex)
+                {
+                    Rollback(transactionContext);
+                    throw new DatabaseException($"Auto Create Table Failed, Database:{databaseName}, Reason:{ex.Message}", ex);
                 }
 
-            }
+            });
         }
 
         private int CreateTable(DatabaseEntityDef def, TransactionContext transContext)
@@ -84,26 +115,11 @@ namespace HB.Framework.Database
             return _databaseEngine.ExecuteSqlNonQuery(transContext.Transaction, def.DatabaseName, sql);
         }
 
-        private void CreateTablesByDatabase(string databaseName)
+        private void CreateTablesByDatabase(string databaseName, TransactionContext transactionContext)
         {
-            IEnumerable<DatabaseEntityDef> defs = _entityDefFactory.GetAllDefsByDatabase(databaseName);
-
-            TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
-
-            try
-            {
-                foreach (DatabaseEntityDef def in defs)
-                {
-                    CreateTable(def, tContext);
-                }
-
-                Commit(tContext);
-            }
-            catch (Exception ex)
-            {
-                Rollback(tContext);
-                throw ex;
-            }
+            _entityDefFactory
+                .GetAllDefsByDatabase(databaseName)
+                .ForEach(def => CreateTable(def, transactionContext));
         }
 
         private void Migarate(IList<Migration> migrations)
@@ -113,54 +129,48 @@ namespace HB.Framework.Database
                 throw new DatabaseException($"oldVersion should always lower than newVersions in Database Migrations");
             }
 
-            foreach (SystemInfo sys in _databaseEngine.GetSystemInfos())
-            {
-                if (sys.Version < _databaseSettings.Version)
+            _databaseEngine.GetDatabaseNames().ForEach(databaseName => {
+
+                TransactionContext transactionContext = BeginTransaction(databaseName, IsolationLevel.Serializable);
+
+                try
                 {
-                    if (migrations == null)
+                    SystemInfo sys = _databaseEngine.GetSystemInfo(databaseName, transactionContext.Transaction);
+
+                    if (sys.Version < _databaseSettings.Version)
                     {
-                        throw new DatabaseException($"Lack Migrations for {sys.DatabaseName}");
+                        if (migrations == null)
+                        {
+                            throw new DatabaseException($"Lack Migrations for {sys.DatabaseName}");
+                        }
+
+                        IOrderedEnumerable<Migration> curOrderedMigrations = migrations
+                            .Where(m => m.TargetSchema.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
+                            .OrderBy(m => m.OldVersion);
+
+                        if (curOrderedMigrations == null)
+                        {
+                            throw new DatabaseException($"Lack Migrations for {sys.DatabaseName}");
+                        }
+
+                        if (!CheckMigration(sys.Version, _databaseSettings.Version, curOrderedMigrations))
+                        {
+                            throw new DatabaseException($"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
+                        }
+
+                        curOrderedMigrations.ForEach(migration => _databaseEngine.ExecuteSqlNonQuery(transactionContext.Transaction, databaseName, migration.SqlStatement));
+
+                        _databaseEngine.UpdateSystemVersion(sys.DatabaseName, _databaseSettings.Version, transactionContext.Transaction);
                     }
 
-                    IOrderedEnumerable<Migration> curOrderedMigrations = migrations
-                        .Where(m => m.TargetSchema.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
-                        .OrderBy(m => m.OldVersion);
-
-                    if (curOrderedMigrations == null)
-                    {
-                        throw new DatabaseException($"Lack Migrations for {sys.DatabaseName}");
-                    }
-
-                    if (!CheckMigration(sys.Version, _databaseSettings.Version, curOrderedMigrations))
-                    {
-                        throw new DatabaseException($"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
-                    }
-
-                    PerfomeMigration(sys.DatabaseName, curOrderedMigrations);
-
-                    _databaseEngine.UpdateSystemVersion(sys.DatabaseName, _databaseSettings.Version);
+                    Commit(transactionContext);
                 }
-            }
-        }
-
-        private void PerfomeMigration(string databaseName, IOrderedEnumerable<Migration> curOrderedMigrations)
-        {
-            TransactionContext tContext = BeginTransaction(databaseName, IsolationLevel.ReadCommitted);
-
-            try
-            {
-                foreach (Migration migration in curOrderedMigrations)
+                catch (Exception ex)
                 {
-                    _databaseEngine.ExecuteSqlNonQuery(tContext.Transaction, databaseName, migration.SqlStatement);
+                    Rollback(transactionContext);
+                    throw new DatabaseException($"Migration Failed at Database:{databaseName}", ex);
                 }
-
-                Commit(tContext);
-            }
-            catch (Exception ex)
-            {
-                Rollback(tContext);
-                throw ex;
-            }
+            });
         }
 
         private bool CheckMigration(int startVersion, int endVersion, IOrderedEnumerable<Migration> curOrderedMigrations)
@@ -1100,6 +1110,11 @@ namespace HB.Framework.Database
                 throw new ArgumentNullException(nameof(context));
             }
 
+            if (context.Status == TransactionStatus.Commited)
+            {
+                return;
+            }
+
             if (context.Status != TransactionStatus.InTransaction)
             {
                 throw new DatabaseException("use a already finished transactioncontenxt");
@@ -1134,6 +1149,11 @@ namespace HB.Framework.Database
             if (context == null || context.Transaction == null)
             {
                 throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status == TransactionStatus.Rollbacked)
+            {
+                return;
             }
 
             if (context.Status != TransactionStatus.InTransaction)

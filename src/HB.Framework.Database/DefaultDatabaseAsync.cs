@@ -886,6 +886,11 @@ namespace HB.Framework.Database
                 throw new ArgumentNullException(nameof(context));
             }
 
+            if (context.Status == TransactionStatus.Commited)
+            {
+                return;
+            }
+
             if (context.Status != TransactionStatus.InTransaction)
             {
                 throw new DatabaseException("use a already finished transactioncontenxt");
@@ -922,6 +927,11 @@ namespace HB.Framework.Database
             if (context == null || context.Transaction == null)
             {
                 throw new ArgumentNullException(nameof(context));
+            }
+
+            if (context.Status == TransactionStatus.Rollbacked)
+            {
+                return;
             }
 
             if (context.Status != TransactionStatus.InTransaction)

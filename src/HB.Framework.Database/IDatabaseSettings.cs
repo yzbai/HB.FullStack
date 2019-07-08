@@ -11,7 +11,7 @@ namespace HB.Framework.Database
         public string DatabaseName { get; set; }
         public string TableName { get; set; }
         public string Description { get; set; }
-        public bool Writeable { get; set; }
+        public bool ReadOnly { get; set; }
     }
 
     public interface IDatabaseSettings
