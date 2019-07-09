@@ -72,9 +72,9 @@ namespace HB.Infrastructure.SQLite.Test
 
             sqliteOptions.DatabaseSettings.Version = 1;
             sqliteOptions.Schemas.Add(new SchemaInfo {
-                SchemaName = "test_db",
+                SchemaName = "test.db",
                 IsMaster = true,
-                ConnectionString = "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None"
+                ConnectionString = "Data Source=c:\\Share\\test.db;Version=3;"
             });
 
             SQLiteBuilder sqliteBuilder = new SQLiteBuilder().SetSQLiteOptions(sqliteOptions).Build();
