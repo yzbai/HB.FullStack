@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 
 namespace HB.Infrastructure.SQLite
 {
@@ -10,21 +11,21 @@ namespace HB.Infrastructure.SQLite
     {
         #region Command Reader
 
-        public static Task<IDataReader> ExecuteCommandReaderAsync(SQLiteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandReaderAsync(sqliteTransaction.Connection, false, (SQLiteCommand)dbCommand);
+            return ExecuteCommandReaderAsync(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
         }
 
         public static Task<IDataReader> ExecuteCommandReaderAsync(string connectString, IDbCommand dbCommand)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectString);
-            return ExecuteCommandReaderAsync(conn, true, (SQLiteCommand)dbCommand);
+            SqliteConnection conn = new SqliteConnection(connectString);
+            return ExecuteCommandReaderAsync(conn, true, (SqliteCommand)dbCommand);
         }
 
-        private static async Task<IDataReader> ExecuteCommandReaderAsync(SQLiteConnection connection, bool isOwnedConnection, SQLiteCommand command)
+        private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
-            SQLiteDataReader reader = null;
+            SqliteDataReader reader = null;
 
             try
             {
@@ -37,11 +38,11 @@ namespace HB.Infrastructure.SQLite
 
                 if (isOwnedConnection)
                 {
-                    reader = (SQLiteDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+                    reader = (SqliteDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
                 }
                 else
                 {
-                    reader = (SQLiteDataReader)await command.ExecuteReaderAsync().ConfigureAwait(false);
+                    reader = (SqliteDataReader)await command.ExecuteReaderAsync().ConfigureAwait(false);
                 }
 
                 return reader;
@@ -68,17 +69,17 @@ namespace HB.Infrastructure.SQLite
 
         public static Task<object> ExecuteCommandScalarAsync(string connectString, IDbCommand dbCommand)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectString);
-            return ExecuteCommandScalarAsync(conn, true, (SQLiteCommand)dbCommand);
+            SqliteConnection conn = new SqliteConnection(connectString);
+            return ExecuteCommandScalarAsync(conn, true, (SqliteCommand)dbCommand);
         }
 
-        public static Task<object> ExecuteCommandScalarAsync(SQLiteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static Task<object> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandScalarAsync(sqliteTransaction.Connection, false, (SQLiteCommand)dbCommand);
+            return ExecuteCommandScalarAsync(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
         }
 
-        private static async Task<object> ExecuteCommandScalarAsync(SQLiteConnection connection, bool isOwnedConnection, SQLiteCommand command)
+        private static async Task<object> ExecuteCommandScalarAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             object rtObj = null;
 
@@ -114,18 +115,18 @@ namespace HB.Infrastructure.SQLite
 
         public static Task<int> ExecuteCommandNonQueryAsync(string connectString, IDbCommand dbCommand)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectString);
+            SqliteConnection conn = new SqliteConnection(connectString);
 
-            return ExecuteCommandNonQueryAsync(conn, true, (SQLiteCommand)dbCommand);
+            return ExecuteCommandNonQueryAsync(conn, true, (SqliteCommand)dbCommand);
         }
 
-        public static Task<int> ExecuteCommandNonQueryAsync(SQLiteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandNonQueryAsync(sqliteTransaction.Connection, false, (SQLiteCommand)dbCommand);
+            return ExecuteCommandNonQueryAsync(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
         }
 
-        private static async Task<int> ExecuteCommandNonQueryAsync(SQLiteConnection conn, bool isOwnedConnection, SQLiteCommand command)
+        private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, bool isOwnedConnection, SqliteCommand command)
         {
             int rtInt = -1;
 

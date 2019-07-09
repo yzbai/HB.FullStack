@@ -1,8 +1,8 @@
 ﻿using HB.Framework.Database.Engine;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +14,7 @@ namespace HB.Infrastructure.SQLite
 
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            SQLiteConnection conn = new SQLiteConnection(GetConnectionString(dbName, true));
+            SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));
             await conn.OpenAsync();
 
             return conn.BeginTransaction(isolationLevel);
@@ -22,7 +22,7 @@ namespace HB.Infrastructure.SQLite
 
         public Task CommitAsync(IDbTransaction transaction)
         {
-            SQLiteTransaction sqliteTransaction = transaction as SQLiteTransaction;
+            SqliteTransaction sqliteTransaction = transaction as SqliteTransaction;
 
             sqliteTransaction.Commit();
 
@@ -31,7 +31,7 @@ namespace HB.Infrastructure.SQLite
 
         public Task RollbackAsync(IDbTransaction transaction)
         {
-            SQLiteTransaction sqliteTransaction = transaction as SQLiteTransaction;
+            SqliteTransaction sqliteTransaction = transaction as SqliteTransaction;
 
             sqliteTransaction.Rollback();
 
@@ -50,7 +50,7 @@ namespace HB.Infrastructure.SQLite
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandNonQueryAsync((SQLiteTransaction)Transaction, dbCommand);
+                return SQLiteExecuter.ExecuteCommandNonQueryAsync((SqliteTransaction)Transaction, dbCommand);
             }
         }
 
@@ -62,7 +62,7 @@ namespace HB.Infrastructure.SQLite
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandReaderAsync((SQLiteTransaction)Transaction, dbCommand);
+                return SQLiteExecuter.ExecuteCommandReaderAsync((SqliteTransaction)Transaction, dbCommand);
             }
         }
 
@@ -74,7 +74,7 @@ namespace HB.Infrastructure.SQLite
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandScalarAsync((SQLiteTransaction)Transaction, dbCommand);
+                return SQLiteExecuter.ExecuteCommandScalarAsync((SqliteTransaction)Transaction, dbCommand);
             }
         }
 
