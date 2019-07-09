@@ -17,7 +17,7 @@ namespace HB.Infrastructure.SQLite
 
         private SQLiteEngine() { }
 
-        public DatabaseEngineType EngineType => DatabaseEngineType.MySQL;
+        public DatabaseEngineType EngineType => DatabaseEngineType.SQLite;
 
         public string FirstDefaultDatabaseName { get; private set; }
 
@@ -172,19 +172,17 @@ namespace HB.Infrastructure.SQLite
         #region SystemInfo
 
         private static string tbSysInfoCreate =
-@"CREATE TABLE `tb_sys_info` (
-	`Id` int (11) NOT NULL AUTO_INCREMENT, 
-	`Name` varchar(100) DEFAULT NULL, 
-	`Value` varchar(1024) DEFAULT NULL,
-	PRIMARY KEY(`Id`),
-	UNIQUE KEY `Name_UNIQUE` (`Name`)
+@"CREATE TABLE ""tb_sys_info"" (
+    ""Id"" INTEGER PRIMARY KEY AUTOINCREMENT,
+	""Name"" TEXT UNIQUE, 
+	""Value"" TEXT
 );
-INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('Version', '1');
-INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', '{0}');";
+INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('Version', '1');
+INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');";
 
-        private static string tbSysInfoRetrieve = @"SELECT * FROM `tb_sys_info`;";
+        private static string tbSysInfoRetrieve = @"SELECT * FROM ""tb_sys_info"";";
 
-        private static string tbSysInfoUpdateVersion = @"UPDATE `tb_sys_info` SET `Value` = '{0}' WHERE `Name` = 'Version';";
+        private static string tbSysInfoUpdateVersion = @"UPDATE ""tb_sys_info"" SET ""Value"" = '{0}' WHERE ""Name"" = 'Version';";
 
         public IEnumerable<string> GetDatabaseNames()
         {

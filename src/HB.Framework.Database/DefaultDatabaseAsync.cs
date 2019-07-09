@@ -767,14 +767,14 @@ namespace HB.Framework.Database
 
                     if (matched != 1)
                     {
-                        throw new DatabaseException("BatchUpdate wrong, no match the {" + count + "}th data item. ");
+                        throw new DatabaseException("BatchUpdate wrong, not found the {" + count + "}th data item. ");
                     }
 
                     count++;
                 }
 
                 if (count != items.Count())
-                    throw new DatabaseException("BatchUpdate wrong number return.");
+                    throw new DatabaseException("BatchUpdate wrong number return. Some data item not found.");
 
                 return DatabaseResult.Succeeded();
             }
@@ -830,14 +830,14 @@ namespace HB.Framework.Database
 
                     if (affected != 1)
                     {
-                        throw new DatabaseException("BatchDelete wrong, no affected the {" + count + "}th data item. ");
+                        throw new DatabaseException("BatchDelete wrong, not found the {" + count + "}th data item. ");
                     }
 
                     count++;
                 }
 
                 if (count != items.Count())
-                    throw new DatabaseException("BatchDelete wrong number return.");
+                    throw new DatabaseException("BatchDelete wrong number return. Some data is not found.");
 
                 return DatabaseResult.Succeeded();
             }
