@@ -36,6 +36,8 @@ namespace DatabaseXamarinSample
 
             IDatabase database = new DatabaseBuilder(new SQLiteBuilder(sqliteOptions).Build()).Build();
 
+            SQLitePCL.Batteries_V2.Init();
+
             database.Initialize();
 
             return database;
