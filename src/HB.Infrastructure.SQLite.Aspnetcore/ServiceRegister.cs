@@ -29,14 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddSQLiteInternal(IServiceCollection services, SQLiteOptions options)
         {
-            SQLiteBuilder engineBuilder = new SQLiteBuilder()
-                            .SetSQLiteOptions(options)
-                            .Build();
-
-            IDatabase database = new DatabaseBuilder()
-                .SetDatabaseSettings(engineBuilder.DatabaseSettings)
-                .SetDatabaseEngine(engineBuilder.DatabaseEngine)
-                .Build();
+            IDatabase database = new DatabaseBuilder(new SQLiteBuilder(options).Build()).Build();
 
             services.AddSingleton(database);
         }

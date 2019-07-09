@@ -77,12 +77,7 @@ namespace HB.Infrastructure.SQLite.Test
                 ConnectionString = "Data Source=c:\\Share\\test.db;Version=3;"
             });
 
-            SQLiteBuilder sqliteBuilder = new SQLiteBuilder().SetSQLiteOptions(sqliteOptions).Build();
-
-            IDatabase database = new DatabaseBuilder()
-                .SetDatabaseEngine(sqliteBuilder.DatabaseEngine)
-                .SetDatabaseSettings(sqliteBuilder.DatabaseSettings)
-                .Build();
+            IDatabase database = new DatabaseBuilder(new SQLiteBuilder(sqliteOptions).Build()).Build();
 
             database.Initialize();
 

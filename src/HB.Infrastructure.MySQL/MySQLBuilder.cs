@@ -8,32 +8,24 @@ namespace HB.Infrastructure.MySQL
 {
     public class MySQLBuilder
     {
-        public IDatabaseEngine DatabaseEngine { get; private set; }
-        public IDatabaseSettings DatabaseSettings { get; private set; }
-
         private MySQLOptions _mysqlOptions;
 
-        public MySQLBuilder() { }
+        private MySQLBuilder() { }
 
-        public MySQLBuilder SetMySqlOptions(MySQLOptions mySQLOptions)
+        public MySQLBuilder (MySQLOptions mySQLOptions)
         {
             _mysqlOptions = mySQLOptions;
 
-            return this;
         }
 
-        public MySQLBuilder Build()
+        public IDatabaseEngine Build()
         {
             if (_mysqlOptions == null)
             {
                 throw new ArgumentNullException("mySQLOptions");
             }
 
-            DatabaseSettings = _mysqlOptions.DatabaseSettings;
-
-            DatabaseEngine = new MySQLEngine(_mysqlOptions);
-
-            return this;
+            return  new MySQLEngine(_mysqlOptions);
         }
     }
 }
