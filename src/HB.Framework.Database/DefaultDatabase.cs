@@ -769,7 +769,7 @@ namespace HB.Framework.Database
 
             try
             {
-                IDbCommand dbCommand = _sqlBuilder.GetDeleteCommand(condition, "default");
+                IDbCommand dbCommand = _sqlBuilder.CreateDeleteCommand(condition, "default");
 
                 long rows = _databaseEngine.ExecuteCommandNonQuery(transContext?.Transaction, entityDef.DatabaseName, dbCommand);
 

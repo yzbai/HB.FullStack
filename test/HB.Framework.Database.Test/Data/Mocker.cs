@@ -12,7 +12,7 @@ namespace HB.Framework.Database.Test.Data
         {
             List<BookEntity> books = new List<BookEntity>();
 
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 books.Add(new BookEntity {
                     Guid = SecurityUtil.CreateUniqueToken(),
@@ -44,7 +44,7 @@ namespace HB.Framework.Database.Test.Data
         {
             List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
 
-            for (int i = 0; i < 200; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 publisherEntities.Add(new PublisherEntity {
                     Guid = SecurityUtil.CreateUniqueToken(),

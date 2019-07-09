@@ -13,7 +13,7 @@ namespace HB.Infrastructure.SQLite.Test
     {
         private readonly IDatabase database;
         private readonly ITestOutputHelper output;
-        private readonly IsolationLevel isolationLevel = IsolationLevel.Serializable;
+        private readonly IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted;
 
 
         public BasicTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)

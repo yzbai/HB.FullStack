@@ -74,7 +74,7 @@ namespace HB.Infrastructure.SQLite.Test
             sqliteOptions.Schemas.Add(new SchemaInfo {
                 SchemaName = "test.db",
                 IsMaster = true,
-                ConnectionString = "Data Source=c:\\Share\\test.db;Version=3;"
+                ConnectionString = "Data Source=c:\\Share\\test.db;"
             });
 
             IDatabase database = new DatabaseBuilder(new SQLiteBuilder(sqliteOptions).Build()).Build();
