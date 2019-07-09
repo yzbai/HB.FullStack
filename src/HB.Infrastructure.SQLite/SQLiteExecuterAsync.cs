@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Data;
 using Microsoft.Data.Sqlite;
-using Microsoft.Data.Sqlite;
 
 namespace HB.Infrastructure.SQLite
 {
