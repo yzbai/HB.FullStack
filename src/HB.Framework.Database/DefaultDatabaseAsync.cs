@@ -583,7 +583,7 @@ namespace HB.Framework.Database
 
             try
             {
-                IDbCommand dbCommand = _sqlBuilder.GetDeleteCommand(condition, "default");
+                IDbCommand dbCommand = _sqlBuilder.CreateDeleteCommand(condition, "default");
 
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, dbCommand).ConfigureAwait(false);
 

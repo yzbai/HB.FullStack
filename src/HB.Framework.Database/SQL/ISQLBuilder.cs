@@ -11,7 +11,7 @@ namespace HB.Framework.Database.SQL
         IDbCommand CreateCountCommand<T>(FromExpression<T> fromCondition = null, WhereExpression<T> whereCondition = null) where T : DatabaseEntity, new();
         
         IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T entity, string lastUser) where T : DatabaseEntity, new();
-        IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new();
+        //IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new();
 
         IDbCommand CreateBatchAddStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new();
 
@@ -33,7 +33,7 @@ namespace HB.Framework.Database.SQL
         /// <returns></returns>
         IDbCommand CreateBatchUpdateStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new();
         string GetTableCreateStatement(Type type, bool addDropStatement);
-        IDbCommand GetDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new();
+        IDbCommand CreateDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new();
 
         SelectExpression<T> NewSelect<T>() where T : DatabaseEntity, new();
 

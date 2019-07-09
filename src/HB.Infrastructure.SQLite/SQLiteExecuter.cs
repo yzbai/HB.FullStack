@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
+
 
 namespace HB.Infrastructure.SQLite
 {
@@ -11,7 +12,7 @@ namespace HB.Infrastructure.SQLite
     /// </summary>
     internal static partial class SQLiteExecuter
     {
-        private static void AttachParameters(SQLiteCommand command, IEnumerable<IDataParameter> commandParameters)
+        private static void AttachParameters(SqliteCommand command, IEnumerable<IDataParameter> commandParameters)
         {
             foreach (IDataParameter p in commandParameters)
             {
@@ -27,21 +28,21 @@ namespace HB.Infrastructure.SQLite
 
         #region Comand Reader
 
-        public static IDataReader ExecuteCommandReader(SQLiteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static IDataReader ExecuteCommandReader(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandReader(sqliteTransaction.Connection, false, (SQLiteCommand)dbCommand);
+            return ExecuteCommandReader(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
         }
 
         public static IDataReader ExecuteCommandReader(string connectString, IDbCommand dbCommand)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectString);
-            return ExecuteCommandReader(conn, true, (SQLiteCommand)dbCommand);
+            SqliteConnection conn = new SqliteConnection(connectString);
+            return ExecuteCommandReader(conn, true, (SqliteCommand)dbCommand);
         }
 
-        private static IDataReader ExecuteCommandReader(SQLiteConnection connection, bool isOwnedConnection, SQLiteCommand command)
+        private static IDataReader ExecuteCommandReader(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
-            SQLiteDataReader reader = null;
+            SqliteDataReader reader = null;
 
             try
             {
@@ -85,17 +86,17 @@ namespace HB.Infrastructure.SQLite
 
         public static object ExecuteCommandScalar(string connectString, IDbCommand dbCommand)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectString);
-            return ExecuteCommandScalar(conn, true, (SQLiteCommand)dbCommand);
+            SqliteConnection conn = new SqliteConnection(connectString);
+            return ExecuteCommandScalar(conn, true, (SqliteCommand)dbCommand);
         }
 
-        public static object ExecuteCommandScalar(SQLiteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static object ExecuteCommandScalar(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandScalar(sqliteTransaction.Connection, false, (SQLiteCommand)dbCommand);
+            return ExecuteCommandScalar(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
         }
 
-        private static object ExecuteCommandScalar(SQLiteConnection connection, bool isOwnedConnection, SQLiteCommand command)
+        private static object ExecuteCommandScalar(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             object rtObj = null;
 
@@ -131,18 +132,18 @@ namespace HB.Infrastructure.SQLite
 
         public static int ExecuteCommandNonQuery(string connectString, IDbCommand dbCommand)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectString);
+            SqliteConnection conn = new SqliteConnection(connectString);
 
-            return ExecuteCommandNonQuery(conn, true, (SQLiteCommand)dbCommand);
+            return ExecuteCommandNonQuery(conn, true, (SqliteCommand)dbCommand);
         }
 
-        public static int ExecuteCommandNonQuery(SQLiteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static int ExecuteCommandNonQuery(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandNonQuery(sqliteTransaction.Connection, false, (SQLiteCommand)dbCommand);
+            return ExecuteCommandNonQuery(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
         }
 
-        private static int ExecuteCommandNonQuery(SQLiteConnection conn, bool isOwnedConnection, SQLiteCommand command)
+        private static int ExecuteCommandNonQuery(SqliteConnection conn, bool isOwnedConnection, SqliteCommand command)
         {
             int rtInt = -1;
 
@@ -179,9 +180,9 @@ namespace HB.Infrastructure.SQLite
 
         public static int ExecuteSqlNonQuery(string connectionString, string sqlString)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectionString);
+            SqliteConnection conn = new SqliteConnection(connectionString);
 
-            SQLiteCommand command = new SQLiteCommand {
+            SqliteCommand command = new SqliteCommand {
                 CommandType = CommandType.Text,
                 CommandText = sqlString
             };
@@ -189,9 +190,9 @@ namespace HB.Infrastructure.SQLite
             return ExecuteCommandNonQuery(conn, true, command);
         }
 
-        public static int ExecuteSqlNonQuery(SQLiteTransaction sqliteTransaction, string sqlString)
+        public static int ExecuteSqlNonQuery(SqliteTransaction sqliteTransaction, string sqlString)
         {
-            SQLiteCommand command = new SQLiteCommand {
+            SqliteCommand command = new SqliteCommand {
                 CommandType = CommandType.Text,
                 CommandText = sqlString,
                 Transaction = sqliteTransaction
@@ -203,9 +204,9 @@ namespace HB.Infrastructure.SQLite
         public static IDataReader ExecuteSqlReader(string connectionString, string sqlString)
         {
             //TODO: do we need a connection manager, that retry and makesure connection is avalible?
-            SQLiteConnection conn = new SQLiteConnection(connectionString);
+            SqliteConnection conn = new SqliteConnection(connectionString);
 
-            SQLiteCommand command = new SQLiteCommand {
+            SqliteCommand command = new SqliteCommand {
                 CommandType = CommandType.Text,
                 CommandText = sqlString
             };
@@ -213,9 +214,9 @@ namespace HB.Infrastructure.SQLite
             return ExecuteCommandReader(conn, true, command);
         }
 
-        public static IDataReader ExecuteSqlReader(SQLiteTransaction sqliteTransaction, string sqlString)
+        public static IDataReader ExecuteSqlReader(SqliteTransaction sqliteTransaction, string sqlString)
         {
-            SQLiteCommand command = new SQLiteCommand {
+            SqliteCommand command = new SqliteCommand {
                 CommandType = CommandType.Text,
                 CommandText = sqlString,
                 Transaction = sqliteTransaction
@@ -225,9 +226,9 @@ namespace HB.Infrastructure.SQLite
         }
         public static object ExecuteSqlScalar(string connectionString, string sqlString)
         {
-            SQLiteConnection conn = new SQLiteConnection(connectionString);
+            SqliteConnection conn = new SqliteConnection(connectionString);
 
-            SQLiteCommand command = new SQLiteCommand {
+            SqliteCommand command = new SqliteCommand {
                 CommandType = CommandType.Text,
                 CommandText = sqlString
             };
@@ -235,9 +236,9 @@ namespace HB.Infrastructure.SQLite
             return ExecuteCommandScalar(conn, true, command);
         }
 
-        public static object ExecuteSqlScalar(SQLiteTransaction sqliteTransaction, string sqlString)
+        public static object ExecuteSqlScalar(SqliteTransaction sqliteTransaction, string sqlString)
         {
-            SQLiteCommand command = new SQLiteCommand {
+            SqliteCommand command = new SqliteCommand {
                 CommandType = CommandType.Text,
                 CommandText = sqlString,
                 Transaction = sqliteTransaction
