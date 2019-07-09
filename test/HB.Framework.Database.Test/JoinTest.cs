@@ -77,12 +77,7 @@ namespace HB.Framework.Database.Test
                 ConnectionString = "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None"
             });
 
-            MySQLBuilder mySQLBuilder = new MySQLBuilder().SetMySqlOptions(mySQLOptions).Build();
-
-            IDatabase database = new DatabaseBuilder()
-                .SetDatabaseEngine(mySQLBuilder.DatabaseEngine)
-                .SetDatabaseSettings(mySQLBuilder.DatabaseSettings)
-                .Build();
+            IDatabase database = new DatabaseBuilder(new MySQLBuilder(mySQLOptions).Build()).Build();
 
             database.Initialize();
 

@@ -30,14 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddMySQLInternal(IServiceCollection services, MySQLOptions options)
         {
-            MySQLBuilder engineBuilder = new MySQLBuilder()
-                            .SetMySqlOptions(options)
-                            .Build();
-
-            IDatabase database = new DatabaseBuilder()
-                .SetDatabaseSettings(engineBuilder.DatabaseSettings)
-                .SetDatabaseEngine(engineBuilder.DatabaseEngine)
-                .Build();
+            IDatabase database = new DatabaseBuilder(new MySQLBuilder(options).Build()).Build();
 
             services.AddSingleton(database);
         }

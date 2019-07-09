@@ -15,11 +15,13 @@ namespace HB.Infrastructure.SQLite
         private readonly SQLiteOptions _options;
         private Dictionary<string, string> _connectionStringDict;
 
-        private SQLiteEngine() { }
+        public IDatabaseSettings DatabaseSettings => _options.DatabaseSettings;
 
         public DatabaseEngineType EngineType => DatabaseEngineType.SQLite;
 
         public string FirstDefaultDatabaseName { get; private set; }
+
+        private SQLiteEngine() { }
 
         public SQLiteEngine(SQLiteOptions options) : this()
         {
@@ -29,8 +31,6 @@ namespace HB.Infrastructure.SQLite
 
             SetConnectionStrings();
         }
-
-        public SQLiteOptions Options { get { return _options; } }
 
         private void SetConnectionStrings()
         {
@@ -349,6 +349,8 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
                 return SQLiteExecuter.ExecuteSqlScalar((SQLiteTransaction)Transaction, SQL);
             }
         }
+
+        
 
         #endregion
     }
