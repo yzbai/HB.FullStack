@@ -9,29 +9,11 @@ namespace HB.Framework.Database
 {
     public class DatabaseBuilder
     {
-        public IDatabase Database { get; private set; }
-
-        private IDatabaseSettings _databaseSettings;
-
         private IDatabaseEngine _databaseEngine;
 
-        public DatabaseBuilder()
-        {
-
-        }
-
-        public DatabaseBuilder SetDatabaseSettings(IDatabaseSettings databaseSettings)
-        {
-            _databaseSettings = databaseSettings;
-
-            return this;
-        }
-
-        public DatabaseBuilder SetDatabaseEngine(IDatabaseEngine databaseEngine)
+        public DatabaseBuilder(IDatabaseEngine databaseEngine)
         {
             _databaseEngine = databaseEngine;
-
-            return this;
         }
 
         public IDatabase Build()
@@ -41,17 +23,12 @@ namespace HB.Framework.Database
                 throw new ArgumentNullException("databaseEngine");
             }
 
-            if (_databaseSettings == null)
-            {
-                throw new ArgumentNullException("databaseSettings");
-            }
-
             IDatabaseTypeConverterFactory databaseTypeConverterFactory = new DatabaseTypeConverterFactory();
-            IDatabaseEntityDefFactory databaseEntityDefFactory = new DefaultDatabaseEntityDefFactory(_databaseSettings, _databaseEngine, databaseTypeConverterFactory);
+            IDatabaseEntityDefFactory databaseEntityDefFactory = new DefaultDatabaseEntityDefFactory(_databaseEngine.DatabaseSettings, _databaseEngine, databaseTypeConverterFactory);
             IDatabaseEntityMapper databaseEntityMapper = new DefaultDatabaseEntityMapper(databaseEntityDefFactory);
             ISQLBuilder sQLBuilder = new SQLBuilder(_databaseEngine, databaseEntityDefFactory);
 
-            return new DefaultDatabase(_databaseSettings, _databaseEngine, databaseEntityDefFactory, databaseEntityMapper, sQLBuilder);
+            return new DefaultDatabase(_databaseEngine.DatabaseSettings, _databaseEngine, databaseEntityDefFactory, databaseEntityMapper, sQLBuilder);
         }
 
     }

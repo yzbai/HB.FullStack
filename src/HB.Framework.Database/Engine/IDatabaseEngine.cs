@@ -20,6 +20,8 @@ namespace HB.Framework.Database.Engine
     {
         #region 管理功能
 
+        IDatabaseSettings DatabaseSettings { get; }
+
         DatabaseEngineType EngineType { get; }
 
         string FirstDefaultDatabaseName { get; }
@@ -128,6 +130,8 @@ namespace HB.Framework.Database.Engine
         /// 用于专有化的字符（`）
         /// </summary>
         string ReservedChar { get; }
+        
+
         /// <summary>
         /// 将名称引号化
         /// </summary>

@@ -8,32 +8,23 @@ namespace HB.Infrastructure.SQLite
 {
     public class SQLiteBuilder
     {
-        public IDatabaseEngine DatabaseEngine { get; private set; }
-        public IDatabaseSettings DatabaseSettings { get; private set; }
-
         private SQLiteOptions _sqliteOptions;
 
-        public SQLiteBuilder() { }
+        private SQLiteBuilder() { }
 
-        public SQLiteBuilder SetSQLiteOptions(SQLiteOptions sqliteOptions)
+        public SQLiteBuilder(SQLiteOptions sqliteOptions)
         {
             _sqliteOptions = sqliteOptions;
-
-            return this;
         }
 
-        public SQLiteBuilder Build()
+        public IDatabaseEngine Build()
         {
             if (_sqliteOptions == null)
             {
                 throw new ArgumentNullException("sqliteOptions");
             }
 
-            DatabaseSettings = _sqliteOptions.DatabaseSettings;
-
-            DatabaseEngine = new SQLiteEngine(_sqliteOptions);
-
-            return this;
+            return new SQLiteEngine(_sqliteOptions);
         }
     }
 }

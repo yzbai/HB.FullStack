@@ -21,11 +21,13 @@ namespace HB.Infrastructure.MySQL
         private readonly MySQLOptions _options;
         private Dictionary<string, string> _connectionStringDict;
 
-        private MySQLEngine() { }
+        public IDatabaseSettings DatabaseSettings => _options.DatabaseSettings;
 
         public DatabaseEngineType EngineType => DatabaseEngineType.MySQL;
 
         public string FirstDefaultDatabaseName { get; private set; }
+
+        private MySQLEngine() { }
 
         public MySQLEngine(MySQLOptions options) : this()
         {
@@ -35,8 +37,6 @@ namespace HB.Infrastructure.MySQL
 
             SetConnectionStrings();
         }
-
-        public MySQLOptions Options { get { return _options; } }
 
         private void SetConnectionStrings()
         {
@@ -249,6 +249,8 @@ namespace HB.Infrastructure.MySQL
         public string QuotedChar { get { return MySQLUtility.QuotedChar; } }
 
         public string ReservedChar { get { return MySQLUtility.ReservedChar; } }
+
+        
 
         public string GetQuotedStatement(string name)
         {
