@@ -3,7 +3,7 @@ using HB.Framework.Database.Engine;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 
 namespace HB.Infrastructure.SQLite
@@ -75,7 +75,7 @@ namespace HB.Infrastructure.SQLite
 
         public IDataParameter CreateParameter(string name, object value, DbType dbType)
         {
-            SQLiteParameter parameter = new SQLiteParameter {
+            SqliteParameter parameter = new SqliteParameter {
                 ParameterName = name,
                 Value = value,
                 DbType = dbType
@@ -85,7 +85,7 @@ namespace HB.Infrastructure.SQLite
 
         public IDataParameter CreateParameter(string name, object value)
         {
-            SQLiteParameter parameter = new SQLiteParameter {
+            SqliteParameter parameter = new SqliteParameter {
                 ParameterName = name,
                 Value = value
             };
@@ -94,7 +94,7 @@ namespace HB.Infrastructure.SQLite
 
         public IDbCommand CreateEmptyCommand()
         {
-            SQLiteCommand command = new SQLiteCommand();
+            SqliteCommand command = new SqliteCommand();
             return command;
         }
 
@@ -149,7 +149,7 @@ namespace HB.Infrastructure.SQLite
 
         public IDbTransaction BeginTransaction(string dbName, IsolationLevel isolationLevel)
         {
-            SQLiteConnection conn = new SQLiteConnection(GetConnectionString(dbName, true));
+            SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));
             conn.Open();
 
             return conn.BeginTransaction(isolationLevel);
@@ -273,7 +273,7 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandNonQuery((SQLiteTransaction)Transaction, dbCommand);
+                return SQLiteExecuter.ExecuteCommandNonQuery((SqliteTransaction)Transaction, dbCommand);
             }
         }
 
@@ -291,7 +291,7 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandReader((SQLiteTransaction)Transaction, dbCommand);
+                return SQLiteExecuter.ExecuteCommandReader((SqliteTransaction)Transaction, dbCommand);
             }
         }
 
@@ -303,7 +303,7 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandScalar((SQLiteTransaction)Transaction, dbCommand);
+                return SQLiteExecuter.ExecuteCommandScalar((SqliteTransaction)Transaction, dbCommand);
             }
         }
 
@@ -319,7 +319,7 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
             }
             else
             {
-                return SQLiteExecuter.ExecuteSqlNonQuery((SQLiteTransaction)Transaction, SQL);
+                return SQLiteExecuter.ExecuteSqlNonQuery((SqliteTransaction)Transaction, SQL);
             }
         }
 
@@ -334,7 +334,7 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
             }
             else
             {
-                return SQLiteExecuter.ExecuteSqlReader((SQLiteTransaction)Transaction, SQL);
+                return SQLiteExecuter.ExecuteSqlReader((SqliteTransaction)Transaction, SQL);
             }
         }
 
@@ -346,7 +346,7 @@ INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', '{0}');"
             }
             else
             {
-                return SQLiteExecuter.ExecuteSqlScalar((SQLiteTransaction)Transaction, SQL);
+                return SQLiteExecuter.ExecuteSqlScalar((SqliteTransaction)Transaction, SQL);
             }
         }
 

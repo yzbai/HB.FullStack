@@ -12,7 +12,7 @@ namespace HB.Infrastructure.SQLite.Test
         {
             List<BookEntity> books = new List<BookEntity>();
 
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < 500; ++i)
             {
                 books.Add(new BookEntity {
                     Guid = SecurityUtil.CreateUniqueToken(),
@@ -44,7 +44,7 @@ namespace HB.Infrastructure.SQLite.Test
         {
             List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
 
-            for (int i = 0; i < 200; ++i)
+            for (int i = 0; i < 1000; ++i)
             {
                 publisherEntities.Add(new PublisherEntity {
                     Guid = SecurityUtil.CreateUniqueToken(),

@@ -31,7 +31,7 @@ namespace DatabaseXamarinSample
             sqliteOptions.Schemas.Add(new SchemaInfo {
                 SchemaName = "test.db",
                 IsMaster = true,
-                ConnectionString = $"Data Source={dbFile};Version=3;"
+                ConnectionString = $"Data Source={dbFile}"
             });
 
             IDatabase database = new DatabaseBuilder(new SQLiteBuilder(sqliteOptions).Build()).Build();

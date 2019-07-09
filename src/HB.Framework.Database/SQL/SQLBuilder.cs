@@ -21,7 +21,7 @@ namespace HB.Framework.Database.SQL
     /// Version： 新增为0，更改时加1，删除时加1.
     /// 单例
     /// </summary>
-    internal class SQLBuilder : ISQLBuilder
+    internal partial class SQLBuilder : ISQLBuilder
     {
         /// <summary>
         /// sql字典. 数据库名:TableName:操作-SQL语句
@@ -76,6 +76,18 @@ namespace HB.Framework.Database.SQL
             }
 
             return command;
+        }
+
+        private object DbParameterValue_Statement(object propertyValue, DatabaseEntityPropertyDef info)
+        {
+            if (propertyValue == null)
+            {
+                return DBNull.Value;
+            }
+
+            return info.TypeConverter == null ?
+                _databaseEngine.GetDbValueStatement(propertyValue, needQuoted: false) :
+                info.TypeConverter.TypeValueToDbValue(propertyValue);
         }
 
         #region 单表查询
@@ -265,77 +277,20 @@ namespace HB.Framework.Database.SQL
 
         #endregion
 
-        #region 增加
-
-        private string GetAddStatement(DatabaseEntityDef definition)
-        {
-            StringBuilder args = new StringBuilder();
-            StringBuilder selectArgs = new StringBuilder();
-
-            foreach (DatabaseEntityPropertyDef info in definition.Properties)
-            {
-                if (info.IsTableProperty)
-                {
-                    selectArgs.AppendFormat(GlobalSettings.Culture, "{0},", info.DbReservedName);
-
-                    if (info.IsAutoIncrementPrimaryKey || info.PropertyName == "LastTime")
-                    {
-                        continue;
-                    }
-
-                    args.AppendFormat(GlobalSettings.Culture, "{0},", info.DbReservedName);
-                }
-            }
-
-            if (selectArgs.Length > 0)
-            {
-                selectArgs.Remove(selectArgs.Length - 1, 1);
-            }
-
-            if (args.Length > 0)
-            {
-                args.Remove(args.Length - 1, 1);
-            }
-
-            return $"insert into {definition.DbTableReservedName}({args.ToString()}) values({{0}});select {selectArgs.ToString()} from {definition.DbTableReservedName} where {_databaseEngine.GetReservedStatement("Id")} = {GetLastInsertIdStatement()};";
-        }
-
-        private string GetLastInsertIdStatement()
-        {
-            switch(_databaseEngine.EngineType)
-            {
-                case DatabaseEngineType.SQLite:
-                    return "last_insert_rowid()";
-                case DatabaseEngineType.MySQL:
-                    return "last_insert_id()";
-                case DatabaseEngineType.MSSQLSERVER:
-                default:
-                    return "";
-            }
-        }
+        #region 单体更改
 
         public IDbCommand CreateAddCommand<T>(T entity, string lastUser) where T : DatabaseEntity, new()
         {
             DatabaseEntityDef modelDef = _entityDefFactory.GetDef<T>();
-            StringBuilder values = new StringBuilder();
             List<IDataParameter> parameters = new List<IDataParameter>();
 
-            #region 获取Add Template
-
             string cacheKey = modelDef.DatabaseName + ":" + modelDef.TableName + ":ADD";
-            string addTemplate;
 
-            if (_sqlStatementDict.ContainsKey(cacheKey))
+            if (!_sqlStatementDict.TryGetValue(cacheKey, out string addTemplate))
             {
-                addTemplate = _sqlStatementDict[cacheKey];
-            }
-            else
-            {
-                addTemplate = GetAddStatement(modelDef);
+                addTemplate = CreateAddTemplate(modelDef, _databaseEngine.EngineType);
                 _sqlStatementDict.TryAdd(cacheKey, addTemplate);
             }
-
-            #endregion
 
             foreach (DatabaseEntityPropertyDef info in modelDef.Properties)
             {
@@ -348,68 +303,24 @@ namespace HB.Framework.Database.SQL
 
                     if (info.PropertyName == "Version")
                     {
-                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, entity.Version + 1, info.DbFieldType));
                     }
                     else if (info.PropertyName == "Deleted")
                     {
-                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, 0, info.DbFieldType));
                     }
                     else if (info.PropertyName == "LastUser")
                     {
-                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, lastUser, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, DbParameterValue_Statement(lastUser, info), info.DbFieldType));
                     }
                     else
                     {
-                        values.AppendFormat(GlobalSettings.Culture, " {0},", info.DbParameterizedName);
-
-                        string dbValueStatement = info.TypeConverter == null ?
-                            _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) :
-                            info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
-
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, dbValueStatement, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
                     }
                 }
             }
 
-            if (values.Length > 0) values.Remove(values.Length - 1, 1);
-
-            string mainClause = string.Format(GlobalSettings.Culture, addTemplate, values.ToString());
-
-            return AssembleCommand<T, T>(false, mainClause, null, null, parameters);
-        }
-
-        #endregion
-
-        #region 修改
-
-        private static string GetUpdateStatement(DatabaseEntityDef modelDef)
-        {
-            StringBuilder args = new StringBuilder();
-
-            foreach (DatabaseEntityPropertyDef info in modelDef.Properties)
-            {
-                if (info.IsTableProperty)
-                {
-                    if (info.IsAutoIncrementPrimaryKey || info.PropertyName == "LastTime" || info.PropertyName == "Deleted")
-                    {
-                        continue;
-                    }
-
-                    args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, info.DbParameterizedName);
-                }
-            }
-
-            if (args.Length > 0)
-            {
-                args.Remove(args.Length - 1, 1);
-            }
-
-            string statement = string.Format(GlobalSettings.Culture, "UPDATE {0} SET {1}", modelDef.DbTableReservedName, args.ToString());
-
-            return statement;
+            return AssembleCommand<T, T>(false, addTemplate, null, null, parameters);
         }
 
         public IDbCommand CreateUpdateCommand<T>(WhereExpression<T> condition, T entity, string lastUser) where T : DatabaseEntity, new()
@@ -417,7 +328,13 @@ namespace HB.Framework.Database.SQL
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
             List<IDataParameter> parameters = new List<IDataParameter>();
 
-            string updateTemplate = GetUpdateStatement(definition);
+            string cacheKey = definition.DatabaseName + ":" + definition.TableName + ":UPDATE";
+
+            if (!_sqlStatementDict.TryGetValue(cacheKey, out string updateTemplate))
+            {
+                updateTemplate = CreateUpdateTemplate(definition);
+                _sqlStatementDict.TryAdd(cacheKey, updateTemplate);
+            }
 
             foreach (DatabaseEntityPropertyDef info in definition.Properties)
             {
@@ -434,15 +351,11 @@ namespace HB.Framework.Database.SQL
                     }
                     else if (info.PropertyName == "LastUser")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, lastUser, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, DbParameterValue_Statement(lastUser, info), info.DbFieldType));
                     }
                     else
                     {
-                        string dbValueStatement = info.TypeConverter == null ? 
-                            _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) :
-                            info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
-
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, dbValueStatement, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
                     }
                 }
             }
@@ -450,127 +363,30 @@ namespace HB.Framework.Database.SQL
             return AssembleCommand<T, T>(false, updateTemplate, null, condition, parameters);
         }
 
-        #endregion
-
-        #region Update Key
-
-        private string GetUpdateKeyStatement(DatabaseEntityDef modelDef, string[] keys, object[] values, string lastUser)
-        {
-            StringBuilder args = new StringBuilder();
-
-            int length = keys.Length;
-
-            for (int i = 0; i < length; i++)
-            {
-                string key = keys[i];
-                DatabaseEntityPropertyDef info = modelDef.GetProperty(key);
-                string dbValueStatement = info.TypeConverter == null ? 
-                    _databaseEngine.GetDbValueStatement(values[i], needQuoted: true) :
-                    _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(values[i]));
-                args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement(key), dbValueStatement);
-            }
-
-            args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement("Version"), _databaseEngine.GetReservedStatement("Version") + " + 1");
-            args.AppendFormat(GlobalSettings.Culture, " {0}={1}", _databaseEngine.GetReservedStatement("LastUser"), _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
-
-            string statement = string.Format(GlobalSettings.Culture, "UPDATE {0} SET {1} ", modelDef.DbTableReservedName, args.ToString());
-
-            return statement;
-        }
-
-        public IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new()
+        public IDbCommand CreateDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new()
         {
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
-        
-            //List<IDataParameter> parameters = new List<IDataParameter>();
 
-            string updateKeyStatement = GetUpdateKeyStatement(definition, keys, values, lastUser);
+            string cacheKey = definition.DatabaseName + ":" + definition.TableName + ":DELETE";
 
-            return AssembleCommand<T,T>(false, updateKeyStatement, null, condition, null);
-        }
+            if (!_sqlStatementDict.TryGetValue(cacheKey, out string deleteTemplate))
+            {
+                deleteTemplate = CreateDeleteTemplate(definition);
+                _sqlStatementDict.TryAdd(cacheKey, deleteTemplate);
+            }
 
-        #endregion
+            DatabaseEntityPropertyDef lastUserProperty = definition.GetProperty("LastUser");
 
-        #region 删除
+            List<IDataParameter> parameters = new List<IDataParameter>();
 
-        public IDbCommand GetDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : DatabaseEntity, new()
-        {
-            return CreateUpdateKeyCommand(condition, new string[] { "Deleted" }, new object[] { 1 }, lastUser);
+            parameters.Add(_databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName, DbParameterValue_Statement(lastUser, lastUserProperty), lastUserProperty.DbFieldType));
+
+            return AssembleCommand<T, T>(false, deleteTemplate, null, condition, parameters);
         }
 
         #endregion
 
         #region Batch
-
-        private string TempTable_Insert(string tempTableName, string value)
-        {
-            switch (_databaseEngine.EngineType)
-            {
-                case DatabaseEngineType.MySQL:
-                    return $"insert into `{tempTableName}`(`id`) values({value});";
-                case DatabaseEngineType.SQLite:
-                    return $"insert into temp.{tempTableName}(\"id\") values({value});";
-                case DatabaseEngineType.MSSQLSERVER:
-                default:
-                    return "";
-            }
-        }
-
-        private string TempTable_Select_All(string tempTableName)
-        {
-            switch (_databaseEngine.EngineType)
-            {
-                case DatabaseEngineType.MySQL:
-                    return $"select `id` from `{tempTableName}`;";
-                case DatabaseEngineType.SQLite:
-                    return $"select id from temp.{tempTableName};";
-                case DatabaseEngineType.MSSQLSERVER:
-                default:
-                    return "";
-            }
-        }
-
-        private string TempTable_Drop(string tempTableName)
-        {
-            switch (_databaseEngine.EngineType)
-            {
-                case DatabaseEngineType.MySQL:
-                    return $"drop temporary table if exists `{tempTableName}`;";
-                case DatabaseEngineType.SQLite:
-                    return $"drop table if EXISTS temp.{tempTableName};";
-                case DatabaseEngineType.MSSQLSERVER:
-                default:
-                    return "";
-            }
-        }
-
-        private string TempTable_Create(string tempTableName)
-        {
-            switch (_databaseEngine.EngineType)
-            {
-                case DatabaseEngineType.MySQL:
-                    return $"create temporary table `{tempTableName}` ( `id` int not null);";
-                case DatabaseEngineType.SQLite:
-                    return $"create temporary table {tempTableName} (\"id\" integer not null);";
-                case DatabaseEngineType.MSSQLSERVER:
-                default:
-                    return "";
-            }
-        }
-
-        private string FoundChanges_Statement()
-        {
-            switch (_databaseEngine.EngineType)
-            {
-                case DatabaseEngineType.MySQL:
-                    return $" found_rows() ";
-                case DatabaseEngineType.SQLite:
-                    return $" changes() ";
-                case DatabaseEngineType.MSSQLSERVER:
-                default:
-                    return "";
-            }
-        }
 
         public IDbCommand CreateBatchAddStatement<T>(IEnumerable<T> entities, string lastUser) where T : DatabaseEntity, new()
         {
@@ -622,16 +438,12 @@ namespace HB.Framework.Database.SQL
                         else if (info.PropertyName == "LastUser")
                         {
                             values.AppendFormat(GlobalSettings.Culture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, lastUser, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(lastUser, info), info.DbFieldType));
                         }
                         else
                         {
-                            string dbValueStatement = info.TypeConverter == null ? 
-                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) : 
-                                info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
-
                             values.AppendFormat(GlobalSettings.Culture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, dbValueStatement, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
                         }
                     }
                 }
@@ -646,12 +458,12 @@ namespace HB.Framework.Database.SQL
                     values.Remove(values.Length - 1, 1);
                 }
 
-                innerBuilder.Append($"insert into {definition.DbTableReservedName}({args.ToString()}) values ({values.ToString()});{TempTable_Insert(tempTableName, GetLastInsertIdStatement())};");
+                innerBuilder.Append($"insert into {definition.DbTableReservedName}({args.ToString()}) values ({values.ToString()});{TempTable_Insert(tempTableName, GetLastInsertIdStatement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
 
                 number++;
             }
 
-            string sql = $"{TempTable_Drop(tempTableName)}{TempTable_Create(tempTableName)}{innerBuilder.ToString()}{TempTable_Select_All(tempTableName)}{TempTable_Drop(tempTableName)};";
+            string sql = $"{TempTable_Drop(tempTableName, _databaseEngine.EngineType)}{TempTable_Create(tempTableName, _databaseEngine.EngineType)}{innerBuilder.ToString()}{TempTable_Select_All(tempTableName, _databaseEngine.EngineType)}{TempTable_Drop(tempTableName, _databaseEngine.EngineType)}";
 
             return AssembleCommand<T,T>(false, sql, null, null, parameters);
         }
@@ -694,16 +506,12 @@ namespace HB.Framework.Database.SQL
                         else if(info.PropertyName == "LastUser")
                         {
                             args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, lastUser, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(lastUser, info), info.DbFieldType));
                         }
                         else
                         {
-                            string dbValueStatement = info.TypeConverter == null ?
-                                _databaseEngine.GetDbValueStatement(info.GetValue(entity), needQuoted: false) :
-                                info.TypeConverter.TypeValueToDbValue(info.GetValue(entity));
-
                             args.AppendFormat(GlobalSettings.Culture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, dbValueStatement, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.GetValue(entity),info), info.DbFieldType));
                         }
                     }
                 }
@@ -711,12 +519,12 @@ namespace HB.Framework.Database.SQL
                 if (args.Length > 0)
                     args.Remove(args.Length - 1, 1);
 
-                innerBuilder.Append($"update {definition.DbTableReservedName} set {args.ToString()} WHERE `Id`={entity.Id} and `Version`={entity.Version};{TempTable_Insert(tempTableName, FoundChanges_Statement())}");
+                innerBuilder.Append($"update {definition.DbTableReservedName} set {args.ToString()} WHERE `Id`={entity.Id} and `Version`={entity.Version};{TempTable_Insert(tempTableName, FoundChanges_Statement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
 
                 number++;
             }
 
-            string sql = $"{TempTable_Drop(tempTableName)}{TempTable_Create(tempTableName)}{innerBuilder.ToString()}{TempTable_Select_All(tempTableName)}{TempTable_Drop(tempTableName)};";
+            string sql = $"{TempTable_Drop(tempTableName, _databaseEngine.EngineType)}{TempTable_Create(tempTableName, _databaseEngine.EngineType)}{innerBuilder.ToString()}{TempTable_Select_All(tempTableName, _databaseEngine.EngineType)}{TempTable_Drop(tempTableName, _databaseEngine.EngineType)}";
 
             return AssembleCommand<T, T>(false, sql, null, null, parameters);
         }       
@@ -734,12 +542,13 @@ namespace HB.Framework.Database.SQL
 
             foreach (T entity in entities)
             {
-                string args = $"`Deleted` = 1, `LastUser` = {_databaseEngine.GetDbValueStatement(lastUser, needQuoted: true)}, `Version` = {entity.Version + 1}";
+                string lastUserValue = lastUser == null ? "null" : _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true);
+                string args = $"`Deleted` = 1, `LastUser` = {lastUserValue}, `Version` = {entity.Version + 1}";
                 innerBuilder.Append(
-                    $"UPDATE {definition.DbTableReservedName} set {args} WHERE `Id`={entity.Id} AND `Version`={entity.Version};{TempTable_Insert(tempTableName, FoundChanges_Statement())}");
+                    $"UPDATE {definition.DbTableReservedName} set {args} WHERE `Id`={entity.Id} AND `Version`={entity.Version};{TempTable_Insert(tempTableName, FoundChanges_Statement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
             }
 
-            string sql = $"{TempTable_Drop(tempTableName)}{TempTable_Create(tempTableName)}{innerBuilder.ToString()}{TempTable_Select_All(tempTableName)}{TempTable_Drop(tempTableName)};";
+            string sql = $"{TempTable_Drop(tempTableName, _databaseEngine.EngineType)}{TempTable_Create(tempTableName, _databaseEngine.EngineType)}{innerBuilder.ToString()}{TempTable_Select_All(tempTableName, _databaseEngine.EngineType)}{TempTable_Drop(tempTableName, _databaseEngine.EngineType)}";
 
             return AssembleCommand<T, T>(false, sql, null, null, null);
         }
@@ -922,3 +731,41 @@ CREATE TABLE {definition.DbTableReservedName} (
         #endregion
     }
 }
+//#region Update Key
+
+//private string GetUpdateKeyStatement(DatabaseEntityDef modelDef, string[] keys, object[] values, string lastUser)
+//{
+//    StringBuilder args = new StringBuilder();
+
+//    int length = keys.Length;
+
+//    for (int i = 0; i < length; i++)
+//    {
+//        string key = keys[i];
+//        DatabaseEntityPropertyDef info = modelDef.GetProperty(key);
+//        string dbValueStatement = info.TypeConverter == null ?
+//            _databaseEngine.GetDbValueStatement(values[i], needQuoted: true) :
+//            _databaseEngine.GetQuotedStatement(info.TypeConverter.TypeValueToDbValue(values[i]));
+//        args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement(key), dbValueStatement);
+//    }
+
+//    args.AppendFormat(GlobalSettings.Culture, " {0}={1},", _databaseEngine.GetReservedStatement("Version"), _databaseEngine.GetReservedStatement("Version") + " + 1");
+//    args.AppendFormat(GlobalSettings.Culture, " {0}={1}", _databaseEngine.GetReservedStatement("LastUser"), _databaseEngine.GetDbValueStatement(lastUser, needQuoted: true));
+
+//    string statement = string.Format(GlobalSettings.Culture, "UPDATE {0} SET {1} ", modelDef.DbTableReservedName, args.ToString());
+
+//    return statement;
+//}
+
+//public IDbCommand CreateUpdateKeyCommand<T>(WhereExpression<T> condition, string[] keys, object[] values, string lastUser) where T : DatabaseEntity, new()
+//{
+//    DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
+
+//    //List<IDataParameter> parameters = new List<IDataParameter>();
+
+//    string updateKeyStatement = GetUpdateKeyStatement(definition, keys, values, lastUser);
+
+//    return AssembleCommand<T, T>(false, updateKeyStatement, null, condition, null);
+//}
+
+//#endregion
