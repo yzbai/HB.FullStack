@@ -12,6 +12,8 @@ namespace HB.Framework.Database
 
         public string TargetSchema { get; set; }
 
+        public Migration() { }
+
         public Migration(string targetSchema, int oldVersion, int newVersion, string sql)
         {
             if (targetSchema.IsNullOrEmpty())

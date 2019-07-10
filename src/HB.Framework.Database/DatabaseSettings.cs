@@ -17,7 +17,7 @@ namespace HB.Framework.Database
 
     public class SchemaInfo
     {
-        public bool IsMaster { get; set; }
+        public bool IsMaster { get; set; } = true;
         public string SchemaName { get; set; }
         public string ConnectionString { get; set; }
     }
