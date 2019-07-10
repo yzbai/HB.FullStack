@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Aliyun.Acs.Core;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
-using Aliyun.Acs.Dysmsapi.Model.V20170525;
 using HB.Infrastructure.Aliyun.Sms.Transform;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
@@ -17,7 +16,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         private readonly ILogger _logger;
         private readonly IDistributedCache _cache;
 
-        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, IDistributedCache cache ) 
+        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, IDistributedCache cache)
         {
             _options = options.Value;
             _logger = logger;
@@ -30,32 +29,37 @@ namespace HB.Infrastructure.Aliyun.Sms
         public Task<SendResult> SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
-            
-            SendSmsRequest request = new SendSmsRequest
-            {
-                AcceptFormat = FormatType.JSON,
-                SignName = _options.SignName,
-                TemplateCode = _options.TemplateIdentityValidation.TemplateCode,
-                PhoneNumbers = mobile,
-                TemplateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}", 
-                    _options.TemplateIdentityValidation.ParamCode, 
-                    smsCode, 
-                    _options.TemplateIdentityValidation.ParamProduct, 
-                    _options.TemplateIdentityValidation.ParamProductValue)
-            };
+
+            string templateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}",
+                    _options.TemplateIdentityValidation.ParamCode,
+                    smsCode,
+                    _options.TemplateIdentityValidation.ParamProduct,
+                    _options.TemplateIdentityValidation.ParamProductValue);
+
+            CommonRequest request = new CommonRequest();
+
+            request.Method = MethodType.POST;
+            request.Domain = "dysmsapi.aliyuncs.com";
+            request.Version = "2017-05-25";
+            request.Action = "SendSms";
+
+            request.AddQueryParameters("PhoneNumbers", mobile);
+            request.AddQueryParameters("SignName", _options.SignName);
+            request.AddQueryParameters("TemplateCode", _options.TemplateIdentityValidation.TemplateCode);
+            request.AddQueryParameters("TemplateParam", templateParam);
 
             string cachedSmsCode = smsCode;
 
-            return PolicyManager.Default(_logger).ExecuteAsync(async ()=> {
-                Task<SendSmsResponse> task = new Task<SendSmsResponse>(() => _client.GetAcsResponse(request));
+            return PolicyManager.Default(_logger).ExecuteAsync(async () => {
+                Task<CommonResponse> task = new Task<CommonResponse>(() => _client.GetCommonResponse(request));
                 task.Start(TaskScheduler.Default);
 
-                SendSmsResponse response = await task.ConfigureAwait(false);
+                CommonResponse response = await task.ConfigureAwait(false);
 
-                if (response.Code == "OK")
-                {
-                    CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
-                }
+                //if (response.Code == "OK")
+                //{
+                //    CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
+                //}
 
                 return response.ToResult();
             });
