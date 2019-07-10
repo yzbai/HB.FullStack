@@ -1,13 +1,13 @@
-﻿using Aliyun.Acs.Dysmsapi.Model.V20170525;
+﻿using Aliyun.Acs.Core;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Sms.Transform
 {
-    public static class SendResultTransformer
+    internal static class SendResultTransformer
     {
-        public static SendResult ToResult(this SendSmsResponse response)
+        public static SendResult ToResult(this CommonResponse response)
         {
             if (response == null)
             {
@@ -16,8 +16,8 @@ namespace HB.Infrastructure.Aliyun.Sms.Transform
 
             SendResult sendResult = new SendResult
             {
-                Message = response.Message,
-                Succeeded = response.Code.Equals("ok", GlobalSettings.ComparisonIgnoreCase)
+                //Message = response.Message,
+                //Succeeded = response.Code.Equals("ok", GlobalSettings.ComparisonIgnoreCase)
             };
 
             return sendResult;
