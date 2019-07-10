@@ -6,7 +6,7 @@ PublishProfiles/
 *.Production.json
 .DS_Store
 *.Development_HOME.json
-
+*.db
 # User-specific files
 *.suo
 *.user

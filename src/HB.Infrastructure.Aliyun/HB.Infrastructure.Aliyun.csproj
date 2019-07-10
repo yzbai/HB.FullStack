@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\build\common.props" />
+  <Import Project="..\..\common.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -8,17 +8,14 @@
 
 
   <ItemGroup>
+    <PackageReference Include="aliyun-net-sdk-core" Version="1.5.1" />
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.9.1" />
     <PackageReference Include="Polly" Version="7.1.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\aliyun-net-sdk-dysmsapi\aliyun-net-sdk-dysmsapi.vs2017.csproj" />
-    <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-sts\aliyun-net-sdk-sts.vs2017.csproj" />
-    <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-vod\aliyun-net-sdk-vod.vs2017.csproj" />
-    <ProjectReference Include="..\..\..\aliyun-oss-csharp-sdk\sdk\aliyun-oss-sdk-dotnetcore.csproj" />
     <ProjectReference Include="..\HB.Framework.Cache\HB.Framework.Cache.csproj" />
-    <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
   </ItemGroup>
 
 </Project>
