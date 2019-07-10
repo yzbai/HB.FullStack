@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Common", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL", "src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj", "{87CC7762-0B4A-48B1-834A-70DCDDAADA45}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Database.Test", "test\HB.Framework.Database.Test\HB.Framework.Database.Test.csproj", "{DF312EB5-A362-4D60-BFEF-12412337E762}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL.Test", "test\HB.Framework.Database.Test\HB.Infrastructure.MySQL.Test.csproj", "{DF312EB5-A362-4D60-BFEF-12412337E762}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{894198C4-54BB-44DD-AEC4-E4982EF5DBA8}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL.Asp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{6DFDEA5A-2DA4-4976-9442-FC5737693815}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseSample", "samples\DatabaseSample\DatabaseSample.csproj", "{F0DAA7C5-8937-428C-8155-1B8E2AD31B1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseConsoleSample", "samples\DatabaseSample\DatabaseConsoleSample.csproj", "{F0DAA7C5-8937-428C-8155-1B8E2AD31B1E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.SQLite", "src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj", "{ECAA542C-3B00-4767-A807-2E2C95F27567}"
 EndProject
@@ -29,7 +29,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseXamarinSample.Andro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseXamarinSample.iOS", "samples\DatabaseXamarinSample\DatabaseXamarinSample.iOS\DatabaseXamarinSample.iOS.csproj", "{1AA33E04-8DFE-442E-A5DC-E2D03E0FE726}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseXamarinSample", "samples\DatabaseXamarinSample\DatabaseXamarinSample\DatabaseXamarinSample.csproj", "{527EB072-0720-474E-A2DB-66BB61702FDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseXamarinSample", "samples\DatabaseXamarinSample\DatabaseXamarinSample\DatabaseXamarinSample.csproj", "{527EB072-0720-474E-A2DB-66BB61702FDD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F72A0B4-B5BB-46C7-9CE7-7F73DCCCF65F}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseAspnetcoreSample", "samples\DatabaseAspnetcoreSample\DatabaseAspnetcoreSample.csproj", "{5AFC4835-F9A0-4F66-BE54-C665C8269A23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -189,6 +196,18 @@ Global
 		{527EB072-0720-474E-A2DB-66BB61702FDD}.Release|iPhone.Build.0 = Release|Any CPU
 		{527EB072-0720-474E-A2DB-66BB61702FDD}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{527EB072-0720-474E-A2DB-66BB61702FDD}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Release|iPhone.Build.0 = Release|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -200,6 +219,7 @@ Global
 		{2B4F7782-266A-4258-97AC-1A7C98C15085} = {6DFDEA5A-2DA4-4976-9442-FC5737693815}
 		{1AA33E04-8DFE-442E-A5DC-E2D03E0FE726} = {6DFDEA5A-2DA4-4976-9442-FC5737693815}
 		{527EB072-0720-474E-A2DB-66BB61702FDD} = {6DFDEA5A-2DA4-4976-9442-FC5737693815}
+		{5AFC4835-F9A0-4F66-BE54-C665C8269A23} = {6DFDEA5A-2DA4-4976-9442-FC5737693815}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F6951372-F92C-435B-AFFE-4572C47FAC08}
