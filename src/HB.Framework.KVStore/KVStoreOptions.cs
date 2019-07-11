@@ -16,12 +16,8 @@ namespace HB.Framework.KVStore
     {
         public KVStoreOptions Value { get { return this; } }
 
-        public IList<KVStoreSchema> KVStoreSchemas { get; set; }
+        public IList<KVStoreSchema> KVStoreSchemas { get; } = new List<KVStoreSchema>();
 
-        public KVStoreOptions()
-        {
-            KVStoreSchemas = new List<KVStoreSchema>();
-        }
 
         public KVStoreSchema GetKVStoreSchema(string entityTypeFullName)
         {

@@ -115,6 +115,8 @@ namespace Microsoft.AspNetCore.Http
 
         public static string GetIpAddress(this HttpContext httpContext)
         {
+            ThrowIf.Null(httpContext, nameof(httpContext));
+
             string ip = httpContext.GetHeaderValueAs<string>("X-Forwarded-For");
 
             if (string.IsNullOrWhiteSpace(ip))

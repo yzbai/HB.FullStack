@@ -22,7 +22,7 @@ namespace HB.Framework.EventBus
             }
         }
 
-        public IList<EventSchema> EventSchemas { get; set; } = new List<EventSchema>();
+        public IList<EventSchema> EventSchemas { get; } = new List<EventSchema>();
 
         public EventSchema GetEventSchema(string topic)
         {
