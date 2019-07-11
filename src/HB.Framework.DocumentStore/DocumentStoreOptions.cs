@@ -20,7 +20,7 @@ namespace HB.Framework.DocumentStore
     {
         public DocumentStoreOptions Value { get { return this; } }
 
-        public IList<DocumentStoreSchema> Schemas { get; set; } = new List<DocumentStoreSchema>();
+        public IList<DocumentStoreSchema> Schemas { get; } = new List<DocumentStoreSchema>();
 
         public DocumentStoreSchema GetDocumentStoreSchema(Type type)
         {

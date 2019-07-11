@@ -50,6 +50,6 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// </summary>
         public string PublicBucketName { get; set; }
 
-        public IList<BucketSettings> Buckets { get; set; } = new List<BucketSettings>();
+        public IList<BucketSettings> Buckets { get; } = new List<BucketSettings>();
     }
 }

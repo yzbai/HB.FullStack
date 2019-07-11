@@ -9,12 +9,12 @@ namespace Microsoft.Extensions.Logging
     {
         public static void SessionCommitCanceled(this ILogger logger, OperationCanceledException ex)
         {
-            logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex?.Message);
         }
 
         public static void ErrorClosingTheSession(this ILogger logger, Exception ex)
         {
-            logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex?.Message);
         }
     }
 }
