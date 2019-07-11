@@ -70,6 +70,8 @@ namespace Microsoft.AspNetCore.Session
         /// <returns>A <see cref="Task"/> that completes when the middleware has completed processing.</returns>
         public async Task Invoke(HttpContext context)
         {
+            ThrowIf.Null(context, nameof(context));
+
             Func<bool> tryEstablishSession = ReturnTrue;
             bool isNewSessionKey = false;
 
@@ -118,6 +120,8 @@ namespace Microsoft.AspNetCore.Session
         //TODO: add data protection later
         private string GetSessionKey(HttpContext context)
         {
+            //ThrowIf.Null(context, nameof(context));
+
             string sessionKey = context.GetValueFromRequest(_options.Name, includeCookie: false);
 
             if (!string.IsNullOrWhiteSpace(sessionKey))

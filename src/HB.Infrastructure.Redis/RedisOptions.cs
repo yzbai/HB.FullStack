@@ -27,12 +27,7 @@ namespace HB.Infrastructure.Redis
     {
         public RedisOptions Value { get { return this; } }
 
-        public IList<RedisInstanceSetting> ConnectionSettings { get; set; }
-
-        public RedisOptions()
-        {
-            ConnectionSettings = new List<RedisInstanceSetting>();
-        }
+        public IList<RedisInstanceSetting> ConnectionSettings { get; } = new List<RedisInstanceSetting>();
 
         public RedisInstanceSetting GetInstanceSetting(string instanceName)
         {

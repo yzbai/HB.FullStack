@@ -9,6 +9,7 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Direct
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "<Pending>")]
     internal class RedisDatabase : IRedisDatabase
     {
         private readonly IRedisInstanceManager _redisConnectionManager;

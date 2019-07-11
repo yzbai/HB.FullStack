@@ -12,7 +12,7 @@ namespace HB.Framework.KVStore.Entity
 
         public string EntityFullName { get; set; }
 
-        public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; set; } = new Dictionary<int, PropertyInfo>();
+        public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; } = new Dictionary<int, PropertyInfo>();
 
         //public string KeyPropertyName
         //{
