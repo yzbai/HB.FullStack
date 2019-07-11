@@ -6,6 +6,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
     
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>HB.Framework.KVStore.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+    
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>HB.Framework.KVStore.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+    
 
     
   <ItemGroup>

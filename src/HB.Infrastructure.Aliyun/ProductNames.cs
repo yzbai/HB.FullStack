@@ -6,10 +6,10 @@ namespace HB.Infrastructure.Aliyun
 {
     internal class ProductNames
     {
-        public static readonly string SMS = "Dysmsapi";
+        public const string SMS = "Dysmsapi";
 
-        public static readonly string OSS = "Oss";
+        public const string OSS = "Oss";
 
-        public static readonly string STS = "Sts";
+        public const string STS = "Sts";
     }
 }
