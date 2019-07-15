@@ -13,7 +13,6 @@ namespace HB.Infrastructure.Redis.EventBus
     internal class RedisEventBusEngine : IEventBusEngine
     {
         private readonly IRedisInstanceManager _instanceManager;
-        private readonly ILogger _logger;
         private readonly ILogger _consumeTaskManagerLogger;
 
         private readonly object _consumeTaskManagerLocker;
@@ -23,7 +22,6 @@ namespace HB.Infrastructure.Redis.EventBus
         public RedisEventBusEngine(IRedisInstanceManager connectionManager, ILoggerFactory loggerFactory)
         {
             _instanceManager = connectionManager;
-            _logger = loggerFactory.CreateLogger<RedisEventBusEngine>();
             _consumeTaskManagerLogger = loggerFactory.CreateLogger<ConsumeTaskManager>();
             _consumeTaskManagers = new Dictionary<string, ConsumeTaskManager>();
             _consumeTaskManagerLocker = new object();

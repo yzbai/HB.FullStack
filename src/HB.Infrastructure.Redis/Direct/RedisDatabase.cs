@@ -14,12 +14,9 @@ namespace HB.Infrastructure.Redis.Direct
     {
         private readonly IRedisInstanceManager _redisConnectionManager;
 
-        private readonly ILogger<RedisDatabase> _logger;
-
-        public RedisDatabase(IRedisInstanceManager redisConnectionManager, ILogger<RedisDatabase> logger)
+        public RedisDatabase(IRedisInstanceManager redisConnectionManager)
         {
             _redisConnectionManager = redisConnectionManager;
-            _logger = logger;
         }
 
         #region Key

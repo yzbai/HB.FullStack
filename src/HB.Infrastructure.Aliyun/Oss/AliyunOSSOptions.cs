@@ -38,7 +38,11 @@ namespace HB.Infrastructure.Aliyun.Oss
 
     public class AliyunOssOptions : IOptions<AliyunOssOptions>
     {
-        public AliyunOssOptions Value => this;
+        public AliyunOssOptions Value {
+            get {
+                return this;
+            }
+        }
 
         /// <summary>
         /// 用于存储用户数据的Bucket
