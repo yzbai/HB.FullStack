@@ -44,7 +44,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             if (CheckToken(setName, id, token))
             {
-                _tokenDict.TryRemove(TokenDictKey(setName, id), out string storedValue);
+                _tokenDict.TryRemove(TokenDictKey(setName, id), out _);
             }
         }
 

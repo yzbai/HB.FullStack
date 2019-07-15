@@ -149,6 +149,11 @@ namespace Microsoft.AspNetCore.Http
         //TODO: add requset info from cookie, form ,query etc.
         public static string RequestDebugInformation(this HttpContext httpContext)
         {
+            if (httpContext is null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             StringBuilder builder = new StringBuilder();
 
             builder.AppendLine();

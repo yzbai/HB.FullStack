@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Session
         private readonly MixedSessionOptions _options;
         private readonly ILogger _logger;
         private readonly ISessionStore _sessionStore;
-        private readonly IDataProtector _dataProtector;
+        //private readonly IDataProtector _dataProtector;
 
         /// <summary>
         /// Creates a new <see cref="SessionMiddleware"/>.
@@ -37,18 +37,12 @@ namespace Microsoft.AspNetCore.Session
         public MixedSessionMiddleware(
              RequestDelegate next,
              ILoggerFactory loggerFactory,
-             IDataProtectionProvider dataProtectionProvider,
              ISessionStore sessionStore,
              IOptions<MixedSessionOptions> options)
         {
             if (loggerFactory == null)
             {
                 throw new ArgumentNullException(nameof(loggerFactory));
-            }
-
-            if (dataProtectionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(dataProtectionProvider));
             }
 
             if (options == null)
@@ -60,7 +54,7 @@ namespace Microsoft.AspNetCore.Session
             _logger = loggerFactory.CreateLogger<MixedSessionMiddleware>();
             _options = options.Value;
             _sessionStore = sessionStore;
-            _dataProtector = dataProtectionProvider.CreateProtector(nameof(MixedSessionMiddleware));
+            //_dataProtector = dataProtectionProvider.CreateProtector(nameof(MixedSessionMiddleware));
         }
 
         /// <summary>
@@ -129,7 +123,7 @@ namespace Microsoft.AspNetCore.Session
                 return sessionKey;
             }
 
-            var cookieValue = context.Request.Cookies[_options.Name];
+            string cookieValue = context.Request.Cookies[_options.Name];
 
             return cookieValue;
         }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Cache
 {
-    public class DistributedCacheFrequencyChecker : IFrequencyChecker
+    public class DistributedCacheFrequencyChecker
     {
         private const string _Prefix = "Freq_C";
 
@@ -31,28 +31,6 @@ namespace HB.Framework.Cache
             }
 
             return false;
-        }
-
-        public bool Check(string resourceType, string resource, TimeSpan aliveTimeSpan)
-        {
-            string key = GetKey(resourceType, resource);
-
-            string value = _cache.GetString(key);
-
-            if (string.IsNullOrEmpty(value))
-            {
-                _cache.SetString(key, "Hit", new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = aliveTimeSpan });
-                return true;
-            }
-
-            return false;
-        }
-
-        public void Reset(string resourceType, string resource)
-        {
-            string key = GetKey(resourceType, resource);
-
-            _cache.Remove(key);
         }
 
         public async Task ResetAsync(string resourceType, string resource)

@@ -15,7 +15,7 @@ namespace HB.Framework.Http
         private byte[] _appsettingsEnvHash = new byte[20];
         private readonly IHostingEnvironment _env;
 
-        private IApplicationLifetime _applicationLifeTime;
+        private readonly IApplicationLifetime _applicationLifeTime;
         private readonly ILogger _logger;
 
  
@@ -64,12 +64,12 @@ namespace HB.Framework.Http
 
         public void EnableMonitoring()
         {
-            this.MonitoringEnabled = true;
+            MonitoringEnabled = true;
         }
 
         public void DisableMonitoring()
         {
-            this.MonitoringEnabled = false;
+            MonitoringEnabled = false;
         }
     }
 }

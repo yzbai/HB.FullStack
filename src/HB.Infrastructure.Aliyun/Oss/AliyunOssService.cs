@@ -14,19 +14,27 @@ namespace HB.Infrastructure.Aliyun.Oss
 {
     internal class AliyunOssService : IAliyunOssService
     {
-        private static string READ_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
-        private static string WRITE_ROLE_POLICY_TEMPLATE = "{ \"Version\":\"1\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}]}";
+        private const string READ_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
+        private const string WRITE_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
 
         private readonly AliyunOssOptions _options;
         private readonly ILogger _logger;
 
-        private IDictionary<string, IAcsClient> _acsClients;
+        private readonly IDictionary<string, IAcsClient> _acsClients;
 
-        private IDictionary<string, BucketSettings> _bucketSettings;
+        private readonly IDictionary<string, BucketSettings> _bucketSettings;
 
-        public string UserBucketName => _options.UserBucketName;
+        public string UserBucketName {
+            get {
+                return _options.UserBucketName;
+            }
+        }
 
-        public string PublicBucketName => _options.PublicBucketName;
+        public string PublicBucketName {
+            get {
+                return _options.PublicBucketName;
+            }
+        }
 
         public AliyunOssService(IOptions<AliyunOssOptions> options, ILogger<AliyunOssService> logger)
         {
