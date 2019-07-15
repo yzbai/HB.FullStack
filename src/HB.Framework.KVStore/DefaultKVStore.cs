@@ -13,23 +13,16 @@ namespace HB.Framework.KVStore
 {
     internal class DefaultKVStore : IKVStore
     {
-        private readonly KVStoreOptions _options;
         private readonly IKVStoreEngine _engine;
         private readonly IKVStoreEntityDefFactory _entityDefFactory;
 
-        public DefaultKVStore(IOptions<KVStoreOptions> options, IKVStoreEngine kvstoreEngine, IKVStoreEntityDefFactory kvstoreEntityDefFactory)
+        public DefaultKVStore(IKVStoreEngine kvstoreEngine, IKVStoreEntityDefFactory kvstoreEntityDefFactory)
         {
-            _options = options.Value;
             _engine = kvstoreEngine;
             _entityDefFactory = kvstoreEntityDefFactory;
         }
 
         #region Private
-
-        private static int EntityVersion<T>(T item) where T : KVStoreEntity, new()
-        {
-            return item.Version;
-        }
 
         private static string StoreName(KVStoreEntityDef entityDef)
         {

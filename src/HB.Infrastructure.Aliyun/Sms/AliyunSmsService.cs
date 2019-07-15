@@ -36,12 +36,12 @@ namespace HB.Infrastructure.Aliyun.Sms
                     _options.TemplateIdentityValidation.ParamProduct,
                     _options.TemplateIdentityValidation.ParamProductValue);
 
-            CommonRequest request = new CommonRequest();
-
-            request.Method = MethodType.POST;
-            request.Domain = "dysmsapi.aliyuncs.com";
-            request.Version = "2017-05-25";
-            request.Action = "SendSms";
+            CommonRequest request = new CommonRequest {
+                Method = MethodType.POST,
+                Domain = "dysmsapi.aliyuncs.com",
+                Version = "2017-05-25",
+                Action = "SendSms"
+            };
 
             request.AddQueryParameters("PhoneNumbers", mobile);
             request.AddQueryParameters("SignName", _options.SignName);
@@ -56,10 +56,10 @@ namespace HB.Infrastructure.Aliyun.Sms
 
                 CommonResponse response = await task.ConfigureAwait(false);
 
-                //if (response.Code == "OK")
-                //{
-                //    CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
-                //}
+                if (response.HttpStatus == 200)
+                {
+                    CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
+                }
 
                 return response.ToResult();
             });
