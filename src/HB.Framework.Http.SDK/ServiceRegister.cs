@@ -9,7 +9,7 @@ namespace HB.Framework.Http.SDK
 {
     public static class ServiceRegister
     {
-        public static IServiceCollection AddAHabitResourceClient(this IServiceCollection services, Action<ResourceClientOptions> action)
+        public static IServiceCollection AddResourceClient(this IServiceCollection services, Action<ResourceClientOptions> action)
         {
             ThrowIf.Null(action, nameof(action));
 
@@ -60,6 +60,9 @@ namespace HB.Framework.Http.SDK
             });
 
             services.Configure(action);
+
+
+            services.AddSingleton<IResourceClient, ResourceClient>();
 
  
             return services;
