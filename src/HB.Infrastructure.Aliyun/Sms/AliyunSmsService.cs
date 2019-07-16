@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Aliyun.Acs.Core;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
-using HB.Infrastructure.Aliyun.Sms.Transform;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -55,13 +54,18 @@ namespace HB.Infrastructure.Aliyun.Sms
                 task.Start(TaskScheduler.Default);
 
                 CommonResponse response = await task.ConfigureAwait(false);
+                SendResult sendResult = JsonUtil.FromJson<SendResult>(response.Data);
 
-                if (response.HttpStatus == 200)
+                if (sendResult.IsSuccessful())
                 {
                     CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
+                else
+                {
+                    _logger.LogError($"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}");
+                }
 
-                return response.ToResult();
+                return sendResult;
             });
         }
 
