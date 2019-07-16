@@ -54,7 +54,7 @@ namespace HB.Framework.Http.SDK
                     httpClient.BaseAddress = kv.Value;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ResourceClient).FullName);
-                }).AddTransientHttpErrorPolicy(p=> {
+                }).AddTransientHttpErrorPolicy(p => {
                     return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
                 });
             });
