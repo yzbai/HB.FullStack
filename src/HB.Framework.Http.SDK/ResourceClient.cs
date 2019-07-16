@@ -7,12 +7,14 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace HB.Framework.Http.SDK
 {
-    public class ResourceClient
+    public class ResourceClient : IResourceClient
     {
         //move to settings
         private const string RefreshTokenFrequencyCheckResource = "_Fqc_Refresh";
@@ -181,16 +183,48 @@ namespace HB.Framework.Http.SDK
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private static HttpRequestMessage ConstructureHttpRequest(ResourceRequest request)
         {
-            string requestUrl = $"{request.GetApiVersion()}/{request.GetResourceName()}/{request.GetCondition()}/";
+            HttpRequestMessage httpRequest = new HttpRequestMessage(request.GetHttpMethod(), ConstructureRequestUrl(request));
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(request.GetHttpMethod(), requestUrl)
+            if (request.GetHttpMethod() != HttpMethod.Get)
             {
-                Content = new FormUrlEncodedContent(request.GetParameters())
-            };
+                httpRequest.Content = new FormUrlEncodedContent(request.GetParameters());
+            }
 
             request.GetHeaders().ForEach(kv => httpRequest.Headers.Add(kv.Key, kv.Value));
 
             return httpRequest;
+        }
+
+        private static string ConstructureRequestUrl(ResourceRequest request)
+        {
+            StringBuilder requestUrlBuilder = new StringBuilder();
+
+            if (!request.GetApiVersion().IsNullOrEmpty())
+            {
+                requestUrlBuilder.Append(request.GetApiVersion());
+            }
+
+            requestUrlBuilder.Append("/");
+            requestUrlBuilder.Append(request.GetResourceName());
+
+            if (!request.GetCondition().IsNullOrEmpty())
+            {
+                requestUrlBuilder.Append("/");
+                requestUrlBuilder.Append(request.GetCondition());
+            }
+
+            if (request.GetHttpMethod() == HttpMethod.Get)
+            {
+                string query = request.GetParameters().ToHttpValueCollection().ToString();
+
+                if (!query.IsNullOrEmpty())
+                {
+                    requestUrlBuilder.Append("?");
+                    requestUrlBuilder.Append(query);
+                }
+            }
+
+            return requestUrlBuilder.ToString();
         }
 
         private async Task<Resource<T>> ConstructureHttpResponseAsync<T>(HttpResponseMessage httpResponse) where T : ResourceResponse
@@ -230,7 +264,7 @@ namespace HB.Framework.Http.SDK
                     return false;
                 }
 
-                request.GetHeaders().Add("Authorization", "Bearer " + accessToken);
+                request.AddHeader("Authorization", "Bearer " + accessToken);
             }
 
             return true;
@@ -238,10 +272,10 @@ namespace HB.Framework.Http.SDK
 
         private void AddDeviceInfoAlways(ResourceRequest request)
         {
-            request.GetParameters().Add("DeviceId", deviceInfoProvider.DeviceId);
-            request.GetParameters().Add("DeviceType", deviceInfoProvider.DeviceType);
-            request.GetParameters().Add("DeviceVersion", deviceInfoProvider.DeviceVersion);
-            request.GetParameters().Add("DeviceAddress", deviceInfoProvider.DeviceAddress);
+            request.AddParameter("DeviceId", deviceInfoProvider.DeviceId);
+            request.AddParameter("DeviceType", deviceInfoProvider.DeviceType);
+            request.AddParameter("DeviceVersion", deviceInfoProvider.DeviceVersion);
+            request.AddParameter("DeviceAddress", deviceInfoProvider.DeviceAddress);
         }
     }
 }

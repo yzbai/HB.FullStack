@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Polly" Version="7.1.0" />
     <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.7-alpha-00002" />
   </ItemGroup>
 
