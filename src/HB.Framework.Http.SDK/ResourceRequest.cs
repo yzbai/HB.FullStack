@@ -44,6 +44,7 @@ namespace HB.Framework.Http.SDK
             }
         }
 
+        //All use fields instead of Properties, for not mvc binding
         private readonly string productType;
         private readonly string apiVersion;
         private readonly HttpMethod httpMethod;
@@ -83,19 +84,9 @@ namespace HB.Framework.Http.SDK
             return condition;
         }
 
-        public IDictionary<string, string> GetHeaders()
-        {
-            return headers;
-        }
-
-        public IDictionary<string, string> GetParameters()
-        {
-            return parameters;
-        }
-
         protected string GetParameter(string name)
         {
-            if (GetParameters().TryGetValue(name, out string value))
+            if (parameters.TryGetValue(name, out string value))
             {
                 return value;
             }
@@ -105,18 +96,39 @@ namespace HB.Framework.Http.SDK
 
         protected void SetParameter(string name, string value)
         {
-            GetParameters()[name] = value;
+            parameters[name] = value;
         }
 
         public void AddParameter(string name, string value)
         {
-            if (GetParameters().ContainsKey(name))
+            if (parameters.ContainsKey(name))
             {
                 throw new ArgumentException($"Request Already has a parameter named {name}");
             }
 
-            GetParameters().Add(name, value);
+            parameters.Add(name, value);
         }
+
+        public void AddHeader(string name, string value)
+        {
+            if (headers.ContainsKey(name))
+            {
+                throw new ArgumentException($"Request Already has a header named {name}");
+            }
+
+            headers.Add(name, value);
+        }
+
+        public IDictionary<string, string> GetParameters()
+        {
+            return parameters;
+        }
+
+        public IDictionary<string, string> GetHeaders()
+        {
+            return headers;
+        }
+
 
         public ResourceRequest(string productType, string apiVersion, HttpMethod httpMethod, bool needAuthenticate, string resourceName, string condition = null)
         {
@@ -125,7 +137,7 @@ namespace HB.Framework.Http.SDK
             this.httpMethod = httpMethod.ThrowIfNull(nameof(httpMethod));
             this.needAuthenticate = needAuthenticate;
             this.resourceName = resourceName.ThrowIfNullOrEmpty(nameof(resourceName));
-            this.condition = condition.ThrowIfNullOrEmpty(nameof(condition));
+            this.condition = condition;
         }
     }
 }

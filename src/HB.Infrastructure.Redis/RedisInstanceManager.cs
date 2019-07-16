@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Retry;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis
@@ -45,7 +47,8 @@ namespace HB.Infrastructure.Redis
 
             if (redisWrapper.Connection != null && !redisWrapper.Connection.IsConnected)
             {
-                Thread.Sleep(5000);
+                //TODO: Check this
+                //Thread.Sleep(5000);
             }
 
             if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
@@ -73,11 +76,13 @@ namespace HB.Infrastructure.Redis
 
                     //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
 
-                    redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);
-                    redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
-                    //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
+                    ReConnectPolicy(_logger, redisWrapper.ConnectionString).Execute(()=> {
+                        redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);
+                        redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
+                        //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
-                    _logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {instanceName}");
+                        _logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {instanceName}");
+                    });
                 }
                 finally
                 {
@@ -86,6 +91,19 @@ namespace HB.Infrastructure.Redis
             }
 
             return redisWrapper.Database;
+        }
+
+        private static RetryPolicy ReConnectPolicy(ILogger logger, string connectionString)
+        {
+            return Policy
+                        .Handle<RedisConnectionException>()
+                        .WaitAndRetry(
+                            10,
+                            count => TimeSpan.FromSeconds(5 + count * 2),
+                            (exception, timeSpan, retryCount, context) => {
+                                RedisConnectionException ex = (RedisConnectionException)exception;
+                                logger.LogError(exception, $"Redis Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
+                            });
         }
 
         public RedisInstanceSetting GetInstanceSetting(string instanceName)
