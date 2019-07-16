@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Http;
 using Polly;
+using System.Net.Http;
 
 namespace HB.Framework.Http.SDK
 {
@@ -54,10 +55,15 @@ namespace HB.Framework.Http.SDK
                     httpClient.BaseAddress = kv.Value;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ResourceClient).FullName);
-                }).AddTransientHttpErrorPolicy(p => {
+                })
+                .ConfigurePrimaryHttpMessageHandler
+                .AddTransientHttpErrorPolicy(p => {
                     return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
                 });
             });
+
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            httpClientHandler.Credentials
 
             services.Configure(action);
 
