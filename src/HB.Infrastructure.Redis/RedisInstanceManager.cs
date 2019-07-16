@@ -95,10 +95,11 @@ namespace HB.Infrastructure.Redis
 
         private static RetryPolicy ReConnectPolicy(ILogger logger, string connectionString)
         {
+            //TODO: move this settings to options
             return Policy
                         .Handle<RedisConnectionException>()
                         .WaitAndRetry(
-                            10,
+                            3,
                             count => TimeSpan.FromSeconds(5 + count * 2),
                             (exception, timeSpan, retryCount, context) => {
                                 RedisConnectionException ex = (RedisConnectionException)exception;
