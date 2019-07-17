@@ -204,8 +204,11 @@ namespace HB.Framework.Http.SDK
                 requestUrlBuilder.Append(request.GetApiVersion());
             }
 
-            requestUrlBuilder.Append("/");
-            requestUrlBuilder.Append(request.GetResourceName());
+            if (!request.GetResourceName().IsNullOrEmpty())
+            {
+                requestUrlBuilder.Append("/");
+                requestUrlBuilder.Append(request.GetResourceName());
+            }
 
             if (!request.GetCondition().IsNullOrEmpty())
             {
