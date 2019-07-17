@@ -56,14 +56,11 @@ namespace HB.Framework.Http.SDK
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ResourceClient).FullName);
                 })
-                .ConfigurePrimaryHttpMessageHandler
                 .AddTransientHttpErrorPolicy(p => {
+                    //TODO: Move this to options
                     return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
                 });
             });
-
-            HttpClientHandler httpClientHandler = new HttpClientHandler();
-            httpClientHandler.Credentials
 
             services.Configure(action);
 

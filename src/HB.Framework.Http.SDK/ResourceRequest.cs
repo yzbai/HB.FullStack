@@ -45,14 +45,14 @@ namespace HB.Framework.Http.SDK
         }
 
         //All use fields instead of Properties, for not mvc binding
-        private readonly string productType;
-        private readonly string apiVersion;
-        private readonly HttpMethod httpMethod;
-        private readonly bool needAuthenticate;
-        private readonly string resourceName;
-        private readonly string condition;
-        private readonly IDictionary<string, string> headers = new Dictionary<string, string>();
-        private readonly IDictionary<string, string> parameters = new Dictionary<string, string>();
+        private string productType;
+        private string apiVersion;
+        private HttpMethod httpMethod;
+        private bool needAuthenticate;
+        private string resourceName;
+        private string condition;
+        private IDictionary<string, string> headers = new Dictionary<string, string>();
+        private IDictionary<string, string> parameters = new Dictionary<string, string>();
 
         public string GetProductType()
         {
@@ -133,10 +133,10 @@ namespace HB.Framework.Http.SDK
         public ResourceRequest(string productType, string apiVersion, HttpMethod httpMethod, bool needAuthenticate, string resourceName, string condition = null)
         {
             this.productType = productType.ThrowIfNullOrEmpty(nameof(productType));
-            this.apiVersion = apiVersion.ThrowIfNullOrEmpty(nameof(apiVersion));
+            this.apiVersion = apiVersion;
             this.httpMethod = httpMethod.ThrowIfNull(nameof(httpMethod));
             this.needAuthenticate = needAuthenticate;
-            this.resourceName = resourceName.ThrowIfNullOrEmpty(nameof(resourceName));
+            this.resourceName = resourceName;
             this.condition = condition;
         }
     }
