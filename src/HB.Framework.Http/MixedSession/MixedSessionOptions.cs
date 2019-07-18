@@ -6,7 +6,7 @@ namespace Microsoft.AspNetCore.Session
 {
     public class MixedSessionOptions
     {
-        public string Name { get; set; } = "ClientId";
+        public string Name { get; set; } = "DeviceId";
       
         public string CookieDomain { get; set; }
 
