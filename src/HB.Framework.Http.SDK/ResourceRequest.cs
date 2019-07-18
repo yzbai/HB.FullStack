@@ -1,12 +1,14 @@
 ﻿using HB.Framework.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 
 namespace HB.Framework.Http.SDK
 {
     public class ResourceRequest : ValidatableObject
     {
+        [Required]
         public string DeviceId {
             get {
                 return GetParameter("DeviceId");
@@ -16,31 +18,37 @@ namespace HB.Framework.Http.SDK
                 SetParameter("DeviceId", value);
             }
         }
+
+        [Required]
         public string DeviceType {
             get {
-                return GetParameter("DeviceId");
+                return GetParameter("DeviceType");
             }
 
             set {
-                SetParameter("DeviceId", value);
+                SetParameter("DeviceType", value);
             }
         }
+
+        [Required]
         public string DeviceVersion {
             get {
-                return GetParameter("DeviceId");
+                return GetParameter("DeviceVersion");
             }
 
             set {
-                SetParameter("DeviceId", value);
+                SetParameter("DeviceVersion", value);
             }
         }
+
+        [Required]
         public string DeviceAddress {
             get {
-                return GetParameter("DeviceId");
+                return GetParameter("DeviceAddress");
             }
 
             set {
-                SetParameter("DeviceId", value);
+                SetParameter("DeviceAddress", value);
             }
         }
 
