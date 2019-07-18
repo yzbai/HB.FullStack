@@ -49,6 +49,8 @@ namespace HB.Framework.Http.SDK
         {
             ThrowIf.Null(request, nameof(request));
 
+            AddDeviceInfoAlways(request);
+
             if (!request.IsValid())
             {
                 return new RequestValidateErrorResponse<T>(request);
@@ -58,8 +60,6 @@ namespace HB.Framework.Http.SDK
             {
                 return new NotLoginResponse<T>();
             }
-
-            AddDeviceInfoAlways(request);
 
             Resource<T> response = await GetResponseCore<T>(request).ConfigureAwait(false);
 
