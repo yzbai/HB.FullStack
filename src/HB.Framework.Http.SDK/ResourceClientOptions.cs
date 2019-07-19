@@ -28,10 +28,6 @@ namespace HB.Framework.Http.SDK
 
     public class TokenRefreshSettings
     {
-        public string AccessTokenParameterName { get; set; } = "AccessToken";
-
-        public string RefreshTokenParameterName { get; set; } = "RefreshToken";
-
         public string ProductType { get; set; }
 
         public string Version { get; set; }
