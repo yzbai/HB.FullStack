@@ -25,22 +25,19 @@ namespace HB.Framework.Http.SDK
 
         private readonly ResourceClientOptions options;
 
-        private readonly ILocalStorage localStorage;
-
         private readonly IHttpClientFactory httpClientFactory;
 
-        private readonly IDeviceInfoProvider deviceInfoProvider;
+        private readonly IMobileInfoProvider mobileInfoProvider;
 
         private readonly InMemoryFrequencyChecker frequencyChecker = new InMemoryFrequencyChecker();
 
         private readonly IDictionary<string, bool> lastRefreshTokenResults = new Dictionary<string, bool>();
 
-        public ResourceClient(IOptions<ResourceClientOptions> options, ILogger<ResourceClient> logger, ILocalStorage localStorage, IDeviceInfoProvider deviceInfoProvider, IHttpClientFactory httpClientFactory)
+        public ResourceClient(IOptions<ResourceClientOptions> options, ILogger<ResourceClient> logger, IMobileInfoProvider mobileInfoProvider, IHttpClientFactory httpClientFactory)
         {
             this.options = options.ThrowIfNull(nameof(options)).Value;
             this.logger = logger;
-            this.localStorage = localStorage.ThrowIfNull(nameof(localStorage));
-            this.deviceInfoProvider = deviceInfoProvider.ThrowIfNull(nameof(deviceInfoProvider));
+            this.mobileInfoProvider = mobileInfoProvider.ThrowIfNull(nameof(mobileInfoProvider));
             this.httpClientFactory = httpClientFactory;
         }
 
@@ -49,7 +46,7 @@ namespace HB.Framework.Http.SDK
         {
             ThrowIf.Null(request, nameof(request));
 
-            AddDeviceInfoAlways(request);
+            await AddDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
             if (!request.IsValid())
             {
@@ -106,7 +103,7 @@ namespace HB.Framework.Http.SDK
 
             try
             {
-                string accessToken = await localStorage.GetAccessTokenAsync().ConfigureAwait(false);
+                string accessToken = await mobileInfoProvider.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
                 {
@@ -128,7 +125,7 @@ namespace HB.Framework.Http.SDK
                 }
 
                 //开始刷新
-                string refreshToken = await localStorage.GetRefreshTokenAsync().ConfigureAwait(false);
+                string refreshToken = await mobileInfoProvider.GetRefreshTokenAsync().ConfigureAwait(false);
 
                 if (!refreshToken.IsNullOrEmpty())
                 {
@@ -139,8 +136,8 @@ namespace HB.Framework.Http.SDK
                         false,
                         options.TokenRefreshSettings.ResourceName);
 
-                    refreshRequest.AddParameter(options.TokenRefreshSettings.AccessTokenParameterName, accessToken);
-                    refreshRequest.AddParameter(options.TokenRefreshSettings.RefreshTokenParameterName, refreshToken);
+                    refreshRequest.AddParameter(MobileInfoNames.AccessToken, accessToken);
+                    refreshRequest.AddParameter(MobileInfoNames.RefreshToken, refreshToken);
 
                     HttpClient httpClient = GetHttpClient(options.TokenRefreshSettings.ProductType);
 
@@ -154,9 +151,9 @@ namespace HB.Framework.Http.SDK
 
                                 string jsonString = await refreshResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                                string newAccessToken = JsonUtil.FromJson(jsonString, options.TokenRefreshSettings.RefreshTokenParameterName);
+                                string newAccessToken = JsonUtil.FromJson(jsonString, MobileInfoNames.AccessToken);
 
-                                await localStorage.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
+                                await mobileInfoProvider.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
 
                                 return await GetAsync<T>(request).ConfigureAwait(false);
                             }
@@ -168,8 +165,8 @@ namespace HB.Framework.Http.SDK
                 //frequencyChecker.Reset(frequencyCheckResourceName, accessTokenHash);
                 lastRefreshTokenResults[accessTokenHashKey] = false;
 
-                await localStorage.SetAccessTokenAsync(null).ConfigureAwait(false);
-                await localStorage.SetRefreshTokenAsync(null).ConfigureAwait(false);
+                await mobileInfoProvider.SetAccessTokenAsync(null).ConfigureAwait(false);
+                await mobileInfoProvider.SetRefreshTokenAsync(null).ConfigureAwait(false);
 
 
                 return response;
@@ -260,7 +257,7 @@ namespace HB.Framework.Http.SDK
         {
             if (request.GetNeedAuthenticate())
             {
-                string accessToken = await localStorage.GetAccessTokenAsync().ConfigureAwait(false);
+                string accessToken = await mobileInfoProvider.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
                 {
@@ -273,12 +270,12 @@ namespace HB.Framework.Http.SDK
             return true;
         }
 
-        private void AddDeviceInfoAlways(ResourceRequest request)
+        private async Task AddDeviceInfoAlwaysAsync(ResourceRequest request)
         {
-            request.AddParameter("DeviceId", deviceInfoProvider.DeviceId);
-            request.AddParameter("DeviceType", deviceInfoProvider.DeviceType);
-            request.AddParameter("DeviceVersion", deviceInfoProvider.DeviceVersion);
-            request.AddParameter("DeviceAddress", deviceInfoProvider.DeviceAddress);
+            request.AddParameter(MobileInfoNames.DeviceId, await mobileInfoProvider.GetDeviceIdAsync().ConfigureAwait(false));
+            request.AddParameter(MobileInfoNames.DeviceType, await mobileInfoProvider.GetDeviceTypeAsync().ConfigureAwait(false));
+            request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
+            request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));
         }
     }
 }

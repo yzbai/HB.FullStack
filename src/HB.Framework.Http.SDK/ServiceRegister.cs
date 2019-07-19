@@ -14,31 +14,16 @@ namespace HB.Framework.Http.SDK
         {
             ThrowIf.Null(action, nameof(action));
 
-            bool existLocalStorage = false;
             bool existDeviceInfoProvider = false;
-            Type localStorageType = typeof(ILocalStorage);
-            Type deviceInfoProviderType = typeof(IDeviceInfoProvider);
+            Type deviceInfoProviderType = typeof(IMobileInfoProvider);
 
             foreach (ServiceDescriptor service in services.ThrowIfNull(nameof(services)))
             {
-                if (service.ServiceType == localStorageType)
-                {
-                    existLocalStorage = true;
-                }
-                else if (service.ServiceType == deviceInfoProviderType)
+                if (service.ServiceType == deviceInfoProviderType)
                 {
                     existDeviceInfoProvider = true;
-                }
-
-                if (existDeviceInfoProvider && existLocalStorage)
-                {
                     break;
                 }
-            }
-
-            if (!existLocalStorage)
-            {
-                throw new ArgumentException("ResourceClient need ILocalStorage Service.");
             }
 
             if (!existDeviceInfoProvider)
