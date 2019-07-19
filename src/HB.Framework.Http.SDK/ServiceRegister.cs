@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Http;
 using Polly;
 using System.Net.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace HB.Framework.Http.SDK
 {
@@ -13,7 +14,54 @@ namespace HB.Framework.Http.SDK
         public static IServiceCollection AddResourceClient(this IServiceCollection services, Action<ResourceClientOptions> action)
         {
             ThrowIf.Null(action, nameof(action));
+            CheckMobileInfoProviderExists(services);
 
+            services.Configure(action);
+
+            ResourceClientOptions options = new ResourceClientOptions();
+            action(options);
+
+            AddResourceClientCore(services, options);
+
+            return services;
+        }
+
+        public static IServiceCollection AddResourceClient(this IServiceCollection services, IConfiguration configuration)
+        {
+            ThrowIf.Null(configuration, nameof(configuration));
+            CheckMobileInfoProviderExists(services);
+
+            services.Configure<ResourceClientOptions>(configuration);
+
+            ResourceClientOptions options = new ResourceClientOptions();
+            configuration.Bind(options);
+
+            AddResourceClientCore(services, options);
+
+            return services;
+        }
+
+        private static void AddResourceClientCore(IServiceCollection services, ResourceClientOptions options)
+        {
+            options.Endpoints.ForEach(endpoint => {
+                services.AddHttpClient(Endpoint.GetHttpClientName(endpoint), httpClient => {
+                    httpClient.BaseAddress = new Uri(endpoint.Url);
+                    httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ResourceClient).FullName);
+                })
+                .AddTransientHttpErrorPolicy(p => {
+                    //TODO: Move this to options
+                    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
+                });
+            });
+
+
+
+            services.AddSingleton<IResourceClient, ResourceClient>();
+        }
+
+        private static void CheckMobileInfoProviderExists(IServiceCollection services)
+        {
             bool existDeviceInfoProvider = false;
             Type deviceInfoProviderType = typeof(IMobileInfoProvider);
 
@@ -30,30 +78,6 @@ namespace HB.Framework.Http.SDK
             {
                 throw new ArgumentException("ResourceClient need IDeviceInfoProvider Service.");
             }
-
-            ResourceClientOptions options = new ResourceClientOptions();
-
-            action(options);
-
-            options.Endpoints.ForEach(kv => {
-                services.AddHttpClient(kv.Key.ToString(GlobalSettings.Culture), httpClient => {
-                    httpClient.BaseAddress = kv.Value;
-                    httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ResourceClient).FullName);
-                })
-                .AddTransientHttpErrorPolicy(p => {
-                    //TODO: Move this to options
-                    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
-                });
-            });
-
-            services.Configure(action);
-
-
-            services.AddSingleton<IResourceClient, ResourceClient>();
-
- 
-            return services;
         }
     }
 }
