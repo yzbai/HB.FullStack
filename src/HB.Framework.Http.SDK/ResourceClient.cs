@@ -46,7 +46,7 @@ namespace HB.Framework.Http.SDK
         {
             ThrowIf.Null(request, nameof(request));
 
-            await AddDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
+            await AddDeviceIdAlwaysAsync(request).ConfigureAwait(false);
 
             if (!request.IsValid())
             {
@@ -58,16 +58,18 @@ namespace HB.Framework.Http.SDK
                 return new NotLoginResponse<T>();
             }
 
-            Resource<T> response = await GetResponseCore<T>(request).ConfigureAwait(false);
+            Endpoint endpoint = options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
-            return await AutoRefreshTokenAsync(request, response).ConfigureAwait(false);
+            Resource<T> response = await GetResponseCore<T>(request, endpoint).ConfigureAwait(false);
+
+            return await AutoRefreshTokenAsync(request, response, endpoint).ConfigureAwait(false);
         }
 
-        private async Task<Resource<T>> GetResponseCore<T>(ResourceRequest request) where T : ResourceResponse
+        private async Task<Resource<T>> GetResponseCore<T>(ResourceRequest request, Endpoint endpoint) where T : ResourceResponse
         {
             using (HttpRequestMessage httpRequest = ConstructureHttpRequest(request))
             {
-                HttpClient httpClient = GetHttpClient(request.GetProductType());
+                HttpClient httpClient = GetHttpClient(endpoint);
 
                 using (HttpResponseMessage httpResponse = await GetResponseActual(httpRequest, httpClient).ConfigureAwait(false))
                 {
@@ -90,7 +92,7 @@ namespace HB.Framework.Http.SDK
             logger.LogTrace($"Request {httpRequest.RequestUri}, Response {httpResponse.StatusCode}");
         }
 
-        private async Task<Resource<T>> AutoRefreshTokenAsync<T>(ResourceRequest request, Resource<T> response) where T : ResourceResponse
+        private async Task<Resource<T>> AutoRefreshTokenAsync<T>(ResourceRequest request, Resource<T> response, Endpoint endpoint) where T : ResourceResponse
         {
             if (response?.HttpCode != 401 || response?.ErrCode != ErrorCode.API_TOKEN_EXPIRED || !request.GetNeedAuthenticate())
             {
@@ -113,7 +115,7 @@ namespace HB.Framework.Http.SDK
                 string accessTokenHashKey = SecurityUtil.GetHash(accessToken);
 
                 //不久前刷新过
-                if (!frequencyChecker.Check(RefreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(options.TokenRefreshIntervalSeconds)))
+                if (!frequencyChecker.Check(RefreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpoint.TokenRefreshIntervalSeconds)))
                 {
                     if (lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -130,16 +132,17 @@ namespace HB.Framework.Http.SDK
                 if (!refreshToken.IsNullOrEmpty())
                 {
                     ResourceRequest refreshRequest = new ResourceRequest(
-                        options.TokenRefreshSettings.ProductType,
-                        options.TokenRefreshSettings.Version,
+                        endpoint.TokenRefreshProductType,
+                        endpoint.TokenRefreshVersion,
                         HttpMethod.Put,
                         false,
-                        options.TokenRefreshSettings.ResourceName);
+                        endpoint.TokenRefreshResourceName);
 
                     refreshRequest.AddParameter(MobileInfoNames.AccessToken, accessToken);
                     refreshRequest.AddParameter(MobileInfoNames.RefreshToken, refreshToken);
 
-                    HttpClient httpClient = GetHttpClient(options.TokenRefreshSettings.ProductType);
+                    Endpoint tokenRefreshEndpoint = options.Endpoints.Single(e => e.ProductType == endpoint.TokenRefreshProductType && e.Version == endpoint.TokenRefreshVersion);
+                    HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 
                     using (HttpRequestMessage httpRefreshRequest = ConstructureHttpRequest(refreshRequest))
                     {
@@ -248,9 +251,9 @@ namespace HB.Framework.Http.SDK
             }
         }
 
-        private HttpClient GetHttpClient(string productType)
+        private HttpClient GetHttpClient(Endpoint endpoint)
         {
-            return httpClientFactory.CreateClient(productType);
+            return httpClientFactory.CreateClient(Endpoint.GetHttpClientName(endpoint));
         }
 
         private async Task<bool> AddAuthenticateIfNeededAsync(ResourceRequest request)
@@ -270,12 +273,12 @@ namespace HB.Framework.Http.SDK
             return true;
         }
 
-        private async Task AddDeviceInfoAlwaysAsync(ResourceRequest request)
+        private async Task AddDeviceIdAlwaysAsync(ResourceRequest request)
         {
             request.AddParameter(MobileInfoNames.DeviceId, await mobileInfoProvider.GetDeviceIdAsync().ConfigureAwait(false));
-            request.AddParameter(MobileInfoNames.DeviceType, await mobileInfoProvider.GetDeviceTypeAsync().ConfigureAwait(false));
-            request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
-            request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));
+            //request.AddParameter(MobileInfoNames.DeviceType, await mobileInfoProvider.GetDeviceTypeAsync().ConfigureAwait(false));
+            //request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
+            //request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));
         }
     }
 }

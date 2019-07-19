@@ -19,39 +19,6 @@ namespace HB.Framework.Http.SDK
             }
         }
 
-        [Required]
-        public string DeviceType {
-            get {
-                return GetParameter(MobileInfoNames.DeviceType);
-            }
-
-            set {
-                SetParameter(MobileInfoNames.DeviceType, value);
-            }
-        }
-
-        [Required]
-        public string DeviceVersion {
-            get {
-                return GetParameter(MobileInfoNames.DeviceVersion);
-            }
-
-            set {
-                SetParameter(MobileInfoNames.DeviceVersion, value);
-            }
-        }
-
-        [Required]
-        public string DeviceAddress {
-            get {
-                return GetParameter(MobileInfoNames.DeviceAddress);
-            }
-
-            set {
-                SetParameter(MobileInfoNames.DeviceAddress, value);
-            }
-        }
-
         //All use fields instead of Properties, for avoid mvc binding
         private readonly string productType;
         private readonly string apiVersion;
