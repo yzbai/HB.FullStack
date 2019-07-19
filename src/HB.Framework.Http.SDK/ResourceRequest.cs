@@ -11,56 +11,56 @@ namespace HB.Framework.Http.SDK
         [Required]
         public string DeviceId {
             get {
-                return GetParameter("DeviceId");
+                return GetParameter(MobileInfoNames.DeviceId);
             }
 
             set {
-                SetParameter("DeviceId", value);
+                SetParameter(MobileInfoNames.DeviceId, value);
             }
         }
 
         [Required]
         public string DeviceType {
             get {
-                return GetParameter("DeviceType");
+                return GetParameter(MobileInfoNames.DeviceType);
             }
 
             set {
-                SetParameter("DeviceType", value);
+                SetParameter(MobileInfoNames.DeviceType, value);
             }
         }
 
         [Required]
         public string DeviceVersion {
             get {
-                return GetParameter("DeviceVersion");
+                return GetParameter(MobileInfoNames.DeviceVersion);
             }
 
             set {
-                SetParameter("DeviceVersion", value);
+                SetParameter(MobileInfoNames.DeviceVersion, value);
             }
         }
 
         [Required]
         public string DeviceAddress {
             get {
-                return GetParameter("DeviceAddress");
+                return GetParameter(MobileInfoNames.DeviceAddress);
             }
 
             set {
-                SetParameter("DeviceAddress", value);
+                SetParameter(MobileInfoNames.DeviceAddress, value);
             }
         }
 
-        //All use fields instead of Properties, for not mvc binding
-        private string productType;
-        private string apiVersion;
-        private HttpMethod httpMethod;
-        private bool needAuthenticate;
-        private string resourceName;
-        private string condition;
-        private IDictionary<string, string> headers = new Dictionary<string, string>();
-        private IDictionary<string, string> parameters = new Dictionary<string, string>();
+        //All use fields instead of Properties, for avoid mvc binding
+        private readonly string productType;
+        private readonly string apiVersion;
+        private readonly HttpMethod httpMethod;
+        private readonly bool needAuthenticate;
+        private readonly string resourceName;
+        private readonly string condition;
+        private readonly IDictionary<string, string> headers = new Dictionary<string, string>();
+        private readonly IDictionary<string, string> parameters = new Dictionary<string, string>();
 
         public string GetProductType()
         {
