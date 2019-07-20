@@ -150,7 +150,6 @@ namespace HB.Infrastructure.Redis.KVStore
 
             RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
 
-
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityJsons.Select(t=>(RedisValue)t)).ToArray();
 
             IDatabase db = _redisConnectionManager.GetDatabase(storeName);
@@ -158,7 +157,6 @@ namespace HB.Infrastructure.Redis.KVStore
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
             return MapResult(result);
-
         }
 
         public KVStoreResult EntityUpdate(string storeName, string entityName, string entityKey, string entityJson, int entityVersion)

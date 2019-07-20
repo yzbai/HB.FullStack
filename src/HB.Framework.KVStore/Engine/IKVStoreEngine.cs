@@ -7,6 +7,7 @@ namespace HB.Framework.KVStore.Engine
 {
     public interface IKVStoreEngine : IKVStoreEngineAsync
     {
+        KVStoreSettings     Settings { get; }
         string              EntityGet(string storeName, string entityName, string entityKey);
         IEnumerable<string> EntityGet(string storeName, string entityName, IEnumerable<string> entityKeys);      
         IEnumerable<string> EntityGetAll(string storeName, string entityName);

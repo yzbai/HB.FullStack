@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using HB.Framework.KVStore.Engine;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -7,15 +8,13 @@ namespace HB.Framework.KVStore.Entity
 {
     internal class DefaultKVStoreModelDefFactory : IKVStoreEntityDefFactory
     {
-        private readonly KVStoreOptions _options;
-        private readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict;
-        private readonly object _lockObj;
+        private readonly KVStoreSettings _settings;
+        private readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict = new ConcurrentDictionary<Type, KVStoreEntityDef>();
+        private readonly object _lockObj = new object();
 
-        public DefaultKVStoreModelDefFactory(IOptions<KVStoreOptions> options)
+        public DefaultKVStoreModelDefFactory(IKVStoreEngine kVStoreEngine)
         {
-            _defDict = new ConcurrentDictionary<Type, KVStoreEntityDef>();
-            _lockObj = new object();
-            _options = options.Value;
+            _settings = kVStoreEngine.ThrowIfNull(nameof(kVStoreEngine)).Settings;
         }
 
         public KVStoreEntityDef GetDef<T>()
@@ -43,7 +42,6 @@ namespace HB.Framework.KVStore.Entity
         {
             KVStoreEntityDef entityDef = new KVStoreEntityDef
             {
-                EntityFullName = type.FullName,
                 EntityType = type
             };
 
