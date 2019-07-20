@@ -31,7 +31,7 @@ namespace HB.Framework.KVStore
 
         private static string EntityName(KVStoreEntityDef entityDef)
         {
-            return entityDef.EntityFullName;
+            return entityDef.EntityType.FullName;
         }
 
         private static string EntityKey(object keyValue)
@@ -67,9 +67,6 @@ namespace HB.Framework.KVStore
             return keyValues.Select(obj => ValueConverter.TypeValueToDbValue(obj));
         }
 
-       
-
-        
 
         //private static T DeSerialize<T>(byte[] value) where T : KVStoreEntity, new()
         //{
