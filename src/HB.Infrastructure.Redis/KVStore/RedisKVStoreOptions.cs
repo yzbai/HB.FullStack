@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using HB.Framework.KVStore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +14,9 @@ namespace HB.Infrastructure.Redis.KVStore
             }
         }
 
+        public IList<RedisInstanceSetting> ConnectionSettings { get; } = new List<RedisInstanceSetting>();
+
+        public KVStoreSettings KVStoreSettings { get; private set; } = new KVStoreSettings();
 
     }
 }

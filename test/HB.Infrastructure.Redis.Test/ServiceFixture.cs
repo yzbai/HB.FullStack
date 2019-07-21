@@ -40,9 +40,8 @@ namespace HB.Infrastructure.Redis.Test
             });
 
 
-            serviceCollection.AddKVStore(Configuration.GetSection("KVStore"));
-            serviceCollection.AddEventBus(Configuration.GetSection("EventBus"));
-            serviceCollection.AddRedis(Configuration.GetSection("Redis"));
+            serviceCollection.AddRedisEventBus(Configuration.GetSection("EventBus"));
+            serviceCollection.AddRedisKVStore(Configuration.GetSection("Redis"));
 
             Services = serviceCollection.BuildServiceProvider();
         }

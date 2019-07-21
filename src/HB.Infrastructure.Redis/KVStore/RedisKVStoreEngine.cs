@@ -32,14 +32,28 @@ namespace HB.Infrastructure.Redis.KVStore
         private const string luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
         private const string luaBatchDeleteReturnTemplate = @"return 1";
 
-        private readonly IRedisInstanceManager _redisConnectionManager;
+        private readonly RedisKVStoreOptions _options;
+        private readonly ILogger _logger;
 
-        public RedisKVStoreEngine(IRedisInstanceManager redisConnectionManager)
+        private IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
+
+        public RedisKVStoreEngine(IOptions<RedisKVStoreOptions> options, ILogger<RedisKVStoreEngine> logger)
         {
-            _redisConnectionManager = redisConnectionManager;
+            _logger = logger;
+            _options = options.Value;
+            _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
+        }
+
+        private IDatabase GetDatabase(string instanceName)
+        {
+            if(_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
+            {
+                return RedisInstanceManager.GetDatabase(setting, _logger);
+            }
+
+            return null;
         }
         
-
         private static string EntityVersionName(string entityName)
         {
             return entityName + ":Version";
@@ -118,14 +132,14 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public string EntityGet(string storeName, string entityName, string entityKey)
         {
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             return db.HashGet(entityName, entityKey);
         }
 
         public IEnumerable<string> EntityGet(string storeName, string entityName, IEnumerable<string> entityKeys)
         {
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             RedisValue[] result = db.HashGet(entityName, entityKeys.Select(str=>(RedisValue)str).ToArray());
 
@@ -134,7 +148,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public IEnumerable<string> EntityGetAll(string storeName, string entityName)
         {
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             return db.HashGetAll(entityName).Select<HashEntry, string>(t => t.Value);
         }
@@ -152,7 +166,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityJsons.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
@@ -173,7 +187,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 .Concat(entityJsons.Select(t=>(RedisValue)t))
                 .Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
@@ -192,7 +206,7 @@ namespace HB.Infrastructure.Redis.KVStore
             RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
             RedisValue[] argvs = entityKeys.Select(t=>(RedisValue)t).Concat(entityVersions.Select(t=>(RedisValue)t)).ToArray();
 
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             RedisResult result = db.ScriptEvaluate(luaScript, keys, argvs);
 
@@ -201,13 +215,22 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public KVStoreResult EntityDeleteAll(string storeName, string entityName)
         {
-            IDatabase db = _redisConnectionManager.GetDatabase(storeName);
+            IDatabase db = GetDatabase(storeName);
 
             bool result = db.KeyDelete(entityName);
 
             return result ? KVStoreResult.Succeeded() : KVStoreResult.Failed();
         }
 
-        
+        public KVStoreSettings Settings => _options.KVStoreSettings;
+
+        public string FirstDefaultInstanceName => _options.ConnectionSettings[0].InstanceName;
+
+        public void Close()
+        {
+            _instanceSettingDict.ForEach(kv => {
+                RedisInstanceManager.Close(kv.Value);
+            });           
+        }
     }
 }

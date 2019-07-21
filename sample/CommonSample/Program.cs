@@ -36,8 +36,8 @@ namespace HB.PresentFish.Tools
 
             //serviceCollection.AddMySQL(Configuration.GetSection("MySQL"));
 
-            serviceCollection.AddRedis(Configuration.GetSection("Redis"));
-            serviceCollection.AddKVStore(Configuration.GetSection("KVStore"));
+            serviceCollection.AddRedisKVStore(Configuration.GetSection("Redis"));
+
             serviceCollection.AddDistributedRedisCache(o =>
             {
                 Configuration.GetSection("RedisCache").Bind(o);

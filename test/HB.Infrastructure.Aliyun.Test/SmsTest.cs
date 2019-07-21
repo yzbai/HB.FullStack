@@ -26,7 +26,7 @@ namespace HB.Infrastructure.Aliyun.Test
 
             _output.WriteLine(result.Message);
 
-            Assert.True(result.Succeeded);
+            Assert.True(result.IsSuccessful());
         }
     }
 }
