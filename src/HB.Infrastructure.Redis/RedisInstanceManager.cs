@@ -4,46 +4,31 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis
 {
-    internal class RedisInstanceManager : IRedisInstanceManager
+    internal static class RedisInstanceManager
     {      
-        private readonly ILogger _logger;
+        private static Dictionary<string, RedisConnection> _connectionDict = new Dictionary<string, RedisConnection>();      //instanceName : RedisConnection
+        private static readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private static readonly object _closeLocker = new object();
 
-        //instanceName : RedisConnection
-        private readonly Dictionary<string, RedisConnection> _connectionDict;
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-
-        private readonly RedisOptions _options;
-
-        public RedisInstanceManager(IOptions<RedisOptions> options, ILogger<RedisInstanceManager> logger)
+        public static IDatabase GetDatabase(RedisInstanceSetting setting, ILogger logger)
         {
-            _logger = logger;
-            _options = options.Value;
-
-            _connectionDict = new Dictionary<string, RedisConnection>();
-        }
-
-        public IDatabase GetDatabase(string instanceName)
-        {
-            if (!_connectionDict.ContainsKey(instanceName))
+            if (setting == null)
             {
-                RedisInstanceSetting setting = _options.GetInstanceSetting(instanceName);
-
-                if (setting == null)
-                {
-                    return null;
-                }
-
-                _connectionDict[instanceName] = new RedisConnection(setting.ConnectionString);
+                return null;
             }
 
-            RedisConnection redisWrapper = _connectionDict[instanceName];
+            if (!_connectionDict.ContainsKey(setting.InstanceName))
+            {
+                _connectionDict[setting.InstanceName] = new RedisConnection(setting.ConnectionString);
+            }
+
+            RedisConnection redisWrapper = _connectionDict[setting.InstanceName];
 
             if (redisWrapper.Connection != null && !redisWrapper.Connection.IsConnected)
             {
@@ -76,12 +61,12 @@ namespace HB.Infrastructure.Redis
 
                     //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
 
-                    ReConnectPolicy(_logger, redisWrapper.ConnectionString).Execute(()=> {
+                    ReConnectPolicy(logger, redisWrapper.ConnectionString).Execute(()=> {
                         redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);
                         redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
                         //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
-                        _logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {instanceName}");
+                        logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {setting.InstanceName}");
                     });
                 }
                 finally
@@ -107,62 +92,29 @@ namespace HB.Infrastructure.Redis
                             });
         }
 
-        public RedisInstanceSetting GetInstanceSetting(string instanceName)
+        public static void Close(RedisInstanceSetting setting)
         {
-            return _options.GetInstanceSetting(instanceName);
-        }
-
-        #region Dispose Support
-
-        private readonly object _disposeLocker = new object();
-        private bool _disposed = false;
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
+            lock(_closeLocker)
             {
-                return;
-            }
-
-            if (disposing)
-            {
-                // Free managed
-
-                lock (_disposeLocker)
+                if (_connectionDict.ContainsKey(setting.InstanceName))
                 {
-                    if (_connectionLock != null)
-                    {
-                        _connectionLock.Dispose();
-                    }
+                    _connectionDict[setting.InstanceName].Connection?.Close();
 
-                    if (_connectionDict != null)
-                    {
-                        foreach (KeyValuePair<string, RedisConnection> pair in _connectionDict)
-                        {
-                            pair.Value?.Connection?.Close();
-                        }
-                    }
+                    _connectionDict.Remove(setting.InstanceName);
                 }
             }
-
-            // Free unmanaged
-
-
-            _disposed = true;
         }
 
-
-        ~RedisInstanceManager()
+        public static void CloseAll()
         {
-            Dispose(false);
-        }
+            lock(_closeLocker)
+            {
+                _connectionDict.ForEach(kv => {
+                    kv.Value?.Connection?.Close();
+                });
 
-        #endregion
+                _connectionDict = new Dictionary<string, RedisConnection>();
+            }
+        }
     }
 }

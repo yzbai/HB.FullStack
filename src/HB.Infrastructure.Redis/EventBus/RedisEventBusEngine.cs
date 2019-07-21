@@ -1,40 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HB.Framework.Common;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
+    /// <summary>
+    /// brokerName 就是 InstanceName
+    /// </summary>
     internal class RedisEventBusEngine : IEventBusEngine
     {
-        private readonly IRedisInstanceManager _instanceManager;
-        private readonly ILogger _consumeTaskManagerLogger;
+        private readonly ILogger _logger;
 
-        private readonly object _consumeTaskManagerLocker;
-        //eventType : ConsumeTaskManager
-        private readonly IDictionary<string, ConsumeTaskManager> _consumeTaskManagers;
+        private readonly object _consumeTaskManagerLocker = new object();
 
-        public RedisEventBusEngine(IRedisInstanceManager connectionManager, ILoggerFactory loggerFactory)
+        private readonly object _consumTaskCloseLocker = new object();
+
+        private readonly RedisEventBusOptions _options;
+
+        private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
+
+        private readonly IDictionary<string, ConsumeTaskManager> _consumeTaskManagers = new Dictionary<string, ConsumeTaskManager>();//eventType : ConsumeTaskManager
+
+        public RedisEventBusEngine(IOptions<RedisEventBusOptions> options, ILogger<RedisEventBusEngine> logger)
         {
-            _instanceManager = connectionManager;
-            _consumeTaskManagerLogger = loggerFactory.CreateLogger<ConsumeTaskManager>();
-            _consumeTaskManagers = new Dictionary<string, ConsumeTaskManager>();
-            _consumeTaskManagerLocker = new object();
+            _logger = logger;
+            _options = options.Value;
+            _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
         }
 
         public async Task<bool> PublishAsync(string brokerName, EventMessage eventMessage)
         {
-            IDatabase database = _instanceManager.GetDatabase(brokerName);
+            RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
-            if (database == null)
+            if (instanceSetting == null)
             {
                 return false;
             }
+
+            IDatabase database = RedisInstanceManager.GetDatabase(instanceSetting, _logger);
 
             EventMessageEntity entity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
 
@@ -58,13 +69,13 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 每一种事件，只有一次SubscribeHandler的机会。之后再订阅，就报错了。
         /// 开始处理
         /// </summary>
-        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public bool SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
         {
-            IDatabase database = _instanceManager.GetDatabase(brokerName);
+            RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
-            if (database == null)
+            if (instanceSetting == null)
             {
-                throw new ArgumentException($"不存在Redis实例{brokerName}");
+                return false;
             }
 
             lock (_consumeTaskManagerLocker)
@@ -74,9 +85,11 @@ namespace HB.Infrastructure.Redis.EventBus
                     throw new ArgumentException($"已经存在{eventType}的处理程序.");
                 }
 
-                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(brokerName,  _instanceManager, eventType, eventHandler, _consumeTaskManagerLogger);
+                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, eventType, eventHandler, _logger);
 
                 _consumeTaskManagers.Add(eventType, consumeTaskManager);
+
+                return true;
             }
         }
         /// <summary>
@@ -115,44 +128,28 @@ namespace HB.Infrastructure.Redis.EventBus
             return eventType + "_Acks";
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        public EventBusSettings EventBusSettings => _options.EventBusSettings;
 
-        protected virtual void Dispose(bool disposing)
+        public void Close()
         {
-            if (!disposedValue)
+            lock(_consumTaskCloseLocker)
             {
-                if (disposing)
-                {
-                    foreach(var kv in _consumeTaskManagers)
-                    {
-                        kv.Value.Dispose();
-                    }
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
+                _consumeTaskManagers.ForEach(kv => {
+                    kv.Value.Dispose();
+                });
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        ~RedisEventBusEngine()
+        private RedisInstanceSetting GetRedisInstanceSetting(string brokerName)
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
+            if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting instanceSetting))
+            {
+                _logger.LogCritical($"no matched broker {brokerName} found.");
 
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            GC.SuppressFinalize(this);
-        }
+                return null;
+            }
 
-        #endregion
+            return instanceSetting;
+        }
     }
 }
