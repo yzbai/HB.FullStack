@@ -29,5 +29,7 @@ namespace HB.Framework.EventBus.Abstractions
         void UnSubscribe(string eventType);
 
         void StartHandle(string eventType);
+
+        void Close();
     }
 }

@@ -16,17 +16,17 @@ namespace HB.Framework.EventBus
     /// </summary>
     internal class DefaultEventBus : IEventBus
     {
-        private readonly EventBusOptions _options;
         private readonly IEventBusEngine _engine;
         private readonly ILogger _logger;
+        private readonly IDictionary<string, EventSchema> _eventSchemaDict;
 
-        public DefaultEventBus(IEventBusEngine eventBusEngine, IOptions<EventBusOptions> options, ILogger<DefaultEventBus> logger)
+        public DefaultEventBus(IEventBusEngine eventBusEngine, ILogger<DefaultEventBus> logger)
         {
-            _options = options.Value;
             _engine = eventBusEngine;
             _logger = logger;
+            _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventType);
         }
-      
+
         public async Task<bool> PublishAsync(EventMessage eventMessage)
         {
             if (!EventMessage.IsValid(eventMessage))
@@ -50,7 +50,7 @@ namespace HB.Framework.EventBus
             eventType.ThrowIfNullOrEmpty(nameof(eventType));
             handler.ThrowIfNull(nameof(handler));
 
-            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType:eventType, eventHandler: handler);
+            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
         }
 
         public void UnSubscribe(string eventType)
@@ -62,18 +62,21 @@ namespace HB.Framework.EventBus
 
         private string GetBrokerName(string eventType)
         {
-            string brokerName = _options.GetEventSchema(eventType)?.BrokerName;
-
-            if (string.IsNullOrEmpty(brokerName))
+            if (_eventSchemaDict.TryGetValue(eventType, out EventSchema eventSchema))
             {
-                Exception ex = new Exception("配置中没有找到对应主题事件的Broker");
-
-                _logger.LogCritical(ex, $"没有Topic对应的BrokerName， eventType：{eventType}");
-
-                throw ex;
+                return eventSchema.BrokerName;
             }
 
-            return brokerName;
+            Exception ex = new Exception("配置中没有找到对应主题事件的Broker");
+
+            _logger.LogCritical(ex, $"没有Topic对应的BrokerName， eventType：{eventType}");
+
+            throw ex;
+        }
+
+        public void Close()
+        {
+            _engine.Close();
         }
     }
 }

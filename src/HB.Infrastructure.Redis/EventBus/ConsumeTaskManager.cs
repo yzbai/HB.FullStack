@@ -21,10 +21,12 @@ namespace HB.Infrastructure.Redis.EventBus
     {
         private const int CONSUME_INTERVAL_SECONDS = 5;
         private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
-        private readonly string _instanceName;
+
         private readonly string _eventType;
         private readonly ILogger _logger;
-        private readonly IRedisInstanceManager _instanceManager;
+
+        private readonly RedisEventBusOptions _options;
+
         private readonly RedisInstanceSetting _instanceSetting;
         private readonly IEventHandler _eventHandler;
 
@@ -34,18 +36,17 @@ namespace HB.Infrastructure.Redis.EventBus
         private readonly Task _historyTask;
         private readonly CancellationTokenSource _historyTaskCTS;
 
-        private readonly DuplicateChecker _duplicateChecker;
+        private readonly RedisSetDuplicateChecker _duplicateChecker;
 
         public ConsumeTaskManager(
-            string brokerName, 
-            IRedisInstanceManager instanceManager, 
+            RedisEventBusOptions options,
+            RedisInstanceSetting redisInstanceSetting, 
             string eventType, 
             IEventHandler eventHandler, 
             ILogger consumeTaskManagerLogger)
         {
-            _instanceName = brokerName;
-            _instanceManager = instanceManager;
-            _instanceSetting = _instanceManager.GetInstanceSetting(brokerName);
+            _options = options;
+            _instanceSetting = redisInstanceSetting;
             _eventType = eventType;
             _eventHandler = eventHandler;
             _logger = consumeTaskManagerLogger;
@@ -56,7 +57,7 @@ namespace HB.Infrastructure.Redis.EventBus
             _historyTaskCTS = new CancellationTokenSource();
             _historyTask = new Task(HistoryTaskProcedure, _historyTaskCTS.Token, TaskCreationOptions.LongRunning);
 
-            _duplicateChecker = new DuplicateChecker(_instanceManager, _instanceName, _instanceSetting.EventBusEventMessageExpiredHours * 60 * 60);
+            _duplicateChecker = new RedisSetDuplicateChecker(_instanceSetting, _options.EventBusEventMessageExpiredHours * 60 * 60, _logger);
         }
 
         private void HistoryTaskProcedure()
@@ -107,10 +108,10 @@ namespace HB.Infrastructure.Redis.EventBus
 
                     string[] redisArgvs = new string[] {
                         TimeUtil.CurrentTimestampSeconds().ToString(GlobalSettings.Culture),
-                        _instanceSetting.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
+                        _options.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
                     };
 
-                    IDatabase database = _instanceManager.GetDatabase(_instanceName);
+                    IDatabase database = RedisInstanceManager.GetDatabase(_instanceSetting, _logger);
 
                     //TODO: Use LoadedScript
                     int result = (int)database.ScriptEvaluate(
@@ -121,24 +122,24 @@ namespace HB.Infrastructure.Redis.EventBus
                     if (result == 0)
                     {
                         //还没有数据，等会吧
-                        _logger.LogTrace($"ScanHistory {_instanceName} 中,还没有数据，，EventType:{_eventType}");
+                        _logger.LogTrace($"ScanHistory {_instanceSetting.InstanceName} 中,还没有数据，，EventType:{_eventType}");
                         Thread.Sleep(10 * 1000);
                     }
                     else if (result == 1)
                     {
                         //时间太早，等会再检查
-                        _logger.LogTrace($"ScanHistory {_instanceName} 中,数据还太新，一会再检查，，EventType:{_eventType}");
+                        _logger.LogTrace($"ScanHistory {_instanceSetting.InstanceName} 中,数据还太新，一会再检查，，EventType:{_eventType}");
                         Thread.Sleep(10 * 1000);
                     }
                     else if (result == 2)
                     {
                         //成功
-                        _logger.LogTrace($"ScanHistory {_instanceName} 中,消息已被处理，现在移出History，EventType:{_eventType}");
+                        _logger.LogTrace($"ScanHistory {_instanceSetting.InstanceName} 中,消息已被处理，现在移出History，EventType:{_eventType}");
                     }
                     else if (result == 3)
                     {
                         //重新放入队列再发送
-                        _logger.LogWarning($"ScanHistory {_instanceName} 中,消息可能被遗漏， 重新放入队列，，EventType:{_eventType}");
+                        _logger.LogWarning($"ScanHistory {_instanceSetting.InstanceName} 中,消息可能被遗漏， 重新放入队列，，EventType:{_eventType}");
                     }
                     else
                     {
@@ -147,7 +148,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 }
                 catch(Exception ex)
                 {
-                    _logger.LogCritical(ex, $"ScanHistory {_instanceName} 中，EventType:{_eventType}, Exceptions: {ex.Message}");
+                    _logger.LogCritical(ex, $"ScanHistory {_instanceSetting.InstanceName} 中，EventType:{_eventType}, Exceptions: {ex.Message}");
                     throw;
                 }
             }
@@ -158,13 +159,13 @@ namespace HB.Infrastructure.Redis.EventBus
             while (!_consumeTaskCTS.IsCancellationRequested)
             {
                 //1, Get Entity
-                IDatabase database = _instanceManager.GetDatabase(_instanceName);
+                IDatabase database = RedisInstanceManager.GetDatabase(_instanceSetting, _logger);
 
                 RedisValue redisValue = database.ListRightPopLeftPush(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType));
 
                 if (redisValue.IsNullOrEmpty)
                 {
-                    _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceName}, eventType:{_eventType}");
+                    _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceSetting.InstanceName}, eventType:{_eventType}");
 
                     Thread.Sleep(CONSUME_INTERVAL_SECONDS * 1000);
 
@@ -177,7 +178,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 double spendHours = (TimeUtil.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
 
-                if (spendHours > _instanceSetting.EventBusEventMessageExpiredHours)
+                if (spendHours > _options.EventBusEventMessageExpiredHours)
                 {
                     _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{JsonUtil.ToJson(entity)}");
                     continue;
