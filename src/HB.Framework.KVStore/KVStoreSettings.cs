@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace HB.Framework.KVStore
 {
-    public class KVStoreSchema
+    public class KVStoreEntitySchema
     {
         public string EntityTypeFullName { get; set; }
         public string InstanceName { get; set; }
@@ -14,6 +14,9 @@ namespace HB.Framework.KVStore
 
     public class KVStoreSettings
     {
-        public IList<KVStoreSchema> KVStoreSchemas { get; } = new List<KVStoreSchema>();
+        public IList<string> AssembliesIncludeEntity { get; } = new List<string>();
+
+        public IList<KVStoreEntitySchema> KVStoreEntities { get; } = new List<KVStoreEntitySchema>();
+
     }
 }

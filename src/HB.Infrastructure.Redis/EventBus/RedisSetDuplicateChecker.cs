@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Common;
 using HB.Framework.Common.Utility;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DuplicateCheck
@@ -11,19 +12,19 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
     /// <summary>
     /// 使用方法：每次都要先Lock，最后Release
     /// </summary>
-    internal class DuplicateChecker
+    internal class RedisSetDuplicateChecker
     {
-        private readonly string _instanceName;
+        private readonly RedisInstanceSetting _setting;
         private readonly long _aliveSeconds;
-        private readonly IRedisInstanceManager _redisInstanceManager;
+        private readonly ILogger _logger;
 
         private readonly ConcurrentDictionary<string, string> _tokenDict = new ConcurrentDictionary<string, string>();
 
-        public DuplicateChecker(IRedisInstanceManager redisInstanceManager, string instanceName, long aliveSeconds)
+        public RedisSetDuplicateChecker(RedisInstanceSetting setting, long aliveSeconds, ILogger logger)
         {
-            _redisInstanceManager = redisInstanceManager;
-            _instanceName = instanceName;
+            _setting = setting;
             _aliveSeconds = aliveSeconds;
+            _logger = logger;
         }
 
         public bool Lock(string setName, string id, out string token)
@@ -52,7 +53,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             if (CheckToken(setName, id, token))
             {
-                IDatabase database = _redisInstanceManager.GetDatabase(_instanceName);
+                IDatabase database = RedisInstanceManager.GetDatabase(_setting, _logger);
 
                 if (database.SortedSetRank(setName, id) == null)
                 {
@@ -69,7 +70,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             if (CheckToken(setName, id, token))
             {
-                IDatabase database = _redisInstanceManager.GetDatabase(_instanceName);
+                IDatabase database = RedisInstanceManager.GetDatabase(_setting, _logger);
 
                 database.SortedSetAdd(setName, id, timestamp, CommandFlags.None);
             }
@@ -81,7 +82,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             long stopTimestamp = TimeUtil.CurrentTimestampSeconds() - _aliveSeconds;
 
-            IDatabase database = _redisInstanceManager.GetDatabase(_instanceName);
+            IDatabase database = RedisInstanceManager.GetDatabase(_setting, _logger);
 
             //寻找小于stopTimestamp的，删除他们
 

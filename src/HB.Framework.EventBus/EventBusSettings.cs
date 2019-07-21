@@ -14,19 +14,8 @@ namespace HB.Framework.EventBus
 
     }
 
-    public class EventBusOptions : IOptions<EventBusOptions>
+    public class EventBusSettings
     {
-        public EventBusOptions Value {
-            get {
-                return this;
-            }
-        }
-
         public IList<EventSchema> EventSchemas { get; } = new List<EventSchema>();
-
-        public EventSchema GetEventSchema(string topic)
-        {
-            return EventSchemas.FirstOrDefault(t => t.EventType.Equals(topic, GlobalSettings.Comparison));
-        }
     }
 }
