@@ -14,7 +14,7 @@ using System.Web;
 
 namespace HB.Framework.Http.SDK
 {
-    public class ResourceClient : IResourceClient
+    public class ResourceClient : IResourceClient  X-HTTP-Method-Override
     {
         //move to settings
         private const string RefreshTokenFrequencyCheckResource = "_Fqc_Refresh";

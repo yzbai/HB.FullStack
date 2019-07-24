@@ -50,6 +50,22 @@ namespace Microsoft.Extensions.Caching.Distributed
             return Convert.ToInt32(value, GlobalSettings.Culture);
         }
 
+        public static async Task<bool> IsExistAndRemoveAsync(this IDistributedCache cache, string key)
+        {
+            ThrowIf.Null(cache, nameof(cache));
+
+            byte[] result = await cache.GetAsync(key).ConfigureAwait(false);
+
+            if (result != null && result.Length > 0)
+            {
+                await cache.RemoveAsync(key).ConfigureAwait(false);
+                return true;
+            }
+
+            return false;
+
+        }
+
         #endregion
         
     }
