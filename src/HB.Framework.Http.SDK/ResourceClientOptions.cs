@@ -15,14 +15,14 @@ namespace HB.Framework.Http.SDK
             }
         }
 
-        public IList<Endpoint> Endpoints { get; private set; } = new List<Endpoint>();
+        public IList<EndpointSettings> Endpoints { get; private set; } = new List<EndpointSettings>();
 
         public void AddEndpoint(string productType, string version, string tokenRefreshResourceName, string url)
         {
             if (!Endpoints.Any(e => e.ProductType.Equals(productType, GlobalSettings.ComparisonIgnoreCase)
             && e.Version.Equals(version, GlobalSettings.ComparisonIgnoreCase)))
             {
-                Endpoints.Add(new Endpoint {
+                Endpoints.Add(new EndpointSettings {
                     ProductType = productType,
                     Version = version,
                     TokenRefreshResourceName = tokenRefreshResourceName,
@@ -32,7 +32,7 @@ namespace HB.Framework.Http.SDK
         }
     }
 
-    public class Endpoint
+    public class EndpointSettings
     {
         public string ProductType { get; set; }
 
@@ -48,8 +48,9 @@ namespace HB.Framework.Http.SDK
 
         public int TokenRefreshIntervalSeconds { get; set; } = 300;
 
+        public bool NeedHttpMethodOveride { get; set; } = true;
 
-        public static string GetHttpClientName(Endpoint endpoint)
+        public static string GetHttpClientName(EndpointSettings endpoint)
         {
             ThrowIf.Null(endpoint, nameof(endpoint));
 
