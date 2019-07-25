@@ -121,6 +121,11 @@ namespace Microsoft.AspNetCore.Http
 
             if (string.IsNullOrWhiteSpace(ip))
             {
+                ip = httpContext.GetHeaderValueAs<string>("X-Real-IP");
+            }
+
+            if (string.IsNullOrWhiteSpace(ip))
+            {
                 ip = httpContext.Connection.RemoteIpAddress.ToString();
             }
 
