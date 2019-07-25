@@ -44,7 +44,7 @@ namespace HB.Framework.Http.SDK
         private static void AddResourceClientCore(IServiceCollection services, ResourceClientOptions options)
         {
             options.Endpoints.ForEach(endpoint => {
-                services.AddHttpClient(Endpoint.GetHttpClientName(endpoint), httpClient => {
+                services.AddHttpClient(EndpointSettings.GetHttpClientName(endpoint), httpClient => {
                     httpClient.BaseAddress = new Uri(endpoint.Url);
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ResourceClient).FullName);

@@ -14,7 +14,7 @@ using System.Web;
 
 namespace HB.Framework.Http.SDK
 {
-    public class ResourceClient : IResourceClient  X-HTTP-Method-Override
+    public class ResourceClient : IResourceClient
     {
         //move to settings
         private const string RefreshTokenFrequencyCheckResource = "_Fqc_Refresh";
@@ -58,18 +58,18 @@ namespace HB.Framework.Http.SDK
                 return new NotLoginResponse<T>();
             }
 
-            Endpoint endpoint = options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
+            EndpointSettings endpoint = options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
             Resource<T> response = await GetResponseCore<T>(request, endpoint).ConfigureAwait(false);
 
             return await AutoRefreshTokenAsync(request, response, endpoint).ConfigureAwait(false);
         }
 
-        private async Task<Resource<T>> GetResponseCore<T>(ResourceRequest request, Endpoint endpoint) where T : ResourceResponse
+        private async Task<Resource<T>> GetResponseCore<T>(ResourceRequest request, EndpointSettings endpointSettings) where T : ResourceResponse
         {
-            using (HttpRequestMessage httpRequest = ConstructureHttpRequest(request))
+            using (HttpRequestMessage httpRequest = ConstructureHttpRequest(request, endpointSettings))
             {
-                HttpClient httpClient = GetHttpClient(endpoint);
+                HttpClient httpClient = GetHttpClient(endpointSettings);
 
                 using (HttpResponseMessage httpResponse = await GetResponseActual(httpRequest, httpClient).ConfigureAwait(false))
                 {
@@ -92,7 +92,7 @@ namespace HB.Framework.Http.SDK
             logger.LogTrace($"Request {httpRequest.RequestUri}, Response {httpResponse.StatusCode}");
         }
 
-        private async Task<Resource<T>> AutoRefreshTokenAsync<T>(ResourceRequest request, Resource<T> response, Endpoint endpoint) where T : ResourceResponse
+        private async Task<Resource<T>> AutoRefreshTokenAsync<T>(ResourceRequest request, Resource<T> response, EndpointSettings endpointSettings) where T : ResourceResponse
         {
             if (response?.HttpCode != 401 || response?.ErrCode != ErrorCode.API_TOKEN_EXPIRED || !request.GetNeedAuthenticate())
             {
@@ -115,7 +115,7 @@ namespace HB.Framework.Http.SDK
                 string accessTokenHashKey = SecurityUtil.GetHash(accessToken);
 
                 //不久前刷新过
-                if (!frequencyChecker.Check(RefreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpoint.TokenRefreshIntervalSeconds)))
+                if (!frequencyChecker.Check(RefreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.TokenRefreshIntervalSeconds)))
                 {
                     if (lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -132,19 +132,19 @@ namespace HB.Framework.Http.SDK
                 if (!refreshToken.IsNullOrEmpty())
                 {
                     ResourceRequest refreshRequest = new ResourceRequest(
-                        endpoint.TokenRefreshProductType,
-                        endpoint.TokenRefreshVersion,
+                        endpointSettings.TokenRefreshProductType,
+                        endpointSettings.TokenRefreshVersion,
                         HttpMethod.Put,
                         false,
-                        endpoint.TokenRefreshResourceName);
+                        endpointSettings.TokenRefreshResourceName);
 
                     refreshRequest.AddParameter(MobileInfoNames.AccessToken, accessToken);
                     refreshRequest.AddParameter(MobileInfoNames.RefreshToken, refreshToken);
 
-                    Endpoint tokenRefreshEndpoint = options.Endpoints.Single(e => e.ProductType == endpoint.TokenRefreshProductType && e.Version == endpoint.TokenRefreshVersion);
+                    EndpointSettings tokenRefreshEndpoint = options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefreshProductType && e.Version == endpointSettings.TokenRefreshVersion);
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 
-                    using (HttpRequestMessage httpRefreshRequest = ConstructureHttpRequest(refreshRequest))
+                    using (HttpRequestMessage httpRefreshRequest = ConstructureHttpRequest(refreshRequest, endpointSettings))
                     {
                         using (HttpResponseMessage refreshResponse = await GetResponseActual(httpRefreshRequest, httpClient).ConfigureAwait(false))
                         {
@@ -181,9 +181,17 @@ namespace HB.Framework.Http.SDK
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        private static HttpRequestMessage ConstructureHttpRequest(ResourceRequest request)
+        private static HttpRequestMessage ConstructureHttpRequest(ResourceRequest request, EndpointSettings endpointSettings)
         {
-            HttpRequestMessage httpRequest = new HttpRequestMessage(request.GetHttpMethod(), ConstructureRequestUrl(request));
+            HttpMethod httpMethod = request.GetHttpMethod();
+
+            if (endpointSettings.NeedHttpMethodOveride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
+            {
+                request.AddHeader("X-HTTP-Method-Override", httpMethod.Method);
+                httpMethod = HttpMethod.Post;
+            }
+
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, ConstructureRequestUrl(request));
 
             if (request.GetHttpMethod() != HttpMethod.Get)
             {
@@ -218,7 +226,9 @@ namespace HB.Framework.Http.SDK
 
             if (request.GetHttpMethod() == HttpMethod.Get)
             {
-                string query = request.GetParameters().ToHttpValueCollection().ToString();
+                string query = request.GetParameters().Select(kv => {
+                    return new KeyValuePair<string, string>(kv.Key, HttpUtility.UrlEncode(kv.Value));
+                }).ToHttpValueCollection().ToString();
 
                 if (!query.IsNullOrEmpty())
                 {
@@ -251,9 +261,9 @@ namespace HB.Framework.Http.SDK
             }
         }
 
-        private HttpClient GetHttpClient(Endpoint endpoint)
+        private HttpClient GetHttpClient(EndpointSettings endpoint)
         {
-            return httpClientFactory.CreateClient(Endpoint.GetHttpClientName(endpoint));
+            return httpClientFactory.CreateClient(EndpointSettings.GetHttpClientName(endpoint));
         }
 
         private async Task<bool> AddAuthenticateIfNeededAsync(ResourceRequest request)
