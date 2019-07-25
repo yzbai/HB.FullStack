@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
+using HB.Framework.Common.Validate;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -71,7 +72,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
         public bool Validate(string mobile, string code)
         {
-            if (string.IsNullOrWhiteSpace(code))
+            if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsPositiveNumber(code))
             {
                 return false;
             }

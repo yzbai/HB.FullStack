@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.Caching.Distributed
             return Convert.ToInt32(value, GlobalSettings.Culture);
         }
 
-        public static async Task<bool> IsExistAndRemoveAsync(this IDistributedCache cache, string key)
+        public static async Task<bool> IsKeyExistAndRemoveAsync(this IDistributedCache cache, string key)
         {
             ThrowIf.Null(cache, nameof(cache));
 

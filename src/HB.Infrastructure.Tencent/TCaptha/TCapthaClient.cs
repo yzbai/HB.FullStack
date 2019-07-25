@@ -60,8 +60,10 @@ namespace HB.Infrastructure.Tencent
                     {
                         return false;
                     }
-
+                    
                     content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    //TODO: 记录分析evil_level
                 }
                 try
                 {
