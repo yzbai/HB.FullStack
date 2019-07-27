@@ -1,4 +1,5 @@
 ﻿using HB.Framework.Common;
+using HB.Framework.Common.Mobile;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System;
