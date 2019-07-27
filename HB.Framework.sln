@@ -39,15 +39,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{93372B5E-4C5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Common", "..\HB.Framework.Common\src\HB.Framework.Common\HB.Framework.Common.csproj", "{62BC7048-68B8-41A8-81EB-EFD8331504F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Http.SDK", "src\HB.Framework.Http.SDK\HB.Framework.Http.SDK.csproj", "{4C32FF79-2855-40E2-9791-D46E9F512CB7}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Database", "..\HB.Framework.Database\src\HB.Framework.Database\HB.Framework.Database.csproj", "{48AC227C-CFE2-49A8-9DB4-6D5C1E0F8623}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL", "..\HB.Framework.Database\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj", "{B20CD0FD-7127-43BA-9B33-8F7606ED2442}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Repository", "src\HB.Framework.Repository\HB.Framework.Repository.csproj", "{411F3096-D9FC-4704-9143-13FC7B4A0E5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.Tencent", "src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj", "{610C3D0E-27D1-4F4F-B0C8-764D59B27E81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Tencent", "src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj", "{610C3D0E-27D1-4F4F-B0C8-764D59B27E81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,10 +102,6 @@ Global
 		{62BC7048-68B8-41A8-81EB-EFD8331504F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62BC7048-68B8-41A8-81EB-EFD8331504F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62BC7048-68B8-41A8-81EB-EFD8331504F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C32FF79-2855-40E2-9791-D46E9F512CB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C32FF79-2855-40E2-9791-D46E9F512CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C32FF79-2855-40E2-9791-D46E9F512CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C32FF79-2855-40E2-9791-D46E9F512CB7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{48AC227C-CFE2-49A8-9DB4-6D5C1E0F8623}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{48AC227C-CFE2-49A8-9DB4-6D5C1E0F8623}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48AC227C-CFE2-49A8-9DB4-6D5C1E0F8623}.Release|Any CPU.ActiveCfg = Release|Any CPU
