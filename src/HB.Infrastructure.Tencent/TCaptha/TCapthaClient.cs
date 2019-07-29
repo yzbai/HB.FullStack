@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Web;
 
 namespace HB.Infrastructure.Tencent
 {
@@ -39,10 +40,10 @@ namespace HB.Infrastructure.Tencent
             }
 
             string query = new Dictionary<string, string> {
-                { "aid", apiKeySetting.AppId },
+                { "aid", apiKeySetting.AppId},
                 { "AppSecretKey", apiKeySetting.AppSecretKey},
                 {"Ticket",  ticket},
-                {"Randstr", randstr },
+                {"Randstr", randstr},
                 {"UserIP", userIp }
             }.ToHttpValueCollection().ToString();
 
@@ -60,7 +61,7 @@ namespace HB.Infrastructure.Tencent
                     {
                         return false;
                     }
-                    
+
                     content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                     //TODO: 记录分析evil_level
@@ -76,7 +77,7 @@ namespace HB.Infrastructure.Tencent
 
                     return false;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
 
