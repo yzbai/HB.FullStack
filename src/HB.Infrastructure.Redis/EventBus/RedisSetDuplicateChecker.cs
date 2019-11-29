@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Common;
-using HB.Framework.Common.Utility;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 

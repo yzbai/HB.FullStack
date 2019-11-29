@@ -18,9 +18,9 @@ namespace HB.Infrastructure.Redis.Direct
 
         IEnumerable<int> HashGetInt(string redisInstanceName, string hashName, IEnumerable<string> fields);
 
-        Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data);
+        Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data) where T : class;
 
-        T PopAndPush<T>(string redisInstanceName, string fromQueueName, string toQueueName);
+        T PopAndPush<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class;
 
         ulong QueueLength(string redisInstanceName, string queueName);
 

@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using HB.Framework.Common;
-using HB.Framework.Common.Utility;
-using HB.Framework.EventBus.Abstractions;
+﻿using HB.Framework.EventBus.Abstractions;
 using HB.Infrastructure.Redis.DuplicateCheck;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
@@ -19,8 +14,8 @@ namespace HB.Infrastructure.Redis.EventBus
     /// </summary>
     internal class ConsumeTaskManager : IDisposable
     {
-        private const int CONSUME_INTERVAL_SECONDS = 5;
-        private const string HISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
+        private const int _cONSUME_INTERVAL_SECONDS = 5;
+        private const string _hISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
 
         private readonly string _eventType;
         private readonly ILogger _logger;
@@ -40,9 +35,9 @@ namespace HB.Infrastructure.Redis.EventBus
 
         public ConsumeTaskManager(
             RedisEventBusOptions options,
-            RedisInstanceSetting redisInstanceSetting, 
-            string eventType, 
-            IEventHandler eventHandler, 
+            RedisInstanceSetting redisInstanceSetting,
+            string eventType,
+            IEventHandler eventHandler,
             ILogger consumeTaskManagerLogger)
         {
             _options = options;
@@ -62,7 +57,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private void HistoryTaskProcedure()
         {
-            while(!_historyTaskCTS.IsCancellationRequested)
+            while (!_historyTaskCTS.IsCancellationRequested)
             {
                 try
                 {
@@ -115,7 +110,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                     //TODO: Use LoadedScript
                     int result = (int)database.ScriptEvaluate(
-                        HISTORY_REDIS_SCRIPT,
+                        _hISTORY_REDIS_SCRIPT,
                         redisKeys.Select<string, RedisKey>(t => t).ToArray(),
                         redisArgvs.Select<string, RedisValue>(t => t).ToArray());
 
@@ -146,7 +141,7 @@ namespace HB.Infrastructure.Redis.EventBus
                         //出错
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.LogCritical(ex, $"ScanHistory {_instanceSetting.InstanceName} 中，EventType:{_eventType}, Exceptions: {ex.Message}");
                     throw;
@@ -167,12 +162,12 @@ namespace HB.Infrastructure.Redis.EventBus
                 {
                     _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceSetting.InstanceName}, eventType:{_eventType}");
 
-                    Thread.Sleep(CONSUME_INTERVAL_SECONDS * 1000);
+                    Thread.Sleep(_cONSUME_INTERVAL_SECONDS * 1000);
 
                     continue;
                 }
 
-                EventMessageEntity entity = JsonUtil.FromJson<EventMessageEntity>(redisValue);
+                EventMessageEntity entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue);
 
                 //2, 过期检查
 
@@ -180,7 +175,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 if (spendHours > _options.EventBusEventMessageExpiredHours)
                 {
-                    _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{JsonUtil.ToJson(entity)}");
+                    _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
                     continue;
                 }
 
@@ -191,14 +186,14 @@ namespace HB.Infrastructure.Redis.EventBus
                 if (!_duplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
                 {
                     //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
-                    continue;  
+                    continue;
                 }
 
                 bool? isExist = _duplicateChecker.IsExist(AcksSetName, entity.Guid, token);
 
                 if (isExist == null || isExist.Value)
                 {
-                    _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{JsonUtil.ToJson(entity)}");
+                    _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
 
                     _duplicateChecker.Release(AcksSetName, entity.Guid, token);
 
@@ -210,9 +205,9 @@ namespace HB.Infrastructure.Redis.EventBus
                 {
                     _eventHandler.Handle(entity.JsonData);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {JsonUtil.ToJson(entity)}");
+                    _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {SerializeUtil.ToJson(entity)}");
                     throw;
                 }
 
@@ -235,11 +230,11 @@ namespace HB.Infrastructure.Redis.EventBus
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -255,7 +250,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                     _historyTaskCTS?.Cancel();
 
-                    while(!_historyTask.IsCompleted)
+                    while (!_historyTask.IsCompleted)
                     {
                         Thread.Sleep(1 * 1000);
                     }
@@ -267,7 +262,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 
