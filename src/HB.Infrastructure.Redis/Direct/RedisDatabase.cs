@@ -12,25 +12,25 @@ namespace HB.Infrastructure.Redis.Direct
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "<Pending>")]
     internal class RedisDatabase : IRedisDatabase
     {
-        private readonly ILogger logger;
+        private readonly ILogger _logger;
 
-        private readonly RedisDatabaseOptions options;
+        private readonly RedisDatabaseOptions _options;
 
-        private readonly IDictionary<string, RedisInstanceSetting> instanceSettingDict;
+        private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
 
         public RedisDatabase(IOptions<RedisDatabaseOptions> options, ILogger<RedisDatabase> logger)
         {
-            this.options = options.Value;
-            this.logger = logger;
+            _options = options.Value;
+            _logger = logger;
 
-            instanceSettingDict = this.options.ConnectionSettings.ToDictionary(s => s.InstanceName);
+            _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
         }
 
         #region Key
 
         public bool KeySetIfNotExist(string redisInstanceName, string key, long expireSeconds)
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
             return database.StringSet(key, "", TimeSpan.FromSeconds(expireSeconds), When.NotExists);
         }
@@ -41,7 +41,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         public void HashSetInt(string redisInstanceName, string hashName, IEnumerable<string> fields, IEnumerable<int> values)
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
             HashEntry[] hashEntries = new HashEntry[fields.Count()];
 
@@ -55,7 +55,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         public IEnumerable<int> HashGetInt(string redisInstanceName, string hashName, IEnumerable<string> fields)
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
             RedisValue[] values = database.HashGet(hashName, fields.Select<string, RedisValue>(t => t).ToArray());
 
@@ -66,26 +66,25 @@ namespace HB.Infrastructure.Redis.Direct
 
         #region List
 
-        public T PopAndPush<T>(string redisInstanceName, string fromQueueName, string toQueueName)
+        public T PopAndPush<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
             byte[] data = database.ListRightPopLeftPush(fromQueueName, toQueueName);
 
-            return JsonUtil.DeSerialize<T>(data);
-            
+            return SerializeUtil.UnPack<T>(data);
         }
 
-        public async Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data)
+        public async Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data) where T : class
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
-            return await database.ListLeftPushAsync(queueName, JsonUtil.ToJson(data)).ConfigureAwait(false);
+            return await database.ListLeftPushAsync(queueName, SerializeUtil.Pack<T>(data)).ConfigureAwait(false);
         }
 
         public ulong QueueLength(string redisInstanceName, string queueName)
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
             return Convert.ToUInt64(database.ListLength(queueName));
         }
@@ -97,7 +96,7 @@ namespace HB.Infrastructure.Redis.Direct
         //TODO: use LoadedLuaScript
         public int ScriptEvaluate(string redisInstanceName, string script, string[] keys, string[] argvs)
         {
-            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), logger);
+            IDatabase database = RedisInstanceManager.GetDatabase(GetRedisInstanceSetting(redisInstanceName), _logger);
 
             RedisResult result = database.ScriptEvaluate(script, keys.Select<string, RedisKey>(t=>t).ToArray(), argvs.Select<string, RedisValue>(t=>t).ToArray());
 
@@ -108,7 +107,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         private RedisInstanceSetting GetRedisInstanceSetting(string instanceName)
         {
-            if (instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
+            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
             {
                 return setting;
             }
