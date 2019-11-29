@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using HB.Framework.Common.Entity;
 
 namespace HB.Framework.EventBus.Abstractions
 {

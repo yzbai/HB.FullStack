@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using HB.Framework.Common.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

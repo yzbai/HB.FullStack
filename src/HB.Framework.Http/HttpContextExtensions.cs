@@ -9,7 +9,6 @@ namespace Microsoft.AspNetCore.Http
 {
     public static class HttpContextExtensions
     {
-
         public static IDictionary<string, string> GetParametersFromRequest(this HttpContext httpContext)
         {
             if (httpContext == null)

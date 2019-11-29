@@ -49,7 +49,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
             EventMessageEntity entity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
 
-            await database.ListLeftPushAsync(QueueName(entity.Type), JsonUtil.ToJson(entity)).ConfigureAwait(false);
+            await database.ListLeftPushAsync(QueueName(entity.Type), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
 
             return true;
         }
@@ -128,7 +128,11 @@ namespace HB.Infrastructure.Redis.EventBus
             return eventType + "_Acks";
         }
 
-        public EventBusSettings EventBusSettings => _options.EventBusSettings;
+        public EventBusSettings EventBusSettings {
+            get {
+                return _options.EventBusSettings;
+            }
+        }
 
         public void Close()
         {

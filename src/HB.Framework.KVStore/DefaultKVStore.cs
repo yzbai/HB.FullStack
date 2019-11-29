@@ -6,7 +6,6 @@ using HB.Framework.KVStore.Entity;
 using HB.Framework.KVStore.Engine;
 using Microsoft.Extensions.Options;
 using HB.Framework.Common;
-using HB.Framework.Common.Entity;
 using System.Text;
 
 namespace HB.Framework.KVStore
@@ -59,7 +58,7 @@ namespace HB.Framework.KVStore
 
         private static IEnumerable<string> EntityKey<T>(IEnumerable<T> items, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
         {
-            return items.Select(t=>EntityKey(t, entityDef));
+            return items.Select(t => EntityKey(t, entityDef));
         }
 
         private static IEnumerable<string> EntityKey(IEnumerable<object> keyValues)
@@ -111,7 +110,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValue));
 
-            return JsonUtil.FromJson<T>(jsonValue);
+            return SerializeUtil.FromJson<T>(jsonValue);
         }
 
         public T GetByGuid<T>(T t) where T : KVStoreEntity, new()
@@ -123,7 +122,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(t, entityDef));
 
-            return JsonUtil.FromJson<T>(jsonValue);
+            return SerializeUtil.FromJson<T>(jsonValue);
         }
 
         public IEnumerable<T> GetByGuids<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -135,7 +134,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues));
 
-            return values.Select(json => JsonUtil.FromJson<T>(json));
+            return values.Select(json => SerializeUtil.FromJson<T>(json));
         }
 
         public IEnumerable<T> GetByGuids<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
@@ -147,7 +146,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef));
 
-            return values.Select(json => JsonUtil.FromJson<T>(json));
+            return values.Select(json => SerializeUtil.FromJson<T>(json));
         }
 
         public IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new()
@@ -158,7 +157,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef));
 
-            return values.Select(json => JsonUtil.FromJson<T>(json));
+            return values.Select(json => SerializeUtil.FromJson<T>(json));
         }
 
         public KVStoreResult Add<T>(T item) where T : KVStoreEntity, new()
@@ -184,7 +183,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=> JsonUtil.ToJson(t))
+                items.Select(t => SerializeUtil.ToJson(t))
                 );
         }
 
@@ -213,7 +212,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=> JsonUtil.ToJson(t)),
+                items.Select(t => SerializeUtil.ToJson(t)),
                 originalVersions
                 );
 
@@ -275,7 +274,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValue)).ConfigureAwait(false);
 
-            return JsonUtil.FromJson<T>(json);
+            return SerializeUtil.FromJson<T>(json);
         }
 
         public async Task<T> GetByGuidAsync<T>(T t) where T : KVStoreEntity, new()
@@ -287,7 +286,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(t, entityDef)).ConfigureAwait(false);
 
-            return JsonUtil.FromJson<T>(json);
+            return SerializeUtil.FromJson<T>(json);
         }
 
         public async Task<IEnumerable<T>> GetByGuidsAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
@@ -299,7 +298,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues)).ConfigureAwait(false);
 
-            return jsons.Select(t => JsonUtil.FromJson<T>(t));
+            return jsons.Select(t => SerializeUtil.FromJson<T>(t));
         }
 
         public async Task<IEnumerable<T>> GetByGuidsAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
@@ -311,7 +310,7 @@ namespace HB.Framework.KVStore
                 EntityName(entityDef),
                 EntityKey(keyValues, entityDef)).ConfigureAwait(false);
 
-            return jsons.Select(t => JsonUtil.FromJson<T>(t));
+            return jsons.Select(t => SerializeUtil.FromJson<T>(t));
         }
 
         public async Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
@@ -322,7 +321,7 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef)).ConfigureAwait(false);
 
-            return jsons.Select(t => JsonUtil.FromJson<T>(t));
+            return jsons.Select(t => SerializeUtil.FromJson<T>(t));
         }
 
         public Task<KVStoreResult> AddAsync<T>(T item) where T : KVStoreEntity, new()
@@ -344,11 +343,11 @@ namespace HB.Framework.KVStore
 
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            return  _engine.EntityAddAsync(
+            return _engine.EntityAddAsync(
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=> JsonUtil.ToJson(t))
+                items.Select(t => SerializeUtil.ToJson(t))
                 );
         }
 
@@ -377,9 +376,9 @@ namespace HB.Framework.KVStore
                 StoreName(entityDef),
                 EntityName(entityDef),
                 EntityKey(items, entityDef),
-                items.Select(t=>JsonUtil.ToJson(t)),
+                items.Select(t => SerializeUtil.ToJson(t)),
                 originalVersions)
-                .ContinueWith(t=> {
+                .ContinueWith(t => {
                     if (!t.Result.IsSucceeded())
                     {
                         foreach (T item in items)

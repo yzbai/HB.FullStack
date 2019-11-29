@@ -1,5 +1,4 @@
-﻿using HB.Framework.Common.Utility;
-using HB.Framework.KVStore.Engine;
+﻿using HB.Framework.KVStore.Engine;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
