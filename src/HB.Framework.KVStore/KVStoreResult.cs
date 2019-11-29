@@ -63,48 +63,5 @@ namespace HB.Framework.KVStore
             return new KVStoreResult { Status = KVStoreResultStatus.Succeeded };
         }
 
-        //public static readonly KVStoreResult Succeeded = new KVStoreResult() { Status = KVStoreResultStatus.Succeeded };
-        //public static readonly KVStoreResult NotFound = new KVStoreResult() { Status = KVStoreResultStatus.NotFound };
-        //public static readonly KVStoreResult Failed = new KVStoreResult() { Status = KVStoreResultStatus.Failed };
-        //public static readonly KVStoreResult ExistAlready = new KVStoreResult() { Status = KVStoreResultStatus.ExistAlready };
-        //public static readonly KVStoreResult VersionNotMatched = new KVStoreResult() { Status = KVStoreResultStatus.VersionNotMatched };
-
-
-        //public static bool operator ==(KVStoreResult left, KVStoreResult right)
-        //{
-        //    if (System.Object.ReferenceEquals(left, right))
-        //    {
-        //        return true;
-        //    }
-
-        //    if (((object)left == null) || ((object)right == null))
-        //    {
-        //        return false;
-        //    }
-
-        //    return left.Status == right.Status;
-        //}
-
-        //public static bool operator !=(KVStoreResult left, KVStoreResult right)
-        //{
-        //    return !(left == right);
-        //}
-
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj == null)
-        //    {
-
-        //    }
-
-        //    KVStoreResult result = obj as KVStoreResult;
-
-        //    return this == result;
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    return base.GetHashCode();
-        //}
     }
 }
