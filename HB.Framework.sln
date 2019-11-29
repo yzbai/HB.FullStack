@@ -11,8 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{DFFFDEC7-B203-40D6-9DA0-B79D9378FDFF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Cache", "src\HB.Framework.Cache\HB.Framework.Cache.csproj", "{098145F7-5FD2-48DC-92BA-C45CCBD5D4DD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.KVStore", "src\HB.Framework.KVStore\HB.Framework.KVStore.csproj", "{4FD5C61F-C867-4717-8055-53BD43B2C642}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Http", "src\HB.Framework.Http\HB.Framework.Http.csproj", "{800ED8B9-798F-4194-A0B0-313EF131E6EF}"
@@ -53,10 +51,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{098145F7-5FD2-48DC-92BA-C45CCBD5D4DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{098145F7-5FD2-48DC-92BA-C45CCBD5D4DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{098145F7-5FD2-48DC-92BA-C45CCBD5D4DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{098145F7-5FD2-48DC-92BA-C45CCBD5D4DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4FD5C61F-C867-4717-8055-53BD43B2C642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4FD5C61F-C867-4717-8055-53BD43B2C642}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FD5C61F-C867-4717-8055-53BD43B2C642}.Release|Any CPU.ActiveCfg = Release|Any CPU
