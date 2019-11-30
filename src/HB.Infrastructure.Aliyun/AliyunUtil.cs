@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Aliyun
                 return;
             }
 
-            DefaultProfile.AddEndpoint(productName + regionId, regionId, productName, endpoint);
+            DefaultProfile.GetProfile().AddEndpoint(productName + regionId, regionId, productName, endpoint);
         }
 
         public static IAcsClient CreateAcsClient(string regionId, string accessKeyId, string accessKeySecret)

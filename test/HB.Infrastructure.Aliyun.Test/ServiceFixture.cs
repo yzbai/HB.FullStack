@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Aliyun.Test
                 .AddEnvironmentVariables()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json", optional: false)
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional:true);
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true);
 
 
             Configuration = configurationBuilder.Build();
@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Aliyun.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IAliyunSmsService SmsService => Services.GetRequiredService < IAliyunSmsService>();
+        public IAliyunSmsService SmsService => Services.GetRequiredService<IAliyunSmsService>();
 
         public IAliyunOssService AliyunOssService => Services.GetRequiredService<IAliyunOssService>();
     }

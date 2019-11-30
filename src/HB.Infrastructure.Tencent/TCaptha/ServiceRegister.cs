@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
             TCapthaOptions options = new TCapthaOptions();
             action(options);
 
-            AddTCapthaCore(services, options);
+            AddTCapthaCore(services);
 
             return services;
         }
@@ -33,12 +33,12 @@ namespace Microsoft.Extensions.DependencyInjection
             TCapthaOptions options = new TCapthaOptions();
             configuration.Bind(options);
 
-            AddTCapthaCore(services, options);
+            AddTCapthaCore(services);
 
             return services;
         }
 
-        private static void AddTCapthaCore(IServiceCollection services, TCapthaOptions options)
+        private static void AddTCapthaCore(IServiceCollection services)
         {
             services.AddHttpClient(TCapthaOptions.EndpointName, httpClient => {
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/json");

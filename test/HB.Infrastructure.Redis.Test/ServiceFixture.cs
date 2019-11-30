@@ -39,14 +39,14 @@ namespace HB.Infrastructure.Redis.Test
                 builder.AddNLog();
             });
 
-
-            serviceCollection.AddRedisEventBus(Configuration.GetSection("EventBus"));
-            serviceCollection.AddRedisKVStore(Configuration.GetSection("Redis"));
+            serviceCollection.AddRedisDatabase(Configuration.GetSection("RedisDatabase"));
+            serviceCollection.AddRedisEventBus(Configuration.GetSection("RedisEventBus"));
+            serviceCollection.AddRedisKVStore(Configuration.GetSection("RedisKVStore"));
 
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IRedisDatabase Redis => Services.GetRequiredService<IRedisDatabase>();
+        public IRedisDatabase RedisDatabase => Services.GetRequiredService<IRedisDatabase>();
 
         public IKVStore KVStore => Services.GetRequiredService<IKVStore>();
 
