@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -82,56 +83,46 @@ namespace HB.Infrastructure.Redis.Test
         }
 
         [Fact]
-        public void AddAndFetch()
+        public async Task AddAndFetchAsync()
         {
-            UserEntity fetched = _kvStore.GetByGuid<UserEntity>(_userEntity1.Id);
+            UserEntity fetched = _kvStore.GetByKey<UserEntity>(_userEntity1.Id);
 
             if (fetched != null)
             {
-                KVStoreResult r = _kvStore.DeleteByGuid<UserEntity>(fetched.Id, fetched.Version);
-                Assert.True(r.IsSucceeded());
+                _kvStore.DeleteByKey<UserEntity>(fetched.Id, fetched.Version);
             }
 
-            KVStoreResult result = _kvStore.AddAsync<UserEntity>(_userEntity1).Result;
+            await _kvStore.AddAsync<UserEntity>(_userEntity1);
 
-            Assert.True(result.IsSucceeded());
-
-            UserEntity fetchedAgain = _kvStore.GetByGuidAsync<UserEntity>(_userEntity1.Id).Result;
+            UserEntity fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity1.Id);
 
             Assert.Equal<UserEntity>(_userEntity1, fetchedAgain, new UserEntityComparer());
         }
 
         [Fact]
-        public void AddAndUpdate()
+        public async Task AddAndUpdateAsync()
         {
-            KVStoreResult result = KVStoreResult.Succeeded();
-
-            UserEntity fetched = _kvStore.GetByGuidAsync<UserEntity>(_userEntity2.Id).Result;
+            UserEntity fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Id);
 
             if (fetched == null)
             {
-                result = _kvStore.AddAsync<UserEntity>(_userEntity2).Result;
+                await _kvStore.AddAsync<UserEntity>(_userEntity2);
 
-                Assert.True(result.IsSucceeded());
-
-                fetched = _kvStore.GetByGuidAsync<UserEntity>(_userEntity2.Id).Result;
+                fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Id);
 
                 Assert.True(fetched != null);
             }
 
             fetched.UserName = "Changed 1 : " + fetched.UserName;
 
-            result = _kvStore.UpdateAsync(fetched).Result;
+            await _kvStore.UpdateAsync(fetched);
 
-            Assert.True(result.IsSucceeded());
-
-            UserEntity fetchedAgain = _kvStore.GetByGuidAsync<UserEntity>(_userEntity2.Id).Result;
+            UserEntity fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Id);
 
             Assert.True(fetched.Version == fetchedAgain.Version);
 
-            result = _kvStore.DeleteByGuidAsync<UserEntity>(_userEntity2.Id, fetchedAgain.Version).Result;
+            await _kvStore.DeleteByKeyAsync<UserEntity>(_userEntity2.Id, fetchedAgain.Version);
 
-            Assert.True(result.IsSucceeded());
         }
     }
 }

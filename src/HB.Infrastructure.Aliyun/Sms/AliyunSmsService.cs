@@ -24,6 +24,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
             AliyunUtil.AddEndpoint(ProductNames.SMS, _options.RegionId, _options.Endpoint);
             _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
+            
         }
 
         public Task<SendResult> SendValidationCode(string mobile/*, out string smsCode*/)
@@ -55,7 +56,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                 task.Start(TaskScheduler.Default);
 
                 CommonResponse response = await task.ConfigureAwait(false);
-                SendResult sendResult = JsonUtil.FromJson<SendResult>(response.Data);
+                SendResult sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
 
                 if (sendResult.IsSuccessful())
                 {
@@ -63,7 +64,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                 }
                 else
                 {
-                    _logger.LogError($"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}");
+                    _logger.LogCritical($"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}");
                 }
 
                 return sendResult;

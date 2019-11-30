@@ -16,12 +16,12 @@ namespace HB.Infrastructure.Redis.Test
 
         private ITestOutputHelper _output;
 
-        private IRedisDatabase _redis;
+        private readonly IRedisDatabase _redis;
 
         public DirectRedisTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
-            _redis = serviceFixture.Redis;
+            _redis = serviceFixture.RedisDatabase;
         }
 
         [Theory]

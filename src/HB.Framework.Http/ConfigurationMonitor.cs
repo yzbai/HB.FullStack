@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
@@ -12,13 +13,13 @@ namespace HB.Framework.Http
     {
         private byte[] _appsettingsHash = new byte[20];
         private byte[] _appsettingsEnvHash = new byte[20];
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
 
-        private readonly IApplicationLifetime _applicationLifeTime;
+        private readonly IHostApplicationLifetime _applicationLifeTime;
         private readonly ILogger _logger;
 
  
-        public ConfigurationMonitor(IConfiguration config, IHostingEnvironment env, IApplicationLifetime applicationLifetime, ILogger<ConfigurationMonitor> logger)
+        public ConfigurationMonitor(IConfiguration config, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime, ILogger<ConfigurationMonitor> logger)
         {
             _env = env;
             _applicationLifeTime = applicationLifetime;
