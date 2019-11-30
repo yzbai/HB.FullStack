@@ -7,25 +7,25 @@ namespace HB.Framework.KVStore.Engine
 {
     public interface IKVStoreEngine : IKVStoreEngineAsync
     {
-        KVStoreSettings     Settings { get; }
+        KVStoreSettings Settings { get; }
 
         string FirstDefaultInstanceName { get; }
 
         void Close();
 
-        string              EntityGet(string storeName, string entityName, string entityKey);
-        IEnumerable<string> EntityGet(string storeName, string entityName, IEnumerable<string> entityKeys);      
+        string EntityGet(string storeName, string entityName, string entityKey);
+        IEnumerable<string> EntityGet(string storeName, string entityName, IEnumerable<string> entityKeys);
         IEnumerable<string> EntityGetAll(string storeName, string entityName);
 
-        KVStoreResult       EntityAdd(string storeName, string entityName, string entityKey, string entityJson);
-        KVStoreResult       EntityAdd(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons);
+        void EntityAdd(string storeName, string entityName, string entityKey, string entityJson);
+        void EntityAdd(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons);
 
-        KVStoreResult       EntityUpdate(string storeName, string entityName, string entityKey, string entityJson, int entityVersion);
-        KVStoreResult       EntityUpdate(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions);
+        void EntityUpdate(string storeName, string entityName, string entityKey, string entityJson, int entityVersion);
+        void EntityUpdate(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions);
 
-        KVStoreResult       EntityDelete(string storeName, string entityName, string entityKey, int entityVersion);
-        KVStoreResult       EntityDelete(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
-        KVStoreResult       EntityDeleteAll(string storeName, string entityName);
-        
+        void EntityDelete(string storeName, string entityName, string entityKey, int entityVersion);
+        void EntityDelete(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
+        bool EntityDeleteAll(string storeName, string entityName);
+
     }
 }

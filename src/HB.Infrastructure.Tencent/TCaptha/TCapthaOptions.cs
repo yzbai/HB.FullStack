@@ -9,7 +9,11 @@ namespace HB.Infrastructure.Tencent
     {
         public const string EndpointName = "Tecent_Captha";
 
-        public TCapthaOptions Value => this;
+        public TCapthaOptions Value {
+            get {
+                return this;
+            }
+        }
 
         public string Endpoint { get; set; }
 
