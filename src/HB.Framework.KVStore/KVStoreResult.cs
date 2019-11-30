@@ -1,67 +1,73 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace HB.Framework.KVStore
 {
-    public enum KVStoreResultStatus
+    public class KVStoreException : Exception
     {
-        Succeeded,
-        NotFound,
-        Failed,
-        ExistAlready,
-        VersionNotMatched
-    }
+        private IDictionary _data;
 
-    public class KVStoreResult
-    {
-        public Exception Exception { get; private set; }
-        public KVStoreResultStatus Status { get; private set; }
-        
-        public static KVStoreResult Fail(Exception exception)
+        public KVStoreError Error { get; private set; }
+
+        public int InnerNumber { get; private set; }
+
+        public string InnerState { get; private set; }
+
+        public string EntityName { get; private set; }
+
+        public string Operation { get; private set; }
+
+        public KVStoreException(KVStoreError error, string entityName, string message, Exception innerException = null, [CallerMemberName]string operation = "") : base(message, innerException)
         {
-            KVStoreResult result = new KVStoreResult
-            {
-                Status = KVStoreResultStatus.Failed
-            };
+            Error = error;
+            Operation = operation;
+            EntityName = entityName;
 
-            if (exception != null)
+        }
+
+        public KVStoreException(Exception innerException, string entityName, string message, [CallerMemberName]string operation = "") :base(message, innerException)
+        {
+            Operation = operation;
+            EntityName = entityName;
+
+            if (innerException is KVStoreException kVStoreException)
             {
-                result.Exception = exception;
+                Error = kVStoreException.Error;
+                
+                InnerNumber = kVStoreException.InnerNumber;
+                InnerState = kVStoreException.InnerState;
             }
-
-            return result;
+            else
+            {
+                Error = KVStoreError.UnKown;
+            }
         }
 
-        public static KVStoreResult Fail(string message)
+        public KVStoreException(int number, string state, string message, Exception innerException = null) : base(message, innerException)
         {
-            return Fail(new Exception(message));
+            InnerNumber = number;
+            InnerState = state;
+            Error = KVStoreError.InnerError;
         }
 
-        public bool IsSucceeded()
-        {
-            return Status == KVStoreResultStatus.Succeeded;
-        }
+        public override IDictionary Data {
+            get {
+                if (_data is null)
+                {
+                    _data = base.Data;
+                }
 
-        public static KVStoreResult ExistAlready()
-        {
-            return new KVStoreResult { Status = KVStoreResultStatus.ExistAlready };
-        }
+                _data["KVStoreError"] = Error.ToString();
+                _data["InnerNumber"] = InnerNumber;
+                _data["InnerState"] = InnerState;
+                _data["EntityName"] = EntityName;
+                _data["Operation"] = Operation;
 
-        public static KVStoreResult VersionNotMatched()
-        {
-            return new KVStoreResult { Status = KVStoreResultStatus.VersionNotMatched };
+                return _data;
+            }
         }
-
-        public static KVStoreResult Failed()
-        {
-            return new KVStoreResult { Status = KVStoreResultStatus.Failed };
-        }
-
-        public static KVStoreResult Succeeded()
-        {
-            return new KVStoreResult { Status = KVStoreResultStatus.Succeeded };
-        }
-
     }
 }
