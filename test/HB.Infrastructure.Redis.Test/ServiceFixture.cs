@@ -46,10 +46,22 @@ namespace HB.Infrastructure.Redis.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IRedisDatabase RedisDatabase => Services.GetRequiredService<IRedisDatabase>();
+        public IRedisDatabase RedisDatabase {
+            get {
+                return Services.GetRequiredService<IRedisDatabase>();
+            }
+        }
 
-        public IKVStore KVStore => Services.GetRequiredService<IKVStore>();
+        public IKVStore KVStore {
+            get {
+                return Services.GetRequiredService<IKVStore>();
+            }
+        }
 
-        public IEventBus EventBus => Services.GetRequiredService<IEventBus>();
+        public IEventBus EventBus {
+            get {
+                return Services.GetRequiredService<IEventBus>();
+            }
+        }
     }
 }

@@ -10,8 +10,8 @@ namespace HB.Infrastructure.Redis.Test
 {
     public class RedisEventBusTest : IClassFixture<ServiceFixture>, IEventHandler
     {
-        private ITestOutputHelper _output;
-        private IEventBus _eventBus;
+        private readonly ITestOutputHelper _output;
+        private readonly IEventBus _eventBus;
 
         public RedisEventBusTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
