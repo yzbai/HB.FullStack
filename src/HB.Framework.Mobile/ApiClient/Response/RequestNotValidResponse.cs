@@ -4,7 +4,7 @@ using System;
 
 namespace HB.Framework.Mobile.ApiClient
 {
-    public class RequestNotValidResponse<T> : ApiResponse<T> where T : ApiData
+    public class RequestNotValidResponse : ApiResponse
     {
         public RequestNotValidResponse()
             : base(400, "", ErrorCode.API_REQUEST_VALIDATE_ERROR) { }
