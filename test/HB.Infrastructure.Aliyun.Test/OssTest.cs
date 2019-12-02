@@ -10,8 +10,8 @@ namespace HB.Infrastructure.Aliyun.Test
 {
     public class OssTest : IClassFixture<ServiceFixture>
     {
-        private ITestOutputHelper _output;
-        private IAliyunOssService _oss;
+        private readonly ITestOutputHelper _output;
+        private readonly IAliyunOssService _oss;
 
         public OssTest(ITestOutputHelper output, ServiceFixture serviceFixture)
         {

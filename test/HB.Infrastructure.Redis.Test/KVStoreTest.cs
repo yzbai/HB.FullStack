@@ -55,10 +55,10 @@ namespace HB.Infrastructure.Redis.Test
 
     public class KVStoreTest : IClassFixture<ServiceFixture>
     {
-        private IKVStore _kvStore;
+        private readonly IKVStore _kvStore;
         private readonly ITestOutputHelper _output;
 
-        private UserEntity _userEntity1 = new UserEntity()
+        private readonly UserEntity _userEntity1 = new UserEntity()
         {
             Id = 300,
             UserName = "22222222222",
@@ -67,7 +67,7 @@ namespace HB.Infrastructure.Redis.Test
             Type = UserType.Admin
         };
 
-        private UserEntity _userEntity2 = new UserEntity()
+        private readonly UserEntity _userEntity2 = new UserEntity()
         {
             Id = 400,
             UserName = "333333333",

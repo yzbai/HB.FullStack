@@ -6,9 +6,9 @@ namespace HB.Infrastructure.Aliyun.Test
 {
     public class SmsTest : IClassFixture<ServiceFixture>
     {
-        private IAliyunSmsService _smsBiz;
-        private ServiceFixture _fixture;
-        private ITestOutputHelper _output;
+        private readonly IAliyunSmsService _smsBiz;
+        private readonly ServiceFixture _fixture;
+        private readonly ITestOutputHelper _output;
 
         public SmsTest(ITestOutputHelper output, ServiceFixture testFixture)
         {

@@ -13,7 +13,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// <param name="mobile"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<SendResult> SendValidationCode(string mobile/*, out string code*/);
+        Task SendValidationCode(string mobile/*, out string code*/);
 
         bool Validate(string mobile, string code);
 
