@@ -12,9 +12,9 @@ namespace HB.Infrastructure.Redis.Test
 {
     public class DirectRedisTest : IClassFixture<ServiceFixture>
     {
-        private Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new Fixture();
 
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
 
         private readonly IRedisDatabase _redis;
 
