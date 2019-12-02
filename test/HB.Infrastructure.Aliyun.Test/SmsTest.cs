@@ -1,4 +1,5 @@
 ﻿using HB.Infrastructure.Aliyun.Sms;
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,19 +15,15 @@ namespace HB.Infrastructure.Aliyun.Test
         {
             _output = output;
             _fixture = testFixture;
-            _smsBiz = _fixture.SmsService;  
+            _smsBiz = _fixture.SmsService;
         }
 
         [Theory]
         [InlineData("15190208956")]
         [InlineData("18015323958")]
-        public void SendSms(string mobile)
+        public async System.Threading.Tasks.Task SendSmsAsync(string mobile)
         {
-            var result = _smsBiz.SendValidationCode(mobile).Result;
-
-            _output.WriteLine(result.Message);
-
-            Assert.True(result.IsSuccessful());
+            await _smsBiz.SendValidationCode(mobile);
         }
     }
 }

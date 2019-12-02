@@ -39,8 +39,25 @@ namespace HB.Framework.Mobile.ApiClient
             _httpClientFactory = httpClientFactory;
         }
 
-        //多次尝试，自动refresh token，
         public async Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiData
+        {
+            ApiResponse apiResponse = await GetAsync(request, typeof(T));
+            ApiResponse<T> typedResponse = new ApiResponse<T>(apiResponse.HttpCode, apiResponse.Message, apiResponse.ErrCode);
+            
+            if (apiResponse.Data != null)
+            {
+                typedResponse.Data = (T)apiResponse.Data;
+            }
+            return typedResponse;
+        }
+
+        public Task<ApiResponse> GetAsync(ApiRequest request)
+        {
+            return GetAsync(request, null);
+        }
+
+        //多次尝试，自动refresh token，
+        private async Task<ApiResponse> GetAsync(ApiRequest request, Type dataType)
         {
             ThrowIf.Null(request, nameof(request));
 
@@ -48,30 +65,30 @@ namespace HB.Framework.Mobile.ApiClient
 
             if (!request.IsValid())
             {
-                return new RequestNotValidResponse<T>(request);
+                return new RequestNotValidResponse(request);
             }
 
             if (!await AddAuthenticateIfNeededAsync(request).ConfigureAwait(false))
             {
-                return new NotLoginResponse<T>();
+                return new NotLoginResponse();
             }
 
             EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
-            ApiResponse<T> response = await GetResponseCore<T>(request, endpoint).ConfigureAwait(false);
+            ApiResponse response = await GetResponseCore(request, endpoint, dataType).ConfigureAwait(false);
 
-            return await AutoRefreshTokenAsync(request, response, endpoint).ConfigureAwait(false);
+            return await AutoRefreshTokenAsync(request, response, endpoint, dataType).ConfigureAwait(false);
         }
 
         #region Privates
 
-        private async Task<ApiResponse<T>> GetResponseCore<T>(ApiRequest request, EndpointSettings endpointSettings) where T : ApiData
+        private async Task<ApiResponse> GetResponseCore(ApiRequest request, EndpointSettings endpointSettings, Type dataType)
         {
             using HttpRequestMessage httpRequest = ConstructureHttpRequest(request, endpointSettings);
             HttpClient httpClient = GetHttpClient(endpointSettings);
 
             using HttpResponseMessage httpResponse = await GetResponseActual(httpRequest, httpClient).ConfigureAwait(false);
-            return await ConstructureHttpResponseAsync<T>(httpResponse).ConfigureAwait(false);
+            return await ConstructureHttpResponseAsync(httpResponse, dataType).ConfigureAwait(false);
         }
 
         private async Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
@@ -88,7 +105,7 @@ namespace HB.Framework.Mobile.ApiClient
             _logger.LogTrace($"Request {httpRequest.RequestUri}, Response {httpResponse.StatusCode}");
         }
 
-        private async Task<ApiResponse<T>> AutoRefreshTokenAsync<T>(ApiRequest request, ApiResponse<T> response, EndpointSettings endpointSettings) where T : ApiData
+        private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type dataType)
         {
             if (response?.HttpCode != 401 || response?.ErrCode != ErrorCode.API_TOKEN_EXPIRED || !request.GetNeedAuthenticate())
             {
@@ -116,7 +133,7 @@ namespace HB.Framework.Mobile.ApiClient
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
                         //刷新成功，再次调用
-                        return await GetAsync<T>(request).ConfigureAwait(false);
+                        return await GetAsync(request, dataType).ConfigureAwait(false);
                     }
 
                     return response;
@@ -152,7 +169,7 @@ namespace HB.Framework.Mobile.ApiClient
 
                         await _mobileGlobal.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
 
-                        return await GetAsync<T>(request).ConfigureAwait(false);
+                        return await GetAsync(request, dataType).ConfigureAwait(false);
                     }
                 }
 
@@ -233,19 +250,19 @@ namespace HB.Framework.Mobile.ApiClient
             return requestUrlBuilder.ToString();
         }
 
-        private async Task<ApiResponse<T>> ConstructureHttpResponseAsync<T>(HttpResponseMessage httpResponse) where T : ApiData
+        private async Task<ApiResponse> ConstructureHttpResponseAsync(HttpResponseMessage httpResponse, Type dataType)
         {
             ThrowIf.Null(httpResponse, nameof(httpResponse));
 
             //TODO: Using httpResponse.Content.ReadAsStreamAsync() instead.
 
-            string con 处理Api的Ok（）返回。没有实体   tent = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                T resource = SerializeUtil.FromJson<T>(content);
+                object data = dataType == null ? null : SerializeUtil.FromJson(dataType, content);
 
-                return new ApiResponse<T>(resource, (int)httpResponse.StatusCode);
+                return new ApiResponse(data, (int)httpResponse.StatusCode);
             }
             else
             {
@@ -255,11 +272,11 @@ namespace HB.Framework.Mobile.ApiClient
                 {
                     ErrorResponse errorResponse = SerializeUtil.FromJson<ErrorResponse>(content);
 
-                    return new ApiResponse<T>((int)httpResponse.StatusCode, errorResponse.Message, errorResponse.Code);
+                    return new ApiResponse((int)httpResponse.StatusCode, errorResponse.Message, errorResponse.Code);
                 }
                 else
                 {
-                    return new ApiResponse<T>((int)httpResponse.StatusCode, "Internal Server Error.", ErrorCode.API_INTERNAL_ERROR);
+                    return new ApiResponse((int)httpResponse.StatusCode, "Internal Server Error.", ErrorCode.API_INTERNAL_ERROR);
                 }
             }
         }
@@ -293,6 +310,8 @@ namespace HB.Framework.Mobile.ApiClient
             //request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));
         }
+
+        
 
         #endregion
     }
