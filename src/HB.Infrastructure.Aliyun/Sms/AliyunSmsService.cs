@@ -27,7 +27,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             
         }
 
-        public Task<SendResult> SendValidationCode(string mobile/*, out string smsCode*/)
+        public Task SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
@@ -52,6 +52,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             string cachedSmsCode = smsCode;
 
             return PolicyManager.Default(_logger).ExecuteAsync(async () => {
+
                 Task<CommonResponse> task = new Task<CommonResponse>(() => _client.GetCommonResponse(request));
                 task.Start(TaskScheduler.Default);
 
@@ -65,6 +66,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                 else
                 {
                     _logger.LogCritical($"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}");
+                    throw new AliyunSmsException(code: sendResult.Code, message: sendResult.Message);
                 }
 
                 return sendResult;
@@ -108,7 +110,17 @@ namespace HB.Infrastructure.Aliyun.Sms
             return mobile + "_vlc";
         }
 
+        class SendResult
+        {
+            public string Code { get; set; }
 
+            public string Message { get; set; }
+
+            public bool IsSuccessful()
+            {
+                return "OK".Equals(Code, GlobalSettings.ComparisonIgnoreCase);
+            }
+        }
 
     }
 }

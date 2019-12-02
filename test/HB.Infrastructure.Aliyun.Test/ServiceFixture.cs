@@ -40,8 +40,16 @@ namespace HB.Infrastructure.Aliyun.Test
             Services = serviceCollection.BuildServiceProvider();
         }
 
-        public IAliyunSmsService SmsService => Services.GetRequiredService<IAliyunSmsService>();
+        public IAliyunSmsService SmsService {
+            get {
+                return Services.GetRequiredService<IAliyunSmsService>();
+            }
+        }
 
-        public IAliyunOssService AliyunOssService => Services.GetRequiredService<IAliyunOssService>();
+        public IAliyunOssService AliyunOssService {
+            get {
+                return Services.GetRequiredService<IAliyunOssService>();
+            }
+        }
     }
 }
