@@ -35,5 +35,10 @@ namespace HB.Framework.Mobile.ApiClient
             Message = message;
             ErrCode = errorCode;
         }
+
+        public bool IsSuccessful()
+        {
+            return HttpCode >= 200 && HttpCode <= 299;
+        }
     }
 }
