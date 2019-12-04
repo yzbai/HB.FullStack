@@ -8,7 +8,6 @@ using Microsoft.Extensions.Primitives;
 
 namespace HB.Framework.Http
 {
-
     public class ConfigurationMonitor : IConfigurationMonitor
     {
         private byte[] _appsettingsHash = new byte[20];

@@ -1,5 +1,4 @@
-﻿using HB.Framework.Common.Mobile;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,10 +8,6 @@ namespace HB.Framework.Mobile
 {
     public class MobileGlobal : IMobileGlobal
     {
-        public const string AccessToken = "AccessToken";
-        public const string RefreshToken = "RefreshToken";
-        public const string CurrentUserGuid = "CurrentUserGuid";
-
         private readonly ILogger _logger;
 
         private string _deviceId;
@@ -38,7 +33,7 @@ namespace HB.Framework.Mobile
                 return _deviceId;
             }
 
-            _deviceId = await PreferenceGetAsync(MobileInfoNames.DeviceId).ConfigureAwait(false);
+            _deviceId = await PreferenceGetAsync(MobileNames.DeviceId).ConfigureAwait(false);
 
             if (_deviceId.IsNotNullOrEmpty())
             {
@@ -47,7 +42,7 @@ namespace HB.Framework.Mobile
 
             _deviceId = MobileUtils.CreateNewDeviceId();
 
-            await PreferenceSetAsync(MobileInfoNames.DeviceId, _deviceId).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.DeviceId, _deviceId).ConfigureAwait(false);
 
             return _deviceId;
         }
@@ -59,7 +54,7 @@ namespace HB.Framework.Mobile
                 return _deviceType;
             }
 
-            _deviceType = await PreferenceGetAsync(MobileInfoNames.DeviceType).ConfigureAwait(false);
+            _deviceType = await PreferenceGetAsync(MobileNames.DeviceType).ConfigureAwait(false);
 
             if (_deviceType.IsNotNullOrEmpty())
             {
@@ -68,7 +63,7 @@ namespace HB.Framework.Mobile
 
             _deviceType = MobileUtils.GetDeviceType();
 
-            await PreferenceSetAsync(MobileInfoNames.DeviceType, _deviceType).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.DeviceType, _deviceType).ConfigureAwait(false);
 
             return _deviceType;
         }
@@ -80,7 +75,7 @@ namespace HB.Framework.Mobile
                 return _deviceVersion;
             }
 
-            _deviceVersion = await PreferenceGetAsync(MobileInfoNames.DeviceVersion).ConfigureAwait(false);
+            _deviceVersion = await PreferenceGetAsync(MobileNames.DeviceVersion).ConfigureAwait(false);
 
             if (_deviceVersion.IsNotNullOrEmpty())
             {
@@ -89,7 +84,7 @@ namespace HB.Framework.Mobile
 
             _deviceVersion = MobileUtils.GetDeviceVersion();
 
-            await PreferenceSetAsync(MobileInfoNames.DeviceVersion, _deviceVersion).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.DeviceVersion, _deviceVersion).ConfigureAwait(false);
 
             return _deviceVersion;
         }
@@ -101,7 +96,7 @@ namespace HB.Framework.Mobile
                 return _deviceAddress;
             }
 
-            _deviceAddress = await PreferenceGetAsync(MobileInfoNames.DeviceAddress).ConfigureAwait(false);
+            _deviceAddress = await PreferenceGetAsync(MobileNames.DeviceAddress).ConfigureAwait(false);
 
             if (_deviceAddress.IsNotNullOrEmpty())
             {
@@ -110,7 +105,7 @@ namespace HB.Framework.Mobile
 
             _deviceAddress = await MobileUtils.GetDeviceAddressAsync().ConfigureAwait(false);
 
-            await PreferenceSetAsync(MobileInfoNames.DeviceAddress, _deviceAddress).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.DeviceAddress, _deviceAddress).ConfigureAwait(false);
 
             return _deviceAddress;
         }
@@ -133,7 +128,7 @@ namespace HB.Framework.Mobile
                 return _currentUserGuid;
             }
 
-            _currentUserGuid = await PreferenceGetAsync(CurrentUserGuid).ConfigureAwait(false);
+            _currentUserGuid = await PreferenceGetAsync(MobileNames.CurrentUserGuid).ConfigureAwait(false);
 
             return _currentUserGuid;
         }
@@ -141,7 +136,7 @@ namespace HB.Framework.Mobile
         public async Task SetCurrentUserGuidAsync(string userGuid)
         {
             _currentUserGuid = userGuid;
-            await PreferenceSetAsync(CurrentUserGuid, userGuid).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.CurrentUserGuid, userGuid).ConfigureAwait(false);
         }
 
         #endregion
@@ -155,7 +150,7 @@ namespace HB.Framework.Mobile
                 return _accessToken;
             }
 
-            _accessToken = await PreferenceGetAsync(AccessToken).ConfigureAwait(false);
+            _accessToken = await PreferenceGetAsync(MobileNames.AccessToken).ConfigureAwait(false);
 
             return _accessToken;
         }
@@ -163,7 +158,7 @@ namespace HB.Framework.Mobile
         public async Task SetAccessTokenAsync(string accessToken)
         {
             _accessToken = accessToken;
-            await PreferenceSetAsync(AccessToken, accessToken).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.AccessToken, accessToken).ConfigureAwait(false);
         }
 
         public async Task<string> GetRefreshTokenAsync()
@@ -173,7 +168,7 @@ namespace HB.Framework.Mobile
                 return _refreshToken;
             }
 
-            _refreshToken = await PreferenceGetAsync(RefreshToken).ConfigureAwait(false);
+            _refreshToken = await PreferenceGetAsync(MobileNames.RefreshToken).ConfigureAwait(false);
 
             return _refreshToken;
         }
@@ -181,7 +176,7 @@ namespace HB.Framework.Mobile
         public async Task SetRefreshTokenAsync(string refreshToken)
         {
             _refreshToken = refreshToken;
-            await PreferenceSetAsync(RefreshToken, refreshToken).ConfigureAwait(false);
+            await PreferenceSetAsync(MobileNames.RefreshToken, refreshToken).ConfigureAwait(false);
         }
 
         #endregion

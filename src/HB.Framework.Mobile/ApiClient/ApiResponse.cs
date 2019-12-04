@@ -1,16 +1,14 @@
-﻿using HB.Framework.Common.Mobile;
-using System;
-using System.Collections.Generic;
+﻿using HB.Framework.Common.Api;
 
 namespace HB.Framework.Mobile.ApiClient
 {
     public class ApiResponse : ApiResponse<object>
     {
-        
+
 
         public ApiResponse(object data, int httpCode) : base(data, httpCode) { }
 
-        public ApiResponse(int httpCode, string message, ErrorCode errorCode) : base(httpCode, message, errorCode) { }
+        public ApiResponse(int httpCode, string message, ApiError errorCode) : base(httpCode, message, errorCode) { }
     }
 
     public class ApiResponse<T>
@@ -19,7 +17,7 @@ namespace HB.Framework.Mobile.ApiClient
 
         public string Message { get; private set; } = null;
 
-        public ErrorCode ErrCode { get; private set; } = ErrorCode.FAILED;
+        public ApiError ErrCode { get; private set; } = ApiError.FAILED;
 
         public T Data { get; set; }
 
@@ -29,7 +27,7 @@ namespace HB.Framework.Mobile.ApiClient
             HttpCode = httpCode;
         }
 
-        public ApiResponse(int httpCode, string message, ErrorCode errorCode)
+        public ApiResponse(int httpCode, string message, ApiError errorCode)
         {
             HttpCode = httpCode;
             Message = message;

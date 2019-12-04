@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common.Mobile;
+﻿using HB.Framework.Common.Api;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -43,7 +43,7 @@ namespace HB.Framework.Mobile.ApiClient
         {
             ApiResponse apiResponse = await GetAsync(request, typeof(T));
             ApiResponse<T> typedResponse = new ApiResponse<T>(apiResponse.HttpCode, apiResponse.Message, apiResponse.ErrCode);
-            
+
             if (apiResponse.Data != null)
             {
                 typedResponse.Data = (T)apiResponse.Data;
@@ -107,7 +107,7 @@ namespace HB.Framework.Mobile.ApiClient
 
         private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type dataType)
         {
-            if (response?.HttpCode != 401 || response?.ErrCode != ErrorCode.API_TOKEN_EXPIRED || !request.GetNeedAuthenticate())
+            if (response?.HttpCode != 401 || response?.ErrCode != ApiError.API_TOKEN_EXPIRED || !request.GetNeedAuthenticate())
             {
                 return response;
             }
@@ -151,8 +151,8 @@ namespace HB.Framework.Mobile.ApiClient
                         false,
                         endpointSettings.TokenRefreshResourceName);
 
-                    refreshRequest.AddParameter(MobileInfoNames.AccessToken, accessToken);
-                    refreshRequest.AddParameter(MobileInfoNames.RefreshToken, refreshToken);
+                    refreshRequest.AddParameter(MobileNames.AccessToken, accessToken);
+                    refreshRequest.AddParameter(MobileNames.RefreshToken, refreshToken);
 
                     EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefreshProductType && e.Version == endpointSettings.TokenRefreshVersion);
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
@@ -165,7 +165,7 @@ namespace HB.Framework.Mobile.ApiClient
 
                         string jsonString = await refreshResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                        string newAccessToken = SerializeUtil.FromJson(jsonString, MobileInfoNames.AccessToken);
+                        string newAccessToken = SerializeUtil.FromJson(jsonString, MobileNames.AccessToken);
 
                         await _mobileGlobal.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
 
@@ -234,10 +234,6 @@ namespace HB.Framework.Mobile.ApiClient
 
             if (request.GetHttpMethod() == HttpMethod.Get)
             {
-                //string query = request.GetParameters().Select(kv => {
-                //    return new KeyValuePair<string, string>(kv.Key, HttpUtility.UrlEncode(kv.Value));
-                //}).ToHttpValueCollection().ToString();
-
                 string query = request.GetParameters().ToHttpValueCollection().ToString();
 
                 if (!query.IsNullOrEmpty())
@@ -270,13 +266,13 @@ namespace HB.Framework.Mobile.ApiClient
 
                 if (mediaType == "application/problem+json" || mediaType == "application/json")
                 {
-                    ErrorResponse errorResponse = SerializeUtil.FromJson<ErrorResponse>(content);
+                    ApiErrorResponse errorResponse = SerializeUtil.FromJson<ApiErrorResponse>(content);
 
                     return new ApiResponse((int)httpResponse.StatusCode, errorResponse.Message, errorResponse.Code);
                 }
                 else
                 {
-                    return new ApiResponse((int)httpResponse.StatusCode, "Internal Server Error.", ErrorCode.API_INTERNAL_ERROR);
+                    return new ApiResponse((int)httpResponse.StatusCode, "Internal Server Error.", ApiError.API_INTERNAL_ERROR);
                 }
             }
         }
@@ -305,13 +301,13 @@ namespace HB.Framework.Mobile.ApiClient
 
         private async Task AddDeviceIdAlwaysAsync(ApiRequest request)
         {
-            request.AddParameter(MobileInfoNames.DeviceId, await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false));
+            request.AddParameter(MobileNames.DeviceId, await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceType, await mobileInfoProvider.GetDeviceTypeAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));
         }
 
-        
+
 
         #endregion
     }
