@@ -1,5 +1,4 @@
-﻿using HB.Framework.Common.Mobile;
-using System;
+﻿using HB.Framework.Common.Api;
 using System.Threading.Tasks;
 
 namespace HB.Framework.Mobile.ApiClient
