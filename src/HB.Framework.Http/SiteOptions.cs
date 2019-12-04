@@ -1,19 +1,18 @@
-﻿using System;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace HB.Framework.Http
 {
     public class SiteOptions : IOptions<SiteOptions>
     {
-        public SiteOptions Value { get { return this; } }
+        public SiteOptions Value {
+            get {
+                return this;
+            }
+        }
 
-        #region Auth
-
-        public string ApplicationDataProtectionDiscriminator { get; set; }
-
-        #endregion
-
-
-
+        public int PublicResourceTokenExpireSeconds { get; set; } = 60;
     }
 }
