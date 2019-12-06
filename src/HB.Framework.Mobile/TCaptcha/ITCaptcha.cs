@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Mobile.TCaptcha
+namespace HB.Framework.Client.TCaptcha
 {
     public interface ITCaptcha
     {
