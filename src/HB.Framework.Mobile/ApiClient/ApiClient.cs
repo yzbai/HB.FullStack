@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Mobile.ApiClient
+namespace HB.Framework.Client.ApiClient
 {
     public class ApiClient : IApiClient
     {
@@ -25,13 +25,13 @@ namespace HB.Framework.Mobile.ApiClient
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        private readonly IMobileGlobal _mobileGlobal;
+        private readonly IClientGlobal _mobileGlobal;
 
         private readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();
 
         private readonly IDictionary<string, bool> _lastRefreshTokenResults = new Dictionary<string, bool>();
 
-        public ApiClient(IOptions<ApiClientOptions> options, ILogger<ApiClient> logger, IMobileGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
+        public ApiClient(IOptions<ApiClientOptions> options, ILogger<ApiClient> logger, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
         {
             _options = options.ThrowIfNull(nameof(options)).Value;
             _logger = logger;
@@ -128,7 +128,7 @@ namespace HB.Framework.Mobile.ApiClient
                 string accessTokenHashKey = SecurityUtil.GetHash(accessToken);
 
                 //不久前刷新过
-                if (!_frequencyChecker.Check(_refreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.TokenRefreshIntervalSeconds)))
+                if (!_frequencyChecker.Check(_refreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.TokenRefresh.TokenRefreshIntervalSeconds)))
                 {
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -145,16 +145,16 @@ namespace HB.Framework.Mobile.ApiClient
                 if (!refreshToken.IsNullOrEmpty())
                 {
                     ApiRequest refreshRequest = new ApiRequest(
-                        endpointSettings.TokenRefreshProductType,
-                        endpointSettings.TokenRefreshVersion,
+                        endpointSettings.TokenRefresh.TokenRefreshProductType,
+                        endpointSettings.TokenRefresh.TokenRefreshVersion,
                         HttpMethod.Put,
                         false,
-                        endpointSettings.TokenRefreshResourceName);
+                        endpointSettings.TokenRefresh.TokenRefreshResourceName);
 
-                    refreshRequest.AddParameter(MobileNames.AccessToken, accessToken);
-                    refreshRequest.AddParameter(MobileNames.RefreshToken, refreshToken);
+                    refreshRequest.AddParameter(ClientNames.AccessToken, accessToken);
+                    refreshRequest.AddParameter(ClientNames.RefreshToken, refreshToken);
 
-                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefreshProductType && e.Version == endpointSettings.TokenRefreshVersion);
+                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefresh.TokenRefreshProductType && e.Version == endpointSettings.TokenRefresh.TokenRefreshVersion);
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 
                     using HttpRequestMessage httpRefreshRequest = ConstructureHttpRequest(refreshRequest, endpointSettings);
@@ -165,7 +165,7 @@ namespace HB.Framework.Mobile.ApiClient
 
                         string jsonString = await refreshResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                        string newAccessToken = SerializeUtil.FromJson(jsonString, MobileNames.AccessToken);
+                        string newAccessToken = SerializeUtil.FromJson(jsonString, ClientNames.AccessToken);
 
                         await _mobileGlobal.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
 
@@ -301,7 +301,7 @@ namespace HB.Framework.Mobile.ApiClient
 
         private async Task AddDeviceIdAlwaysAsync(ApiRequest request)
         {
-            request.AddParameter(MobileNames.DeviceId, await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false));
+            request.AddParameter(ClientNames.DeviceId, await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceType, await mobileInfoProvider.GetDeviceTypeAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
             //request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));

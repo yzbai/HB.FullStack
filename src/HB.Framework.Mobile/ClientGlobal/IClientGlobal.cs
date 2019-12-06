@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace HB.Framework.Mobile
+namespace HB.Framework.Client
 {
-    public interface IMobileGlobal
+    public interface IClientGlobal
     {
         #region Device
 
