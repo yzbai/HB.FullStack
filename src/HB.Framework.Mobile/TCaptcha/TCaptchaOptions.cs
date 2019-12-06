@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Mobile.TCaptcha
+namespace HB.Framework.Client.TCaptcha
 {
     public class TCaptchaOptions : IOptions<TCaptchaOptions>
     {

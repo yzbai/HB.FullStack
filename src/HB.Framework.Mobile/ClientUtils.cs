@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
-namespace HB.Framework.Mobile
+namespace HB.Framework.Client
 {
-    public class MobileUtils
+    public class ClientUtils
     {
         public static string GetDeviceType()
         {
@@ -33,12 +33,16 @@ namespace HB.Framework.Mobile
             return SecurityUtil.CreateUniqueToken();
         }
 
-        public static IConfiguration BuildConfiguration(string appsettingsFileName, [ValidatedNotNull]Assembly executingAssembly)
+        public static IConfiguration BuildConfiguration(string appsettingsName, [ValidatedNotNull]Assembly executingAssembly)
         {
-            //TODO: 性能与安全检测
-            string fullPath = Path.Combine(FileSystem.CacheDirectory, appsettingsFileName);
+            ThrowIf.NullOrEmpty(appsettingsName, nameof(appsettingsName));
+            ThrowIf.Null(executingAssembly, nameof(executingAssembly));
 
-            using (Stream resFileStream = executingAssembly.GetManifestResourceStream(appsettingsFileName))
+            string fileName = $"{executingAssembly.FullName.Split(",")[0]}.{appsettingsName}";
+
+            string fullPath = Path.Combine(FileSystem.CacheDirectory, fileName);
+
+            using (Stream resFileStream = executingAssembly.GetManifestResourceStream(fileName))
             {
                 if (resFileStream != null)
                 {

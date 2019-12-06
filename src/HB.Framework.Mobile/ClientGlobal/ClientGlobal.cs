@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
-namespace HB.Framework.Mobile
+namespace HB.Framework.Client
 {
-    public class MobileGlobal : IMobileGlobal
+    //TODO: 考虑SecurityStorage不支持时，改用普通的Storage
+    public class ClientGlobal : IClientGlobal
     {
-        private readonly ILogger _logger;
-
         private string _deviceId;
         private string _deviceType;
         private string _deviceVersion;
@@ -19,7 +18,9 @@ namespace HB.Framework.Mobile
         private string _accessToken;
         private string _refreshToken;
 
-        public MobileGlobal(ILogger<MobileGlobal> logger)
+        private readonly ILogger _logger;
+
+        public ClientGlobal(ILogger<ClientGlobal> logger)
         {
             _logger = logger;
         }
@@ -33,16 +34,16 @@ namespace HB.Framework.Mobile
                 return _deviceId;
             }
 
-            _deviceId = await PreferenceGetAsync(MobileNames.DeviceId).ConfigureAwait(false);
+            _deviceId = await PreferenceGetAsync(ClientNames.DeviceId).ConfigureAwait(false);
 
             if (_deviceId.IsNotNullOrEmpty())
             {
                 return _deviceId;
             }
 
-            _deviceId = MobileUtils.CreateNewDeviceId();
+            _deviceId = ClientUtils.CreateNewDeviceId();
 
-            await PreferenceSetAsync(MobileNames.DeviceId, _deviceId).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.DeviceId, _deviceId).ConfigureAwait(false);
 
             return _deviceId;
         }
@@ -54,16 +55,16 @@ namespace HB.Framework.Mobile
                 return _deviceType;
             }
 
-            _deviceType = await PreferenceGetAsync(MobileNames.DeviceType).ConfigureAwait(false);
+            _deviceType = await PreferenceGetAsync(ClientNames.DeviceType).ConfigureAwait(false);
 
             if (_deviceType.IsNotNullOrEmpty())
             {
                 return _deviceType;
             }
 
-            _deviceType = MobileUtils.GetDeviceType();
+            _deviceType = ClientUtils.GetDeviceType();
 
-            await PreferenceSetAsync(MobileNames.DeviceType, _deviceType).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.DeviceType, _deviceType).ConfigureAwait(false);
 
             return _deviceType;
         }
@@ -75,16 +76,16 @@ namespace HB.Framework.Mobile
                 return _deviceVersion;
             }
 
-            _deviceVersion = await PreferenceGetAsync(MobileNames.DeviceVersion).ConfigureAwait(false);
+            _deviceVersion = await PreferenceGetAsync(ClientNames.DeviceVersion).ConfigureAwait(false);
 
             if (_deviceVersion.IsNotNullOrEmpty())
             {
                 return _deviceVersion;
             }
 
-            _deviceVersion = MobileUtils.GetDeviceVersion();
+            _deviceVersion = ClientUtils.GetDeviceVersion();
 
-            await PreferenceSetAsync(MobileNames.DeviceVersion, _deviceVersion).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.DeviceVersion, _deviceVersion).ConfigureAwait(false);
 
             return _deviceVersion;
         }
@@ -96,16 +97,16 @@ namespace HB.Framework.Mobile
                 return _deviceAddress;
             }
 
-            _deviceAddress = await PreferenceGetAsync(MobileNames.DeviceAddress).ConfigureAwait(false);
+            _deviceAddress = await PreferenceGetAsync(ClientNames.DeviceAddress).ConfigureAwait(false);
 
             if (_deviceAddress.IsNotNullOrEmpty())
             {
                 return _deviceAddress;
             }
 
-            _deviceAddress = await MobileUtils.GetDeviceAddressAsync().ConfigureAwait(false);
+            _deviceAddress = await ClientUtils.GetDeviceAddressAsync().ConfigureAwait(false);
 
-            await PreferenceSetAsync(MobileNames.DeviceAddress, _deviceAddress).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.DeviceAddress, _deviceAddress).ConfigureAwait(false);
 
             return _deviceAddress;
         }
@@ -128,7 +129,7 @@ namespace HB.Framework.Mobile
                 return _currentUserGuid;
             }
 
-            _currentUserGuid = await PreferenceGetAsync(MobileNames.CurrentUserGuid).ConfigureAwait(false);
+            _currentUserGuid = await PreferenceGetAsync(ClientNames.CurrentUserGuid).ConfigureAwait(false);
 
             return _currentUserGuid;
         }
@@ -136,7 +137,7 @@ namespace HB.Framework.Mobile
         public async Task SetCurrentUserGuidAsync(string userGuid)
         {
             _currentUserGuid = userGuid;
-            await PreferenceSetAsync(MobileNames.CurrentUserGuid, userGuid).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.CurrentUserGuid, userGuid).ConfigureAwait(false);
         }
 
         #endregion
@@ -150,7 +151,7 @@ namespace HB.Framework.Mobile
                 return _accessToken;
             }
 
-            _accessToken = await PreferenceGetAsync(MobileNames.AccessToken).ConfigureAwait(false);
+            _accessToken = await PreferenceGetAsync(ClientNames.AccessToken).ConfigureAwait(false);
 
             return _accessToken;
         }
@@ -158,7 +159,7 @@ namespace HB.Framework.Mobile
         public async Task SetAccessTokenAsync(string accessToken)
         {
             _accessToken = accessToken;
-            await PreferenceSetAsync(MobileNames.AccessToken, accessToken).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.AccessToken, accessToken).ConfigureAwait(false);
         }
 
         public async Task<string> GetRefreshTokenAsync()
@@ -168,7 +169,7 @@ namespace HB.Framework.Mobile
                 return _refreshToken;
             }
 
-            _refreshToken = await PreferenceGetAsync(MobileNames.RefreshToken).ConfigureAwait(false);
+            _refreshToken = await PreferenceGetAsync(ClientNames.RefreshToken).ConfigureAwait(false);
 
             return _refreshToken;
         }
@@ -176,7 +177,7 @@ namespace HB.Framework.Mobile
         public async Task SetRefreshTokenAsync(string refreshToken)
         {
             _refreshToken = refreshToken;
-            await PreferenceSetAsync(MobileNames.RefreshToken, refreshToken).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.RefreshToken, refreshToken).ConfigureAwait(false);
         }
 
         #endregion

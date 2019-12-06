@@ -5,7 +5,7 @@ using Microsoft.Extensions.Http;
 using Polly;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
-using HB.Framework.Mobile.ApiClient;
+using HB.Framework.Client.ApiClient;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
