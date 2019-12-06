@@ -1,6 +1,6 @@
 ﻿using HB.Framework.Common.Api;
 
-namespace HB.Framework.Mobile.ApiClient
+namespace HB.Framework.Client.ApiClient
 {
     public class NotLoginResponse : ApiResponse
     {

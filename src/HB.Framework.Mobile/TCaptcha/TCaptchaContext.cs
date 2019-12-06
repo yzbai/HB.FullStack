@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Mobile.TCaptcha
+namespace HB.Framework.Client.TCaptcha
 {
     public class TCaptchaContext
     {

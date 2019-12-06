@@ -1,4 +1,4 @@
-﻿using HB.Framework.Mobile.TCaptcha;
+﻿using HB.Framework.Client.TCaptcha;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;

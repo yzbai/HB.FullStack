@@ -1,7 +1,7 @@
 ﻿using HB.Framework.Common.Api;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Mobile.ApiClient
+namespace HB.Framework.Client.ApiClient
 {
     public interface IApiClient
     {

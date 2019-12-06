@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Mobile
+namespace HB.Framework.Client
 {
-    public class MobileNames
+    public class ClientNames
     {
         public const string AccessToken = "AccessToken";
         public const string RefreshToken = "RefreshToken";
