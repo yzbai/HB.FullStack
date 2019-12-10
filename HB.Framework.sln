@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Repository", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Tencent", "src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj", "{610C3D0E-27D1-4F4F-B0C8-764D59B27E81}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Mobile", "src\HB.Framework.Mobile\HB.Framework.Mobile.csproj", "{48AEDB00-68BB-4D13-9286-A3990E399D8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Client", "src\HB.Framework.Mobile\HB.Framework.Client.csproj", "{DDCBE558-985F-4537-9759-B964C795DD80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,10 +93,10 @@ Global
 		{610C3D0E-27D1-4F4F-B0C8-764D59B27E81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{610C3D0E-27D1-4F4F-B0C8-764D59B27E81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{610C3D0E-27D1-4F4F-B0C8-764D59B27E81}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48AEDB00-68BB-4D13-9286-A3990E399D8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48AEDB00-68BB-4D13-9286-A3990E399D8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48AEDB00-68BB-4D13-9286-A3990E399D8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48AEDB00-68BB-4D13-9286-A3990E399D8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDCBE558-985F-4537-9759-B964C795DD80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDCBE558-985F-4537-9759-B964C795DD80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDCBE558-985F-4537-9759-B964C795DD80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDCBE558-985F-4537-9759-B964C795DD80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
