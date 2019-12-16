@@ -61,8 +61,8 @@ namespace HB.Infrastructure.Redis
 
                     //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
 
-                    ReConnectPolicy(logger, redisWrapper.ConnectionString).Execute(()=> {
-                        redisWrapper.Connection = ConnectionMultiplexer.Connect(configurationOptions);
+                    ReConnectPolicy(logger, redisWrapper.ConnectionString).Execute(async ()=> {
+                        redisWrapper.Connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
                         redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
                         //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
