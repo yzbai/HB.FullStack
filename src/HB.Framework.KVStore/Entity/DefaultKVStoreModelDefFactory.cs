@@ -107,7 +107,7 @@ namespace HB.Framework.KVStore.Entity
                 }
             }
 
-            if (entityDef.KeyPropertyInfos.Count == 0)
+            if (!entityDef.KeyPropertyInfos.Any())
             {
                 throw new Exception("lack of KVStoreKeyAttribute.");
             }
