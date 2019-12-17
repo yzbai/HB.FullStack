@@ -15,5 +15,17 @@ namespace HB.Infrastructure.Aliyun.Sms
         //public string Message { get; set; }
 
         public string Code { get; set; }
+
+        public AliyunSmsException()
+        {
+        }
+
+        public AliyunSmsException(string message) : base(message)
+        {
+        }
+
+        public AliyunSmsException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }
