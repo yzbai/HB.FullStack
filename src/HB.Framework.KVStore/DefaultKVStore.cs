@@ -69,7 +69,7 @@ namespace HB.Framework.KVStore
 
         private static bool CheckEntityVersions<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            if (items == null || items.Count() == 0)
+            if (items == null || !items.Any())
             {
                 return true;
             }

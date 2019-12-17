@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Tencent
@@ -74,9 +75,9 @@ namespace HB.Infrastructure.Tencent
 
                 return false;
             }
-            catch (Exception ex)
+            catch (JsonException jsonException)
             {
-                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogError(jsonException, $"TCaptha Response Parse Error. Content:{content}");
 
                 return false;
             }

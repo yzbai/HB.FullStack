@@ -58,6 +58,16 @@ namespace HB.Infrastructure.Aliyun.Oss
             return GetDirectoryTokenAsync(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(userGuid), isRead);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bucket"></param>
+        /// <param name="directory"></param>
+        /// <param name="roleSessionName"></param>
+        /// <param name="isRead"></param>
+        /// <returns></returns>
+        /// <exception cref="Aliyun.Acs.Core.Exceptions.ServerException"></exception> 
+        /// <exception cref="Aliyun.Acs.Core.Exceptions.ClientException"></exception> 
         public Task<AliyunStsToken> GetDirectoryTokenAsync(string bucket, string directory, string roleSessionName, bool isRead)
         {
             string path = bucket + "/" + directory;
