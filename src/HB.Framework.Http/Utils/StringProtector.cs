@@ -19,6 +19,14 @@ namespace HB.Framework.Http
             return Convert.ToBase64String(protectedToken);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="protectedToken"></param>
+        /// <param name="dataProtector"></param>
+        /// <returns></returns>
+        /// <exception cref="System.FormatException">can cause by Convert.FromBase64String</exception>
+        /// <exception cref="System.Security.Cryptography.CryptographicException">can cause by dataProtector.Unprotect</exception>
         public static string UnProtect(string protectedToken, IDataProtector dataProtector)
         {
             ThrowIf.Null(dataProtector, nameof(dataProtector));
