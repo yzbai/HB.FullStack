@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HB.Framework.Http
 {
-    public class StringProtector
+    public static class StringProtector
     {
         public static string Protect(string token, IDataProtector dataProtector)
         {
@@ -23,35 +23,28 @@ namespace HB.Framework.Http
         {
             ThrowIf.Null(dataProtector, nameof(dataProtector));
 
-            try
-            {
-                if (protectedToken.IsNullOrEmpty())
-                {
-                    return string.Empty;
-                }
-
-                string padedString = Pad(protectedToken);
-
-                byte[] bytes = Convert.FromBase64String(padedString);
-
-                if (bytes == null)
-                {
-                    return string.Empty;
-                }
-
-                byte[] tokenBytes = dataProtector.Unprotect(bytes);
-
-                if (tokenBytes == null)
-                {
-                    return string.Empty;
-                }
-
-                return Encoding.UTF8.GetString(tokenBytes);
-            }
-            catch (Exception)
+            if (protectedToken.IsNullOrEmpty())
             {
                 return string.Empty;
             }
+
+            string padedString = Pad(protectedToken);
+
+            byte[] bytes = Convert.FromBase64String(padedString);
+
+            if (bytes == null)
+            {
+                return string.Empty;
+            }
+
+            byte[] tokenBytes = dataProtector.Unprotect(bytes);
+
+            if (tokenBytes == null)
+            {
+                return string.Empty;
+            }
+
+            return Encoding.UTF8.GetString(tokenBytes);
         }
 
         private static string Pad(string text)

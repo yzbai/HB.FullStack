@@ -37,7 +37,7 @@ namespace HB.Framework.Http.Security
                 exceptions = new[] { authFailure };
             }
 
-            if (exceptions.Count() == 0)
+            if (!exceptions.Any())
             {
                 return string.Empty;
             }
