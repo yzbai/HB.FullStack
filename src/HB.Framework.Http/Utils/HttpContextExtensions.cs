@@ -80,7 +80,7 @@ namespace Microsoft.AspNetCore.Http
         {
             ThrowIf.Null(request, nameof(request));
 
-            string url = request.GetEncodedUrl().Replace(request.Scheme, "https");
+            string url = request.GetEncodedUrl().Replace(request.Scheme, "https", GlobalSettings.Comparison);
 
             return new Uri(url);
         }

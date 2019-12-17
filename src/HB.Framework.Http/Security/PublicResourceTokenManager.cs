@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace HB.Framework.Http
@@ -40,15 +41,31 @@ namespace HB.Framework.Http
                 return false;
             }
 
-            string token = StringProtector.UnProtect(protectedToken, _dataProtector);
+            string token;
 
-            if (token.IsNullOrEmpty() || token.Length != _tokenlength || !token.StartsWith(_prefix, GlobalSettings.Comparison))
+            try
             {
-                _logger.LogWarning($"UnProtected Failed. May has an attack. Input:{protectedToken}.");
+                token = StringProtector.UnProtect(protectedToken, _dataProtector);
+
+                if (token.IsNullOrEmpty() || token.Length != _tokenlength || !token.StartsWith(_prefix, GlobalSettings.Comparison))
+                {
+                    _logger.LogWarning($"UnProtected Failed. May has an attack. Input:{protectedToken}.");
+                    return false;
+                }
+            }
+            catch(FormatException ex)
+            {
+                _logger.LogException(ex, $"protectedToken:{protectedToken}");
+                return false;
+            }
+            catch (CryptographicException ex)
+            {
+                _logger.LogException(ex, $"protectedToken:{protectedToken}");
                 return false;
             }
 
-            return await _cache.RemoveIfExistAsync(token).ConfigureAwait(false);
+
+            return await _cache.IsExistThenRemoveAsync(token).ConfigureAwait(false);
         }
 
 

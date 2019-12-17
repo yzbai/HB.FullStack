@@ -69,5 +69,17 @@ namespace HB.Framework.KVStore
                 return _data;
             }
         }
+
+        public KVStoreException()
+        {
+        }
+
+        public KVStoreException(string message) : base(message)
+        {
+        }
+
+        public KVStoreException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }
