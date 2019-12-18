@@ -14,8 +14,8 @@ namespace HB.Infrastructure.Aliyun.Oss
 {
     internal class AliyunOssService : IAliyunOssService
     {
-        private const string READ_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
-        private const string WRITE_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
+        private const string _rEAD_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\":[\"oss:ListObjects\",\"oss:GetObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
+        private const string _wRITE_ROLE_POLICY_TEMPLATE = "{{ \"Version\":\"1\",\"Statement\":[{{\"Effect\":\"Allow\",\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Resource\":[\"acs:oss:*:*:{0}/*\"]}}]}}";
 
         private readonly AliyunOssOptions _options;
         private readonly ILogger _logger;
@@ -53,6 +53,8 @@ namespace HB.Infrastructure.Aliyun.Oss
             _bucketSettings = _options.Buckets.ToDictionary(b => b.BucketName);
         }
 
+        /// <exception cref="Aliyun.Acs.Core.Exceptions.ServerException"></exception> 
+        /// <exception cref="Aliyun.Acs.Core.Exceptions.ClientException"></exception> 
         public Task<AliyunStsToken> GetUserDirectoryTokenAsync(string bucket, string userGuid, bool isRead)
         {
             return GetDirectoryTokenAsync(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(userGuid), isRead);
@@ -71,8 +73,8 @@ namespace HB.Infrastructure.Aliyun.Oss
         public Task<AliyunStsToken> GetDirectoryTokenAsync(string bucket, string directory, string roleSessionName, bool isRead)
         {
             string path = bucket + "/" + directory;
-            string policy = isRead ? string.Format(GlobalSettings.Culture, READ_ROLE_POLICY_TEMPLATE, path)
-                : string.Format(GlobalSettings.Culture, WRITE_ROLE_POLICY_TEMPLATE, path);
+            string policy = isRead ? string.Format(GlobalSettings.Culture, _rEAD_ROLE_POLICY_TEMPLATE, path)
+                : string.Format(GlobalSettings.Culture, _wRITE_ROLE_POLICY_TEMPLATE, path);
 
 
             if (!_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))

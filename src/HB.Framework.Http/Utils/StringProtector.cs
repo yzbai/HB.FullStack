@@ -7,6 +7,13 @@ namespace HB.Framework.Http
 {
     public static class StringProtector
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="dataProtector"></param>
+        /// <returns></returns>
+        /// <exception cref="EncoderFallbackException"></exception>
         public static string Protect(string token, IDataProtector dataProtector)
         {
             ThrowIf.NullOrEmpty(token, nameof(token));
