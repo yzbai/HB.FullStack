@@ -1,6 +1,7 @@
 ﻿using Aliyun.Acs.Core.Exceptions;
 using Microsoft.Extensions.Logging;
 using Polly;
+using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,13 +10,13 @@ namespace HB.Infrastructure.Aliyun
 {
     public static class PolicyManager
     {
-        public static AsyncPolicy Default(ILogger logger)
+        public static RetryPolicy Default(ILogger logger)
         {
             return Policy
                 .Handle<ServerException>()
                 .Or<ClientException>()
-                .WaitAndRetryAsync(
-                    new[] { TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8) },
+                .WaitAndRetry(
+                    new[] { TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16) },
                     (exception, timeSpan, retryCount, context) =>
                     {
                         ClientException cex = (ClientException)exception;
