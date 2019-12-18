@@ -6,6 +6,9 @@ using Aliyun.Acs.Core.Http;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
 using HB.Framework.Common.Validate;
+using AsyncAwaitBestPractices;
+using System.Text.Json;
+using Aliyun.Acs.Core.Exceptions;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -24,10 +27,11 @@ namespace HB.Infrastructure.Aliyun.Sms
 
             AliyunUtil.AddEndpoint(ProductNames.SMS, _options.RegionId, _options.Endpoint);
             _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
-            
+
         }
 
-        public Task SendValidationCode(string mobile/*, out string smsCode*/)
+        //TODO: 等待阿里云增加异步方法，再次之外，调用这个方法，应该使用SafeFireAndForget
+        public SendResult SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
@@ -37,7 +41,8 @@ namespace HB.Infrastructure.Aliyun.Sms
                     _options.TemplateIdentityValidation.ParamProduct,
                     _options.TemplateIdentityValidation.ParamProductValue);
 
-            CommonRequest request = new CommonRequest {
+            CommonRequest request = new CommonRequest
+            {
                 Method = MethodType.POST,
                 Domain = "dysmsapi.aliyuncs.com",
                 Version = "2017-05-25",
@@ -49,19 +54,16 @@ namespace HB.Infrastructure.Aliyun.Sms
             request.AddQueryParameters("TemplateCode", _options.TemplateIdentityValidation.TemplateCode);
             request.AddQueryParameters("TemplateParam", templateParam);
 
-            string cachedSmsCode = smsCode;
+            try
+            {
+                CommonResponse response = PolicyManager.Default(_logger).Execute(() => { return _client.GetCommonResponse(request); });
 
-            return PolicyManager.Default(_logger).ExecuteAsync(async () => {
-
-                Task<CommonResponse> task = new Task<CommonResponse>(() => _client.GetCommonResponse(request));
-                task.Start(TaskScheduler.Default);
-
-                CommonResponse response = await task.ConfigureAwait(false);
                 SendResult sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
 
+                
                 if (sendResult.IsSuccessful())
                 {
-                    CacheSmsCode(mobile, cachedSmsCode, _options.TemplateIdentityValidation.ExpireMinutes);
+                    CacheSmsCode(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
                 else
                 {
@@ -70,7 +72,19 @@ namespace HB.Infrastructure.Aliyun.Sms
                 }
 
                 return sendResult;
-            });
+            }
+            catch (JsonException ex)
+            {
+            }
+            catch(ClientException ex)
+            {
+
+            }
+            catch(ServerException ex)
+            {
+
+            }
+
         }
 
         public bool Validate(string mobile, string code)
@@ -90,7 +104,8 @@ namespace HB.Infrastructure.Aliyun.Sms
             _cache.SetString(
                         GetCachedKey(mobile),
                         cachedSmsCode,
-                        new DistributedCacheEntryOptions() {
+                        new DistributedCacheEntryOptions()
+                        {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
                         });
         }
