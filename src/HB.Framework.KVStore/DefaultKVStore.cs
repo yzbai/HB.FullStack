@@ -35,7 +35,7 @@ namespace HB.Framework.KVStore
 
         private static string EntityKey(object keyValue)
         {
-            return ValueConverter.TypeValueToDbValue(keyValue);
+            return ValueConverterUtil.TypeValueToStringValue(keyValue);
         }
 
         private static string EntityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
@@ -45,7 +45,7 @@ namespace HB.Framework.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                builder.Append(ValueConverter.TypeValueToDbValue(entityDef.KeyPropertyInfos[i].GetValue(item)));
+                builder.Append(ValueConverterUtil.TypeValueToStringValue(entityDef.KeyPropertyInfos[i].GetValue(item)));
 
                 if (i != count - 1)
                 {
@@ -63,7 +63,7 @@ namespace HB.Framework.KVStore
 
         private static IEnumerable<string> EntityKey(IEnumerable<object> keyValues)
         {
-            return keyValues.Select(obj => ValueConverter.TypeValueToDbValue(obj));
+            return keyValues.Select(obj => ValueConverterUtil.TypeValueToStringValue(obj));
         }
 
 

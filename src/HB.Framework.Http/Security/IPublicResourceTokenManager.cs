@@ -7,6 +7,7 @@ namespace HB.Framework.Http
     /// </summary>
     public interface IPublicResourceTokenManager
     {
+        /// <exception cref="EncoderFallbackException"></exception>
         Task<string> GetNewToken(int expiredSeconds = 60);
 
         Task<bool> CheckToken(string token);
