@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using HB.Framework.Http.Properties;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -37,8 +38,8 @@ namespace HB.Framework.Http
         {
             if (MonitoringEnabled)
             {
-                byte[] appsettingsHash = FileHelper.ComputeHash("appSettings.json");
-                byte[] appsettingsEnvHash = FileHelper.ComputeHash($"appSettings.{_env.EnvironmentName}.json");
+                byte[] appsettingsHash = FileUtil.ComputeHash("appSettings.json");
+                byte[] appsettingsEnvHash = FileUtil.ComputeHash($"appSettings.{_env.EnvironmentName}.json");
 
                 if (!_appsettingsHash.SequenceEqual(appsettingsHash) || 
                     !_appsettingsEnvHash.SequenceEqual(appsettingsEnvHash))
@@ -50,8 +51,8 @@ namespace HB.Framework.Http
                     _appsettingsEnvHash = appsettingsEnvHash;
 
                     _logger.LogInformation(message);
-                    _logger.LogInformation("appsettings.json 配置文件变动");
-                    _logger.LogInformation("系统即将重启......");
+                    _logger.LogInformation(Resources.ConfigurationFileChangedMessage);
+                    _logger.LogInformation(Resources.SystemWillRestartMessage);
 
 
                     //TODO: 这里放关闭应用前，需要做的工作
