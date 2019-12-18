@@ -83,12 +83,11 @@ namespace HB.Infrastructure.Redis
             //TODO: move this settings to options
             return Policy
                         .Handle<RedisConnectionException>()
-                        .WaitAndRetry(
-                            3,
+                        .WaitAndRetryForever(
                             count => TimeSpan.FromSeconds(5 + count * 2),
-                            (exception, timeSpan, retryCount, context) => {
+                            (exception, retryCount, timeSpan) => {
                                 RedisConnectionException ex = (RedisConnectionException)exception;
-                                logger.LogError(exception, $"Redis Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
+                                logger.LogCritical(exception, $"Redis Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
                             });
         }
 
