@@ -13,8 +13,7 @@ namespace HB.Infrastructure.Aliyun
         public static RetryPolicy Default(ILogger logger)
         {
             return Policy
-                .Handle<ServerException>()
-                .Or<ClientException>()
+                .Handle<ClientException>()
                 .WaitAndRetry(
                     new[] { TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16) },
                     (exception, timeSpan, retryCount, context) =>
