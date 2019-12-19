@@ -6,9 +6,9 @@ using Aliyun.Acs.Core.Http;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
 using HB.Framework.Common.Validate;
-using AsyncAwaitBestPractices;
 using System.Text.Json;
 using Aliyun.Acs.Core.Exceptions;
+using HB.Infrastructure.Aliyun.Properties;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -30,8 +30,14 @@ namespace HB.Infrastructure.Aliyun.Sms
 
         }
 
-        //TODO: 等待阿里云增加异步方法，再次之外，调用这个方法，应该使用SafeFireAndForget
-        public SendResult SendValidationCode(string mobile/*, out string smsCode*/)
+        //TODO: 等待阿里云增加异步方法，在此之外，调用这个方法，应该使用SafeFireAndForget
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <returns></returns>
+        /// <exception cref="AliyunSmsException"></exception>
+        public void SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
@@ -59,7 +65,6 @@ namespace HB.Infrastructure.Aliyun.Sms
                 CommonResponse response = PolicyManager.Default(_logger).Execute(() => { return _client.GetCommonResponse(request); });
 
                 SendResult sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
-
                 
                 if (sendResult.IsSuccessful())
                 {
@@ -70,21 +75,17 @@ namespace HB.Infrastructure.Aliyun.Sms
                     _logger.LogCritical($"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}");
                     throw new AliyunSmsException(code: sendResult.Code, message: sendResult.Message);
                 }
-
-                return sendResult;
             }
             catch (JsonException ex)
             {
+                _logger.LogException(ex, Resources.AliyunSmsResponseFormatErrorMessage, LogLevel.Critical);
+                throw new AliyunSmsException(Resources.AliyunSmsResponseFormatErrorMessage, ex);
             }
             catch(ClientException ex)
             {
-
+                _logger.LogException(ex, Resources.AliyunSmsServiceDownErrorMessage);
+                throw new AliyunSmsException(Resources.AliyunSmsServiceDownErrorMessage, ex);
             }
-            catch(ServerException ex)
-            {
-
-            }
-
         }
 
         public bool Validate(string mobile, string code)
