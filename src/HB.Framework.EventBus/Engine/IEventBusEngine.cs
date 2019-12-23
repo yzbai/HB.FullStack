@@ -14,9 +14,16 @@ namespace HB.Framework.EventBus
         /// Engine负责确保，将Event发布
         /// </summary>
         /// <param name="eventMessage"></param>
-        Task<bool> PublishAsync(string brokerName, EventMessage eventMessage);
-        bool SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler);
+        /// <exception cref="EventBusException"></exception>
+        Task PublishAsync(string brokerName, EventMessage eventMessage);
+
+        /// <exception cref="EventBusException"></exception>
+        void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler);
+
+        /// <exception cref="EventBusException"></exception>
         void UnSubscribeHandler(string eventyType);
+        
+        /// <exception cref="EventBusException"></exception>
         void StartHandle(string eventType);
         void Close();
     }

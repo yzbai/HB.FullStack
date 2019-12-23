@@ -27,24 +27,42 @@ namespace HB.Framework.EventBus
             _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventType);
         }
 
-        public async Task<bool> PublishAsync(EventMessage eventMessage)
+        /// <summary>
+        /// PublishAsync
+        /// </summary>
+        /// <param name="eventMessage"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.EventBus.EventBusException">
+        /// </exception>
+        public async Task PublishAsync(EventMessage eventMessage)
         {
             if (!EventMessage.IsValid(eventMessage))
             {
-                Exception ex = new ArgumentException("不符合要求", nameof(eventMessage));
-                _logger.LogCritical(ex, "用于Publish的eventMessage不符合要求");
+                EventBusException ex = new EventBusException($"not a valid event message : {SerializeUtil.ToJson(eventMessage)}");
+                _logger.LogException(ex, null, LogLevel.Critical);
 
                 throw ex;
             }
 
-            return await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
+            await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// StartHandle
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void StartHandle(string eventType)
         {
             _engine.StartHandle(eventType);
         }
 
+        /// <summary>
+        /// Subscribe
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="handler"></param>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void Subscribe(string eventType, IEventHandler handler)
         {
             eventType.ThrowIfNullOrEmpty(nameof(eventType));
@@ -53,6 +71,11 @@ namespace HB.Framework.EventBus
             _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
         }
 
+        /// <summary>
+        /// UnSubscribe
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void UnSubscribe(string eventType)
         {
             eventType.ThrowIfNull(nameof(eventType));
@@ -60,6 +83,12 @@ namespace HB.Framework.EventBus
             _engine.UnSubscribeHandler(eventyType: eventType);
         }
 
+        /// <summary>
+        /// GetBrokerName
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         private string GetBrokerName(string eventType)
         {
             if (_eventSchemaDict.TryGetValue(eventType, out EventSchema eventSchema))
@@ -67,9 +96,9 @@ namespace HB.Framework.EventBus
                 return eventSchema.BrokerName;
             }
 
-            Exception ex = new Exception("配置中没有找到对应主题事件的Broker");
+            EventBusException ex = new EventBusException($"Not Found Matched EventSchema for EventType:{eventType}");
 
-            _logger.LogCritical(ex, $"没有Topic对应的BrokerName， eventType：{eventType}");
+            _logger.LogException(ex, null, LogLevel.Critical);
 
             throw ex;
         }

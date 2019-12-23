@@ -36,14 +36,16 @@ namespace HB.Infrastructure.Redis.EventBus
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
         }
 
-        public async Task<bool> PublishAsync(string brokerName, EventMessage eventMessage)
+        /// <summary>
+        /// PublishAsync
+        /// </summary>
+        /// <param name="brokerName"></param>
+        /// <param name="eventMessage"></param>
+        /// <returns></returns>
+        /// <exception cref="EventBusException"></exception>
+        public async Task PublishAsync(string brokerName, EventMessage eventMessage)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
-
-            if (instanceSetting == null)
-            {
-                return false;
-            }
 
             IDatabase database = RedisInstanceManager.GetDatabase(instanceSetting, _logger);
 
@@ -51,15 +53,19 @@ namespace HB.Infrastructure.Redis.EventBus
 
             await database.ListLeftPushAsync(QueueName(entity.Type), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
 
-            return true;
         }
 
         //启动Consume线程, 启动History线程
+        /// <summary>
+        /// StartHandle
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <exception cref="EventBusException"></exception>
         public void StartHandle(string eventType)
         {
             if (!_consumeTaskManagers.ContainsKey(eventType))
             {
-                throw new ArgumentException($"不存在{eventType}的处理程序。");
+                throw new EventBusException($"Handler Not Existed for EventType:{eventType}");
             }
 
             _consumeTaskManagers[eventType].Start();
@@ -69,39 +75,34 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 每一种事件，只有一次SubscribeHandler的机会。之后再订阅，就报错了。
         /// 开始处理
         /// </summary>
-        public bool SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        /// <exception cref="EventBusException"></exception>
+        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
-
-            if (instanceSetting == null)
-            {
-                return false;
-            }
 
             lock (_consumeTaskManagerLocker)
             {
                 if (_consumeTaskManagers.ContainsKey(eventType))
                 {
-                    throw new ArgumentException($"已经存在{eventType}的处理程序.");
+                    throw new EventBusException($"Handler already exists for EventType: {eventType}, BrokerName:{brokerName}");
                 }
 
                 ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, eventType, eventHandler, _logger);
 
                 _consumeTaskManagers.Add(eventType, consumeTaskManager);
-
-                return true;
             }
         }
         /// <summary>
         /// 停止处理
         /// </summary>
+        /// <exception cref="EventBusException"></exception>
         public void UnSubscribeHandler(string eventType)
         {
             lock (_consumeTaskManagerLocker)
             {
                 if (!_consumeTaskManagers.ContainsKey(eventType))
                 {
-                    throw new ArgumentException($"不存在{eventType}的处理程序。");
+                    throw new EventBusException($"Handler for EventType:{eventType} not Exist.");
                 }
 
                 _consumeTaskManagers[eventType].Cancel();
@@ -144,13 +145,18 @@ namespace HB.Infrastructure.Redis.EventBus
             }
         }
 
+        
+        /// <summary>
+        /// GetRedisInstanceSetting
+        /// </summary>
+        /// <param name="brokerName"></param>
+        /// <returns></returns>
+        /// <exception cref="EventBusException"></exception>
         private RedisInstanceSetting GetRedisInstanceSetting(string brokerName)
         {
             if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting instanceSetting))
             {
-                _logger.LogCritical($"no matched broker {brokerName} found.");
-
-                return null;
+                throw new EventBusException($"Not Found matched RedisInstanceSetting for Broker: {brokerName}.");
             }
 
             return instanceSetting;
