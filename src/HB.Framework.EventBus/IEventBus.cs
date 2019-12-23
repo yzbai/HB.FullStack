@@ -22,7 +22,7 @@ namespace HB.Framework.EventBus.Abstractions
         /// </summary>
         /// <param name="eventMessage"></param>
         /// <returns>是否发布成功，只有返回true才能确保消息不丢失</returns>
-        Task<bool> PublishAsync(EventMessage eventMessage);
+        Task PublishAsync(EventMessage eventMessage);
 
         void Subscribe(string eventType, IEventHandler handler);
 
