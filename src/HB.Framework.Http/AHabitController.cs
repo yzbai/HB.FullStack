@@ -1,5 +1,6 @@
 ﻿using HB.Framework.Common.Api;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace HB.Framework.Http
 {
@@ -7,7 +8,7 @@ namespace HB.Framework.Http
     {
         protected BadRequestObjectResult Error(ApiError errorCode, string message = null)
         {
-            return BadRequest(new ApiErrorResponse(errorCode, message));
+            return BadRequest(new ApiErrorResponse(errorCode, message ?? errorCode.ToString()));
         }
     }
 }
