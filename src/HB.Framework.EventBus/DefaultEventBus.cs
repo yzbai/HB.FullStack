@@ -1,13 +1,8 @@
-﻿using HB.Framework.Common;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using HB.Framework.EventBus.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq;
-using HB.Framework.EventBus.Abstractions;
+using System.Threading.Tasks;
 
 namespace HB.Framework.EventBus
 {
@@ -17,13 +12,11 @@ namespace HB.Framework.EventBus
     internal class DefaultEventBus : IEventBus
     {
         private readonly IEventBusEngine _engine;
-        private readonly ILogger _logger;
         private readonly IDictionary<string, EventSchema> _eventSchemaDict;
 
-        public DefaultEventBus(IEventBusEngine eventBusEngine, ILogger<DefaultEventBus> logger)
+        public DefaultEventBus(IEventBusEngine eventBusEngine)
         {
             _engine = eventBusEngine;
-            _logger = logger;
             _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventType);
         }
 
@@ -32,16 +25,12 @@ namespace HB.Framework.EventBus
         /// </summary>
         /// <param name="eventMessage"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.EventBus.EventBusException">
-        /// </exception>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public async Task PublishAsync(EventMessage eventMessage)
         {
             if (!EventMessage.IsValid(eventMessage))
             {
-                EventBusException ex = new EventBusException($"not a valid event message : {SerializeUtil.ToJson(eventMessage)}");
-                _logger.LogException(ex, null, LogLevel.Critical);
-
-                throw ex;
+                throw new EventBusException($"not a valid event message : {SerializeUtil.ToJson(eventMessage)}");
             }
 
             await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
@@ -96,11 +85,7 @@ namespace HB.Framework.EventBus
                 return eventSchema.BrokerName;
             }
 
-            EventBusException ex = new EventBusException($"Not Found Matched EventSchema for EventType:{eventType}");
-
-            _logger.LogException(ex, null, LogLevel.Critical);
-
-            throw ex;
+            throw new EventBusException($"Not Found Matched EventSchema for EventType:{eventType}");
         }
 
         public void Close()

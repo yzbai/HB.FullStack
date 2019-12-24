@@ -8,32 +8,44 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore
 {
-    public interface IKVStore : IKVStoreAsync
+    public interface IKVStore
     {
-        T GetByKey<T>(object keyValue) where T : KVStoreEntity, new();
+        Task<T> GetByKeyAsync<T>(object keyValue) where T : KVStoreEntity, new();
 
-        T GetByKey<T>(T t) where T : KVStoreEntity, new();
+        Task<T> GetByKeyAsync<T>(T t) where T : KVStoreEntity, new();
 
-        IEnumerable<T> GetByKeys<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
+        Task<IEnumerable<T>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
 
-        IEnumerable<T> GetByKeys<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
+        Task<IEnumerable<T>> GetByKeysAsync<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
 
-        IEnumerable<T> GetAll<T>() where T : KVStoreEntity, new();
+        Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new();
 
-        void Add<T>(T item) where T : KVStoreEntity, new();
+        Task AddAsync<T>(T item) where T : KVStoreEntity, new();
 
-        void Add<T>(IEnumerable<T> items) where T : KVStoreEntity, new();
+        Task AddAsync<T>(IEnumerable<T> items) where T : KVStoreEntity, new();
 
-        void Update<T>(T item) where T : KVStoreEntity, new();
+        /// <summary>
+        /// item的Version会被改变
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        Task UpdateAsync<T>(T item) where T : KVStoreEntity, new();
 
-        void Update<T>(IEnumerable<T> items) where T : KVStoreEntity, new();
+        /// <summary>
+        /// item的Version会被改变
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        Task UpdateAsync<T>(IEnumerable<T> items) where T : KVStoreEntity, new();
 
-        void Delete<T>(T item) where T : KVStoreEntity, new();
+        Task DeleteAsync<T>(T item) where T : KVStoreEntity, new();
 
-        void DeleteAll<T>() where T : KVStoreEntity, new();
+        Task DeleteAllAsync<T>() where T : KVStoreEntity, new();
 
-        void DeleteByKey<T>(object keyValue, int version) where T : KVStoreEntity, new();
+        Task DeleteByKeyAsync<T>(object keyValue, int version) where T : KVStoreEntity, new();
 
-        void DeleteByKeys<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new();
+        Task DeleteByKeysAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new();
     }
 }
