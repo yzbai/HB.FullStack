@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Engine
 {
-    public interface IKVStoreEngine : IKVStoreEngineAsync
+    public interface IKVStoreEngine
     {
         KVStoreSettings Settings { get; }
 
@@ -13,19 +13,19 @@ namespace HB.Framework.KVStore.Engine
 
         void Close();
 
-        string EntityGet(string storeName, string entityName, string entityKey);
-        IEnumerable<string> EntityGet(string storeName, string entityName, IEnumerable<string> entityKeys);
-        IEnumerable<string> EntityGetAll(string storeName, string entityName);
+        Task<string> EntityGetAsync(string storeName, string entityName, string entityKey);
+        Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys);
+        Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName);
 
-        void EntityAdd(string storeName, string entityName, string entityKey, string entityJson);
-        void EntityAdd(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons);
+        Task EntityAddAsync(string storeName, string entityName, string entityKey, string entityJson);
+        Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons);
 
-        void EntityUpdate(string storeName, string entityName, string entityKey, string entityJson, int entityVersion);
-        void EntityUpdate(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions);
+        Task EntityUpdateAsync(string storeName, string entityName, string entityKey, string entityJson, int entityVersion);
+        Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions);
 
-        void EntityDelete(string storeName, string entityName, string entityKey, int entityVersion);
-        void EntityDelete(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
-        bool EntityDeleteAll(string storeName, string entityName);
+        Task EntityDeleteAsync(string storeName, string entityName, string entityKey, int entityVersion);
+        Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
+        Task<bool> EntityDeleteAllAsync(string storeName, string entityName);
 
     }
 }

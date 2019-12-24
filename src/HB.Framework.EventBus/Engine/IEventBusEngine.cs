@@ -25,6 +25,7 @@ namespace HB.Framework.EventBus
         
         /// <exception cref="EventBusException"></exception>
         void StartHandle(string eventType);
+        
         void Close();
     }
 }
