@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -16,7 +17,7 @@ namespace HB.Infrastructure.Redis
         private static readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         private static readonly object _closeLocker = new object();
 
-        public static IDatabase GetDatabase(RedisInstanceSetting setting, ILogger logger)
+        public static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting setting, ILogger logger)
         {
             if (setting == null)
             {
@@ -30,44 +31,33 @@ namespace HB.Infrastructure.Redis
 
             RedisConnection redisWrapper = _connectionDict[setting.InstanceName];
 
-            if (redisWrapper.Connection != null && !redisWrapper.Connection.IsConnected)
+            while (redisWrapper.Connection != null && redisWrapper.Connection.IsConnecting)
             {
-                //TODO: Check this
-                //Thread.Sleep(5000);
+                await Task.Delay(1000).ConfigureAwait(false);
             }
 
             if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
             {
-                _connectionLock.Wait();
-
-                //TODO: add polly here,
-                //TODO: add heath check
-                //TODO: add Event Listening
-                //TODO: add More Log here
-                //TODO: dig into ConfigurationOptions when create ConnectionMultiplexer
-
                 try
                 {
+                    _connectionLock.Wait();
+
                     redisWrapper.Connection?.Dispose();
 
                     ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(redisWrapper.ConnectionString);
 
-                    //TODO: add into configure file
-                    configurationOptions.AbortOnConnectFail = false;
-                    configurationOptions.KeepAlive = 60;
-                    configurationOptions.ConnectTimeout = 10 * 1000;
-                    //configurationOptions.ResponseTimeout = 100 * 1000;
-                    configurationOptions.SyncTimeout = 100 * 1000;
+                    //configurationOptions.AbortOnConnectFail = false;
+                    //configurationOptions.KeepAlive = 60;
+                    //configurationOptions.ConnectTimeout = 10 * 1000;
+                    //configurationOptions.SyncTimeout = 100 * 1000;
 
-                    //TODO: add detailed ConfigurationOptions Settings, like abortOnConnectionFailed, Should Retry Policy, etc.;
-
-                    ReConnectPolicy(logger, redisWrapper.ConnectionString).Execute(async ()=> {
+                    await ReConnectPolicyAsync(logger, redisWrapper.ConnectionString).ExecuteAsync(async ()=> {
                         redisWrapper.Connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
                         redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
                         //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
                         logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {setting.InstanceName}");
-                    });
+                    }).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -78,12 +68,12 @@ namespace HB.Infrastructure.Redis
             return redisWrapper.Database;
         }
 
-        private static RetryPolicy ReConnectPolicy(ILogger logger, string connectionString)
+        private static AsyncRetryPolicy ReConnectPolicyAsync(ILogger logger, string connectionString)
         {
             //TODO: move this settings to options
             return Policy
                         .Handle<RedisConnectionException>()
-                        .WaitAndRetryForever(
+                        .WaitAndRetryForeverAsync(
                             count => TimeSpan.FromSeconds(5 + count * 2),
                             (exception, retryCount, timeSpan) => {
                                 RedisConnectionException ex = (RedisConnectionException)exception;
