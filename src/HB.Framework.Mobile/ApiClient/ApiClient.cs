@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -61,7 +62,7 @@ namespace HB.Framework.Client.ApiClient
         {
             ThrowIf.Null(request, nameof(request));
 
-            await AddDeviceIdAlwaysAsync(request).ConfigureAwait(false);
+            await AddDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
             if (!request.IsValid())
             {
@@ -91,18 +92,9 @@ namespace HB.Framework.Client.ApiClient
             return await ConstructureHttpResponseAsync(httpResponse, dataType).ConfigureAwait(false);
         }
 
-        private async Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
+        private Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
         {
-            HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-
-            TraceLog(httpRequestMessage, httpResponseMessage);
-
-            return httpResponseMessage;
-        }
-
-        private void TraceLog(HttpRequestMessage httpRequest, HttpResponseMessage httpResponse)
-        {
-            _logger.LogTrace($"Request {httpRequest.RequestUri}, Response {httpResponse.StatusCode}");
+            return httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead);
         }
 
         private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type dataType)
@@ -250,13 +242,11 @@ namespace HB.Framework.Client.ApiClient
         {
             ThrowIf.Null(httpResponse, nameof(httpResponse));
 
-            //TODO: Using httpResponse.Content.ReadAsStreamAsync() instead.
-
-            string content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            Stream responseStream = await httpResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                object data = dataType == null ? null : SerializeUtil.FromJson(dataType, content);
+                object data = dataType == null ? null : await SerializeUtil.FromJsonAsync(dataType, responseStream).ConfigureAwait(false);
 
                 return new ApiResponse(data, (int)httpResponse.StatusCode);
             }
@@ -266,7 +256,7 @@ namespace HB.Framework.Client.ApiClient
 
                 if (mediaType == "application/problem+json" || mediaType == "application/json")
                 {
-                    ApiErrorResponse errorResponse = SerializeUtil.FromJson<ApiErrorResponse>(content);
+                    ApiErrorResponse errorResponse = await SerializeUtil.FromJsonAsync<ApiErrorResponse>(responseStream).ConfigureAwait(false);
 
                     return new ApiResponse((int)httpResponse.StatusCode, errorResponse.Message, errorResponse.Code);
                 }
@@ -299,12 +289,12 @@ namespace HB.Framework.Client.ApiClient
             return true;
         }
 
-        private async Task AddDeviceIdAlwaysAsync(ApiRequest request)
+        private async Task AddDeviceInfoAlwaysAsync(ApiRequest request)
         {
             request.AddParameter(ClientNames.DeviceId, await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false));
-            //request.AddParameter(MobileInfoNames.DeviceType, await mobileInfoProvider.GetDeviceTypeAsync().ConfigureAwait(false));
-            //request.AddParameter(MobileInfoNames.DeviceVersion, await mobileInfoProvider.GetDeviceVersionAsync().ConfigureAwait(false));
-            //request.AddParameter(MobileInfoNames.DeviceAddress, await mobileInfoProvider.GetDeviceAddressAsync().ConfigureAwait(false));
+            request.AddParameter(ClientNames.DeviceType, await _mobileGlobal.GetDeviceTypeAsync().ConfigureAwait(false));
+            request.AddParameter(ClientNames.DeviceVersion, await _mobileGlobal.GetDeviceVersionAsync().ConfigureAwait(false));
+            request.AddParameter(ClientNames.DeviceAddress, await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false));
         }
 
 
