@@ -1,4 +1,5 @@
 ﻿using HB.Framework.KVStore.Engine;
+using HB.Framework.KVStore.Properties;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
@@ -109,7 +110,7 @@ namespace HB.Framework.KVStore.Entity
 
             if (!entityDef.KeyPropertyInfos.Any())
             {
-                throw new Exception("lack of KVStoreKeyAttribute.");
+                throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
             }
 
             if (_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))

@@ -19,10 +19,7 @@ namespace HB.Infrastructure.Redis
 
         public static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting setting, ILogger logger)
         {
-            if (setting == null)
-            {
-                return null;
-            }
+            ThrowIf.Null(setting, nameof(setting));
 
             if (!_connectionDict.ContainsKey(setting.InstanceName))
             {
@@ -53,7 +50,7 @@ namespace HB.Infrastructure.Redis
 
                     await ReConnectPolicyAsync(logger, redisWrapper.ConnectionString).ExecuteAsync(async ()=> {
                         redisWrapper.Connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
-                        redisWrapper.Database = redisWrapper.Connection.GetDatabase(0);
+                        redisWrapper.Database = redisWrapper.Connection.GetDatabase(setting.DatabaseNumber);
                         //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
                         logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {setting.InstanceName}");
