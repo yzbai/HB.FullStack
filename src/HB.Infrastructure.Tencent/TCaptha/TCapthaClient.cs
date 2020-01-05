@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Tencent
@@ -27,15 +26,17 @@ namespace HB.Infrastructure.Tencent
 
         public async Task<bool> VerifyTicket(string appid, string ticket, string randstr, string userIp)
         {
+            ThrowIf.NullOrEmpty(appid, nameof(appid));
+
             ThrowIf.NullOrEmpty(ticket, nameof(ticket));
 
             ThrowIf.NullOrEmpty(randstr, nameof(randstr));
 
             ThrowIf.NullOrEmpty(userIp, nameof(userIp));
 
-            if (!_apiKeySettings.TryGetValue(appid.ThrowIfNullOrEmpty(nameof(appid)), out ApiKeySetting apiKeySetting))
+            if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting apiKeySetting))
             {
-                _logger.LogError($"lack ApiKeySettings for AppId:{appid}");
+                throw new ServiceException($"lack ApiKeySettings for AppId:{appid}");
             }
 
             string query = new Dictionary<string, string> {
@@ -75,9 +76,11 @@ namespace HB.Infrastructure.Tencent
 
                 return false;
             }
-            catch (JsonException jsonException)
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception jsonException)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.LogError(jsonException, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogException(jsonException, $"TCaptha Response Parse Error. Content:{content}");
 
                 return false;
             }

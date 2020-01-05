@@ -106,7 +106,7 @@ namespace HB.Infrastructure.Redis.EventBus
                         _options.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
                     };
 
-                    IDatabase database = RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger);
+                    IDatabase database = RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).Result;
 
                     //TODO: Use LoadedScript
                     int result = (int)database.ScriptEvaluate(
@@ -143,8 +143,8 @@ namespace HB.Infrastructure.Redis.EventBus
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogCritical(ex, $"ScanHistory {_instanceSetting.InstanceName} 中，EventType:{_eventType}, Exceptions: {ex.Message}");
-                    throw;
+                    _logger.LogCritical(ex, $"ScanHistory {_instanceSetting.InstanceName} 中出错，EventType:{_eventType}, Exceptions: {ex.Message}");
+                    //throw;
                 }
             }
         }
@@ -154,7 +154,7 @@ namespace HB.Infrastructure.Redis.EventBus
             while (!_consumeTaskCTS.IsCancellationRequested)
             {
                 //1, Get Entity
-                IDatabase database = RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger);
+                IDatabase database = RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).Result;
 
                 RedisValue redisValue = database.ListRightPopLeftPush(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType));
 
@@ -189,7 +189,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     continue;
                 }
 
-                bool? isExist = _duplicateChecker.IsExist(AcksSetName, entity.Guid, token);
+                bool? isExist = _duplicateChecker.IsExistAsync(AcksSetName, entity.Guid, token).Result;
 
                 if (isExist == null || isExist.Value)
                 {
@@ -205,14 +205,15 @@ namespace HB.Infrastructure.Redis.EventBus
                 {
                     _eventHandler.Handle(entity.JsonData);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {SerializeUtil.ToJson(entity)}");
-                    throw;
                 }
 
                 //5, Acks
-                _duplicateChecker.Add(AcksSetName, entity.Guid, entity.Timestamp, token);
+                _duplicateChecker.AddAsync(AcksSetName, entity.Guid, entity.Timestamp, token).Wait();
                 _duplicateChecker.Release(AcksSetName, entity.Guid, token);
             }
         }

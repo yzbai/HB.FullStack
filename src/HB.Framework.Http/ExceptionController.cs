@@ -11,7 +11,7 @@ namespace HB.Framework.Http
     [ApiController]
     public class ExceptionController : ExtendedController
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public ExceptionController(ILogger<ExceptionController> logger)
         {

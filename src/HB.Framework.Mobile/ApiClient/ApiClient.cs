@@ -20,8 +20,6 @@ namespace HB.Framework.Client.ApiClient
 
         private static readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
 
-        private readonly ILogger _logger;
-
         private readonly ApiClientOptions _options;
 
         private readonly IHttpClientFactory _httpClientFactory;
@@ -32,10 +30,9 @@ namespace HB.Framework.Client.ApiClient
 
         private readonly IDictionary<string, bool> _lastRefreshTokenResults = new Dictionary<string, bool>();
 
-        public ApiClient(IOptions<ApiClientOptions> options, ILogger<ApiClient> logger, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
+        public ApiClient(IOptions<ApiClientOptions> options, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
         {
             _options = options.ThrowIfNull(nameof(options)).Value;
-            _logger = logger;
             _mobileGlobal = mobileGlobal.ThrowIfNull(nameof(mobileGlobal));
             _httpClientFactory = httpClientFactory;
         }
@@ -99,7 +96,7 @@ namespace HB.Framework.Client.ApiClient
 
         private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type dataType)
         {
-            if (response?.HttpCode != 401 || response?.ErrCode != ApiError.API_TOKEN_EXPIRED || !request.GetNeedAuthenticate())
+            if (response?.HttpCode != 401 || response?.ErrCode != ApiError.ApiTokenExpired|| !request.GetNeedAuthenticate())
             {
                 return response;
             }
@@ -262,7 +259,7 @@ namespace HB.Framework.Client.ApiClient
                 }
                 else
                 {
-                    return new ApiResponse((int)httpResponse.StatusCode, "Internal Server Error.", ApiError.API_INTERNAL_ERROR);
+                    return new ApiResponse((int)httpResponse.StatusCode, "Internal Server Error.", ApiError.ApiInternalError);
                 }
             }
         }
