@@ -10,13 +10,7 @@
     <NeutralLanguage>English</NeutralLanguage>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>HB.Infrastructure.Aliyun.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>HB.Infrastructure.Aliyun.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
 
 
   <ItemGroup>

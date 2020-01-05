@@ -55,7 +55,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            return null;
+            throw new KVStoreException($"Can not found Such Redis Instance: {instanceName}");
         }
 
         private static string EntityVersionName(string entityName)

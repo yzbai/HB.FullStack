@@ -9,5 +9,7 @@ namespace HB.Infrastructure.Redis
     {
         public string InstanceName { get; set; }
         public string ConnectionString { get; set; }
+
+        public int DatabaseNumber { get; set; } = 0;
     }
 }
