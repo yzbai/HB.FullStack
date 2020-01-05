@@ -12,18 +12,18 @@ namespace HB.Infrastructure.Redis.Direct
         /// <param name="key"></param>
         /// <param name="expireSeconds"></param>
         /// <returns></returns>
-        bool KeySetIfNotExist(string redisInstanceName, string key, long expireSeconds);
+        Task<bool> KeySetIfNotExistAsync(string redisInstanceName, string key, long expireSeconds);
 
-        void HashSetInt(string redisInstanceName, string hashName, IEnumerable<string> fields, IEnumerable<int> values);
+        Task HashSetIntAsync(string redisInstanceName, string hashName, IEnumerable<string> fields, IEnumerable<int> values);
 
-        IEnumerable<int> HashGetInt(string redisInstanceName, string hashName, IEnumerable<string> fields);
+        Task<IEnumerable<int>> HashGetIntAsync(string redisInstanceName, string hashName, IEnumerable<string> fields);
 
         Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data) where T : class;
 
-        T PopAndPush<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class;
+        Task<T> PopAndPushAsync<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class;
 
-        ulong QueueLength(string redisInstanceName, string queueName);
+        Task<ulong> QueueLengthAsync(string redisInstanceName, string queueName);
 
-        int ScriptEvaluate(string redisInstanceName, string script, string[] keys, string[] argvs);
+        Task<int> ScriptEvaluateAsync(string redisInstanceName, string script, string[] keys, string[] argvs);
     }
 }

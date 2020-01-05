@@ -1,5 +1,6 @@
 ﻿using HB.Framework.KVStore.Engine;
 using HB.Framework.KVStore.Entity;
+using HB.Framework.KVStore.Properties;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -211,7 +212,7 @@ namespace HB.Framework.KVStore
 
             if (!CheckEntityVersions<T>(items))
             {
-                throw new KVStoreException(KVStoreError.VersionNotMatched, typeof(T).FullName, "item wanted to be added, version should be 0.");
+                throw new KVStoreException(KVStoreError.VersionNotMatched, typeof(T).FullName, Resources.AddedItemVersionErrorMessage);
             }
 
             try
@@ -326,7 +327,7 @@ namespace HB.Framework.KVStore
 
             if (keyValues.Count() != versions.Count())
             {
-                throw new ArgumentException("versions.count is not equal keyValues.count");
+                throw new ArgumentException(Resources.VersionsKeysNotEqualErrorMessage);
             }
 
             try

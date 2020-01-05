@@ -47,7 +47,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
-            IDatabase database = RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger);
+            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger).ConfigureAwait(false);
 
             EventMessageEntity entity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
 

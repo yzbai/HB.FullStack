@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Aliyun.Acs.Core;
+﻿using Aliyun.Acs.Core;
 using Aliyun.Acs.Core.Auth.Sts;
 using Aliyun.Acs.Core.Exceptions;
 using Aliyun.Acs.Core.Http;
-using HB.Framework.Common;
 using HB.Infrastructure.Aliyun.Properties;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
@@ -23,24 +20,11 @@ namespace HB.Infrastructure.Aliyun.Oss
         private readonly ILogger _logger;
 
         private readonly IDictionary<string, IAcsClient> _acsClients;
-
         private readonly IDictionary<string, BucketSettings> _bucketSettings;
 
-        public string UserBucketName
-        {
-            get
-            {
-                return _options.UserBucketName;
-            }
-        }
+        public string UserBucketName { get { return _options.UserBucketName; } }
 
-        public string PublicBucketName
-        {
-            get
-            {
-                return _options.PublicBucketName;
-            }
-        }
+        public string PublicBucketName { get { return _options.PublicBucketName; } }
 
         public AliyunOssService(IOptions<AliyunOssOptions> options, ILogger<AliyunOssService> logger)
         {
@@ -79,12 +63,12 @@ namespace HB.Infrastructure.Aliyun.Oss
         {
             if (!_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
             {
-                throw new AliyunOssException($"Can not find BucketSettings related to {bucket}");
+                throw new ServiceException($"AliyunOssService went wrong: No bucket found:{bucket}", new AliyunOssException($"No Such Bucket : {bucket}"));
             }
 
             if (!_acsClients.TryGetValue(bucket, out IAcsClient acsClient))
             {
-                throw new AliyunOssException($"Can not find AcsClient related to {bucket}");
+                throw new ServiceException($"AliyunOssService went wrong: No bucket found:{bucket}", new AliyunOssException($"Can not find AcsClient related to {bucket}"));
             }
 
             string path = bucket + "/" + directory;
@@ -117,47 +101,47 @@ namespace HB.Infrastructure.Aliyun.Oss
 
                 return stsToken;
             }
-            catch(ClientException ex)
+            catch (ClientException ex)
             {
                 throw new AliyunOssException(Resources.AliyunOssAssumeRoleRequestFailedMessage, ex);
             }
         }
 
-public string GetOssEndpoint(string bucket)
-{
-    if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
-    {
-        return bucketSettings.Endpoint;
-    }
+        public string GetOssEndpoint(string bucket)
+        {
+            if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
+            {
+                return bucketSettings.Endpoint;
+            }
 
-    return null;
-}
+            throw new ServiceException($"AliyunOssService went wrong: No bucket found:{bucket}", new AliyunOssException($"No Such Bucket : {bucket}"));
+        }
 
-public string GetRegionId(string bucket)
-{
-    if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
-    {
-        return bucketSettings.RegionId;
-    }
+        public string GetRegionId(string bucket)
+        {
+            if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
+            {
+                return bucketSettings.RegionId;
+            }
 
-    return null;
-}
+            throw new ServiceException($"AliyunOssService went wrong: No bucket found:{bucket}", new AliyunOssException($"No Such Bucket : {bucket}"));
+        }
 
-private string GetUserDirectory(string bucket, string userGuid)
-{
-    if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
-    {
-        string seprator = bucketSettings.BucketUserDirectory.EndsWith("/", GlobalSettings.Comparison) ? "" : "/";
-        return bucketSettings.BucketUserDirectory + seprator + userGuid;
-    }
+        private string GetUserDirectory(string bucket, string userGuid)
+        {
+            if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
+            {
+                string seprator = bucketSettings.BucketUserDirectory.EndsWith("/", GlobalSettings.Comparison) ? "" : "/";
+                return bucketSettings.BucketUserDirectory + seprator + userGuid;
+            }
 
-    return null;
-}
+            throw new ServiceException($"AliyunOssService went wrong: No bucket found:{bucket}", new AliyunOssException($"No Such Bucket : {bucket}"));
+        }
 
-private static string GetRoleSessionName(string userGuid)
-{
-    return userGuid;
-}
+        private static string GetRoleSessionName(string userGuid)
+        {
+            return userGuid;
+        }
     }
 }
 
