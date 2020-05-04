@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿#nullable enable
+
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,15 +17,21 @@ namespace HB.Infrastructure.Tencent
             }
         }
 
-        public string Endpoint { get; set; }
+        public string Endpoint { get; set; } = default!;
 
         public IList<ApiKeySetting> ApiKeySettings { get; private set; } = new List<ApiKeySetting>();
     }
 
     public class ApiKeySetting
     {
-        public string AppId { get; set; }
+        public string AppId { get; private set; }
 
-        public string AppSecretKey { get; set; }
+        public string AppSecretKey { get; private set; }
+
+        public ApiKeySetting(string appId, string appSecretKey)
+        {
+            AppId = appId;
+            AppSecretKey = appSecretKey;
+        }
     }
 }

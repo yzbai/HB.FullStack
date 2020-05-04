@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Aliyun.Test
         public OssTest(ITestOutputHelper output, ServiceFixture serviceFixture)
         {
             _output = output;
-            _oss = serviceFixture.AliyunOssService;
+            _oss = serviceFixture.ThrowIfNull(nameof(serviceFixture)).AliyunOssService;
         }
 
         //[Theory]

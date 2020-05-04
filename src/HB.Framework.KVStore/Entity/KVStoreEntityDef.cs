@@ -12,6 +12,11 @@ namespace HB.Framework.KVStore.Entity
 
         public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; } = new Dictionary<int, PropertyInfo>();
 
-        public KVStoreEntityDef() { }        
+        public KVStoreEntityDef(string kvstoreName, Type type)
+        {
+            KVStoreName = kvstoreName;
+            EntityType = type;
+        }
+
     }
 }

@@ -13,6 +13,8 @@ namespace HB.Framework.Client.TCaptcha
             }
         }
 
-        public string SmsUsedAppId { get; set; }
+        public string SmsUsedAppId { get; private set; } = default!;
+
+
     }
 }

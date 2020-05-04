@@ -9,7 +9,7 @@ using Xamarin.Essentials;
 
 namespace HB.Framework.Client
 {
-    public class ClientUtils
+    public static class ClientUtils
     {
         public static string GetDeviceType()
         {

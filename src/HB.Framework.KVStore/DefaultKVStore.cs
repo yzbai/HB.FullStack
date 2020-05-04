@@ -81,7 +81,7 @@ namespace HB.Framework.KVStore
 
         #endregion
 
-        public async Task<T> GetByKeyAsync<T>(object keyValue) where T : KVStoreEntity, new()
+        public async Task<T?> GetByKeyAsync<T>(object keyValue) where T : KVStoreEntity, new()
         {
             ThrowIf.Null(keyValue, nameof(keyValue));
 
@@ -106,7 +106,7 @@ namespace HB.Framework.KVStore
             }
         }
 
-        public async Task<T> GetByKeyAsync<T>(T t) where T : KVStoreEntity, new()
+        public async Task<T?> GetByKeyAsync<T>(T t) where T : KVStoreEntity, new()
         {
             ThrowIf.NullOrNotValid(t, nameof(t));
             try
@@ -130,7 +130,7 @@ namespace HB.Framework.KVStore
             }
         }
 
-        public async Task<IEnumerable<T>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
             ThrowIf.AnyNull(keyValues, nameof(keyValues));
 
@@ -155,7 +155,7 @@ namespace HB.Framework.KVStore
             }
         }
 
-        public async Task<IEnumerable<T>> GetByKeysAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
         {
             ThrowIf.AnyNull(keyValues, nameof(keyValues));
             try
@@ -179,7 +179,7 @@ namespace HB.Framework.KVStore
             }
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
             try
             {

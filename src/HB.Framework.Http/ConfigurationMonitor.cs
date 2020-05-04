@@ -38,8 +38,8 @@ namespace HB.Framework.Http
         {
             if (MonitoringEnabled)
             {
-                byte[] appsettingsHash = FileUtil.ComputeHash("appSettings.json");
-                byte[] appsettingsEnvHash = FileUtil.ComputeHash($"appSettings.{_env.EnvironmentName}.json");
+                byte[] appsettingsHash = FileUtil.ComputeFileHash("appSettings.json");
+                byte[] appsettingsEnvHash = FileUtil.ComputeFileHash($"appSettings.{_env.EnvironmentName}.json");
 
                 if (!_appsettingsHash.SequenceEqual(appsettingsHash) || 
                     !_appsettingsEnvHash.SequenceEqual(appsettingsEnvHash))

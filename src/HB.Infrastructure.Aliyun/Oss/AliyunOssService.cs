@@ -88,16 +88,15 @@ namespace HB.Infrastructure.Aliyun.Oss
             {
                 AssumeRoleResponse assumeRoleResponse = PolicyManager.Default(_logger).Execute(() => acsClient.GetAcsResponse(request));
 
-                AliyunStsToken stsToken = new AliyunStsToken()
-                {
-                    RequestId = assumeRoleResponse.RequestId,
-                    SecurityToken = assumeRoleResponse.Credentials.SecurityToken,
-                    AccessKeyId = assumeRoleResponse.Credentials.AccessKeyId,
-                    AccessKeySecret = assumeRoleResponse.Credentials.AccessKeySecret,
-                    ExpirationAt = assumeRoleResponse.Credentials.Expiration,
-                    AssumedRoleId = assumeRoleResponse.AssumedRoleUser.AssumedRoleId,
-                    AssumedRoleName = assumeRoleResponse.AssumedRoleUser.Arn
-                };
+                AliyunStsToken stsToken = new AliyunStsToken(
+                    assumeRoleResponse.RequestId,
+                    assumeRoleResponse.Credentials.SecurityToken,
+                    assumeRoleResponse.Credentials.AccessKeyId,
+                    assumeRoleResponse.Credentials.AccessKeySecret,
+                    assumeRoleResponse.Credentials.Expiration,
+                    assumeRoleResponse.AssumedRoleUser.AssumedRoleId,
+                    assumeRoleResponse.AssumedRoleUser.Arn
+                );
 
                 return stsToken;
             }

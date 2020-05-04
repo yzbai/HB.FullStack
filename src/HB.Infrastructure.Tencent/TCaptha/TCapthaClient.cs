@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿#nullable enable
+
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Tencent
@@ -26,14 +29,6 @@ namespace HB.Infrastructure.Tencent
 
         public async Task<bool> VerifyTicket(string appid, string ticket, string randstr, string userIp)
         {
-            ThrowIf.NullOrEmpty(appid, nameof(appid));
-
-            ThrowIf.NullOrEmpty(ticket, nameof(ticket));
-
-            ThrowIf.NullOrEmpty(randstr, nameof(randstr));
-
-            ThrowIf.NullOrEmpty(userIp, nameof(userIp));
-
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting apiKeySetting))
             {
                 throw new ServiceException($"lack ApiKeySettings for AppId:{appid}");
@@ -76,14 +71,28 @@ namespace HB.Infrastructure.Tencent
 
                 return false;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception jsonException)
-#pragma warning restore CA1031 // Do not catch general exception types
+            catch (JsonException ex)
             {
-                _logger.LogException(jsonException, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
 
                 return false;
             }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                return false;
+            }
+            catch(OverflowException ex)
+            {
+                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                return false;
+            }
+            catch(FormatException ex)
+            {
+                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                return false;
+            }
+
         }
 
 

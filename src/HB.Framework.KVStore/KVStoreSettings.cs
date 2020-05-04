@@ -1,15 +1,20 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace HB.Framework.KVStore
 {
     public class KVStoreEntitySchema
     {
-        public string EntityTypeFullName { get; set; }
-        public string InstanceName { get; set; }
-        public string Description { get; set; } = "";
+        [DisallowNull, NotNull]
+        public string? EntityTypeFullName { get; set; }
+
+        [DisallowNull, NotNull]
+        public string? InstanceName { get; set; }
+        
+        public string? Description { get; set; }
     }
 
     public class KVStoreSettings
