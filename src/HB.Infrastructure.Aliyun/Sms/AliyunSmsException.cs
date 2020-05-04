@@ -4,8 +4,10 @@ using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsException : Exception
+    public class AliyunSmsException : FrameworkException
     {
+        public override FrameworkExceptionType ExceptionType { get => FrameworkExceptionType.AliyunSms;}
+
         public AliyunSmsException()
         {
         }
