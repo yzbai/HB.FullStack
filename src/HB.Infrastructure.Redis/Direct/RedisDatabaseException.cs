@@ -5,8 +5,10 @@ using System.Text;
 
 namespace HB.Infrastructure.Redis.Direct
 {
-    public class RedisDatabaseException : Exception
+    public class RedisDatabaseException : FrameworkException
     {
+        public override FrameworkExceptionType ExceptionType { get => FrameworkExceptionType.RedisDatabase; }
+
         public RedisDatabaseException(string message) : base(message)
         {
         }
