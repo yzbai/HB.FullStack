@@ -167,7 +167,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     continue;
                 }
 
-                EventMessageEntity entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue);
+                EventMessageEntity entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue)!;
 
                 //2, 过期检查
 

@@ -63,9 +63,9 @@ namespace HB.Infrastructure.Aliyun.Sms
             {
                 CommonResponse response = PolicyManager.Default(_logger).Execute(() => { return _client.GetCommonResponse(request); });
 
-                SendResult sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
+                SendResult? sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
                 
-                if (sendResult.IsSuccessful())
+                if (sendResult != null && sendResult.IsSuccessful())
                 {
                     CacheSmsCode(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
@@ -113,7 +113,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             return _cache.GetString(GetCachedKey(mobile));
         }
 
-        private string GenerateNewSmsCode(int codeLength)
+        private static string GenerateNewSmsCode(int codeLength)
         {
             return SecurityUtil.CreateRandomNumbericString(codeLength);
         }
@@ -125,9 +125,9 @@ namespace HB.Infrastructure.Aliyun.Sms
 
         class SendResult
         {
-            public string Code { get; set; }
+            public string? Code { get; set; }
 
-            public string Message { get; set; }
+            public string? Message { get; set; }
 
             public bool IsSuccessful()
             {

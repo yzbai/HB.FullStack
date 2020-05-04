@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.Http
         {
             ThrowIf.Null(httpContext, nameof(httpContext));
 
-            string ip = httpContext.Request.GetHeaderValueAs<string>("X-Forwarded-For");
+            string? ip = httpContext.Request.GetHeaderValueAs<string>("X-Forwarded-For");
 
             if (string.IsNullOrWhiteSpace(ip))
             {
@@ -109,7 +109,7 @@ namespace Microsoft.AspNetCore.Http
             return string.IsNullOrWhiteSpace(ip) ? "127.0.0.1" : ip;
         }
 
-        public static T GetHeaderValueAs<T>(this HttpRequest request, string headerName)
+        public static T? GetHeaderValueAs<T>(this HttpRequest request, string headerName) where T:class
         {
             ThrowIf.Null(request, nameof(request));
 

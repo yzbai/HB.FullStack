@@ -20,7 +20,7 @@ namespace HB.Infrastructure.Redis.Direct
 
         Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data) where T : class;
 
-        Task<T> PopAndPushAsync<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class;
+        Task<T?> PopAndPushAsync<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class;
 
         Task<ulong> QueueLengthAsync(string redisInstanceName, string queueName);
 

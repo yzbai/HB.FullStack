@@ -8,8 +8,10 @@ namespace HB.Infrastructure.Redis.KVStore
 {
     public class RedisKVStoreOptions : IOptions<RedisKVStoreOptions>
     {
-        public RedisKVStoreOptions Value {
-            get {
+        public RedisKVStoreOptions Value
+        {
+            get
+            {
                 return this;
             }
         }

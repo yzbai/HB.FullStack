@@ -8,11 +8,11 @@ namespace System
     {
         public static bool IsDevelopment()
         {
-            string aspnetcore_environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string? aspnetcore_environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             if (!aspnetcore_environment.IsNullOrEmpty())
             {
-                return aspnetcore_environment.Equals("Development", GlobalSettings.ComparisonIgnoreCase);
+                return aspnetcore_environment!.Equals("Development", GlobalSettings.ComparisonIgnoreCase);
             }
 
             return false;

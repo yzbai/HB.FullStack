@@ -12,7 +12,7 @@ namespace HB.Framework.EventBus.Abstractions
 
         public string JsonData { get; set; }
 
-        public EventMessage() { }
+        //public EventMessage() { }
 
         public EventMessage(string type, string jsonData)
         {
