@@ -29,7 +29,7 @@ namespace HB.Framework.Http.Security
 
             if (authFailure is AggregateException)
             {
-                AggregateException agEx = authFailure as AggregateException;
+                AggregateException agEx = (AggregateException)authFailure;
                 exceptions = agEx.InnerExceptions;
             }
             else

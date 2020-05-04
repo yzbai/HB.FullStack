@@ -15,8 +15,6 @@ namespace HB.Infrastructure.Redis.EventBus
 
         public string JsonData { get; set; }
 
-        public EventMessageEntity() { }
-
         public EventMessageEntity(string type, string jsonData)
         {
             Type = type;

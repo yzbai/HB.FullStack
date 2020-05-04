@@ -109,7 +109,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 _consumeTaskManagers[eventType].Dispose();
 
-                _consumeTaskManagers[eventType] = null;
+                //_consumeTaskManagers[eventType] = null;
                 _consumeTaskManagers.Remove(eventType);
             }
         }

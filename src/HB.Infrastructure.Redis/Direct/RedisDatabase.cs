@@ -66,11 +66,11 @@ namespace HB.Infrastructure.Redis.Direct
 
         #region List
 
-        public async Task<T> PopAndPushAsync<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class
+        public async Task<T?> PopAndPushAsync<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class
         {
             IDatabase database = await RedisInstanceManager.GetDatabaseAsync(GetRedisInstanceSetting(redisInstanceName), _logger).ConfigureAwait(false);
 
-            byte[] data = database.ListRightPopLeftPush(fromQueueName, toQueueName);
+            byte[]? data = database.ListRightPopLeftPush(fromQueueName, toQueueName);
 
             return SerializeUtil.UnPack<T>(data);
         }

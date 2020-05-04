@@ -15,15 +15,15 @@ namespace HB.Infrastructure.Aliyun.Test
         {
             _output = output;
             _fixture = testFixture;
-            _smsBiz = _fixture.SmsService;
+            _smsBiz = _fixture.ThrowIfNull(nameof(testFixture)).SmsService;
         }
 
         [Theory]
         [InlineData("15190208956")]
         [InlineData("18015323958")]
-        public async System.Threading.Tasks.Task SendSmsAsync(string mobile)
+        public void SendSmsAsync(string mobile)
         {
-            await _smsBiz.SendValidationCode(mobile);
+            _smsBiz.SendValidationCode(mobile);
         }
     }
 }

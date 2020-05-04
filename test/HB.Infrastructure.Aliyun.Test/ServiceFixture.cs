@@ -9,9 +9,9 @@ namespace HB.Infrastructure.Aliyun.Test
 {
     public class ServiceFixture
     {
-        public static IConfiguration Configuration { get; private set; }
+        public IConfiguration Configuration { get; private set; } = default!;
 
-        public static IServiceProvider Services { get; private set; }
+        public IServiceProvider Services { get; private set; } = default!;
 
         public ServiceFixture()
         {

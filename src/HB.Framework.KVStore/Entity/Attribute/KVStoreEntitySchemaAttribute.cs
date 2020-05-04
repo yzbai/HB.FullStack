@@ -7,6 +7,6 @@ namespace HB.Framework.KVStore.Entity
     [AttributeUsage(AttributeTargets.Class)]
     public class KVStoreEntitySchemaAttribute : Attribute
     {
-        public string InstanceName { get; set; }
+        public string? InstanceName { get; set; }
     }
 }
