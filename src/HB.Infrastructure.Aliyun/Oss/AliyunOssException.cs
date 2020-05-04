@@ -4,8 +4,10 @@ using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
-    public class AliyunOssException : Exception
+    public class AliyunOssException : FrameworkException
     {
+        public override FrameworkExceptionType ExceptionType { get => FrameworkExceptionType.AliyunOss; }
+
         public AliyunOssException(string message) : base(message)
         {
         }
