@@ -1,7 +1,7 @@
 ﻿using HB.Framework.Common.Api;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Client.ApiClient
+namespace HB.Framework.Client.Api
 {
     public interface IApiClient
     {

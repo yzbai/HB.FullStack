@@ -20,5 +20,16 @@ namespace HB.Infrastructure.Aliyun
 
         public string AssumedRoleName { get; set; }
 
+        public AliyunStsToken(string requestId, string securityToken, string accessKeyId, string accessKeySecret, string expirationAt, string assumedRoleId, string assumedRoleName)
+        {
+            RequestId = requestId;
+            SecurityToken = securityToken;
+            AccessKeyId = accessKeyId;
+            AccessKeySecret = accessKeySecret;
+            ExpirationAt = expirationAt;
+            AssumedRoleId = assumedRoleId;
+            AssumedRoleName = assumedRoleName;
+        }
+
     }
 }

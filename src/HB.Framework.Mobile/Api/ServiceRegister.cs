@@ -5,7 +5,7 @@ using Microsoft.Extensions.Http;
 using Polly;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
-using HB.Framework.Client.ApiClient;
+using HB.Framework.Client.Api;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -43,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             options.Endpoints.ForEach(endpoint => {
                 services.AddHttpClient(EndpointSettings.GetHttpClientName(endpoint), httpClient => {
-                    httpClient.BaseAddress = new Uri(endpoint.Url);
+                    httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
                 })

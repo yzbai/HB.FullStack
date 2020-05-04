@@ -41,27 +41,34 @@ namespace HB.Framework.KVStore.Entity
             IDictionary<string, KVStoreEntitySchema> filedDict = _settings.KVStoreEntities.ToDictionary(t => t.EntityTypeFullName);
             IDictionary<string, KVStoreEntitySchema> resultDict = new Dictionary<string, KVStoreEntitySchema>();
 
-            allEntityTypes.ForEach(type => {
+            allEntityTypes.ForEach(type =>
+            {
                 KVStoreEntitySchemaAttribute attribute = type.GetCustomAttribute<KVStoreEntitySchemaAttribute>();
 
                 filedDict.TryGetValue(type.FullName, out KVStoreEntitySchema fileConfigured);
 
-                KVStoreEntitySchema entitySchema = new KVStoreEntitySchema { EntityTypeFullName = type.FullName };
+                string? instanceName = null;
 
                 if (attribute != null)
                 {
-                    entitySchema.InstanceName = attribute.InstanceName.IsNullOrEmpty() ? _kvStoreEngine.FirstDefaultInstanceName : attribute.InstanceName;
+                    instanceName = attribute.InstanceName.IsNullOrEmpty() ? _kvStoreEngine.FirstDefaultInstanceName : attribute.InstanceName!;
                 }
 
                 if (fileConfigured != null)
                 {
-                    entitySchema.InstanceName = fileConfigured.InstanceName;
+                    instanceName = fileConfigured.InstanceName;
                 }
 
-                if (entitySchema.InstanceName.IsNullOrEmpty())
+                if (instanceName.IsNullOrEmpty())
                 {
-                    entitySchema.InstanceName = _kvStoreEngine.FirstDefaultInstanceName;
+                    instanceName = _kvStoreEngine.FirstDefaultInstanceName;
                 }
+
+                KVStoreEntitySchema entitySchema = new KVStoreEntitySchema
+                {
+                    EntityTypeFullName = type.FullName,
+                    InstanceName = instanceName!
+                };
 
                 resultDict.Add(type.FullName, entitySchema);
             });
@@ -92,9 +99,14 @@ namespace HB.Framework.KVStore.Entity
 
         private KVStoreEntityDef CreateEntityDef(Type type)
         {
-            KVStoreEntityDef entityDef = new KVStoreEntityDef {
-                EntityType = type
-            };
+            if (!_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))
+            {
+                throw new KVStoreException(KVStoreError.NoEntitySchemaFound, type.FullName, null);
+            }
+
+            KVStoreEntityDef entityDef = new KVStoreEntityDef(storeEntitySchema.InstanceName, type);
+
+            #region Handle Key Properties
 
             PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
 
@@ -113,10 +125,7 @@ namespace HB.Framework.KVStore.Entity
                 throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
             }
 
-            if (_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))
-            {
-                entityDef.KVStoreName = storeEntitySchema.InstanceName;
-            }
+            #endregion
 
             return entityDef;
         }

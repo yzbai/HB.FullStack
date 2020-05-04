@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Redis.Test
         public RedisEventBusTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
-            _eventBus = serviceFixture.EventBus;
+            _eventBus = serviceFixture.ThrowIfNull(nameof(serviceFixture)).EventBus;
         }
 
         public void Handle(string jsonData)

@@ -1,4 +1,5 @@
-﻿using HB.Framework.Common.Api;
+﻿using HB.Framework.Client.Properties;
+using HB.Framework.Common.Api;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -11,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Client.ApiClient
+namespace HB.Framework.Client.Api
 {
     public class ApiClient : IApiClient
     {
@@ -39,7 +40,7 @@ namespace HB.Framework.Client.ApiClient
 
         public async Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiData
         {
-            ApiResponse apiResponse = await GetAsync(request, typeof(T));
+            ApiResponse apiResponse = await GetAsync(request, typeof(T)).ConfigureAwait(false);
             ApiResponse<T> typedResponse = new ApiResponse<T>(apiResponse.HttpCode, apiResponse.Message, apiResponse.ErrCode);
 
             if (apiResponse.Data != null)
@@ -55,7 +56,7 @@ namespace HB.Framework.Client.ApiClient
         }
 
         //多次尝试，自动refresh token，
-        private async Task<ApiResponse> GetAsync(ApiRequest request, Type dataType)
+        private async Task<ApiResponse> GetAsync(ApiRequest request, Type? dataType)
         {
             ThrowIf.Null(request, nameof(request));
 
@@ -73,6 +74,8 @@ namespace HB.Framework.Client.ApiClient
 
             EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
+            ThrowIf.NullOrNotValid(endpoint, nameof(endpoint));
+
             ApiResponse response = await GetResponseCore(request, endpoint, dataType).ConfigureAwait(false);
 
             return await AutoRefreshTokenAsync(request, response, endpoint, dataType).ConfigureAwait(false);
@@ -80,7 +83,7 @@ namespace HB.Framework.Client.ApiClient
 
         #region Privates
 
-        private async Task<ApiResponse> GetResponseCore(ApiRequest request, EndpointSettings endpointSettings, Type dataType)
+        private async Task<ApiResponse> GetResponseCore(ApiRequest request, EndpointSettings endpointSettings, Type? dataType)
         {
             using HttpRequestMessage httpRequest = ConstructureHttpRequest(request, endpointSettings);
             HttpClient httpClient = GetHttpClient(endpointSettings);
@@ -89,14 +92,14 @@ namespace HB.Framework.Client.ApiClient
             return await ConstructureHttpResponseAsync(httpResponse, dataType).ConfigureAwait(false);
         }
 
-        private Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
+        private static Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
         {
             return httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead);
         }
 
-        private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type dataType)
+        private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type? dataType)
         {
-            if (response?.HttpCode != 401 || response?.ErrCode != ApiError.ApiTokenExpired|| !request.GetNeedAuthenticate())
+            if (response.HttpCode != 401 || response.ErrCode != ApiError.ApiTokenExpired|| !request.GetNeedAuthenticate())
             {
                 return response;
             }
@@ -107,17 +110,17 @@ namespace HB.Framework.Client.ApiClient
 
             try
             {
-                string accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+                string? accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
                 {
                     return response;
                 }
 
-                string accessTokenHashKey = SecurityUtil.GetHash(accessToken);
+                string accessTokenHashKey = SecurityUtil.GetHash(accessToken!);
 
                 //不久前刷新过
-                if (!_frequencyChecker.Check(_refreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.TokenRefresh.TokenRefreshIntervalSeconds)))
+                if (!_frequencyChecker.Check(_refreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.TokenRefreshSettings.TokenRefreshIntervalSeconds)))
                 {
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -129,21 +132,21 @@ namespace HB.Framework.Client.ApiClient
                 }
 
                 //开始刷新
-                string refreshToken = await _mobileGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
+                string? refreshToken = await _mobileGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
 
                 if (!refreshToken.IsNullOrEmpty())
                 {
                     ApiRequest refreshRequest = new ApiRequest(
-                        endpointSettings.TokenRefresh.TokenRefreshProductType,
-                        endpointSettings.TokenRefresh.TokenRefreshVersion,
+                        endpointSettings.TokenRefreshSettings!.TokenRefreshProductType!,
+                        endpointSettings.TokenRefreshSettings!.TokenRefreshVersion!,
                         HttpMethod.Put,
                         false,
-                        endpointSettings.TokenRefresh.TokenRefreshResourceName);
+                        endpointSettings.TokenRefreshSettings!.TokenRefreshResourceName!);
 
-                    refreshRequest.AddParameter(ClientNames.AccessToken, accessToken);
-                    refreshRequest.AddParameter(ClientNames.RefreshToken, refreshToken);
+                    refreshRequest.AddParameter(ClientNames.AccessToken, accessToken!);
+                    refreshRequest.AddParameter(ClientNames.RefreshToken, refreshToken!);
 
-                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefresh.TokenRefreshProductType && e.Version == endpointSettings.TokenRefresh.TokenRefreshVersion);
+                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefreshSettings.TokenRefreshProductType && e.Version == endpointSettings.TokenRefreshSettings.TokenRefreshVersion);
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 
                     using HttpRequestMessage httpRefreshRequest = ConstructureHttpRequest(refreshRequest, endpointSettings);
@@ -154,7 +157,7 @@ namespace HB.Framework.Client.ApiClient
 
                         string jsonString = await refreshResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                        string newAccessToken = SerializeUtil.FromJson(jsonString, ClientNames.AccessToken);
+                        string? newAccessToken = SerializeUtil.FromJson(jsonString, ClientNames.AccessToken);
 
                         await _mobileGlobal.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
 
@@ -235,7 +238,7 @@ namespace HB.Framework.Client.ApiClient
             return requestUrlBuilder.ToString();
         }
 
-        private async Task<ApiResponse> ConstructureHttpResponseAsync(HttpResponseMessage httpResponse, Type dataType)
+        private static async Task<ApiResponse> ConstructureHttpResponseAsync(HttpResponseMessage httpResponse, Type? dataType)
         {
             ThrowIf.Null(httpResponse, nameof(httpResponse));
 
@@ -243,7 +246,7 @@ namespace HB.Framework.Client.ApiClient
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                object data = dataType == null ? null : await SerializeUtil.FromJsonAsync(dataType, responseStream).ConfigureAwait(false);
+                object? data = dataType == null ? null : await SerializeUtil.FromJsonAsync(dataType, responseStream).ConfigureAwait(false);
 
                 return new ApiResponse(data, (int)httpResponse.StatusCode);
             }
@@ -259,7 +262,7 @@ namespace HB.Framework.Client.ApiClient
                 }
                 else
                 {
-                    return new ApiResponse((int)httpResponse.StatusCode, "Internal Server Error.", ApiError.ApiInternalError);
+                    return new ApiResponse((int)httpResponse.StatusCode, Resources.InternalServerErrorMessage, ApiError.ApiInternalError);
                 }
             }
         }
@@ -273,7 +276,7 @@ namespace HB.Framework.Client.ApiClient
         {
             if (request.GetNeedAuthenticate())
             {
-                string accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+                string? accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
                 {

@@ -18,7 +18,7 @@ namespace HB.Framework.Client
 
         #region User
 
-        Task<string> GetCurrentUserGuidAsync();
+        Task<string?> GetCurrentUserGuidAsync();
 
         Task SetCurrentUserGuidAsync(string userGuid);
 
@@ -28,13 +28,13 @@ namespace HB.Framework.Client
 
         #region Token
 
-        Task<string> GetAccessTokenAsync();
+        Task<string?> GetAccessTokenAsync();
 
-        Task SetAccessTokenAsync(string newAccessToken);
+        Task SetAccessTokenAsync(string? newAccessToken);
 
-        Task<string> GetRefreshTokenAsync();
+        Task<string?> GetRefreshTokenAsync();
 
-        Task SetRefreshTokenAsync(string refreshToken);
+        Task SetRefreshTokenAsync(string? refreshToken);
 
         #endregion
     }

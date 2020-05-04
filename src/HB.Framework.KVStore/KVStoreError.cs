@@ -10,5 +10,6 @@
         VersionNotMatched = 4,
         NotValid = 5,
         UnKown = 6,
+        NoEntitySchemaFound = 7,
     }
 }

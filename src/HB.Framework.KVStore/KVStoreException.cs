@@ -8,19 +8,19 @@ namespace HB.Framework.KVStore
 {
     public class KVStoreException : Exception
     {
-        private IDictionary _data;
+        private IDictionary? _data;
 
         public KVStoreError Error { get; private set; }
 
         public int InnerNumber { get; private set; }
 
-        public string InnerState { get; private set; }
+        public string? InnerState { get; private set; }
 
-        public string EntityName { get; private set; }
+        public string? EntityName { get; private set; }
 
-        public string Operation { get; private set; }
+        public string? Operation { get; private set; }
 
-        public KVStoreException(KVStoreError error, string entityName, string message, Exception innerException = null, [CallerMemberName]string operation = "") : base(message, innerException)
+        public KVStoreException(KVStoreError error, string entityName, string? message, Exception? innerException = null, [CallerMemberName]string operation = "") : base(message, innerException)
         {
             Error = error;
             Operation = operation;
@@ -46,7 +46,7 @@ namespace HB.Framework.KVStore
             }
         }
 
-        public KVStoreException(int number, string state, string message, Exception innerException = null) : base(message, innerException)
+        public KVStoreException(int number, string state, string message, Exception? innerException = null) : base(message, innerException)
         {
             InnerNumber = number;
             InnerState = state;

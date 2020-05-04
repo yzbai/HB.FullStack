@@ -10,15 +10,15 @@ namespace HB.Framework.KVStore
 {
     public interface IKVStore
     {
-        Task<T> GetByKeyAsync<T>(object keyValue) where T : KVStoreEntity, new();
+        Task<T?> GetByKeyAsync<T>(object keyValue) where T : KVStoreEntity, new();
 
-        Task<T> GetByKeyAsync<T>(T t) where T : KVStoreEntity, new();
+        Task<T?> GetByKeyAsync<T>(T t) where T : KVStoreEntity, new();
 
-        Task<IEnumerable<T>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
+        Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new();
 
-        Task<IEnumerable<T>> GetByKeysAsync<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
+        Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<T> ts) where T : KVStoreEntity, new();
 
-        Task<IEnumerable<T>> GetAllAsync<T>() where T : KVStoreEntity, new();
+        Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new();
 
         Task AddAsync<T>(T item) where T : KVStoreEntity, new();
 
