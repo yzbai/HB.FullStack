@@ -4,8 +4,10 @@ using System.Text;
 
 namespace HB.Framework.EventBus
 {
-    public class EventBusException : Exception
+    public class EventBusException : FrameworkException
     {
+        public override FrameworkExceptionType ExceptionType { get => FrameworkExceptionType.EventBus; }
+
         public EventBusException(string message) : base(message)
         {
         }
