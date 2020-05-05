@@ -72,13 +72,24 @@ namespace HB.Framework.Client.Api
                 return new NotLoginResponse();
             }
 
-            EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
+            try
+            {
+                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
-            ThrowIf.NullOrNotValid(endpoint, nameof(endpoint));
+                ThrowIf.NullOrNotValid(endpoint, nameof(endpoint));
 
-            ApiResponse response = await GetResponseCore(request, endpoint, dataType).ConfigureAwait(false);
+                ApiResponse response = await GetResponseCore(request, endpoint, dataType).ConfigureAwait(false);
 
-            return await AutoRefreshTokenAsync(request, response, endpoint, dataType).ConfigureAwait(false);
+                return await AutoRefreshTokenAsync(request, response, endpoint, dataType).ConfigureAwait(false);
+            }
+            catch(InvalidOperationException)
+            {
+                return new EndpointNotFoundResponse();
+            }
+            catch(FrameworkException)
+            {
+                return new EndpointNotFoundResponse();
+            }
         }
 
         #region Privates
