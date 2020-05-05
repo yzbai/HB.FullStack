@@ -36,6 +36,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// </summary>
         /// <param name="mobile"></param>
         /// <returns></returns>
+        /// <exception cref="HB.Infrastructure.Aliyun.Sms.AliyunSmsException"></exception>
         public void SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
@@ -72,16 +73,16 @@ namespace HB.Infrastructure.Aliyun.Sms
                 else
                 {
                     string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
-                    throw new ServiceException(errorMessage);
+                    throw new AliyunSmsException(errorMessage);
                 }
             }
             catch (JsonException ex)
             {
-                throw new ServiceException(Resources.AliyunSmsResponseFormatErrorMessage, ex);
+                throw new AliyunSmsException(Resources.AliyunSmsResponseFormatErrorMessage, ex);
             }
             catch(ClientException ex)
             {
-                throw new ServiceException(Resources.AliyunSmsServiceDownErrorMessage, ex);
+                throw new AliyunSmsException(Resources.AliyunSmsServiceDownErrorMessage, ex);
             }
         }
 

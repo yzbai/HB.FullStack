@@ -31,7 +31,7 @@ namespace HB.Infrastructure.Tencent
         {
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting apiKeySetting))
             {
-                throw new ServiceException($"lack ApiKeySettings for AppId:{appid}");
+                throw new TCapthaException($"lack ApiKeySettings for AppId:{appid}");
             }
 
             string query = new Dictionary<string, string> {
