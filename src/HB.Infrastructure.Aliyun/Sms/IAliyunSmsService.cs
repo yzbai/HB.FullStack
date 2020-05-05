@@ -13,6 +13,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// <param name="mobile"></param>
         /// <param name="code"></param>
         /// <returns></returns>
+        /// <exception cref="HB.Infrastructure.Aliyun.Sms.AliyunSmsException"></exception>
         void SendValidationCode(string mobile/*, out string code*/);
 
         bool Validate(string mobile, string code);
