@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Entity
 {
     internal interface IKVStoreEntityDefFactory
     {
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         KVStoreEntityDef GetDef<T>();
+
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         KVStoreEntityDef GetDef(Type type);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using HB.Framework.Client.Properties;
 using HB.Framework.Common.Api;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -33,8 +32,8 @@ namespace HB.Framework.Client.Api
 
         public ApiClient(IOptions<ApiClientOptions> options, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
         {
-            _options = options.ThrowIfNull(nameof(options)).Value;
-            _mobileGlobal = mobileGlobal.ThrowIfNull(nameof(mobileGlobal));
+            _options = options.Value;
+            _mobileGlobal = mobileGlobal;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -58,8 +57,6 @@ namespace HB.Framework.Client.Api
         //多次尝试，自动refresh token，
         private async Task<ApiResponse> GetAsync(ApiRequest request, Type? dataType)
         {
-            ThrowIf.Null(request, nameof(request));
-
             await AddDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
             if (!request.IsValid())
@@ -76,17 +73,15 @@ namespace HB.Framework.Client.Api
             {
                 EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
-                ThrowIf.NullOrNotValid(endpoint, nameof(endpoint));
-
                 ApiResponse response = await GetResponseCore(request, endpoint, dataType).ConfigureAwait(false);
 
                 return await AutoRefreshTokenAsync(request, response, endpoint, dataType).ConfigureAwait(false);
             }
-            catch(InvalidOperationException)
+            catch (InvalidOperationException)
             {
                 return new EndpointNotFoundResponse();
             }
-            catch(FrameworkException)
+            catch (FrameworkException)
             {
                 return new EndpointNotFoundResponse();
             }
@@ -94,6 +89,14 @@ namespace HB.Framework.Client.Api
 
         #region Privates
 
+        /// <summary>
+        /// GetResponseCore
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="endpointSettings"></param>
+        /// <param name="dataType"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.Client.ClientException"></exception>
         private async Task<ApiResponse> GetResponseCore(ApiRequest request, EndpointSettings endpointSettings, Type? dataType)
         {
             using HttpRequestMessage httpRequest = ConstructureHttpRequest(request, endpointSettings);
@@ -103,24 +106,49 @@ namespace HB.Framework.Client.Api
             return await ConstructureHttpResponseAsync(httpResponse, dataType).ConfigureAwait(false);
         }
 
-        private static Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
+        /// <summary>
+        /// GetResponseActual
+        /// </summary>
+        /// <param name="httpRequestMessage"></param>
+        /// <param name="httpClient"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.Client.ClientException"></exception>
+        private static async Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
         {
-            return httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead);
+            try
+            {
+                return await httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new ClientException($"ApiClient.GetResponseActual Error", ex);
+            }
         }
 
+        /// <summary>
+        /// AutoRefreshTokenAsync
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="response"></param>
+        /// <param name="endpointSettings"></param>
+        /// <param name="dataType"></param>
+        /// <returns></returns>
+        /// <exception cref="ObjectDisposedException">Ignore.</exception>
+        /// <exception cref="SemaphoreFullException">Ignore.</exception>
+        /// <exception cref="HB.Framework.Client.ClientException"></exception>
         private async Task<ApiResponse> AutoRefreshTokenAsync(ApiRequest request, ApiResponse response, EndpointSettings endpointSettings, Type? dataType)
         {
-            if (response.HttpCode != 401 || response.ErrCode != ApiError.ApiTokenExpired|| !request.GetNeedAuthenticate())
+            if (response.HttpCode != 401 || response.ErrCode != ApiError.ApiTokenExpired || !request.GetNeedAuthenticate())
             {
                 return response;
             }
 
-            //只处理token过期这一种情况
-
-            await _tokenRefreshSemaphore.WaitAsync().ConfigureAwait(false);
-
             try
             {
+                //只处理token过期这一种情况
+
+                await _tokenRefreshSemaphore.WaitAsync().ConfigureAwait(false);
+
                 string? accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
@@ -186,12 +214,23 @@ namespace HB.Framework.Client.Api
 
                 return response;
             }
+            catch (Exception ex)
+            {
+                throw new ClientException("ApiClient.AutoRefreshTokenAsync Error.", ex);
+            }
             finally
             {
                 _tokenRefreshSemaphore.Release();
             }
         }
 
+        /// <summary>
+        /// ConstructureHttpRequest
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="endpointSettings"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         private static HttpRequestMessage ConstructureHttpRequest(ApiRequest request, EndpointSettings endpointSettings)
         {
             HttpMethod httpMethod = request.GetHttpMethod();
@@ -249,10 +288,15 @@ namespace HB.Framework.Client.Api
             return requestUrlBuilder.ToString();
         }
 
+        /// <summary>
+        /// ConstructureHttpResponseAsync
+        /// </summary>
+        /// <param name="httpResponse"></param>
+        /// <param name="dataType"></param>
+        /// <returns></returns>
+        /// <exception cref="System.Text.Json.JsonException">Ignore.</exception>
         private static async Task<ApiResponse> ConstructureHttpResponseAsync(HttpResponseMessage httpResponse, Type? dataType)
         {
-            ThrowIf.Null(httpResponse, nameof(httpResponse));
-
             Stream responseStream = await httpResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
             if (httpResponse.IsSuccessStatusCode)

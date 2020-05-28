@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Http;
-using Polly;
-using System.Net.Http;
+﻿using HB.Framework.Client.Api;
 using Microsoft.Extensions.Configuration;
-using HB.Framework.Client.Api;
+using Polly;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -13,8 +9,6 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddApiClient(this IServiceCollection services, Action<ApiClientOptions> action)
         {
-            ThrowIf.Null(action, nameof(action));
-
             services.Configure(action);
 
             ApiClientOptions options = new ApiClientOptions();
@@ -27,8 +21,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddApiClient(this IServiceCollection services, IConfiguration configuration)
         {
-            ThrowIf.Null(configuration, nameof(configuration));
-
             services.Configure<ApiClientOptions>(configuration);
 
             ApiClientOptions options = new ApiClientOptions();
@@ -39,15 +31,24 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        /// <summary>
+        /// AddApiClientCore
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="options"></param>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
-            options.Endpoints.ForEach(endpoint => {
-                services.AddHttpClient(EndpointSettings.GetHttpClientName(endpoint), httpClient => {
+            options.Endpoints.ForEach(endpoint =>
+            {
+                services.AddHttpClient(EndpointSettings.GetHttpClientName(endpoint), httpClient =>
+                {
                     httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
                 })
-                .AddTransientHttpErrorPolicy(p => {
+                .AddTransientHttpErrorPolicy(p =>
+                {
                     //TODO: Move this to options
                     return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
                 });

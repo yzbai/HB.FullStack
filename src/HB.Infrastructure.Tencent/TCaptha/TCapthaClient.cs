@@ -27,6 +27,17 @@ namespace HB.Infrastructure.Tencent
             _apiKeySettings = _options.ApiKeySettings.ToDictionary(s => s.AppId);
         }
 
+        /// <summary>
+        /// VerifyTicket
+        /// </summary>
+        /// <param name="appid"></param>
+        /// <param name="ticket"></param>
+        /// <param name="randstr"></param>
+        /// <param name="userIp"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Infrastructure.Tencent.TCapthaException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="HttpRequestException"></exception>
         public async Task<bool> VerifyTicket(string appid, string ticket, string randstr, string userIp)
         {
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting apiKeySetting))
@@ -82,12 +93,12 @@ namespace HB.Infrastructure.Tencent
                 _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
                 return false;
             }
-            catch(OverflowException ex)
+            catch (OverflowException ex)
             {
                 _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
                 return false;
             }
-            catch(FormatException ex)
+            catch (FormatException ex)
             {
                 _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
                 return false;
