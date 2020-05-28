@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using HB.Framework.Common.Api;
-using System;
 
 namespace HB.Framework.Client.Api
 {
@@ -44,8 +43,6 @@ namespace HB.Framework.Client.Api
 
         public static implicit operator ApiResponse(ApiResponse<T> t)
         {
-            ThrowIf.Null(t, nameof(t));
-
             ApiResponse rt = new ApiResponse(t.HttpCode, t.Message, t.ErrCode)
             {
                 Data = t.Data
@@ -56,8 +53,6 @@ namespace HB.Framework.Client.Api
 
         public static implicit operator ApiResponse<T>(ApiResponse v)
         {
-            ThrowIf.Null(v, nameof(v));
-
             ApiResponse<T> rt = new ApiResponse<T>(v.HttpCode, v.Message, v.ErrCode);
 
             if (v.Data != null)

@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
@@ -33,12 +31,28 @@ namespace HB.Framework.Client
             return SecurityUtil.CreateUniqueToken();
         }
 
-        public static IConfiguration BuildConfiguration(string appsettingsName, [ValidatedNotNull]Assembly executingAssembly)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="appsettingsName"></param>
+        /// <param name="executingAssembly"></param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentException"></exception>
+        /// <exception cref="FileLoadException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="BadImageFormatException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <exception cref="PathTooLongException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="ObjectDisposedException"></exception>
+        public static IConfiguration BuildConfiguration(string appsettingsName, [ValidatedNotNull] Assembly executingAssembly)
         {
-            ThrowIf.NullOrEmpty(appsettingsName, nameof(appsettingsName));
-            ThrowIf.Null(executingAssembly, nameof(executingAssembly));
+            ThrowIf.Empty(appsettingsName, nameof(appsettingsName));
+            //ThrowIf.Null(executingAssembly, nameof(executingAssembly));
 
             string fileName = $"{executingAssembly.FullName.Split(",")[0]}.{appsettingsName}";
+            //string fileName = appsettingsName;
 
             string fullPath = Path.Combine(FileSystem.CacheDirectory, fileName);
 

@@ -31,8 +31,6 @@ namespace HB.Framework.Client.Api
 
         public static string GetHttpClientName(EndpointSettings endpoint)
         {
-            ThrowIf.Null(endpoint, nameof(endpoint));
-
             return endpoint.ProductType + "_" + endpoint.Version;
         }
     }

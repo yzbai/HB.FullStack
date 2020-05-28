@@ -33,6 +33,15 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private readonly RedisSetDuplicateChecker _duplicateChecker;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="redisInstanceSetting"></param>
+        /// <param name="eventType"></param>
+        /// <param name="eventHandler"></param>
+        /// <param name="consumeTaskManagerLogger"></param>
+        /// <exception cref="ObjectDisposedException">Ignore.</exception>
         public ConsumeTaskManager(
             RedisEventBusOptions options,
             RedisInstanceSetting redisInstanceSetting,
@@ -149,6 +158,11 @@ namespace HB.Infrastructure.Redis.EventBus
             }
         }
 
+        /// <summary>
+        /// CosumeTaskProcedure
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">Ignore.</exception>
+        /// <exception cref="AggregateException">Ignore.</exception>
         private void CosumeTaskProcedure()
         {
             while (!_consumeTaskCTS.IsCancellationRequested)
@@ -218,12 +232,23 @@ namespace HB.Infrastructure.Redis.EventBus
             }
         }
 
+        /// <summary>
+        /// Cancel
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">Ignore.</exception>
+        /// <exception cref="AggregateException">Ignore.</exception>
         public void Cancel()
         {
             _consumeTaskCTS.Cancel();
             _historyTaskCTS.Cancel();
         }
 
+        /// <summary>
+        /// Start
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
+        /// <exception cref="ObjectDisposedException">Ignore.</exception>
+        /// <exception cref="TaskSchedulerException">Ignore.</exception>
         public void Start()
         {
             _consumeTask.Start(TaskScheduler.Default);
@@ -233,6 +258,13 @@ namespace HB.Infrastructure.Redis.EventBus
         #region IDisposable Support
         private bool _disposedValue = false; // To detect redundant calls
 
+        /// <summary>
+        /// Dispose
+        /// </summary>
+        /// <param name="disposing"></param>
+        /// <exception cref="ObjectDisposedException">Ignore.</exception>
+        /// <exception cref="AggregateException">Ignore.</exception>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)

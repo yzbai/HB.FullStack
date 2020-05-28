@@ -81,10 +81,14 @@ namespace HB.Framework.KVStore
 
         #endregion
 
+        /// <summary>
+        /// GetByKeyAsync
+        /// </summary>
+        /// <param name="keyValue"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<T?> GetByKeyAsync<T>(object keyValue) where T : KVStoreEntity, new()
         {
-            ThrowIf.Null(keyValue, nameof(keyValue));
-
             try
             {
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
@@ -106,9 +110,17 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// GetByKeyAsync
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<T?> GetByKeyAsync<T>(T t) where T : KVStoreEntity, new()
         {
-            ThrowIf.NullOrNotValid(t, nameof(t));
+            ThrowIf.NotValid(t);
+
             try
             {
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
@@ -130,9 +142,15 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// GetByKeysAsync
+        /// </summary>
+        /// <param name="keyValues"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : KVStoreEntity, new()
         {
-            ThrowIf.AnyNull(keyValues, nameof(keyValues));
+            //ThrowIf.AnyNull(keyValues, nameof(keyValues));
 
             try
             {
@@ -155,9 +173,15 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// GetByKeysAsync
+        /// </summary>
+        /// <param name="keyValues"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<T> keyValues) where T : KVStoreEntity, new()
         {
-            ThrowIf.AnyNull(keyValues, nameof(keyValues));
+            //ThrowIf.AnyNull(keyValues, nameof(keyValues));
             try
             {
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
@@ -179,6 +203,11 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// GetAllAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
             try
@@ -201,14 +230,23 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public Task AddAsync<T>(T item) where T : KVStoreEntity, new()
         {
             return AddAsync<T>(new T[] { item });
         }
 
+        /// <summary>
+        /// AddAsync
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public Task AddAsync<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            ThrowIf.NullOrNotValid(items, nameof(items));
+            ThrowIf.NotValid(items);
 
             if (!CheckEntityVersions<T>(items))
             {
@@ -237,14 +275,23 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public Task UpdateAsync<T>(T item) where T : KVStoreEntity, new()
         {
             return UpdateAsync<T>(new T[] { item });
         }
 
+        /// <summary>
+        /// UpdateAsync
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task UpdateAsync<T>(IEnumerable<T> items) where T : KVStoreEntity, new()
         {
-            ThrowIf.NullOrNotValid(items, nameof(items));
+            ThrowIf.NotValid(items);
             bool versionChanged = false;
 
             try
@@ -285,15 +332,28 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// DeleteAsync
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public Task DeleteAsync<T>(T item) where T : KVStoreEntity, new()
         {
-            ThrowIf.NullOrNotValid(item, nameof(item));
+            ThrowIf.NotValid(item);
 
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
             return DeleteByKeysAsync<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
         }
 
+
+        /// <summary>
+        /// DeleteAllAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public Task DeleteAllAsync<T>() where T : KVStoreEntity, new()
         {
             try
@@ -320,9 +380,16 @@ namespace HB.Framework.KVStore
             return DeleteByKeysAsync<T>(new object[] { keyValue }, new int[] { version });
         }
 
+        /// <summary>
+        /// DeleteByKeysAsync
+        /// </summary>
+        /// <param name="keyValues"></param>
+        /// <param name="versions"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
+        /// <exception cref="System.ArgumentException"></exception>
         public Task DeleteByKeysAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
-            ThrowIf.AnyNull(keyValues, nameof(keyValues));
             ThrowIf.NullOrEmpty(versions, nameof(versions));
 
             if (keyValues.Count() != versions.Count())

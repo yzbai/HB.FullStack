@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http.Extensions;
-using System.Text;
-using System.Globalization;
 
 namespace Microsoft.AspNetCore.Http
 {
@@ -11,8 +9,6 @@ namespace Microsoft.AspNetCore.Http
     {
         public static IDictionary<string, string> GetParameters(this HttpRequest request)
         {
-            ThrowIf.Null(request, nameof(request));
-
             IDictionary<string, string> parameters = new Dictionary<string, string>();
 
             // Read from Query
@@ -47,8 +43,7 @@ namespace Microsoft.AspNetCore.Http
 
         public static string GetValue(this HttpRequest request, string key, bool includeCookie = false)
         {
-            ThrowIf.Null(request, nameof(request));
-            ThrowIf.NullOrEmpty(key, nameof(key));
+            ThrowIf.Empty(key, nameof(key));
 
             StringValues value = StringValues.Empty;
 
@@ -78,8 +73,6 @@ namespace Microsoft.AspNetCore.Http
 
         public static Uri MakeToHttpsRawUri(this HttpRequest request)
         {
-            ThrowIf.Null(request, nameof(request));
-
             string url = request.GetEncodedUrl().Replace(request.Scheme, "https", GlobalSettings.Comparison);
 
             return new Uri(url);
@@ -87,8 +80,6 @@ namespace Microsoft.AspNetCore.Http
 
         public static string GetIpAddress(this HttpContext httpContext)
         {
-            ThrowIf.Null(httpContext, nameof(httpContext));
-
             string? ip = httpContext.Request.GetHeaderValueAs<string>("X-Forwarded-For");
 
             if (string.IsNullOrWhiteSpace(ip))
@@ -98,7 +89,16 @@ namespace Microsoft.AspNetCore.Http
 
             if (string.IsNullOrWhiteSpace(ip))
             {
-                ip = httpContext.Connection.RemoteIpAddress.ToString();
+                try
+                {
+                    ip = httpContext.Connection.RemoteIpAddress.ToString();
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    ip = null;
+                }
             }
 
             if (string.IsNullOrWhiteSpace(ip))
@@ -109,20 +109,33 @@ namespace Microsoft.AspNetCore.Http
             return string.IsNullOrWhiteSpace(ip) ? "127.0.0.1" : ip;
         }
 
-        public static T? GetHeaderValueAs<T>(this HttpRequest request, string headerName) where T:class
+        /// <summary>
+        /// GetHeaderValueAs
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="headerName"></param>
+        /// <returns></returns>
+        public static T? GetHeaderValueAs<T>(this HttpRequest request, string headerName) where T : class
         {
-            ThrowIf.Null(request, nameof(request));
-
-            StringValues values;
-
-            if (request.Headers?.TryGetValue(headerName, out values) ?? false)
+            try
             {
-                string rawValues = values.ToString();   // writes out as Csv when there are multiple.
+                StringValues values;
 
-                if (!string.IsNullOrEmpty(rawValues))
-                    return (T)Convert.ChangeType(values.ToString(), typeof(T), GlobalSettings.Culture);
+                if (request.Headers?.TryGetValue(headerName, out values) ?? false)
+                {
+                    string rawValues = values.ToString();   // writes out as Csv when there are multiple.
+
+                    if (!string.IsNullOrEmpty(rawValues))
+                        return (T)Convert.ChangeType(values.ToString(), typeof(T), GlobalSettings.Culture);
+                }
+                return default;
             }
-            return default;
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return default;
+            }
         }
 
     }
