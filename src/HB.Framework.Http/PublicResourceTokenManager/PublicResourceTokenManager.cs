@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -19,10 +18,10 @@ namespace HB.Framework.Http
 
         public PublicResourceTokenManager(IDistributedCache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenManager> logger)
         {
-            _cache = cache.ThrowIfNull(nameof(cache));
+            _cache = cache;
             _logger = logger;
 
-            _dataProtector = dataProtectionProvider.ThrowIfNull(nameof(dataProtectionProvider)).CreateProtector(nameof(PublicResourceTokenManager));
+            _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenManager));
         }
 
         /// <exception cref="EncoderFallbackException"></exception>
@@ -54,7 +53,7 @@ namespace HB.Framework.Http
                     return false;
                 }
             }
-            catch(FormatException ex)
+            catch (FormatException ex)
             {
                 _logger.LogException(ex, $"protectedToken:{protectedToken}");
                 return false;

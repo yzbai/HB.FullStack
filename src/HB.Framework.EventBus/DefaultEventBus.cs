@@ -54,9 +54,6 @@ namespace HB.Framework.EventBus
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void Subscribe(string eventType, IEventHandler handler)
         {
-            eventType.ThrowIfNullOrEmpty(nameof(eventType));
-            handler.ThrowIfNull(nameof(handler));
-
             _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
         }
 
@@ -67,8 +64,6 @@ namespace HB.Framework.EventBus
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void UnSubscribe(string eventType)
         {
-            eventType.ThrowIfNull(nameof(eventType));
-
             _engine.UnSubscribeHandler(eventyType: eventType);
         }
 

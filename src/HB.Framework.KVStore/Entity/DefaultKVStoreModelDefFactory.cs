@@ -1,6 +1,5 @@
 ﻿using HB.Framework.KVStore.Engine;
 using HB.Framework.KVStore.Properties;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ namespace HB.Framework.KVStore.Entity
 
         public DefaultKVStoreModelDefFactory(IKVStoreEngine kVStoreEngine)
         {
-            _kvStoreEngine = kVStoreEngine.ThrowIfNull(nameof(kVStoreEngine));
+            _kvStoreEngine = kVStoreEngine;
             _settings = _kvStoreEngine.Settings;
 
             IEnumerable<Type> allEntityTypes;
@@ -76,11 +75,22 @@ namespace HB.Framework.KVStore.Entity
             return resultDict;
         }
 
+        /// <summary>
+        /// GetDef
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public KVStoreEntityDef GetDef<T>()
         {
             return GetDef(typeof(T));
         }
 
+        /// <summary>
+        /// GetDef
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public KVStoreEntityDef GetDef(Type type)
         {
             if (!_defDict.ContainsKey(type))
@@ -97,6 +107,12 @@ namespace HB.Framework.KVStore.Entity
             return _defDict[type];
         }
 
+        /// <summary>
+        /// CreateEntityDef
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         private KVStoreEntityDef CreateEntityDef(Type type)
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))

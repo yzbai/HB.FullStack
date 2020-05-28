@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace HB.Framework.Http
@@ -16,8 +15,7 @@ namespace HB.Framework.Http
         /// <exception cref="EncoderFallbackException"></exception>
         public static string Protect(string token, IDataProtector dataProtector)
         {
-            ThrowIf.NullOrEmpty(token, nameof(token));
-            ThrowIf.Null(dataProtector, nameof(dataProtector));
+            ThrowIf.Empty(token, nameof(token));
 
             byte[] byteToken = Encoding.UTF8.GetBytes(token);
 
@@ -36,8 +34,6 @@ namespace HB.Framework.Http
         /// <exception cref="System.Security.Cryptography.CryptographicException">can cause by dataProtector.Unprotect</exception>
         public static string UnProtect(string protectedToken, IDataProtector dataProtector)
         {
-            ThrowIf.Null(dataProtector, nameof(dataProtector));
-
             if (protectedToken.IsNullOrEmpty())
             {
                 return string.Empty;
