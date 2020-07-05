@@ -84,23 +84,23 @@ namespace HB.Infrastructure.Tencent
             }
             catch (JsonException ex)
             {
-                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
 
                 return false;
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
                 return false;
             }
             catch (OverflowException ex)
             {
-                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
                 return false;
             }
             catch (FormatException ex)
             {
-                _logger.LogException(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
                 return false;
             }
 

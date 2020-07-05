@@ -6,16 +6,24 @@ namespace System
 {
     public static class EnvironmentUtil
     {
+        private static string? _aspnetcore_environment;
+
+        public static string AspNetCoreEnvironment
+        {
+            get
+            {
+                if (_aspnetcore_environment.IsNullOrEmpty())
+                {
+                    _aspnetcore_environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                }
+
+                return _aspnetcore_environment!;
+            }
+        }
+
         public static bool IsDevelopment()
         {
-            string? aspnetcore_environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-            if (!aspnetcore_environment.IsNullOrEmpty())
-            {
-                return aspnetcore_environment!.Equals("Development", GlobalSettings.ComparisonIgnoreCase);
-            }
-
-            return false;
+            return AspNetCoreEnvironment.Equals("Development", GlobalSettings.ComparisonIgnoreCase);
         }
     }
 }
