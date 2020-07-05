@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.AspNetCore.Http
+namespace System
 {
     public static class HttpContextExtensions
     {

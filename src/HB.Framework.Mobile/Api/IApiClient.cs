@@ -5,7 +5,7 @@ namespace HB.Framework.Client.Api
 {
     public interface IApiClient
     {
-        Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiData;
+        Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiResponseData;
         Task<ApiResponse> GetAsync(ApiRequest request);
     }
 }

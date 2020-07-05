@@ -27,15 +27,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.4" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.5" />
+    <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
+
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="3.1.5" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\HB.Component\src\HB.Component.Authorization\HB.Component.Authorization.csproj" />
+    <ProjectReference Include="..\..\..\HB.Component\src\HB.Component.Identity\HB.Component.Identity.csproj" />
     <ProjectReference Include="..\..\..\HB.Framework.Common\src\HB.Framework.Common\HB.Framework.Common.csproj" />
   </ItemGroup>
 
