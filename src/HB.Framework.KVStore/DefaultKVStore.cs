@@ -104,7 +104,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{EntityKey(keyValue)}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, $"DefaultKVStore::GetByKeyAsync, key:{keyValue}");
 
                 throw exception;
             }
@@ -136,7 +136,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{SerializeUtil.ToJson(t)}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, $"DefaultKVStore::GetByKeyAsync<T>, key:{SerializeUtil.ToJson(t)}");
 
                 throw exception;
             }
@@ -167,7 +167,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{SerializeUtil.ToJson(EntityKey(keyValues))}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, $"DefaultKVStore::GetByKeysAsync keys:{string.Join(',', keyValues.ToArray())}");
 
                 throw exception;
             }
@@ -197,7 +197,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{SerializeUtil.ToJson(keyValues)}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, $"DefaultKVStore::GetByKeysAsync<T> keys:{SerializeUtil.ToJson(keyValues)}");
 
                 throw exception;
             }
@@ -224,7 +224,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, $"DefaultKVStore::GetAllAsync,Type:{typeof(T).FullName}");
 
                 throw exception;
             }
@@ -269,7 +269,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, "");
 
                 throw exception;
             }
@@ -326,7 +326,7 @@ namespace HB.Framework.KVStore
 
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, "");
 
                 throw exception;
             }
@@ -369,7 +369,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, "");
 
                 throw exception;
             }
@@ -412,7 +412,7 @@ namespace HB.Framework.KVStore
             {
                 KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"keyValues:{SerializeUtil.ToJson(keyValues)}, versions:{SerializeUtil.ToJson(versions)}");
 
-                _logger.LogException(exception);
+                _logger.LogError(exception, "");
 
                 throw exception;
             }
