@@ -55,12 +55,12 @@ namespace HB.Framework.Http
             }
             catch (FormatException ex)
             {
-                _logger.LogException(ex, $"protectedToken:{protectedToken}");
+                _logger.LogError(ex, $"protectedToken:{protectedToken}");
                 return false;
             }
             catch (CryptographicException ex)
             {
-                _logger.LogException(ex, $"protectedToken:{protectedToken}");
+                _logger.LogError(ex, $"protectedToken:{protectedToken}");
                 return false;
             }
 

@@ -37,7 +37,7 @@ namespace HB.Framework.Client.Api
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiData
+        public async Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiResponseData
         {
             ApiResponse apiResponse = await GetAsync(request, typeof(T)).ConfigureAwait(false);
             ApiResponse<T> typedResponse = new ApiResponse<T>(apiResponse.HttpCode, apiResponse.Message, apiResponse.ErrCode);
@@ -303,7 +303,7 @@ namespace HB.Framework.Client.Api
             {
                 object? data = dataType == null ? null : await SerializeUtil.FromJsonAsync(dataType, responseStream).ConfigureAwait(false);
 
-                return new ApiResponse(data, (int)httpResponse.StatusCode);
+                return new ApiResponse(data as ApiResponseData, (int)httpResponse.StatusCode);
             }
             else
             {

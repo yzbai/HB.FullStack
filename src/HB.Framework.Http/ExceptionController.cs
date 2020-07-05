@@ -23,7 +23,7 @@ namespace HB.Framework.Http
         {
             IExceptionHandlerFeature exceptionHandlerFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();
 
-            _logger.LogException(exceptionHandlerFeature.Error);
+            _logger.LogError(exceptionHandlerFeature.Error, "Error From ExceptionController");
 
             ApiErrorResponse apiErrorResponse = new ApiErrorResponse(ApiError.EXCEPTIONTHROWN, exceptionHandlerFeature.Error.Message);
 
