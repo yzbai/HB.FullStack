@@ -11,8 +11,10 @@ namespace HB.Infrastructure.Tencent
     {
         public const string EndpointName = "Tecent_Captha";
 
-        public TCapthaOptions Value {
-            get {
+        public TCapthaOptions Value
+        {
+            get
+            {
                 return this;
             }
         }
@@ -24,9 +26,11 @@ namespace HB.Infrastructure.Tencent
 
     public class ApiKeySetting
     {
-        public string AppId { get; private set; }
+        public string AppId { get; set; } = null!;
 
-        public string AppSecretKey { get; private set; }
+        public string AppSecretKey { get; set; } = null!;
+
+        public ApiKeySetting() { }
 
         public ApiKeySetting(string appId, string appSecretKey)
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace HB.Framework.Http.Startup
+namespace HB.Framework.Http
 {
     public class JwtSettings
     {
