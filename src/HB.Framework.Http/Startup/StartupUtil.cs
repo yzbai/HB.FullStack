@@ -1,6 +1,5 @@
 ﻿using HB.Framework.Common.Api;
 using HB.Framework.Http;
-using HB.Framework.Http.Startup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
