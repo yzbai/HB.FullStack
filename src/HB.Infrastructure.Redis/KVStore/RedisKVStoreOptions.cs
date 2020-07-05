@@ -18,7 +18,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public IList<RedisInstanceSetting> ConnectionSettings { get; } = new List<RedisInstanceSetting>();
 
-        public KVStoreSettings KVStoreSettings { get; private set; } = new KVStoreSettings();
+        public KVStoreSettings KVStoreSettings { get; set; } = new KVStoreSettings();
 
     }
 }

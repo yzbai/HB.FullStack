@@ -31,7 +31,7 @@ namespace HB.Framework.Http
 
             await _cache.SetStringAsync(token, _defaultValue, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(expiredSeconds) }).ConfigureAwait(false);
 
-            return StringProtector.Protect(token, _dataProtector);
+            return _dataProtector.Protect(token);
         }
 
         public async Task<bool> CheckToken(string protectedToken)
@@ -45,7 +45,7 @@ namespace HB.Framework.Http
 
             try
             {
-                token = StringProtector.UnProtect(protectedToken, _dataProtector);
+                token = _dataProtector.Unprotect(protectedToken);
 
                 if (token.IsNullOrEmpty() || token.Length != _tokenlength || !token.StartsWith(_prefix, GlobalSettings.Comparison))
                 {

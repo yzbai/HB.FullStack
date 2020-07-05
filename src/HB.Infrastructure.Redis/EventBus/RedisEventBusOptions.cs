@@ -8,8 +8,10 @@ namespace HB.Infrastructure.Redis.EventBus
 {
     public class RedisEventBusOptions : IOptions<RedisEventBusOptions>
     {
-        public RedisEventBusOptions Value {
-            get {
+        public RedisEventBusOptions Value
+        {
+            get
+            {
                 return this;
             }
         }
@@ -28,6 +30,6 @@ namespace HB.Infrastructure.Redis.EventBus
         /// </summary>
         public int EventBusEventMessageExpiredHours { get; set; } = 24;
 
-        public EventBusSettings EventBusSettings { get; private set; } = new EventBusSettings();
+        public EventBusSettings EventBusSettings { get; set; } = new EventBusSettings();
     }
 }
