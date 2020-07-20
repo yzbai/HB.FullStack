@@ -19,11 +19,36 @@ namespace HB.Framework.Client
             return AppInfo.VersionString;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public static async Task<string> GetDeviceAddressAsync()
         {
-            Location location = await Geolocation.GetLastKnownLocationAsync().ConfigureAwait(false);
+            try
+            {
+                Location? location = await Geolocation.GetLastKnownLocationAsync().ConfigureAwait(false);
 
-            return $"{location.Latitude}.{location.Longitude}.{location.Altitude}.{location.Accuracy}.{location.Speed}.{location.Timestamp}";
+                if (location != null)
+                {
+                    return $"{location.Latitude}.{location.Longitude}.{location.Altitude}.{location.Accuracy}.{location.Speed}.{location.Timestamp}";
+                }
+            }
+            catch (FeatureNotSupportedException)
+            {
+                // Handle not supported on device exception
+            }
+            catch (FeatureNotEnabledException)
+            {
+                // Handle not enabled on device exception
+            }
+            catch (PermissionException)
+            {
+                // Handle permission exception
+            }
+            catch (Exception)
+            {
+                // Unable to get location
+            }
+
+            return "unkown";
         }
 
         public static string CreateNewDeviceId()

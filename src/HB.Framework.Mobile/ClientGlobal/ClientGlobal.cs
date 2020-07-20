@@ -92,21 +92,21 @@ namespace HB.Framework.Client
 
         public async Task<string> GetDeviceAddressAsync()
         {
-            if (_deviceAddress.IsNotNullOrEmpty())
-            {
-                return _deviceAddress!;
-            }
+            //if (_deviceAddress.IsNotNullOrEmpty())
+            //{
+            //    return _deviceAddress!;
+            //}
 
-            _deviceAddress = await PreferenceGetAsync(ClientNames.DeviceAddress).ConfigureAwait(false);
+            //_deviceAddress = await PreferenceGetAsync(ClientNames.DeviceAddress).ConfigureAwait(false);
 
-            if (_deviceAddress.IsNotNullOrEmpty())
-            {
-                return _deviceAddress!;
-            }
+            //if (_deviceAddress.IsNotNullOrEmpty())
+            //{
+            //    return _deviceAddress!;
+            //}
 
             _deviceAddress = await ClientUtils.GetDeviceAddressAsync().ConfigureAwait(false);
 
-            await PreferenceSetAsync(ClientNames.DeviceAddress, _deviceAddress).ConfigureAwait(false);
+            //await PreferenceSetAsync(ClientNames.DeviceAddress, _deviceAddress).ConfigureAwait(false);
 
             return _deviceAddress!;
         }
