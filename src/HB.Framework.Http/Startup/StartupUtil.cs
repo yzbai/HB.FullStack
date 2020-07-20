@@ -100,11 +100,12 @@ namespace System
 
                             ApiError error = c.AuthenticateFailure switch
                             {
+                                null => ApiError.NOAUTHORITY,
                                 SecurityTokenExpiredException s => ApiError.ApiTokenExpired,
                                 _ => ApiError.NOAUTHORITY
                             };
 
-                            ApiErrorResponse errorResponse = new ApiErrorResponse(error, c.AuthenticateFailure.Message);
+                            ApiErrorResponse errorResponse = new ApiErrorResponse(error, c.AuthenticateFailure?.Message);
 
                             return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
                         }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Polly;
 using System;
+using System.Net.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -51,7 +52,21 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     //TODO: Move this to options
                     return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
-                });
+                })
+#if DEBUG
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                {
+                    HttpClientHandler handler = new HttpClientHandler();
+                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                    {
+                        if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                            return true;
+                        return errors == System.Net.Security.SslPolicyErrors.None;
+                    };
+                    return handler;
+                })
+#endif
+                ;
             });
 
 

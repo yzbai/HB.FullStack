@@ -37,9 +37,9 @@ namespace HB.Framework.Client.Api
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<ApiResponse<T>> GetAsync<T>(ApiRequest request) where T : ApiResponseData
+        public async Task<ApiResponse<T>> RequestAsync<T>(ApiRequest request) where T : ApiResponseData
         {
-            ApiResponse apiResponse = await GetAsync(request, typeof(T)).ConfigureAwait(false);
+            ApiResponse apiResponse = await RequestAsync(request, typeof(T)).ConfigureAwait(false);
             ApiResponse<T> typedResponse = new ApiResponse<T>(apiResponse.HttpCode, apiResponse.Message, apiResponse.ErrCode);
 
             if (apiResponse.Data != null)
@@ -49,13 +49,13 @@ namespace HB.Framework.Client.Api
             return typedResponse;
         }
 
-        public Task<ApiResponse> GetAsync(ApiRequest request)
+        public Task<ApiResponse> RequestAsync(ApiRequest request)
         {
-            return GetAsync(request, null);
+            return RequestAsync(request, null);
         }
 
         //多次尝试，自动refresh token，
-        private async Task<ApiResponse> GetAsync(ApiRequest request, Type? dataType)
+        private async Task<ApiResponse> RequestAsync(ApiRequest request, Type? dataType)
         {
             await AddDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
@@ -164,7 +164,7 @@ namespace HB.Framework.Client.Api
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
                         //刷新成功，再次调用
-                        return await GetAsync(request, dataType).ConfigureAwait(false);
+                        return await RequestAsync(request, dataType).ConfigureAwait(false);
                     }
 
                     return response;
@@ -200,7 +200,7 @@ namespace HB.Framework.Client.Api
 
                         await _mobileGlobal.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
 
-                        return await GetAsync(request, dataType).ConfigureAwait(false);
+                        return await RequestAsync(request, dataType).ConfigureAwait(false);
                     }
                 }
 
@@ -346,13 +346,11 @@ namespace HB.Framework.Client.Api
 
         private async Task AddDeviceInfoAlwaysAsync(ApiRequest request)
         {
-            request.AddParameter(ClientNames.DeviceId, await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false));
-            request.AddParameter(ClientNames.DeviceType, await _mobileGlobal.GetDeviceTypeAsync().ConfigureAwait(false));
-            request.AddParameter(ClientNames.DeviceVersion, await _mobileGlobal.GetDeviceVersionAsync().ConfigureAwait(false));
-            request.AddParameter(ClientNames.DeviceAddress, await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false));
+            request.DeviceId = await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false);
+            request.DeviceType = await _mobileGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
+            request.DeviceVersion = await _mobileGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
+            request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
-
-
 
         #endregion
     }
