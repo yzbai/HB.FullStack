@@ -15,20 +15,19 @@ namespace HB.Framework.Client.Api
 {
     public class ApiClient : IApiClient
     {
-        //move to settings
-        private const string _refreshTokenFrequencyCheckResource = "_Fqc_Refresh";
+        private const string _refreshTokenFrequencyCheckResourceType = "_Fqc_Refresh";
 
         private static readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
+
+        private readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();
+
+        private readonly IDictionary<string, bool> _lastRefreshTokenResults = new Dictionary<string, bool>();
 
         private readonly ApiClientOptions _options;
 
         private readonly IHttpClientFactory _httpClientFactory;
 
         private readonly IClientGlobal _mobileGlobal;
-
-        private readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();
-
-        private readonly IDictionary<string, bool> _lastRefreshTokenResults = new Dictionary<string, bool>();
 
         public ApiClient(IOptions<ApiClientOptions> options, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
         {
@@ -44,8 +43,9 @@ namespace HB.Framework.Client.Api
 
             if (apiResponse.Data != null)
             {
-                typedResponse.Data = (T)apiResponse.Data;
+                typedResponse.Data = apiResponse.Data as T;
             }
+
             return typedResponse;
         }
 
@@ -73,7 +73,9 @@ namespace HB.Framework.Client.Api
             {
                 EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductType == request.GetProductType() && e.Version == request.GetApiVersion());
 
-                ApiResponse response = await GetResponseCore(request, endpoint, dataType).ConfigureAwait(false);
+                HttpClient httpClient = GetHttpClient(endpoint);
+
+                ApiResponse response = await request.GetApiResponse(dataType, httpClient, endpoint.NeedHttpMethodOveride).ConfigureAwait(false);
 
                 return await AutoRefreshTokenAsync(request, response, endpoint, dataType).ConfigureAwait(false);
             }
@@ -87,52 +89,6 @@ namespace HB.Framework.Client.Api
             }
         }
 
-        #region Privates
-
-        /// <summary>
-        /// GetResponseCore
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="endpointSettings"></param>
-        /// <param name="dataType"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.Client.ClientException"></exception>
-        private async Task<ApiResponse> GetResponseCore(ApiRequest request, EndpointSettings endpointSettings, Type? dataType)
-        {
-            using HttpRequestMessage httpRequest = ConstructureHttpRequest(request, endpointSettings);
-            HttpClient httpClient = GetHttpClient(endpointSettings);
-
-            using HttpResponseMessage httpResponse = await GetResponseActual(httpRequest, httpClient).ConfigureAwait(false);
-            return await ConstructureHttpResponseAsync(httpResponse, dataType).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// GetResponseActual
-        /// </summary>
-        /// <param name="httpRequestMessage"></param>
-        /// <param name="httpClient"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.Client.ClientException"></exception>
-        private static async Task<HttpResponseMessage> GetResponseActual(HttpRequestMessage httpRequestMessage, HttpClient httpClient)
-        {
-            try
-            {
-                return await httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new ClientException($"ApiClient.GetResponseActual Error", ex);
-            }
-        }
-
-        /// <summary>
-        /// AutoRefreshTokenAsync
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="response"></param>
-        /// <param name="endpointSettings"></param>
-        /// <param name="dataType"></param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">Ignore.</exception>
         /// <exception cref="SemaphoreFullException">Ignore.</exception>
         /// <exception cref="HB.Framework.Client.ClientException"></exception>
@@ -159,7 +115,10 @@ namespace HB.Framework.Client.Api
                 string accessTokenHashKey = SecurityUtil.GetHash(accessToken!);
 
                 //不久前刷新过
-                if (!_frequencyChecker.Check(_refreshTokenFrequencyCheckResource, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.TokenRefreshSettings.TokenRefreshIntervalSeconds)))
+                if (!_frequencyChecker.Check(
+                    _refreshTokenFrequencyCheckResourceType,
+                    accessTokenHashKey,
+                    TimeSpan.FromSeconds(endpointSettings.TokenRefreshSettings.TokenRefreshIntervalSeconds)))
                 {
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -185,11 +144,15 @@ namespace HB.Framework.Client.Api
                     refreshRequest.AddParameter(ClientNames.AccessToken, accessToken!);
                     refreshRequest.AddParameter(ClientNames.RefreshToken, refreshToken!);
 
-                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(e => e.ProductType == endpointSettings.TokenRefreshSettings.TokenRefreshProductType && e.Version == endpointSettings.TokenRefreshSettings.TokenRefreshVersion);
+                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(
+                        e => e.ProductType == endpointSettings.TokenRefreshSettings.TokenRefreshProductType &&
+                        e.Version == endpointSettings.TokenRefreshSettings.TokenRefreshVersion);
+
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 
-                    using HttpRequestMessage httpRefreshRequest = ConstructureHttpRequest(refreshRequest, endpointSettings);
-                    using HttpResponseMessage refreshResponse = await GetResponseActual(httpRefreshRequest, httpClient).ConfigureAwait(false);
+                    using HttpRequestMessage httpRefreshRequest = refreshRequest.ToHttpRequestMessage(tokenRefreshEndpoint.NeedHttpMethodOveride);
+                    using HttpResponseMessage refreshResponse = await httpRefreshRequest.GetHttpResponseMessage(httpClient).ConfigureAwait(false);
+
                     if (refreshResponse.StatusCode == HttpStatusCode.OK)
                     {
                         _lastRefreshTokenResults[accessTokenHashKey] = true;
@@ -224,104 +187,6 @@ namespace HB.Framework.Client.Api
             }
         }
 
-        /// <summary>
-        /// ConstructureHttpRequest
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="endpointSettings"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException">Ignore.</exception>
-        private static HttpRequestMessage ConstructureHttpRequest(ApiRequest request, EndpointSettings endpointSettings)
-        {
-            HttpMethod httpMethod = request.GetHttpMethod();
-
-            if (endpointSettings.NeedHttpMethodOveride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
-            {
-                request.AddHeader("X-HTTP-Method-Override", httpMethod.Method);
-                httpMethod = HttpMethod.Post;
-            }
-
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, ConstructureRequestUrl(request));
-
-            if (request.GetHttpMethod() != HttpMethod.Get)
-            {
-                httpRequest.Content = new FormUrlEncodedContent(request.GetParameters());
-            }
-
-            request.GetHeaders().ForEach(kv => httpRequest.Headers.Add(kv.Key, kv.Value));
-
-            return httpRequest;
-        }
-
-        private static string ConstructureRequestUrl(ApiRequest request)
-        {
-            StringBuilder requestUrlBuilder = new StringBuilder();
-
-            if (!request.GetApiVersion().IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append(request.GetApiVersion());
-            }
-
-            if (!request.GetResourceName().IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append("/");
-                requestUrlBuilder.Append(request.GetResourceName());
-            }
-
-            if (!request.GetCondition().IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append("/");
-                requestUrlBuilder.Append(request.GetCondition());
-            }
-
-            if (request.GetHttpMethod() == HttpMethod.Get)
-            {
-                string query = request.GetParameters().ToHttpValueCollection().ToString();
-
-                if (!query.IsNullOrEmpty())
-                {
-                    requestUrlBuilder.Append("?");
-                    requestUrlBuilder.Append(query);
-                }
-            }
-
-            return requestUrlBuilder.ToString();
-        }
-
-        /// <summary>
-        /// ConstructureHttpResponseAsync
-        /// </summary>
-        /// <param name="httpResponse"></param>
-        /// <param name="dataType"></param>
-        /// <returns></returns>
-        /// <exception cref="System.Text.Json.JsonException">Ignore.</exception>
-        private static async Task<ApiResponse> ConstructureHttpResponseAsync(HttpResponseMessage httpResponse, Type? dataType)
-        {
-            Stream responseStream = await httpResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
-
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                object? data = dataType == null ? null : await SerializeUtil.FromJsonAsync(dataType, responseStream).ConfigureAwait(false);
-
-                return new ApiResponse(data as ApiResponseData, (int)httpResponse.StatusCode);
-            }
-            else
-            {
-                string mediaType = httpResponse.Content.Headers.ContentType.MediaType;
-
-                if (mediaType == "application/problem+json" || mediaType == "application/json")
-                {
-                    ApiErrorResponse errorResponse = await SerializeUtil.FromJsonAsync<ApiErrorResponse>(responseStream).ConfigureAwait(false);
-
-                    return new ApiResponse((int)httpResponse.StatusCode, errorResponse.Message, errorResponse.Code);
-                }
-                else
-                {
-                    return new ApiResponse((int)httpResponse.StatusCode, Resources.InternalServerErrorMessage, ApiError.ApiInternalError);
-                }
-            }
-        }
-
         private HttpClient GetHttpClient(EndpointSettings endpoint)
         {
             return _httpClientFactory.CreateClient(EndpointSettings.GetHttpClientName(endpoint));
@@ -349,9 +214,8 @@ namespace HB.Framework.Client.Api
             request.DeviceId = await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false);
             request.DeviceType = await _mobileGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
             request.DeviceVersion = await _mobileGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
-            request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
+            //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        #endregion
     }
 }
