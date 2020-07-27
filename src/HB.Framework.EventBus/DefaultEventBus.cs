@@ -17,7 +17,7 @@ namespace HB.Framework.EventBus
         public DefaultEventBus(IEventBusEngine eventBusEngine)
         {
             _engine = eventBusEngine;
-            _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventType);
+            _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventName);
         }
 
         /// <summary>
@@ -26,14 +26,9 @@ namespace HB.Framework.EventBus
         /// <param name="eventMessage"></param>
         /// <returns></returns>
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        public async Task PublishAsync(EventMessage eventMessage)
+        public async Task PublishAsync(string eventName, string jsonData)
         {
-            if (!EventMessage.IsValid(eventMessage))
-            {
-                throw new EventBusException($"not a valid event message : {SerializeUtil.ToJson(eventMessage)}");
-            }
-
-            await _engine.PublishAsync(GetBrokerName(eventMessage.Type), eventMessage).ConfigureAwait(false);
+            await _engine.PublishAsync(GetBrokerName(eventName), eventName, jsonData).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -54,7 +49,7 @@ namespace HB.Framework.EventBus
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void Subscribe(string eventType, IEventHandler handler)
         {
-            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventType: eventType, eventHandler: handler);
+            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventName: eventType, eventHandler: handler);
         }
 
         /// <summary>
@@ -64,23 +59,23 @@ namespace HB.Framework.EventBus
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         public void UnSubscribe(string eventType)
         {
-            _engine.UnSubscribeHandler(eventyType: eventType);
+            _engine.UnSubscribeHandler(eventyName: eventType);
         }
 
         /// <summary>
         /// GetBrokerName
         /// </summary>
-        /// <param name="eventType"></param>
+        /// <param name="eventName"></param>
         /// <returns></returns>
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        private string GetBrokerName(string eventType)
+        private string GetBrokerName(string eventName)
         {
-            if (_eventSchemaDict.TryGetValue(eventType, out EventSchema eventSchema))
+            if (_eventSchemaDict.TryGetValue(eventName, out EventSchema eventSchema))
             {
                 return eventSchema.BrokerName;
             }
 
-            throw new EventBusException($"Not Found Matched EventSchema for EventType:{eventType}");
+            throw new EventBusException($"Not Found Matched EventSchema for EventType:{eventName}");
         }
 
         public void Close()

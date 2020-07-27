@@ -10,8 +10,11 @@ namespace HB.Framework.EventBus
     public class EventSchema
     {
         [DisallowNull, NotNull]
-        public string? EventType { get; set; }
+        public string? EventName { get; set; }
 
+        /// <summary>
+        /// 比如RedisEventBus中的ConnectionSettings的InstanceName。即处理这个event的设施
+        /// </summary>
         [DisallowNull, NotNull]
         public string? BrokerName { get; set; }
 

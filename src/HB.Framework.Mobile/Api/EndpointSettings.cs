@@ -10,7 +10,7 @@ namespace HB.Framework.Client.Api
         /// 产品名，一般为站点类名
         /// </summary>
         [Required]
-        public string? ProductType { get; set; }
+        public string? ProductName { get; set; }
 
         /// <summary>
         /// 版本
@@ -26,12 +26,12 @@ namespace HB.Framework.Client.Api
 
         public bool NeedHttpMethodOveride { get; set; } = true;
 
-        public TokenRefreshSettings TokenRefreshSettings { get; set; } = new TokenRefreshSettings();
+        public JwtSettings JwtSettings { get; set; } = new JwtSettings();
 
 
         public static string GetHttpClientName(EndpointSettings endpoint)
         {
-            return endpoint.ProductType + "_" + endpoint.Version;
+            return endpoint.ProductName + "_" + endpoint.Version;
         }
     }
 }
