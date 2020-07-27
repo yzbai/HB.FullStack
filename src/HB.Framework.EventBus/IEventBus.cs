@@ -23,16 +23,16 @@ namespace HB.Framework.EventBus.Abstractions
         /// <param name="eventMessage"></param>
         /// <returns>是否发布成功，只有返回true才能确保消息不丢失</returns>
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        Task PublishAsync(EventMessage eventMessage);
+        Task PublishAsync(string eventName, string jsonData);
 
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        void Subscribe(string eventType, IEventHandler handler);
+        void Subscribe(string eventName, IEventHandler handler);
 
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        void UnSubscribe(string eventType);
+        void UnSubscribe(string eventName);
 
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        void StartHandle(string eventType);
+        void StartHandle(string eventName);
 
         void Close();
     }

@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
-    /// <summary>
-    /// TODO: 未来使用多线程, 对于_consumeTask 和 _historyTask
-    /// </summary>
     internal class ConsumeTaskManager : IDisposable
     {
         private const int _cONSUME_INTERVAL_SECONDS = 5;

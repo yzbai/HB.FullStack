@@ -11,13 +11,13 @@ namespace HB.Infrastructure.Redis.EventBus
 
         public long Timestamp { get; set; } = TimeUtil.CurrentTimestampSeconds();
 
-        public string Type { get; set; }
+        public string EventName { get; set; }
 
         public string JsonData { get; set; }
 
-        public EventMessageEntity(string type, string jsonData)
+        public EventMessageEntity(string eventName, string jsonData)
         {
-            Type = type;
+            EventName = eventName;
             JsonData = jsonData;
         }
 

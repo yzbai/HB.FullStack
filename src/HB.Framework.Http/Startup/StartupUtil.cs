@@ -1,5 +1,6 @@
 ﻿using HB.Framework.Common.Api;
 using HB.Framework.Http;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
@@ -73,78 +75,79 @@ namespace System
         /// <param name="audience">我是谁，即jwt是颁发给谁的</param>
         /// <param name="authority">当局。我该去向谁核实，即是谁颁发了这个jwt</param>
         /// <returns></returns>
-        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, Action<JwtSettings> action)
+        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             JwtSettings jwtSettings = new JwtSettings();
-            action(jwtSettings);
+            configuration.Bind(jwtSettings);
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-            }).AddJwtBearer(jwtOptions =>
-            {
-                jwtOptions.Audience = jwtSettings.Audience;
-                jwtOptions.Authority = jwtSettings.Authority;
-                jwtOptions.Events = new JwtBearerEvents
+            return
+                services
+                .AddAuthentication(options =>
                 {
-                    OnChallenge = c =>
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(jwtOptions =>
+                {
+                    jwtOptions.Audience = jwtSettings.Audience;
+                    jwtOptions.Authority = jwtSettings.Authority;
+
+                    jwtOptions.Events = new JwtBearerEvents
                     {
-                        c.HandleResponse();
-                        c.Response.StatusCode = 401;
-
-                        if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
+                        OnChallenge = c =>
                         {
-                            c.Response.ContentType = "application/json";
+                            c.HandleResponse();
+                            c.Response.StatusCode = 401;
 
-                            ApiError error = c.AuthenticateFailure switch
+                            if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
                             {
-                                null => ApiError.NOAUTHORITY,
-                                SecurityTokenExpiredException s => ApiError.ApiTokenExpired,
-                                _ => ApiError.NOAUTHORITY
-                            };
+                                c.Response.ContentType = "application/problem+json";
 
-                            ApiErrorResponse errorResponse = new ApiErrorResponse(error, c.AuthenticateFailure?.Message);
+                                ApiError error = c.AuthenticateFailure switch
+                                {
+                                    null => ApiError.NOAUTHORITY,
+                                    SecurityTokenExpiredException s => ApiError.ApiTokenExpired,
+                                    _ => ApiError.NOAUTHORITY
+                                };
 
-                            return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
-                        }
-                        else
+                                ApiErrorResponse errorResponse = new ApiErrorResponse(error, c.AuthenticateFailure?.Message);
+
+                                return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
+                            }
+                            else
+                            {
+                                return Task.CompletedTask;
+                            }
+                        },
+                        OnAuthenticationFailed = c =>
+                        {
+                            //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
+                            return Task.CompletedTask;
+                        },
+                        OnMessageReceived = c =>
                         {
                             return Task.CompletedTask;
-                        }
-                    },
-                    OnAuthenticationFailed = c =>
-                    {
-                        //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
-                        return Task.CompletedTask;
-                    },
-                    OnMessageReceived = c =>
-                    {
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = c =>
-                    {
-                        //验证DeviceId 与 JWT 中的DeviceId 是否一致
-                        string? jwt_DeviceId = c.Principal?.GetDeviceId();
-                        string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);
-
-
-                        if (!string.IsNullOrWhiteSpace(jwt_DeviceId) && jwt_DeviceId.Equals(request_DeviceId, GlobalSettings.ComparisonIgnoreCase))
+                        },
+                        OnTokenValidated = c =>
                         {
+                            //验证DeviceId 与 JWT 中的DeviceId 是否一致
+                            string? jwt_DeviceId = c.Principal?.GetDeviceId();
+                            string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);
+
+
+                            if (!string.IsNullOrWhiteSpace(jwt_DeviceId) && jwt_DeviceId.Equals(request_DeviceId, GlobalSettings.ComparisonIgnoreCase))
+                            {
+                                return Task.CompletedTask;
+                            }
+
+                            c.Fail("Token DeviceId do not match Request DeviceId");
+
+                            Log.Warning($"DeviceId:{request_DeviceId} do not match Request DeviceId : {jwt_DeviceId}");
+
                             return Task.CompletedTask;
                         }
-
-                        c.Fail("Token DeviceId do not match Request DeviceId");
-
-                        Log.Warning($"DeviceId:{request_DeviceId} do not match Request DeviceId : {jwt_DeviceId}");
-
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-
-            return services;
+                    };
+                });
         }
 
         public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
