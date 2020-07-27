@@ -15,17 +15,17 @@ namespace HB.Framework.EventBus
         /// </summary>
         /// <param name="eventMessage"></param>
         /// <exception cref="EventBusException"></exception>
-        Task PublishAsync(string brokerName, EventMessage eventMessage);
+        Task PublishAsync(string brokerName, string eventName, string jsonData);
 
         /// <exception cref="EventBusException"></exception>
-        void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler);
+        void SubscribeHandler(string brokerName, string eventName, IEventHandler eventHandler);
 
         /// <exception cref="EventBusException"></exception>
-        void UnSubscribeHandler(string eventyType);
-        
+        void UnSubscribeHandler(string eventyName);
+
         /// <exception cref="EventBusException"></exception>
-        void StartHandle(string eventType);
-        
+        void StartHandle(string eventName);
+
         void Close();
     }
 }
