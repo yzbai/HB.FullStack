@@ -43,15 +43,15 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <param name="eventMessage"></param>
         /// <returns></returns>
         /// <exception cref="EventBusException"></exception>
-        public async Task PublishAsync(string brokerName, EventMessage eventMessage)
+        public async Task PublishAsync(string brokerName, string eventName, string jsonData)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
             IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger).ConfigureAwait(false);
 
-            EventMessageEntity entity = new EventMessageEntity(eventMessage.Type, eventMessage.JsonData);
+            EventMessageEntity entity = new EventMessageEntity(eventName, jsonData);
 
-            await database.ListLeftPushAsync(QueueName(entity.Type), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
+            await database.ListLeftPushAsync(QueueName(entity.EventName), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
 
         }
 
@@ -129,23 +129,26 @@ namespace HB.Infrastructure.Redis.EventBus
             return eventType + "_Acks";
         }
 
-        public EventBusSettings EventBusSettings {
-            get {
+        public EventBusSettings EventBusSettings
+        {
+            get
+            {
                 return _options.EventBusSettings;
             }
         }
 
         public void Close()
         {
-            lock(_consumTaskCloseLocker)
+            lock (_consumTaskCloseLocker)
             {
-                _consumeTaskManagers.ForEach(kv => {
+                _consumeTaskManagers.ForEach(kv =>
+                {
                     kv.Value.Dispose();
                 });
             }
         }
 
-        
+
         /// <summary>
         /// GetRedisInstanceSetting
         /// </summary>
