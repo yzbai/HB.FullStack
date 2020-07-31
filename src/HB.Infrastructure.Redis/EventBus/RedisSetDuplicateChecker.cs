@@ -18,7 +18,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         private readonly long _aliveSeconds;
         private readonly ILogger _logger;
 
-        private readonly ConcurrentDictionary<string, string> _tokenDict = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> _tokenDict = new ConcurrentDictionary<string, string>();
 
         public RedisSetDuplicateChecker(RedisInstanceSetting setting, long aliveSeconds, ILogger logger)
         {
@@ -27,27 +27,39 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
             _logger = logger;
         }
 
-        public bool Lock(string setName, string id, out string token)
+        #region Lock & Release
+
+        public static bool Lock(string setName, string id, out string token)
         {
             token = SecurityUtil.CreateUniqueToken();
 
             string tokenDictKey = TokenDictKey(setName, id);
 
-            if (_tokenDict.TryAdd(tokenDictKey, token))
-            {
-                return true;
-            }
-
-            return false;
+            return _tokenDict.TryAdd(tokenDictKey, token);
         }
 
-        public void Release(string setName, string id, string token)
+        public static void Release(string setName, string id, string token)
         {
             if (CheckToken(setName, id, token))
             {
                 _tokenDict.TryRemove(TokenDictKey(setName, id), out _);
             }
         }
+
+        private static bool CheckToken(string setName, string id, string token)
+        {
+            if (_tokenDict.TryGetValue(TokenDictKey(setName, id), out string storedToken))
+            {
+                if (storedToken.Equals(token, GlobalSettings.Comparison))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        #endregion
 
         public async Task<bool> IsExistAsync(string setName, string id, string token)
         {
@@ -95,17 +107,6 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
             return setName + "_" + id;
         }
 
-        private bool CheckToken(string setName, string id, string token)
-        {
-            if (_tokenDict.TryGetValue(TokenDictKey(setName, id), out string storedToken))
-            {
-                if(storedToken.Equals(token, GlobalSettings.Comparison))
-                {
-                    return true;
-                }
-            }
 
-            return false;
-        }
     }
 }
