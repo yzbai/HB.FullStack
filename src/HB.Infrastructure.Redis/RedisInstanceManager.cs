@@ -5,6 +5,7 @@ using Polly;
 using Polly.Retry;
 using StackExchange.Redis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,30 +22,42 @@ namespace HB.Infrastructure.Redis
         {
             if (!_connectionDict.ContainsKey(setting.InstanceName))
             {
-                _connectionDict[setting.InstanceName] = new RedisConnection(setting.ConnectionString);
+                _connectionLock.Wait();
+
+                //double check
+                if (!_connectionDict.ContainsKey(setting.InstanceName))
+                {
+                    _connectionDict[setting.InstanceName] = new RedisConnection(setting.ConnectionString); ;
+                }
+
+                _connectionLock.Release();
             }
 
             RedisConnection redisWrapper = _connectionDict[setting.InstanceName];
 
-            while (redisWrapper.Connection != null && redisWrapper.Connection.IsConnecting)
+            try
             {
-                await Task.Delay(1000).ConfigureAwait(false);
-            }
+                _connectionLock.Wait();
 
-            if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
-            {
-                try
+                while (redisWrapper.Connection != null && redisWrapper.Connection.IsConnecting)
                 {
-                    _connectionLock.Wait();
+                    await Task.Delay(1000).ConfigureAwait(false);
+                }
 
+                if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
+                {
+                    //double check
+                    //if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
+                    //{
                     redisWrapper.Connection?.Dispose();
 
                     ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(redisWrapper.ConnectionString);
 
-                    //configurationOptions.AbortOnConnectFail = false;
-                    //configurationOptions.KeepAlive = 60;
-                    //configurationOptions.ConnectTimeout = 10 * 1000;
-                    //configurationOptions.SyncTimeout = 100 * 1000;
+                    //TODO: 调查参数
+                    configurationOptions.AbortOnConnectFail = false;
+                    configurationOptions.KeepAlive = 30;
+                    configurationOptions.ConnectTimeout = 10 * 1000;
+                    configurationOptions.SyncTimeout = 100 * 1000;
 
                     await ReConnectPolicyAsync(logger, redisWrapper.ConnectionString).ExecuteAsync(async () =>
                     {
@@ -52,16 +65,18 @@ namespace HB.Infrastructure.Redis
                         redisWrapper.Database = redisWrapper.Connection.GetDatabase(setting.DatabaseNumber);
                         //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
 
-                        logger.LogInformation($"Redis KVStoreEngine Connection ReConnected : {setting.InstanceName}");
+                        logger.LogInformation($"Redis KVStoreEngine Connection Connected : {setting.InstanceName}");
                     }).ConfigureAwait(false);
-                }
-                finally
-                {
-                    _connectionLock.Release();
-                }
-            }
+                    //}
 
-            return redisWrapper.Database!;
+                }
+
+                return redisWrapper.Database!;
+            }
+            finally
+            {
+                _connectionLock.Release();
+            }
         }
 
         private static AsyncRetryPolicy ReConnectPolicyAsync(ILogger logger, string connectionString)
