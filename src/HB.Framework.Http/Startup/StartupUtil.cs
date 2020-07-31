@@ -160,6 +160,7 @@ namespace System
                     //need authenticated by default. no need add [Authorize] everywhere
                     AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
+                    //options.Filters
                 })
                 .ConfigureApiBehaviorOptions(apiBehaviorOptions =>
                 {

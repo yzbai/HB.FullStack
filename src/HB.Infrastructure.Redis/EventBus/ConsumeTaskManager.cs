@@ -12,7 +12,7 @@ namespace HB.Infrastructure.Redis.EventBus
     internal class ConsumeTaskManager : IDisposable
     {
         private const int _cONSUME_INTERVAL_SECONDS = 5;
-        private const string _hISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV [1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV [2] + 0) then redis.call('rpush', KEYS [1], rawEvent) return 1 end if (redis.call('zrank', KEYS [2], eid) ~= nil) then return 2 end redis.call('rpush', KEYS [3], rawEvent) return 3";
+        private const string _hISTORY_REDIS_SCRIPT = "local rawEvent = redis.call('rpop', KEYS[1]) if (not rawEvent) then return 0 end local event = cjson.decode(rawEvent) local aliveTime = ARGV[1] - event[\"Timestamp\"] local eid = event[\"Guid\"] if (aliveTime < ARGV[2] + 0) then redis.call('rpush', KEYS[1], rawEvent) return 1 end if (redis.call('zrank', KEYS[2], eid) ~= nil) then redis.call('zrem', KEYS[2], eid) return 2 end redis.call('rpush', KEYS[3], rawEvent) return 3";
 
         private readonly string _eventType;
         private readonly ILogger _logger;
@@ -93,6 +93,8 @@ namespace HB.Infrastructure.Redis.EventBus
                     --如果已存在acks set中，则直接返回
                     if (redis.call('zrank', KEYS [2], eid) ~= nil)
                     then
+                        -- 移除acks队列
+                        redis.call('zrem', KEYS [2], eid)
                         return 2
                     end
 
@@ -194,7 +196,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
 
-                if (!_duplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
+                if (!RedisSetDuplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
                 {
                     //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
                     continue;
@@ -206,7 +208,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 {
                     _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
 
-                    _duplicateChecker.Release(AcksSetName, entity.Guid, token);
+                    RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
 
                     continue;
                 }
@@ -225,7 +227,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                 //5, Acks
                 _duplicateChecker.AddAsync(AcksSetName, entity.Guid, entity.Timestamp, token).Wait();
-                _duplicateChecker.Release(AcksSetName, entity.Guid, token);
+                RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
             }
         }
 
