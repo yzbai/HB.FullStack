@@ -143,8 +143,8 @@ namespace HB.Framework.Client.Api
                         HttpMethod.Put,
                         endpointSettings.JwtSettings!.ResourceName!);
 
-                    refreshRequest.AddParameter(ClientNames.AccessToken, accessToken!);
-                    refreshRequest.AddParameter(ClientNames.RefreshToken, refreshToken!);
+                    refreshRequest.SetParameter(ClientNames.AccessToken, accessToken!);
+                    refreshRequest.SetParameter(ClientNames.RefreshToken, refreshToken!);
 
                     EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(
                         e => e.ProductName == endpointSettings.JwtSettings.ProductName &&
@@ -212,7 +212,7 @@ namespace HB.Framework.Client.Api
                 return false;
             }
 
-            request.Jwt = accessToken!;
+            request.SetJwt(accessToken!);
 
             return true;
         }
@@ -221,7 +221,7 @@ namespace HB.Framework.Client.Api
         {
             if (_options.TryGetApiKey(apiKeyRequest.GetApiKeyName(), out string key))
             {
-                apiKeyRequest.ApiKey = key;
+                apiKeyRequest.SetApiKey(key);
                 return true;
             }
 
