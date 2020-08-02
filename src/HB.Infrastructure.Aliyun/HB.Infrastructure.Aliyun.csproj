@@ -15,14 +15,14 @@
 
 
   <ItemGroup>
-    <PackageReference Include="aliyun-net-sdk-core" Version="1.5.6" />
-    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.10.0" />
+    <PackageReference Include="aliyun-net-sdk-core" Version="1.5.8" />
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.11.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Polly" Version="7.2.1" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.6" />
   </ItemGroup>
 
 

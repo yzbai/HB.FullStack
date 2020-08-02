@@ -96,18 +96,18 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 停止处理
         /// </summary>
         /// <exception cref="EventBusException"></exception>
-        public void UnSubscribeHandler(string eventType)
+        public async Task UnSubscribeHandlerAsync(string eventType)
         {
+            await _consumeTaskManagers[eventType].CancelAsync().ConfigureAwait(false);
+
+            _consumeTaskManagers[eventType].Dispose();
+
             lock (_consumeTaskManagerLocker)
             {
                 if (!_consumeTaskManagers.ContainsKey(eventType))
                 {
                     throw new EventBusException($"Handler for EventType:{eventType} not Exist.");
                 }
-
-                _consumeTaskManagers[eventType].Cancel();
-
-                _consumeTaskManagers[eventType].Dispose();
 
                 //_consumeTaskManagers[eventType] = null;
                 _consumeTaskManagers.Remove(eventType);
