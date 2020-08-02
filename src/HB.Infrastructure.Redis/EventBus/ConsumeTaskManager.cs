@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
+    //TODO: 改用Task
+    //Handler 改用Async
     internal class ConsumeTaskManager : IDisposable
     {
         private const int _cONSUME_INTERVAL_SECONDS = 5;
