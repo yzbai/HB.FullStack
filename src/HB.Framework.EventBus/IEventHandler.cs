@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HB.Framework.EventBus.Abstractions
 {
@@ -8,6 +9,6 @@ namespace HB.Framework.EventBus.Abstractions
     {
         //string EventType { get; }
 
-        void Handle(string jsonData);
+        Task HandleAsync(string jsonData);
     }
 }

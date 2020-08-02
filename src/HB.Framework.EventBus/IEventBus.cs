@@ -29,7 +29,7 @@ namespace HB.Framework.EventBus.Abstractions
         void Subscribe(string eventName, IEventHandler handler);
 
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        void UnSubscribe(string eventName);
+        Task UnSubscribeAsync(string eventName);
 
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
         void StartHandle(string eventName);
