@@ -21,7 +21,7 @@ namespace HB.Framework.EventBus
         void SubscribeHandler(string brokerName, string eventName, IEventHandler eventHandler);
 
         /// <exception cref="EventBusException"></exception>
-        void UnSubscribeHandler(string eventyName);
+        Task UnSubscribeHandlerAsync(string eventyName);
 
         /// <exception cref="EventBusException"></exception>
         void StartHandle(string eventName);

@@ -57,9 +57,9 @@ namespace HB.Framework.EventBus
         /// </summary>
         /// <param name="eventType"></param>
         /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
-        public void UnSubscribe(string eventType)
+        public async Task UnSubscribeAsync(string eventType)
         {
-            _engine.UnSubscribeHandler(eventyName: eventType);
+            await _engine.UnSubscribeHandlerAsync(eventyName: eventType).ConfigureAwait(false);
         }
 
         /// <summary>

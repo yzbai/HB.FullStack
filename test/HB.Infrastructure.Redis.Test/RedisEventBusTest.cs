@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using HB.Framework.EventBus.Abstractions;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,13 +20,8 @@ namespace HB.Infrastructure.Redis.Test
             _eventBus = serviceFixture.ThrowIfNull(nameof(serviceFixture)).EventBus;
         }
 
-        public void Handle(string jsonData)
-        {
-            _output.WriteLine(jsonData);
-        }
-
         [Fact]
-        public void TestEventBus()
+        public async Task TestEventBusAsync()
         {
             string eventName = "User.Upload.HeadImage";
 
@@ -37,12 +33,18 @@ namespace HB.Infrastructure.Redis.Test
 
             for (int i = 0; i < 100; ++i)
             {
-                _eventBus.PublishAsync(eventName, $"Hello, Just say {i} times.");
+                await _eventBus.PublishAsync(eventName, $"Hello, Just say {i} times.").ConfigureAwait(false);
             }
 
             Thread.Sleep(1 * 60 * 1000);
 
-            _eventBus.UnSubscribe(eventName);
+            await _eventBus.UnSubscribeAsync(eventName).ConfigureAwait(false);
+        }
+
+        public Task HandleAsync(string jsonData)
+        {
+            _output.WriteLine(jsonData);
+            return Task.CompletedTask;
         }
     }
 }

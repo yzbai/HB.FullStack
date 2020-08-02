@@ -1,8 +1,10 @@
-﻿using HB.Framework.EventBus.Abstractions;
+﻿using AsyncAwaitBestPractices;
+using HB.Framework.EventBus.Abstractions;
 using HB.Infrastructure.Redis.DuplicateCheck;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,10 +26,9 @@ namespace HB.Infrastructure.Redis.EventBus
         private readonly RedisInstanceSetting _instanceSetting;
         private readonly IEventHandler _eventHandler;
 
-        private readonly Task _consumeTask;
+        private Task? _consumeTask;
+        private Task? _historyTask;
         private readonly CancellationTokenSource _consumeTaskCTS;
-
-        private readonly Task _historyTask;
         private readonly CancellationTokenSource _historyTaskCTS;
 
         private readonly RedisSetDuplicateChecker _duplicateChecker;
@@ -39,31 +40,29 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <param name="redisInstanceSetting"></param>
         /// <param name="eventType"></param>
         /// <param name="eventHandler"></param>
-        /// <param name="consumeTaskManagerLogger"></param>
+        /// <param name="logger"></param>
         /// <exception cref="ObjectDisposedException">Ignore.</exception>
         public ConsumeTaskManager(
             RedisEventBusOptions options,
             RedisInstanceSetting redisInstanceSetting,
             string eventType,
             IEventHandler eventHandler,
-            ILogger consumeTaskManagerLogger)
+            ILogger logger)
         {
             _options = options;
             _instanceSetting = redisInstanceSetting;
             _eventType = eventType;
             _eventHandler = eventHandler;
-            _logger = consumeTaskManagerLogger;
+            _logger = logger;
 
             _consumeTaskCTS = new CancellationTokenSource();
-            _consumeTask = new Task(CosumeTaskProcedure, _consumeTaskCTS.Token, TaskCreationOptions.LongRunning);
 
             _historyTaskCTS = new CancellationTokenSource();
-            _historyTask = new Task(HistoryTaskProcedure, _historyTaskCTS.Token, TaskCreationOptions.LongRunning);
 
             _duplicateChecker = new RedisSetDuplicateChecker(_instanceSetting, _options.EventBusEventMessageExpiredHours * 60 * 60, _logger);
         }
 
-        private void HistoryTaskProcedure()
+        private async Task ScanHistoryAsync()
         {
             while (!_historyTaskCTS.IsCancellationRequested)
             {
@@ -116,25 +115,25 @@ namespace HB.Infrastructure.Redis.EventBus
                         _options.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
                     };
 
-                    IDatabase database = RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).Result;
+                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
                     //TODO: Use LoadedScript
-                    int result = (int)database.ScriptEvaluate(
+                    int result = (int)await database.ScriptEvaluateAsync(
                         _hISTORY_REDIS_SCRIPT,
                         redisKeys.Select<string, RedisKey>(t => t).ToArray(),
-                        redisArgvs.Select<string, RedisValue>(t => t).ToArray());
+                        redisArgvs.Select<string, RedisValue>(t => t).ToArray()).ConfigureAwait(false);
 
                     if (result == 0)
                     {
                         //还没有数据，等会吧
                         _logger.LogTrace($"ScanHistory {_instanceSetting.InstanceName} 中,还没有数据，，EventType:{_eventType}");
-                        Thread.Sleep(10 * 1000);
+                        await Task.Delay(10 * 1000).ConfigureAwait(false);
                     }
                     else if (result == 1)
                     {
                         //时间太早，等会再检查
                         _logger.LogTrace($"ScanHistory {_instanceSetting.InstanceName} 中,数据还太新，一会再检查，，EventType:{_eventType}");
-                        Thread.Sleep(10 * 1000);
+                        await Task.Delay(10 * 1000).ConfigureAwait(false);
                     }
                     else if (result == 2)
                     {
@@ -151,12 +150,16 @@ namespace HB.Infrastructure.Redis.EventBus
                         //出错
                     }
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.LogCritical(ex, $"ScanHistory {_instanceSetting.InstanceName} 中出错，EventType:{_eventType}, Exceptions: {ex.Message}");
                     //throw;
                 }
             }
+
+            _logger.LogTrace($"History Task For {_eventType} Stopped.");
         }
 
         /// <summary>
@@ -164,25 +167,32 @@ namespace HB.Infrastructure.Redis.EventBus
         /// </summary>
         /// <exception cref="ObjectDisposedException">Ignore.</exception>
         /// <exception cref="AggregateException">Ignore.</exception>
-        private void CosumeTaskProcedure()
+        private async Task CosumeAsync()
         {
             while (!_consumeTaskCTS.IsCancellationRequested)
             {
                 //1, Get Entity
-                IDatabase database = RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).Result;
+                IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
-                RedisValue redisValue = database.ListRightPopLeftPush(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType));
+                RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);
 
                 if (redisValue.IsNullOrEmpty)
                 {
                     _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceSetting.InstanceName}, eventType:{_eventType}");
 
-                    Thread.Sleep(_cONSUME_INTERVAL_SECONDS * 1000);
+                    await Task.Delay(_cONSUME_INTERVAL_SECONDS * 1000).ConfigureAwait(false);
 
                     continue;
                 }
 
-                EventMessageEntity entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue)!;
+                EventMessageEntity? entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue);
+
+                if (entity == null)
+                {
+                    _logger.LogCritical($"有空EventMessageEntity, eventType:{_eventType}, value:{redisValue}");
+                    continue;
+                }
+
 
                 //2, 过期检查
 
@@ -204,7 +214,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     continue;
                 }
 
-                bool? isExist = _duplicateChecker.IsExistAsync(AcksSetName, entity.Guid, token).Result;
+                bool? isExist = await _duplicateChecker.IsExistAsync(AcksSetName, entity.Guid, token).ConfigureAwait(false);
 
                 if (isExist == null || isExist.Value)
                 {
@@ -218,7 +228,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 //4, Handle Entity
                 try
                 {
-                    _eventHandler.Handle(entity.JsonData);
+                    await _eventHandler.HandleAsync(entity.JsonData).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -228,9 +238,11 @@ namespace HB.Infrastructure.Redis.EventBus
                 }
 
                 //5, Acks
-                _duplicateChecker.AddAsync(AcksSetName, entity.Guid, entity.Timestamp, token).Wait();
+                await _duplicateChecker.AddAsync(AcksSetName, entity.Guid, entity.Timestamp, token).ConfigureAwait(false);
                 RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
             }
+
+            _logger.LogTrace($"Consume Task For {_eventType} Stopped.");
         }
 
         /// <summary>
@@ -238,10 +250,28 @@ namespace HB.Infrastructure.Redis.EventBus
         /// </summary>
         /// <exception cref="ObjectDisposedException">Ignore.</exception>
         /// <exception cref="AggregateException">Ignore.</exception>
-        public void Cancel()
+        public async Task CancelAsync()
         {
             _consumeTaskCTS.Cancel();
             _historyTaskCTS.Cancel();
+
+            List<Task> tasks = new List<Task>();
+
+            if (_consumeTask != null)
+            {
+                tasks.Add(_consumeTask);
+            }
+
+            if (_historyTask != null)
+            {
+                tasks.Add(_historyTask);
+            }
+
+            if (tasks.Any())
+            {
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+                _logger.LogTrace($"Task For {_eventType} Stopped.");
+            }
         }
 
         /// <summary>
@@ -252,8 +282,13 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <exception cref="TaskSchedulerException">Ignore.</exception>
         public void Start()
         {
-            _consumeTask.Start(TaskScheduler.Default);
-            _historyTask.Start(TaskScheduler.Default);
+            _consumeTask = CosumeAsync();
+
+            _consumeTask.SafeFireAndForget();
+
+            _historyTask = ScanHistoryAsync();
+
+            _historyTask.SafeFireAndForget();
         }
 
         #region IDisposable Support
@@ -273,23 +308,9 @@ namespace HB.Infrastructure.Redis.EventBus
                 if (disposing)
                 {
                     _consumeTaskCTS?.Cancel();
-
-                    while (!_consumeTask.IsCompleted)
-                    {
-                        Thread.Sleep(1 * 1000);
-                    }
-
-                    _consumeTask.Dispose();
-                    _consumeTaskCTS?.Dispose();
-
                     _historyTaskCTS?.Cancel();
 
-                    while (!_historyTask.IsCompleted)
-                    {
-                        Thread.Sleep(1 * 1000);
-                    }
-
-                    _historyTask.Dispose();
+                    _consumeTaskCTS?.Dispose();
                     _historyTaskCTS?.Dispose();
                 }
 
