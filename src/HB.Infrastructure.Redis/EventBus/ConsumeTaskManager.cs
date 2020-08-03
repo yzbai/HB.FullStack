@@ -64,6 +64,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private async Task ScanHistoryAsync()
         {
+
             while (!_historyTaskCTS.IsCancellationRequested)
             {
                 try
@@ -73,7 +74,7 @@ namespace HB.Infrastructure.Redis.EventBus
                     -- argvs={currentTimestampSeconds, waitSecondsToBeHistory}
 
                     local rawEvent = redis.call('rpop', KEYS[1])
-                    
+
                     --还没有数据
                     if (not rawEvent)
                     then
@@ -108,12 +109,12 @@ namespace HB.Infrastructure.Redis.EventBus
                         RedisEventBusEngine.HistoryQueueName(_eventType),
                         RedisEventBusEngine.AcksSetName(_eventType),
                         RedisEventBusEngine.QueueName(_eventType)
-                    };
+                        };
 
                     string[] redisArgvs = new string[] {
                         TimeUtil.CurrentTimestampSeconds().ToString(GlobalSettings.Culture),
                         _options.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
-                    };
+                        };
 
                     IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
@@ -150,12 +151,20 @@ namespace HB.Infrastructure.Redis.EventBus
                         //出错
                     }
                 }
+                catch (RedisConnectionException ex)
+                {
+                    _logger.LogError(ex, $"Scan History 中出现Redis链接问题. EventType:{_eventType}");
+                    await Task.Delay(5000).ConfigureAwait(false);
+                }
+                catch (RedisTimeoutException ex)
+                {
+                    _logger.LogError(ex, $"Scan History 中出现Redis超时问题. EventType:{_eventType}");
+                }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    _logger.LogCritical(ex, $"ScanHistory {_instanceSetting.InstanceName} 中出错，EventType:{_eventType}, Exceptions: {ex.Message}");
-                    //throw;
+                    _logger.LogCritical(ex, $"Scan History 出现未知问题. EventType:{_eventType}");
                 }
             }
 
@@ -171,78 +180,96 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             while (!_consumeTaskCTS.IsCancellationRequested)
             {
-                //1, Get Entity
-                IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
-
-                RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);
-
-                if (redisValue.IsNullOrEmpty)
-                {
-                    _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceSetting.InstanceName}, eventType:{_eventType}");
-
-                    await Task.Delay(_cONSUME_INTERVAL_SECONDS * 1000).ConfigureAwait(false);
-
-                    continue;
-                }
-
-                EventMessageEntity? entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue);
-
-                if (entity == null)
-                {
-                    _logger.LogCritical($"有空EventMessageEntity, eventType:{_eventType}, value:{redisValue}");
-                    continue;
-                }
-
-
-                //2, 过期检查
-
-                double spendHours = (TimeUtil.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
-
-                if (spendHours > _options.EventBusEventMessageExpiredHours)
-                {
-                    _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
-                    continue;
-                }
-
-                //3, 防重检查
-
-                string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
-
-                if (!RedisSetDuplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
-                {
-                    //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
-                    continue;
-                }
-
-                bool? isExist = await _duplicateChecker.IsExistAsync(AcksSetName, entity.Guid, token).ConfigureAwait(false);
-
-                if (isExist == null || isExist.Value)
-                {
-                    _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
-
-                    RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
-
-                    continue;
-                }
-
-                //4, Handle Entity
                 try
                 {
-                    await _eventHandler.HandleAsync(entity.JsonData).ConfigureAwait(false);
+                    //1, Get Entity
+                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
+
+                    RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);
+
+                    if (redisValue.IsNullOrEmpty)
+                    {
+                        _logger.LogTrace($"ConsumeTask Sleep, brokerName:{_instanceSetting.InstanceName}, eventType:{_eventType}");
+
+                        await Task.Delay(_cONSUME_INTERVAL_SECONDS * 1000).ConfigureAwait(false);
+
+                        continue;
+                    }
+
+                    EventMessageEntity? entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue);
+
+                    if (entity == null)
+                    {
+                        _logger.LogCritical($"有空EventMessageEntity, eventType:{_eventType}, value:{redisValue}");
+                        continue;
+                    }
+
+
+                    //2, 过期检查
+
+                    double spendHours = (TimeUtil.CurrentTimestampSeconds() - entity.Timestamp) / 3600;
+
+                    if (spendHours > _options.EventBusEventMessageExpiredHours)
+                    {
+                        _logger.LogCritical($"有EventMessage过期，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
+                        continue;
+                    }
+
+                    //3, 防重检查
+
+                    string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
+
+                    if (!RedisSetDuplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
+                    {
+                        //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
+                        continue;
+                    }
+
+                    bool? isExist = await _duplicateChecker.IsExistAsync(AcksSetName, entity.Guid, token).ConfigureAwait(false);
+
+                    if (isExist == null || isExist.Value)
+                    {
+                        _logger.LogInformation($"有EventMessage重复，eventType:{_eventType}, entity:{SerializeUtil.ToJson(entity)}");
+
+                        RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
+
+                        continue;
+                    }
+
+                    //4, Handle Entity
+                    try
+                    {
+                        await _eventHandler.HandleAsync(entity.JsonData).ConfigureAwait(false);
+                    }
+#pragma warning disable CA1031 // Do not catch general exception types
+                    catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                    {
+                        _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {SerializeUtil.ToJson(entity)}");
+                    }
+
+                    //5, Acks
+                    await _duplicateChecker.AddAsync(AcksSetName, entity.Guid, entity.Timestamp, token).ConfigureAwait(false);
+                    RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
+
+                    _logger.LogTrace($"Consume Task For {_eventType} Stopped.");
+                }
+                catch (RedisConnectionException ex)
+                {
+                    _logger.LogError(ex, $"Consume 中出现Redis链接问题. EventType:{_eventType}");
+                    await Task.Delay(5000).ConfigureAwait(false);
+                }
+                catch (RedisTimeoutException ex)
+                {
+                    _logger.LogError(ex, $"Consume 中出现Redis超时问题. EventType:{_eventType}");
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    _logger.LogCritical(ex, $"处理消息出错, eventType:{_eventType}, entity : {SerializeUtil.ToJson(entity)}");
+                    _logger.LogCritical(ex, $"Consume 出现未知问题. EventType:{_eventType}");
                 }
-
-                //5, Acks
-                await _duplicateChecker.AddAsync(AcksSetName, entity.Guid, entity.Timestamp, token).ConfigureAwait(false);
-                RedisSetDuplicateChecker.Release(AcksSetName, entity.Guid, token);
             }
-
-            _logger.LogTrace($"Consume Task For {_eventType} Stopped.");
         }
 
         /// <summary>
@@ -285,6 +312,7 @@ namespace HB.Infrastructure.Redis.EventBus
             _consumeTask = CosumeAsync();
 
             _consumeTask.SafeFireAndForget();
+
 
             _historyTask = ScanHistoryAsync();
 
