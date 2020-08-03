@@ -11,5 +11,7 @@
         NotValid = 5,
         UnKown = 6,
         NoEntitySchemaFound = 7,
+        RedisTimeout = 8,
+        RedisConnectionFailed = 9
     }
 }

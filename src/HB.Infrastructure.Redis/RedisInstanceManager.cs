@@ -14,68 +14,64 @@ namespace HB.Infrastructure.Redis
 {
     internal static class RedisInstanceManager
     {
-        private static Dictionary<string, RedisConnection> _connectionDict = new Dictionary<string, RedisConnection>();      //instanceName : RedisConnection
+        private static ConcurrentDictionary<string, ConnectionMultiplexer> _connectionDict = new ConcurrentDictionary<string, ConnectionMultiplexer>();      //instanceName : RedisConnection
         private static readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-        private static readonly object _closeLocker = new object();
 
         public static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting setting, ILogger logger)
         {
-            if (!_connectionDict.ContainsKey(setting.InstanceName))
+            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached))
             {
-                _connectionLock.Wait();
-
-                //double check
-                if (!_connectionDict.ContainsKey(setting.InstanceName))
-                {
-                    _connectionDict[setting.InstanceName] = new RedisConnection(setting.ConnectionString); ;
-                }
-
-                _connectionLock.Release();
+                return cached.GetDatabase(setting.DatabaseNumber);
             }
-
-            RedisConnection redisWrapper = _connectionDict[setting.InstanceName];
 
             try
             {
                 _connectionLock.Wait();
 
-                while (redisWrapper.Connection != null && redisWrapper.Connection.IsConnecting)
+                //Double check
+                if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached2))
                 {
-                    await Task.Delay(1000).ConfigureAwait(false);
+                    return cached2.GetDatabase(setting.DatabaseNumber);
                 }
 
-                if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
+                ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(setting.ConnectionString);
+
+                //TODO: 调查参数
+                //configurationOptions.KeepAlive = 30;
+                //configurationOptions.ConnectTimeout = 10 * 1000;
+                //configurationOptions.SyncTimeout = 100 * 1000;
+                //configurationOptions.ReconnectRetryPolicy = new ExponentialRetry(5000);
+
+                IDatabase database = null!;
+
+                await ReConnectPolicyAsync(logger, setting.ConnectionString).ExecuteAsync(async () =>
                 {
-                    //double check
-                    //if (redisWrapper.Connection == null || !redisWrapper.Connection.IsConnected || redisWrapper.Database == null)
-                    //{
-                    redisWrapper.Connection?.Dispose();
+                    ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
 
-                    ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(redisWrapper.ConnectionString);
+                    _connectionDict[setting.InstanceName] = connection;
 
-                    //TODO: 调查参数
-                    configurationOptions.AbortOnConnectFail = false;
-                    configurationOptions.KeepAlive = 30;
-                    configurationOptions.ConnectTimeout = 10 * 1000;
-                    configurationOptions.SyncTimeout = 100 * 1000;
+                    database = connection.GetDatabase(setting.DatabaseNumber);
 
-                    await ReConnectPolicyAsync(logger, redisWrapper.ConnectionString).ExecuteAsync(async () =>
-                    {
-                        redisWrapper.Connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
-                        redisWrapper.Database = redisWrapper.Connection.GetDatabase(setting.DatabaseNumber);
-                        //redisWrapper.Connection.ConnectionFailed += Connection_ConnectionFailed;
+                    logger.LogInformation($"Redis 链接建立 Connected : {setting.InstanceName}");
+                }).ConfigureAwait(false);
 
-                        logger.LogInformation($"Redis KVStoreEngine Connection Connected : {setting.InstanceName}");
-                    }).ConfigureAwait(false);
-                    //}
+                _connectionLock.Release();
 
-                }
-
-                return redisWrapper.Database!;
+                return database;
             }
-            finally
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 _connectionLock.Release();
+
+                logger.LogCritical(ex, $"Redis Database获取失败.尝试重新获取。 SettingName:{setting.InstanceName}, Connection:{setting.ConnectionString}");
+
+                Close(setting);
+
+                await Task.Delay(1000).ConfigureAwait(false);
+
+                return await GetDatabaseAsync(setting, logger).ConfigureAwait(false);
             }
         }
 
@@ -85,38 +81,32 @@ namespace HB.Infrastructure.Redis
             return Policy
                         .Handle<RedisConnectionException>()
                         .WaitAndRetryForeverAsync(
-                            count => TimeSpan.FromSeconds(5 + count * 2),
+                            count => TimeSpan.FromSeconds(5),
                             (exception, retryCount, timeSpan) =>
                             {
                                 RedisConnectionException ex = (RedisConnectionException)exception;
-                                logger.LogCritical(exception, $"Redis Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
+                                logger.LogCritical(exception, $"Redis 建立链接时失败 Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
                             });
         }
 
         public static void Close(RedisInstanceSetting setting)
         {
-            lock (_closeLocker)
+            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer connection))
             {
-                if (_connectionDict.ContainsKey(setting.InstanceName))
-                {
-                    _connectionDict[setting.InstanceName].Connection?.Close();
-
-                    _connectionDict.Remove(setting.InstanceName);
-                }
+                connection.Dispose();
+                _connectionDict.TryRemove(setting.InstanceName, out ConnectionMultiplexer _);
             }
         }
 
         public static void CloseAll()
         {
-            lock (_closeLocker)
+            _connectionDict.ForEach(kv =>
             {
-                _connectionDict.ForEach(kv =>
-                {
-                    kv.Value?.Connection?.Close();
-                });
+                kv.Value?.Dispose();
+                _connectionDict.TryRemove(kv.Key, out ConnectionMultiplexer _);
+            });
 
-                _connectionDict = new Dictionary<string, RedisConnection>();
-            }
+            _connectionDict = new ConcurrentDictionary<string, ConnectionMultiplexer>();
         }
     }
 }
