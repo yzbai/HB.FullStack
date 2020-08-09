@@ -45,7 +45,7 @@ namespace HB.Infrastructure.Tencent
                 throw new TCapthaException($"lack ApiKeySettings for AppId:{appid}");
             }
 
-            string query = new Dictionary<string, string> {
+            string query = new Dictionary<string, string?> {
                 { "aid", apiKeySetting.AppId},
                 { "AppSecretKey", apiKeySetting.AppSecretKey},
                 {"Ticket",  ticket},

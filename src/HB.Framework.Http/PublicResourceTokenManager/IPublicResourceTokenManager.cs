@@ -10,6 +10,6 @@ namespace HB.Framework.Http
         /// <exception cref="EncoderFallbackException"></exception>
         Task<string> GetNewToken(int expiredSeconds = 60);
 
-        Task<bool> CheckToken(string token);
+        Task<bool> CheckToken(string? token);
     }
 }
