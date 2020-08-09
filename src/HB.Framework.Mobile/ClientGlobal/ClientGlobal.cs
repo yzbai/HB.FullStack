@@ -156,6 +156,8 @@ namespace HB.Framework.Client
             return _accessToken;
         }
 
+
+
         public async Task SetAccessTokenAsync(string? accessToken)
         {
             _accessToken = accessToken;
@@ -200,7 +202,7 @@ namespace HB.Framework.Client
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.LogError($"SecureStorage Get Failed. key:{key}. Message:{ex.Message}");
+                _logger.LogCritical($"SecureStorage Get Failed. key:{key}. Message:{ex.Message}");
                 return null;
             }
         }
@@ -221,7 +223,7 @@ namespace HB.Framework.Client
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 //TODO: Possible that device doesn't support secure storage on device.
-                _logger.LogError($"SecureStorage Set Failed. key:{key}. Message:{ex.Message}");
+                _logger.LogCritical($"SecureStorage Set Failed. key:{key}. Message:{ex.Message}");
                 return;
             }
         }
