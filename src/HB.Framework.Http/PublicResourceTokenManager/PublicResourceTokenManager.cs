@@ -34,7 +34,7 @@ namespace HB.Framework.Http
             return _dataProtector.Protect(token);
         }
 
-        public async Task<bool> CheckToken(string protectedToken)
+        public async Task<bool> CheckToken(string? protectedToken)
         {
             if (protectedToken.IsNullOrEmpty())
             {

@@ -9,10 +9,11 @@ using HB.Framework.Common.Validate;
 using System.Text.Json;
 using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Properties;
+using HB.Framework.Common.Sms;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    internal class AliyunSmsService : IAliyunSmsService
+    internal class AliyunSmsService : ISmsService
     {
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;
@@ -65,7 +66,7 @@ namespace HB.Infrastructure.Aliyun.Sms
                 CommonResponse response = PolicyManager.Default(_logger).Execute(() => { return _client.GetCommonResponse(request); });
 
                 SendResult? sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
-                
+
                 if (sendResult != null && sendResult.IsSuccessful())
                 {
                     CacheSmsCode(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
@@ -80,7 +81,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             {
                 throw new AliyunSmsException(Resources.AliyunSmsResponseFormatErrorMessage, ex);
             }
-            catch(ClientException ex)
+            catch (ClientException ex)
             {
                 throw new AliyunSmsException(Resources.AliyunSmsServiceDownErrorMessage, ex);
             }
