@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public static class StartupUtil
+    public static class StartupExtensions
     {
         public static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
@@ -110,7 +110,7 @@ namespace System
                                     _ => ApiError.NOAUTHORITY
                                 };
 
-                                ApiErrorResponse errorResponse = new ApiErrorResponse(error, c.AuthenticateFailure?.Message);
+                                ApiErrorResponse errorResponse = new ApiErrorResponse(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
 
                                 return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
                             }

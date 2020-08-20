@@ -14,8 +14,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static AuthenticationBuilder AddApiKeyAuthentication(this AuthenticationBuilder authenticationBuilder, IConfiguration configuration)
         {
-
-
             return authenticationBuilder.AddScheme<ApiKeyOptions, ApiKeyAuthenticationHandler>(ApiKeyOptions.DefaultScheme, options =>
             {
 
