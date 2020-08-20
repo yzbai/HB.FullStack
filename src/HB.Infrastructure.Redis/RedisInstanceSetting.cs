@@ -14,6 +14,6 @@ namespace HB.Infrastructure.Redis
         [DisallowNull, NotNull]
         public string? ConnectionString { get; set; }
 
-        public int DatabaseNumber { get; set; } = 0;
+        public int DatabaseNumber { get; set; }
     }
 }

@@ -71,7 +71,8 @@ namespace HB.Framework.Client.Api
 
                     return await AutoRefreshJwtAsync<T>(jwtApiRequest, response, endpoint).ConfigureAwait(false);
                 }
-                else if (request is ApiKeyApiRequest apiKeyRequest)
+
+                if (request is ApiKeyApiRequest apiKeyRequest)
                 {
                     if (!TryAddApiKey(apiKeyRequest))
                     {
@@ -80,19 +81,26 @@ namespace HB.Framework.Client.Api
 
                     return await apiKeyRequest.GetResponseAsync<T>(httpClient).ConfigureAwait(false);
                 }
-                else
-                {
-                    return await request.GetResponseAsync<T>(httpClient).ConfigureAwait(false);
-                }
+
+                return await request.GetResponseAsync<T>(httpClient).ConfigureAwait(false);
             }
-            catch (InvalidOperationException)
+#pragma warning disable CS0168 // Variable is declared but never used
+            catch (InvalidOperationException ex)
+#pragma warning restore CS0168 // Variable is declared but never used
             {
                 return new EndpointNotFoundResponse();
             }
-            catch (FrameworkException)
+#pragma warning disable CS0168 // Variable is declared but never used
+            catch (FrameworkException ex)
+#pragma warning restore CS0168 // Variable is declared but never used
             {
                 return new EndpointNotFoundResponse();
             }
+        }
+
+        private class InnerUpdateTokenResponseData : ApiResponseData
+        {
+            public string AccessToken { get; set; } = null!;
         }
 
         private async Task<ApiResponse<T>> AutoRefreshJwtAsync<T>(JwtApiRequest request, ApiResponse response, EndpointSettings endpointSettings) where T : ApiResponseData
@@ -143,6 +151,8 @@ namespace HB.Framework.Client.Api
                         HttpMethod.Put,
                         endpointSettings.JwtSettings!.ResourceName!);
 
+                    await AddDeviceInfoAlwaysAsync(refreshRequest).ConfigureAwait(false);
+
                     refreshRequest.SetParameter(ClientNames.AccessToken, accessToken!);
                     refreshRequest.SetParameter(ClientNames.RefreshToken, refreshToken!);
 
@@ -152,16 +162,13 @@ namespace HB.Framework.Client.Api
 
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 
-                    ApiResponse refreshResponse = await refreshRequest.GetResponseAsync(httpClient).ConfigureAwait(false);
-
-                    //using HttpRequestMessage httpRefreshRequest = refreshRequest.ToHttpRequestMessage(tokenRefreshEndpoint.NeedHttpMethodOveride);
-                    //using HttpResponseMessage refreshResponse = await httpRefreshRequest.GetHttpResponseMessage(httpClient).ConfigureAwait(false);
+                    ApiResponse<InnerUpdateTokenResponseData> refreshResponse = await refreshRequest.GetResponseAsync<InnerUpdateTokenResponseData>(httpClient).ConfigureAwait(false);
 
                     if (refreshResponse.IsSuccessful())
                     {
                         _lastRefreshTokenResults[accessTokenHashKey] = true;
 
-                        string newAccessToken = refreshResponse.Data!.GetType().GetProperty(ClientNames.AccessToken).GetValue(refreshResponse.Data).ToString();
+                        string newAccessToken = refreshResponse.Data!.AccessToken;
 
                         await OnJwtRefreshSucceed(newAccessToken).ConfigureAwait(false);
 
