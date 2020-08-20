@@ -8,6 +8,6 @@ namespace HB.Framework.KVStore.Entity
 {
     public class KVStoreEntity : ValidatableObject
     {
-        public int Version { get; set; } = 0;
+        public int Version { get; set; }
     }
 }
