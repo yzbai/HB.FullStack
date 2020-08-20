@@ -51,7 +51,7 @@ namespace HB.Framework.KVStore
 
                 if (i != count - 1)
                 {
-                    builder.Append("_");
+                    builder.Append('_');
                 }
             }
 

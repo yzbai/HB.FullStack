@@ -1,4 +1,5 @@
-﻿using HB.Infrastructure.Aliyun.Sms;
+﻿using HB.Framework.Common.Sms;
+using HB.Infrastructure.Aliyun.Sms;
 using System;
 using Xunit;
 using Xunit.Abstractions;
@@ -7,7 +8,7 @@ namespace HB.Infrastructure.Aliyun.Test
 {
     public class SmsTest : IClassFixture<ServiceFixture>
     {
-        private readonly IAliyunSmsService _smsBiz;
+        private readonly ISmsService _smsBiz;
         private readonly ServiceFixture _fixture;
         private readonly ITestOutputHelper _output;
 
