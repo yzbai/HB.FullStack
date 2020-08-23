@@ -28,12 +28,12 @@ namespace HB.Framework.Client.Api
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        private readonly IClientGlobal _mobileGlobal;
+        private readonly IClientGlobal _global;
 
         public ApiClient(IOptions<ApiClientOptions> options, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
         {
             _options = options.Value;
-            _mobileGlobal = mobileGlobal;
+            _global = mobileGlobal;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -69,7 +69,7 @@ namespace HB.Framework.Client.Api
 
                     ApiResponse<T> response = await jwtApiRequest.GetResponseAsync<T>(httpClient).ConfigureAwait(false);
 
-                    return await AutoRefreshJwtAsync<T>(jwtApiRequest, response, endpoint).ConfigureAwait(false);
+                    return await RefreshJwtAsync<T>(jwtApiRequest, response, endpoint).ConfigureAwait(false);
                 }
 
                 if (request is ApiKeyApiRequest apiKeyRequest)
@@ -88,6 +88,7 @@ namespace HB.Framework.Client.Api
             catch (InvalidOperationException ex)
 #pragma warning restore CS0168 // Variable is declared but never used
             {
+
                 return new EndpointNotFoundResponse();
             }
 #pragma warning disable CS0168 // Variable is declared but never used
@@ -103,7 +104,7 @@ namespace HB.Framework.Client.Api
             public string AccessToken { get; set; } = null!;
         }
 
-        private async Task<ApiResponse<T>> AutoRefreshJwtAsync<T>(JwtApiRequest request, ApiResponse response, EndpointSettings endpointSettings) where T : ApiResponseData
+        public async Task<ApiResponse<T>> RefreshJwtAsync<T>(JwtApiRequest? request, ApiResponse response, EndpointSettings endpointSettings) where T : ApiResponseData
         {
             if (response.HttpCode != 401 || response.ErrCode != ApiError.ApiTokenExpired)
             {
@@ -116,7 +117,7 @@ namespace HB.Framework.Client.Api
 
                 await _tokenRefreshSemaphore.WaitAsync().ConfigureAwait(false);
 
-                string? accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+                string? accessToken = await _global.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
                 {
@@ -133,15 +134,18 @@ namespace HB.Framework.Client.Api
                 {
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
-                        //刷新成功，再次调用
-                        return await RequestAsync<T>(request).ConfigureAwait(false);
+                        //上次刷新成功，直接再次调用
+                        if (request != null)
+                        {
+                            return await RequestAsync<T>(request!).ConfigureAwait(false);
+                        }
                     }
 
                     return response;
                 }
 
                 //开始刷新
-                string? refreshToken = await _mobileGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
+                string? refreshToken = await _global.GetRefreshTokenAsync().ConfigureAwait(false);
 
                 if (!refreshToken.IsNullOrEmpty())
                 {
@@ -172,7 +176,14 @@ namespace HB.Framework.Client.Api
 
                         await OnJwtRefreshSucceed(newAccessToken).ConfigureAwait(false);
 
-                        return await RequestAsync<T>(request).ConfigureAwait(false);
+                        if (request != null)
+                        {
+                            return await RequestAsync<T>(request!).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            return response;
+                        }
                     }
                 }
 
@@ -196,13 +207,15 @@ namespace HB.Framework.Client.Api
 
         private async Task OnJwtRefreshSucceed(string? newAccessToken)
         {
-            await _mobileGlobal.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
+            await _global.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
         }
 
         private async Task OnJwtRefreshFailed()
         {
-            await _mobileGlobal.SetAccessTokenAsync(null).ConfigureAwait(false);
-            await _mobileGlobal.SetRefreshTokenAsync(null).ConfigureAwait(false);
+            await _global.SetAccessTokenAsync(null).ConfigureAwait(false);
+            await _global.SetRefreshTokenAsync(null).ConfigureAwait(false);
+
+            //TODO: 进行登录要求
         }
 
         private HttpClient GetHttpClient(EndpointSettings endpoint)
@@ -212,7 +225,7 @@ namespace HB.Framework.Client.Api
 
         private async Task<bool> TryAddJwt(JwtApiRequest request)
         {
-            string? accessToken = await _mobileGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+            string? accessToken = await _global.GetAccessTokenAsync().ConfigureAwait(false);
 
             if (accessToken.IsNullOrEmpty())
             {
@@ -237,9 +250,9 @@ namespace HB.Framework.Client.Api
 
         private async Task AddDeviceInfoAlwaysAsync(ApiRequest request)
         {
-            request.DeviceId = await _mobileGlobal.GetDeviceIdAsync().ConfigureAwait(false);
-            request.DeviceType = await _mobileGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
-            request.DeviceVersion = await _mobileGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
+            request.DeviceId = await _global.GetDeviceIdAsync().ConfigureAwait(false);
+            request.DeviceType = await _global.GetDeviceTypeAsync().ConfigureAwait(false);
+            request.DeviceVersion = await _global.GetDeviceVersionAsync().ConfigureAwait(false);
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 

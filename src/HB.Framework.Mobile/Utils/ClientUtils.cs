@@ -56,21 +56,6 @@ namespace HB.Framework.Client
             return SecurityUtil.CreateUniqueToken();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="appsettingsName"></param>
-        /// <param name="executingAssembly"></param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
-        /// <exception cref="FileLoadException"></exception>
-        /// <exception cref="FileNotFoundException"></exception>
-        /// <exception cref="BadImageFormatException"></exception>
-        /// <exception cref="UnauthorizedAccessException"></exception>
-        /// <exception cref="PathTooLongException"></exception>
-        /// <exception cref="DirectoryNotFoundException"></exception>
-        /// <exception cref="IOException"></exception>
-        /// <exception cref="ObjectDisposedException"></exception>
         public static IConfiguration BuildConfiguration(string appsettingsName, [ValidatedNotNull] Assembly executingAssembly)
         {
             ThrowIf.Empty(appsettingsName, nameof(appsettingsName));

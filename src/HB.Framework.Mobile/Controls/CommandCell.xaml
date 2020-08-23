@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<base:BaseContentView
+    x:Class="HB.Framework.Client.Controls.CommandCell"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:base="clr-namespace:HB.Framework.Client.Base"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    mc:Ignorable="d">
+
+    <Grid Margin="{Binding Margin}" BindingContext="{Reference root}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="{Binding Title}"
+            FontSize="Medium"
+            VerticalTextAlignment="Center"
+            HorizontalOptions="Start" />
+        <Label
+            Grid.Row="0"
+            Grid.Column="1"
+            Text="{Binding Text}"
+            VerticalTextAlignment="Center"
+            FontSize="Small"
+            TextColor="Gray"
+            HorizontalOptions="End" />
+        <Label
+            Grid.Row="0"
+            Grid.Column="2"
+            Text="{Binding ChevronRight}"
+            FontFamily="Fabric"
+            VerticalTextAlignment="Center"
+            FontSize="Medium"
+            HorizontalOptions="EndAndExpand" />
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+        </Grid.GestureRecognizers>
+    </Grid>
+</base:BaseContentView>

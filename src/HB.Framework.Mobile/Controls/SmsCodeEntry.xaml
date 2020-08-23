@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<base:BaseContentView
+    x:Class="HB.Framework.Client.Controls.SmsCodeEntry"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+xmlns:base="clr-namespace:HB.Framework.Client.Base"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
+    mc:Ignorable="d">
+    <base:BaseContentView.Content>
+        <StackLayout BindingContext="{Reference Root}">
+            <AbsoluteLayout>
+                <FlexLayout
+                    x:Name="PinLayout"
+                    JustifyContent="SpaceEvenly"
+                    AbsoluteLayout.LayoutBounds="0,0,1,1"
+                    AbsoluteLayout.LayoutFlags="SizeProportional" />
+
+                <Entry
+                    x:Name="InputEntry"
+                    IsVisible="True"
+                    Opacity="0"
+                    MaxLength="{Binding CodeCount}"
+                    AbsoluteLayout.LayoutBounds="0,0,1,1"
+                    AbsoluteLayout.LayoutFlags="SizeProportional"
+                    Keyboard="Numeric"
+                    Text="{Binding Text}" />
+
+            </AbsoluteLayout>
+        </StackLayout>
+    </base:BaseContentView.Content>
+</base:BaseContentView>
