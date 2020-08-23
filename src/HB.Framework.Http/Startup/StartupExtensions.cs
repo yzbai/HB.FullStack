@@ -99,25 +99,25 @@ namespace System
                             c.HandleResponse();
                             c.Response.StatusCode = 401;
 
-                            if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
+                            //if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
+                            //{
+                            c.Response.ContentType = "application/problem+json";
+
+                            ApiError error = c.AuthenticateFailure switch
                             {
-                                c.Response.ContentType = "application/problem+json";
+                                null => ApiError.NOAUTHORITY,
+                                SecurityTokenExpiredException s => ApiError.ApiTokenExpired,
+                                _ => ApiError.NOAUTHORITY
+                            };
 
-                                ApiError error = c.AuthenticateFailure switch
-                                {
-                                    null => ApiError.NOAUTHORITY,
-                                    SecurityTokenExpiredException s => ApiError.ApiTokenExpired,
-                                    _ => ApiError.NOAUTHORITY
-                                };
+                            ApiErrorResponse errorResponse = new ApiErrorResponse(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
 
-                                ApiErrorResponse errorResponse = new ApiErrorResponse(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
-
-                                return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
-                            }
-                            else
-                            {
-                                return Task.CompletedTask;
-                            }
+                            return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
+                            //}
+                            //else
+                            //{
+                            //    return Task.CompletedTask;
+                            //}
                         },
                         OnAuthenticationFailed = c =>
                         {
