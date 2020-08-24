@@ -103,14 +103,14 @@ namespace System
                             //{
                             c.Response.ContentType = "application/problem+json";
 
-                            ApiError error = c.AuthenticateFailure switch
+                            ApiErrorCode error = c.AuthenticateFailure switch
                             {
-                                null => ApiError.NOAUTHORITY,
-                                SecurityTokenExpiredException s => ApiError.ApiTokenExpired,
-                                _ => ApiError.NOAUTHORITY
+                                null => ApiErrorCode.NOAUTHORITY,
+                                SecurityTokenExpiredException s => ApiErrorCode.ApiTokenExpired,
+                                _ => ApiErrorCode.NOAUTHORITY
                             };
 
-                            ApiErrorResponse errorResponse = new ApiErrorResponse(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
+                            ApiError errorResponse = new ApiError(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
 
                             return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
                             //}
@@ -166,7 +166,7 @@ namespace System
                 {
                     apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
                     {
-                        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(ApiError.MODELVALIDATIONERROR, actionContext.ModelState.GetErrors());
+                        ApiError apiErrorResponse = new ApiError(ApiErrorCode.MODELVALIDATIONERROR, actionContext.ModelState.GetErrors());
 
                         return new BadRequestObjectResult(apiErrorResponse)
                         {
