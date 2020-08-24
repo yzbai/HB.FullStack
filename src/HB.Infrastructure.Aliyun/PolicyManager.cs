@@ -5,6 +5,7 @@ using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 
 namespace HB.Infrastructure.Aliyun
 {

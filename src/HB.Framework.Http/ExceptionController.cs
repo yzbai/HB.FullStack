@@ -25,7 +25,7 @@ namespace HB.Framework.Http
 
             _logger.LogError(exceptionHandlerFeature.Error, "Error From ExceptionController");
 
-            ApiErrorResponse apiErrorResponse = new ApiErrorResponse(ApiError.EXCEPTIONTHROWN, exceptionHandlerFeature.Error.Message);
+            ApiError apiErrorResponse = new ApiError(ApiErrorCode.EXCEPTIONTHROWN, exceptionHandlerFeature.Error.Message);
 
             return new BadRequestObjectResult(apiErrorResponse)
             {
