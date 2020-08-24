@@ -107,7 +107,7 @@ namespace HB.Infrastructure.Aliyun.Oss
 
                 return stsToken;
             }
-            catch (ClientException ex)
+            catch (Exception ex)
             {
                 throw new AliyunOssException(Resources.AliyunOssAssumeRoleRequestFailedMessage, ex);
             }

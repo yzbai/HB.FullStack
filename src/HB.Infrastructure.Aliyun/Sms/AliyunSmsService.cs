@@ -10,6 +10,7 @@ using System.Text.Json;
 using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Properties;
 using HB.Framework.Common.Sms;
+using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {

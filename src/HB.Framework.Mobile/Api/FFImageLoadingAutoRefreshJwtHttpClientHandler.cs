@@ -11,6 +11,7 @@ using HB.Framework.Client;
 using HB.Framework.Client.Api;
 using HB.Framework.Common.Api;
 using Microsoft.Extensions.Options;
+using Xamarin.Forms;
 
 namespace HB.Framework.Client.Api
 {
@@ -41,39 +42,31 @@ namespace HB.Framework.Client.Api
             await AddDeviceInfo(request).ConfigureAwait(false);
             await AddAuthorization(request).ConfigureAwait(false);
 
-            HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                ApiResponse<object> response = await responseMessage.ToApiResponseAsync<object>().ConfigureAwait(false);
+
+                if (response.HttpCode == 401 && response.ErrCode == ApiErrorCode.ApiTokenExpired)
                 {
-                    return response;
-                }
+                    EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
 
-                string? mediaType = response.Content.Headers.ContentType?.MediaType;
-
-                if ("application/problem+json" != mediaType && "application/json" != mediaType)
-                {
-                    return response;
-                }
-
-                ApiResponse<ApiResponseData> apiResponse = await ApiRequestUtils.ToApiResponseAsync<ApiResponseData>(response).ConfigureAwait(false);
-
-                EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
-
-                if (endpointSettings != null)
-                {
-                    _ = await _apiClient.RefreshJwtAsync<ApiResponseData>(null, apiResponse, endpointSettings).ConfigureAwait(false);
+                    if (endpointSettings != null)
+                    {
+                        await _apiClient.RefreshJwtAsync(endpointSettings).ConfigureAwait(false);
+                    }
                 }
 
                 //刷新后，等待下次自动Retry
-                return response;
+                return responseMessage;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception)
+            catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return response;
+                Application.Current.GetUIExceptionHandler()?.Invoke(ex);
+                return responseMessage;
             }
         }
 
