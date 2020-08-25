@@ -2,7 +2,7 @@
 
 namespace HB.Framework.Client.Logging
 {
-    public interface IClientLoggerImpl
+    public interface IPlatformLoggerImpl
     {
         void Wtf(string message);
 
