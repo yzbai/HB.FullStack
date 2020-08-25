@@ -3,15 +3,16 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using Xamarin.Forms;
 
 namespace HB.Framework.Client.Logging
 {
-    public class ClientLogger : ILogger
+    public class PlatformLogger : ILogger
     {
-        private readonly IClientLoggerImpl _impl;
+        private readonly IPlatformLoggerImpl? _impl;
         private readonly LogLevel _minLevel;
 
-        public ClientLogger(IClientLoggerImpl impl, LogLevel logLevel)
+        public PlatformLogger(IPlatformLoggerImpl? impl, LogLevel logLevel)
         {
             _impl = impl;
             _minLevel = logLevel;
@@ -29,22 +30,22 @@ namespace HB.Framework.Client.Logging
             switch (logLevel)
             {
                 case LogLevel.Trace:
-                    _impl.Trace(message);
+                    _impl?.Trace(message);
                     break;
                 case LogLevel.Debug:
-                    _impl.Debug(message);
+                    _impl?.Debug(message);
                     break;
                 case LogLevel.Information:
-                    _impl.Info(message);
+                    _impl?.Info(message);
                     break;
                 case LogLevel.Warning:
-                    _impl.Warn(message);
+                    _impl?.Warn(message);
                     break;
                 case LogLevel.Error:
-                    _impl.Error(message);
+                    _impl?.Error(message);
                     break;
                 case LogLevel.Critical:
-                    _impl.Wtf(message);
+                    _impl?.Wtf(message);
                     break;
                 case LogLevel.None:
                     break;
@@ -62,13 +63,15 @@ namespace HB.Framework.Client.Logging
         }
     }
 
-    public class ClientLoggerProvider : ILoggerProvider
+    public class PlatformLoggerProvider : ILoggerProvider
     {
         private readonly ILogger _logger;
 
-        public ClientLoggerProvider(IClientLoggerImpl impl, LogLevel logLevel)
+        public PlatformLoggerProvider(LogLevel logLevel)
         {
-            _logger = new ClientLogger(impl, logLevel);
+            IPlatformLoggerImpl? impl = DependencyService.Get<IPlatformLoggerImpl>();
+
+            _logger = new PlatformLogger(impl, logLevel);
         }
         public ILogger CreateLogger(string categoryName)
         {

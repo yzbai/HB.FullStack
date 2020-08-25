@@ -1,13 +1,9 @@
-﻿using HB.Framework.Client.Properties;
-using HB.Framework.Common.Api;
+﻿using HB.Framework.Common.Api;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +29,7 @@ namespace HB.Framework.Client.Api
             await SendAsync<object>(request).ConfigureAwait(false);
         }
 
-        public async Task<T?> SendAsync<T>(ApiRequest request) where T : class
+        public async Task<T> SendAsync<T>(ApiRequest request) where T : class
         {
             await SetDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
@@ -87,7 +83,14 @@ namespace HB.Framework.Client.Api
                     throw new ApiException(response.ErrCode, response.Message, response.HttpCode);
                 }
 
-                return response.Data;
+                T? data = response.Data;
+
+                if (typeof(T) != typeof(object) && data == null)
+                {
+                    throw new ApiException(ApiErrorCode.NullResponseDataReturn);
+                }
+
+                return data!;
             }
             catch (ApiException)
             {
@@ -215,7 +218,7 @@ namespace HB.Framework.Client.Api
 
                         string newAccessToken = refreshResponse.Data!.AccessToken;
 
-                        await OnJwtRefreshSucceed(newAccessToken).ConfigureAwait(false);
+                        await _global.OnJwtRefreshSucceedAync(newAccessToken).ConfigureAwait(false);
 
                         return true;
                     }
@@ -224,7 +227,7 @@ namespace HB.Framework.Client.Api
                 //刷新失败
                 _lastRefreshTokenResults[accessTokenHashKey] = false;
 
-                await OnJwtRefreshFailed().ConfigureAwait(false);
+                await _global.OnJwtRefreshFailedAync().ConfigureAwait(false);
 
                 return false;
             }
@@ -240,17 +243,6 @@ namespace HB.Framework.Client.Api
             {
                 _tokenRefreshSemaphore.Release();
             }
-        }
-
-        private async Task OnJwtRefreshSucceed(string? newAccessToken)
-        {
-            await _global.SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
-        }
-
-        private async Task OnJwtRefreshFailed()
-        {
-            await _global.SetAccessTokenAsync(null).ConfigureAwait(false);
-            await _global.SetRefreshTokenAsync(null).ConfigureAwait(false);
         }
 
         #endregion
