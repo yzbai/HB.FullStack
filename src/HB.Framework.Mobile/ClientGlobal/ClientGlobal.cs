@@ -156,8 +156,6 @@ namespace HB.Framework.Client
             return _accessToken;
         }
 
-
-
         public async Task SetAccessTokenAsync(string? accessToken)
         {
             _accessToken = accessToken;
@@ -180,6 +178,24 @@ namespace HB.Framework.Client
         {
             _refreshToken = refreshToken;
             await PreferenceSetAsync(ClientNames.RefreshToken, refreshToken).ConfigureAwait(false);
+        }
+
+        public async Task OnJwtRefreshSucceedAync(string newAccessToken)
+        {
+            await SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
+        }
+
+        public async Task OnJwtRefreshFailedAync()
+        {
+            await SetAccessTokenAsync(null).ConfigureAwait(false);
+            await SetRefreshTokenAsync(null).ConfigureAwait(false);
+        }
+
+        public async Task OnLoginSuccessedAsync(string userGuid, string accessToken, string refreshToken)
+        {
+            await SetCurrentUserGuidAsync(userGuid).ConfigureAwait(false);
+            await SetAccessTokenAsync(accessToken).ConfigureAwait(false);
+            await SetRefreshTokenAsync(refreshToken).ConfigureAwait(false);
         }
 
         #endregion
