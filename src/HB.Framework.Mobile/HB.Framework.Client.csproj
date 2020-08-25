@@ -37,8 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Base\ModalDialogPage.xaml.cs">
-      <DependentUpon>%(Filename)</DependentUpon>
+    <Compile Update="Base\BaseModalDialog.xaml.cs">
+      <DependentUpon>BaseModalDialog.xaml</DependentUpon>
     </Compile>
     <Compile Update="Controls\ActionSheetCell.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>

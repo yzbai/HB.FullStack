@@ -37,5 +37,11 @@ namespace HB.Framework.Client
         Task SetRefreshTokenAsync(string? refreshToken);
 
         #endregion
+
+        Task OnJwtRefreshSucceedAync(string newAccessToken);
+
+        Task OnJwtRefreshFailedAync();
+
+        Task OnLoginSuccessedAsync(string userGuid, string accessToken, string refreshToken);
     }
 }
