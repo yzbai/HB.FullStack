@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceRegister
+    public static class PublicResourceTokenManagerServiceRegister
     {
         public static IServiceCollection AddPublicResourceTokenManager(this IServiceCollection services)
         {
