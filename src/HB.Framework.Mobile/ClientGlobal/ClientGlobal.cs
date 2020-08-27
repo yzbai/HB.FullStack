@@ -17,6 +17,9 @@ namespace HB.Framework.Client
         private string? _currentUserGuid;
         private string? _accessToken;
         private string? _refreshToken;
+        private string? _currentUserName;
+        private string? _currentMobile;
+        private string? _currentEmail;
 
         private readonly ILogger _logger;
 
@@ -134,10 +137,27 @@ namespace HB.Framework.Client
             return _currentUserGuid;
         }
 
-        public async Task SetCurrentUserGuidAsync(string userGuid)
+        public async Task SetCurrentUserGuidAsync(string? userGuid)
         {
             _currentUserGuid = userGuid;
             await PreferenceSetAsync(ClientNames.CurrentUserGuid, userGuid).ConfigureAwait(false);
+        }
+
+        public async Task<string?> GetCurrentUserNameAsync()
+        {
+            if (_currentUserName.IsNullOrEmpty())
+            {
+                _currentUserName = await PreferenceGetAsync(ClientNames.CurrentUserName).ConfigureAwait(false);
+            }
+
+            return _currentUserName;
+        }
+
+        public async Task SetCurrentUserNameAsync(string? userName)
+        {
+            _currentUserName = userName;
+
+            await PreferenceSetAsync(ClientNames.CurrentUserName, userName).ConfigureAwait(false);
         }
 
         #endregion
@@ -191,11 +211,21 @@ namespace HB.Framework.Client
             await SetRefreshTokenAsync(null).ConfigureAwait(false);
         }
 
-        public async Task OnLoginSuccessedAsync(string userGuid, string accessToken, string refreshToken)
+        public async Task OnLoginSuccessedAsync(string userGuid, string? userName, string? mobile, string? email, string accessToken, string refreshToken)
         {
             await SetCurrentUserGuidAsync(userGuid).ConfigureAwait(false);
+            await SetCurrentUserNameAsync(userName).ConfigureAwait(false);
+            await SetCurrentEmailAsync(email).ConfigureAwait(false);
+            await SetCurrentMobileAsync(mobile).ConfigureAwait(false);
+
             await SetAccessTokenAsync(accessToken).ConfigureAwait(false);
             await SetRefreshTokenAsync(refreshToken).ConfigureAwait(false);
+
+        }
+
+        public async Task OnLoginFailedAsync()
+        {
+            await OnJwtRefreshFailedAync().ConfigureAwait(false);
         }
 
         #endregion
@@ -242,6 +272,40 @@ namespace HB.Framework.Client
                 _logger.LogCritical($"SecureStorage Set Failed. key:{key}. Message:{ex.Message}");
                 return;
             }
+        }
+
+        public async Task<string?> GetCurrentMobileAsync()
+        {
+            if (_currentMobile.IsNullOrEmpty())
+            {
+                _currentMobile = await PreferenceGetAsync(ClientNames.Mobile).ConfigureAwait(false);
+            }
+
+            return _currentMobile;
+        }
+
+        public async Task SetCurrentMobileAsync(string? mobile)
+        {
+            _currentMobile = mobile;
+
+            await PreferenceSetAsync(ClientNames.Mobile, mobile).ConfigureAwait(false);
+        }
+
+        public async Task<string?> GetCurrentEmailAsync()
+        {
+            if (_currentEmail.IsNullOrEmpty())
+            {
+                _currentEmail = await PreferenceGetAsync(ClientNames.Email).ConfigureAwait(false);
+            }
+
+            return _currentEmail;
+        }
+
+        public async Task SetCurrentEmailAsync(string? email)
+        {
+            _currentEmail = email;
+
+            await PreferenceSetAsync(ClientNames.Email, email).ConfigureAwait(false);
         }
 
         #endregion

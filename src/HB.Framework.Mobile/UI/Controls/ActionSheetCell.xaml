@@ -20,26 +20,26 @@
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Text="{Binding Title}"
             FontSize="Medium"
-            VerticalTextAlignment="Center"
-            HorizontalOptions="Start" />
+            HorizontalOptions="Start"
+            Text="{Binding Title}"
+            VerticalTextAlignment="Center" />
         <Label
             Grid.Row="0"
             Grid.Column="1"
-            Text="{Binding SelectedDisplayText}"
-            VerticalTextAlignment="Center"
             FontSize="Small"
+            HorizontalOptions="End"
+            Text="{Binding SelectedDisplayText}"
             TextColor="Gray"
-            HorizontalOptions="End" />
+            VerticalTextAlignment="Center" />
         <Label
             Grid.Row="0"
             Grid.Column="2"
-            Text="{Binding ChevronRight}"
-            FontFamily="Fabric"
-            VerticalTextAlignment="Center"
+            FontFamily="MaterialIcon"
             FontSize="Medium"
-            HorizontalOptions="EndAndExpand" />
+            HorizontalOptions="EndAndExpand"
+            Text="{Binding ChevronRight}"
+            VerticalTextAlignment="Center" />
         <Grid.GestureRecognizers>
             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
         </Grid.GestureRecognizers>

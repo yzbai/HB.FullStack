@@ -14,11 +14,8 @@
 
 
   <ItemGroup>
-    <Compile Remove="Filters\**" />
     <Compile Remove="MixedSession\**" />
-    <EmbeddedResource Remove="Filters\**" />
     <EmbeddedResource Remove="MixedSession\**" />
-    <None Remove="Filters\**" />
     <None Remove="MixedSession\**" />
   </ItemGroup>
 

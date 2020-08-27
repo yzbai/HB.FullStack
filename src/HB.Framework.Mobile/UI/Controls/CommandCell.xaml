@@ -2,8 +2,8 @@
 <base:BaseContentView
     x:Class="HB.Framework.Client.Controls.CommandCell"
     xmlns="http://xamarin.com/schemas/2014/forms"
-    xmlns:base="clr-namespace:HB.Framework.Client.Base"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.Framework.Client.Base"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="root"
@@ -21,26 +21,26 @@
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Text="{Binding Title}"
             FontSize="Medium"
-            VerticalTextAlignment="Center"
-            HorizontalOptions="Start" />
+            HorizontalOptions="Start"
+            Text="{Binding Title}"
+            VerticalTextAlignment="Center" />
         <Label
             Grid.Row="0"
             Grid.Column="1"
-            Text="{Binding Text}"
-            VerticalTextAlignment="Center"
             FontSize="Small"
+            HorizontalOptions="End"
+            Text="{Binding Text}"
             TextColor="Gray"
-            HorizontalOptions="End" />
+            VerticalTextAlignment="Center" />
         <Label
             Grid.Row="0"
             Grid.Column="2"
-            Text="{Binding ChevronRight}"
-            FontFamily="Fabric"
-            VerticalTextAlignment="Center"
+            FontFamily="MaterialIcon"
             FontSize="Medium"
-            HorizontalOptions="EndAndExpand" />
+            HorizontalOptions="EndAndExpand"
+            Text="{Binding ChevronRight}"
+            VerticalTextAlignment="Center" />
         <Grid.GestureRecognizers>
             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
         </Grid.GestureRecognizers>

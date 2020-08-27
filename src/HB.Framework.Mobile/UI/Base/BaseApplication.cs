@@ -37,7 +37,7 @@ namespace HB.Framework.Client.Base
             {
                 if (_configuration == null)
                 {
-                    _configuration = ClientUtils.BuildConfiguration($"appsettings.{GetEnvironment()}.json", Assembly.GetExecutingAssembly());
+                    _configuration = ClientUtils.BuildConfiguration($"appsettings.{GetEnvironment()}.json", Assembly.GetCallingAssembly());
                 }
 
                 return _configuration;

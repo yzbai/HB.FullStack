@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Reflection;

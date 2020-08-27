@@ -29,13 +29,13 @@ namespace HB.Framework.Client.Api
             await SendAsync<object>(request).ConfigureAwait(false);
         }
 
-        public async Task<T> SendAsync<T>(ApiRequest request) where T : class
+        public async Task<T?> SendAsync<T>(ApiRequest request) where T : class
         {
             await SetDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
             if (!request.IsValid())
             {
-                throw new ApiException(ApiErrorCode.MODELVALIDATIONERROR);
+                throw new ApiException(ApiErrorCode.MODELVALIDATIONERROR, 400);
             }
 
             try
@@ -50,7 +50,7 @@ namespace HB.Framework.Client.Api
 
                     if (!jwtAdded)
                     {
-                        throw new ApiException(ApiErrorCode.NOAUTHORITY);
+                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
                     }
                 }
 
@@ -58,7 +58,7 @@ namespace HB.Framework.Client.Api
                 {
                     if (!TrySetApiKey(apiKeyRequest))
                     {
-                        throw new ApiException(ApiErrorCode.NOAUTHORITY);
+                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
                     }
                 }
 
@@ -80,17 +80,10 @@ namespace HB.Framework.Client.Api
 
                 if (!response.IsSuccessful)
                 {
-                    throw new ApiException(response.ErrCode, response.Message, response.HttpCode);
+                    throw new ApiException(response.ErrCode, response.HttpCode, response.Message);
                 }
 
-                T? data = response.Data;
-
-                if (typeof(T) != typeof(object) && data == null)
-                {
-                    throw new ApiException(ApiErrorCode.NullResponseDataReturn);
-                }
-
-                return data!;
+                return response.Data;
             }
             catch (ApiException)
             {
@@ -100,7 +93,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ex, ApiErrorCode.UnKownError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}");
+                throw new ApiException(ex, ApiErrorCode.UnKownError, 400, $"ApiClient.SendAsync Failed.Type : {typeof(T)}");
             }
         }
 
@@ -237,7 +230,7 @@ namespace HB.Framework.Client.Api
             }
             catch (Exception ex)
             {
-                throw new ApiException(ex, ApiErrorCode.TokenRefresherError, "ApiClient.AutoRefreshTokenAsync Error.");
+                throw new ApiException(ex, ApiErrorCode.TokenRefresherError, 401, "ApiClient.AutoRefreshTokenAsync Error.");
             }
             finally
             {
