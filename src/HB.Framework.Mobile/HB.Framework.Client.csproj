@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Styles\materialdesignicons-webfont.ttf" />
+    <None Remove="UI\Styles\materialdesignicons-webfont.ttf" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Styles\materialdesignicons-webfont.ttf" />
+    <EmbeddedResource Include="UI\Styles\materialdesignicons-webfont.ttf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,34 +37,34 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Base\BaseModalDialog.xaml.cs">
+    <Compile Update="UI\Base\BaseModalDialog.xaml.cs">
       <DependentUpon>BaseModalDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Controls\ActionSheetCell.xaml.cs">
+    <Compile Update="UI\Controls\ActionSheetCell.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\Chip.xaml.cs">
+    <Compile Update="UI\Controls\Chip.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\CommandCell.xaml.cs">
+    <Compile Update="UI\Controls\CommandCell.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\ImageOptions.xaml.cs">
+    <Compile Update="UI\Controls\ImageOptions.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\MonthDayPicker.xaml.cs">
+    <Compile Update="UI\Controls\MonthDayPicker.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\MultipleListPicker.xaml.cs">
+    <Compile Update="UI\Controls\MultipleListPicker.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\MultiplePickerDialog.xaml.cs">
+    <Compile Update="UI\Controls\MultiplePickerDialog.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\SingleListPicker.xaml.cs">
+    <Compile Update="UI\Controls\SingleListPicker.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Controls\SmsCodeEntry.xaml.cs">
+    <Compile Update="UI\Controls\SmsCodeEntry.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
