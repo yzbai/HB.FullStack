@@ -12,15 +12,15 @@ namespace HB.Framework.Client.Skia
     {
         private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigureCanvasView>>();
 
-        public bool AutoBringToFront { get; set; } = true;
-
-        public bool EnableFailedToHitEvent { get; set; } = true;
-
         private readonly List<SKFigure> _figures = new List<SKFigure>();
 
         private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
 
-        //private bool _timerMode;
+        public bool AutoBringToFront { get; set; } = true;
+
+        public bool EnableFailedToHitEvent { get; set; } = true;
+
+        private bool _timerMode;
 
         public SKFigureCanvasView() : base()
         {
@@ -39,7 +39,7 @@ namespace HB.Framework.Client.Skia
 
         public void SetReDrawTimer(int milliseconds)
         {
-            //_timerMode = true;
+            _timerMode = true;
 
             Device.StartTimer(TimeSpan.FromMilliseconds(milliseconds), () =>
             {
@@ -178,7 +178,6 @@ namespace HB.Framework.Client.Skia
 
                             figure.ProcessTouchAction(args);
 
-
                             if (AutoBringToFront)
                             {
                                 if (_figures.Remove(figure))
@@ -202,7 +201,7 @@ namespace HB.Framework.Client.Skia
                         }
                     }
 
-                    //if (!_timerMode)
+                    if (!_timerMode)
                     {
                         InvalidateSurface();
                     }
@@ -214,7 +213,7 @@ namespace HB.Framework.Client.Skia
                     {
                         relatedFigure.ProcessTouchAction(args);
 
-                        //if (!_timerMode)
+                        if (!_timerMode)
                         {
                             InvalidateSurface();
                         }
@@ -229,7 +228,7 @@ namespace HB.Framework.Client.Skia
 
                         _touchDictionary.Remove(eventId);
 
-                        //if (!_timerMode)
+                        if (!_timerMode)
                         {
                             InvalidateSurface();
                         }

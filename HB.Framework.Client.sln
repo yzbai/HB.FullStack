@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Common", "..\H
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Client", "src\HB.Framework.Mobile\HB.Framework.Client.csproj", "{1085D7FA-7A6F-41AE-9CB0-F769B5DDAD25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.Client.Android", "src\HB.Framework.Client.Android\HB.Framework.Client.Android.csproj", "{BC579823-8579-4559-87AB-CEFA80264A96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.Client.iOS", "src\HB.Framework.Client.iOS\HB.Framework.Client.iOS.csproj", "{61CB302F-B736-4B7C-A456-ED30ECEB4D39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{1085D7FA-7A6F-41AE-9CB0-F769B5DDAD25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1085D7FA-7A6F-41AE-9CB0-F769B5DDAD25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1085D7FA-7A6F-41AE-9CB0-F769B5DDAD25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC579823-8579-4559-87AB-CEFA80264A96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC579823-8579-4559-87AB-CEFA80264A96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC579823-8579-4559-87AB-CEFA80264A96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC579823-8579-4559-87AB-CEFA80264A96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61CB302F-B736-4B7C-A456-ED30ECEB4D39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61CB302F-B736-4B7C-A456-ED30ECEB4D39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61CB302F-B736-4B7C-A456-ED30ECEB4D39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61CB302F-B736-4B7C-A456-ED30ECEB4D39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

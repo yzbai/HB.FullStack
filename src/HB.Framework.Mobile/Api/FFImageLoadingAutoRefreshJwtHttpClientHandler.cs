@@ -46,7 +46,7 @@ namespace HB.Framework.Client.Api
 
             try
             {
-                ApiResponse<object> response = await responseMessage.ToApiResponseAsync<object>().ConfigureAwait(false);
+                ApiResponse response = await responseMessage.ToApiResponseAsync().ConfigureAwait(false);
 
                 if (response.HttpCode == 401 && response.ErrCode == ApiErrorCode.ApiTokenExpired)
                 {
@@ -65,7 +65,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Application.Current.GetUIExceptionHandler()?.Invoke(ex);
+                Application.Current.GetExceptionHandler()?.Invoke(ex);
                 return responseMessage;
             }
         }

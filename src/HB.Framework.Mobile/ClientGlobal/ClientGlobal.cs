@@ -17,7 +17,7 @@ namespace HB.Framework.Client
         private string? _currentUserGuid;
         private string? _accessToken;
         private string? _refreshToken;
-        private string? _currentUserName;
+        private string? _currentLoginName;
         private string? _currentMobile;
         private string? _currentEmail;
 
@@ -143,21 +143,21 @@ namespace HB.Framework.Client
             await PreferenceSetAsync(ClientNames.CurrentUserGuid, userGuid).ConfigureAwait(false);
         }
 
-        public async Task<string?> GetCurrentUserNameAsync()
+        public async Task<string?> GetCurrentLoginNameAsync()
         {
-            if (_currentUserName.IsNullOrEmpty())
+            if (_currentLoginName.IsNullOrEmpty())
             {
-                _currentUserName = await PreferenceGetAsync(ClientNames.CurrentUserName).ConfigureAwait(false);
+                _currentLoginName = await PreferenceGetAsync(ClientNames.CurrentLoginName).ConfigureAwait(false);
             }
 
-            return _currentUserName;
+            return _currentLoginName;
         }
 
-        public async Task SetCurrentUserNameAsync(string? userName)
+        public async Task SetCurrentLoginNameAsync(string? loginName)
         {
-            _currentUserName = userName;
+            _currentLoginName = loginName;
 
-            await PreferenceSetAsync(ClientNames.CurrentUserName, userName).ConfigureAwait(false);
+            await PreferenceSetAsync(ClientNames.CurrentLoginName, loginName).ConfigureAwait(false);
         }
 
         #endregion
@@ -211,10 +211,10 @@ namespace HB.Framework.Client
             await SetRefreshTokenAsync(null).ConfigureAwait(false);
         }
 
-        public async Task OnLoginSuccessedAsync(string userGuid, string? userName, string? mobile, string? email, string accessToken, string refreshToken)
+        public async Task OnLoginSuccessedAsync(string userGuid, string? loginName, string? mobile, string? email, string accessToken, string refreshToken)
         {
             await SetCurrentUserGuidAsync(userGuid).ConfigureAwait(false);
-            await SetCurrentUserNameAsync(userName).ConfigureAwait(false);
+            await SetCurrentLoginNameAsync(loginName).ConfigureAwait(false);
             await SetCurrentEmailAsync(email).ConfigureAwait(false);
             await SetCurrentMobileAsync(mobile).ConfigureAwait(false);
 
