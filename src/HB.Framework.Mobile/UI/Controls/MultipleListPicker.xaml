@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <base:BaseContentView
     x:Class="HB.Framework.Client.Controls.MultipleListPicker"
-    xmlns:base="clr-namespace:HB.Framework.Client.Base"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.Framework.Client.Base"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="root"
@@ -13,22 +13,16 @@
             <ListView
                 x:Name="listView"
                 HorizontalScrollBarVisibility="Never"
-                VerticalScrollBarVisibility="Never"
+                ItemTapped="ListView_ItemTapped"
                 ItemsSource="{Binding ItemsSource}"
                 SelectionMode="None"
-                ItemTapped="ListView_ItemTapped">
+                VerticalScrollBarVisibility="Never">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <Label
-                                    Text="{Binding Text}"
-                                    HorizontalOptions="StartAndExpand"
-                                    VerticalTextAlignment="Center" />
-                                <CheckBox
-                                    HorizontalOptions="EndAndExpand"
-                                    IsChecked="{Binding IsChecked}"
-                                    CheckedChanged="CheckBox_CheckedChanged" />
+                                <Label HorizontalOptions="StartAndExpand" Text="{Binding Text}" VerticalTextAlignment="Center" />
+                                <CheckBox CheckedChanged="CheckBox_CheckedChanged" HorizontalOptions="EndAndExpand" IsChecked="{Binding IsChecked}" />
                             </StackLayout>
                         </ViewCell>
                     </DataTemplate>

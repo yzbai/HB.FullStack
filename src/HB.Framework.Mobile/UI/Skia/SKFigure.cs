@@ -16,6 +16,7 @@ namespace HB.Framework.Client.Skia
 
         public CancellationTokenSource CancellationTokenSource { get; set; } = null!;
     }
+
     public abstract class SKFigure
     {
         public const float LongTapTolerantDistanceInDp = 0.1f;
@@ -40,9 +41,8 @@ namespace HB.Framework.Client.Skia
         /// </summary>
         public virtual SKRect HitTestBounds { get; set; }
 
-#pragma warning disable CA1051 // Do not declare visible instance fields
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>")]
         public SKMatrix AppliedMatrix = SKMatrix.CreateIdentity();
-#pragma warning restore CA1051 // Do not declare visible instance fields
 
         private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigure>>();
 
@@ -300,11 +300,8 @@ namespace HB.Framework.Client.Skia
             }
         }
 
-        #endregion 
+        #endregion
 
-        public static SKPoint TranslatePointToCenter(SKPoint skPoint, float canvasWidth, float canvasHeight)
-        {
-            return new SKPoint(skPoint.X - canvasWidth / 2, skPoint.Y - canvasHeight / 2);
-        }
+
     }
 }

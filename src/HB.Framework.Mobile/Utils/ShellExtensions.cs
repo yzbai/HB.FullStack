@@ -9,12 +9,12 @@ namespace Xamarin.Forms
     {
         public static bool CurrentPageIsA(this Shell shell, Type pageType)
         {
-            if (shell?.CurrentItem?.CurrentItem is IShellSectionController shellSectionController)
-            {
-                return shellSectionController.PresentedPage.GetType() == pageType;
-            }
+            return shell.CurrentPage().GetType() == pageType;
+        }
 
-            return false;
+        public static Page CurrentPage(this Shell shell)
+        {
+            return ((IShellSectionController)shell.CurrentItem.CurrentItem).PresentedPage;
         }
     }
 }

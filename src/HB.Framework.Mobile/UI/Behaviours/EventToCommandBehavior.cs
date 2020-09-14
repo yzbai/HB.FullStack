@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Windows.Input;
+using HB.Framework.Client.Base;
 using Xamarin.Forms;
 
 #nullable disable
 
-namespace HB.Framework.Client.Behaviours
+namespace HB.Framework.Client.UI.Behaviors
 {
-    public class EventToCommandBehavior : BehaviorBase<View>
+    public class EventToCommandBehavior : BaseBehavior<View>
     {
         private Delegate _eventHandler;
 
