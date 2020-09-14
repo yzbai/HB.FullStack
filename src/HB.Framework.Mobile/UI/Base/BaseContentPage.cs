@@ -14,10 +14,15 @@ namespace HB.Framework.Client.Base
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
         }
+
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
         protected override void OnAppearing()
         {
+            Shell.SetTabBarIsVisible(this, ShowTabBar());
+            Shell.SetNavBarIsVisible(this, ShowNavigationBar());
+            Shell.SetNavBarHasShadow(this, ShowNavigationBarShadow());
+
             base.OnAppearing();
 
             if (BindingContext is BaseViewModel viewModel)
@@ -37,7 +42,7 @@ namespace HB.Framework.Client.Base
                 baseContentView?.OnAppearing();
             }
 
-            ExecuteAppearedAsync().SafeFireAndForget(Application.Current.GetUIExceptionHandler());
+            ExecuteAppearedAsync().SafeFireAndForget(Application.Current.GetExceptionHandler());
         }
 
         protected override void OnDisappearing()
@@ -73,6 +78,21 @@ namespace HB.Framework.Client.Base
         protected virtual Task OnAppearedAsync()
         {
             return Task.CompletedTask;
+        }
+
+        protected virtual bool ShowTabBar()
+        {
+            return true;
+        }
+
+        protected virtual bool ShowNavigationBar()
+        {
+            return true;
+        }
+
+        protected virtual bool ShowNavigationBarShadow()
+        {
+            return false;
         }
     }
 }

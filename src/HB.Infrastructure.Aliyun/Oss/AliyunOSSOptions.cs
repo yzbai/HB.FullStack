@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         public string? Endpoint { get; set; }
 
         [DisallowNull, NotNull]
-        public string? AccessUserName { get; set; }
+        public string? AccessLoginName { get; set; }
 
         [DisallowNull, NotNull]
         public string? AccessKeyId { get; set; }

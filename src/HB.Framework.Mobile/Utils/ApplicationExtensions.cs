@@ -7,7 +7,7 @@ namespace Xamarin.Forms
 {
     public static class ApplicationExtensions
     {
-        public static Action<Exception>? GetUIExceptionHandler(this Application application)
+        public static Action<Exception>? GetExceptionHandler(this Application application)
         {
             if (application is BaseApplication)
             {

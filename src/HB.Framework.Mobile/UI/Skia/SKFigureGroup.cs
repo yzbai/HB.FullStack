@@ -85,6 +85,7 @@ namespace HB.Framework.Client.Skia
         }
 
         #region 事件派发
+
         private void SKFigureGroup_Pressed(object sender, SKTouchInfo info)
         {
             //Bring to Front
