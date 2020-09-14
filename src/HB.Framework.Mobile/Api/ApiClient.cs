@@ -26,7 +26,68 @@ namespace HB.Framework.Client.Api
 
         public async Task SendAsync(ApiRequest request)
         {
-            await SendAsync<object>(request).ConfigureAwait(false);
+            await SetDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
+
+            if (!request.IsValid())
+            {
+                throw new ApiException(ApiErrorCode.MODELVALIDATIONERROR, 400);
+            }
+
+            try
+            {
+                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductType() && e.Version == request.GetApiVersion());
+
+                HttpClient httpClient = GetHttpClient(endpoint);
+
+                if (request is JwtApiRequest jwtApiRequest)
+                {
+                    bool jwtAdded = await TrySetJwt(jwtApiRequest).ConfigureAwait(false);
+
+                    if (!jwtAdded)
+                    {
+                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
+                    }
+                }
+
+                if (request is ApiKeyRequest apiKeyRequest)
+                {
+                    if (!TrySetApiKey(apiKeyRequest))
+                    {
+                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
+                    }
+                }
+
+                ApiResponse response = await request.GetResponseAsync(httpClient).ConfigureAwait(false);
+
+                if (request is JwtApiRequest)
+                {
+                    //只处理token过期这一种情况
+                    if (response.HttpCode == 401 && response.ErrCode == ApiErrorCode.ApiTokenExpired)
+                    {
+                        bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
+
+                        if (refreshSuccessed)
+                        {
+                            await SendAsync(request).ConfigureAwait(false);
+                        }
+                    }
+                }
+
+                if (!response.IsSuccessful)
+                {
+                    throw new ApiException(response.ErrCode, response.HttpCode, response.Message);
+                }
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                throw new ApiException(ex, ApiErrorCode.UnKownError, 400, $"ApiClient.SendAsync Failed.");
+            }
         }
 
         public async Task<T?> SendAsync<T>(ApiRequest request) where T : class

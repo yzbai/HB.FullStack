@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HB.Framework.Client.Base;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.Behaviours
+namespace HB.Framework.Client.UI.Behaviors
 {
-    public class EntryLineValidationBehavior : BehaviorBase<Entry>
+    public class EntryLineValidationBehavior : BaseBehavior<Entry>
     {
         public static readonly BindableProperty IsValidProperty = BindableProperty.Create(nameof(IsValid), typeof(bool), typeof(EntryLineValidationBehavior), true, propertyChanged: OnIsValidChanged);
 

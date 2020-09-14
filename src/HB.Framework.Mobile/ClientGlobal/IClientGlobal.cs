@@ -22,9 +22,9 @@ namespace HB.Framework.Client
 
         Task SetCurrentUserGuidAsync(string? userGuid);
 
-        Task<string?> GetCurrentUserNameAsync();
+        Task<string?> GetCurrentLoginNameAsync();
 
-        Task SetCurrentUserNameAsync(string? userName);
+        Task SetCurrentLoginNameAsync(string? loginName);
 
         Task<string?> GetCurrentMobileAsync();
 
@@ -54,7 +54,7 @@ namespace HB.Framework.Client
 
         Task OnJwtRefreshFailedAync();
 
-        Task OnLoginSuccessedAsync(string userGuid, string? userName, string? mobile, string? email, string accessToken, string refreshToken);
+        Task OnLoginSuccessedAsync(string userGuid, string? loginName, string? mobile, string? email, string accessToken, string refreshToken);
 
         Task OnLoginFailedAsync();
     }

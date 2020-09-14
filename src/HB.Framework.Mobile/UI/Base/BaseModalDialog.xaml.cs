@@ -67,11 +67,11 @@ namespace HB.Framework.Client.Base
 
                 if (Shell.Current != null)
                 {
-                    Shell.Current.Navigation.PopModalAsync(false).SafeFireAndForget(Application.Current.GetUIExceptionHandler());
+                    Shell.Current.Navigation.PopModalAsync(false).SafeFireAndForget(Application.Current.GetExceptionHandler());
                 }
                 else
                 {
-                    Navigation.PopModalAsync(false).SafeFireAndForget(Application.Current.GetUIExceptionHandler());
+                    Navigation.PopModalAsync(false).SafeFireAndForget(Application.Current.GetExceptionHandler());
                 }
 
             }

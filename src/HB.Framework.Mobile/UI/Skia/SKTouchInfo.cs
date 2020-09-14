@@ -9,6 +9,7 @@ namespace HB.Framework.Client.Skia
         public long TouchEventId { get; set; }
 
         public bool IsOver { get; set; }
+
         public SKPoint StartPoint { get; set; }
 
         public SKPoint PreviousPoint { get; set; }

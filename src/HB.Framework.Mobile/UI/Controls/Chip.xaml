@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <base:BaseContentView
     x:Class="HB.Framework.Client.Controls.Chip"
-    xmlns:base="clr-namespace:HB.Framework.Client.Base"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.Framework.Client.Base"
+    xmlns:converters="clr-namespace:HB.Framework.Client.Converters"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:converters="clr-namespace:HB.Framework.Client.Converters"
     x:Name="ChipRoot"
     mc:Ignorable="d">
     <Frame
@@ -14,10 +14,10 @@
         Margin="0,0"
         Padding="8,5"
         BindingContext="{x:Reference ChipRoot}"
-        HasShadow="False"
         CornerRadius="15"
-        VerticalOptions="Center"
-        HorizontalOptions="Center">
+        HasShadow="False"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
         <Frame.Resources>
             <ResourceDictionary>
                 <converters:HasValueConverter x:Key="HasValueConverter" />
@@ -29,32 +29,23 @@
         </Frame.GestureRecognizers>
 
         <Frame.Content>
-            <StackLayout
-                Orientation="Horizontal"
-                VerticalOptions="Center"
-                HorizontalOptions="Center">
+            <StackLayout HorizontalOptions="Center" Orientation="Horizontal" VerticalOptions="Center">
 
-                <Image
-                    d:IsVisible="False"
-                    IsVisible="{Binding Image, Converter={StaticResource HasValueConverter}}"
-                    Source="{Binding Image}" />
+                <Image d:IsVisible="False" IsVisible="{Binding Image, Converter={StaticResource HasValueConverter}}" Source="{Binding Image}" />
 
                 <Label
                     d:Text="Chip"
-                    IsVisible="{Binding Text, Converter={StaticResource HasValueConverter}}"
-                    Text="{Binding Text}"
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{Binding Text, Converter={StaticResource HasValueConverter}}"
+                    Text="{Binding Text}"
                     TextColor="{Binding TextColor}"
                     VerticalOptions="Center"
-                    HorizontalOptions="Center"
-                    VerticalTextAlignment="Center"
-                    HorizontalTextAlignment="Center" />
+                    VerticalTextAlignment="Center" />
 
-                <Image
-                    d:IsVisible="False"
-                    IsVisible="{Binding CloseImage, Converter={StaticResource HasValueConverter}}"
-                    Source="{Binding CloseImage}">
+                <Image d:IsVisible="False" IsVisible="{Binding CloseImage, Converter={StaticResource HasValueConverter}}" Source="{Binding CloseImage}">
                     <Image.GestureRecognizers>
                         <TapGestureRecognizer Tapped="CloseButton_Clicked" />
                     </Image.GestureRecognizers>

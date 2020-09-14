@@ -55,10 +55,5 @@ namespace HB.Framework.Client.Base
                 await Application.Current.MainPage.DisplayAlert(message, title, button).ConfigureAwait(false);
             });
         }
-
-        protected void PerformLogin()
-        {
-            //Shell.Current.Navigation.PushAsync(new LoginPage());
-        }
     }
 }

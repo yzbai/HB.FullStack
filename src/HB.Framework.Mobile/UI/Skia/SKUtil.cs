@@ -250,5 +250,10 @@ namespace HB.Framework.Client.Skia
         {
             return Math.Sqrt(Math.Pow(b.Y - a.Y, 2) + Math.Pow(b.X - a.X, 2));
         }
+
+        public static SKPoint TranslatePointToCenter(SKPoint skPoint, float canvasWidth, float canvasHeight)
+        {
+            return new SKPoint(skPoint.X - canvasWidth / 2, skPoint.Y - canvasHeight / 2);
+        }
     }
 }

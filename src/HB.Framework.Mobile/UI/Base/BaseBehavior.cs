@@ -5,9 +5,9 @@ using Xamarin.Forms;
 
 #nullable disable
 
-namespace HB.Framework.Client.Behaviours
+namespace HB.Framework.Client.Base
 {
-    public class BehaviorBase<T> : Behavior<T> where T : BindableObject
+    public class BaseBehavior<T> : Behavior<T> where T : BindableObject
     {
         public T AssociatedObject { get; private set; }
 
