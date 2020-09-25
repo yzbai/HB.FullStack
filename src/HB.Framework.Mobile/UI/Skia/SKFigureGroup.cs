@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Client.Skia
+namespace HB.Framework.Client.UI.Skia
 {
     public class SKFigureGroup<T> : SKFigure, IDisposable where T : SKFigure
     {
