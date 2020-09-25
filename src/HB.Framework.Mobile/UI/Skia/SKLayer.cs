@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Client.Skia
+namespace HB.Framework.Client.UI.Skia
 {
     /// <summary>
     /// one layer is one bitmap

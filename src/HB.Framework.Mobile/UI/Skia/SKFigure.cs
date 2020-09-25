@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.Skia
+namespace HB.Framework.Client.UI.Skia
 {
     internal class TaskWrapper
     {
@@ -26,6 +26,32 @@ namespace HB.Framework.Client.Skia
         /// Maybe SKFigureGroup or SKFigureCanvasView
         /// </summary>
         public object? Parent { get; set; }
+
+        public SKFigureCanvasView? CanvasView
+        {
+            get
+            {
+                object? obj = Parent;
+
+                while (obj != null)
+                {
+                    if (obj is SKFigureCanvasView canvasView)
+                    {
+                        return canvasView;
+                    }
+                    else if (obj is SKFigure figure)
+                    {
+                        obj = figure.Parent;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                return null;
+            }
+        }
 
         public bool EnableDrag { get; set; } = true;
 
@@ -280,24 +306,7 @@ namespace HB.Framework.Client.Skia
 
         public void InvalidateSurface()
         {
-            object? obj = Parent;
-
-            while (obj != null)
-            {
-                if (obj is SKFigureCanvasView canvasView)
-                {
-                    canvasView.InvalidateSurface();
-                    return;
-                }
-                else if (obj is SKFigure figure)
-                {
-                    obj = figure.Parent;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            CanvasView?.InvalidateSurface();
         }
 
         #endregion

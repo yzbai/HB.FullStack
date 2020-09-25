@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Client.Skia
+namespace HB.Framework.Client.UI.Skia
 {
     public class SKTouchInfo
     {

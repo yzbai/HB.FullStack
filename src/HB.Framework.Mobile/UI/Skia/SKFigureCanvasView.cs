@@ -1,14 +1,16 @@
-﻿using HB.Framework.Client.Effects;
+﻿using HB.Framework.Client.Base;
+using HB.Framework.Client.Effects;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.Skia
+namespace HB.Framework.Client.UI.Skia
 {
-    public class SKFigureCanvasView : SKCanvasView
+    public class SKFigureCanvasView : SKCanvasView, IBaseContentView
     {
         private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigureCanvasView>>();
 
@@ -21,6 +23,14 @@ namespace HB.Framework.Client.Skia
         public bool EnableFailedToHitEvent { get; set; } = true;
 
         private bool _timerMode;
+
+        private bool _isAnimating;
+
+        private readonly Stopwatch _stopwatch = new Stopwatch();
+
+        private int _intervalMilliseconds = 16;
+
+        public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
 
         public SKFigureCanvasView() : base()
         {
@@ -37,9 +47,37 @@ namespace HB.Framework.Client.Skia
             PaintSurface += FigureCanvasView_PaintSurface;
         }
 
+        public void OnAppearing()
+        {
+            if (_timerMode)
+            {
+                _isAnimating = true;
+                _stopwatch.Start();
+
+                Device.StartTimer(
+                    TimeSpan.FromMilliseconds(_intervalMilliseconds),
+                    () =>
+                    {
+                        Device.BeginInvokeOnMainThread(() => { InvalidateSurface(); });
+                        return _isAnimating;
+                    });
+            }
+        }
+
+        public void OnDisappearing()
+        {
+            if (_timerMode)
+            {
+                _isAnimating = false;
+                _stopwatch.Stop();
+            }
+        }
+
         public void SetReDrawTimer(int milliseconds)
         {
             _timerMode = true;
+
+            _intervalMilliseconds = milliseconds;
 
             Device.StartTimer(TimeSpan.FromMilliseconds(milliseconds), () =>
             {
@@ -237,5 +275,7 @@ namespace HB.Framework.Client.Skia
                     break;
             }
         }
+
+
     }
 }
