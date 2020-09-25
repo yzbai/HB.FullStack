@@ -2,7 +2,7 @@
 using System;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.Skia
+namespace HB.Framework.Client.UI.Skia
 {
     public enum CaculateType
     {
