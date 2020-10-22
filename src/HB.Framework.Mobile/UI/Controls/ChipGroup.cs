@@ -272,10 +272,17 @@ namespace HB.Framework.Client.Controls
 
         public override void OnAppearing()
         {
+            base.OnAppearing();
         }
 
         public override void OnDisappearing()
         {
+            base.OnAppearing();
+        }
+
+        public override IList<IBaseContentView?>? GetAllCustomerControls()
+        {
+            return null;
         }
     }
 }

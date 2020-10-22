@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using HB.Framework.Client.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -83,10 +84,17 @@ namespace HB.Framework.Client.Controls
 
         public override void OnAppearing()
         {
+            base.OnAppearing();
         }
 
         public override void OnDisappearing()
         {
+            base.OnDisappearing();
+        }
+
+        public override IList<IBaseContentView?>? GetAllCustomerControls()
+        {
+            return null;
         }
     }
 }

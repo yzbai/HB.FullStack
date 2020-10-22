@@ -1,6 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.Framework.Client.Base;
 using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 using Xamarin.Forms;
 
@@ -227,10 +228,12 @@ namespace HB.Framework.Client.Controls
 
         public override void OnAppearing()
         {
+            base.OnAppearing();
         }
 
         public override void OnDisappearing()
         {
+            base.OnDisappearing();
         }
 
         private void RefreshVisualState()
@@ -299,6 +302,9 @@ namespace HB.Framework.Client.Controls
                 CloseCommand.Execute(CloseCommandParameter);
         }
 
-
+        public override IList<IBaseContentView?>? GetAllCustomerControls()
+        {
+            return null;
+        }
     }
 }
