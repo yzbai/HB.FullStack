@@ -55,12 +55,19 @@ namespace HB.Framework.Client.Controls
 
         public void OnAppearing()
         {
-
+            IsAppearing = true;
         }
 
         public void OnDisappearing()
         {
-
+            IsAppearing = false;
         }
+
+        public IList<IBaseContentView?>? GetAllCustomerControls()
+        {
+            return null;
+        }
+
+        public bool IsAppearing { get; private set; }
     }
 }

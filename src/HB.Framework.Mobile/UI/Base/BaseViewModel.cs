@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using AsyncAwaitBestPractices;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client.Base
@@ -50,9 +51,9 @@ namespace HB.Framework.Client.Base
 
         public static void DisplayAlert(string message, string title, string button)
         {
-            Device.BeginInvokeOnMainThread(async () =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Application.Current.MainPage.DisplayAlert(message, title, button).ConfigureAwait(false);
+                Application.Current.MainPage.DisplayAlert(message, title, button).SafeFireAndForget(Application.Current.GetExceptionHandler());
             });
         }
     }

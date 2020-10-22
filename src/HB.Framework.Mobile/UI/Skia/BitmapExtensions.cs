@@ -46,12 +46,12 @@ namespace HB.Framework.Client.UI.Skia
         }
 
         public static void DrawBitmap(this SKCanvas canvas, SKBitmap bitmap, SKRect dest,
-                                      BitmapStretch stretch,
-                                      BitmapAlignment horizontal = BitmapAlignment.Center,
-                                      BitmapAlignment vertical = BitmapAlignment.Center,
+                                      SKStretch stretch,
+                                      SKAlignment horizontal = SKAlignment.Center,
+                                      SKAlignment vertical = SKAlignment.Center,
                                       SKPaint? paint = null)
         {
-            if (stretch == BitmapStretch.Fill)
+            if (stretch == SKStretch.Fill)
             {
                 canvas.DrawBitmap(bitmap, dest, paint);
             }
@@ -61,14 +61,14 @@ namespace HB.Framework.Client.UI.Skia
 
                 switch (stretch)
                 {
-                    case BitmapStretch.None:
+                    case SKStretch.None:
                         break;
 
-                    case BitmapStretch.Uniform:
+                    case SKStretch.AspectFit:
                         scale = Math.Min(dest.Width / bitmap.Width, dest.Height / bitmap.Height);
                         break;
 
-                    case BitmapStretch.UniformToFill:
+                    case SKStretch.AspectFill:
                         scale = Math.Max(dest.Width / bitmap.Width, dest.Height / bitmap.Height);
                         break;
                 }
@@ -81,12 +81,12 @@ namespace HB.Framework.Client.UI.Skia
         }
 
         public static void DrawBitmap(this SKCanvas canvas, SKBitmap bitmap, SKRect source, SKRect dest,
-                                      BitmapStretch stretch,
-                                      BitmapAlignment horizontal = BitmapAlignment.Center,
-                                      BitmapAlignment vertical = BitmapAlignment.Center,
+                                      SKStretch stretch,
+                                      SKAlignment horizontal = SKAlignment.Center,
+                                      SKAlignment vertical = SKAlignment.Center,
                                       SKPaint? paint = null)
         {
-            if (stretch == BitmapStretch.Fill)
+            if (stretch == SKStretch.Fill)
             {
                 canvas.DrawBitmap(bitmap, source, dest, paint);
             }
@@ -96,14 +96,14 @@ namespace HB.Framework.Client.UI.Skia
 
                 switch (stretch)
                 {
-                    case BitmapStretch.None:
+                    case SKStretch.None:
                         break;
 
-                    case BitmapStretch.Uniform:
+                    case SKStretch.AspectFit:
                         scale = Math.Min(dest.Width / source.Width, dest.Height / source.Height);
                         break;
 
-                    case BitmapStretch.UniformToFill:
+                    case SKStretch.AspectFill:
                         scale = Math.Max(dest.Width / source.Width, dest.Height / source.Height);
                         break;
                 }
@@ -116,35 +116,35 @@ namespace HB.Framework.Client.UI.Skia
         }
 
         static SKRect CalculateDisplayRect(SKRect dest, float bmpWidth, float bmpHeight,
-                                           BitmapAlignment horizontal, BitmapAlignment vertical)
+                                           SKAlignment horizontal, SKAlignment vertical)
         {
             float x = 0;
             float y = 0;
 
             switch (horizontal)
             {
-                case BitmapAlignment.Center:
+                case SKAlignment.Center:
                     x = (dest.Width - bmpWidth) / 2;
                     break;
 
-                case BitmapAlignment.Start:
+                case SKAlignment.Start:
                     break;
 
-                case BitmapAlignment.End:
+                case SKAlignment.End:
                     x = dest.Width - bmpWidth;
                     break;
             }
 
             switch (vertical)
             {
-                case BitmapAlignment.Center:
+                case SKAlignment.Center:
                     y = (dest.Height - bmpHeight) / 2;
                     break;
 
-                case BitmapAlignment.Start:
+                case SKAlignment.Start:
                     break;
 
-                case BitmapAlignment.End:
+                case SKAlignment.End:
                     y = dest.Height - bmpHeight;
                     break;
             }
@@ -156,17 +156,17 @@ namespace HB.Framework.Client.UI.Skia
         }
     }
 
-    public enum BitmapStretch
+    public enum SKStretch
     {
         None,
         Fill,
-        Uniform,
-        UniformToFill,
-        AspectFit = Uniform,
-        AspectFill = UniformToFill
+        //Uniform,
+        //UniformToFill,
+        AspectFit, //= Uniform,
+        AspectFill// = UniformToFill
     }
 
-    public enum BitmapAlignment
+    public enum SKAlignment
     {
         Start,
         Center,
