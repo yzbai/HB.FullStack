@@ -10,6 +10,8 @@ namespace HB.Framework.Client.Base
 {
     public abstract class BaseContentPage : ContentPage
     {
+        public bool IsAppearing { get; set; }
+
         public BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
@@ -25,10 +27,7 @@ namespace HB.Framework.Client.Base
 
             base.OnAppearing();
 
-            if (BindingContext is BaseViewModel viewModel)
-            {
-                viewModel.OnAppearing();
-            }
+            IsAppearing = true;
 
             IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
 
@@ -42,6 +41,11 @@ namespace HB.Framework.Client.Base
                 baseContentView?.OnAppearing();
             }
 
+            if (BindingContext is BaseViewModel viewModel)
+            {
+                viewModel.OnAppearing();
+            }
+
             ExecuteAppearedAsync().SafeFireAndForget(Application.Current.GetExceptionHandler());
         }
 
@@ -49,10 +53,7 @@ namespace HB.Framework.Client.Base
         {
             base.OnDisappearing();
 
-            if (BindingContext is BaseViewModel viewModel)
-            {
-                viewModel.OnDisappearing();
-            }
+            IsAppearing = false;
 
             IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
 
@@ -64,6 +65,11 @@ namespace HB.Framework.Client.Base
             foreach (IBaseContentView? baseContentView in contentViews)
             {
                 baseContentView?.OnDisappearing();
+            }
+
+            if (BindingContext is BaseViewModel viewModel)
+            {
+                viewModel.OnDisappearing();
             }
         }
 

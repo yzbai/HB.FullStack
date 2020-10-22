@@ -4,41 +4,42 @@ using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using Xamarin.Forms;
+using System.Linq;
+using AsyncAwaitBestPractices;
+using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HB.Framework.Client.UI.Skia
 {
+    [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable",
+        Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
     public class SKFigureCanvasView : SKCanvasView, IBaseContentView
     {
-        private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigureCanvasView>>();
+        public static readonly BindableProperty FiguresProperty = BindableProperty.Create(nameof(Figures), typeof(ObservableCollection<SKFigure>), typeof(SKFigureCanvasView), new ObservableCollection<SKFigure>(), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((ObservableCollection<SKFigure>?)o, (ObservableCollection<SKFigure>?)n); });
 
-        private readonly List<SKFigure> _figures = new List<SKFigure>();
+        public static readonly BindableProperty IsAnimationModeProperty = BindableProperty.Create(nameof(IsAnimationMode), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnIsAnimationModeChanged((bool)o, (bool)n); });
+
+        public static readonly BindableProperty AnimationIntervalProperty = BindableProperty.Create(nameof(AnimationInterval), typeof(int), typeof(SKFigureCanvasView), 16, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnAnimationIntervalChanged(); });
+
+        private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigureCanvasView>>();
 
         private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
 
-        public bool AutoBringToFront { get; set; } = true;
+        private Timer? _animationTimer;
 
-        public bool EnableFailedToHitEvent { get; set; } = true;
-
-        private bool _timerMode;
-
-        private bool _isAnimating;
+        private readonly WeakEventManager _eventManager = new WeakEventManager();
 
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
-        private int _intervalMilliseconds = 16;
-
-        public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
-
         public SKFigureCanvasView() : base()
         {
-            TouchEffect touchEffect = new TouchEffect
-            {
-                //TODO: 测试这个
-                Capture = true
-            };
+            TouchEffect touchEffect = new TouchEffect { Capture = true };
 
             touchEffect.TouchAction += TouchEffect_TouchAction;
 
@@ -47,89 +48,165 @@ namespace HB.Framework.Client.UI.Skia
             PaintSurface += FigureCanvasView_PaintSurface;
         }
 
+        public ObservableCollection<SKFigure> Figures { get => (ObservableCollection<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
+
+        public bool IsAnimationMode { get => (bool)GetValue(IsAnimationModeProperty); set => SetValue(IsAnimationModeProperty, value); }
+
+        public int AnimationInterval { get => (int)GetValue(AnimationIntervalProperty); set => SetValue(AnimationIntervalProperty, value); }
+
+        public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
+
+        public bool IsAnimating { get; private set; }
+
+        public bool IsAppearing { get; private set; }
+
+        public bool AutoBringToFront { get; set; }
+
+        public bool EnableFailedToHitEvent { get; set; } = true;
+
+        /// <summary>
+        /// 在Painting 事件中不可以再直接或者间接调用InValidateSurface，会引起循环调用
+        /// </summary>
+        public event EventHandler<SKPaintSurfaceEventArgs> Painting
+        {
+            add => _eventManager.AddEventHandler(value);
+            remove => _eventManager.RemoveEventHandler(value);
+        }
+
+        /// <summary>
+        /// Painted 事件中不可以再直接或者间接调用InValidateSurface，会引起循环调用
+        /// </summary>
+        public event EventHandler<SKPaintSurfaceEventArgs> Painted
+        {
+            add => _eventManager.AddEventHandler(value);
+            remove => _eventManager.AddEventHandler(value);
+        }
+
         public void OnAppearing()
         {
-            if (_timerMode)
-            {
-                _isAnimating = true;
-                _stopwatch.Start();
+            IsAppearing = true;
 
-                Device.StartTimer(
-                    TimeSpan.FromMilliseconds(_intervalMilliseconds),
-                    () =>
-                    {
-                        Device.BeginInvokeOnMainThread(() => { InvalidateSurface(); });
-                        return _isAnimating;
-                    });
+            if (IsAnimationMode)
+            {
+                ReStartAnimation();
             }
         }
 
         public void OnDisappearing()
         {
-            if (_timerMode)
+            IsAppearing = false;
+
+            StopAnimation();
+
+            _touchDictionary.Clear();
+        }
+
+        public IList<IBaseContentView?>? GetAllCustomerControls()
+        {
+            return null;
+        }
+
+        private void OnIsAnimationModeChanged(bool oldValue, bool newValue)
+        {
+            if (oldValue == newValue)
             {
-                _isAnimating = false;
-                _stopwatch.Stop();
+                return;
+            }
+
+            if (newValue && IsAppearing)
+            {
+                ReStartAnimation();
+            }
+            else
+            {
+                StopAnimation();
             }
         }
 
-        public void SetReDrawTimer(int milliseconds)
+        private void OnAnimationIntervalChanged()
         {
-            _timerMode = true;
+            ReStartAnimation();
+        }
 
-            _intervalMilliseconds = milliseconds;
+        private void OnFiguresChanged(ObservableCollection<SKFigure>? oldValue, ObservableCollection<SKFigure>? newValue)
+        {
+            StopAnimation();
 
-            Device.StartTimer(TimeSpan.FromMilliseconds(milliseconds), () =>
+            oldValue.ForEach(f => f.Dispose());
+            newValue.ForEach(f => f.Parent = this);
+
+            if (IsAnimationMode)
+            {
+                ReStartAnimation();
+            }
+            else
             {
                 InvalidateSurface();
-                return true;
-            });
-        }
-
-        /// <summary>
-        /// 按顺序添加，最后添加的显示在最上面
-        /// </summary>
-        /// <param name="figure"></param>
-        public void AddFigure(SKFigure figure)
-        {
-            figure.Parent = this;
-            _figures.Add(figure);
-        }
-
-        public bool RemoveFigure(SKFigure figure)
-        {
-            if (figure is IDisposable disposable)
-            {
-                disposable.Dispose();
             }
 
-            return _figures.Remove(figure);
-        }
-
-        public void ClearFigure()
-        {
-            foreach (SKFigure figure in _figures)
+            if (oldValue is ObservableCollection<SKFigure> oldCollection)
             {
-                if (figure is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
+                oldCollection.CollectionChanged -= OnFiguresCollectionChanged;
             }
 
-            _figures.Clear();
+            if (newValue is ObservableCollection<SKFigure> newCollection)
+            {
+                newCollection.CollectionChanged += OnFiguresCollectionChanged;
+            }
         }
 
+        private void OnFiguresCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (sender is IEnumerable<SKFigure> figures)
+            {
+                figures.ForEach(f => f.Parent = this);
+            }
 
-        //TODO: WeakManager 改造
-        /// <summary>
-        /// 在Painting 事件中不可以再直接或者间接调用InValidateSurface，会引起循环调用
-        /// </summary>
-        public event EventHandler<SKPaintSurfaceEventArgs>? Painting;
+            if (IsAnimationMode)
+            {
+                ReStartAnimation();
+            }
+            else
+            {
+                InvalidateSurface();
+            }
+        }
 
-        /// <summary>
-        /// Painted 事件中不可以再直接或者间接调用InValidateSurface，会引起循环调用
-        /// </summary>
-        public event EventHandler<SKPaintSurfaceEventArgs>? Painted;
+        private void ReStartAnimation()
+        {
+            if (!IsAnimationMode)
+            {
+                return;
+            }
+
+            _stopwatch.Restart();
+            IsAnimating = true;
+
+            if (_animationTimer == null)
+            {
+                _animationTimer = new Timer(
+                    new TimerCallback(state =>
+                    {
+                        Device.BeginInvokeOnMainThread(() => InvalidateSurface());
+                    }),
+                    null,
+                    0,
+                    AnimationInterval);
+            }
+            else
+            {
+                _animationTimer.Change(0, AnimationInterval);
+            }
+        }
+
+        private void StopAnimation()
+        {
+            _animationTimer?.Dispose();
+            _animationTimer = null;
+
+            IsAnimating = false;
+            _stopwatch.Stop();
+        }
 
         private void FigureCanvasView_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
@@ -144,39 +221,43 @@ namespace HB.Framework.Client.UI.Skia
             OnPainted(sender, e);
         }
 
-        public void OnPainting(object sender, SKPaintSurfaceEventArgs e)
+        private void OnPainting(object sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                Painting?.Invoke(sender, e);
+                _eventManager.RaiseEvent(sender, e, nameof(Painting));
             }
         }
+
         private void OnPaintFigures(SKPaintSurfaceEventArgs e, SKCanvas canvas)
         {
-            foreach (SKFigure figure in _figures)
+            Figures.ForEach(f =>
             {
                 using (new SKAutoCanvasRestore(canvas))
                 {
-                    figure.Paint(e);
+                    f.Paint(e);
                 }
-            }
+            });
         }
 
-        public void OnPainted(object sender, SKPaintSurfaceEventArgs e)
+        private void OnPainted(object sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                Painted?.Invoke(sender, e);
+                _eventManager.RaiseEvent(sender, e, nameof(Painted));
             }
         }
 
         private void TouchEffect_TouchAction(object sender, TouchActionEventArgs args)
         {
-            //_logger.LogDebug($"{args.Type}. ID: {args.Id},  Location:{args.Location}");
+            if (Figures == null)
+            {
+                return;
+            }
 
             SKPoint skPoint = SKUtil.ToSKPoint(args.Location);
 
@@ -204,9 +285,9 @@ namespace HB.Framework.Client.UI.Skia
 
                     bool founded = false;
 
-                    for (int i = _figures.Count - 1; i >= 0; --i)
+                    for (int i = Figures.Count - 1; i >= 0; --i)
                     {
-                        SKFigure figure = _figures[i];
+                        SKFigure figure = Figures[i];
 
                         if (!founded && figure.HitTest(skPoint, args.Id))
                         {
@@ -218,9 +299,9 @@ namespace HB.Framework.Client.UI.Skia
 
                             if (AutoBringToFront)
                             {
-                                if (_figures.Remove(figure))
+                                if (Figures.Remove(figure))
                                 {
-                                    _figures.Add(figure);
+                                    Figures.Add(figure);
                                 }
                             }
 
@@ -239,7 +320,7 @@ namespace HB.Framework.Client.UI.Skia
                         }
                     }
 
-                    if (!_timerMode)
+                    if (!IsAnimationMode)
                     {
                         InvalidateSurface();
                     }
@@ -251,7 +332,7 @@ namespace HB.Framework.Client.UI.Skia
                     {
                         relatedFigure.ProcessTouchAction(args);
 
-                        if (!_timerMode)
+                        if (!IsAnimationMode)
                         {
                             InvalidateSurface();
                         }
@@ -266,7 +347,7 @@ namespace HB.Framework.Client.UI.Skia
 
                         _touchDictionary.Remove(eventId);
 
-                        if (!_timerMode)
+                        if (!IsAnimationMode)
                         {
                             InvalidateSurface();
                         }
@@ -275,7 +356,5 @@ namespace HB.Framework.Client.UI.Skia
                     break;
             }
         }
-
-
     }
 }

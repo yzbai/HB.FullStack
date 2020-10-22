@@ -14,7 +14,9 @@ namespace System
 
         public Task TaskCompletion { get; private set; }
 
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         public TResult Result { get { return (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : default; } }
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
         public TaskStatus Status { get { return Task.Status; } }
 
@@ -38,7 +40,7 @@ namespace System
 
         public ObservableTask(Task<TResult> task, Action<Exception> onException = null, bool continueOnCapturedContext = false)
         {
-            ThrowIf.Null(task, nameof(task));
+            _ = ThrowIf.Null(task, nameof(task));
 
             Task = task;
 
@@ -51,7 +53,9 @@ namespace System
         {
             try
             {
+#pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
                 await task.ConfigureAwait(continueOnCapturedContext);
+#pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
             }
             catch (Exception obj) when (onException != null)
             {

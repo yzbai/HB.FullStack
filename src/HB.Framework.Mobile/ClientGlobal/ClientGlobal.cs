@@ -200,12 +200,12 @@ namespace HB.Framework.Client
             await PreferenceSetAsync(ClientNames.RefreshToken, refreshToken).ConfigureAwait(false);
         }
 
-        public async Task OnJwtRefreshSucceedAync(string newAccessToken)
+        public async Task OnJwtRefreshSucceedAsync(string newAccessToken)
         {
             await SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
         }
 
-        public async Task OnJwtRefreshFailedAync()
+        public async Task OnJwtRefreshFailedAsync()
         {
             await SetAccessTokenAsync(null).ConfigureAwait(false);
             await SetRefreshTokenAsync(null).ConfigureAwait(false);
@@ -225,7 +225,7 @@ namespace HB.Framework.Client
 
         public async Task OnLoginFailedAsync()
         {
-            await OnJwtRefreshFailedAync().ConfigureAwait(false);
+            await OnJwtRefreshFailedAsync().ConfigureAwait(false);
         }
 
         #endregion

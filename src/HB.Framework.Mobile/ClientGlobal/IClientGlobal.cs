@@ -50,9 +50,9 @@ namespace HB.Framework.Client
 
         #endregion
 
-        Task OnJwtRefreshSucceedAync(string newAccessToken);
+        Task OnJwtRefreshSucceedAsync(string newAccessToken);
 
-        Task OnJwtRefreshFailedAync();
+        Task OnJwtRefreshFailedAsync();
 
         Task OnLoginSuccessedAsync(string userGuid, string? loginName, string? mobile, string? email, string accessToken, string refreshToken);
 

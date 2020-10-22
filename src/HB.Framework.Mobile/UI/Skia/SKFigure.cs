@@ -4,6 +4,7 @@ using SkiaSharp;
 using SkiaSharp.Views.Forms;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -17,10 +18,32 @@ namespace HB.Framework.Client.UI.Skia
         public CancellationTokenSource CancellationTokenSource { get; set; } = null!;
     }
 
-    public abstract class SKFigure
+    public abstract class SKFigure : IDisposable
     {
         public const float LongTapTolerantDistanceInDp = 0.1f;
         public const int LongTapMinDurationInMilliseconds = 400;
+
+        private readonly Dictionary<long, SKTouchInfo> _touchInfos = new Dictionary<long, SKTouchInfo>();
+        private readonly Dictionary<long, TaskWrapper> _touchLongTask = new Dictionary<long, TaskWrapper>();
+
+        public SKFigure() : this(1f, 1f, SKAlignment.Center, SKAlignment.Center) { }
+
+        public SKFigure(float widthRatio, float heightRatio) : this(widthRatio, heightRatio, SKAlignment.Center, SKAlignment.Center) { }
+
+        public SKFigure(float widthRatio, float heightRatio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment)
+        {
+            WidthRatio = widthRatio;
+            HeightRatio = heightRatio;
+
+            VerticalAlignment = verticalAlignment;
+            HorizontalAlignment = horizontalAlignment;
+        }
+
+        public float WidthRatio { get; }
+        public float HeightRatio { get; }
+
+        public SKAlignment VerticalAlignment { get; }
+        public SKAlignment HorizontalAlignment { get; }
 
         /// <summary>
         /// Maybe SKFigureGroup or SKFigureCanvasView
@@ -67,14 +90,8 @@ namespace HB.Framework.Client.UI.Skia
         /// </summary>
         public virtual SKRect HitTestBounds { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>")]
+        [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>")]
         public SKMatrix AppliedMatrix = SKMatrix.CreateIdentity();
-
-        private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigure>>();
-
-        private readonly Dictionary<long, SKTouchInfo> _touchInfos = new Dictionary<long, SKTouchInfo>();
-
-        private readonly Dictionary<long, TaskWrapper> _touchLongTask = new Dictionary<long, TaskWrapper>();
 
         public abstract void Paint(SKPaintSurfaceEventArgs e);
 
@@ -82,6 +99,11 @@ namespace HB.Framework.Client.UI.Skia
 
         public virtual bool HitTest(SKPoint skPoint, long touchId)
         {
+            if (HitTestBounds == SKRect.Empty && Bounds == SKRect.Empty)
+            {
+                return false;
+            }
+
             if (EnableTouch == false)
             {
                 return false;
@@ -116,7 +138,7 @@ namespace HB.Framework.Client.UI.Skia
 
         public event EventHandler? HitFailed;
 
-        private Task LongPressedTask(SKTouchInfo info, CancellationToken cancellationToken)
+        private Task LongPressedTaskAsync(SKTouchInfo info, CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
@@ -124,11 +146,8 @@ namespace HB.Framework.Client.UI.Skia
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogDebug($"LongPress Cancelled.");
                     return;
                 }
-
-                _logger.LogDebug($"LongPress Fired.");
 
                 info.LongPressHappend = true;
 
@@ -176,7 +195,7 @@ namespace HB.Framework.Client.UI.Skia
                             _touchLongTask[args.Id] = new TaskWrapper
                             {
                                 CancellationTokenSource = cancellationTokenSource,
-                                Task = LongPressedTask(touchInfo, cancellationTokenSource.Token)
+                                Task = LongPressedTaskAsync(touchInfo, cancellationTokenSource.Token)
                             };
 
                             OnPressed(touchInfo);
@@ -267,7 +286,6 @@ namespace HB.Framework.Client.UI.Skia
 
                             _touchInfos.Remove(args.Id);
 
-                            _logger.LogDebug($"Touch Action Cancelled. Id{args.Id}");
                         }
                     }
                     break;
@@ -309,8 +327,127 @@ namespace HB.Framework.Client.UI.Skia
             CanvasView?.InvalidateSurface();
         }
 
+
+
         #endregion
 
+        #region Matrix
+
+        public SKSize GetFigureSize(SKSize canvasSize)
+        {
+            return new SKSize(canvasSize.Width * WidthRatio, canvasSize.Height * HeightRatio);
+        }
+
+        public float GetFigureWidth(SKSize canvasSize)
+        {
+            return canvasSize.Width * WidthRatio;
+        }
+
+        public float GetFigureHeight(SKSize canvasSize)
+        {
+            return canvasSize.Height * HeightRatio;
+        }
+
+        public SKMatrix GetTransToFigureCenterMatrix(SKSize canvasSize, SKSize sourceSize)
+        {
+            SKPoint figureCenter = GetFigureCenter(canvasSize);
+
+            SKPoint sourceCenter = new SKPoint(sourceSize.Width / 2f, sourceSize.Height / 2f);
+
+            return SKMatrix.CreateTranslation(figureCenter.X - sourceCenter.X, figureCenter.Y - sourceCenter.Y);
+        }
+
+        public SKPoint GetFigureCenter(SKSize canvasSize)
+        {
+            float x, y;
+
+            x = HorizontalAlignment switch
+            {
+                SKAlignment.Center => canvasSize.Width / 2f,
+                SKAlignment.Start => canvasSize.Width * WidthRatio / 2f,
+                SKAlignment.End => canvasSize.Width - canvasSize.Width * WidthRatio / 2f,
+                _ => 0
+            };
+
+            y = VerticalAlignment switch
+            {
+                SKAlignment.Center => canvasSize.Height / 2f,
+                SKAlignment.Start => canvasSize.Height * HeightRatio / 2f,
+                SKAlignment.End => canvasSize.Height - canvasSize.Height * HeightRatio / 2f,
+                _ => 0
+            };
+
+            return new SKPoint(x, y);
+        }
+
+        /// <summary>
+        /// 获取sourceSize大小的bitmap填充Figure的变换矩阵
+        /// </summary>
+        /// <param name="canvasSize"></param>
+        /// <param name="sourceSize"></param>
+        /// <param name="stretch"></param>
+        /// <returns></returns>
+        public SKMatrix GetFilledMatrix(SKSize canvasSize, SKSize sourceSize, SKStretch stretch = SKStretch.AspectFill)
+        {
+            SKMatrix transToCenterMatrix = GetTransToFigureCenterMatrix(canvasSize, sourceSize);
+
+            float figureWidth = canvasSize.Width * WidthRatio;
+            float figureHeight = canvasSize.Height * HeightRatio;
+            float widthScale = figureWidth / sourceSize.Width;
+            float heightScale = figureHeight / sourceSize.Height;
+            float maxScale = Math.Max(heightScale, widthScale);
+            float minScale = Math.Min(heightScale, widthScale);
+
+            SKPoint sourceCenter = new SKPoint(sourceSize.Width / 2f, sourceSize.Height / 2f);
+
+            SKMatrix scaleMatrix = stretch switch
+            {
+                SKStretch.AspectFill => SKMatrix.CreateScale(maxScale, maxScale, sourceCenter.X, sourceCenter.Y),
+                SKStretch.AspectFit => SKMatrix.CreateScale(minScale, minScale, sourceCenter.X, sourceCenter.Y),
+                SKStretch.Fill => SKMatrix.CreateScale(widthScale, heightScale, sourceCenter.X, sourceCenter.Y),
+                _ => SKMatrix.Identity
+            };
+
+            return SKMatrix.Concat(transToCenterMatrix, scaleMatrix);
+
+        }
+
+        #endregion
+
+        #region Disposable Pattern
+
+        private bool _disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                _disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~SKFigure()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
 
     }
 }

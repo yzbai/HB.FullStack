@@ -39,8 +39,8 @@ namespace HB.Framework.Client.Api
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            await AddDeviceInfo(request).ConfigureAwait(false);
-            await AddAuthorization(request).ConfigureAwait(false);
+            await AddDeviceInfoAsync(request).ConfigureAwait(false);
+            await AddAuthorizationAsync(request).ConfigureAwait(false);
 
             HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -80,14 +80,14 @@ namespace HB.Framework.Client.Api
             });
         }
 
-        private async Task AddAuthorization(HttpRequestMessage request)
+        private async Task AddAuthorizationAsync(HttpRequestMessage request)
         {
             string? token = await _global.GetAccessTokenAsync().ConfigureAwait(false);
 
             request.Headers.Add("Authorization", "Bearer " + token);
         }
 
-        private async Task AddDeviceInfo(HttpRequestMessage request)
+        private async Task AddDeviceInfoAsync(HttpRequestMessage request)
         {
             string deviceId = await _global.GetDeviceIdAsync().ConfigureAwait(false);
             string deviceType = await _global.GetDeviceTypeAsync().ConfigureAwait(false);

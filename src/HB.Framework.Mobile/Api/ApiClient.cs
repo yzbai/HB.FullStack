@@ -41,7 +41,7 @@ namespace HB.Framework.Client.Api
 
                 if (request is JwtApiRequest jwtApiRequest)
                 {
-                    bool jwtAdded = await TrySetJwt(jwtApiRequest).ConfigureAwait(false);
+                    bool jwtAdded = await TrySetJwtAsync(jwtApiRequest).ConfigureAwait(false);
 
                     if (!jwtAdded)
                     {
@@ -107,7 +107,7 @@ namespace HB.Framework.Client.Api
 
                 if (request is JwtApiRequest jwtApiRequest)
                 {
-                    bool jwtAdded = await TrySetJwt(jwtApiRequest).ConfigureAwait(false);
+                    bool jwtAdded = await TrySetJwtAsync(jwtApiRequest).ConfigureAwait(false);
 
                     if (!jwtAdded)
                     {
@@ -163,7 +163,7 @@ namespace HB.Framework.Client.Api
             return _httpClientFactory.CreateClient(EndpointSettings.GetHttpClientName(endpoint));
         }
 
-        private async Task<bool> TrySetJwt(JwtApiRequest request)
+        private async Task<bool> TrySetJwtAsync(JwtApiRequest request)
         {
             string? accessToken = await _global.GetAccessTokenAsync().ConfigureAwait(false);
 
@@ -272,7 +272,7 @@ namespace HB.Framework.Client.Api
 
                         string newAccessToken = refreshResponse.Data!.AccessToken;
 
-                        await _global.OnJwtRefreshSucceedAync(newAccessToken).ConfigureAwait(false);
+                        await _global.OnJwtRefreshSucceedAsync(newAccessToken).ConfigureAwait(false);
 
                         return true;
                     }
@@ -281,7 +281,7 @@ namespace HB.Framework.Client.Api
                 //刷新失败
                 _lastRefreshTokenResults[accessTokenHashKey] = false;
 
-                await _global.OnJwtRefreshFailedAync().ConfigureAwait(false);
+                await _global.OnJwtRefreshFailedAsync().ConfigureAwait(false);
 
                 return false;
             }

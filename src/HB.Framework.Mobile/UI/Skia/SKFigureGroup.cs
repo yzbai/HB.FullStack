@@ -6,7 +6,7 @@ using System.Text;
 
 namespace HB.Framework.Client.UI.Skia
 {
-    public class SKFigureGroup<T> : SKFigure, IDisposable where T : SKFigure
+    public class SKFigureGroup<T> : SKFigure where T : SKFigure
     {
         public bool AutoBringToFront { get; set; } = true;
 
@@ -172,14 +172,10 @@ namespace HB.Framework.Client.UI.Skia
 
         private bool _disposed;
 
-        public void Dispose()
+        protected override void Dispose(bool disposeManaged)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            base.Dispose(disposeManaged);
 
-        protected virtual void Dispose(bool disposeManaged)
-        {
             if (!_disposed)
             {
                 if (disposeManaged)
