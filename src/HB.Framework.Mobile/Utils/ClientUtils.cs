@@ -1,6 +1,7 @@
 ﻿using Microsoft;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace HB.Framework.Client
             return AppInfo.VersionString;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public static async Task<string> GetDeviceAddressAsync()
         {
             try

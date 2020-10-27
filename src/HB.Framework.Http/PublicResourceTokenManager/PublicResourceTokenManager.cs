@@ -25,7 +25,7 @@ namespace HB.Framework.Http
         }
 
         /// <exception cref="EncoderFallbackException"></exception>
-        public async Task<string> GetNewToken(int expiredSeconds)
+        public async Task<string> GetNewTokenAsync(int expiredSeconds)
         {
             string token = _prefix + Guid.NewGuid().ToString();
 
@@ -34,7 +34,7 @@ namespace HB.Framework.Http
             return _dataProtector.Protect(token);
         }
 
-        public async Task<bool> CheckToken(string? protectedToken)
+        public async Task<bool> CheckTokenAsync(string? protectedToken)
         {
             if (protectedToken.IsNullOrEmpty())
             {

@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace System
@@ -14,9 +15,9 @@ namespace System
 
         public Task TaskCompletion { get; private set; }
 
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        public TResult Result { get { return (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : default; } }
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+        [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
+        [SuppressMessage("Usage", "VSTHRD104:Offer async methods", Justification = "<Pending>")]
+        public TResult Result => (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : default;
 
         public TaskStatus Status { get { return Task.Status; } }
 
