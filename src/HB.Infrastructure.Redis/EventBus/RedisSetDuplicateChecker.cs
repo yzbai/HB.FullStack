@@ -67,7 +67,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting, _logger).ConfigureAwait(false);
 
-                if (database.SortedSetRank(setName, id) == null)
+                if (await database.SortedSetRankAsync(setName, id).ConfigureAwait(false) == null)
                 {
                     return false;
                 }
@@ -84,7 +84,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting, _logger).ConfigureAwait(false);
 
-                database.SortedSetAdd(setName, id, timestamp, CommandFlags.None);
+                await database.SortedSetAddAsync(setName, id, timestamp, CommandFlags.None).ConfigureAwait(false);
             }
 
             await ClearTimeoutAsync(setName).ConfigureAwait(false);
@@ -98,7 +98,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
 
             //寻找小于stopTimestamp的，删除他们
 
-            database.SortedSetRemoveRangeByScore(setName, 0, stopTimestamp);
+            await database.SortedSetRemoveRangeByScoreAsync(setName, 0, stopTimestamp).ConfigureAwait(false);
 
         }
 

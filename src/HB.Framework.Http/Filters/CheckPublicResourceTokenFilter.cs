@@ -32,7 +32,7 @@ namespace HB.Framework.Http.Filters
 
                 if (firstArgumentValue is ApiRequest apiRequest)
                 {
-                    if (await _securityService.NeedPublicResourceToken(apiRequest).ConfigureAwait(false))
+                    if (await _securityService.NeedPublicResourceTokenAsync(apiRequest).ConfigureAwait(false))
                     {
                         if (apiRequest.PublicResourceToken.IsNullOrEmpty())
                         {
@@ -40,7 +40,7 @@ namespace HB.Framework.Http.Filters
                             return;
                         }
 
-                        if (!await _publicResourceTokenManager.CheckToken(apiRequest.PublicResourceToken).ConfigureAwait(false))
+                        if (!await _publicResourceTokenManager.CheckTokenAsync(apiRequest.PublicResourceToken).ConfigureAwait(false))
                         {
                             OnError(context, ApiErrorCode.PUBLICRESOURCETOKENERROR);
                             return;

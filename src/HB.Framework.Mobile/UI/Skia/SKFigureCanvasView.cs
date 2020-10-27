@@ -22,20 +22,13 @@ namespace HB.Framework.Client.UI.Skia
     public class SKFigureCanvasView : SKCanvasView, IBaseContentView
     {
         public static readonly BindableProperty FiguresProperty = BindableProperty.Create(nameof(Figures), typeof(ObservableCollection<SKFigure>), typeof(SKFigureCanvasView), new ObservableCollection<SKFigure>(), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((ObservableCollection<SKFigure>?)o, (ObservableCollection<SKFigure>?)n); });
-
         public static readonly BindableProperty IsAnimationModeProperty = BindableProperty.Create(nameof(IsAnimationMode), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnIsAnimationModeChanged((bool)o, (bool)n); });
-
         public static readonly BindableProperty AnimationIntervalProperty = BindableProperty.Create(nameof(AnimationInterval), typeof(int), typeof(SKFigureCanvasView), 16, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnAnimationIntervalChanged(); });
 
-        private readonly ILogger _logger = DependencyService.Resolve<ILogger<SKFigureCanvasView>>();
-
-        private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
-
-        private Timer? _animationTimer;
-
         private readonly WeakEventManager _eventManager = new WeakEventManager();
-
+        private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
+        private Timer? _animationTimer;
 
         public SKFigureCanvasView() : base()
         {
@@ -64,18 +57,12 @@ namespace HB.Framework.Client.UI.Skia
 
         public bool EnableFailedToHitEvent { get; set; } = true;
 
-        /// <summary>
-        /// 在Painting 事件中不可以再直接或者间接调用InValidateSurface，会引起循环调用
-        /// </summary>
         public event EventHandler<SKPaintSurfaceEventArgs> Painting
         {
             add => _eventManager.AddEventHandler(value);
             remove => _eventManager.RemoveEventHandler(value);
         }
 
-        /// <summary>
-        /// Painted 事件中不可以再直接或者间接调用InValidateSurface，会引起循环调用
-        /// </summary>
         public event EventHandler<SKPaintSurfaceEventArgs> Painted
         {
             add => _eventManager.AddEventHandler(value);
@@ -276,8 +263,6 @@ namespace HB.Framework.Client.UI.Skia
 
                     if (relatedFigure != null)
                     {
-                        _logger.LogWarning($"Wired in TouchAction, eventId {eventId} already exists, but TouchActionType is Pressed.");
-
                         _touchDictionary.Remove(eventId);
 
                         return;

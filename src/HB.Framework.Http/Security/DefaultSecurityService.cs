@@ -21,7 +21,7 @@ namespace HB.Framework.Http.Security
 
         //static Random random = new Random();
 
-        public Task<bool> NeedPublicResourceToken(ApiRequest? apiRequest)
+        public Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest)
         {
             //TODO:其他安全检测
             //1， 频率. DeviceId, IP. 根据频率来决定客户端要不要弹出防水墙

@@ -44,7 +44,7 @@ namespace HB.Framework.Client.Controls
             InitializeComponent();
         }
 
-        private void listView_ItemTapped(object sender, ItemTappedEventArgs e)
+        private void RadioList_ItemTapped(object sender, ItemTappedEventArgs e)
         {
             ItemsSource[e.ItemIndex].IsChecked = !ItemsSource[e.ItemIndex].IsChecked;
         }
