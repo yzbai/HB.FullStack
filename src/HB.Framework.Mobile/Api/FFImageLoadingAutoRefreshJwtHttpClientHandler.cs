@@ -150,11 +150,12 @@ namespace HB.Framework.Client.Api
             }
             else if (request.Content == null)
             {
-                Dictionary<string, string> dict = new Dictionary<string, string>();
-
-                dict[ClientNames.DeviceId] = deviceId;
-                dict[ClientNames.DeviceType] = deviceType;
-                dict[ClientNames.DeviceVersion] = deviceVersion;
+                Dictionary<string, string> dict = new Dictionary<string, string>
+                {
+                    [ClientNames.DeviceId] = deviceId,
+                    [ClientNames.DeviceType] = deviceType,
+                    [ClientNames.DeviceVersion] = deviceVersion
+                };
 
                 string json = SerializeUtil.ToJson(dict);
 

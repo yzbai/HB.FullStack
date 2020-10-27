@@ -13,10 +13,8 @@ namespace HB.Framework.Client.UI.Skia
         {
             Assembly assembly = type.GetTypeInfo().Assembly;
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceID))
-            {
-                return SKBitmap.Decode(stream);
-            }
+            using Stream stream = assembly.GetManifestResourceStream(resourceID);
+            return SKBitmap.Decode(stream);
         }
 
         public static uint RgbaMakePixel(byte red, byte green, byte blue, byte alpha = 255)

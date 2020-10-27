@@ -56,12 +56,14 @@ namespace Microsoft.Extensions.DependencyInjection
 #if DEBUG
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {
-                    HttpClientHandler handler = new HttpClientHandler();
-                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                    HttpClientHandler handler = new HttpClientHandler
                     {
-                        if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
-                            return true;
-                        return errors == System.Net.Security.SslPolicyErrors.None;
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                        {
+                            if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                                return true;
+                            return errors == System.Net.Security.SslPolicyErrors.None;
+                        }
                     };
                     return handler;
                 })
