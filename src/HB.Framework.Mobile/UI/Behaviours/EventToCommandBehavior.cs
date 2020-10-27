@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Windows.Input;
@@ -99,9 +100,8 @@ namespace HB.Framework.Client.UI.Behaviors
             _eventHandler = null;
         }
 
-#pragma warning disable CA1801 // Review unused parameters
+        [SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         private void OnEvent(object sender, object eventArgs)
-#pragma warning restore CA1801 // Review unused parameters
         {
             if (Command == null)
             {

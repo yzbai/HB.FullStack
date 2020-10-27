@@ -41,7 +41,7 @@ namespace HB.Infrastructure.Redis.Direct
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(GetRedisInstanceSetting(redisInstanceName), _logger).ConfigureAwait(false);
 
-                return database.StringSet(key, "", TimeSpan.FromSeconds(expireSeconds), When.NotExists);
+                return await database.StringSetAsync(key, "", TimeSpan.FromSeconds(expireSeconds), When.NotExists).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace HB.Infrastructure.Redis.Direct
                     hashEntries[i] = new HashEntry(fields.ElementAt(i), values.ElementAt(i));
                 }
 
-                database.HashSet(hashName, hashEntries);
+                await database.HashSetAsync(hashName, hashEntries).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -97,7 +97,7 @@ namespace HB.Infrastructure.Redis.Direct
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(GetRedisInstanceSetting(redisInstanceName), _logger).ConfigureAwait(false);
 
-                RedisValue[] values = database.HashGet(hashName, fields.Select<string, RedisValue>(t => t).ToArray());
+                RedisValue[] values = await database.HashGetAsync(hashName, fields.Select<string, RedisValue>(t => t).ToArray()).ConfigureAwait(false);
 
                 return values.Select(t => (int)t);
             }
@@ -125,7 +125,7 @@ namespace HB.Infrastructure.Redis.Direct
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(GetRedisInstanceSetting(redisInstanceName), _logger).ConfigureAwait(false);
 
-                byte[]? data = database.ListRightPopLeftPush(fromQueueName, toQueueName);
+                byte[]? data = await database.ListRightPopLeftPushAsync(fromQueueName, toQueueName).ConfigureAwait(false);
 
                 return await SerializeUtil.UnPackAsync<T>(data).ConfigureAwait(false);
             }
@@ -170,7 +170,7 @@ namespace HB.Infrastructure.Redis.Direct
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(GetRedisInstanceSetting(redisInstanceName), _logger).ConfigureAwait(false);
 
-                return Convert.ToUInt64(database.ListLength(queueName));
+                return Convert.ToUInt64(await database.ListLengthAsync(queueName).ConfigureAwait(false));
             }
             catch (Exception ex)
             {

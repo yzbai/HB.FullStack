@@ -26,7 +26,7 @@ namespace HB.Infrastructure.Redis
 
             try
             {
-                _connectionLock.Wait();
+                await _connectionLock.WaitAsync().ConfigureAwait(false);
 
                 //Double check
                 if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached2))
@@ -44,7 +44,7 @@ namespace HB.Infrastructure.Redis
 
                 IDatabase database = null!;
 
-                await ReConnectPolicyAsync(logger, setting.ConnectionString).ExecuteAsync(async () =>
+                await ReConnectPolicy(logger, setting.ConnectionString).ExecuteAsync(async () =>
                 {
                     ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
 
@@ -75,7 +75,7 @@ namespace HB.Infrastructure.Redis
             }
         }
 
-        private static AsyncRetryPolicy ReConnectPolicyAsync(ILogger logger, string connectionString)
+        private static AsyncRetryPolicy ReConnectPolicy(ILogger logger, string connectionString)
         {
             //TODO: move this settings to options
             return Policy

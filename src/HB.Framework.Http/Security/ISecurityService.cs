@@ -10,7 +10,7 @@ namespace HB.Framework.Http.Security
 {
     public interface ISecurityService
     {
-        Task<bool> NeedPublicResourceToken(ApiRequest? apiRequest);
+        Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest);
         Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedExtensions, long sizeLimit);
     }
 }

@@ -8,8 +8,8 @@ namespace HB.Framework.Http
     public interface IPublicResourceTokenManager
     {
         /// <exception cref="EncoderFallbackException"></exception>
-        Task<string> GetNewToken(int expiredSeconds = 60);
+        Task<string> GetNewTokenAsync(int expiredSeconds = 60);
 
-        Task<bool> CheckToken(string? token);
+        Task<bool> CheckTokenAsync(string? token);
     }
 }
