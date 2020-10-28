@@ -7,7 +7,7 @@ namespace Xamarin.Forms
 {
     public static class ShellExtensions
     {
-        public static bool CurrentPageIsA(this Shell shell, Type pageType)
+        public static bool IsCurrentPageA(this Shell shell, Type pageType)
         {
             return shell.CurrentPage().GetType() == pageType;
         }

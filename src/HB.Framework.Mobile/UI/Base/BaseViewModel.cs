@@ -53,7 +53,7 @@ namespace HB.Framework.Client.Base
         {
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.DisplayAlert(message, title, button).SafeFireAndForget(Application.Current.GetExceptionHandler());
+                Application.Current.MainPage.DisplayAlert(message, title, button).Fire();
             });
         }
     }
