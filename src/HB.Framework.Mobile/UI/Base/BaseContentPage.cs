@@ -12,9 +12,12 @@ namespace HB.Framework.Client.Base
     {
         public bool IsAppearing { get; set; }
 
+        protected IClientGlobal ClientGlobal { get; set; }
+
         public BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
+            ClientGlobal = DependencyService.Resolve<IClientGlobal>();
         }
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
@@ -46,7 +49,7 @@ namespace HB.Framework.Client.Base
                 viewModel.OnAppearing();
             }
 
-            ExecuteAppearedAsync().SafeFireAndForget(Application.Current.GetExceptionHandler());
+            ExecuteAppearedAsync().Fire();
         }
 
         protected override void OnDisappearing()

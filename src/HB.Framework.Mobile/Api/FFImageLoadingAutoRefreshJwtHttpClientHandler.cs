@@ -7,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Web;
-using HB.Framework.Client;
-using HB.Framework.Client.Api;
 using HB.Framework.Common.Api;
 using Microsoft.Extensions.Options;
 using Xamarin.Forms;
@@ -65,7 +63,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                Application.Current.GetExceptionHandler()?.Invoke(ex);
+                Application.Current.Log(Microsoft.Extensions.Logging.LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
                 return responseMessage;
             }
         }

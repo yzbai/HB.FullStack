@@ -7,29 +7,23 @@ using HB.Framework.Client.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client.Base
 {
     public abstract class BaseApplication : Application
     {
+        private LogLevel? _minimumLogLevel;
+        private IConfiguration? _configuration;
+
         public BaseApplication(IServiceCollection services)
         {
+            //Version
+            VersionTracking.Track();
+
             InitializeServices(services);
         }
-
-        private void InitializeServices(IServiceCollection services)
-        {
-            ConfigureServices(services);
-
-            InitializeServices();
-        }
-
-        protected abstract void ConfigureServices(IServiceCollection services);
-
-        protected abstract void InitializeServices();
-
-        private static IConfiguration? _configuration;
 
         public IConfiguration Configuration
         {
@@ -37,14 +31,57 @@ namespace HB.Framework.Client.Base
             {
                 if (_configuration == null)
                 {
-                    _configuration = ClientUtils.BuildConfiguration($"appsettings.{GetEnvironment()}.json", Assembly.GetCallingAssembly());
+                    _configuration = ClientUtils.BuildConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
                 }
 
                 return _configuration;
             }
         }
 
-        public abstract string GetEnvironment();
+        public LogLevel MinimumLogLevel
+        {
+            get
+            {
+                if (_minimumLogLevel == null)
+                {
+                    if ("Debug".Equals(Environment, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        _minimumLogLevel = LogLevel.Trace;
+                    }
+                    else
+                    {
+                        _minimumLogLevel = LogLevel.Information;
+                    }
+                }
+
+                return _minimumLogLevel.Value;
+            }
+        }
+
+        public abstract string Environment { get; }
+
+        protected abstract void RegisterServices(IServiceCollection services);
+
+        protected virtual void ConfigureServices()
+        {
+            //Connectivity
+            Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
+        }
+
+        protected virtual void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+
+        }
+
+        private void InitializeServices(IServiceCollection services)
+        {
+            RegisterServices(services);
+
+            ConfigureServices();
+        }
+
+        private static IRemoteLoggingService? _remoteLoggingService;
+        private static ILogger? _localLogger;
 
         public static void ExceptionHandler(Exception ex)
         {
@@ -66,33 +103,6 @@ namespace HB.Framework.Client.Base
             }
 
             _localLogger?.Log(logLevel, ex, message);
-        }
-
-        private static IRemoteLoggingService? _remoteLoggingService;
-        private static ILogger? _localLogger;
-
-        private LogLevel? _minimumLogLevel;
-
-        public LogLevel MinimumLogLevel
-        {
-            get
-            {
-                if (_minimumLogLevel == null)
-                {
-                    string? environment = GetEnvironment();
-
-                    if ("Debug".Equals(environment, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        _minimumLogLevel = LogLevel.Trace;
-                    }
-                    else
-                    {
-                        _minimumLogLevel = LogLevel.Information;
-                    }
-                }
-
-                return _minimumLogLevel.Value;
-            }
         }
     }
 }

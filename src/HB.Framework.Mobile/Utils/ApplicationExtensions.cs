@@ -7,6 +7,14 @@ namespace Xamarin.Forms
 {
     public static class ApplicationExtensions
     {
+        public static void Log(this Application application, LogLevel logLevel, Exception? ex, string? message)
+        {
+            if (application is BaseApplication)
+            {
+                BaseApplication.Log(logLevel, ex, message);
+            }
+        }
+
         public static Action<Exception>? GetExceptionHandler(this Application application)
         {
             if (application is BaseApplication)
@@ -21,7 +29,7 @@ namespace Xamarin.Forms
         {
             if (application is BaseApplication baseApplication)
             {
-                return baseApplication.GetEnvironment();
+                return baseApplication.Environment;
             }
 
             return null;

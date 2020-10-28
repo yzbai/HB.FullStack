@@ -37,7 +37,7 @@ namespace HB.Framework.Client.Controls
             };
             retButton.Clicked += (sender, e) =>
             {
-                Shell.Current.Navigation.PopModalAsync(false).SafeFireAndForget(Application.Current.GetExceptionHandler());
+                Shell.Current.Navigation.PopModalAsync(false).Fire();
             };
 
 
