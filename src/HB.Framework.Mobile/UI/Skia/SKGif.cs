@@ -22,7 +22,7 @@ namespace HB.Framework.Client.UI.Skia
         public SKGif(string resourceName)
         {
             _initializeTask = InitializeAsync(resourceName);
-            _initializeTask.SafeFireAndForget(Application.Current.GetExceptionHandler());
+            _initializeTask.Fire();
         }
 
         private Task InitializeAsync(string fileName)

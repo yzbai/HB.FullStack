@@ -59,7 +59,7 @@ namespace HB.Framework.Client.Controls
 
         private void Confirm_Button_Clicked(object sender, EventArgs e)
         {
-            Shell.Current.Navigation.PopModalAsync().SafeFireAndForget(Application.Current.GetExceptionHandler());
+            Shell.Current.Navigation.PopModalAsync().Fire();
         }
     }
 }

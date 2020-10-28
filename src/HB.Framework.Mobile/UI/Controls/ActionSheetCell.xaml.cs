@@ -143,7 +143,7 @@ namespace HB.Framework.Client.Controls
 
         private void TapGestureRecognizer_Tapped(object sender, EventArgs e)
         {
-            DisplayActionSheetAndExecuteAsync().SafeFireAndForget(Application.Current.GetExceptionHandler());
+            DisplayActionSheetAndExecuteAsync().Fire();
         }
 
         private async Task DisplayActionSheetAndExecuteAsync()
