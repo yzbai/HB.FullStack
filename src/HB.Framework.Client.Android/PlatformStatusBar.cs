@@ -10,19 +10,33 @@ namespace HB.Framework.Client.Android
 {
     public class PlatformStatusBar : IStatusBar
     {
-        WindowManagerFlags _orginalFlags;
+        private WindowManagerFlags _orginalFlags;
+
+        public bool IsShowing { get; set; } = true;
 
         public void Show()
         {
+            if (IsShowing)
+            {
+                return;
+            }
+
             var attrs = Platform.CurrentActivity.Window.Attributes;
 
             attrs.Flags = _orginalFlags;
 
             Platform.CurrentActivity.Window.Attributes = attrs;
+
+            IsShowing = true;
         }
 
         public void Hide()
         {
+            if (!IsShowing)
+            {
+                return;
+            }
+
             WindowManagerLayoutParams attrs = Platform.CurrentActivity.Window.Attributes;
 
             _orginalFlags = attrs.Flags;
@@ -30,6 +44,8 @@ namespace HB.Framework.Client.Android
             attrs.Flags |= WindowManagerFlags.Fullscreen;
 
             Platform.CurrentActivity.Window.Attributes = attrs;
+
+            IsShowing = false;
         }
     }
 }

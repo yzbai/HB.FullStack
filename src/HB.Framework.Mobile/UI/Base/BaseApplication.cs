@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using AsyncAwaitBestPractices;
+using HB.Framework.Client.Api;
 using HB.Framework.Client.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,7 +61,25 @@ namespace HB.Framework.Client.Base
 
         public abstract string Environment { get; }
 
-        protected abstract void RegisterServices(IServiceCollection services);
+        private void InitializeServices(IServiceCollection services)
+        {
+            RegisterServices(services);
+
+            ConfigureServices();
+        }
+
+        protected virtual void RegisterServices(IServiceCollection services)
+        {
+            services.AddOptions();
+
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(MinimumLogLevel);
+                builder.AddProvider(new PlatformLoggerProvider(LogLevel.Trace));
+            });
+
+            services.AddSingleton<FFImageLoadingAutoRefreshJwtHttpClientHandler>();
+        }
 
         protected virtual void ConfigureServices()
         {
@@ -73,12 +92,7 @@ namespace HB.Framework.Client.Base
 
         }
 
-        private void InitializeServices(IServiceCollection services)
-        {
-            RegisterServices(services);
 
-            ConfigureServices();
-        }
 
         private static IRemoteLoggingService? _remoteLoggingService;
         private static ILogger? _localLogger;

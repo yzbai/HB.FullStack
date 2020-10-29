@@ -15,13 +15,11 @@ namespace HB.Framework.Client.Api
 {
     public class FFImageLoadingAutoRefreshJwtHttpClientHandler : HttpClientHandler
     {
-        private readonly IClientGlobal _global;
         private readonly IApiClient _apiClient;
         private readonly ApiClientOptions _options;
 
-        public FFImageLoadingAutoRefreshJwtHttpClientHandler(IClientGlobal clientGlobal, IApiClient apiClient, IOptions<ApiClientOptions> options)
+        public FFImageLoadingAutoRefreshJwtHttpClientHandler(IApiClient apiClient, IOptions<ApiClientOptions> options)
         {
-            _global = clientGlobal;
             _apiClient = apiClient;
             _options = options.Value;
 
@@ -78,18 +76,18 @@ namespace HB.Framework.Client.Api
             });
         }
 
-        private async Task AddAuthorizationAsync(HttpRequestMessage request)
+        private static async Task AddAuthorizationAsync(HttpRequestMessage request)
         {
-            string? token = await _global.GetAccessTokenAsync().ConfigureAwait(false);
+            string? token = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
 
             request.Headers.Add("Authorization", "Bearer " + token);
         }
 
-        private async Task AddDeviceInfoAsync(HttpRequestMessage request)
+        private static async Task AddDeviceInfoAsync(HttpRequestMessage request)
         {
-            string deviceId = await _global.GetDeviceIdAsync().ConfigureAwait(false);
-            string deviceType = await _global.GetDeviceTypeAsync().ConfigureAwait(false);
-            string deviceVersion = await _global.GetDeviceVersionAsync().ConfigureAwait(false);
+            string deviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
+            string deviceType = await ClientGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
+            string deviceVersion = await ClientGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
 
             if (request.Method == HttpMethod.Get)
             {
