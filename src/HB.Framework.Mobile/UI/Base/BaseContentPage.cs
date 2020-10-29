@@ -4,31 +4,72 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
+using HB.Framework.Client.Services;
+using HB.Framework.Client.UI.Platform;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client.Base
 {
     public abstract class BaseContentPage : ContentPage
     {
-        public bool IsAppearing { get; set; }
+        private bool _showNavigationPageNavigationBar = true;
 
-        protected IClientGlobal ClientGlobal { get; set; }
+        public bool IsAppearing { get; private set; }
+
+        public bool ShowShellTabBar { get => Shell.GetTabBarIsVisible(this); set => Shell.SetTabBarIsVisible(this, value); }
+
+        public bool ShowShellNavBar { get => Shell.GetNavBarIsVisible(this); set => Shell.SetNavBarIsVisible(this, value); }
+
+        public bool ShowShellNavBarShadow { get => Shell.GetNavBarHasShadow(this); set => Shell.SetNavBarHasShadow(this, value); }
+
+        public bool ShowNavigationPageNavigationBar
+        {
+            get => _showNavigationPageNavigationBar;
+            set
+            {
+                _showNavigationPageNavigationBar = value;
+                NavigationPage.SetHasNavigationBar(this, value);
+            }
+        }
+
+        public static bool ShowStatusBar
+        {
+            get
+            {
+                return DependencyService.Resolve<IStatusBar>().IsShowing;
+            }
+            set
+            {
+                if (value)
+                {
+                    DependencyService.Resolve<IStatusBar>().Show();
+                }
+                else
+                {
+                    DependencyService.Resolve<IStatusBar>().Hide();
+                }
+            }
+        }
+
+        public bool DisableBackButton { get; set; }
+
+        public bool NeedLogined { get; set; }
 
         public BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
-            ClientGlobal = DependencyService.Resolve<IClientGlobal>();
         }
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
         protected override void OnAppearing()
         {
-            Shell.SetTabBarIsVisible(this, ShowTabBar());
-            Shell.SetNavBarIsVisible(this, ShowNavigationBar());
-            Shell.SetNavBarHasShadow(this, ShowNavigationBarShadow());
-
             base.OnAppearing();
+
+            if (NeedLogined)
+            {
+                CheckLoginAsync().Fire();
+            }
 
             IsAppearing = true;
 
@@ -89,19 +130,22 @@ namespace HB.Framework.Client.Base
             return Task.CompletedTask;
         }
 
-        protected virtual bool ShowTabBar()
+        private static async Task CheckLoginAsync()
         {
-            return true;
+            if (!await ClientGlobal.IsLoginedAsync().ConfigureAwait(false))
+            {
+                DependencyService.Resolve<ILoginService>().PerformLogin();
+            }
         }
 
-        protected virtual bool ShowNavigationBar()
+        protected override bool OnBackButtonPressed()
         {
-            return true;
-        }
+            if (DisableBackButton)
+            {
+                return true;
+            }
 
-        protected virtual bool ShowNavigationBarShadow()
-        {
-            return false;
+            return base.OnBackButtonPressed();
         }
     }
 }
