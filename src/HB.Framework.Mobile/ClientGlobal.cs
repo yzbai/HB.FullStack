@@ -3,34 +3,28 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
+using Xamarin.Forms;
 
 namespace HB.Framework.Client
 {
     //TODO: 考虑SecurityStorage不支持时，改用普通的Storage
-    public class ClientGlobal : IClientGlobal
+    public static class ClientGlobal
     {
-        private string? _deviceId;
-        private string? _deviceType;
-        private string? _deviceVersion;
-        private string? _deviceAddress;
+        private static string? _deviceId;
+        private static string? _deviceType;
+        private static string? _deviceVersion;
+        private static string? _deviceAddress;
 
-        private string? _currentUserGuid;
-        private string? _accessToken;
-        private string? _refreshToken;
-        private string? _currentLoginName;
-        private string? _currentMobile;
-        private string? _currentEmail;
-
-        private readonly ILogger _logger;
-
-        public ClientGlobal(ILogger<ClientGlobal> logger)
-        {
-            _logger = logger;
-        }
+        private static string? _currentUserGuid;
+        private static string? _accessToken;
+        private static string? _refreshToken;
+        private static string? _currentLoginName;
+        private static string? _currentMobile;
+        private static string? _currentEmail;
 
         #region Device
 
-        public async Task<string> GetDeviceIdAsync()
+        public static async Task<string> GetDeviceIdAsync()
         {
             if (_deviceId.IsNotNullOrEmpty())
             {
@@ -51,7 +45,7 @@ namespace HB.Framework.Client
             return _deviceId!;
         }
 
-        public async Task<string> GetDeviceTypeAsync()
+        public static async Task<string> GetDeviceTypeAsync()
         {
             if (_deviceType.IsNotNullOrEmpty())
             {
@@ -72,7 +66,7 @@ namespace HB.Framework.Client
             return _deviceType!;
         }
 
-        public async Task<string> GetDeviceVersionAsync()
+        public static async Task<string> GetDeviceVersionAsync()
         {
             if (_deviceVersion.IsNotNullOrEmpty())
             {
@@ -93,7 +87,7 @@ namespace HB.Framework.Client
             return _deviceVersion!;
         }
 
-        public async Task<string> GetDeviceAddressAsync()
+        public static async Task<string> GetDeviceAddressAsync()
         {
             //if (_deviceAddress.IsNotNullOrEmpty())
             //{
@@ -118,14 +112,14 @@ namespace HB.Framework.Client
 
         #region User
 
-        public async Task<bool> IsUserLoginedAsync()
+        public static async Task<bool> IsLoginedAsync()
         {
             string? token = await GetAccessTokenAsync().ConfigureAwait(false);
 
             return !token.IsNullOrEmpty();
         }
 
-        public async Task<string?> GetCurrentUserGuidAsync()
+        public static async Task<string?> GetCurrentUserGuidAsync()
         {
             if (_currentUserGuid.IsNotNullOrEmpty())
             {
@@ -137,13 +131,13 @@ namespace HB.Framework.Client
             return _currentUserGuid;
         }
 
-        public async Task SetCurrentUserGuidAsync(string? userGuid)
+        public static async Task SetCurrentUserGuidAsync(string? userGuid)
         {
             _currentUserGuid = userGuid;
             await PreferenceSetAsync(ClientNames.CurrentUserGuid, userGuid).ConfigureAwait(false);
         }
 
-        public async Task<string?> GetCurrentLoginNameAsync()
+        public static async Task<string?> GetCurrentLoginNameAsync()
         {
             if (_currentLoginName.IsNullOrEmpty())
             {
@@ -153,7 +147,7 @@ namespace HB.Framework.Client
             return _currentLoginName;
         }
 
-        public async Task SetCurrentLoginNameAsync(string? loginName)
+        public static async Task SetCurrentLoginNameAsync(string? loginName)
         {
             _currentLoginName = loginName;
 
@@ -164,7 +158,7 @@ namespace HB.Framework.Client
 
         #region Token
 
-        public async Task<string?> GetAccessTokenAsync()
+        public static async Task<string?> GetAccessTokenAsync()
         {
             if (_accessToken.IsNotNullOrEmpty())
             {
@@ -176,13 +170,13 @@ namespace HB.Framework.Client
             return _accessToken;
         }
 
-        public async Task SetAccessTokenAsync(string? accessToken)
+        public static async Task SetAccessTokenAsync(string? accessToken)
         {
             _accessToken = accessToken;
             await PreferenceSetAsync(ClientNames.AccessToken, accessToken).ConfigureAwait(false);
         }
 
-        public async Task<string?> GetRefreshTokenAsync()
+        public static async Task<string?> GetRefreshTokenAsync()
         {
             if (_refreshToken.IsNotNullOrEmpty())
             {
@@ -194,24 +188,24 @@ namespace HB.Framework.Client
             return _refreshToken;
         }
 
-        public async Task SetRefreshTokenAsync(string? refreshToken)
+        public static async Task SetRefreshTokenAsync(string? refreshToken)
         {
             _refreshToken = refreshToken;
             await PreferenceSetAsync(ClientNames.RefreshToken, refreshToken).ConfigureAwait(false);
         }
 
-        public async Task OnJwtRefreshSucceedAsync(string newAccessToken)
+        public static async Task OnJwtRefreshSucceedAsync(string newAccessToken)
         {
             await SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
         }
 
-        public async Task OnJwtRefreshFailedAsync()
+        public static async Task OnJwtRefreshFailedAsync()
         {
             await SetAccessTokenAsync(null).ConfigureAwait(false);
             await SetRefreshTokenAsync(null).ConfigureAwait(false);
         }
 
-        public async Task OnLoginSuccessedAsync(string userGuid, string? loginName, string? mobile, string? email, string accessToken, string refreshToken)
+        public static async Task OnLoginSuccessedAsync(string userGuid, string? loginName, string? mobile, string? email, string accessToken, string refreshToken)
         {
             await SetCurrentUserGuidAsync(userGuid).ConfigureAwait(false);
             await SetCurrentLoginNameAsync(loginName).ConfigureAwait(false);
@@ -223,7 +217,7 @@ namespace HB.Framework.Client
 
         }
 
-        public async Task OnLoginFailedAsync()
+        public static async Task OnLoginFailedAsync()
         {
             await OnJwtRefreshFailedAsync().ConfigureAwait(false);
         }
@@ -232,7 +226,7 @@ namespace HB.Framework.Client
 
         #region Privates
 
-        private async Task<string?> PreferenceGetAsync(string key)
+        private static async Task<string?> PreferenceGetAsync(string key)
         {
             if (key.IsNullOrEmpty())
             {
@@ -248,12 +242,12 @@ namespace HB.Framework.Client
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.LogCritical($"SecureStorage Get Failed. key:{key}. Message:{ex.Message}");
+                Application.Current.Log(LogLevel.Critical, ex, $"SecureStorage Get 失败，很严重. key:{key}. Message:{ex.Message}");
                 return null;
             }
         }
 
-        private async Task PreferenceSetAsync(string key, string? value)
+        private static async Task PreferenceSetAsync(string key, string? value)
         {
             if (key.IsNullOrEmpty())
             {
@@ -269,12 +263,12 @@ namespace HB.Framework.Client
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 //TODO: Possible that device doesn't support secure storage on device.
-                _logger.LogCritical($"SecureStorage Set Failed. key:{key}. Message:{ex.Message}");
+                Application.Current.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
                 return;
             }
         }
 
-        public async Task<string?> GetCurrentMobileAsync()
+        public static async Task<string?> GetCurrentMobileAsync()
         {
             if (_currentMobile.IsNullOrEmpty())
             {
@@ -284,14 +278,14 @@ namespace HB.Framework.Client
             return _currentMobile;
         }
 
-        public async Task SetCurrentMobileAsync(string? mobile)
+        public static async Task SetCurrentMobileAsync(string? mobile)
         {
             _currentMobile = mobile;
 
             await PreferenceSetAsync(ClientNames.Mobile, mobile).ConfigureAwait(false);
         }
 
-        public async Task<string?> GetCurrentEmailAsync()
+        public static async Task<string?> GetCurrentEmailAsync()
         {
             if (_currentEmail.IsNullOrEmpty())
             {
@@ -301,7 +295,7 @@ namespace HB.Framework.Client
             return _currentEmail;
         }
 
-        public async Task SetCurrentEmailAsync(string? email)
+        public static async Task SetCurrentEmailAsync(string? email)
         {
             _currentEmail = email;
 
