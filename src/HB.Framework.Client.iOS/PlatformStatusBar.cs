@@ -21,5 +21,7 @@ namespace HB.Framework.Client.iOS
         {
             UIApplication.SharedApplication.StatusBarHidden = true;
         }
+
+        public bool IsShowing { get => UIApplication.SharedApplication.StatusBarHidden; }
     }
 }

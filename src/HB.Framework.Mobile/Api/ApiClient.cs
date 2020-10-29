@@ -15,12 +15,9 @@ namespace HB.Framework.Client.Api
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        private readonly IClientGlobal _global;
-
-        public ApiClient(IOptions<ApiClientOptions> options, IClientGlobal mobileGlobal, IHttpClientFactory httpClientFactory)
+        public ApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory)
         {
             _options = options.Value;
-            _global = mobileGlobal;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -163,9 +160,9 @@ namespace HB.Framework.Client.Api
             return _httpClientFactory.CreateClient(EndpointSettings.GetHttpClientName(endpoint));
         }
 
-        private async Task<bool> TrySetJwtAsync(JwtApiRequest request)
+        private static async Task<bool> TrySetJwtAsync(JwtApiRequest request)
         {
-            string? accessToken = await _global.GetAccessTokenAsync().ConfigureAwait(false);
+            string? accessToken = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
 
             if (accessToken.IsNullOrEmpty())
             {
@@ -188,11 +185,11 @@ namespace HB.Framework.Client.Api
             return false;
         }
 
-        private async Task SetDeviceInfoAlwaysAsync(ApiRequest request)
+        private static async Task SetDeviceInfoAlwaysAsync(ApiRequest request)
         {
-            request.DeviceId = await _global.GetDeviceIdAsync().ConfigureAwait(false);
-            request.DeviceType = await _global.GetDeviceTypeAsync().ConfigureAwait(false);
-            request.DeviceVersion = await _global.GetDeviceVersionAsync().ConfigureAwait(false);
+            request.DeviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
+            request.DeviceType = await ClientGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
+            request.DeviceVersion = await ClientGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
@@ -218,7 +215,7 @@ namespace HB.Framework.Client.Api
                 //上锁
                 await _tokenRefreshSemaphore.WaitAsync().ConfigureAwait(false);
 
-                string? accessToken = await _global.GetAccessTokenAsync().ConfigureAwait(false);
+                string? accessToken = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
 
                 if (accessToken.IsNullOrEmpty())
                 {
@@ -241,7 +238,7 @@ namespace HB.Framework.Client.Api
                     return false;
                 }
 
-                string? refreshToken = await _global.GetRefreshTokenAsync().ConfigureAwait(false);
+                string? refreshToken = await ClientGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
 
                 if (!refreshToken.IsNullOrEmpty())
                 {
@@ -272,7 +269,7 @@ namespace HB.Framework.Client.Api
 
                         string newAccessToken = refreshResponse.Data!.AccessToken;
 
-                        await _global.OnJwtRefreshSucceedAsync(newAccessToken).ConfigureAwait(false);
+                        await ClientGlobal.OnJwtRefreshSucceedAsync(newAccessToken).ConfigureAwait(false);
 
                         return true;
                     }
@@ -281,7 +278,7 @@ namespace HB.Framework.Client.Api
                 //刷新失败
                 _lastRefreshTokenResults[accessTokenHashKey] = false;
 
-                await _global.OnJwtRefreshFailedAsync().ConfigureAwait(false);
+                await ClientGlobal.OnJwtRefreshFailedAsync().ConfigureAwait(false);
 
                 return false;
             }
