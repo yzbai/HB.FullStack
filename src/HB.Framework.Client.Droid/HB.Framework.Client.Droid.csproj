@@ -5,19 +5,19 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BC579823-8579-4559-87AB-CEFA80264A96}</ProjectGuid>
+    <ProjectGuid>{DEAC9EB8-B69B-413B-BC86-0C2DBAE8A359}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TemplateGuid>{9ef11e43-1701-4396-8835-8392d57abb70}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HB.Framework.Client.Android</RootNamespace>
-    <AssemblyName>HB.Framework.Client.Android</AssemblyName>
+    <RootNamespace>HB.Framework.Client.Droid</RootNamespace>
+    <AssemblyName>HB.Framework.Client.Droid</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>True</Deterministic>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v10.0</TargetFrameworkVersion>
     <AndroidUseAapt2>true</AndroidUseAapt2>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -28,6 +28,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>portable</DebugType>
@@ -36,6 +37,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -47,7 +49,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PlatformStatusBar.cs" />
+    <Compile Include="Effects\FocusEffect.cs" />
+    <Compile Include="Effects\TouchEffect.cs" />
+    <Compile Include="Platforms\AndroidImageExtensions.cs" />
+    <Compile Include="Platforms\LoggerImpl.cs" />
+    <Compile Include="Platforms\StatusBarHelper.cs" />
+    <Compile Include="Renders\HybridWebViewRenderer.cs" />
+    <Compile Include="Renders\JavascriptWebViewClient.cs" />
+    <Compile Include="Renders\JSBridge.cs" />
+    <Compile Include="Renders\WheelPickerRenderer.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -56,9 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
-    <PackageReference Include="Xamarin.Essentials">
-      <Version>1.6.0-pre2</Version>
-    </PackageReference>
     <PackageReference Include="Xamarin.Forms">
       <Version>4.8.0.1534</Version>
     </PackageReference>

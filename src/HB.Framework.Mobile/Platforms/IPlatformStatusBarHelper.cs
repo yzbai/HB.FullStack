@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Client.UI.Platform
+namespace HB.Framework.Client.Platforms
 {
-    public interface IStatusBar
+    public interface IPlatformStatusBarHelper
     {
         bool IsShowing { get; }
 

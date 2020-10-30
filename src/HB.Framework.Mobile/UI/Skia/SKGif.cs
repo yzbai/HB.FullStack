@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
-using HB.Framework.Client.Services;
+using HB.Framework.Client.Platforms;
 using SkiaSharp;
 using Xamarin.Forms;
 
@@ -29,7 +28,7 @@ namespace HB.Framework.Client.UI.Skia
         {
             return Task.Run(async () =>
             {
-                IFileService fileService = DependencyService.Resolve<IFileService>();
+                IPlatformFileHelper fileService = DependencyService.Resolve<IPlatformFileHelper>();
 
                 using Stream stream = await fileService.GetStreamOfResourceAsync(fileName).ConfigureAwait(false);
                 using SKManagedStream sKManagedStream = new SKManagedStream(stream);

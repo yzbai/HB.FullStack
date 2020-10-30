@@ -33,6 +33,14 @@ namespace HB.Framework.Client
 
         private static bool? _isLogined;
 
+        #region Const
+
+        public const int SmsCodeLength = 6;
+
+        public const string EffectsGroupName = "HB.Framework.Client.Effects";
+
+        #endregion
+
         #region Device
 
         public static async Task<string> GetDeviceIdAsync()
