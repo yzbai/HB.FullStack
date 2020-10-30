@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.Services
+namespace HB.Framework.Client.Platforms
 {
-    public interface IFileService
+    public interface IPlatformFileHelper
     {
         Task SaveUserHeadImageAsync(ImageSource imageSource, string usreGuid);
 

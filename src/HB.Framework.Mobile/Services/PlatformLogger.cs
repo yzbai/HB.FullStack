@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.Framework.Client.Platforms;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.Logging
+namespace HB.Framework.Client.Services
 {
     public class PlatformLogger : ILogger
     {
