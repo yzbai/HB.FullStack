@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HB.Framework.Client.iOS;
-using HB.Framework.Client.UI.Platform;
+using HB.Framework.Client.Platforms;
 using UIKit;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(PlatformStatusBar))]
 namespace HB.Framework.Client.iOS
 {
-    public class PlatformStatusBar : IStatusBar
+    public class PlatformStatusBar : IPlatformStatusBarHelper
     {
         public void Show()
         {

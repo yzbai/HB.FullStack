@@ -9,7 +9,7 @@ namespace HB.Framework.Client.Effects
 {
     public class FocusEffect : RoutingEffect
     {
-        public FocusEffect() : base($"HB.Framework.Client.Effects.{nameof(FocusEffect)}")
+        public FocusEffect() : base($"{ClientGlobal.EffectsGroupName}.{nameof(FocusEffect)}")
         {
         }
     }
