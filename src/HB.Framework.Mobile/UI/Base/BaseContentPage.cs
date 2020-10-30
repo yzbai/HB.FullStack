@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,8 @@ namespace HB.Framework.Client.Base
             }
         }
 
-        public static bool ShowStatusBar
+        [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public bool ShowStatusBar
         {
             get
             {
@@ -53,8 +55,6 @@ namespace HB.Framework.Client.Base
 
         public bool DisableBackButton { get; set; }
 
-        public bool NeedLogined { get; set; }
-
         public BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
@@ -65,11 +65,6 @@ namespace HB.Framework.Client.Base
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
-            if (NeedLogined)
-            {
-                CheckLoginAsync().Fire();
-            }
 
             IsAppearing = true;
 
@@ -128,14 +123,6 @@ namespace HB.Framework.Client.Base
         protected virtual Task OnAppearedAsync()
         {
             return Task.CompletedTask;
-        }
-
-        private static async Task CheckLoginAsync()
-        {
-            if (!await ClientGlobal.IsLoginedAsync().ConfigureAwait(false))
-            {
-                DependencyService.Resolve<ILoginService>().PerformLogin();
-            }
         }
 
         protected override bool OnBackButtonPressed()
