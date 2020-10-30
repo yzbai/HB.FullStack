@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace HB.Framework.Client.Logging
+namespace HB.Framework.Client.Services
 {
     public interface IRemoteLoggingService
     {

@@ -1,14 +1,13 @@
-﻿using System;
-using Android.Views;
-using HB.Framework.Client.Android;
-using HB.Framework.Client.UI.Platform;
+﻿using Android.Views;
+using HB.Framework.Client.Droid.Platforms;
+using HB.Framework.Client.Platforms;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-[assembly: Dependency(typeof(PlatformStatusBar))]
-namespace HB.Framework.Client.Android
+[assembly: Dependency(typeof(StatusBarHelper))]
+namespace HB.Framework.Client.Droid.Platforms
 {
-    public class PlatformStatusBar : IStatusBar
+    public class StatusBarHelper : IPlatformStatusBarHelper
     {
         private WindowManagerFlags _orginalFlags;
 

@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Text;
 using AsyncAwaitBestPractices;
 using HB.Framework.Client.Api;
-using HB.Framework.Client.Logging;
+using HB.Framework.Client.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

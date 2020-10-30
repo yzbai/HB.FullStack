@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
+using HB.Framework.Client.Platforms;
 using HB.Framework.Client.Services;
-using HB.Framework.Client.UI.Platform;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client.Base
@@ -38,17 +38,17 @@ namespace HB.Framework.Client.Base
         {
             get
             {
-                return DependencyService.Resolve<IStatusBar>().IsShowing;
+                return DependencyService.Resolve<IPlatformStatusBarHelper>().IsShowing;
             }
             set
             {
                 if (value)
                 {
-                    DependencyService.Resolve<IStatusBar>().Show();
+                    DependencyService.Resolve<IPlatformStatusBarHelper>().Show();
                 }
                 else
                 {
-                    DependencyService.Resolve<IStatusBar>().Hide();
+                    DependencyService.Resolve<IPlatformStatusBarHelper>().Hide();
                 }
             }
         }

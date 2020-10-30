@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.Framework.Client.Logging
+namespace HB.Framework.Client.Platforms
 {
     public interface IPlatformLoggerImpl
     {
