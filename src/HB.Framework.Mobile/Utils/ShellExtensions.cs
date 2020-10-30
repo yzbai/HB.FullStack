@@ -16,5 +16,27 @@ namespace Xamarin.Forms
         {
             return ((IShellSectionController)shell.CurrentItem.CurrentItem).PresentedPage;
         }
+
+        public static string? GetPageName(this ShellNavigationState? state)
+        {
+            if (state == null)
+                return null;
+
+            string? routing = state.Location.OriginalString;
+
+            if (routing == null)
+            {
+                return null;
+            }
+
+            string[]? segments = routing.Split('/');
+
+            if (segments.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            return segments[^1];
+        }
     }
 }
