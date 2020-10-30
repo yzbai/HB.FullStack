@@ -1,12 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client
 {
+    public enum ClientState
+    {
+        NotLogined,
+        NewVersionAndLogined,
+        OldVersionAndLogined
+    }
+
     //TODO: 考虑SecurityStorage不支持时，改用普通的Storage
     public static class ClientGlobal
     {
@@ -21,6 +30,8 @@ namespace HB.Framework.Client
         private static string? _currentLoginName;
         private static string? _currentMobile;
         private static string? _currentEmail;
+
+        private static bool? _isLogined;
 
         #region Device
 
@@ -112,11 +123,29 @@ namespace HB.Framework.Client
 
         #region User
 
+        public static bool IsLogined()
+        {
+            if (_isLogined == null)
+            {
+                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                return joinableTaskFactory.Run(async () => { return await IsLoginedAsync().ConfigureAwait(false); });
+            }
+
+            return _isLogined.Value;
+        }
+
         public static async Task<bool> IsLoginedAsync()
         {
-            string? token = await GetAccessTokenAsync().ConfigureAwait(false);
+            if (_isLogined == null)
+            {
+                string? token = await GetAccessTokenAsync().ConfigureAwait(false);
 
-            return !token.IsNullOrEmpty();
+                _isLogined = !token.IsNullOrEmpty();
+            }
+
+            return _isLogined.Value;
         }
 
         public static async Task<string?> GetCurrentUserGuidAsync()
@@ -203,6 +232,8 @@ namespace HB.Framework.Client
         {
             await SetAccessTokenAsync(null).ConfigureAwait(false);
             await SetRefreshTokenAsync(null).ConfigureAwait(false);
+
+            _isLogined = false;
         }
 
         public static async Task OnLoginSuccessedAsync(string userGuid, string? loginName, string? mobile, string? email, string accessToken, string refreshToken)
@@ -215,11 +246,14 @@ namespace HB.Framework.Client
             await SetAccessTokenAsync(accessToken).ConfigureAwait(false);
             await SetRefreshTokenAsync(refreshToken).ConfigureAwait(false);
 
+            _isLogined = true;
         }
 
         public static async Task OnLoginFailedAsync()
         {
             await OnJwtRefreshFailedAsync().ConfigureAwait(false);
+
+            _isLogined = false;
         }
 
         #endregion
