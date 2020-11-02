@@ -298,7 +298,7 @@ namespace HB.Framework.Client
 
             try
             {
-                await SecureStorage.SetAsync(key, value).ConfigureAwait(false);
+                await SecureStorage.SetAsync(key, value ?? string.Empty).ConfigureAwait(false);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
