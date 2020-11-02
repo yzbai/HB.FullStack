@@ -4298,151 +4298,109 @@ namespace HB.Framework.Client.Droid
 			public static int abc_capital_on = 2131492871;
 			
 			// aapt resource value: 0x7F0C0008
-			public static int abc_font_family_body_1_material = 2131492872;
+			public static int abc_menu_alt_shortcut_label = 2131492872;
 			
 			// aapt resource value: 0x7F0C0009
-			public static int abc_font_family_body_2_material = 2131492873;
+			public static int abc_menu_ctrl_shortcut_label = 2131492873;
 			
 			// aapt resource value: 0x7F0C000A
-			public static int abc_font_family_button_material = 2131492874;
+			public static int abc_menu_delete_shortcut_label = 2131492874;
 			
 			// aapt resource value: 0x7F0C000B
-			public static int abc_font_family_caption_material = 2131492875;
+			public static int abc_menu_enter_shortcut_label = 2131492875;
 			
 			// aapt resource value: 0x7F0C000C
-			public static int abc_font_family_display_1_material = 2131492876;
+			public static int abc_menu_function_shortcut_label = 2131492876;
 			
 			// aapt resource value: 0x7F0C000D
-			public static int abc_font_family_display_2_material = 2131492877;
+			public static int abc_menu_meta_shortcut_label = 2131492877;
 			
 			// aapt resource value: 0x7F0C000E
-			public static int abc_font_family_display_3_material = 2131492878;
+			public static int abc_menu_shift_shortcut_label = 2131492878;
 			
 			// aapt resource value: 0x7F0C000F
-			public static int abc_font_family_display_4_material = 2131492879;
+			public static int abc_menu_space_shortcut_label = 2131492879;
 			
 			// aapt resource value: 0x7F0C0010
-			public static int abc_font_family_headline_material = 2131492880;
+			public static int abc_menu_sym_shortcut_label = 2131492880;
 			
 			// aapt resource value: 0x7F0C0011
-			public static int abc_font_family_menu_material = 2131492881;
-			
-			// aapt resource value: 0x7F0C0012
-			public static int abc_font_family_subhead_material = 2131492882;
+			public static int abc_prepend_shortcut_label = 2131492881;
 			
 			// aapt resource value: 0x7F0C0013
-			public static int abc_font_family_title_material = 2131492883;
+			public static int abc_searchview_description_clear = 2131492883;
 			
 			// aapt resource value: 0x7F0C0014
-			public static int abc_menu_alt_shortcut_label = 2131492884;
+			public static int abc_searchview_description_query = 2131492884;
 			
 			// aapt resource value: 0x7F0C0015
-			public static int abc_menu_ctrl_shortcut_label = 2131492885;
+			public static int abc_searchview_description_search = 2131492885;
 			
 			// aapt resource value: 0x7F0C0016
-			public static int abc_menu_delete_shortcut_label = 2131492886;
+			public static int abc_searchview_description_submit = 2131492886;
 			
 			// aapt resource value: 0x7F0C0017
-			public static int abc_menu_enter_shortcut_label = 2131492887;
+			public static int abc_searchview_description_voice = 2131492887;
+			
+			// aapt resource value: 0x7F0C0012
+			public static int abc_search_hint = 2131492882;
 			
 			// aapt resource value: 0x7F0C0018
-			public static int abc_menu_function_shortcut_label = 2131492888;
+			public static int abc_shareactionprovider_share_with = 2131492888;
 			
 			// aapt resource value: 0x7F0C0019
-			public static int abc_menu_meta_shortcut_label = 2131492889;
+			public static int abc_shareactionprovider_share_with_application = 2131492889;
 			
 			// aapt resource value: 0x7F0C001A
-			public static int abc_menu_shift_shortcut_label = 2131492890;
+			public static int abc_toolbar_collapse_description = 2131492890;
 			
 			// aapt resource value: 0x7F0C001B
-			public static int abc_menu_space_shortcut_label = 2131492891;
+			public static int appbar_scrolling_view_behavior = 2131492891;
 			
 			// aapt resource value: 0x7F0C001C
-			public static int abc_menu_sym_shortcut_label = 2131492892;
+			public static int bottom_sheet_behavior = 2131492892;
 			
 			// aapt resource value: 0x7F0C001D
-			public static int abc_prepend_shortcut_label = 2131492893;
-			
-			// aapt resource value: 0x7F0C001F
-			public static int abc_searchview_description_clear = 2131492895;
-			
-			// aapt resource value: 0x7F0C0020
-			public static int abc_searchview_description_query = 2131492896;
-			
-			// aapt resource value: 0x7F0C0021
-			public static int abc_searchview_description_search = 2131492897;
-			
-			// aapt resource value: 0x7F0C0022
-			public static int abc_searchview_description_submit = 2131492898;
-			
-			// aapt resource value: 0x7F0C0023
-			public static int abc_searchview_description_voice = 2131492899;
+			public static int character_counter_content_description = 2131492893;
 			
 			// aapt resource value: 0x7F0C001E
-			public static int abc_search_hint = 2131492894;
+			public static int character_counter_pattern = 2131492894;
+			
+			// aapt resource value: 0x7F0C001F
+			public static int fab_transformation_scrim_behavior = 2131492895;
+			
+			// aapt resource value: 0x7F0C0020
+			public static int fab_transformation_sheet_behavior = 2131492896;
+			
+			// aapt resource value: 0x7F0C0021
+			public static int hide_bottom_view_on_scroll_behavior = 2131492897;
+			
+			// aapt resource value: 0x7F0C0022
+			public static int mtrl_chip_close_icon_content_description = 2131492898;
+			
+			// aapt resource value: 0x7F0C0023
+			public static int overflow_tab_title = 2131492899;
 			
 			// aapt resource value: 0x7F0C0024
-			public static int abc_shareactionprovider_share_with = 2131492900;
+			public static int password_toggle_content_description = 2131492900;
 			
 			// aapt resource value: 0x7F0C0025
-			public static int abc_shareactionprovider_share_with_application = 2131492901;
+			public static int path_password_eye = 2131492901;
 			
 			// aapt resource value: 0x7F0C0026
-			public static int abc_toolbar_collapse_description = 2131492902;
-			
-			// aapt resource value: 0x7F0C0028
-			public static int appbar_scrolling_view_behavior = 2131492904;
+			public static int path_password_eye_mask_strike_through = 2131492902;
 			
 			// aapt resource value: 0x7F0C0027
-			public static int app_name = 2131492903;
+			public static int path_password_eye_mask_visible = 2131492903;
+			
+			// aapt resource value: 0x7F0C0028
+			public static int path_password_strike_through = 2131492904;
 			
 			// aapt resource value: 0x7F0C0029
-			public static int bottom_sheet_behavior = 2131492905;
+			public static int search_menu_title = 2131492905;
 			
 			// aapt resource value: 0x7F0C002A
-			public static int character_counter_content_description = 2131492906;
-			
-			// aapt resource value: 0x7F0C002B
-			public static int character_counter_pattern = 2131492907;
-			
-			// aapt resource value: 0x7F0C002C
-			public static int fab_transformation_scrim_behavior = 2131492908;
-			
-			// aapt resource value: 0x7F0C002D
-			public static int fab_transformation_sheet_behavior = 2131492909;
-			
-			// aapt resource value: 0x7F0C002E
-			public static int hello = 2131492910;
-			
-			// aapt resource value: 0x7F0C002F
-			public static int hide_bottom_view_on_scroll_behavior = 2131492911;
-			
-			// aapt resource value: 0x7F0C0030
-			public static int mtrl_chip_close_icon_content_description = 2131492912;
-			
-			// aapt resource value: 0x7F0C0031
-			public static int overflow_tab_title = 2131492913;
-			
-			// aapt resource value: 0x7F0C0032
-			public static int password_toggle_content_description = 2131492914;
-			
-			// aapt resource value: 0x7F0C0033
-			public static int path_password_eye = 2131492915;
-			
-			// aapt resource value: 0x7F0C0034
-			public static int path_password_eye_mask_strike_through = 2131492916;
-			
-			// aapt resource value: 0x7F0C0035
-			public static int path_password_eye_mask_visible = 2131492917;
-			
-			// aapt resource value: 0x7F0C0036
-			public static int path_password_strike_through = 2131492918;
-			
-			// aapt resource value: 0x7F0C0037
-			public static int search_menu_title = 2131492919;
-			
-			// aapt resource value: 0x7F0C0038
-			public static int status_bar_notification_info_overflow = 2131492920;
+			public static int status_bar_notification_info_overflow = 2131492906;
 			
 			static String()
 			{
