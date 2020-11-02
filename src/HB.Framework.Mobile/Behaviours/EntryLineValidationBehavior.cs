@@ -4,7 +4,7 @@ using System.Text;
 using HB.Framework.Client.Base;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.UI.Behaviors
+namespace HB.Framework.Client.Behaviors
 {
     public class EntryLineValidationBehavior : BaseBehavior<Entry>
     {
