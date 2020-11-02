@@ -4,15 +4,13 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using HB.Framework.Client.Base;
-using HB.Framework.Client.UI.Behaviors;
 using Xamarin.Forms;
 using Xamarin.Forms.Markup;
 using static Xamarin.Forms.Markup.GridRowsColumns;
 
-namespace HB.Framework.Client.UI.Controls
+namespace HB.Framework.Client.Controls
 {
     public class CardStackView : BaseContentView
     {

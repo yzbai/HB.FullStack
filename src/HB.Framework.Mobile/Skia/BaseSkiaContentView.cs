@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using HB.Framework.Client.Base;
 
-namespace HB.Framework.Client.UI.Skia
+namespace HB.Framework.Client.Skia
 {
     public abstract class BaseSkiaContentView : BaseContentView
     {

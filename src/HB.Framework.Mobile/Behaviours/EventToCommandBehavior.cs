@@ -9,7 +9,7 @@ using Xamarin.Forms;
 
 #nullable disable
 
-namespace HB.Framework.Client.UI.Behaviors
+namespace HB.Framework.Client.Behaviors
 {
     public class EventToCommandBehavior : BaseBehavior<View>
     {

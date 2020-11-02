@@ -5,7 +5,7 @@ using HB.Framework.Client.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Shapes;
 
-namespace HB.Framework.Client.UI.Behaviors
+namespace HB.Framework.Client.Behaviors
 {
     public class CircleClipBehavior : BaseBehavior<View>
     {

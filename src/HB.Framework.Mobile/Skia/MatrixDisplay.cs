@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 
-namespace HB.Framework.Client.UI.Skia
+namespace HB.Framework.Client.Skia
 {
     public class MatrixDisplay
     {
