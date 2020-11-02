@@ -51,7 +51,7 @@
   <ItemGroup>
     <Compile Include="Effects\FocusEffect.cs" />
     <Compile Include="Effects\TouchEffect.cs" />
-    <Compile Include="Platforms\AndroidImageExtensions.cs" />
+    <Compile Include="Platforms\ImageExtensions.cs" />
     <Compile Include="Platforms\LoggerImpl.cs" />
     <Compile Include="Platforms\StatusBarHelper.cs" />
     <Compile Include="Renders\HybridWebViewRenderer.cs" />
