@@ -5,7 +5,7 @@ using HB.Framework.Client.Platforms;
 using SkiaSharp;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.UI.Skia
+namespace HB.Framework.Client.Skia
 {
     public class SKGif : IDisposable
     {

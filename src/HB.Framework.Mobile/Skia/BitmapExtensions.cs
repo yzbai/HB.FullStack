@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using SkiaSharp;
 
-namespace HB.Framework.Client.UI.Skia
+namespace HB.Framework.Client.Skia
 {
     public static class BitmapExtensions
     {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.UI.Converters
+namespace HB.Framework.Client.Converters
 {
     public class BoundsToCenterConverter : IValueConverter
     {

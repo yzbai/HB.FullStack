@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace HB.Framework.Client.UI.Skia
+namespace HB.Framework.Client.Skia
 {
     internal class TaskWrapper
     {
