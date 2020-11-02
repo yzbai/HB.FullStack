@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using HB.Framework.Client.Platforms;
 using HB.Framework.Client.Services;
+using Microsoft.Extensions.Logging;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client.Base
@@ -58,28 +59,23 @@ namespace HB.Framework.Client.Base
         public BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
+            Application.Current.LogUsage(UsageType.PageCreate, GetType().Name);
         }
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
         protected override void OnAppearing()
         {
+            Application.Current.LogUsage(UsageType.PageAppearing, GetType().Name);
+
             base.OnAppearing();
 
             IsAppearing = true;
 
-            IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
+            //baseContentViews
+            GetAllCustomerControls().ForEach(v => v?.OnAppearing());
 
-            if (contentViews == null)
-            {
-                return;
-            }
-
-            foreach (IBaseContentView? baseContentView in contentViews)
-            {
-                baseContentView?.OnAppearing();
-            }
-
+            //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
                 viewModel.OnAppearing();
@@ -90,22 +86,16 @@ namespace HB.Framework.Client.Base
 
         protected override void OnDisappearing()
         {
+            Application.Current.LogUsage(UsageType.PageDisappearing, GetType().Name);
+
             base.OnDisappearing();
 
             IsAppearing = false;
 
-            IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
+            //baseContentViews
+            GetAllCustomerControls().ForEach(v => v?.OnDisappearing());
 
-            if (contentViews == null)
-            {
-                return;
-            }
-
-            foreach (IBaseContentView? baseContentView in contentViews)
-            {
-                baseContentView?.OnDisappearing();
-            }
-
+            //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
                 viewModel.OnDisappearing();
