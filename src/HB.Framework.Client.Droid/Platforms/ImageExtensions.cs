@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Android.Graphics;
-using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-namespace HB.Framework.Client.Droid.Extensions
+namespace Xamarin.Forms
 {
-    public static class AndroidImageExtensions
+    public static class ImageExtensions
     {
         public static IImageSourceHandler GetHandler(this ImageSource imageSource)
         {
