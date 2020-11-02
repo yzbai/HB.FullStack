@@ -15,7 +15,7 @@ using AsyncAwaitBestPractices;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.Framework.Client.UI.Skia
+namespace HB.Framework.Client.Skia
 {
     [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable",
         Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
