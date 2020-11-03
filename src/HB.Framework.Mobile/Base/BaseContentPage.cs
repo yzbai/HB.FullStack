@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
 using HB.Framework.Client.Platforms;
-using HB.Framework.Client.Services;
-using Microsoft.Extensions.Logging;
 using Xamarin.Forms;
 
 namespace HB.Framework.Client.Base
@@ -17,6 +12,8 @@ namespace HB.Framework.Client.Base
         private bool _showNavigationPageNavigationBar = true;
 
         public bool IsAppearing { get; private set; }
+
+        public string PageName { get; private set; }
 
         public bool ShowShellTabBar { get => Shell.GetTabBarIsVisible(this); set => Shell.SetTabBarIsVisible(this, value); }
 
@@ -59,14 +56,16 @@ namespace HB.Framework.Client.Base
         public BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
-            Application.Current.LogUsage(UsageType.PageCreate, GetType().Name);
+            PageName = GetType().Name;
+
+            Application.Current.LogUsage(UsageType.PageCreate, PageName);
         }
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
         protected override void OnAppearing()
         {
-            Application.Current.LogUsage(UsageType.PageAppearing, GetType().Name);
+            Application.Current.LogUsage(UsageType.PageAppearing, PageName);
 
             base.OnAppearing();
 
@@ -78,7 +77,7 @@ namespace HB.Framework.Client.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnAppearing();
+                viewModel.OnAppearing(PageName);
             }
 
             ExecuteAppearedAsync().Fire();
@@ -86,7 +85,7 @@ namespace HB.Framework.Client.Base
 
         protected override void OnDisappearing()
         {
-            Application.Current.LogUsage(UsageType.PageDisappearing, GetType().Name);
+            Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
 
             base.OnDisappearing();
 
@@ -98,7 +97,7 @@ namespace HB.Framework.Client.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnDisappearing();
+                viewModel.OnDisappearing(PageName);
             }
         }
 

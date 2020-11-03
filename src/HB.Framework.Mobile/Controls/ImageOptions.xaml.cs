@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace HB.Framework.Client.Controls
 {
     public class ImageOptionItem : ObservableObject
     {
-        public int Key { get; set; }
+        public int Index { get; set; }
 
         public string? Title { get; set; }
 
@@ -32,74 +33,86 @@ namespace HB.Framework.Client.Controls
         private bool _isSelected;
 
         public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
+
+        public object? Tag { get; set; }
     }
 
+    /// <summary>
+    /// 单选图形列表
+    /// </summary>
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ImageOptions : BaseContentView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList<ImageOptionItem>), typeof(ImageOptions), null);
-        public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(ImageOptionItem), typeof(ImageOptions), null, BindingMode.TwoWay);
+        public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(ImageOptions), -1, BindingMode.TwoWay, propertyChanged: (b, o, n) => ((ImageOptions)b).OnSelectedIndexChanged());
 
-#pragma warning disable CA2227 // Collection properties should be read only
+        [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public IList<ImageOptionItem>? ItemsSource { get => (IList<ImageOptionItem>)GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
-#pragma warning restore CA2227 // Collection properties should be read only
 
-        public ImageOptionItem? SelectedItem { get => (ImageOptionItem)GetValue(SelectedItemProperty); set => SetValue(SelectedItemProperty, value); }
+        public int SelectedIndex { get => (int)GetValue(SelectedIndexProperty); set => SetValue(SelectedIndexProperty, value); }
+
+        public ImageOptionItem? SelectedItem { get => SelectedIndex == -1 ? null : ItemsSource![SelectedIndex]; }
 
         public ICommand SingleSelectedCommand { get; private set; }
 
-        public int ImageHeightRequest { get; set; } = 80;
+        public ICommand SingleUnSelectedCommand { get; private set; }
 
-        public int ImageWidthRequest { get; set; } = 80;
+        private int _imageHeightRequest = 80;
+        public int ImageHeightRequest { get { return _imageHeightRequest; } set { _imageHeightRequest = value; OnPropertyChanged(); } }
 
-        public int VerticalItemSpacing { get; set; } = 24;
+        private int _imageWidthRequest = 80;
+        public int ImageWidthRequest { get { return _imageWidthRequest; } set { _imageWidthRequest = value; OnPropertyChanged(); } }
 
-        public int Column { get; set; } = 2;
+        private int _verticalItemSpacing = 24;
+        public int VerticalItemSpacing { get { return _verticalItemSpacing; } set { _verticalItemSpacing = value; OnPropertyChanged(); } }
+
+        private int _column = 2;
+        public int Column { get { return _column; } set { _column = value; OnPropertyChanged(); } }
 
         public Point ImageCenter { get => new Point(ImageWidthRequest / 2.0, ImageHeightRequest / 2.0); }
-
-
 
         public ImageOptions()
         {
             InitializeComponent();
 
-            SingleSelectedCommand = new Command<int>(Action_SingleSelectedCommand);
+            SingleSelectedCommand = new Command<int>(SingleSelected);
+            SingleUnSelectedCommand = new Command<int>(SingleUnSelected);
         }
 
-        private void Action_SingleSelectedCommand(int key)
+        private void SingleUnSelected(int index)
         {
-            ImageOptionItem curItem = ItemsSource.First(item => item.Key == key);
+            SelectedIndex = -1;
+        }
 
-            if (!curItem.IsSelected)
+        private void SingleSelected(int index)
+        {
+            SelectedIndex = index;
+        }
+
+        private void OnSelectedIndexChanged()
+        {
+            ImageOptionItem? lastItem = ItemsSource.FirstOrDefault(item => item.IsSelected && item.Index != SelectedIndex);
+
+            if (lastItem != null)
             {
-                SelectedItem = null;
+                lastItem.IsSelected = false;
 
-                if (curItem.UnSelectedCommand != null && curItem.UnSelectedCommand.CanExecute(curItem.UnSelectedCommandParameter))
+                if (lastItem.UnSelectedCommand != null && lastItem.UnSelectedCommand.CanExecute(lastItem.UnSelectedCommandParameter))
                 {
-                    curItem.UnSelectedCommand.Execute(curItem.UnSelectedCommandParameter);
+                    lastItem.UnSelectedCommand.Execute(lastItem.UnSelectedCommandParameter);
                 }
             }
-            else
+
+            if (SelectedIndex == -1)
             {
-                ImageOptionItem? lastItem = ItemsSource.FirstOrDefault(item => item.IsSelected && item.Key != key);
+                return;
+            }
 
-                if (lastItem != null)
-                {
-                    lastItem.IsSelected = false;
+            ImageOptionItem curItem = ItemsSource.First(item => item.Index == SelectedIndex);
 
-                    if (lastItem.UnSelectedCommand != null && lastItem.UnSelectedCommand.CanExecute(lastItem.UnSelectedCommandParameter))
-                    {
-                        lastItem.UnSelectedCommand.Execute(lastItem.UnSelectedCommandParameter);
-                    }
-                }
-
-                SelectedItem = curItem;
-
-                if (curItem.SelectedCommand != null && curItem.SelectedCommand.CanExecute(curItem.SelectedCommandParameter))
-                {
-                    curItem.SelectedCommand.Execute(curItem.SelectedCommandParameter);
-                }
+            if (curItem.SelectedCommand != null && curItem.SelectedCommand.CanExecute(curItem.SelectedCommandParameter))
+            {
+                curItem.SelectedCommand.Execute(curItem.SelectedCommandParameter);
             }
         }
 

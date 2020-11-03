@@ -15,17 +15,11 @@
             HorizontalOptions="Center"
             VerticalOptions="Center">
             <CollectionView.ItemsLayout>
-                <GridItemsLayout
-                    Orientation="Vertical"
-                    Span="{Binding Column}"
-                    VerticalItemSpacing="{Binding VerticalItemSpacing}" />
+                <GridItemsLayout Orientation="Vertical" Span="{Binding Column}" VerticalItemSpacing="{Binding VerticalItemSpacing}" />
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <StackLayout
-                        Orientation="Vertical"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center">
+                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" VerticalOptions="Center">
                         <controls:SelectableImage
                             HeightRequest="{Binding Source={Reference Root}, Path=ImageHeightRequest}"
                             WidthRequest="{Binding Source={Reference Root}, Path=ImageWidthRequest}"
@@ -36,20 +30,14 @@
                             IsSelected="{Binding IsSelected}"
                             SelectedImageSource="{Binding SelectedImage}"
                             SelectedCommand="{Binding Source={Reference Root}, Path=SingleSelectedCommand}"
-                            SelectedCommandParameter="{Binding Key}"
-                            UnSelectedCommand="{Binding Source={Reference Root}, Path=SingleSelectedCommand}"
-                            UnSelectedCommandParameter="{Binding Key}">
+                            SelectedCommandParameter="{Binding Index}"
+                            UnSelectedCommand="{Binding Source={Reference Root}, Path=SingleUnSelectedCommand}"
+                            UnSelectedCommandParameter="{Binding Index}">
                             <controls:SelectableImage.Clip>
-                                <EllipseGeometry
-                                    Center="{Binding Source={Reference Root}, Path=ImageCenter}"
-                                    RadiusX="{Binding Source={Reference Root}, Path=ImageCenter.X}"
-                                    RadiusY="{Binding Source={Reference Root}, Path=ImageCenter.Y}" />
+                                <EllipseGeometry Center="{Binding Source={Reference Root}, Path=ImageCenter}" RadiusX="{Binding Source={Reference Root}, Path=ImageCenter.X}" RadiusY="{Binding Source={Reference Root}, Path=ImageCenter.Y}" />
                             </controls:SelectableImage.Clip>
                         </controls:SelectableImage>
-                        <Label
-                            Text="{Binding Title}"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
+                        <Label Text="{Binding Title}" HorizontalOptions="Center" VerticalOptions="Center" />
                     </StackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
