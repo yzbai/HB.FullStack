@@ -13,5 +13,12 @@ namespace HB.Framework.Client.Platforms
 
         Task<Stream> GetStreamOfResourceAsync(string fileName);
 
+        /// <summary>
+        /// 如果不存在，返回null
+        /// </summary>
+        /// <param name="userGuid"></param>
+        /// <returns></returns>
+        string? GetUserHeadImagePath(string userGuid);
+
     }
 }
