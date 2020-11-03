@@ -8,35 +8,12 @@ namespace HB.Framework.Client.Controls
 {
     public class SelectableImage : Image
     {
-        public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(nameof(IsSelected), typeof(bool), typeof(SelectableImage), false, BindingMode.TwoWay, propertyChanged: OnIsSelectedChanged);
+        public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(nameof(IsSelected), typeof(bool), typeof(SelectableImage), false, BindingMode.TwoWay, propertyChanged: (b, o, n) => ((SelectableImage)b).OnIsSelectedChagned());
         public static readonly BindableProperty SelectedImageSourceProperty = BindableProperty.Create(nameof(SelectedImageSource), typeof(ImageSource), typeof(SelectableImage), null);
-
         public static readonly BindableProperty SelectedCommandProperty = BindableProperty.Create(nameof(SelectedCommand), typeof(ICommand), typeof(SelectableImage), null);
         public static readonly BindableProperty UnSelectedCommandProperty = BindableProperty.Create(nameof(UnSelectedCommand), typeof(ICommand), typeof(SelectableImage), null);
-
         public static readonly BindableProperty SelectedCommandParameterProperty = BindableProperty.Create(nameof(SelectedCommandParameter), typeof(object), typeof(SelectableImage), null);
         public static readonly BindableProperty UnSelectedCommandParameterProperty = BindableProperty.Create(nameof(UnSelectedCommandParameter), typeof(object), typeof(SelectableImage), null);
-
-        private static void OnIsSelectedChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            if (bindable is SelectableImage image)
-            {
-                if (image.UnSelectedImageSource == null)
-                {
-                    image.UnSelectedImageSource = image.Source;
-                }
-
-                if (image.IsSelected && image.SelectedImageSource != null)
-                {
-                    image.Source = image.SelectedImageSource;
-                }
-
-                if (!image.IsSelected && image.UnSelectedImageSource != null)
-                {
-                    image.Source = image.UnSelectedImageSource;
-                }
-            }
-        }
 
         public bool IsSelected { get => (bool)GetValue(IsSelectedProperty); set => SetValue(IsSelectedProperty, value); }
 
@@ -55,15 +32,35 @@ namespace HB.Framework.Client.Controls
         public SelectableImage()
         {
             TapGestureRecognizer tapGestureRecognizer = new TapGestureRecognizer();
-            tapGestureRecognizer.Tapped += TapGestureRecognizer_Tapped;
+            tapGestureRecognizer.Tapped += OnTapGestureRecognizerTapped;
 
             GestureRecognizers.Add(tapGestureRecognizer);
         }
 
-        private void TapGestureRecognizer_Tapped(object sender, EventArgs e)
+        private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
         {
             IsSelected = !IsSelected;
+        }
 
+        private void OnIsSelectedChagned()
+        {
+            //Source
+            if (UnSelectedImageSource == null)
+            {
+                UnSelectedImageSource = Source;
+            }
+
+            if (IsSelected && SelectedImageSource != null)
+            {
+                Source = SelectedImageSource;
+            }
+
+            if (!IsSelected && UnSelectedImageSource != null)
+            {
+                Source = UnSelectedImageSource;
+            }
+
+            //Command
             if (IsSelected && SelectedCommand != null)
             {
                 if (SelectedCommand.CanExecute(SelectedCommandParameter))

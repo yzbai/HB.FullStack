@@ -39,12 +39,12 @@ namespace HB.Framework.Client.Base
             OnPropertyChanged(nameof(ValidationResults));
         }
 
-        public virtual void OnAppearing()
+        public virtual void OnAppearing(string pageName)
         {
             NotifyValidationChanged();
         }
 
-        public virtual void OnDisappearing()
+        public virtual void OnDisappearing(string pageName)
         {
 
         }
