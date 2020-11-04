@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
-    public class AliyunOssException : ServerException
+    public class AliyunOssException : FrameworkException
     {
 
         public AliyunOssException(string? message) : base(message)
@@ -19,15 +19,15 @@ namespace HB.Infrastructure.Aliyun.Oss
         {
         }
 
-        public AliyunOssException(ServerErrorCode errorCode, string? message) : base(errorCode, message)
+        public AliyunOssException(ErrorCode errorCode, string? message) : base(errorCode, message)
         {
         }
 
-        public AliyunOssException(ServerErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
+        public AliyunOssException(ErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
         {
         }
 
-        public AliyunOssException(ServerErrorCode errorCode) : base(errorCode)
+        public AliyunOssException(ErrorCode errorCode) : base(errorCode)
         {
         }
     }

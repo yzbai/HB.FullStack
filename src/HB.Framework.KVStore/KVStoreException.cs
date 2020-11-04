@@ -6,9 +6,9 @@ using System.Text;
 
 namespace HB.Framework.KVStore
 {
-    public class KVStoreException : ServerException
+    public class KVStoreException : FrameworkException
     {
-        public KVStoreException(ServerErrorCode errorCode, string entityName, string? message = null, Exception? innerException = null)
+        public KVStoreException(ErrorCode errorCode, string entityName, string? message = null, Exception? innerException = null)
             : base(errorCode, $"EntityName:{entityName}, Message:{message}", innerException)
         {
 

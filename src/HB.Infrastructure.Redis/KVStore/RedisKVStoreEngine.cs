@@ -67,17 +67,17 @@ namespace HB.Infrastructure.Redis.KVStore
             return entityName + ":Version";
         }
 
-        private static ServerErrorCode MapResult(RedisResult redisResult)
+        private static ErrorCode MapResult(RedisResult redisResult)
         {
             int result = (int)redisResult;
 
-            ServerErrorCode error = result switch
+            ErrorCode error = result switch
             {
-                9 => ServerErrorCode.KVStoreExistAlready,
-                7 => ServerErrorCode.KVStoreVersionNotMatched,
-                0 => ServerErrorCode.KVStoreError,
-                1 => ServerErrorCode.OK,
-                _ => ServerErrorCode.KVStoreError,
+                9 => ErrorCode.KVStoreExistAlready,
+                7 => ErrorCode.KVStoreVersionNotMatched,
+                0 => ErrorCode.KVStoreError,
+                1 => ErrorCode.OK,
+                _ => ErrorCode.KVStoreError,
             };
 
             return error;
@@ -158,15 +158,15 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
         }
@@ -193,15 +193,15 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
         }
 
@@ -224,15 +224,15 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
         }
 
@@ -281,18 +281,18 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
-            ServerErrorCode error = MapResult(result);
+            ErrorCode error = MapResult(result);
 
             if (!error.IsSuccessful())
             {
@@ -344,18 +344,18 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
-            ServerErrorCode error = MapResult(result);
+            ErrorCode error = MapResult(result);
 
             if (!error.IsSuccessful())
             {
@@ -403,18 +403,18 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
-            ServerErrorCode error = MapResult(result);
+            ErrorCode error = MapResult(result);
 
             if (!error.IsSuccessful())
             {
@@ -439,15 +439,15 @@ namespace HB.Infrastructure.Redis.KVStore
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(ServerErrorCode.KVStoreError, entityName, "", ex);
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
         }
 
