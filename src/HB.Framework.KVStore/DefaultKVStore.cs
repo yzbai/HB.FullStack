@@ -12,13 +12,11 @@ namespace HB.Framework.KVStore
 {
     internal partial class DefaultKVStore : IKVStore
     {
-        private readonly ILogger _logger;
         private readonly IKVStoreEngine _engine;
         private readonly IKVStoreEntityDefFactory _entityDefFactory;
 
-        public DefaultKVStore(IKVStoreEngine kvstoreEngine, IKVStoreEntityDefFactory kvstoreEntityDefFactory, ILogger<DefaultKVStore> logger)
+        public DefaultKVStore(IKVStoreEngine kvstoreEngine, IKVStoreEntityDefFactory kvstoreEntityDefFactory)
         {
-            _logger = logger;
             _engine = kvstoreEngine;
             _entityDefFactory = kvstoreEntityDefFactory;
         }
@@ -102,11 +100,12 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{EntityKey(keyValue)}");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, $"DefaultKVStore::GetByKeyAsync, key:{keyValue}");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"Key:{EntityKey(keyValue)}", ex);
             }
         }
 
@@ -134,11 +133,12 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{SerializeUtil.ToJson(t)}");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, $"DefaultKVStore::GetByKeyAsync<T>, key:{SerializeUtil.ToJson(t)}");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"Key:{SerializeUtil.ToJson(t)}", ex);
             }
         }
 
@@ -165,11 +165,12 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{SerializeUtil.ToJson(EntityKey(keyValues))}");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, $"DefaultKVStore::GetByKeysAsync keys:{string.Join(',', keyValues.ToArray())}");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"Key:{SerializeUtil.ToJson(EntityKey(keyValues))}", ex);
             }
         }
 
@@ -195,11 +196,11 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"key:{SerializeUtil.ToJson(keyValues)}");
-
-                _logger.LogError(exception, $"DefaultKVStore::GetByKeysAsync<T> keys:{SerializeUtil.ToJson(keyValues)}");
-
-                throw exception;
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"key:{SerializeUtil.ToJson(keyValues)}", ex);
             }
         }
 
@@ -222,11 +223,12 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, $"DefaultKVStore::GetAllAsync,Type:{typeof(T).FullName}");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, null, ex);
             }
         }
 
@@ -250,7 +252,7 @@ namespace HB.Framework.KVStore
 
             if (!CheckEntityVersions<T>(items))
             {
-                throw new KVStoreException(KVStoreError.VersionNotMatched, typeof(T).FullName, Resources.AddedItemVersionErrorMessage);
+                throw new KVStoreException(ServerErrorCode.KVStoreVersionNotMatched, typeof(T).FullName, Resources.AddedItemVersionErrorMessage);
             }
 
             try
@@ -267,11 +269,12 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, "");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}", ex);
             }
         }
 
@@ -314,6 +317,7 @@ namespace HB.Framework.KVStore
                     items.Select(t => SerializeUtil.ToJson(t)),
                     originalVersions).ConfigureAwait(false);
             }
+
             catch (Exception ex)
             {
                 if (versionChanged)
@@ -324,11 +328,12 @@ namespace HB.Framework.KVStore
                     }
                 }
 
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, "");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}", ex);
             }
         }
 
@@ -365,13 +370,18 @@ namespace HB.Framework.KVStore
                     EntityName(entityDef)
                     );
             }
+            catch (KVStoreException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, "");
-
-                throw exception;
+                throw new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, null, ex);
             }
         }
 
@@ -410,9 +420,13 @@ namespace HB.Framework.KVStore
             }
             catch (Exception ex)
             {
-                KVStoreException exception = new KVStoreException(ex, typeof(T).FullName, $"keyValues:{SerializeUtil.ToJson(keyValues)}, versions:{SerializeUtil.ToJson(versions)}");
+                if (ex is KVStoreException)
+                {
+                    throw;
+                }
 
-                _logger.LogError(exception, "");
+                KVStoreException exception = new KVStoreException(ServerErrorCode.KVStoreError, typeof(T).FullName, $"keyValues:{SerializeUtil.ToJson(keyValues)}, versions:{SerializeUtil.ToJson(versions)}", ex);
+
 
                 throw exception;
             }

@@ -67,7 +67,7 @@ namespace HB.Framework.Http.Filters
         {
             if (context != null)
             {
-                context.Result = new BadRequestObjectResult(new ApiError(ApiErrorCode.SmsCodeInvalid));
+                context.Result = new BadRequestObjectResult(new ApiError(ServerErrorCode.ApiSmsCodeInvalid));
             }
         }
     }
