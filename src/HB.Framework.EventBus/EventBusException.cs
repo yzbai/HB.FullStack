@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.Framework.EventBus
 {
-    public class EventBusException : ServerException
+    public class EventBusException : FrameworkException
     {
         public EventBusException(string message) : base(message)
         {
@@ -18,15 +18,15 @@ namespace HB.Framework.EventBus
         {
         }
 
-        public EventBusException(ServerErrorCode errorCode, string? message) : base(errorCode, message)
+        public EventBusException(ErrorCode errorCode, string? message) : base(errorCode, message)
         {
         }
 
-        public EventBusException(ServerErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
+        public EventBusException(ErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
         {
         }
 
-        public EventBusException(ServerErrorCode errorCode) : base(errorCode)
+        public EventBusException(ErrorCode errorCode) : base(errorCode)
         {
         }
     }

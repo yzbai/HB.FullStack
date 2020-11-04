@@ -101,10 +101,10 @@ namespace HB.Framework.Client.Base
         {
             Log(LogLevel.Error, ex, null);
 
-            if (ex is ApiException apiException)
-            {
-                if (apiException.ErrorCode == Common.Api.ApiErrorCode.PUBLICRESOURCETOKENERROR)
-            }
+            //if (ex is ApiException apiException)
+            //{
+            //    if (apiException.ErrorCode == Common.Api.ApiErrorCode.PUBLICRESOURCETOKENERROR)
+            //}
 
         }
 

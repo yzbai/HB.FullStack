@@ -36,20 +36,20 @@ namespace HB.Framework.Http.Filters
                     {
                         if (apiRequest.PublicResourceToken.IsNullOrEmpty())
                         {
-                            OnError(context, ServerErrorCode.ApiPublicResourceTokenNeeded);
+                            OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
                             return;
                         }
 
                         if (!await _publicResourceTokenManager.CheckTokenAsync(apiRequest.PublicResourceToken).ConfigureAwait(false))
                         {
-                            OnError(context, ServerErrorCode.ApiPublicResourceTokenError);
+                            OnError(context, ErrorCode.ApiPublicResourceTokenError);
                             return;
                         }
                     }
                 }
                 else
                 {
-                    OnError(context, ServerErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
                     return;
                 }
 
@@ -59,12 +59,12 @@ namespace HB.Framework.Http.Filters
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                OnError(context, ServerErrorCode.ApiPublicResourceTokenNeeded);
+                OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");
             }
         }
 
-        private static void OnError(ActionExecutingContext? context, ServerErrorCode error)
+        private static void OnError(ActionExecutingContext? context, ErrorCode error)
         {
             if (context != null)
             {

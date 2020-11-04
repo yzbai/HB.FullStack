@@ -5,13 +5,13 @@ using System.Text;
 
 namespace HB.Infrastructure.Redis.Direct
 {
-    public class RedisDatabaseException : ServerException
+    public class RedisDatabaseException : FrameworkException
     {
         public RedisDatabaseException()
         {
         }
 
-        public RedisDatabaseException(ServerErrorCode errorCode) : base(errorCode)
+        public RedisDatabaseException(ErrorCode errorCode) : base(errorCode)
         {
         }
 
@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Redis.Direct
         {
         }
 
-        public RedisDatabaseException(ServerErrorCode errorCode, string? message) : base(errorCode, message)
+        public RedisDatabaseException(ErrorCode errorCode, string? message) : base(errorCode, message)
         {
         }
 
@@ -27,7 +27,7 @@ namespace HB.Infrastructure.Redis.Direct
         {
         }
 
-        public RedisDatabaseException(ServerErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
+        public RedisDatabaseException(ErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
         {
         }
     }
