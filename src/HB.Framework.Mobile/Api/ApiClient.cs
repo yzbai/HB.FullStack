@@ -27,7 +27,7 @@ namespace HB.Framework.Client.Api
 
             if (!request.IsValid())
             {
-                throw new ApiException(ServerErrorCode.ApiModelValidationError);
+                throw new ApiException(ErrorCode.ApiModelValidationError);
             }
 
             try
@@ -42,7 +42,7 @@ namespace HB.Framework.Client.Api
 
                     if (!jwtAdded)
                     {
-                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
+                        throw new ApiException(ErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -50,7 +50,7 @@ namespace HB.Framework.Client.Api
                 {
                     if (!TrySetApiKey(apiKeyRequest))
                     {
-                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
+                        throw new ApiException(ErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -59,7 +59,7 @@ namespace HB.Framework.Client.Api
                 if (request is JwtApiRequest)
                 {
                     //只处理token过期这一种情况
-                    if (response.HttpCode == 401 && response.ErrCode == ServerErrorCode.ApiTokenExpired)
+                    if (response.HttpCode == 401 && response.ErrCode == ErrorCode.ApiTokenExpired)
                     {
                         bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
 
@@ -83,7 +83,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ServerErrorCode.ApiError, $"ApiClient.SendAsync Failed.", ex);
+                throw new ApiException(ErrorCode.ApiError, $"ApiClient.SendAsync Failed.", ex);
             }
         }
 
@@ -93,7 +93,7 @@ namespace HB.Framework.Client.Api
 
             if (!request.IsValid())
             {
-                throw new ApiException(ServerErrorCode.ApiModelValidationError);
+                throw new ApiException(ErrorCode.ApiModelValidationError);
             }
 
             try
@@ -108,7 +108,7 @@ namespace HB.Framework.Client.Api
 
                     if (!jwtAdded)
                     {
-                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
+                        throw new ApiException(ErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -116,7 +116,7 @@ namespace HB.Framework.Client.Api
                 {
                     if (!TrySetApiKey(apiKeyRequest))
                     {
-                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
+                        throw new ApiException(ErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -125,7 +125,7 @@ namespace HB.Framework.Client.Api
                 if (request is JwtApiRequest)
                 {
                     //只处理token过期这一种情况
-                    if (response.HttpCode == 401 && response.ErrCode == ServerErrorCode.ApiTokenExpired)
+                    if (response.HttpCode == 401 && response.ErrCode == ErrorCode.ApiTokenExpired)
                     {
                         bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
 
@@ -151,7 +151,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ServerErrorCode.ApiError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
+                throw new ApiException(ErrorCode.ApiError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 
@@ -288,7 +288,7 @@ namespace HB.Framework.Client.Api
             }
             catch (Exception ex)
             {
-                throw new ApiException(ServerErrorCode.ApiTokenRefresherError, "ApiClient.AutoRefreshTokenAsync Error.", ex);
+                throw new ApiException(ErrorCode.ApiTokenRefresherError, "ApiClient.AutoRefreshTokenAsync Error.", ex);
             }
             finally
             {

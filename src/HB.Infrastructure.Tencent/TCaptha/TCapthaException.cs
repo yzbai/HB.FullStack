@@ -4,13 +4,13 @@ using System.Text;
 
 namespace HB.Infrastructure.Tencent
 {
-    public class TCapthaException : ServerException
+    public class TCapthaException : FrameworkException
     {
         public TCapthaException()
         {
         }
 
-        public TCapthaException(ServerErrorCode errorCode) : base(errorCode)
+        public TCapthaException(ErrorCode errorCode) : base(errorCode)
         {
         }
 
@@ -18,7 +18,7 @@ namespace HB.Infrastructure.Tencent
         {
         }
 
-        public TCapthaException(ServerErrorCode errorCode, string? message) : base(errorCode, message)
+        public TCapthaException(ErrorCode errorCode, string? message) : base(errorCode, message)
         {
         }
 
@@ -26,7 +26,7 @@ namespace HB.Infrastructure.Tencent
         {
         }
 
-        public TCapthaException(ServerErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
+        public TCapthaException(ErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
         {
         }
     }

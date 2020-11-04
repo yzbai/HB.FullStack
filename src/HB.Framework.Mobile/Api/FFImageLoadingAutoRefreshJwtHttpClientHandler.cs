@@ -44,7 +44,7 @@ namespace HB.Framework.Client.Api
             {
                 ApiResponse response = await responseMessage.ToApiResponseAsync().ConfigureAwait(false);
 
-                if (response.HttpCode == 401 && response.ErrCode == ServerErrorCode.ApiTokenExpired)
+                if (response.HttpCode == 401 && response.ErrCode == ErrorCode.ApiTokenExpired)
                 {
                     EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
 
