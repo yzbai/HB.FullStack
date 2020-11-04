@@ -49,12 +49,12 @@ namespace HB.Framework.Http.Security
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedExtensions.IsNullOrEmpty())
             {
-                throw new ApiException(ApiErrorCode.FileUploadNeeded, 400);
+                throw new ApiException(ServerErrorCode.ApiUploadEmptyFile);
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw new ApiException(ApiErrorCode.FileUploadOverSize, 400);
+                throw new ApiException(ServerErrorCode.ApiUploadOverSize);
             }
 
             try
@@ -68,13 +68,13 @@ namespace HB.Framework.Http.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw new ApiException(ApiErrorCode.FileUploadNeeded, 400);
+                    throw new ApiException(ServerErrorCode.ApiUploadEmptyFile);
                 }
 
                 if (!IsValidFileExtensionAndSignature(
                     formFile.FileName, memoryStream, permittedExtensions))
                 {
-                    throw new ApiException(ApiErrorCode.FileUploadTypeNotMatch, 400);
+                    throw new ApiException(ServerErrorCode.ApiUploadWrongType);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace HB.Framework.Http.Security
             }
             catch (Exception ex)
             {
-                throw new ApiException(ex, ApiErrorCode.FileUploadError, 400, $"文件名称{formFile.FileName}");
+                throw new ApiException(ServerErrorCode.ApiError, $"文件名称{formFile.FileName}", ex);
             }
         }
 

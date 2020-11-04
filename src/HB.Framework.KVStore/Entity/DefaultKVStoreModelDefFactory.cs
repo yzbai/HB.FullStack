@@ -117,7 +117,7 @@ namespace HB.Framework.KVStore.Entity
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))
             {
-                throw new KVStoreException(KVStoreError.NoEntitySchemaFound, type.FullName, null);
+                throw new KVStoreException(ServerErrorCode.KVStoreNoEntitySchemaFound, type.FullName);
             }
 
             KVStoreEntityDef entityDef = new KVStoreEntityDef(storeEntitySchema.InstanceName, type);

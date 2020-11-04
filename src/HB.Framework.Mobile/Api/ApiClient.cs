@@ -27,7 +27,7 @@ namespace HB.Framework.Client.Api
 
             if (!request.IsValid())
             {
-                throw new ApiException(ApiErrorCode.MODELVALIDATIONERROR, 400);
+                throw new ApiException(ServerErrorCode.ApiModelValidationError);
             }
 
             try
@@ -42,7 +42,7 @@ namespace HB.Framework.Client.Api
 
                     if (!jwtAdded)
                     {
-                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
+                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -50,7 +50,7 @@ namespace HB.Framework.Client.Api
                 {
                     if (!TrySetApiKey(apiKeyRequest))
                     {
-                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
+                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -59,7 +59,7 @@ namespace HB.Framework.Client.Api
                 if (request is JwtApiRequest)
                 {
                     //只处理token过期这一种情况
-                    if (response.HttpCode == 401 && response.ErrCode == ApiErrorCode.ApiTokenExpired)
+                    if (response.HttpCode == 401 && response.ErrCode == ServerErrorCode.ApiTokenExpired)
                     {
                         bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
 
@@ -72,7 +72,7 @@ namespace HB.Framework.Client.Api
 
                 if (!response.IsSuccessful)
                 {
-                    throw new ApiException(response.ErrCode, response.HttpCode, response.Message);
+                    throw new ApiException(response.ErrCode, response.Message);
                 }
             }
             catch (ApiException)
@@ -83,7 +83,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ex, ApiErrorCode.UnKownError, 400, $"ApiClient.SendAsync Failed.");
+                throw new ApiException(ServerErrorCode.ApiError, $"ApiClient.SendAsync Failed.", ex);
             }
         }
 
@@ -93,7 +93,7 @@ namespace HB.Framework.Client.Api
 
             if (!request.IsValid())
             {
-                throw new ApiException(ApiErrorCode.MODELVALIDATIONERROR, 400);
+                throw new ApiException(ServerErrorCode.ApiModelValidationError);
             }
 
             try
@@ -108,7 +108,7 @@ namespace HB.Framework.Client.Api
 
                     if (!jwtAdded)
                     {
-                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
+                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -116,7 +116,7 @@ namespace HB.Framework.Client.Api
                 {
                     if (!TrySetApiKey(apiKeyRequest))
                     {
-                        throw new ApiException(ApiErrorCode.NOAUTHORITY, 401);
+                        throw new ApiException(ServerErrorCode.ApiNoAuthority);
                     }
                 }
 
@@ -125,7 +125,7 @@ namespace HB.Framework.Client.Api
                 if (request is JwtApiRequest)
                 {
                     //只处理token过期这一种情况
-                    if (response.HttpCode == 401 && response.ErrCode == ApiErrorCode.ApiTokenExpired)
+                    if (response.HttpCode == 401 && response.ErrCode == ServerErrorCode.ApiTokenExpired)
                     {
                         bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
 
@@ -138,7 +138,7 @@ namespace HB.Framework.Client.Api
 
                 if (!response.IsSuccessful)
                 {
-                    throw new ApiException(response.ErrCode, response.HttpCode, response.Message);
+                    throw new ApiException(response.ErrCode, response.Message);
                 }
 
                 return response.Data;
@@ -151,7 +151,7 @@ namespace HB.Framework.Client.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ex, ApiErrorCode.UnKownError, 400, $"ApiClient.SendAsync Failed.Type : {typeof(T)}");
+                throw new ApiException(ServerErrorCode.ApiError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 
@@ -288,7 +288,7 @@ namespace HB.Framework.Client.Api
             }
             catch (Exception ex)
             {
-                throw new ApiException(ex, ApiErrorCode.TokenRefresherError, 401, "ApiClient.AutoRefreshTokenAsync Error.");
+                throw new ApiException(ServerErrorCode.ApiTokenRefresherError, "ApiClient.AutoRefreshTokenAsync Error.", ex);
             }
             finally
             {

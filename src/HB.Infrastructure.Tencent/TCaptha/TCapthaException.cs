@@ -4,11 +4,21 @@ using System.Text;
 
 namespace HB.Infrastructure.Tencent
 {
-    public class TCapthaException : FrameworkException
+    public class TCapthaException : ServerException
     {
-        public override FrameworkExceptionType ExceptionType { get => FrameworkExceptionType.TCaptha; }
+        public TCapthaException()
+        {
+        }
+
+        public TCapthaException(ServerErrorCode errorCode) : base(errorCode)
+        {
+        }
 
         public TCapthaException(string? message) : base(message)
+        {
+        }
+
+        public TCapthaException(ServerErrorCode errorCode, string? message) : base(errorCode, message)
         {
         }
 
@@ -16,7 +26,7 @@ namespace HB.Infrastructure.Tencent
         {
         }
 
-        public TCapthaException()
+        public TCapthaException(ServerErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
         {
         }
     }

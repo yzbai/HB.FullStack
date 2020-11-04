@@ -60,7 +60,7 @@ namespace HB.Framework.Http.ApiKeyAuthentication
             Response.StatusCode = 401;
             Response.ContentType = "application/problem+json";
 
-            ApiError errorResponse = new ApiError(ApiErrorCode.APIKEYUNAUTHENTICATED);
+            ApiError errorResponse = new ApiError(ServerErrorCode.ApiKeyUnAuthenticated);
 
             return Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
         }
@@ -70,7 +70,7 @@ namespace HB.Framework.Http.ApiKeyAuthentication
             Response.StatusCode = 403;
             Response.ContentType = "application/problem+json";
 
-            ApiError errorResponse = new ApiError(ApiErrorCode.APIKEYUNAUTHENTICATED);
+            ApiError errorResponse = new ApiError(ServerErrorCode.ApiKeyUnAuthenticated);
 
             return Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
         }

@@ -100,6 +100,12 @@ namespace HB.Framework.Client.Base
         public static void ExceptionHandler(Exception ex)
         {
             Log(LogLevel.Error, ex, null);
+
+            if (ex is ApiException apiException)
+            {
+                if (apiException.ErrorCode == Common.Api.ApiErrorCode.PUBLICRESOURCETOKENERROR)
+            }
+
         }
 
         public static void Log(LogLevel logLevel, Exception? ex, string? message = null)
