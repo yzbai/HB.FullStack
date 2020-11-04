@@ -9,7 +9,7 @@ namespace HB.Framework.Client.Platforms
 {
     public interface IPlatformFileHelper
     {
-        Task SaveUserHeadImageAsync(ImageSource imageSource, string usreGuid);
+        Task SaveAvatarAsync(ImageSource imageSource, string usreGuid);
 
         Task<Stream> GetStreamOfResourceAsync(string fileName);
 
@@ -18,7 +18,7 @@ namespace HB.Framework.Client.Platforms
         /// </summary>
         /// <param name="userGuid"></param>
         /// <returns></returns>
-        string? GetUserHeadImagePath(string userGuid);
-
+        string? GetAvatarFilePath(string userGuid);
+        Task<byte[]?> GetAvatarAsync(string userGuid);
     }
 }

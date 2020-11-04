@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using Xamarin.Forms;
 
@@ -55,6 +56,11 @@ namespace HB.Framework.Client.Base
             {
                 Application.Current.MainPage.DisplayAlert(message, title, button).Fire();
             });
+        }
+
+        public static Task<bool> DisplayAlertAsync(string message, string title, string acceptButton, string cancelButton)
+        {
+            return Application.Current.MainPage.DisplayAlert(title, message, acceptButton, cancelButton);
         }
     }
 }
