@@ -25,11 +25,11 @@ namespace HB.Framework.Client
         private static string? _deviceAddress;
 
         private static string? _currentUserGuid;
-        private static string? _accessToken;
-        private static string? _refreshToken;
         private static string? _currentLoginName;
         private static string? _currentMobile;
         private static string? _currentEmail;
+        private static string? _accessToken;
+        private static string? _refreshToken;
 
         private static bool? _isLogined;
 
@@ -64,6 +64,22 @@ namespace HB.Framework.Client
             return _deviceId!;
         }
 
+        public static string DeviceId
+        {
+            get
+            {
+                if (_deviceId.IsNullOrEmpty())
+                {
+                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                    return joinableTaskFactory.Run(async () => { return await GetDeviceIdAsync().ConfigureAwait(false); });
+                }
+
+                return _deviceId!;
+            }
+        }
+
         public static async Task<string> GetDeviceTypeAsync()
         {
             if (_deviceType.IsNotNullOrEmpty())
@@ -83,6 +99,22 @@ namespace HB.Framework.Client
             await PreferenceSetAsync(ClientNames.DeviceType, _deviceType).ConfigureAwait(false);
 
             return _deviceType!;
+        }
+
+        public static string DeviceType
+        {
+            get
+            {
+                if (_deviceType.IsNullOrEmpty())
+                {
+                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                    return joinableTaskFactory.Run(async () => { return await GetDeviceTypeAsync().ConfigureAwait(false); });
+                }
+
+                return _deviceType!;
+            }
         }
 
         public static async Task<string> GetDeviceVersionAsync()
@@ -106,12 +138,28 @@ namespace HB.Framework.Client
             return _deviceVersion!;
         }
 
+        public static string DeviceVersion
+        {
+            get
+            {
+                if (_deviceVersion.IsNullOrEmpty())
+                {
+                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                    return joinableTaskFactory.Run(async () => { return await GetDeviceVersionAsync().ConfigureAwait(false); });
+                }
+
+                return _deviceVersion!;
+            }
+        }
+
         public static async Task<string> GetDeviceAddressAsync()
         {
-            //if (_deviceAddress.IsNotNullOrEmpty())
-            //{
-            //    return _deviceAddress!;
-            //}
+            if (_deviceAddress.IsNotNullOrEmpty())
+            {
+                return _deviceAddress!;
+            }
 
             //_deviceAddress = await PreferenceGetAsync(ClientNames.DeviceAddress).ConfigureAwait(false);
 
@@ -127,21 +175,40 @@ namespace HB.Framework.Client
             return _deviceAddress!;
         }
 
+        public static string DeviceAddress
+        {
+            get
+            {
+                if (_deviceAddress.IsNullOrEmpty())
+                {
+                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                    return joinableTaskFactory.Run(async () => { return await GetDeviceAddressAsync().ConfigureAwait(false); });
+                }
+
+                return _deviceAddress!;
+            }
+        }
+
         #endregion
 
         #region User
 
-        public static bool IsLogined()
+        public static bool IsLogined
         {
-            if (_isLogined == null)
+            get
             {
-                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+                if (_isLogined == null)
+                {
+                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
 
-                return joinableTaskFactory.Run(async () => { return await IsLoginedAsync().ConfigureAwait(false); });
+                    return joinableTaskFactory.Run(async () => { return await IsLoginedAsync().ConfigureAwait(false); });
+                }
+
+                return _isLogined.Value;
             }
-
-            return _isLogined.Value;
         }
 
         public static async Task<bool> IsLoginedAsync()

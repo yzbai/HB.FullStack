@@ -5,6 +5,6 @@ namespace HB.Framework.Http.File
 {
     public interface IFileService
     {
-        Task SaveAvatarAsync(string userGuid, IFormFile file);
+        Task SetAvatarAsync(string userGuid, IFormFile file);
     }
 }
