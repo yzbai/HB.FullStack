@@ -87,7 +87,7 @@ namespace HB.Framework.Client.Api
             }
         }
 
-        public async Task<T?> SendAsync<T>(ApiRequest request) where T : class
+        public async Task<T> SendAsync<T>(ApiRequest request) where T : class
         {
             await SetDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
 
@@ -141,7 +141,8 @@ namespace HB.Framework.Client.Api
                     throw new ApiException(response.ErrCode, response.Message);
                 }
 
-                return response.Data;
+                //TODO: 小心检查随后
+                return response.Data!;
             }
             catch (ApiException)
             {
