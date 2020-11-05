@@ -22,7 +22,7 @@ namespace HB.Infrastructure.Aliyun.Test
         [Theory]
         [InlineData("15190208956")]
         [InlineData("18015323958")]
-        public void SendSmsAsync(string mobile)
+        public void SendSms(string mobile)
         {
             _smsBiz.SendValidationCode(mobile);
         }
