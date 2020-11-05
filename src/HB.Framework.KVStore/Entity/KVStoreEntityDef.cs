@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace HB.Framework.KVStore.Entity
@@ -7,40 +8,15 @@ namespace HB.Framework.KVStore.Entity
     {
         public string KVStoreName { get; set; }
 
-        public int KVStoreIndex { get; set; }
-
         public Type EntityType { get; set; }
 
-        public string EntityFullName { get; set; }
+        public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; } = new Dictionary<int, PropertyInfo>();
 
-        public PropertyInfo KeyPropertyInfo { get; set; }
-
-        public string KeyPropertyName
+        public KVStoreEntityDef(string kvstoreName, Type type)
         {
-            get
-            {
-                if (KeyPropertyInfo == null)
-                {
-                    return null;
-                }
-
-                return KeyPropertyInfo.Name;
-            }
+            KVStoreName = kvstoreName;
+            EntityType = type;
         }
 
-        public Type KeyPropertyType
-        {
-            get
-            {
-                if (KeyPropertyInfo == null)
-                {
-                    return null;
-                }
-
-                return KeyPropertyInfo.PropertyType;
-            }
-        }
-
-        public KVStoreEntityDef() { }        
     }
 }

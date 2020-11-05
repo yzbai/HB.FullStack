@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using HB.Framework.Common;
+using HB.Framework.Common.Mobile;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System;
 
@@ -6,7 +8,7 @@ namespace Microsoft.AspNetCore.Session
 {
     public class MixedSessionOptions
     {
-        public string Name { get; set; } = "ClientId";
+        public string Name { get; set; } = MobileInfoNames.DeviceId;
       
         public string CookieDomain { get; set; }
 

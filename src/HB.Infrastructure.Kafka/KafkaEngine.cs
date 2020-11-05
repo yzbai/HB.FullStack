@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Kafka
 {
     public class KafkaEngine : IEventBusEngine
     {
-        private readonly object _objLocker = new object();
+        //private readonly object _objLocker = new object();
         private KafkaEngineOptions _options;
         private ILogger _logger;
 
@@ -53,10 +53,10 @@ namespace HB.Infrastructure.Kafka
 
             var task = producer.ProduceAsync(eventName, null, data);
 
-            return task.ContinueWith<PublishResult>(t =>
+            return task.ContinueWith(t =>
             {
                 return t.Result.Error.HasError ? PublishResult.Fail(t.Result.Error.Reason) : PublishResult.Succeeded();
-            });
+            }, TaskScheduler.Default);
         }
 
         public Task SubscribeAndConsume(string serverName, string subscriberGroup, string eventName, IEventHandler handler)
@@ -78,7 +78,7 @@ namespace HB.Infrastructure.Kafka
 
             if (handler == null)
             {
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(handler));
             }
 
             CancellationTokenSource cts = new CancellationTokenSource();
@@ -198,7 +198,8 @@ namespace HB.Infrastructure.Kafka
                     }
                     catch (Exception ex)
                     {
-                        throw ex;
+                        _logger.LogError(ex, $"任务资源没有释放干净，{cts.Token.ToString()}");
+                        //throw ex;
                     }
                 }
             }

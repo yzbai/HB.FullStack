@@ -1,26 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Engine
 {
-    public interface IKVStoreEngine : IKVStoreEngineAsync
+    public interface IKVStoreEngine
     {
-        byte[]              EntityGet(string storeName, int storeIndex, string entityName, string entityKey);
-        IEnumerable<byte[]> EntityGet(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys);      
-        IEnumerable<byte[]> EntityGetAll(string storeName, int storeIndex, string entityName);
+        KVStoreSettings Settings { get; }
 
-        KVStoreResult       EntityAdd(string storeName, int storeIndex, string entityName, string entityKey, byte[] entityValue);
-        KVStoreResult       EntityAdd(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<byte[]> entityValues);
+        string FirstDefaultInstanceName { get; }
 
-        KVStoreResult       EntityUpdate(string storeName, int storeIndex, string entityName, string entityKey, byte[] entityValue, int entityVersion);
-        KVStoreResult       EntityUpdate(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<byte[]> entityValues, IEnumerable<int> entityVersions);
+        void Close();
 
-        KVStoreResult       EntityDelete(string storeName, int storeIndex, string entityName, string entityKey, int entityVersion);
-        KVStoreResult       EntityDelete(string storeName, int storeIndex, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
-        KVStoreResult       EntityDeleteAll(string storeName, int storeIndex, string entityName);
-        
+        /// <exception cref="KVStoreException"></exception>
+        Task<string> EntityGetAsync(string storeName, string entityName, string entityKey);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task EntityAddAsync(string storeName, string entityName, string entityKey, string entityJson);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task EntityUpdateAsync(string storeName, string entityName, string entityKey, string entityJson, int entityVersion);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task EntityDeleteAsync(string storeName, string entityName, string entityKey, int entityVersion);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
+
+        /// <exception cref="KVStoreException"></exception>
+        Task<bool> EntityDeleteAllAsync(string storeName, string entityName);
 
     }
 }

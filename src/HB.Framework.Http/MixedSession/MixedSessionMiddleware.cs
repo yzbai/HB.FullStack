@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Session
         private readonly MixedSessionOptions _options;
         private readonly ILogger _logger;
         private readonly ISessionStore _sessionStore;
-        private readonly IDataProtector _dataProtector;
+        //private readonly IDataProtector _dataProtector;
 
         /// <summary>
         /// Creates a new <see cref="SessionMiddleware"/>.
@@ -37,18 +37,12 @@ namespace Microsoft.AspNetCore.Session
         public MixedSessionMiddleware(
              RequestDelegate next,
              ILoggerFactory loggerFactory,
-             IDataProtectionProvider dataProtectionProvider,
              ISessionStore sessionStore,
              IOptions<MixedSessionOptions> options)
         {
             if (loggerFactory == null)
             {
                 throw new ArgumentNullException(nameof(loggerFactory));
-            }
-
-            if (dataProtectionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(dataProtectionProvider));
             }
 
             if (options == null)
@@ -60,7 +54,7 @@ namespace Microsoft.AspNetCore.Session
             _logger = loggerFactory.CreateLogger<MixedSessionMiddleware>();
             _options = options.Value;
             _sessionStore = sessionStore;
-            _dataProtector = dataProtectionProvider.CreateProtector(nameof(MixedSessionMiddleware));
+            //_dataProtector = dataProtectionProvider.CreateProtector(nameof(MixedSessionMiddleware));
         }
 
         /// <summary>
@@ -70,6 +64,8 @@ namespace Microsoft.AspNetCore.Session
         /// <returns>A <see cref="Task"/> that completes when the middleware has completed processing.</returns>
         public async Task Invoke(HttpContext context)
         {
+            ThrowIf.Null(context, nameof(context));
+
             Func<bool> tryEstablishSession = ReturnTrue;
             bool isNewSessionKey = false;
 
@@ -81,15 +77,16 @@ namespace Microsoft.AspNetCore.Session
                 CryptoRandom.GetBytes(guidBytes);
                 sessionKey = new Guid(guidBytes).ToString();
 
-                var establisher = new SessionEstablisher(context, sessionKey, _options);
+                SessionEstablisher establisher = new SessionEstablisher(context, sessionKey, _options);
                 tryEstablishSession = establisher.TryEstablishSession;
                 isNewSessionKey = true;
             }
 
-            var feature = new SessionFeature
+            SessionFeature feature = new SessionFeature
             {
                 Session = _sessionStore.Create(sessionKey, _options.IdleTimeout, _options.IOTimeout, tryEstablishSession, isNewSessionKey)
             };
+
             context.Features.Set<ISessionFeature>(feature);
 
             try
@@ -106,9 +103,9 @@ namespace Microsoft.AspNetCore.Session
                     {
                         await feature.Session.CommitAsync().ConfigureAwait(true);
                     }
-                    catch (Exception ex)
+                    catch (OperationCanceledException ex)
                     {
-                        _logger.LogError("Error closing the session.", ex);
+                        _logger.SessionCommitCanceled(ex);
                     }
                 }
             }
@@ -117,6 +114,8 @@ namespace Microsoft.AspNetCore.Session
         //TODO: add data protection later
         private string GetSessionKey(HttpContext context)
         {
+            //ThrowIf.Null(context, nameof(context));
+
             string sessionKey = context.GetValueFromRequest(_options.Name, includeCookie: false);
 
             if (!string.IsNullOrWhiteSpace(sessionKey))
@@ -124,7 +123,7 @@ namespace Microsoft.AspNetCore.Session
                 return sessionKey;
             }
 
-            var cookieValue = context.Request.Cookies[_options.Name];
+            string cookieValue = context.Request.Cookies[_options.Name];
 
             return cookieValue;
         }
@@ -163,7 +162,7 @@ namespace Microsoft.AspNetCore.Session
 
             private static Task OnStartingCallback(object state)
             {
-                var establisher = (SessionEstablisher)state;
+                SessionEstablisher establisher = (SessionEstablisher)state;
                 if (establisher._shouldEstablishSession)
                 {
                     establisher.SetCookie();
@@ -173,7 +172,7 @@ namespace Microsoft.AspNetCore.Session
 
             private void SetCookie()
             {
-                var cookieOptions = new CookieOptions
+                CookieOptions cookieOptions = new CookieOptions
                 {
                     SameSite = _options.SameSiteMode,
                     Secure = _options.CookieSecure == CookieSecurePolicy.Always || (_options.CookieSecure == CookieSecurePolicy.SameAsRequest && _context.Request.IsHttps),

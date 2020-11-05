@@ -1,112 +1,86 @@
-﻿using HB.Framework.Common;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Polly;
+﻿using HB.Framework.EventBus.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq;
-using HB.Framework.EventBus.Abstractions;
+using System.Threading.Tasks;
 
 namespace HB.Framework.EventBus
 {
-
     /// <summary>
     /// 单例启动
     /// </summary>
-    public class DefaultEventBus : IEventBus
+    internal class DefaultEventBus : IEventBus
     {
-        private EventBusOptions _options;
-        private IEventBusEngine _engine;
-        private ILogger _logger;
-        private readonly IEnumerable<IEventHandler> _eventHandlers;
-        private bool _handled;
+        private readonly IEventBusEngine _engine;
+        private readonly IDictionary<string, EventSchema> _eventSchemaDict;
 
-        public DefaultEventBus(IEventBusEngine eventBusEngine, IEnumerable<IEventHandler> eventHandlers, IOptions<EventBusOptions> options, ILogger<DefaultEventBus> logger)
+        public DefaultEventBus(IEventBusEngine eventBusEngine)
         {
-            _options = options.Value;
             _engine = eventBusEngine;
-            _logger = logger;
-            _eventHandlers = eventHandlers;
-            _handled = false;
+            _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventName);
         }
 
-        public void Handle()
+        /// <summary>
+        /// PublishAsync
+        /// </summary>
+        /// <param name="eventMessage"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
+        public async Task PublishAsync(string eventName, string jsonData)
         {
-            if (_handled)
-            {
-                return;
-            }
-
-
-            if (_eventHandlers == null)
-            {
-                return;
-            }
- 
-            foreach (var handler in _eventHandlers)
-            {
-                EventHandlerConfig handlerConfig = handler.GetConfig();
-
-                if (handlerConfig != null)
-                {
-                    if (string.IsNullOrWhiteSpace(handlerConfig.SubscribeGroup))
-                    {
-                        handlerConfig.SubscribeGroup = _options.SubscribeConfig.DefaultSubscribeGroup;
-                    }
-
-                    _engine.SubscribeAndConsume(handlerConfig.ServerName, handlerConfig.SubscribeGroup, handlerConfig.EventName, handler);
-                }
-            }
-
-            _handled = true;
+            await _engine.PublishAsync(GetBrokerName(eventName), eventName, jsonData).ConfigureAwait(false);
         }
 
-        public void RegisterEvent(EventConfig eventConfig)
+        /// <summary>
+        /// StartHandle
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
+        public void StartHandle(string eventType)
         {
-            if (eventConfig == null)
-            {
-                throw new ArgumentNullException(nameof(eventConfig));
-            }
-
-            if (_options.PublishConfig == null)
-            {
-                _options.PublishConfig = new PublishConfig();
-            }
-
-            if (_options.PublishConfig.Events == null)
-            {
-                _options.PublishConfig.Events = new List<EventConfig>();
-            }
-
-            _options.PublishConfig.Events.Add(eventConfig);
+            _engine.StartHandle(eventType);
         }
 
-        public Task<PublishResult> Publish(string eventName, string jsonString)
+        /// <summary>
+        /// Subscribe
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="handler"></param>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
+        public void Subscribe(string eventType, IEventHandler handler)
         {
-            EventConfig eventConfig = GetEventConfiguration(eventName);
-
-            if (eventConfig == null)
-            {
-                _logger.LogCritical("Event :{0} dot not have configuration.", eventName);
-                return null;
-            }
-
-            return Policy
-                .Handle<Exception>()
-                .WaitAndRetryForeverAsync(n => TimeSpan.FromSeconds(1), (ex, count, ts) => {
-                    _logger.LogCritical(ex, "Publish Error: EventName : {0}, Json : {1}, Message : {2}, Count : {3}", eventName, jsonString, ex.Message, count);
-                })
-                .ExecuteAsync(() => {
-                    return _engine.PublishString(eventConfig.ServerName, eventConfig.EventName, jsonString);
-                });
+            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventName: eventType, eventHandler: handler);
         }
 
-        private EventConfig GetEventConfiguration(string eventName)
+        /// <summary>
+        /// UnSubscribe
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
+        public async Task UnSubscribeAsync(string eventType)
         {
-            return _options.PublishConfig?.Events?.FirstOrDefault(e => e.EventName.Equals(eventName));
+            await _engine.UnSubscribeHandlerAsync(eventyName: eventType).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// GetBrokerName
+        /// </summary>
+        /// <param name="eventName"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Framework.EventBus.EventBusException"></exception>
+        private string GetBrokerName(string eventName)
+        {
+            if (_eventSchemaDict.TryGetValue(eventName, out EventSchema eventSchema))
+            {
+                return eventSchema.BrokerName;
+            }
+
+            throw new EventBusException($"Not Found Matched EventSchema for EventType:{eventName}");
+        }
+
+        public void Close()
+        {
+            _engine.Close();
         }
     }
 }

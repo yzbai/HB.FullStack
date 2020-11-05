@@ -1,91 +1,142 @@
-﻿using System.Text;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Aliyun.Acs.Core;
-using HB.Framework.Common;
 using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
-using HB.Compnent.Resource.Sms;
-using Aliyun.Acs.Dysmsapi.Model.V20170525;
-using HB.Component.Resource.Sms.Entity;
-using System.Globalization;
-using Polly;
-using Aliyun.Acs.Core.Exceptions;
-using HB.Infrastructure.Aliyun.Sms.Transform;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
+using HB.Framework.Common.Validate;
+using System.Text.Json;
+using Aliyun.Acs.Core.Exceptions;
+using HB.Infrastructure.Aliyun.Properties;
+using HB.Framework.Common.Sms;
+using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsBiz : ISmsService
+    internal class AliyunSmsService : ISmsService
     {
-        private AliyunSmsOptions _options;
-        private IAcsClient _client;
+        private readonly AliyunSmsOptions _options;
+        private readonly IAcsClient _client;
         private readonly ILogger _logger;
-        private IDistributedCache _cache;
+        private readonly IDistributedCache _cache;
 
-        public AliyunSmsBiz(IAcsClientManager acsClientManager, IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsBiz> logger, IDistributedCache cache) 
+        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, IDistributedCache cache)
         {
             _options = options.Value;
-            _client = acsClientManager.GetAcsClient(_options.ProductName);
             _logger = logger;
             _cache = cache;
+
+            AliyunUtil.AddEndpoint(ProductNames.SMS, _options.RegionId, _options.Endpoint);
+            _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
+
         }
 
-        public Task<SendResult> SendValidationCode(string mobile, out string code)
+        //TODO: 等待阿里云增加异步方法，在此之外，调用这个方法，应该使用SafeFireAndForget
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.Infrastructure.Aliyun.Sms.AliyunSmsException"></exception>
+        public void SendValidationCode(string mobile/*, out string smsCode*/)
         {
-            code = SecurityHelper.CreateRandomNumbericString(_options.TemplateIdentityValidation.CodeLength);
+            string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
-            SendSmsRequest request = new SendSmsRequest
+            string templateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}",
+                    _options.TemplateIdentityValidation.ParamCode,
+                    smsCode,
+                    _options.TemplateIdentityValidation.ParamProduct,
+                    _options.TemplateIdentityValidation.ParamProductValue);
+
+            CommonRequest request = new CommonRequest
             {
-                AcceptFormat = FormatType.JSON,
-                SignName = _options.SignName,
-                TemplateCode = _options.TemplateIdentityValidation.TemplateCode,
-                PhoneNumbers = mobile,
-                TemplateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}", 
-                    _options.TemplateIdentityValidation.ParamCode, 
-                    code, 
-                    _options.TemplateIdentityValidation.ParamProduct, 
-                    _options.TemplateIdentityValidation.ParamProductValue)
+                Method = MethodType.POST,
+                Domain = "dysmsapi.aliyuncs.com",
+                Version = "2017-05-25",
+                Action = "SendSms"
             };
 
-            string cachedValue = code;
+            request.AddQueryParameters("PhoneNumbers", mobile);
+            request.AddQueryParameters("SignName", _options.SignName);
+            request.AddQueryParameters("TemplateCode", _options.TemplateIdentityValidation.TemplateCode);
+            request.AddQueryParameters("TemplateParam", templateParam);
 
-            return PolicyManager.Default(_logger).ExecuteAsync(async ()=> {
-                Task<SendSmsResponse> task = new Task<SendSmsResponse>(() => _client.GetAcsResponse(request));
-                task.Start(TaskScheduler.Default);
+            try
+            {
+                CommonResponse response = PolicyManager.Default(_logger).Execute(() => { return _client.GetCommonResponse(request); });
 
-                SendSmsResponse result = await task.ConfigureAwait(false);
+                SendResult? sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
 
-                if (result.Code == "OK")
+                if (sendResult != null && sendResult.IsSuccessful())
                 {
-                    _cache.SetString(
-                        getCachedKey(mobile), 
-                        cachedValue, 
-                        new DistributedCacheEntryOptions() { 
-                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.TemplateIdentityValidation.ExpireMinutes)
-                        });
+                    CacheSmsCode(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
-
-                return SendResultTransformer.Transform(result);
-            });
+                else
+                {
+                    string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
+                    throw new AliyunSmsException(errorMessage);
+                }
+            }
+            catch (JsonException ex)
+            {
+                throw new AliyunSmsException(Resources.AliyunSmsResponseFormatErrorMessage, ex);
+            }
+            catch (ClientException ex)
+            {
+                throw new AliyunSmsException(Resources.AliyunSmsServiceDownErrorMessage, ex);
+            }
         }
 
         public bool Validate(string mobile, string code)
         {
-            if (string.IsNullOrWhiteSpace(code))
+            if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsPositiveNumber(code))
             {
                 return false;
             }
 
-            string storedCode = _cache.GetString(getCachedKey(mobile));
+            string cachedSmsCode = GetSmsCodeFromCache(mobile);
 
-            return string.Equals(code, storedCode, GlobalSettings.Comparison);
+            return string.Equals(code, cachedSmsCode, GlobalSettings.Comparison);
         }
 
-        public string getCachedKey(string mobile)
+        private void CacheSmsCode(string mobile, string cachedSmsCode, int expireMinutes)
+        {
+            _cache.SetString(
+                        GetCachedKey(mobile),
+                        cachedSmsCode,
+                        new DistributedCacheEntryOptions()
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
+                        });
+        }
+
+        private string GetSmsCodeFromCache(string mobile)
+        {
+            return _cache.GetString(GetCachedKey(mobile));
+        }
+
+        private static string GenerateNewSmsCode(int codeLength)
+        {
+            return SecurityUtil.CreateRandomNumbericString(codeLength);
+        }
+
+        private static string GetCachedKey(string mobile)
         {
             return mobile + "_vlc";
         }
+
+        class SendResult
+        {
+            public string? Code { get; set; }
+
+            public string? Message { get; set; }
+
+            public bool IsSuccessful()
+            {
+                return "OK".Equals(Code, GlobalSettings.ComparisonIgnoreCase);
+            }
+        }
+
     }
 }

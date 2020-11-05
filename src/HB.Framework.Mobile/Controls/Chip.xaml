@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<base:BaseContentView
+    x:Class="HB.Framework.Client.Controls.Chip"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.Framework.Client.Base"
+    xmlns:converters="clr-namespace:HB.Framework.Client.Converters"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="ChipRoot"
+    mc:Ignorable="d">
+    <Frame
+        x:Name="frame"
+        Margin="0,0"
+        Padding="8,5"
+        BindingContext="{x:Reference ChipRoot}"
+        CornerRadius="15"
+        HasShadow="False"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
+        <Frame.Resources>
+            <ResourceDictionary>
+                <converters:HasValueConverter x:Key="HasValueConverter" />
+            </ResourceDictionary>
+        </Frame.Resources>
+
+        <Frame.GestureRecognizers>
+            <TapGestureRecognizer Tapped="Clicked" />
+        </Frame.GestureRecognizers>
+
+        <Frame.Content>
+            <StackLayout HorizontalOptions="Center" Orientation="Horizontal" VerticalOptions="Center">
+
+                <Image d:IsVisible="False" IsVisible="{Binding Image, Converter={StaticResource HasValueConverter}}" Source="{Binding Image}" />
+
+                <Label
+                    d:Text="Chip"
+                    FontFamily="{Binding FontFamily}"
+                    FontSize="{Binding FontSize}"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{Binding Text, Converter={StaticResource HasValueConverter}}"
+                    Text="{Binding Text}"
+                    TextColor="{Binding TextColor}"
+                    VerticalOptions="Center"
+                    VerticalTextAlignment="Center" />
+
+                <Image d:IsVisible="False" IsVisible="{Binding CloseImage, Converter={StaticResource HasValueConverter}}" Source="{Binding CloseImage}">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="CloseButton_Clicked" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </StackLayout>
+        </Frame.Content>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Selected">
+                    <VisualState.Setters>
+                        <Setter Property="BackgroundColor" Value="{Binding SelectedBackgroundColor, Source={Reference ChipRoot}}" />
+                        <Setter Property="HasShadow" Value="{Binding SelectedHasShadow, Source={Reference ChipRoot}}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Unselected">
+                    <VisualState.Setters>
+                        <Setter Property="BackgroundColor" Value="{Binding UnselectedBackgroundColor, Source={Reference ChipRoot}}" />
+                        <Setter Property="HasShadow" Value="{Binding UnselectedHasShadow, Source={Reference ChipRoot}}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Frame>
+
+
+</base:BaseContentView>

@@ -1,19 +1,50 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\build\common.props" />
+  <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NeutralLanguage>English</NeutralLanguage>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\aliyun-net-sdk-dysmsapi\aliyun-net-sdk-dysmsapi.vs2017.csproj" />
-    <ProjectReference Include="..\..\..\aliyun-openapi-net-sdk\aliyun-net-sdk-vod\aliyun-net-sdk-vod.vs2017.csproj" />
-    <ProjectReference Include="..\HB.Component.Resource\HB.Component.Resource.csproj" />
-  </ItemGroup>
+
+
 
   <ItemGroup>
-    <Folder Include="Sts\" />
+    <PackageReference Include="aliyun-net-sdk-core" Version="1.5.10" />
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.12.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.9" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\HB.Framework.Common\src\HB.Framework.Common\HB.Framework.Common.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

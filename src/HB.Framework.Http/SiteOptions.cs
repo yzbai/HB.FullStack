@@ -1,19 +1,37 @@
-﻿using System;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace HB.Framework.Http
 {
     public class SiteOptions : IOptions<SiteOptions>
     {
-        public SiteOptions Value { get { return this; } }
+        public SiteOptions Value
+        {
+            get
+            {
+                return this;
+            }
+        }
 
-        #region Auth
+        public int PublicResourceTokenExpireSeconds { get; set; } = 60;
 
-        public string ApplicationDataProtectionDiscriminator { get; set; }
+        public FileSettings FileSettings { get; set; } = new FileSettings();
 
-        #endregion
+    }
 
+    public class FileSettings
+    {
+        public string PublicPath { get; set; } = @"C:\MyColorfulTime\Public";
 
+        public string ProtectedPath { get; set; } = @"C:\MyColorfulTime\Protected";
 
+        public string PrivatePath { get; set; } = @"C:\MyColorfulTime\Private";
+
+        public string AvatarPath { get; set; } = @"C:\MyColorfulTime\Protected\Avatars";
+
+        public int AvatarMaxSize { get; set; } = 2097152;
     }
 }

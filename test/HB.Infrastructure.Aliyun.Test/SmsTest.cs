@@ -1,33 +1,30 @@
-﻿using HB.Compnent.Resource.Sms;
-using HB.Infrastructure.Aliyun.Test;
+﻿using HB.Framework.Common.Sms;
+using HB.Infrastructure.Aliyun.Sms;
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace HB.PresentFish.Tools
+namespace HB.Infrastructure.Aliyun.Test
 {
-    public class SmsTest : IClassFixture<TestFixture>
+    public class SmsTest : IClassFixture<ServiceFixture>
     {
-        private ISmsService _smsBiz;
-        private TestFixture _fixture;
-        private ITestOutputHelper _output;
+        private readonly ISmsService _smsBiz;
+        private readonly ServiceFixture _fixture;
+        private readonly ITestOutputHelper _output;
 
-        public SmsTest(ITestOutputHelper output, TestFixture testFixture)
+        public SmsTest(ITestOutputHelper output, ServiceFixture testFixture)
         {
             _output = output;
             _fixture = testFixture;
-            _smsBiz = _fixture.SmsService;
+            _smsBiz = _fixture.ThrowIfNull(nameof(testFixture)).SmsService;
         }
 
         [Theory]
         [InlineData("15190208956")]
         [InlineData("18015323958")]
-        public void SendSms(string mobile)
+        public void SendSmsAsync(string mobile)
         {
-            var result = _smsBiz.SendValidationCode(mobile, out string code).Result;
-
-            _output.WriteLine(result.Message);
-
-            Assert.True(result.Succeeded);
+            _smsBiz.SendValidationCode(mobile);
         }
     }
 }
