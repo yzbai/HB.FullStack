@@ -46,7 +46,7 @@ namespace HB.Framework.Client.Converters
                     key = key.Substring(1);
                 }
 
-                bool existed = results.ExistErrorOf(key);
+                bool existed = key.IsNullOrEmpty() ? results.ExistError() : results.ExistErrorOf(key);
 
                 return flag ? existed : !existed;
             }

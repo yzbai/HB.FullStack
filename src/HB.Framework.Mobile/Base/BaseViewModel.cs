@@ -34,7 +34,7 @@ namespace HB.Framework.Client.Base
 
         }
 
-        public void NotifyValidationChanged(string? proerptyName = null)
+        public void NotifyValidationChanged([CallerMemberName] string? proerptyName = null)
         {
             PerformValidate(proerptyName);
             OnPropertyChanged(nameof(ValidationResults));
