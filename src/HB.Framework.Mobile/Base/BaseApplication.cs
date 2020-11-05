@@ -101,10 +101,24 @@ namespace HB.Framework.Client.Base
         {
             Log(LogLevel.Error, ex, null);
 
-            //if (ex is ApiException apiException)
-            //{
-            //    if (apiException.ErrorCode == Common.Api.ApiErrorCode.PUBLICRESOURCETOKENERROR)
-            //}
+            if (ex is FrameworkException fex)
+            {
+                switch (fex.ErrorCode)
+                {
+                    case ErrorCode.ApiNoInternet:
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
+                        });
+                        break;
+                    case ErrorCode.ApiNoAuthority:
+                    case ErrorCode.ApiTokenRefresherError:
+                    case ErrorCode.ApiTokenExpired:
+                        DependencyService.Resolve<ILoginService>()?.PerformLogin();
+                        break;
+                    default: break;
+                }
+            }
 
         }
 
