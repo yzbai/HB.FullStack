@@ -21,7 +21,7 @@ namespace HB.Framework.Http.File
             _securityService = securityService;
         }
 
-        public async Task SaveAvatarAsync(string userGuid, IFormFile file)
+        public async Task SetAvatarAsync(string userGuid, IFormFile file)
         {
             byte[] data = await _securityService.ProcessFormFileAsync(
                     file,
