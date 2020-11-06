@@ -86,8 +86,8 @@ namespace HB.Framework.Client.Api
         private static async Task AddDeviceInfoAsync(HttpRequestMessage request)
         {
             string deviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
-            string deviceType = await ClientGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
-            string deviceVersion = await ClientGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
+            string deviceInfos = ClientGlobal.DeviceInfos.ToString();
+            string deviceVersion = ClientGlobal.DeviceVersion;
 
             if (request.Method == HttpMethod.Get)
             {
@@ -95,7 +95,7 @@ namespace HB.Framework.Client.Api
 
                 NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
                 queries[ClientNames.DeviceId] = deviceId;
-                queries[ClientNames.DeviceType] = deviceType;
+                queries[ClientNames.DeviceInfos] = deviceInfos;
                 queries[ClientNames.DeviceVersion] = deviceVersion;
 
                 uriBuilder.Query = queries.ToString();
@@ -107,7 +107,7 @@ namespace HB.Framework.Client.Api
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope //当request dispose的时候，httpcontent也会dispose
                 content.Add(new StringContent(deviceId), ClientNames.DeviceId);
-                content.Add(new StringContent(deviceType), ClientNames.DeviceType);
+                content.Add(new StringContent(deviceInfos), ClientNames.DeviceInfos);
                 content.Add(new StringContent(deviceVersion), ClientNames.DeviceVersion);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             }
@@ -129,7 +129,7 @@ namespace HB.Framework.Client.Api
                     }
 
                     dict[ClientNames.DeviceId] = deviceId;
-                    dict[ClientNames.DeviceType] = deviceType;
+                    dict[ClientNames.DeviceInfos] = deviceInfos;
                     dict[ClientNames.DeviceVersion] = deviceVersion;
 
                     json = SerializeUtil.ToJson(dict);
@@ -149,7 +149,7 @@ namespace HB.Framework.Client.Api
                 Dictionary<string, string> dict = new Dictionary<string, string>
                 {
                     [ClientNames.DeviceId] = deviceId,
-                    [ClientNames.DeviceType] = deviceType,
+                    [ClientNames.DeviceInfos] = deviceInfos,
                     [ClientNames.DeviceVersion] = deviceVersion
                 };
 

@@ -32,7 +32,7 @@ namespace HB.Framework.Client.Api
 
             try
             {
-                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductType() && e.Version == request.GetApiVersion());
+                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductName() && e.Version == request.GetApiVersion());
 
                 HttpClient httpClient = GetHttpClient(endpoint);
 
@@ -98,7 +98,7 @@ namespace HB.Framework.Client.Api
 
             try
             {
-                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductType() && e.Version == request.GetApiVersion());
+                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductName() && e.Version == request.GetApiVersion());
 
                 HttpClient httpClient = GetHttpClient(endpoint);
 
@@ -189,8 +189,8 @@ namespace HB.Framework.Client.Api
         private static async Task SetDeviceInfoAlwaysAsync(ApiRequest request)
         {
             request.DeviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
-            request.DeviceType = await ClientGlobal.GetDeviceTypeAsync().ConfigureAwait(false);
-            request.DeviceVersion = await ClientGlobal.GetDeviceVersionAsync().ConfigureAwait(false);
+            request.DeviceInfos = ClientGlobal.DeviceInfos;
+            request.DeviceVersion = ClientGlobal.DeviceVersion;
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 

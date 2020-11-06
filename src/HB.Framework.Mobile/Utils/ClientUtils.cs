@@ -11,9 +11,26 @@ namespace HB.Framework.Client
 {
     public static class ClientUtils
     {
-        public static string GetDeviceType()
+        public static DeviceInfos GetDeviceInfos()
         {
-            return $"{DeviceInfo.DeviceType}.{DeviceInfo.Idiom}.{DeviceInfo.Manufacturer}.{DeviceInfo.Model}.{DeviceInfo.Name}.{DeviceInfo.Platform}.{DeviceInfo.VersionString}";
+            return new DeviceInfos
+            {
+                Name = DeviceInfo.Name,
+                Model = DeviceInfo.Model,
+                OSVersion = DeviceInfo.VersionString,
+                Platform = DeviceInfo.Platform.ToString(),
+                Idiom = DeviceInfo.Idiom.ToString() switch
+                {
+                    "Phone" => System.DeviceIdiom.Phone,
+                    "Tablet" => System.DeviceIdiom.Tablet,
+                    "Desktop" => System.DeviceIdiom.Desktop,
+                    "TV" => System.DeviceIdiom.TV,
+                    "Watch" => System.DeviceIdiom.Watch,
+                    "Web" => System.DeviceIdiom.Web,
+                    _ => System.DeviceIdiom.Unknown
+                },
+                Type = DeviceInfo.DeviceType.ToString()
+            };
         }
 
         public static string GetDeviceVersion()

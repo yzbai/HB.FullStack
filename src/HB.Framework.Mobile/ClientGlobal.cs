@@ -20,7 +20,7 @@ namespace HB.Framework.Client
     public static class ClientGlobal
     {
         private static string? _deviceId;
-        private static string? _deviceType;
+        private static DeviceInfos? _deviceInfos;
         private static string? _deviceVersion;
         private static string? _deviceAddress;
 
@@ -80,62 +80,17 @@ namespace HB.Framework.Client
             }
         }
 
-        public static async Task<string> GetDeviceTypeAsync()
-        {
-            if (_deviceType.IsNotNullOrEmpty())
-            {
-                return _deviceType!;
-            }
-
-            _deviceType = await PreferenceGetAsync(ClientNames.DeviceType).ConfigureAwait(false);
-
-            if (_deviceType.IsNotNullOrEmpty())
-            {
-                return _deviceType!;
-            }
-
-            _deviceType = ClientUtils.GetDeviceType();
-
-            await PreferenceSetAsync(ClientNames.DeviceType, _deviceType).ConfigureAwait(false);
-
-            return _deviceType!;
-        }
-
-        public static string DeviceType
+        public static DeviceInfos DeviceInfos
         {
             get
             {
-                if (_deviceType.IsNullOrEmpty())
+                if (_deviceInfos == null)
                 {
-                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
-
-                    return joinableTaskFactory.Run(async () => { return await GetDeviceTypeAsync().ConfigureAwait(false); });
+                    _deviceInfos = ClientUtils.GetDeviceInfos();
                 }
 
-                return _deviceType!;
+                return _deviceInfos!;
             }
-        }
-
-        public static async Task<string> GetDeviceVersionAsync()
-        {
-            if (_deviceVersion.IsNotNullOrEmpty())
-            {
-                return _deviceVersion!;
-            }
-
-            _deviceVersion = await PreferenceGetAsync(ClientNames.DeviceVersion).ConfigureAwait(false);
-
-            if (_deviceVersion.IsNotNullOrEmpty())
-            {
-                return _deviceVersion!;
-            }
-
-            _deviceVersion = ClientUtils.GetDeviceVersion();
-
-            await PreferenceSetAsync(ClientNames.DeviceVersion, _deviceVersion).ConfigureAwait(false);
-
-            return _deviceVersion!;
         }
 
         public static string DeviceVersion
@@ -144,10 +99,7 @@ namespace HB.Framework.Client
             {
                 if (_deviceVersion.IsNullOrEmpty())
                 {
-                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
-
-                    return joinableTaskFactory.Run(async () => { return await GetDeviceVersionAsync().ConfigureAwait(false); });
+                    _deviceVersion = ClientUtils.GetDeviceVersion();
                 }
 
                 return _deviceVersion!;
