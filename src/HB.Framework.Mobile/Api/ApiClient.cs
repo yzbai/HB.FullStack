@@ -244,16 +244,16 @@ namespace HB.Framework.Client.Api
                 if (!refreshToken.IsNullOrEmpty())
                 {
                     //开始刷新
-                    ApiRequest refreshRequest = new ApiRequest(
+                    RefreshJwtApiRequest refreshRequest = new RefreshJwtApiRequest(
                         endpointSettings.JwtSettings!.ProductName!,
                         endpointSettings.JwtSettings!.Version!,
                         HttpMethod.Put,
-                        endpointSettings.JwtSettings!.ResourceName!);
+                        endpointSettings.JwtSettings!.ResourceName!,
+                        accessToken!,
+                        refreshToken!
+                        );
 
                     await SetDeviceInfoAlwaysAsync(refreshRequest).ConfigureAwait(false);
-
-                    refreshRequest.SetParameter(ClientNames.AccessToken, accessToken!);
-                    refreshRequest.SetParameter(ClientNames.RefreshToken, refreshToken!);
 
                     EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(
                         e => e.ProductName == endpointSettings.JwtSettings.ProductName &&
@@ -296,6 +296,20 @@ namespace HB.Framework.Client.Api
                 _tokenRefreshSemaphore.Release();
             }
         }
+
+        private class RefreshJwtApiRequest : ApiRequest
+        {
+            public string AccessToken { get; set; } = null!;
+
+            public string RefreshToken { get; set; } = null!;
+
+            public RefreshJwtApiRequest(string productName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken) : base(productName, apiVersion, httpMethod, resourceName, null)
+            {
+                AccessToken = accessToken;
+                RefreshToken = refreshToken;
+            }
+        }
+
 
         #endregion
     }

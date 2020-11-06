@@ -31,8 +31,10 @@ namespace HB.Framework.Http.Filters
 
                 if (firstArgumentValue is ApiRequest apiRequest)
                 {
-                    string? smsCode = apiRequest.GetParameter(ClientNames.SmsCode);
-                    string? mobile = apiRequest.GetParameter(ClientNames.Mobile);
+                    Type apiRequestType = apiRequest.GetType();
+
+                    string? smsCode = apiRequestType.GetProperty(ClientNames.SmsCode)?.GetValue(apiRequest)?.ToString();
+                    string? mobile = apiRequestType.GetProperty(ClientNames.Mobile)?.GetValue(apiRequest)?.ToString();
 
                     if (smsCode.IsNullOrEmpty() || smsCode.IsNullOrEmpty())
                     {

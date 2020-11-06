@@ -15,9 +15,9 @@ namespace HB.Framework.Client
         {
             return new DeviceInfos
             {
-                Name = DeviceInfo.Name,
-                Model = DeviceInfo.Model,
-                OSVersion = DeviceInfo.VersionString,
+                Name = DeviceInfo.Name ?? "Unkown",
+                Model = DeviceInfo.Model ?? "Unkown",
+                OSVersion = DeviceInfo.VersionString ?? "Unkown",
                 Platform = DeviceInfo.Platform.ToString(),
                 Idiom = DeviceInfo.Idiom.ToString() switch
                 {

@@ -10,6 +10,7 @@ using System.Web;
 using HB.Framework.Common.Api;
 using Microsoft.Extensions.Options;
 using Xamarin.Forms;
+using Microsoft.Extensions.Logging;
 
 namespace HB.Framework.Client.Api
 {
@@ -83,79 +84,93 @@ namespace HB.Framework.Client.Api
             request.Headers.Add("Authorization", "Bearer " + token);
         }
 
+        private class DeviceWrapper
+        {
+            public string DeviceId { get; set; } = null!;
+            public string DeviceVersion { get; set; } = null!;
+            public DeviceInfos DeviceInfos { get; set; } = null!;
+        }
         private static async Task AddDeviceInfoAsync(HttpRequestMessage request)
         {
             string deviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
-            string deviceInfos = ClientGlobal.DeviceInfos.ToString();
-            string deviceVersion = ClientGlobal.DeviceVersion;
 
-            if (request.Method == HttpMethod.Get)
+            DeviceWrapper deviceWrapper = new DeviceWrapper
             {
-                UriBuilder uriBuilder = new UriBuilder(request.RequestUri);
+                DeviceId = deviceId,
+                DeviceVersion = ClientGlobal.DeviceVersion,
+                DeviceInfos = ClientGlobal.DeviceInfos
+            };
 
-                NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
-                queries[ClientNames.DeviceId] = deviceId;
-                queries[ClientNames.DeviceInfos] = deviceInfos;
-                queries[ClientNames.DeviceVersion] = deviceVersion;
 
-                uriBuilder.Query = queries.ToString();
 
-                request.RequestUri = uriBuilder.Uri;
+
+            //if (request.Method == HttpMethod.Get)
+            //{
+            //    UriBuilder uriBuilder = new UriBuilder(request.RequestUri);
+
+            //    NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
+            //    queries[ClientNames.DeviceId] = deviceId;
+            //    queries[ClientNames.DeviceInfos] = deviceInfos;
+            //    queries[ClientNames.DeviceVersion] = deviceVersion;
+
+            //    uriBuilder.Query = queries.ToString();
+
+            //    request.RequestUri = uriBuilder.Uri;
+            //}
+
+
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            StringContent deviceContent = new StringContent(SerializeUtil.ToJson(deviceWrapper), Encoding.UTF8, "application/json");
+#pragma warning restore CA2000 // Dispose objects before losing scope
+
+            if (request.Content == null)
+            {
+                request.Content = deviceContent;
             }
-
             else if (request.Content is MultipartFormDataContent content)
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope //当request dispose的时候，httpcontent也会dispose
-                content.Add(new StringContent(deviceId), ClientNames.DeviceId);
-                content.Add(new StringContent(deviceInfos), ClientNames.DeviceInfos);
-                content.Add(new StringContent(deviceVersion), ClientNames.DeviceVersion);
+                content.Add(deviceContent);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             }
             else if (request.Content is StringContent stringContent)
             {
                 try
                 {
-                    string json = await stringContent.ReadAsStringAsync().ConfigureAwait(false);
-                    if (string.IsNullOrEmpty(json))
-                    {
-                        return;
-                    }
+                    MultipartContent multipartContent = new MultipartContent();
 
-                    Dictionary<string, object?>? dict = SerializeUtil.FromJson<Dictionary<string, object?>>(json);
+                    multipartContent.Add(request.Content);
+                    multipartContent.Add(deviceContent);
+                    //string json = await stringContent.ReadAsStringAsync().ConfigureAwait(false);
+                    //if (string.IsNullOrEmpty(json))
+                    //{
+                    //    return;
+                    //}
 
-                    if (dict == null)
-                    {
-                        dict = new Dictionary<string, object?>();
-                    }
+                    //Dictionary<string, object?>? dict = SerializeUtil.FromJson<Dictionary<string, object?>>(json);
 
-                    dict[ClientNames.DeviceId] = deviceId;
-                    dict[ClientNames.DeviceInfos] = deviceInfos;
-                    dict[ClientNames.DeviceVersion] = deviceVersion;
+                    //if (dict == null)
+                    //{
+                    //    dict = new Dictionary<string, object?>();
+                    //}
 
-                    json = SerializeUtil.ToJson(dict);
+                    //dict[ClientNames.DeviceId] = deviceId;
+                    //dict[ClientNames.DeviceInfos] = deviceInfos;
+                    //dict[ClientNames.DeviceVersion] = deviceVersion;
 
-                    request.Content.Dispose();
-                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                    //json = SerializeUtil.ToJson(dict);
+
+                    //request.Content.Dispose();
+                    //request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    request.Content = multipartContent;
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
-                catch (Exception)
+                catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-
+                    Application.Current.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
                 }
-            }
-            else if (request.Content == null)
-            {
-                Dictionary<string, string> dict = new Dictionary<string, string>
-                {
-                    [ClientNames.DeviceId] = deviceId,
-                    [ClientNames.DeviceInfos] = deviceInfos,
-                    [ClientNames.DeviceVersion] = deviceVersion
-                };
-
-                string json = SerializeUtil.ToJson(dict);
-
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
         }
     }

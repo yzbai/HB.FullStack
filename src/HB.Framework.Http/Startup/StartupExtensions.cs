@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Encodings.Web;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace System
@@ -161,6 +163,10 @@ namespace System
                     AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
                     //options.Filters
+                })
+                .AddJsonOptions(options =>
+                {
+                    SerializeUtil.Configure(options.JsonSerializerOptions);
                 })
                 .ConfigureApiBehaviorOptions(apiBehaviorOptions =>
                 {
