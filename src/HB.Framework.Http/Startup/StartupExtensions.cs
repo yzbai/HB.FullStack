@@ -38,7 +38,7 @@ namespace System
             if (certificate2 == null)
             {
                 Log.Fatal($"Cert For DataProtection not found. CertSubject:{dataProtectionSettings.CertificateSubject}");
-                throw new Exception($"DataProtection Certificate Not Found. CertSubject:{dataProtectionSettings.CertificateSubject}");
+                throw new FrameworkException(ErrorCode.DataProtectionCertNotFound, $"Subject:{dataProtectionSettings.CertificateSubject}");
             }
 
             ConfigurationOptions redisConfigurationOptions = ConfigurationOptions.Parse(dataProtectionSettings.RedisConnectString);
@@ -79,8 +79,18 @@ namespace System
         /// <returns></returns>
         public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            JwtSettings jwtSettings = new JwtSettings();
+            JwtClientSettings jwtSettings = new JwtClientSettings();
             configuration.Bind(jwtSettings);
+
+            //TODO: 在appsettings.json中暂时用了DataProtection的证书，正式发布时需要换掉
+            X509Certificate2? encryptCert = CertificateUtil.GetBySubject(jwtSettings.DecryptionCertificateSubject);
+
+            if (encryptCert == null)
+            {
+                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
+            }
+
+            X509SecurityKey tokenDecryptionKey = new X509SecurityKey(encryptCert);
 
             return
                 services
@@ -93,7 +103,18 @@ namespace System
                 {
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
-                    jwtOptions.TokenValidationParameters.e
+                    jwtOptions.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        RequireExpirationTime = true,
+                        RequireSignedTokens = true,
+                        RequireAudience = true,
+                        TryAllIssuerSigningKeys = true,
+                        ValidateAudience = true,
+                        ValidateIssuer = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true,
+                        TokenDecryptionKey = tokenDecryptionKey
+                    };
                     jwtOptions.Events = new JwtBearerEvents
                     {
                         OnChallenge = c =>
@@ -101,9 +122,9 @@ namespace System
                             c.HandleResponse();
                             c.Response.StatusCode = 401;
 
-                            //if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
-                            //{
-                            c.Response.ContentType = "application/problem+json";
+                    //if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
+                    //{
+                    c.Response.ContentType = "application/problem+json";
 
                             ErrorCode error = c.AuthenticateFailure switch
                             {
@@ -115,16 +136,16 @@ namespace System
                             ApiError errorResponse = new ApiError(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
 
                             return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
-                            //}
-                            //else
-                            //{
-                            //    return Task.CompletedTask;
-                            //}
-                        },
+                    //}
+                    //else
+                    //{
+                    //    return Task.CompletedTask;
+                    //}
+                },
                         OnAuthenticationFailed = c =>
                         {
-                            //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
-                            return Task.CompletedTask;
+                    //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
+                    return Task.CompletedTask;
                         },
                         OnMessageReceived = c =>
                         {
@@ -132,9 +153,9 @@ namespace System
                         },
                         OnTokenValidated = c =>
                         {
-                            //TODO: 因为DeviceId放在了Body中，所以这里有问题。
-                            //验证DeviceId 与 JWT 中的DeviceId 是否一致
-                            string? jwt_DeviceId = c.Principal?.GetDeviceId();
+                    //TODO: 因为DeviceId放在了Body中，所以这里有问题。
+                    //验证DeviceId 与 JWT 中的DeviceId 是否一致
+                    string? jwt_DeviceId = c.Principal?.GetDeviceId();
                             string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);
 
                             if (!string.IsNullOrWhiteSpace(jwt_DeviceId) && jwt_DeviceId.Equals(request_DeviceId, GlobalSettings.ComparisonIgnoreCase))
@@ -159,11 +180,11 @@ namespace System
             services
                 .AddControllers(options =>
                 {
-                    //need authenticated by default. no need add [Authorize] everywhere
-                    AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                //need authenticated by default. no need add [Authorize] everywhere
+                AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
-                    //options.Filters
-                })
+                //options.Filters
+            })
                 .AddJsonOptions(options =>
                 {
                     SerializeUtil.Configure(options.JsonSerializerOptions);

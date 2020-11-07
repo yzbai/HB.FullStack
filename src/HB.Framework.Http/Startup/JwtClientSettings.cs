@@ -5,12 +5,18 @@ using System.Text;
 
 namespace HB.Framework.Http
 {
-    public class JwtSettings
+    public class JwtClientSettings
     {
         [DisallowNull, NotNull]
         public string? Authority { get; set; }
 
         [DisallowNull, NotNull]
         public string? Audience { get; set; }
+
+        /// <summary>
+        /// 要与AuthorizationServerOptions中的EncryptingCertificateSubject相同
+        /// </summary>
+        [DisallowNull, NotNull]
+        public string? DecryptionCertificateSubject { get; set; }
     }
 }
