@@ -93,7 +93,7 @@ namespace System
                 {
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
-
+                    jwtOptions.TokenValidationParameters.e
                     jwtOptions.Events = new JwtBearerEvents
                     {
                         OnChallenge = c =>
@@ -132,10 +132,10 @@ namespace System
                         },
                         OnTokenValidated = c =>
                         {
+                            //TODO: 因为DeviceId放在了Body中，所以这里有问题。
                             //验证DeviceId 与 JWT 中的DeviceId 是否一致
                             string? jwt_DeviceId = c.Principal?.GetDeviceId();
                             string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);
-
 
                             if (!string.IsNullOrWhiteSpace(jwt_DeviceId) && jwt_DeviceId.Equals(request_DeviceId, GlobalSettings.ComparisonIgnoreCase))
                             {
