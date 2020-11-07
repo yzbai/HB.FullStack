@@ -175,6 +175,22 @@ namespace HB.Framework.Client
             return _isLogined.Value;
         }
 
+        public static string? CurrentUserGuid
+        {
+            get
+            {
+                if (_currentUserGuid == null)
+                {
+                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                    return joinableTaskFactory.Run(async () => { return await GetCurrentUserGuidAsync().ConfigureAwait(false); });
+                }
+
+                return _currentUserGuid;
+            }
+        }
+
         public static async Task<string?> GetCurrentUserGuidAsync()
         {
             if (_currentUserGuid.IsNotNullOrEmpty())

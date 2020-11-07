@@ -11,6 +11,7 @@ using HB.Framework.Common.Api;
 using Microsoft.Extensions.Options;
 using Xamarin.Forms;
 using Microsoft.Extensions.Logging;
+using HB.Framework.Common.Utility;
 
 namespace HB.Framework.Client.Api
 {
@@ -90,6 +91,9 @@ namespace HB.Framework.Client.Api
             public string DeviceVersion { get; set; } = null!;
             public DeviceInfos DeviceInfos { get; set; } = null!;
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:丢失范围之前释放对象", Justification = "<挂起>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:不捕获常规异常类型", Justification = "<挂起>")]
         private static async Task AddDeviceInfoAsync(HttpRequestMessage request)
         {
             string deviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
@@ -101,27 +105,10 @@ namespace HB.Framework.Client.Api
                 DeviceInfos = ClientGlobal.DeviceInfos
             };
 
-
-
-
-            //if (request.Method == HttpMethod.Get)
-            //{
-            //    UriBuilder uriBuilder = new UriBuilder(request.RequestUri);
-
-            //    NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
-            //    queries[ClientNames.DeviceId] = deviceId;
-            //    queries[ClientNames.DeviceInfos] = deviceInfos;
-            //    queries[ClientNames.DeviceVersion] = deviceVersion;
-
-            //    uriBuilder.Query = queries.ToString();
-
-            //    request.RequestUri = uriBuilder.Uri;
-            //}
-
-
-#pragma warning disable CA2000 // Dispose objects before losing scope
+            // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
+            request.RequestUri = request.RequestUri.AddQuery(ClientNames.DeviceId, deviceId);
+            
             StringContent deviceContent = new StringContent(SerializeUtil.ToJson(deviceWrapper), Encoding.UTF8, "application/json");
-#pragma warning restore CA2000 // Dispose objects before losing scope
 
             if (request.Content == null)
             {
@@ -129,9 +116,7 @@ namespace HB.Framework.Client.Api
             }
             else if (request.Content is MultipartFormDataContent content)
             {
-#pragma warning disable CA2000 // Dispose objects before losing scope //当request dispose的时候，httpcontent也会dispose
                 content.Add(deviceContent);
-#pragma warning restore CA2000 // Dispose objects before losing scope
             }
             else if (request.Content is StringContent stringContent)
             {
@@ -141,33 +126,10 @@ namespace HB.Framework.Client.Api
 
                     multipartContent.Add(request.Content);
                     multipartContent.Add(deviceContent);
-                    //string json = await stringContent.ReadAsStringAsync().ConfigureAwait(false);
-                    //if (string.IsNullOrEmpty(json))
-                    //{
-                    //    return;
-                    //}
-
-                    //Dictionary<string, object?>? dict = SerializeUtil.FromJson<Dictionary<string, object?>>(json);
-
-                    //if (dict == null)
-                    //{
-                    //    dict = new Dictionary<string, object?>();
-                    //}
-
-                    //dict[ClientNames.DeviceId] = deviceId;
-                    //dict[ClientNames.DeviceInfos] = deviceInfos;
-                    //dict[ClientNames.DeviceVersion] = deviceVersion;
-
-                    //json = SerializeUtil.ToJson(dict);
-
-                    //request.Content.Dispose();
-                    //request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
+               
                     request.Content = multipartContent;
                 }
-#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     Application.Current.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
                 }
