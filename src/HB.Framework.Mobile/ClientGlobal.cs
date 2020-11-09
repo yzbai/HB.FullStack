@@ -47,7 +47,7 @@ namespace HB.Framework.Client
 
         private const string _apiResourceType = "Api";
 
-        private static readonly TimeSpan _apiReousrceAliveTimespan = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan _apiReousrceAliveTimespan = TimeSpan.FromMinutes(2);
 
         public static bool CheckSyncFrequency(string userGuid, string resourceName)
         {
