@@ -11,13 +11,15 @@ namespace System
     /// <typeparam name="TResult"></typeparam>
     public sealed class ObservableTask<TResult> : ObservableObject
     {
+        public TResult InitialResult { get; private set; }
+
         public Task<TResult> Task { get; private set; }
 
         public Task TaskCompletion { get; private set; }
 
         [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         [SuppressMessage("Usage", "VSTHRD104:Offer async methods", Justification = "<Pending>")]
-        public TResult Result => (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : default;
+        public TResult Result => (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : InitialResult;
 
         public TaskStatus Status { get { return Task.Status; } }
 
@@ -37,48 +39,61 @@ namespace System
 
         public string ErrorMessage { get { return InnerException?.Message; } }
 
-        //public event PropertyChangedEventHandler PropertyChanged;
+        private readonly Func<Task<TResult>> _taskFunc;
 
-        public ObservableTask(Task<TResult> task, Action<Exception> onException = null, bool continueOnCapturedContext = false)
+        private readonly Action<Exception> _exceptionHandler;
+
+        private readonly bool _continueOnCapturedContext;
+
+        public ObservableTask(Func<Task<TResult>> taskFunc, TResult initialResult = default, Action<Exception> onException = null, bool continueOnCapturedContext = false)
         {
-            _ = ThrowIf.Null(task, nameof(task));
+            _taskFunc = taskFunc;
+            InitialResult = initialResult;
+            _exceptionHandler = onException;
+            _continueOnCapturedContext = continueOnCapturedContext;
 
-            Task = task;
+            TriggerTask();
+        }
 
-            if (!task.IsCompleted)
+        public async Task RePlayAsync()
+        {
+            await TaskCompletion.ConfigureAwait(false);
+
+            TriggerTask();
+        }
+
+        private void TriggerTask()
+        {
+            Task = _taskFunc();
+
+            if (!Task.IsCompleted)
             {
-                TaskCompletion = WatchTaskAsync(task, onException, continueOnCapturedContext);
+                TaskCompletion = WatchTaskAsync();
             }
         }
-        private async Task WatchTaskAsync(Task task, Action<Exception> onException, bool continueOnCapturedContext)
+
+        private async Task WatchTaskAsync()
         {
             try
             {
 #pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
-                await task.ConfigureAwait(continueOnCapturedContext);
+                await Task.ConfigureAwait(_continueOnCapturedContext);
 #pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
             }
-            catch (Exception obj) when (onException != null)
+            catch (Exception obj) when (_exceptionHandler != null)
             {
-                onException!(obj);
+                _exceptionHandler!(obj);
             }
-
-            //PropertyChangedEventHandler propertyChanged = PropertyChanged;
-
-            //if (propertyChanged == null)
-            //{
-            //    return;
-            //}
 
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(IsCompleted));
             OnPropertyChanged(nameof(IsNotCompleted));
 
-            if (task.IsCanceled)
+            if (Task.IsCanceled)
             {
                 OnPropertyChanged(nameof(IsCanceled));
             }
-            else if (task.IsFaulted)
+            else if (Task.IsFaulted)
             {
                 OnPropertyChanged(nameof(IsFaulted));
                 OnPropertyChanged(nameof(Exception));
@@ -91,8 +106,6 @@ namespace System
                 OnPropertyChanged(nameof(Result));
             }
         }
-
-
     }
 }
 #nullable restore
