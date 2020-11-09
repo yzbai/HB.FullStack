@@ -41,6 +41,26 @@ namespace HB.Framework.Client
 
         #endregion
 
+        #region facilities
+
+        private static readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();
+
+        private const string _apiResourceType = "Api";
+
+        private static readonly TimeSpan _apiReousrceAliveTimespan = TimeSpan.FromMinutes(5);
+
+        public static bool CheckSyncFrequency(string userGuid, string resourceName)
+        {
+            return _frequencyChecker.Check(_apiResourceType, userGuid + resourceName, _apiReousrceAliveTimespan);
+        }
+
+        public static void ResetSyncFrequency(string userGuid, string resourceName)
+        {
+            _frequencyChecker.Reset(_apiResourceType, userGuid + resourceName);
+        }
+
+        #endregion
+
         #region Device
 
         public static async Task<string> GetDeviceIdAsync()
