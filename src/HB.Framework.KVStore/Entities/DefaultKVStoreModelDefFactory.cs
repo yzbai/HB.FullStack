@@ -1,4 +1,5 @@
-﻿using HB.Framework.KVStore.Engine;
+﻿using HB.Framework.Common.Entities;
+using HB.Framework.KVStore.Engine;
 using HB.Framework.KVStore.Properties;
 using System;
 using System.Collections.Concurrent;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace HB.Framework.KVStore.Entity
+namespace HB.Framework.KVStore.Entities
 {
     internal class DefaultKVStoreModelDefFactory : IKVStoreEntityDefFactory
     {
@@ -25,11 +26,11 @@ namespace HB.Framework.KVStore.Entity
 
             if (_settings.AssembliesIncludeEntity.IsNullOrEmpty())
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(KVStoreEntity)));
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(Entity)));
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, t => t.IsSubclassOf(typeof(KVStoreEntity)));
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, t => t.IsSubclassOf(typeof(Entity)));
             }
 
             _typeSchemaDict = ConstructeSchemaDict(allEntityTypes);

@@ -1,9 +1,9 @@
 ﻿using HB.Framework.KVStore;
-using HB.Framework.KVStore.Entity;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 using HB.Framework.KVStore.Engine;
+using HB.Framework.KVStore.Entities;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
