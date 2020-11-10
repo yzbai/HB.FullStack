@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace HB.Framework.KVStore.Entity
+namespace HB.Framework.KVStore.Entities
 {
     public class KVStoreEntityDef
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.Framework.KVStore.Entity
+namespace HB.Framework.KVStore.Entities
 {
     internal interface IKVStoreEntityDefFactory
     {

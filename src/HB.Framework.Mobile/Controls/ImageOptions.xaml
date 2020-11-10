@@ -30,9 +30,9 @@
                             IsSelected="{Binding IsSelected}"
                             SelectedImageSource="{Binding SelectedImage}"
                             SelectedCommand="{Binding Source={Reference Root}, Path=SingleSelectedCommand}"
-                            SelectedCommandParameter="{Binding Index}"
+                            SelectedCommandParameter="{Binding .}"
                             UnSelectedCommand="{Binding Source={Reference Root}, Path=SingleUnSelectedCommand}"
-                            UnSelectedCommandParameter="{Binding Index}">
+                            UnSelectedCommandParameter="{Binding .}">
                             <controls:SelectableImage.Clip>
                                 <EllipseGeometry Center="{Binding Source={Reference Root}, Path=ImageCenter}" RadiusX="{Binding Source={Reference Root}, Path=ImageCenter.X}" RadiusY="{Binding Source={Reference Root}, Path=ImageCenter.Y}" />
                             </controls:SelectableImage.Clip>
