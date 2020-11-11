@@ -8,32 +8,41 @@ namespace HB.Framework.KVStore
 {
     public interface IKVStore
     {
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task<T?> GetByKeyAsync<T>(object keyValue) where T : Entity, new();
+        Task<T?> GetAsync<T>(string guid) where T : Entity, new();
+        Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> guids) where T : Entity, new();
 
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task<T?> GetByKeyAsync<T>(T t) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<T> ts) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         Task<IEnumerable<T?>> GetAllAsync<T>() where T : Entity, new();
 
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task AddAsync<T>(T item, string lastUser) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
+        public Task AddAsync<T>(T item, string lastUser) where T : Entity, new();
 
         /// <summary>
-        /// 返回最新的Version
+        /// 反应Version变化
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
+
+        public Task UpdateAsync<T>(T item, string lastUser) where T : Entity, new();
+
+        /// <summary>
+        /// 反应Version变化
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
+
+        Task DeleteAllAsync<T>() where T : Entity, new();
+
+        public Task DeleteAsync<T>(string guid, int version) where T : Entity, new();
+
+        Task DeleteAsync<T>(IEnumerable<string> guids, IEnumerable<int> versions) where T : Entity, new();
+
+        /// <summary>
+        /// 返回最新Version
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
@@ -42,45 +51,12 @@ namespace HB.Framework.KVStore
         Task<int> AddOrUpdateAsync<T>(T item, string lastUser) where T : Entity, new();
 
         /// <summary>
-        /// 返回最新的Version
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> item, string lastUser) where T : Entity, new();
-
-        /// <summary>
-        /// item的Version会被改变
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        Task UpdateAsync<T>(T item, string lastUser) where T : Entity, new();
-
-        /// <summary>
-        /// item的Version会被改变
+        /// 返回最新的Versions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="items"></param>
+        /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task DeleteAsync<T>(T item) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task DeleteAllAsync<T>() where T : Entity, new();
-
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task DeleteByKeyAsync<T>(object keyValue, int version) where T : Entity, new();
-
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task DeleteByKeysAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : Entity, new();
+        Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
     }
 }

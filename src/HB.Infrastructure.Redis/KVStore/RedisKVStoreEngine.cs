@@ -31,6 +31,8 @@ namespace HB.Infrastructure.Redis.KVStore
         private const string _luaBatchAddOrUpdateTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) local version= redis.call('HINCRBY', KEYS[2], ARGV[{0}],1) redis.call('RPUSH', KEYS[3], version) else redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) redis.call('RPUSH', KEYS[3], 0) end ";
         private const string _luaBatchAddOrUpdateReturnTemplate = @" return redis.call('LRANGE', KEYS[3], 0, -1)  ";
 
+        private const string _luaBatchGetTemplate = @" local array = {{}} array[1] = redis.call('HMGET', KEYS[1], {0}) array[2] = redis.call('HMGET', KEYS[2], {0}) return array";
+
         private readonly RedisKVStoreOptions _options;
         private readonly ILogger _logger;
 
@@ -47,43 +49,44 @@ namespace HB.Infrastructure.Redis.KVStore
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
         }
 
-        public async Task<Tuple<string, int>> EntityGetAsync(string storeName, string entityName, string entityKey)
+        public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
         {
+            if (!entityKeys.Any())
+            {
+                return new List<Tuple<string?, int>>();
+            }
+
             try
             {
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
+                StringBuilder stringBuilder = new StringBuilder();
 
+                foreach (string key in entityKeys)
+                {
+                    stringBuilder.Append($"'{key}',");
+                }
 
-                return await db.HashGetAsync(entityName, entityKey).ConfigureAwait(false);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
 
-        }
+                string lua = string.Format(GlobalSettings.Culture, _luaBatchGetTemplate, stringBuilder.ToString());
 
+                RedisResult result = await db.ScriptEvaluateAsync(lua, new RedisKey[] { entityName, EntityVersionName(entityName) }).ConfigureAwait(false);
 
-        public async Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
-        {
-            try
-            {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+                RedisResult[] results = (RedisResult[])result;
 
-                RedisValue[] values = entityKeys.Select(str => (RedisValue)str).ToArray();
+                string[] values = (string[])results[0];
+                int[] version = (int[])results[1];
 
-                RedisValue[] redisValues = await db.HashGetAsync(entityName, values).ConfigureAwait(false);
+                List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
 
-                return redisValues.Select<RedisValue, string>(t => t);
+                for (int i = 0; i < values.Length; ++i)
+                {
+                    rt.Add(new Tuple<string?, int>(values[i], version[i]));
+                }
+
+                return rt;
+
             }
             catch (RedisConnectionException ex)
             {

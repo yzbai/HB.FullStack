@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HB.Framework.KVStore.Engine
@@ -11,11 +12,7 @@ namespace HB.Framework.KVStore.Engine
 
         void Close();
 
-        /// <exception cref="KVStoreException"></exception>
-        Task<string> EntityGetAsync(string storeName, string entityName, string entityKey);
-
-        /// <exception cref="KVStoreException"></exception>
-        Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys);
+        Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys);
 
         /// <exception cref="KVStoreException"></exception>
         Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName);

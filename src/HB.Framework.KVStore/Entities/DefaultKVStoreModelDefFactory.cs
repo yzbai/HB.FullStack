@@ -138,11 +138,11 @@ namespace HB.Framework.KVStore.Entities
 
                 if (keyAttr != null)
                 {
-                    entityDef.KeyPropertyInfos.Add(keyAttr.Order, info);
+                    entityDef.KeyPropertyInfo = info;
                 }
             }
 
-            if (!entityDef.KeyPropertyInfos.Any())
+            if (entityDef.KeyPropertyInfo == null)
             {
                 throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
             }
