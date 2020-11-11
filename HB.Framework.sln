@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Tencent",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Client", "src\HB.Framework.Mobile\HB.Framework.Client.csproj", "{DDCBE558-985F-4537-9759-B964C795DD80}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.SQLite", "..\HB.Framework.Database\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj", "{A49D852D-1679-4A3B-A97A-54291D202BB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{DDCBE558-985F-4537-9759-B964C795DD80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDCBE558-985F-4537-9759-B964C795DD80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDCBE558-985F-4537-9759-B964C795DD80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49D852D-1679-4A3B-A97A-54291D202BB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49D852D-1679-4A3B-A97A-54291D202BB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49D852D-1679-4A3B-A97A-54291D202BB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49D852D-1679-4A3B-A97A-54291D202BB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +114,7 @@ Global
 		{62BC7048-68B8-41A8-81EB-EFD8331504F2} = {93372B5E-4C52-4B08-81E5-697FB106A161}
 		{48AC227C-CFE2-49A8-9DB4-6D5C1E0F8623} = {93372B5E-4C52-4B08-81E5-697FB106A161}
 		{B20CD0FD-7127-43BA-9B33-8F7606ED2442} = {93372B5E-4C52-4B08-81E5-697FB106A161}
+		{A49D852D-1679-4A3B-A97A-54291D202BB5} = {93372B5E-4C52-4B08-81E5-697FB106A161}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {81307950-DF5A-4A8D-B3B9-6724112D8232}

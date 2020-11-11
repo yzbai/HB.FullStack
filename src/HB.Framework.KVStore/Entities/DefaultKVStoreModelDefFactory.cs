@@ -26,14 +26,19 @@ namespace HB.Framework.KVStore.Entities
 
             if (_settings.AssembliesIncludeEntity.IsNullOrEmpty())
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(Entity)));
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(kvstoreEntityTypeCondition);
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, t => t.IsSubclassOf(typeof(Entity)));
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, kvstoreEntityTypeCondition);
             }
 
             _typeSchemaDict = ConstructeSchemaDict(allEntityTypes);
+
+            static bool kvstoreEntityTypeCondition(Type t)
+            {
+                return t.IsSubclassOf(typeof(Entity)) && t.GetCustomAttribute<KVStoreEntityAttribute>() != null;
+            }
         }
 
         private IDictionary<string, KVStoreEntitySchema> ConstructeSchemaDict(IEnumerable<Type> allEntityTypes)
@@ -43,7 +48,7 @@ namespace HB.Framework.KVStore.Entities
 
             allEntityTypes.ForEach(type =>
             {
-                KVStoreEntitySchemaAttribute attribute = type.GetCustomAttribute<KVStoreEntitySchemaAttribute>();
+                KVStoreEntityAttribute attribute = type.GetCustomAttribute<KVStoreEntityAttribute>();
 
                 filedDict.TryGetValue(type.FullName, out KVStoreEntitySchema fileConfigured);
 

@@ -1,5 +1,6 @@
-﻿using HB.Framework.KVStore;
-using HB.Framework.KVStore.Entity;
+﻿using HB.Framework.Common.Entities;
+using HB.Framework.KVStore;
+using HB.Framework.KVStore.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -18,10 +19,8 @@ namespace HB.Infrastructure.Redis.Test
         Admin
     }
 
-    public class UserEntity : KVStoreEntity
+    public class UserEntity : Entity
     {
-        [KVStoreKey]
-        public long Id { get; set; }
 
         public string? UserName { get; set; }
 
