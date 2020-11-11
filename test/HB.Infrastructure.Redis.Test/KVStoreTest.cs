@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -19,6 +20,7 @@ namespace HB.Infrastructure.Redis.Test
         Admin
     }
 
+    [KVStoreEntity]
     public class UserEntity : Entity
     {
 
@@ -60,7 +62,6 @@ namespace HB.Infrastructure.Redis.Test
 
         private readonly UserEntity _userEntity1 = new UserEntity()
         {
-            Id = 300,
             UserName = "22222222222",
             CreateTime = DateTime.UtcNow,
             Activated = true,
@@ -69,7 +70,6 @@ namespace HB.Infrastructure.Redis.Test
 
         private readonly UserEntity _userEntity2 = new UserEntity()
         {
-            Id = 400,
             UserName = "333333333",
             CreateTime = DateTime.UtcNow,
             Activated = true,
@@ -92,9 +92,9 @@ namespace HB.Infrastructure.Redis.Test
                 await _kvStore.DeleteByKeyAsync<UserEntity>(fetched.Id, fetched.Version).ConfigureAwait(false);
             }
 
-            await _kvStore.AddAsync(_userEntity1).ConfigureAwait(false);
+            await _kvStore.AddAsync(_userEntity1, "xx").ConfigureAwait(false);
 
-            UserEntity? fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity1.Id).ConfigureAwait(false);
+            UserEntity? fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
 
             Assert.Equal<UserEntity>(_userEntity1, fetchedAgain!, new UserEntityComparer());
         }
@@ -102,27 +102,45 @@ namespace HB.Infrastructure.Redis.Test
         [Fact]
         public async Task AddAndUpdateAsync()
         {
-            UserEntity? fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Id).ConfigureAwait(false);
+            UserEntity? fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
 
             if (fetched == null)
             {
-                await _kvStore.AddAsync(_userEntity2).ConfigureAwait(false);
+                await _kvStore.AddAsync(_userEntity2, "xxx").ConfigureAwait(false);
 
-                fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Id).ConfigureAwait(false);
+                fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
 
                 Assert.True(fetched != null);
             }
 
             fetched!.UserName = "Changed 1 : " + fetched.UserName;
 
-            await _kvStore.UpdateAsync(fetched).ConfigureAwait(false);
+            await _kvStore.UpdateAsync(fetched, "xxx").ConfigureAwait(false);
 
-            UserEntity? fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Id).ConfigureAwait(false);
+            UserEntity? fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
 
             Assert.True(condition: fetched.Version == fetchedAgain!.Version);
 
-            await _kvStore.DeleteByKeyAsync<UserEntity>(_userEntity2.Id, fetchedAgain.Version).ConfigureAwait(false);
+            await _kvStore.DeleteByKeyAsync<UserEntity>(_userEntity2.Guid, fetchedAgain.Version).ConfigureAwait(false);
 
+        }
+
+        [Fact]
+        public async Task AddOrUpdateTestAsync()
+        {
+            IEnumerable<UserEntity?> alls = await _kvStore.GetAllAsync<UserEntity>().ConfigureAwait(false);
+
+            IEnumerable<int> results = await _kvStore.AddOrUpdateAsync(new List<UserEntity> { _userEntity1, _userEntity2 }, "sfas").ConfigureAwait(false);
+
+            Assert.True(results.ElementAt(0) == 1);
+            Assert.True(results.ElementAt(1) == 1);
+
+            alls = await _kvStore.GetAllAsync<UserEntity>().ConfigureAwait(false);
+
+            results = await _kvStore.AddOrUpdateAsync(new List<UserEntity> { _userEntity1, _userEntity2 }, "sfas").ConfigureAwait(false);
+
+            Assert.True(results.ElementAt(0) == 2);
+            Assert.True(results.ElementAt(1) == 2);
         }
     }
 }

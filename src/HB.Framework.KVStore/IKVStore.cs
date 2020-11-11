@@ -26,11 +26,29 @@ namespace HB.Framework.KVStore
 
         /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
         /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task AddAsync<T>(T item) where T : Entity, new();
+        Task AddAsync<T>(T item, string lastUser) where T : Entity, new();
 
         /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
         /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        Task AddAsync<T>(IEnumerable<T> items) where T : Entity, new();
+        Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
+
+        /// <summary>
+        /// 返回最新的Version
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        Task<int> AddOrUpdateAsync<T>(T item, string lastUser) where T : Entity, new();
+
+        /// <summary>
+        /// 返回最新的Version
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> item, string lastUser) where T : Entity, new();
 
         /// <summary>
         /// item的Version会被改变
@@ -40,7 +58,7 @@ namespace HB.Framework.KVStore
         /// <returns></returns>
         /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        Task UpdateAsync<T>(T item) where T : Entity, new();
+        Task UpdateAsync<T>(T item, string lastUser) where T : Entity, new();
 
         /// <summary>
         /// item的Version会被改变
@@ -50,7 +68,7 @@ namespace HB.Framework.KVStore
         /// <returns></returns>
         /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        Task UpdateAsync<T>(IEnumerable<T> items) where T : Entity, new();
+        Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
 
         /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
         /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>

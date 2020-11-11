@@ -1,13 +1,12 @@
-﻿using HB.Framework.Common.Entities;
-using HB.Framework.KVStore.Engine;
-using HB.Framework.KVStore.Entities;
-using HB.Framework.KVStore.Properties;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HB.Framework.Common.Entities;
+using HB.Framework.KVStore.Engine;
+using HB.Framework.KVStore.Entities;
+using HB.Framework.KVStore.Properties;
 
 namespace HB.Framework.KVStore
 {
@@ -67,25 +66,8 @@ namespace HB.Framework.KVStore
             return keyValues.Select(obj => ValueConverterUtil.TypeValueToStringValue(obj)!);
         }
 
-
-        private static bool CheckEntityVersions<T>(IEnumerable<T> items) where T : Entity, new()
-        {
-            if (items == null || !items.Any())
-            {
-                return true;
-            }
-
-            return items.All(t => t.Version == 0);
-        }
-
         #endregion
 
-        /// <summary>
-        /// GetByKeyAsync
-        /// </summary>
-        /// <param name="keyValue"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<T?> GetByKeyAsync<T>(object keyValue) where T : Entity, new()
         {
             try
@@ -110,13 +92,6 @@ namespace HB.Framework.KVStore
             }
         }
 
-        /// <summary>
-        /// GetByKeyAsync
-        /// </summary>
-        /// <param name="t"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<T?> GetByKeyAsync<T>(T t) where T : Entity, new()
         {
             ThrowIf.NotValid(t);
@@ -143,12 +118,6 @@ namespace HB.Framework.KVStore
             }
         }
 
-        /// <summary>
-        /// GetByKeysAsync
-        /// </summary>
-        /// <param name="keyValues"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<object> keyValues) where T : Entity, new()
         {
             //ThrowIf.AnyNull(keyValues, nameof(keyValues));
@@ -175,12 +144,6 @@ namespace HB.Framework.KVStore
             }
         }
 
-        /// <summary>
-        /// GetByKeysAsync
-        /// </summary>
-        /// <param name="keyValues"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetByKeysAsync<T>(IEnumerable<T> keyValues) where T : Entity, new()
         {
             //ThrowIf.AnyNull(keyValues, nameof(keyValues));
@@ -205,11 +168,6 @@ namespace HB.Framework.KVStore
             }
         }
 
-        /// <summary>
-        /// GetAllAsync
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : Entity, new()
         {
             try
@@ -233,40 +191,47 @@ namespace HB.Framework.KVStore
             }
         }
 
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        public Task AddAsync<T>(T item) where T : Entity, new()
+        public Task AddAsync<T>(T item, string lastUser) where T : Entity, new()
         {
-            return AddAsync<T>(new T[] { item });
+            return AddAsync<T>(new T[] { item }, lastUser);
         }
 
         /// <summary>
-        /// AddAsync
+        /// 反应Version变化
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="items"></param>
+        /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        public Task AddAsync<T>(IEnumerable<T> items) where T : Entity, new()
+        public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new()
         {
-            ThrowIf.NotValid(items);
-
-            if (!CheckEntityVersions<T>(items))
+            if (!items.Any())
             {
-                throw new KVStoreException(ErrorCode.KVStoreVersionNotMatched, typeof(T).FullName, Resources.AddedItemVersionErrorMessage);
+                return;
             }
+
+            ThrowIf.NotValid(items);
 
             try
             {
-
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-                return _engine.EntityAddAsync(
+                await _engine.EntityAddAsync(
                     StoreName(entityDef),
                     EntityName(entityDef),
                     EntityKey(items, entityDef),
-                    items.Select(t => SerializeUtil.ToJson(t))
-                    );
+                    items.Select(t =>
+                    {
+                        t.LastUser = lastUser;
+                        return SerializeUtil.ToJson(t);
+                    })
+                    ).ConfigureAwait(false);
+
+                //version 变化
+                foreach (T item in items)
+                {
+                    item.Version = 0;
+                }
             }
             catch (Exception ex)
             {
@@ -279,24 +244,27 @@ namespace HB.Framework.KVStore
             }
         }
 
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        public Task UpdateAsync<T>(T item) where T : Entity, new()
+        public Task UpdateAsync<T>(T item, string lastUser) where T : Entity, new()
         {
-            return UpdateAsync<T>(new T[] { item });
+            return UpdateAsync<T>(new T[] { item }, lastUser);
         }
 
+
         /// <summary>
-        /// UpdateAsync
+        /// 反应Version变化
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="items"></param>
+        /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        public async Task UpdateAsync<T>(IEnumerable<T> items) where T : Entity, new()
+        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new()
         {
+            if (!items.Any())
+            {
+                return;
+            }
+
             ThrowIf.NotValid(items);
-            bool versionChanged = false;
 
             try
             {
@@ -306,45 +274,33 @@ namespace HB.Framework.KVStore
 
                 foreach (T item in items)
                 {
-                    item.Version++;
+                    item.LastUser = lastUser;
                 }
-
-                versionChanged = true;
 
                 await _engine.EntityUpdateAsync(
                     StoreName(entityDef),
                     EntityName(entityDef),
                     EntityKey(items, entityDef),
-                    items.Select(t => SerializeUtil.ToJson(t)),
+                    items.Select(t =>
+                    {
+                        return SerializeUtil.ToJson(t);
+                    }),
                     originalVersions).ConfigureAwait(false);
+
+
+                //反应Version变化
+                foreach (T item in items)
+                {
+                    item.Version++;
+                }
             }
 
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is KVStoreException))
             {
-                if (versionChanged)
-                {
-                    foreach (T item in items)
-                    {
-                        item.Version--;
-                    }
-                }
-
-                if (ex is KVStoreException)
-                {
-                    throw;
-                }
-
                 throw new KVStoreException(ErrorCode.KVStoreError, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}", ex);
             }
         }
 
-        /// <summary>
-        /// DeleteAsync
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
         public Task DeleteAsync<T>(T item) where T : Entity, new()
         {
             ThrowIf.NotValid(item);
@@ -354,22 +310,16 @@ namespace HB.Framework.KVStore
             return DeleteByKeysAsync<T>(new object[] { EntityKey(item, entityDef) }, new int[] { item.Version });
         }
 
-
-        /// <summary>
-        /// DeleteAllAsync
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        public Task DeleteAllAsync<T>() where T : Entity, new()
+        public async Task DeleteAllAsync<T>() where T : Entity, new()
         {
             try
             {
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-                return _engine.EntityDeleteAllAsync(
-                    StoreName(entityDef),
-                    EntityName(entityDef)
-                    );
+                await _engine.EntityDeleteAllAsync(
+                   StoreName(entityDef),
+                   EntityName(entityDef)
+                   ).ConfigureAwait(false);
             }
             catch (KVStoreException)
             {
@@ -391,15 +341,7 @@ namespace HB.Framework.KVStore
             return DeleteByKeysAsync<T>(new object[] { keyValue }, new int[] { version });
         }
 
-        /// <summary>
-        /// DeleteByKeysAsync
-        /// </summary>
-        /// <param name="keyValues"></param>
-        /// <param name="versions"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.KVStore.KVStoreException"></exception>
-        /// <exception cref="System.ArgumentException"></exception>
-        public Task DeleteByKeysAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : Entity, new()
+        public async Task DeleteByKeysAsync<T>(IEnumerable<object> keyValues, IEnumerable<int> versions) where T : Entity, new()
         {
             ThrowIf.NullOrEmpty(versions, nameof(versions));
 
@@ -412,12 +354,12 @@ namespace HB.Framework.KVStore
             {
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-                return _engine.EntityDeleteAsync(
+                await _engine.EntityDeleteAsync(
                     StoreName(entityDef),
                     EntityName(entityDef),
                     EntityKey(keyValues),
                     versions
-                    );
+                    ).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -433,5 +375,58 @@ namespace HB.Framework.KVStore
             }
         }
 
+        public Task<int> AddOrUpdateAsync<T>(T item, string lastUser) where T : Entity, new()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 返回最新的Versions
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new()
+        {
+            if (!items.Any())
+            {
+                return new List<int>();
+            }
+
+            ThrowIf.NotValid(items);
+
+            try
+            {
+                KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+                IEnumerable<int> versions = await _engine.EntityAddOrUpdateAsync(
+                    StoreName(entityDef),
+                    EntityName(entityDef),
+                    EntityKey(items, entityDef),
+                    items.Select(t =>
+                    {
+                        t.LastUser = lastUser;
+                        return SerializeUtil.ToJson(t);
+                    })
+                    ).ConfigureAwait(false);
+
+                if (items.Count() != versions.Count())
+                {
+                    throw new KVStoreException(ErrorCode.KVStoreError, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}");
+                }
+
+                for (int i = 0; i < items.Count(); ++i)
+                {
+                    items.ElementAt(i).Version = versions.ElementAt(i);
+                }
+
+                return versions;
+            }
+            catch (Exception ex) when (!(ex is KVStoreException))
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}", ex);
+            }
+        }
     }
 }

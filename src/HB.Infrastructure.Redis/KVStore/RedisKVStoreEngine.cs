@@ -16,19 +16,20 @@ namespace HB.Infrastructure.Redis.KVStore
         //private static readonly string luaAddScript = @"if redis.call('HSETNX',KEYS[1], ARGV[1], ARGV[2]) == 1 then redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) return 1 else return 9 end";
         //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";
         //private static readonly string luaUpdateScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) redis.call('HSET', KEYS[1], ARGV[1], ARGV[4]) return 1 end";
-
-
         private const string _luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then return 9 end ";
         private const string _luaBatchAddTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) ";
         private const string _luaBatchAddReturnTemplate = @"return 1";
 
         private const string _luaBatchUpdateVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
-        private const string _luaBatchUpdateTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], ARGV[{2}]+1) ";
+        private const string _luaBatchUpdateTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HINCRBY', KEYS[2], ARGV[{0}], 1) ";
         private const string _luaBatchUpdateReturnTemplate = @"return 1";
 
         private const string _luaBatchDeleteVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
         private const string _luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
         private const string _luaBatchDeleteReturnTemplate = @"return 1";
+
+        private const string _luaBatchAddOrUpdateTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) local version= redis.call('HINCRBY', KEYS[2], ARGV[{0}],1) redis.call('RPUSH', KEYS[3], version) else redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) redis.call('RPUSH', KEYS[3], 0) end ";
+        private const string _luaBatchAddOrUpdateReturnTemplate = @" return redis.call('LRANGE', KEYS[3], 0, -1)  ";
 
         private readonly RedisKVStoreOptions _options;
         private readonly ILogger _logger;
@@ -46,12 +47,271 @@ namespace HB.Infrastructure.Redis.KVStore
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
         }
 
+        public async Task<Tuple<string, int>> EntityGetAsync(string storeName, string entityName, string entityKey)
+        {
+            try
+            {
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+
+
+                return await db.HashGetAsync(entityName, entityKey).ConfigureAwait(false);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+
+        }
+
+
+        public async Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
+        {
+            try
+            {
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                RedisValue[] values = entityKeys.Select(str => (RedisValue)str).ToArray();
+
+                RedisValue[] redisValues = await db.HashGetAsync(entityName, values).ConfigureAwait(false);
+
+                return redisValues.Select<RedisValue, string>(t => t);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+        }
+
+
+        public async Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName)
+        {
+            try
+            {
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                HashEntry[] results = await db.HashGetAllAsync(entityName).ConfigureAwait(false);
+
+                return results.Select<HashEntry, string>(t => t.Value);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+        }
+
+        public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
+        {
+            RedisResult result = null!;
+
+            try
+            {
+                string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
+
+                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
+
+                IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
+                IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
+
+                RedisValue[] argvs = argvs1.Concat(argvs2).ToArray();
+
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+
+            ErrorCode error = MapResult(result);
+
+            if (!error.IsSuccessful())
+            {
+                throw new KVStoreException(error, entityName, "");
+            }
+        }
+
         /// <summary>
-        /// GetDatabaseAsync
+        /// 返回最新的Version
         /// </summary>
-        /// <param name="instanceName"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        public async Task<IEnumerable<int>> EntityAddOrUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
+        {
+            RedisResult result = null!;
+
+            try
+            {
+                string luaScript = AssembleBatchAddOrUpdateScript(entityKeys.Count());
+
+                string tempListName = "lst" + SecurityUtil.CreateUniqueToken();
+
+                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName), tempListName };
+
+                IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
+                IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
+
+                RedisValue[] argvs = argvs1.Concat(argvs2).ToArray();
+
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+
+                await db.ScriptEvaluateAsync(@" redis.call('DEL', KEYS[1]) ", new RedisKey[] { tempListName }).ConfigureAwait(false);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+
+            return (int[])result;
+        }
+
+        public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
+        {
+            RedisResult result = null!;
+
+            try
+            {
+                string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
+
+                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
+                RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t)
+                    .Concat(entityJsons.Select(t => (RedisValue)t))
+                    .Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
+
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+
+            ErrorCode error = MapResult(result);
+
+            if (!error.IsSuccessful())
+            {
+                throw new KVStoreException(error, entityName, "");
+            }
+        }
+
+        public async Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
+        {
+            RedisResult result = null!;
+
+            try
+            {
+                string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
+
+                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
+                RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t).Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
+
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+
+            ErrorCode error = MapResult(result);
+
+            if (!error.IsSuccessful())
+            {
+                throw new KVStoreException(error, entityName, "");
+            }
+        }
+
+
+        public async Task<bool> EntityDeleteAllAsync(string storeName, string entityName)
+        {
+            try
+            {
+                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+
+                return await db.KeyDeleteAsync(entityName).ConfigureAwait(false);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+        }
+
+        public void Close()
+        {
+            _instanceSettingDict.ForEach(kv =>
+            {
+                RedisInstanceManager.Close(kv.Value);
+            });
+        }
+
         private async Task<IDatabase> GetDatabaseAsync(string instanceName)
         {
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
@@ -102,6 +362,20 @@ namespace HB.Infrastructure.Redis.KVStore
             return stringBuilder.ToString();
         }
 
+        private static string AssembleBatchAddOrUpdateScript(int count)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < count; ++i)
+            {
+                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchAddOrUpdateTemplate, i + 1, i + count + 1);
+            }
+
+            stringBuilder.Append(_luaBatchAddOrUpdateReturnTemplate);
+
+            return stringBuilder.ToString();
+        }
+
         private static string AssembleBatchUpdateLuaScript(int count)
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -113,7 +387,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchUpdateTemplate, i + 1, i + count + 1, i + count + count + 1);
+                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchUpdateTemplate, i + 1, i + count + 1);
             }
 
             stringBuilder.Append(_luaBatchUpdateReturnTemplate);
@@ -138,325 +412,6 @@ namespace HB.Infrastructure.Redis.KVStore
             stringBuilder.Append(_luaBatchDeleteReturnTemplate);
 
             return stringBuilder.ToString();
-        }
-
-        /// <summary>
-        /// EntityGetAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKey"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task<string> EntityGetAsync(string storeName, string entityName, string entityKey)
-        {
-            try
-            {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                return await db.HashGetAsync(entityName, entityKey).ConfigureAwait(false);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-
-        }
-
-        /// <summary>
-        /// EntityGetAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task<IEnumerable<string>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
-        {
-            try
-            {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                RedisValue[] values = entityKeys.Select(str => (RedisValue)str).ToArray();
-
-                RedisValue[] redisValues = await db.HashGetAsync(entityName, values).ConfigureAwait(false);
-
-                return redisValues.Select<RedisValue, string>(t => t);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-        }
-
-        /// <summary>
-        /// EntityGetAllAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName)
-        {
-            try
-            {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                HashEntry[] results = await db.HashGetAllAsync(entityName).ConfigureAwait(false);
-
-                return results.Select<HashEntry, string>(t => t.Value);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-        }
-
-        /// <summary>
-        /// EntityAddAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKey"></param>
-        /// <param name="entityJson"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public Task EntityAddAsync(string storeName, string entityName, string entityKey, string entityJson)
-        {
-            return EntityAddAsync(storeName, entityName, new string[] { entityKey }, new List<string> { entityJson });
-        }
-
-        /// <summary>
-        /// EntityAddAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <param name="entityJsons"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
-        {
-            RedisResult result = null!;
-
-            try
-            {
-                string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
-
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
-
-                IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
-                IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
-
-                RedisValue[] argvs = argvs1.Concat(argvs2).ToArray();
-
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
-
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-
-            ErrorCode error = MapResult(result);
-
-            if (!error.IsSuccessful())
-            {
-                throw new KVStoreException(error, entityName, "");
-            }
-        }
-
-        /// <summary>
-        /// EntityUpdateAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKey"></param>
-        /// <param name="entityJson"></param>
-        /// <param name="entityVersion"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public Task EntityUpdateAsync(string storeName, string entityName, string entityKey, string entityJson, int entityVersion)
-        {
-            return EntityUpdateAsync(storeName, entityName, new string[] { entityKey }, new List<string>() { entityJson }, new int[] { entityVersion });
-        }
-
-        /// <summary>
-        /// EntityUpdateAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <param name="entityJsons"></param>
-        /// <param name="entityVersions"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
-        {
-            RedisResult result = null!;
-
-            try
-            {
-                string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
-
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
-                RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t)
-                    .Concat(entityJsons.Select(t => (RedisValue)t))
-                    .Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
-
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-
-            ErrorCode error = MapResult(result);
-
-            if (!error.IsSuccessful())
-            {
-                throw new KVStoreException(error, entityName, "");
-            }
-        }
-
-        /// <summary>
-        /// EntityDeleteAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKey"></param>
-        /// <param name="entityVersion"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public Task EntityDeleteAsync(string storeName, string entityName, string entityKey, int entityVersion)
-        {
-            return EntityDeleteAsync(storeName, entityName, new string[] { entityKey }, new int[] { entityVersion });
-        }
-
-        /// <summary>
-        /// EntityDeleteAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <param name="entityVersions"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
-        {
-            RedisResult result = null!;
-
-            try
-            {
-                string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
-
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
-                RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t).Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
-
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-
-            ErrorCode error = MapResult(result);
-
-            if (!error.IsSuccessful())
-            {
-                throw new KVStoreException(error, entityName, "");
-            }
-        }
-
-        /// <summary>
-        /// EntityDeleteAllAsync
-        /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        public async Task<bool> EntityDeleteAllAsync(string storeName, string entityName)
-        {
-            try
-            {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                return await db.KeyDeleteAsync(entityName).ConfigureAwait(false);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-        }
-
-        public void Close()
-        {
-            _instanceSettingDict.ForEach(kv =>
-            {
-                RedisInstanceManager.Close(kv.Value);
-            });
         }
     }
 }
