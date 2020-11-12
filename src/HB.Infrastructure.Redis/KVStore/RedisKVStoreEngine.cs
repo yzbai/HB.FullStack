@@ -33,6 +33,8 @@ namespace HB.Infrastructure.Redis.KVStore
 
         private const string _luaBatchGetTemplate = @" local array = {{}} array[1] = redis.call('HMGET', KEYS[1], {0}) array[2] = redis.call('HMGET', KEYS[2], {0}) return array";
 
+        private const string _luaGetAllTemplate = @"local array = {{}}";
+
         private readonly RedisKVStoreOptions _options;
         private readonly ILogger _logger;
 

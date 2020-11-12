@@ -85,16 +85,16 @@ namespace HB.Infrastructure.Redis.Test
         [Fact]
         public async Task AddAndFetchAsync()
         {
-            UserEntity? fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity1.Id).ConfigureAwait(false);
+            UserEntity? fetched = await _kvStore.GetAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
 
             if (fetched != null)
             {
-                await _kvStore.DeleteByKeyAsync<UserEntity>(fetched.Id, fetched.Version).ConfigureAwait(false);
+                await _kvStore.DeleteAsync<UserEntity>(fetched.Guid, fetched.Version).ConfigureAwait(false);
             }
 
             await _kvStore.AddAsync(_userEntity1, "xx").ConfigureAwait(false);
 
-            UserEntity? fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
+            UserEntity? fetchedAgain = await _kvStore.GetAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
 
             Assert.Equal<UserEntity>(_userEntity1, fetchedAgain!, new UserEntityComparer());
         }
@@ -102,13 +102,13 @@ namespace HB.Infrastructure.Redis.Test
         [Fact]
         public async Task AddAndUpdateAsync()
         {
-            UserEntity? fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
+            UserEntity? fetched = await _kvStore.GetAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
 
             if (fetched == null)
             {
                 await _kvStore.AddAsync(_userEntity2, "xxx").ConfigureAwait(false);
 
-                fetched = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
+                fetched = await _kvStore.GetAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
 
                 Assert.True(fetched != null);
             }
@@ -117,18 +117,18 @@ namespace HB.Infrastructure.Redis.Test
 
             await _kvStore.UpdateAsync(fetched, "xxx").ConfigureAwait(false);
 
-            UserEntity? fetchedAgain = await _kvStore.GetByKeyAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
+            UserEntity? fetchedAgain = await _kvStore.GetAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
 
             Assert.True(condition: fetched.Version == fetchedAgain!.Version);
 
-            await _kvStore.DeleteByKeyAsync<UserEntity>(_userEntity2.Guid, fetchedAgain.Version).ConfigureAwait(false);
+            await _kvStore.DeleteAsync<UserEntity>(_userEntity2.Guid, fetchedAgain.Version).ConfigureAwait(false);
 
         }
 
         [Fact]
         public async Task AddOrUpdateTestAsync()
         {
-            IEnumerable<UserEntity?> alls = await _kvStore.GetAllAsync<UserEntity>().ConfigureAwait(false);
+            IEnumerable<UserEntity?> alls = await _kvStore.GetAll Async<UserEntity>().ConfigureAwait(false);
 
             IEnumerable<int> results = await _kvStore.AddOrUpdateAsync(new List<UserEntity> { _userEntity1, _userEntity2 }, "sfas").ConfigureAwait(false);
 

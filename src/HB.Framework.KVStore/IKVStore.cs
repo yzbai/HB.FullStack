@@ -35,11 +35,14 @@ namespace HB.Framework.KVStore
         /// <returns></returns>
         Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
 
-        Task DeleteAllAsync<T>() where T : Entity, new();
+        
 
         public Task DeleteAsync<T>(string guid, int version) where T : Entity, new();
 
         Task DeleteAsync<T>(IEnumerable<string> guids, IEnumerable<int> versions) where T : Entity, new();
+
+
+        Task DeleteAllAsync<T>() where T : Entity, new();
 
         /// <summary>
         /// 返回最新Version
