@@ -15,7 +15,7 @@ namespace HB.Framework.KVStore.Engine
         Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys);
 
         /// <exception cref="KVStoreException"></exception>
-        Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName);
+        Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName);
 
         Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons);
 

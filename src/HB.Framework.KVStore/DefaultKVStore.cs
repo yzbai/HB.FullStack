@@ -21,12 +21,19 @@ namespace HB.Framework.KVStore
             _entityDefFactory = kvstoreEntityDefFactory;
         }
 
+        /// <summary>
+        /// 反应Version变化
+        /// </summary>
         public async Task<T?> GetAsync<T>(string guid) where T : Entity, new()
         {
             IEnumerable<T?> ts = await GetAsync<T>(new string[] { guid }).ConfigureAwait(false);
 
             return ts.Any() ? ts.ElementAt(0) : null;
         }
+
+        /// <summary>
+        /// 反应Version变化
+        /// </summary>
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> guids) where T : Entity, new()
         {
             KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
@@ -37,24 +44,8 @@ namespace HB.Framework.KVStore
                     entityDef.KVStoreName,
                     entityDef.EntityType.FullName,
                     guids).ConfigureAwait(false);
-
-                List<T?> rt = new List<T?>();
-
-                tuples.ForEach(t =>
-                {
-                    T? item = SerializeUtil.FromJson<T>(t.Item1);
-                    if (item == null)
-                    {
-                        rt.Add(null);
-                    }
-                    else
-                    {
-                        item.Version = t.Item2;
-                        rt.Add(item);
-                    }
-                });
-
-                return rt;
+                
+                return MapTupleToEntity<T>(tuples);
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
@@ -62,17 +53,20 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// 反应Version变化
+        /// </summary>
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : Entity, new()
         {
             try
             {
                 KVStoreEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-                IEnumerable<string> jsons = await _engine.EntityGetAllAsync(
+                IEnumerable<Tuple<string?, int>> tuples = await _engine.EntityGetAllAsync(
                     entityDef.KVStoreName,
                     entityDef.EntityType.FullName).ConfigureAwait(false);
 
-                return jsons.Select(t => SerializeUtil.FromJson<T>(t));
+                return MapTupleToEntity<T>(tuples);
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
@@ -80,6 +74,9 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// 反应Version变化
+        /// </summary>
         public Task AddAsync<T>(T item, string lastUser) where T : Entity, new()
         {
             return AddAsync<T>(new T[] { item }, lastUser);
@@ -123,6 +120,9 @@ namespace HB.Framework.KVStore
             }
         }
 
+        /// <summary>
+        /// 反应Version变化
+        /// </summary>
         public Task UpdateAsync<T>(T item, string lastUser) where T : Entity, new()
         {
             return UpdateAsync<T>(new T[] { item }, lastUser);
@@ -281,6 +281,27 @@ namespace HB.Framework.KVStore
             {
                 throw new KVStoreException(ErrorCode.KVStoreError, typeof(T).FullName, $"Items:{SerializeUtil.ToJson(items)}", ex);
             }
+        }
+
+        private static IEnumerable<T?> MapTupleToEntity<T>(IEnumerable<Tuple<string?, int>> tuples) where T : Entity, new()
+        {
+            List<T?> rt = new List<T?>();
+
+            tuples.ForEach(t =>
+            {
+                T? item = SerializeUtil.FromJson<T>(t.Item1);
+                if (item == null)
+                {
+                    rt.Add(null);
+                }
+                else
+                {
+                    item.Version = t.Item2;
+                    rt.Add(item);
+                }
+            });
+
+            return rt;
         }
     }
 }

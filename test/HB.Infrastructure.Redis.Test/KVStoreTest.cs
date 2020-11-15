@@ -128,19 +128,26 @@ namespace HB.Infrastructure.Redis.Test
         [Fact]
         public async Task AddOrUpdateTestAsync()
         {
-            IEnumerable<UserEntity?> alls = await _kvStore.GetAll Async<UserEntity>().ConfigureAwait(false);
+            IEnumerable<UserEntity?> alls = await _kvStore.GetAllAsync<UserEntity>().ConfigureAwait(false);
 
             IEnumerable<int> results = await _kvStore.AddOrUpdateAsync(new List<UserEntity> { _userEntity1, _userEntity2 }, "sfas").ConfigureAwait(false);
+
+            Assert.True(results.ElementAt(0) == 0);
+            Assert.True(results.ElementAt(1) == 0);
+
+            results = await _kvStore.AddOrUpdateAsync(new List<UserEntity> { _userEntity1, _userEntity2 }, "sfas").ConfigureAwait(false);
 
             Assert.True(results.ElementAt(0) == 1);
             Assert.True(results.ElementAt(1) == 1);
 
-            alls = await _kvStore.GetAllAsync<UserEntity>().ConfigureAwait(false);
+            int newVersion = await _kvStore.AddOrUpdateAsync( _userEntity1, "sfas").ConfigureAwait(false);
 
-            results = await _kvStore.AddOrUpdateAsync(new List<UserEntity> { _userEntity1, _userEntity2 }, "sfas").ConfigureAwait(false);
+            Assert.True(newVersion == 2);
 
-            Assert.True(results.ElementAt(0) == 2);
-            Assert.True(results.ElementAt(1) == 2);
+            IEnumerable<UserEntity?> fecheds = await _kvStore.GetAsync<UserEntity>(new string[] { _userEntity1.Guid, _userEntity2.Guid }).ConfigureAwait(false);
+
+            Assert.True(fecheds.ElementAt(0)!.Version == 2);
+            Assert.True(fecheds.ElementAt(1)!.Version == 1);
         }
     }
 }

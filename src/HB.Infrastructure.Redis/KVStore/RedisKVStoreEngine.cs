@@ -16,24 +16,24 @@ namespace HB.Infrastructure.Redis.KVStore
         //private static readonly string luaAddScript = @"if redis.call('HSETNX',KEYS[1], ARGV[1], ARGV[2]) == 1 then redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) return 1 else return 9 end";
         //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";
         //private static readonly string luaUpdateScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) redis.call('HSET', KEYS[1], ARGV[1], ARGV[4]) return 1 end";
-        private const string _luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then return 9 end ";
-        private const string _luaBatchAddTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) ";
+        private const string _luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS',KEYS[1],ARGV[{0}])==1 then return 9 end ";
+        private const string _luaBatchAddTemplate = @"redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) redis.call('HSET',KEYS[2],ARGV[{0}],0) ";
         private const string _luaBatchAddReturnTemplate = @"return 1";
 
-        private const string _luaBatchUpdateVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
-        private const string _luaBatchUpdateTemplate = @"redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HINCRBY', KEYS[2], ARGV[{0}], 1) ";
+        private const string _luaBatchUpdateVersionCheckTemplate = @"if redis.call('HGET',KEYS[2],ARGV[{0}])~=ARGV[{1}] then return 7 end ";
+        private const string _luaBatchUpdateTemplate = @"redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) redis.call('HINCRBY',KEYS[2],ARGV[{0}],1) ";
         private const string _luaBatchUpdateReturnTemplate = @"return 1";
 
-        private const string _luaBatchDeleteVersionCheckTemplate = @"if redis.call('HGET', KEYS[2], ARGV[{0}]) ~= ARGV[{1}] then return 7 end ";
-        private const string _luaBatchDeleteTemplate = @"redis.call('HDEL', KEYS[1], ARGV[{0}]) redis.call('HDEL', KEYS[2], ARGV[{0}]) ";
+        private const string _luaBatchDeleteVersionCheckTemplate = @"if redis.call('HGET',KEYS[2],ARGV[{0}])~=ARGV[{1}] then return 7 end ";
+        private const string _luaBatchDeleteTemplate = @"redis.call('HDEL',KEYS[1],ARGV[{0}]) redis.call('HDEL',KEYS[2],ARGV[{0}]) ";
         private const string _luaBatchDeleteReturnTemplate = @"return 1";
 
-        private const string _luaBatchAddOrUpdateTemplate = @"if redis.call('HEXISTS', KEYS[1], ARGV[{0}]) == 1 then redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) local version= redis.call('HINCRBY', KEYS[2], ARGV[{0}],1) redis.call('RPUSH', KEYS[3], version) else redis.call('HSET', KEYS[1], ARGV[{0}], ARGV[{1}]) redis.call('HSET', KEYS[2], ARGV[{0}], 0) redis.call('RPUSH', KEYS[3], 0) end ";
-        private const string _luaBatchAddOrUpdateReturnTemplate = @" return redis.call('LRANGE', KEYS[3], 0, -1)  ";
+        private const string _luaBatchAddOrUpdateTemplate = @"if redis.call('HEXISTS',KEYS[1],ARGV[{0}])==1 then redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) local version= redis.call('HINCRBY',KEYS[2],ARGV[{0}],1) redis.call('RPUSH',KEYS[3],version) else redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) redis.call('HSET',KEYS[2],ARGV[{0}],0) redis.call('RPUSH',KEYS[3],0) end ";
+        private const string _luaBatchAddOrUpdateReturnTemplate = @" return redis.call('LRANGE',KEYS[3],0,-1) ";
 
-        private const string _luaBatchGetTemplate = @" local array = {{}} array[1] = redis.call('HMGET', KEYS[1], {0}) array[2] = redis.call('HMGET', KEYS[2], {0}) return array";
+        private const string _luaBatchGetTemplate = @" local array={{}} array[1]=redis.call('HMGET',KEYS[1],{0}) array[2]=redis.call('HMGET',KEYS[2],{0}) return array";
 
-        private const string _luaGetAllTemplate = @"local array = {{}}";
+        private const string _luaGetAllTemplate = @"local array={{}} array[1]=redis.call('HGETALL',KEYS[1]) array[2]=redis.call('HGETALL',KEYS[2]) return array";
 
         private readonly RedisKVStoreOptions _options;
         private readonly ILogger _logger;
@@ -75,20 +75,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
                 RedisResult result = await db.ScriptEvaluateAsync(lua, new RedisKey[] { entityName, EntityVersionName(entityName) }).ConfigureAwait(false);
 
-                RedisResult[] results = (RedisResult[])result;
-
-                string[] values = (string[])results[0];
-                int[] version = (int[])results[1];
-
-                List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
-
-                for (int i = 0; i < values.Length; ++i)
-                {
-                    rt.Add(new Tuple<string?, int>(values[i], version[i]));
-                }
-
-                return rt;
-
+                return MapResultToStringWithVersion(result);
             }
             catch (RedisConnectionException ex)
             {
@@ -104,16 +91,15 @@ namespace HB.Infrastructure.Redis.KVStore
             }
         }
 
-
-        public async Task<IEnumerable<string>> EntityGetAllAsync(string storeName, string entityName)
+        public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName)
         {
             try
             {
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                HashEntry[] results = await db.HashGetAllAsync(entityName).ConfigureAwait(false);
-
-                return results.Select<HashEntry, string>(t => t.Value);
+                RedisResult result = await db.ScriptEvaluateAsync(_luaGetAllTemplate, new RedisKey[] { entityName, EntityVersionName(entityName) }).ConfigureAwait(false);
+                
+                return MapGetAllResultToStringWithVersion(result);
             }
             catch (RedisConnectionException ex)
             {
@@ -162,7 +148,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
-            ErrorCode error = MapResult(result);
+            ErrorCode error = MapResultToErrorCode(result);
 
             if (!error.IsSuccessful())
             {
@@ -242,7 +228,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
-            ErrorCode error = MapResult(result);
+            ErrorCode error = MapResultToErrorCode(result);
 
             if (!error.IsSuccessful())
             {
@@ -278,7 +264,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
 
-            ErrorCode error = MapResult(result);
+            ErrorCode error = MapResultToErrorCode(result);
 
             if (!error.IsSuccessful())
             {
@@ -332,7 +318,7 @@ namespace HB.Infrastructure.Redis.KVStore
             return entityName + ":Version";
         }
 
-        private static ErrorCode MapResult(RedisResult redisResult)
+        private static ErrorCode MapResultToErrorCode(RedisResult redisResult)
         {
             int result = (int)redisResult;
 
@@ -346,6 +332,38 @@ namespace HB.Infrastructure.Redis.KVStore
             };
 
             return error;
+        }
+
+        private static IEnumerable<Tuple<string?, int>> MapResultToStringWithVersion(RedisResult result)
+        {
+            RedisResult[] results = (RedisResult[])result;
+            string[] values = (string[])results[0];
+            int[] version = (int[])results[1];
+
+            List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
+
+            for (int i = 0; i < values.Length; ++i)
+            {
+                rt.Add(new Tuple<string?, int>(values[i], version[i]));
+            }
+
+            return rt;
+        }
+
+        private static IEnumerable<Tuple<string?, int>> MapGetAllResultToStringWithVersion(RedisResult result)
+        {
+            RedisResult[] results = (RedisResult[])result;
+            Dictionary<string, RedisResult> values = results[0].ToDictionary();
+            Dictionary<string, RedisResult> versions = results[1].ToDictionary();
+
+            List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
+
+            values.ForEach(kv => {
+                int version = (int)versions[kv.Key];
+                rt.Add(new Tuple<string?, int>(kv.Value.ToString(), version));
+            });
+
+            return rt;
         }
 
         private static string AssembleBatchAddLuaScript(int count)
