@@ -8,8 +8,8 @@ namespace HB.Framework.KVStore
 {
     public interface IKVStore
     {
-        Task<T?> GetAsync<T>(string guid) where T : Entity, new();
-        Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> guids) where T : Entity, new();
+        Task<T?> GetAsync<T>(string key) where T : Entity, new();
+        Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : Entity, new();
 
         Task<IEnumerable<T?>> GetAllAsync<T>() where T : Entity, new();
 
@@ -37,9 +37,9 @@ namespace HB.Framework.KVStore
 
         
 
-        public Task DeleteAsync<T>(string guid, int version) where T : Entity, new();
+        public Task DeleteAsync<T>(string key, int version) where T : Entity, new();
 
-        Task DeleteAsync<T>(IEnumerable<string> guids, IEnumerable<int> versions) where T : Entity, new();
+        Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : Entity, new();
 
 
         Task DeleteAllAsync<T>() where T : Entity, new();
@@ -61,5 +61,7 @@ namespace HB.Framework.KVStore
         /// <param name="lastUser"></param>
         /// <returns></returns>
         Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
+
+        string GetEntityKey<T>(T item) where T : Entity, new();
     }
 }

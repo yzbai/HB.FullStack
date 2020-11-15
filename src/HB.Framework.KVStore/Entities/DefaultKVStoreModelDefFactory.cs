@@ -132,19 +132,32 @@ namespace HB.Framework.KVStore.Entities
 
             PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
 
+            PropertyInfo? backupKeyPropertyInfo = null;
+
             foreach (PropertyInfo info in properties)
             {
                 KVStoreKeyAttribute keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>();
 
                 if (keyAttr != null)
                 {
-                    entityDef.KeyPropertyInfo = info;
+                    entityDef.KeyPropertyInfos.Add(keyAttr.Order, info);
+                }
+                else if (info.GetCustomAttribute<KVStoreBackupKeyAttribute>() != null)
+                {
+                    backupKeyPropertyInfo = info;
                 }
             }
 
-            if (entityDef.KeyPropertyInfo == null)
+            //如果KVStoreKey没有找到，就启用BackupKey
+
+            if (!entityDef.KeyPropertyInfos.Any())
             {
-                throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
+                if (backupKeyPropertyInfo == null)
+                {
+                    throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
+                }
+
+                entityDef.KeyPropertyInfos.Add(0, backupKeyPropertyInfo);
             }
 
             #endregion

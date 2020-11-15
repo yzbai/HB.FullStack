@@ -10,7 +10,7 @@ namespace HB.Framework.KVStore.Entities
 
         public Type EntityType { get; set; }
 
-        public PropertyInfo? KeyPropertyInfo { get; set; }
+        public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; } = new Dictionary<int, PropertyInfo>();
 
         public KVStoreEntityDef(string kvstoreName, Type type)
         {
