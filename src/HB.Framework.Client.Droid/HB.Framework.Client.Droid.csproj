@@ -65,9 +65,8 @@
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
-    
     <PackageReference Include="Xamarin.Forms">
-      <Version>4.8.0.1534</Version>
+      <Version>4.8.0.1687</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

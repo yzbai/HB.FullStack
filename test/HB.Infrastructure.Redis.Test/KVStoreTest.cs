@@ -63,7 +63,7 @@ namespace HB.Infrastructure.Redis.Test
         private readonly UserEntity _userEntity1 = new UserEntity()
         {
             UserName = "22222222222",
-            CreateTime = DateTime.UtcNow,
+            CreateTime = DateTimeOffset.UtcNow,
             Activated = true,
             Type = UserType.Admin
         };
@@ -71,7 +71,7 @@ namespace HB.Infrastructure.Redis.Test
         private readonly UserEntity _userEntity2 = new UserEntity()
         {
             UserName = "333333333",
-            CreateTime = DateTime.UtcNow,
+            CreateTime = DateTimeOffset.UtcNow,
             Activated = true,
             Type = UserType.Customer
         };
@@ -140,7 +140,7 @@ namespace HB.Infrastructure.Redis.Test
             Assert.True(results.ElementAt(0) == 1);
             Assert.True(results.ElementAt(1) == 1);
 
-            int newVersion = await _kvStore.AddOrUpdateAsync( _userEntity1, "sfas").ConfigureAwait(false);
+            int newVersion = await _kvStore.AddOrUpdateAsync(_userEntity1, "sfas").ConfigureAwait(false);
 
             Assert.True(newVersion == 2);
 
