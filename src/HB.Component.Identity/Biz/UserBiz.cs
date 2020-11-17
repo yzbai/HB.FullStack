@@ -1,5 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.Component.Identity.Entities;
+using HB.Framework.Business;
 using HB.Framework.Common;
 using HB.Framework.Common.Utility;
 using HB.Framework.Database;
@@ -16,22 +17,22 @@ namespace HB.Component.Identity
     /// <summary>
     /// 重要改变（比如Password）后，一定要清空对应UserId的Authtoken
     /// </summary>
-    internal class UserBiz
+    internal class UserBiz : BaseBiz
     {
         private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         private readonly IdentityOptions _identityOptions;
         private readonly IDatabase _db;
         private readonly IDistributedCache _cache;
-        private readonly IBloomFilter _bloomFilter;
+        //private readonly IBloomFilter _bloomFilter;
 
         private readonly DistributedCacheEntryOptions _distributedCacheEntryOptions;
 
-        public UserBiz(IOptions<IdentityOptions> identityOptions, IDatabase database, IDistributedCache cache, IBloomFilter bloomFilter)
+        public UserBiz(IOptions<IdentityOptions> identityOptions, IDatabase database, IDistributedCache cache/*, IBloomFilter bloomFilter*/)
         {
             _identityOptions = identityOptions.Value;
             _db = database;
             _cache = cache;
-            _bloomFilter = bloomFilter;
+            //_bloomFilter = bloomFilter;
 
             _distributedCacheEntryOptions = new DistributedCacheEntryOptions();
         }
@@ -43,6 +44,24 @@ namespace HB.Component.Identity
         }
 
         public event AsyncEventHandler<IdentityUser, EventArgs> UserUpdated
+        {
+            add => _asyncEventManager.Add(value);
+            remove => _asyncEventManager.Remove(value);
+        }
+
+        public event AsyncEventHandler<IdentityUser?, EventArgs> UserUpdateFailed
+        {
+            add => _asyncEventManager.Add(value);
+            remove => _asyncEventManager.Remove(value);
+        }
+
+        public event AsyncEventHandler<IdentityUser, EventArgs> UserAdding
+        {
+            add => _asyncEventManager.Add(value);
+            remove => _asyncEventManager.Remove(value);
+        }
+
+        public event AsyncEventHandler<IdentityUser, EventArgs> UserAdded
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
@@ -97,18 +116,21 @@ namespace HB.Component.Identity
         {
             ThrowIf.NotLoginName(loginName, nameof(loginName), false);
 
-            //Existense Check
-            //long count = await _db.CountAsync<TUser>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
+            # region Existense Check
 
-            //if (count != 0)
+            long count = await _db.CountAsync<TUser>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
+
+            if (count != 0)
+            {
+                throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
+            }
+
+            //if (_bloomFilter.Exists(bloomFilterName: _identityOptions.BloomFilterName, loginName))
             //{
             //    throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
             //}
 
-            if (_bloomFilter.Exists(bloomFilterName: _identityOptions.BloomFilterName, loginName))
-            {
-                throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
-            }
+            #endregion
 
             TUser? user = await GetByGuidAsync<TUser>(userGuid, transContext).ConfigureAwait(false);
 
@@ -126,18 +148,16 @@ namespace HB.Component.Identity
                 await _db.UpdateAsync(user, OnUserUpdatingAsync, OnUserUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
 
                 //update bloomFilter
-                _bloomFilter.Add(_identityOptions.BloomFilterName, loginName);
-                _bloomFilter.Delete(_identityOptions.BloomFilterName, oldLoginName);
+                //_bloomFilter.Add(_identityOptions.BloomFilterName, loginName);
+                //_bloomFilter.Delete(_identityOptions.BloomFilterName, oldLoginName);
             }
             catch
             {
                 //有可能从cache中获取了旧数据，导致update失败
-                OnUserUpdateFailed(user);
+                await OnUserUpdateFailedAsync(user).ConfigureAwait(false);
                 throw;
             }
         }
-
-
 
         public async Task UpdatePasswordByMobileAsync<TUser>(string mobile, string newPassword, string lastUser, TransactionContext transContext) where TUser : IdentityUser, new()
         {
@@ -153,14 +173,13 @@ namespace HB.Component.Identity
 
             try
             {
-
                 user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
 
                 await _db.UpdateAsync(user, OnUserUpdatingAsync, OnUserUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
             }
             catch
             {
-                OnUserUpdateFailed(user);
+                await OnUserUpdateFailedAsync(user).ConfigureAwait(false);
                 throw;
             }
         }
@@ -188,9 +207,15 @@ namespace HB.Component.Identity
                 throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
             }
 
-            //TODO:使用 Bloom Filter 来查重，可以基于Redis
+            //if (_bloomFilter.ExistAny(_identityOptions.BloomFilterName, new string?[] { mobile, email, loginName }))
+            //{
+            //    throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(TUser)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
+            //}
 
-            if (_bloomFilter.ExistAny(_identityOptions.BloomFilterName, new string?[] { mobile, email, loginName }))
+            WhereExpression<TUser> where = _db.Where<TUser>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            long count = await _db.CountAsync(where, transContext).ConfigureAwait(false);
+
+            if (count != 0)
             {
                 throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(TUser)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
             }
@@ -225,7 +250,7 @@ namespace HB.Component.Identity
             user.SecurityStamp = SecurityUtil.CreateUniqueToken();
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(UserUpdating), user, new EventArgs()).ConfigureAwait(false);
+            await _asyncEventManager.RaiseEventAsync(nameof(UserUpdating), user, EventArgs.Empty).ConfigureAwait(false);
         }
 
         private async Task OnUserUpdatedAsync<TUser>(TUser user) where TUser : IdentityUser, new()
@@ -234,32 +259,37 @@ namespace HB.Component.Identity
             _cache.SetAsync(user.Guid, user, _distributedCacheEntryOptions).Fire();
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(UserUpdated), user, new EventArgs()).ConfigureAwait(false);
+            await _asyncEventManager.RaiseEventAsync(nameof(UserUpdated), user, EventArgs.Empty).ConfigureAwait(false);
         }
 
-        private void OnUserUpdateFailed<TUser>(TUser? user) where TUser : IdentityUser, new()
+        private async Task OnUserUpdateFailedAsync<TUser>(TUser? user) where TUser : IdentityUser, new()
         {
             //Cache
             if (user != null)
             {
                 _cache.RemoveAsync(user.Guid).Fire();
             }
+
+            //Events
+            await _asyncEventManager.RaiseEventAsync(nameof(UserUpdateFailed), user, EventArgs.Empty).ConfigureAwait(false);
         }
 
-        private static Task OnUserAddingAsync<TUser>(TUser user) where TUser : IdentityUser, new()
+        private async Task OnUserAddingAsync<TUser>(TUser user) where TUser : IdentityUser, new()
         {
-            return Task.CompletedTask;
+            //events
+            await _asyncEventManager.RaiseEventAsync(nameof(UserAdding), user, EventArgs.Empty).ConfigureAwait(false);
         }
 
-        private Task OnUserAddedAsync<TUser>(TUser user) where TUser : IdentityUser, new()
+        private async Task OnUserAddedAsync<TUser>(TUser user) where TUser : IdentityUser, new()
         {
             //BloomFilter
-            _bloomFilter.Add(_identityOptions.BloomFilterName, new string?[] { user.Mobile, user.Email, user.LoginName });
+            //_bloomFilter.Add(_identityOptions.BloomFilterName, new string?[] { user.Mobile, user.Email, user.LoginName });
 
             //Cache
             _cache.SetAsync(user.Guid, user, _distributedCacheEntryOptions).Fire();
 
-            return Task.CompletedTask;
+            //Events
+            await _asyncEventManager.RaiseEventAsync(nameof(UserAdded), user, EventArgs.Empty).ConfigureAwait(false);
         }
 
         #endregion

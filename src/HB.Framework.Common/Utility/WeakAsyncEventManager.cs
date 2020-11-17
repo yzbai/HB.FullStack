@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable disable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,18 +10,17 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Common
 {
-
     public delegate Task AsyncEventHandler<TSender, TEventArgs>(TSender sender, TEventArgs args);
 
     internal class DelegateWrapper
     {
-        public DelegateWrapper(WeakReference? caller, MethodInfo handler)
+        public DelegateWrapper(WeakReference caller, MethodInfo handler)
         {
             CallerWeakReference = caller;
             Handler = handler;
         }
 
-        public WeakReference? CallerWeakReference { get; set; }
+        public WeakReference CallerWeakReference { get; set; }
 
         public MethodInfo Handler { get; set; }
     }
@@ -46,7 +47,7 @@ namespace HB.Framework.Common
 
     static class WeakAsyncEventManagerExecutor
     {
-        internal static void Add(string eventName, object? caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
+        internal static void Add(string eventName, object caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
         {
             if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper> wrappers))
             {
@@ -64,14 +65,14 @@ namespace HB.Framework.Common
             }
         }
 
-        internal static void Remove(string eventName, object? caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
+        internal static void Remove(string eventName, object caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
         {
             if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper> wrappers))
             {
                 return;
             }
 
-            DelegateWrapper? wrapper = wrappers.SingleOrDefault(w => w.CallerWeakReference?.Target == caller && w.Handler.Name == methodInfo.Name);
+            DelegateWrapper wrapper = wrappers.SingleOrDefault(w => w.CallerWeakReference?.Target == caller && w.Handler.Name == methodInfo.Name);
 
             if (wrapper != null)
             {
@@ -87,11 +88,11 @@ namespace HB.Framework.Common
             }
 
             List<DelegateWrapper> toRemoves = new();
-            List<(object?, MethodInfo)> toRaises = new();
+            List<(object, MethodInfo)> toRaises = new();
 
             foreach (DelegateWrapper wrapper in wrappers)
             {
-                object? caller = wrapper.CallerWeakReference?.Target;
+                object caller = wrapper.CallerWeakReference?.Target;
 
                 if (wrapper.CallerWeakReference != null && caller == null)
                 {
@@ -109,13 +110,13 @@ namespace HB.Framework.Common
             //Invoke
             for (int i = 0; i < toRaises.Count; ++i)
             {
-                (object? caller, MethodInfo methodInfo) = toRaises[i];
+                (object caller, MethodInfo methodInfo) = toRaises[i];
 
-                object? rtObj;
+                object rtObj;
 
                 if (methodInfo.IsLightweightMethod())
                 {
-                    DynamicMethod? dynamicMethodInfo = TryGetDynamicMethod(methodInfo);
+                    DynamicMethod dynamicMethodInfo = TryGetDynamicMethod(methodInfo);
                     rtObj = dynamicMethodInfo?.Invoke(caller, new object[] { sender, eventArgs });
                 }
                 else
@@ -123,13 +124,13 @@ namespace HB.Framework.Common
                     rtObj = methodInfo.Invoke(caller, new object[] { sender, eventArgs });
                 }
 
-                Task task = (Task)rtObj!;
+                Task task = (Task)rtObj;
 
                 await task.ConfigureAwait(false);
             }
         }
 
-        static DynamicMethod? TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
+        static DynamicMethod TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
         {
             var typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
             var typeRTDynamicMethod = typeInfoRTDynamicMethod?.AsType();
@@ -148,3 +149,4 @@ namespace HB.Framework.Common
 
 
 }
+#nullable restore

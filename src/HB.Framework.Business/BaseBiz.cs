@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HB.Framework.Common.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Business
 {
-    public class BaseBiz
+    public abstract class BaseBiz
     {
         
     }
