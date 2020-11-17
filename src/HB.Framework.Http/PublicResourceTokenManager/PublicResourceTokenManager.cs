@@ -5,7 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace HB.Framework.Http
+namespace HB.Framework.Server
 {
     internal class PublicResourceTokenManager : IPublicResourceTokenManager
     {

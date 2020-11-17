@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace HB.Framework.Http
+namespace HB.Framework.Server
 {
     /// <summary>
     /// 公开资源，即不需要验证就和获取的资源，需要先获取Token

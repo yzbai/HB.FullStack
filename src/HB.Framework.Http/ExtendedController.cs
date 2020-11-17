@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 
-namespace HB.Framework.Http
+namespace HB.Framework.Server
 {
     public class ExtendedController : ControllerBase
     {

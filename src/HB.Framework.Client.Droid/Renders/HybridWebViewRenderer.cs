@@ -23,16 +23,23 @@ namespace HB.Framework.Client.Droid.Renders
 
             if (e.OldElement != null)
             {
-                Control.RemoveJavascriptInterface("jsBridge");
+                //Control.RemoveJavascriptInterface("jsBridge");
                 ((HybridWebView)Element).Cleanup();
             }
             if (e.NewElement != null)
             {
                 //TODO: 调整Cache
-                Control.Settings.CacheMode = Android.Webkit.CacheModes.NoCache;
+                //Control.Settings.CacheMode = Android.Webkit.CacheModes.NoCache;
 
-                Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {_javascriptFunction}"));
-                Control.AddJavascriptInterface(new JSBridge(this), "jsBridge");
+                Control.Settings.AllowContentAccess = true;
+                Control.Settings.AllowFileAccess = true;
+                Control.Settings.AllowFileAccessFromFileURLs = true;
+                Control.Settings.AllowUniversalAccessFromFileURLs = true;
+                Control.Settings.JavaScriptEnabled = true;
+
+                //Control.AddJavascriptInterface(new JSBridge(this), "jsBridge");
+
+                //Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {_javascriptFunction}"));
                 //Control.LoadUrl($"file:///android_asset/Content/{((HybridWebView)Element).Uri}");
 
                 if (Element is HybridWebView hybridWebView)

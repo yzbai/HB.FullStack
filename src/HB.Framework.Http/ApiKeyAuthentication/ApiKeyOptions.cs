@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.Collections.Generic;
 using System;
 
-namespace HB.Framework.Http.ApiKeyAuthentication
+namespace HB.Framework.Server.ApiKeyAuthentication
 {
     public class ApiKeyOptions : AuthenticationSchemeOptions
     {

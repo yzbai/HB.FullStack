@@ -26,14 +26,19 @@ namespace HB.Framework.KVStore.Entities
 
             if (_settings.AssembliesIncludeEntity.IsNullOrEmpty())
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(Entity)));
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(kvstoreEntityTypeCondition);
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, t => t.IsSubclassOf(typeof(Entity)));
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, kvstoreEntityTypeCondition);
             }
 
             _typeSchemaDict = ConstructeSchemaDict(allEntityTypes);
+
+            static bool kvstoreEntityTypeCondition(Type t)
+            {
+                return t.IsSubclassOf(typeof(Entity)) && t.GetCustomAttribute<KVStoreEntityAttribute>() != null;
+            }
         }
 
         private IDictionary<string, KVStoreEntitySchema> ConstructeSchemaDict(IEnumerable<Type> allEntityTypes)
@@ -43,7 +48,7 @@ namespace HB.Framework.KVStore.Entities
 
             allEntityTypes.ForEach(type =>
             {
-                KVStoreEntitySchemaAttribute attribute = type.GetCustomAttribute<KVStoreEntitySchemaAttribute>();
+                KVStoreEntityAttribute attribute = type.GetCustomAttribute<KVStoreEntityAttribute>();
 
                 filedDict.TryGetValue(type.FullName, out KVStoreEntitySchema fileConfigured);
 
@@ -127,6 +132,8 @@ namespace HB.Framework.KVStore.Entities
 
             PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
 
+            PropertyInfo? backupKeyPropertyInfo = null;
+
             foreach (PropertyInfo info in properties)
             {
                 KVStoreKeyAttribute keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>();
@@ -135,11 +142,22 @@ namespace HB.Framework.KVStore.Entities
                 {
                     entityDef.KeyPropertyInfos.Add(keyAttr.Order, info);
                 }
+                else if (info.GetCustomAttribute<KVStoreBackupKeyAttribute>() != null)
+                {
+                    backupKeyPropertyInfo = info;
+                }
             }
+
+            //如果KVStoreKey没有找到，就启用BackupKey
 
             if (!entityDef.KeyPropertyInfos.Any())
             {
-                throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
+                if (backupKeyPropertyInfo == null)
+                {
+                    throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
+                }
+
+                entityDef.KeyPropertyInfos.Add(0, backupKeyPropertyInfo);
             }
 
             #endregion

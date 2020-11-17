@@ -1,4 +1,4 @@
-﻿using HB.Framework.Http.ApiKeyAuthentication;
+﻿using HB.Framework.Server.ApiKeyAuthentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using System;

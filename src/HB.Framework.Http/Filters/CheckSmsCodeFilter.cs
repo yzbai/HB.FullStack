@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace HB.Framework.Http.Filters
+namespace HB.Framework.Server.Filters
 {
     public class CheckSmsCodeFilter : IAsyncActionFilter
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace HB.Framework.Http
+namespace HB.Framework.Server
 {
     public class SiteOptions : IOptions<SiteOptions>
     {
