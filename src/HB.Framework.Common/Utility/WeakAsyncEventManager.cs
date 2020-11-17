@@ -12,6 +12,10 @@ namespace HB.Framework.Common
 {
     public delegate Task AsyncEventHandler<TSender, TEventArgs>(TSender sender, TEventArgs args);
 
+    public delegate Task AsyncEventHandler(object sender, EventArgs args);
+
+    public delegate Task AsyncEventHandler<TSender>(TSender sender, EventArgs args);
+
     internal class DelegateWrapper
     {
         public DelegateWrapper(WeakReference caller, MethodInfo handler)
@@ -34,7 +38,27 @@ namespace HB.Framework.Common
             WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
+        public void Add<TSender>(AsyncEventHandler<TSender> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
+        {
+            WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
+        }
+
+        public void Add(AsyncEventHandler handlerDelegate, [CallerMemberName] string eventName = "")
+        {
+            WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
+        }
+
         public void Remove<TSender, TEventArgs>(AsyncEventHandler<TSender, TEventArgs> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
+        {
+            WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
+        }
+
+        public void Remove<TSender>(AsyncEventHandler<TSender> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
+        {
+            WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
+        }
+
+        public void Remove(AsyncEventHandler handlerDelegate, [CallerMemberName] string eventName = "")
         {
             WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
@@ -42,6 +66,16 @@ namespace HB.Framework.Common
         public Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs) where TSender : class where TEventArgs : class
         {
             return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, TEventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
+        }
+
+        public Task RaiseEventAsync<TSender>(string eventName, TSender sender, EventArgs eventArgs) where TSender : class
+        {
+            return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
+        }
+
+        public Task RaiseEventAsync(string eventName, object sender, EventArgs eventArgs)
+        {
+            return WeakAsyncEventManagerExecutor.RaiseEventAsync<object, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
         }
     }
 

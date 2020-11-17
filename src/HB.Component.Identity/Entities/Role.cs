@@ -9,7 +9,8 @@ namespace HB.Component.Identity.Entities
     /// <summary>
     /// ½ÇÉ«
     /// </summary>
-    public abstract class IdentityRole : Entity
+    [DatabaseEntity]
+    public class Role : Entity
     {
         [EntityProperty("½ÇÉ«Ãû", Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;

@@ -8,23 +8,23 @@ namespace HB.Component.Identity
 {
     public interface IIdentityService
     {
-        Task<TUser?> GetUserBySecurityStampAsync<TUser>(string userGuid, string? securityStamp) where TUser : IdentityUser, new();
-        Task<TUser?> GetUserByMobileAsync<TUser>(string mobile) where TUser : IdentityUser, new();
-        Task<TUser?> GetUserByLoginNameAsync<TUser>(string loginName) where TUser : IdentityUser, new();
+        Task<TUser?> GetUserBySecurityStampAsync<TUser>(string userGuid, string? securityStamp) where TUser : User, new();
+        Task<TUser?> GetUserByMobileAsync<TUser>(string mobile) where TUser : User, new();
+        Task<TUser?> GetUserByLoginNameAsync<TUser>(string loginName) where TUser : User, new();
 
         /// <exception cref="DatabaseException"></exception>
-        Task<TUser> CreateUserByMobileAsync<TUser>(string mobile, string? loginName, string? password, bool mobileConfirmed, string lastUser) where TUser : IdentityUser, new();
+        Task<TUser> CreateUserByMobileAsync<TUser>(string mobile, string? loginName, string? password, bool mobileConfirmed, string lastUser) where TUser : User, new();
 
         /// <exception cref="DatabaseException"></exception>
-        Task SetLockoutAsync<TUser>(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null) where TUser : IdentityUser, new();
+        Task SetLockoutAsync<TUser>(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null) where TUser : User, new();
 
         /// <exception cref="DatabaseException"></exception>
-        Task SetAccessFailedCountAsync<TUser>(string userGuid, long count, string lastUser) where TUser : IdentityUser, new();
+        Task SetAccessFailedCountAsync<TUser>(string userGuid, long count, string lastUser) where TUser : User, new();
 
         /// <exception cref="DatabaseException"></exception>
-        Task<IEnumerable<Claim>> GetUserClaimAsync<TUserClaim, TRole, TRoleOfUser>(IdentityUser user)
-            where TUserClaim : IdentityUserClaim, new()
-            where TRole : IdentityRole, new()
-            where TRoleOfUser : IdentityRoleOfUser, new();
+        Task<IEnumerable<Claim>> GetUserClaimAsync<TUserClaim, TRole, TRoleOfUser>(User user)
+            where TUserClaim : UserClaim, new()
+            where TRole : Role, new()
+            where TRoleOfUser : RoleOfUser, new();
     }
 }

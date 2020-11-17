@@ -10,7 +10,7 @@ namespace HB.Component.Authorization.Entities
     public class SignInToken : Entity
     {
         [Required]
-        [ForeignKey(typeof(IdentityUser))]
+        [ForeignKey(typeof(User))]
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = default!;
 

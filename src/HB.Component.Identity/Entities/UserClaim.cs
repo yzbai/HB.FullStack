@@ -4,9 +4,10 @@ using System;
 
 namespace HB.Component.Identity.Entities
 {
-    public abstract class IdentityUserClaim : Entity
+    [DatabaseEntity]
+    public class UserClaim : Entity
     {
-        [ForeignKey(typeof(IdentityUser))]
+        [ForeignKey(typeof(User))]
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = default!;
 

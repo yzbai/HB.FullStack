@@ -22,7 +22,7 @@ namespace HB.Component.Identity
             _claimsFactory = claimsFactory;
         }
 
-        public async Task<TUser> CreateUserByMobileAsync<TUser>(string mobile, string? loginName, string? password, bool mobileConfirmed, string lastUser) where TUser : IdentityUser, new()
+        public async Task<TUser> CreateUserByMobileAsync<TUser>(string mobile, string? loginName, string? password, bool mobileConfirmed, string lastUser) where TUser : User, new()
         {
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
             try
@@ -40,17 +40,17 @@ namespace HB.Component.Identity
             }
         }
 
-        public Task<TUser?> GetUserByMobileAsync<TUser>(string mobile) where TUser : IdentityUser, new()
+        public Task<TUser?> GetUserByMobileAsync<TUser>(string mobile) where TUser : User, new()
         {
             return _userBiz.GetByMobileAsync<TUser>(mobile);
         }
 
-        public Task<TUser?> GetUserByLoginNameAsync<TUser>(string loginName) where TUser : IdentityUser, new()
+        public Task<TUser?> GetUserByLoginNameAsync<TUser>(string loginName) where TUser : User, new()
         {
             return _userBiz.GetByLoginNameAsync<TUser>(loginName);
         }
 
-        public async Task SetAccessFailedCountAsync<TUser>(string userGuid, long count, string lastUser) where TUser : IdentityUser, new()
+        public async Task SetAccessFailedCountAsync<TUser>(string userGuid, long count, string lastUser) where TUser : User, new()
         {
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
             try
@@ -66,7 +66,7 @@ namespace HB.Component.Identity
             }
         }
 
-        public async Task SetLockoutAsync<TUser>(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null) where TUser : IdentityUser, new()
+        public async Task SetLockoutAsync<TUser>(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null) where TUser : User, new()
         {
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
 
@@ -83,15 +83,15 @@ namespace HB.Component.Identity
             }
         }
 
-        public Task<TUser?> GetUserBySecurityStampAsync<TUser>(string userGuid, string? securityStamp) where TUser : IdentityUser, new()
+        public Task<TUser?> GetUserBySecurityStampAsync<TUser>(string userGuid, string? securityStamp) where TUser : User, new()
         {
             return _userBiz.GetUserBySecurityStampAsync<TUser>(userGuid, securityStamp);
         }
 
-        public async Task<IEnumerable<Claim>> GetUserClaimAsync<TUserClaim, TRole, TRoleOfUser>(IdentityUser user)
-            where TUserClaim : IdentityUserClaim, new()
-            where TRole : IdentityRole, new()
-            where TRoleOfUser : IdentityRoleOfUser, new()
+        public async Task<IEnumerable<Claim>> GetUserClaimAsync<TUserClaim, TRole, TRoleOfUser>(User user)
+            where TUserClaim : UserClaim, new()
+            where TRole : Role, new()
+            where TRoleOfUser : RoleOfUser, new()
         {
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUserClaim>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
             try

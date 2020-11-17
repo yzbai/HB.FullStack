@@ -11,7 +11,7 @@ namespace HB.Component.Identity.Entities
     {
         [Required]
         [KVStoreKey]
-        [ForeignKey(typeof(IdentityUser))]
+        [ForeignKey(typeof(User))]
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = null!;
 

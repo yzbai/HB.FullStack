@@ -9,7 +9,7 @@ namespace HB.Component.Authorization.Entities
     [DatabaseEntity]
     public class ThirdPartyLogin : Entity
     {
-        [ForeignKey(typeof(IdentityUser))]
+        [ForeignKey(typeof(User))]
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = default!;
 

@@ -18,8 +18,8 @@ namespace HB.Component.Identity
         }
 
         public Task<IEnumerable<TRole>> GetByUserGuidAsync<TRole, TRoleOfUser>(string userGuid, TransactionContext? transContext = null)
-            where TRole : IdentityRole, new()
-            where TRoleOfUser : IdentityRoleOfUser, new()
+            where TRole : Role, new()
+            where TRoleOfUser : RoleOfUser, new()
         {
             FromExpression<TRole> from = _database.From<TRole>().RightJoin<TRoleOfUser>((r, ru) => r.Guid == ru.RoleGuid);
             WhereExpression<TRole> where = _database.Where<TRole>().And<TRoleOfUser>(ru => ru.UserGuid == userGuid);
