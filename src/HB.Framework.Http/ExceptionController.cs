@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Http
+namespace HB.Framework.Server
 {
     [ApiController]
     public class ExceptionController : ExtendedController

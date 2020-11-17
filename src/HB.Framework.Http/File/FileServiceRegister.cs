@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using HB.Framework.Http.File;
+using HB.Framework.Server.File;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

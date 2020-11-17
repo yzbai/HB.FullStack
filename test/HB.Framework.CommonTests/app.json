@@ -1,0 +1,13 @@
+﻿{
+  "SimpleAppOptions": {
+    "Name": "xxx",
+    "Age": 12,
+    "Url": "http://www.baidu.com/",
+    "Inners": [
+      { "Name": "a" },
+      { "Name": "b" },
+      { "Name": "c" }
+    ]
+     
+  }
+}

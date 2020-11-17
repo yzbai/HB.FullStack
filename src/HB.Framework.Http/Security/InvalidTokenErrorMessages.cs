@@ -5,7 +5,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 
-namespace HB.Framework.Http.Security
+namespace HB.Framework.Server.Security
 {
     public static class InvalidTokenErrorMessages
     {

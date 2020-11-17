@@ -1,5 +1,5 @@
 ﻿using HB.Framework.Common.Api;
-using HB.Framework.Http;
+using HB.Framework.Server;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -122,9 +122,9 @@ namespace System
                             c.HandleResponse();
                             c.Response.StatusCode = 401;
 
-                    //if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
-                    //{
-                    c.Response.ContentType = "application/problem+json";
+                            //if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
+                            //{
+                            c.Response.ContentType = "application/problem+json";
 
                             ErrorCode error = c.AuthenticateFailure switch
                             {
@@ -136,16 +136,16 @@ namespace System
                             ApiError errorResponse = new ApiError(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
 
                             return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
-                    //}
-                    //else
-                    //{
-                    //    return Task.CompletedTask;
-                    //}
-                },
+                            //}
+                            //else
+                            //{
+                            //    return Task.CompletedTask;
+                            //}
+                        },
                         OnAuthenticationFailed = c =>
                         {
-                    //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
-                    return Task.CompletedTask;
+                            //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
+                            return Task.CompletedTask;
                         },
                         OnMessageReceived = c =>
                         {
@@ -153,9 +153,9 @@ namespace System
                         },
                         OnTokenValidated = c =>
                         {
-                    //TODO: 因为DeviceId放在了Body中，所以这里有问题。
-                    //验证DeviceId 与 JWT 中的DeviceId 是否一致
-                    string? jwt_DeviceId = c.Principal?.GetDeviceId();
+                            //TODO: 因为DeviceId放在了Body中，所以这里有问题。
+                            //验证DeviceId 与 JWT 中的DeviceId 是否一致
+                            string? jwt_DeviceId = c.Principal?.GetDeviceId();
                             string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);
 
                             if (!string.IsNullOrWhiteSpace(jwt_DeviceId) && jwt_DeviceId.Equals(request_DeviceId, GlobalSettings.ComparisonIgnoreCase))
@@ -180,11 +180,11 @@ namespace System
             services
                 .AddControllers(options =>
                 {
-                //need authenticated by default. no need add [Authorize] everywhere
-                AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                    //need authenticated by default. no need add [Authorize] everywhere
+                    AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
-                //options.Filters
-            })
+                    //options.Filters
+                })
                 .AddJsonOptions(options =>
                 {
                     SerializeUtil.Configure(options.JsonSerializerOptions);

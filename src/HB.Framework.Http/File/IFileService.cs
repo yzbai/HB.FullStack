@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace HB.Framework.Http.File
+namespace HB.Framework.Server.File
 {
     public interface IFileService
     {

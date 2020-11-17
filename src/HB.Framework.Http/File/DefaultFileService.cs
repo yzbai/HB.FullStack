@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using HB.Framework.Http;
-using HB.Framework.Http.Security;
+using HB.Framework.Server;
+using HB.Framework.Server.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace HB.Framework.Http.File
+namespace HB.Framework.Server.File
 {
     public class DefaultFileService : IFileService
     {

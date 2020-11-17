@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HB.Framework.Common.Api;
 using Microsoft.AspNetCore.Http;
 
-namespace HB.Framework.Http.Security
+namespace HB.Framework.Server.Security
 {
     public interface ISecurityService
     {
