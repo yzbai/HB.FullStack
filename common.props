@@ -1,5 +1,4 @@
 <Project>
-
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
     <Product>HB.Framework</Product>
@@ -10,5 +9,4 @@
     <RepositoryUrl>https://github.com/yzbai</RepositoryUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-
 </Project>
