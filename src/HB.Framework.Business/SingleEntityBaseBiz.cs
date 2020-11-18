@@ -6,12 +6,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.Framework.Business
 {
     public abstract class SingleEntityBaseBiz<TEntity> where TEntity : Entity, new()
     {
+        private static readonly int _semaphoreSlimTimeout = 5000;
+
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly IDistributedCache _cache;
 
@@ -59,25 +62,25 @@ namespace HB.Framework.Business
         protected async virtual Task OnEntityUpdatedAsync(TEntity entity)
         {
             //Cache
-            _cache.SetAsync(user.Guid, user, _distributedCacheEntryOptions).Fire();
+            _cache.SetEntityAsync<TEntity>(entity).Fire();
 
             //Events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdated), entity, EventArgs.Empty).ConfigureAwait(false);
         }
 
-        protected async virtual Task OnEntityUpdateFailedAsync<TUser>(TEntity? entity)
+        protected async virtual Task OnEntityUpdateFailedAsync(TEntity? entity)
         {
             //Cache
             if (entity != null)
             {
-                _cache.RemoveAsync(user.Guid).Fire();
+                _cache.RemoveEntityAsync<TEntity>(entity).Fire();
             }
 
             //Events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdateFailed), entity, EventArgs.Empty).ConfigureAwait(false);
         }
 
-        protected async virtual Task OnEntityAddingAsync<TUser>(TEntity entity)
+        protected async virtual Task OnEntityAddingAsync(TEntity entity)
         {
             //events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityAdding), entity, EventArgs.Empty).ConfigureAwait(false);
@@ -85,65 +88,68 @@ namespace HB.Framework.Business
 
         protected async virtual Task OnEntityAddedAsync(TEntity entity)
         {
-
-
             //Cache
-            _cache.SetAsync(user.Guid, user, _distributedCacheEntryOptions).Fire();
+            _cache.SetEntityAsync<TEntity>(entity).Fire();
 
             //Events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityAdded), entity, EventArgs.Empty).ConfigureAwait(false);
         }
 
-        private static ConcurrentDictionary<string, object> concurrentDictionary = new ConcurrentDictionary<string, object>();
-        protected async Task<TEntity?> CacheAsideAsync(Func<Task<TEntity?>> execute, TimeSpan? expiresIn, string key)
-        {
+        //这里必须用分布式锁，因为可能又多台Service服务器
+        private static ConcurrentDictionary<string, SemaphoreSlim> concurrentDictionary = new ConcurrentDictionary<string, SemaphoreSlim>();
 
-            (TEntity? cached, bool exists) = await _cache.GetAsync<TEntity>().ConfigureAwait(false);
+        protected async Task<IEnumerable<TEntity>> CacheAsideAsync(string cacheKeyName, IEnumerable<string> cacheKeyValues, Func<Task<IEnumerable<TEntity>>> retrieve)
+        {
+            //if (!_cache.IsMultipleEnabled<TEntity>())
+            //{
+            //    return await retrieve().ConfigureAwait(false);
+            //}
+
+            //TODO: 暂不支持multiple 等待重写IDistributeCache
+
+            return await retrieve().ConfigureAwait(false);
+        }
+
+        protected async Task<TEntity?> TryCacheAsideAsync(string cacheKeyName, string cacheKeyValue, Func<Task<TEntity?>> retrieve)
+        {
+            if (!_cache.IsEnabled<TEntity>())
+            {
+                return await retrieve().ConfigureAwait(false);
+            }
+
+            (TEntity? cached, bool exists) = await _cache.GetEntityAsync<TEntity>(cacheKeyName: cacheKeyName, cacheKeyValue: cacheKeyValue).ConfigureAwait(false);
 
             if (exists)
             {
                 return cached;
             }
 
-            //TODO: Log Missed!
+            SemaphoreSlim curSlim = concurrentDictionary.GetOrAdd(cacheKeyName + cacheKeyValue, new SemaphoreSlim(1, 1));
 
-            TEntity? fromDb = await execute().ConfigureAwait(true);
+            await curSlim.WaitAsync(_semaphoreSlimTimeout).ConfigureAwait(false);
 
-            _cache.SetAsync<TUser>(userGuid, fromDb, _distributedCacheEntryOptions).Fire();
-
-            return fromDb;
-
-
-            var cached = cacheManager.Get(key);
-
-            if (EqualityComparer<T>.Default.Equals(cached, default(T)))
+            try
             {
-                object lockOn = concurrentDictionary.GetOrAdd(key, new object());
+                //Double Check
+                (TEntity? cached2, bool exists2) = await _cache.GetEntityAsync<TEntity>(cacheKeyName: cacheKeyName, cacheKeyValue: cacheKeyValue).ConfigureAwait(false);
 
-                lock (lockOn)
+                if (exists2)
                 {
-                    cached = cacheManager.Get(key);
-
-                    if (EqualityComparer<T>.Default.Equals(cached, default(T)))
-                    {
-                        var executed = execute();
-
-                        if (expiresIn.HasValue)
-                            cacheManager.Set(key, executed, expiresIn.Value);
-                        else
-                            cacheManager.Set(key, executed);
-
-                        return executed;
-                    }
-                    else
-                    {
-                        return cached;
-                    }
+                    return cached2;
                 }
+
+                //TODO: Log Missed!
+
+                TEntity? entity = await retrieve().ConfigureAwait(true);
+
+                _cache.SetEntityAsync<TEntity>(cacheKeyName, cacheKeyValue, entity).Fire();
+
+                return entity;
+
             }
-            else
+            finally
             {
-                return cached;
+                curSlim.Release();
             }
         }
     }

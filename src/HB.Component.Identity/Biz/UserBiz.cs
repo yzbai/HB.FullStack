@@ -14,9 +14,6 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    /// <summary>
-    /// 重要改变（比如Password）后，一定要清空对应UserId的Authtoken
-    /// </summary>
     internal class UserBiz : SingleEntityBaseBiz<User>
     {
         private readonly IdentityOptions _identityOptions;
@@ -38,43 +35,70 @@ namespace HB.Component.Identity
 
         public async Task<User?> GetByGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
-            return await CacheAsideAsync(() => {
-                return _db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
-            }, null, userGuid).ConfigureAwait(false);
+            return await TryCacheAsideAsync(
+                cacheKeyName: nameof(User.Guid),
+                cacheKeyValue: userGuid,
+                retrieve: () =>
+                {
+                    return _db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
+                }).ConfigureAwait(false);
         }
 
-        public Task<IEnumerable<TUser>> GetByGuidAsync<TUser>(IEnumerable<string> userGuids, TransactionContext? transContext = null) where TUser : User, new()
+        public async Task<IEnumerable<User>> GetByGuidsAsync(IEnumerable<string> userGuids, TransactionContext? transContext = null)
         {
-            //TODO:扩展DIstributedCache
-            return _db.RetrieveAsync<TUser>(u => SQLUtil.In(u.Guid, true, userGuids.ToArray()), transContext);
+            return await CacheAsideAsync(
+                nameof(User.Guid),
+                userGuids,
+                () =>
+                {
+                    return _db.RetrieveAsync<User>(u => SQLUtil.In(u.Guid, true, userGuids.ToArray()), transContext);
+                }).ConfigureAwait(false);
         }
 
-        public Task<TUser?> GetByMobileAsync<TUser>(string mobile, TransactionContext? transContext = null) where TUser : User, new()
+        public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
-            return _db.ScalarAsync<TUser>(u => u.Mobile == mobile, transContext);
+            return await TryCacheAsideAsync(
+                nameof(User.Mobile),
+                mobile,
+                () =>
+                {
+                    return _db.ScalarAsync<User>(u => u.Mobile == mobile, transContext);
+                }).ConfigureAwait(false);
         }
 
-        public Task<TUser?> GetByLoginNameAsync<TUser>(string loginName, TransactionContext? transContext = null) where TUser : User, new()
+        public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
-            return _db.ScalarAsync<TUser>(u => u.LoginName == loginName, transContext);
+            return await TryCacheAsideAsync(
+                nameof(User.LoginName),
+                loginName,
+                () =>
+                {
+                    return _db.ScalarAsync<User>(u => u.LoginName == loginName, transContext);
+                }).ConfigureAwait(false);
         }
 
-        public Task<TUser?> GetByEmailAsync<TUser>(string email, TransactionContext? transContext = null) where TUser : User, new()
+        public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
-            return _db.ScalarAsync<TUser>(u => u.Email == email, transContext);
+            return await TryCacheAsideAsync(
+                nameof(User.Email),
+                email,
+                () =>
+                {
+                    return _db.ScalarAsync<User>(u => u.Email == email, transContext);
+                }).ConfigureAwait(false);
         }
 
         #endregion
 
         #region Update
 
-        public async Task UpdateLoginNameAsync<TUser>(string userGuid, string loginName, string lastUser, TransactionContext transContext) where TUser : User, new()
+        public async Task UpdateLoginNameAsync(string userGuid, string loginName, string lastUser, TransactionContext transContext)
         {
             ThrowIf.NotLoginName(loginName, nameof(loginName), false);
 
             # region Existense Check
 
-            long count = await _db.CountAsync<TUser>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
+            long count = await _db.CountAsync<User>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
 
             if (count != 0)
             {
@@ -88,7 +112,7 @@ namespace HB.Component.Identity
 
             #endregion
 
-            TUser? user = await GetByGuidAsync<TUser>(userGuid, transContext).ConfigureAwait(false);
+            User? user = await GetByGuidAsync(userGuid, transContext).ConfigureAwait(false);
 
             try
             {
@@ -101,7 +125,7 @@ namespace HB.Component.Identity
 
                 user.LoginName = loginName;
 
-                await _db.UpdateAsync(user, OnUserUpdatingAsync, OnUserUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
+                await _db.UpdateAsync(user, OnEntityUpdatingAsync, OnEntityUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
 
                 //update bloomFilter
                 //_bloomFilter.Add(_identityOptions.BloomFilterName, loginName);
@@ -110,17 +134,17 @@ namespace HB.Component.Identity
             catch
             {
                 //有可能从cache中获取了旧数据，导致update失败
-                await OnUserUpdateFailedAsync(user).ConfigureAwait(false);
+                await OnEntityUpdateFailedAsync(user).ConfigureAwait(false);
                 throw;
             }
         }
 
-        public async Task UpdatePasswordByMobileAsync<TUser>(string mobile, string newPassword, string lastUser, TransactionContext transContext) where TUser : User, new()
+        public async Task UpdatePasswordByMobileAsync(string mobile, string newPassword, string lastUser, TransactionContext transContext)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), false);
             ThrowIf.NotPassword(mobile, nameof(newPassword), false);
 
-            TUser? user = await GetByMobileAsync<TUser>(mobile, transContext).ConfigureAwait(false);
+            User? user = await GetByMobileAsync(mobile, transContext).ConfigureAwait(false);
 
             if (user == null)
             {
@@ -131,11 +155,11 @@ namespace HB.Component.Identity
             {
                 user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
 
-                await _db.UpdateAsync(user, OnUserUpdatingAsync, OnUserUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
+                await _db.UpdateAsync(user, OnEntityUpdatingAsync, OnEntityUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
             }
             catch
             {
-                await OnUserUpdateFailedAsync(user).ConfigureAwait(false);
+                await OnEntityUpdateFailedAsync(user).ConfigureAwait(false);
                 throw;
             }
         }
@@ -144,7 +168,7 @@ namespace HB.Component.Identity
 
         #region Create
 
-        public async Task<TUser> CreateAsync<TUser>(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext transContext) where TUser : User, new()
+        public async Task<User> CreateAsync(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext transContext)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
             ThrowIf.NotEmail(email, nameof(email), true);
@@ -168,17 +192,17 @@ namespace HB.Component.Identity
             //    throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(TUser)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
             //}
 
-            WhereExpression<TUser> where = _db.Where<TUser>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            WhereExpression<User> where = _db.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
             long count = await _db.CountAsync(where, transContext).ConfigureAwait(false);
 
             if (count != 0)
             {
-                throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(TUser)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
+                throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(User)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
             }
 
             #endregion
 
-            TUser user = new TUser
+            User user = new User
             {
                 SecurityStamp = SecurityUtil.CreateUniqueToken(),
                 LoginName = loginName,
@@ -191,7 +215,7 @@ namespace HB.Component.Identity
 
             user.PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
 
-            await _db.AddAsync(user, OnUserAddingAsync, OnUserAddedAsync, lastUser, transContext).ConfigureAwait(false);
+            await _db.AddAsync(user, OnEntityAddingAsync, OnEntityAddedAsync, lastUser, transContext).ConfigureAwait(false);
 
             return user;
         }

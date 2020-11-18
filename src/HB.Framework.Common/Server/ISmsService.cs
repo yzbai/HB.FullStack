@@ -1,4 +1,4 @@
-﻿namespace HB.Framework.Common.Sms
+﻿namespace HB.Framework.Common.Server
 {
     public interface ISmsService
     {

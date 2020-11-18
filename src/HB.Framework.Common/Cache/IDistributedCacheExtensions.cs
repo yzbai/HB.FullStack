@@ -11,14 +11,14 @@ namespace Microsoft.Extensions.Caching.Distributed
         #region Generic
 
         /// <summary>
-        /// SetAsync
+        /// 可以存储空值
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="cache"></param>
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.Cache.CacheException"></exception>
         public static async Task SetAsync<T>(this IDistributedCache cache, string key, T? value, DistributedCacheEntryOptions options) where T : class
         {
             try
@@ -56,15 +56,6 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
         }
 
-        /// <summary>
-        /// SetIntAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public static async Task SetIntAsync(this IDistributedCache cache, string key, int value, DistributedCacheEntryOptions options)
         {
             try
@@ -77,13 +68,6 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
         }
 
-        /// <summary>
-        /// GetIntAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public static async Task<(int, bool)> GetIntAsync(this IDistributedCache cache, string key)
         {
             try
@@ -109,7 +93,7 @@ namespace Microsoft.Extensions.Caching.Distributed
         {
             try
             {
-                byte[] result = await cache.GetAsync(key).ConfigureAwait(false);
+                byte[]? result = await cache.GetAsync(key).ConfigureAwait(false);
 
                 if (result != null && result.Length > 0)
                 {

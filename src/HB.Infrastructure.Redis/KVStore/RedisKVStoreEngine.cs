@@ -98,7 +98,7 @@ namespace HB.Infrastructure.Redis.KVStore
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
                 RedisResult result = await db.ScriptEvaluateAsync(_luaGetAllTemplate, new RedisKey[] { entityName, EntityVersionName(entityName) }).ConfigureAwait(false);
-                
+
                 return MapGetAllResultToStringWithVersion(result);
             }
             catch (RedisConnectionException ex)
@@ -115,7 +115,7 @@ namespace HB.Infrastructure.Redis.KVStore
             }
         }
 
-        public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
+        public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
             RedisResult result = null!;
 
@@ -159,7 +159,7 @@ namespace HB.Infrastructure.Redis.KVStore
         /// <summary>
         /// 返回最新的Version
         /// </summary>
-        public async Task<IEnumerable<int>> EntityAddOrUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons)
+        public async Task<IEnumerable<int>> EntityAddOrUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
             RedisResult result = null!;
 
@@ -198,7 +198,7 @@ namespace HB.Infrastructure.Redis.KVStore
             return (int[])result;
         }
 
-        public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string> entityJsons, IEnumerable<int> entityVersions)
+        public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions)
         {
             RedisResult result = null!;
 
@@ -358,7 +358,8 @@ namespace HB.Infrastructure.Redis.KVStore
 
             List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
 
-            values.ForEach(kv => {
+            values.ForEach(kv =>
+            {
                 int version = (int)versions[kv.Key];
                 rt.Add(new Tuple<string?, int>(kv.Value.ToString(), version));
             });

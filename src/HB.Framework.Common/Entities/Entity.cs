@@ -26,6 +26,7 @@ namespace HB.Framework.Common.Entities
         [Required]
         [UniqueGuidEntityProperty]
         [KVStoreBackupKey]
+        [CacheGuidKey]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
         [EntityProperty("Version")]
