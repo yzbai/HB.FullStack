@@ -8,31 +8,6 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace Microsoft.Extensions.Caching.Distributed
 {
-    public class CacheEntityDef
-    {
-        public PropertyInfo GuidKeyProperty { get; internal set; } = null!;
-
-        public List<PropertyInfo> OtherDimensions { get; private set; } = new List<PropertyInfo>();
-
-        public bool IsCacheable { get; internal set; }
-
-        public string Name { get; internal set; } = null!;
-
-        public DistributedCacheEntryOptions EntryOptions { get; internal set; } = null!;
-    }
-
-    public static class CacheEntityDefFactory
-    {
-        private static readonly Dictionary<Type, CacheEntityDef> _defDict = new Dictionary<Type, CacheEntityDef>();
-
-        public static CacheEntityDef Get<TEntity>() where TEntity : Entity, new()
-        {
-             
-
-
-        }
-    }
-
     public static class IDistributedCacheEntityExtensions
     {
         /// <summary>

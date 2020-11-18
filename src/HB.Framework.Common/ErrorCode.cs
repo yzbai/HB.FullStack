@@ -142,11 +142,13 @@
         JwtSigningCertNotFound = 74,
         DataProtectionCertNotFound = 727,
 
-
-
-
-
         #endregion Cert
+
+        #region Cache
+        
+        CacheEntityNotHaveGuidKeyAttribute = 828,
+
+        #endregion
     }
 
     public static class ErrorCodeExtensions
