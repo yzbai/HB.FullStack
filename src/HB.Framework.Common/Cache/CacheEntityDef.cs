@@ -14,5 +14,6 @@ namespace Microsoft.Extensions.Caching.Distributed
         public string Name { get; internal set; } = null!;
 
         public DistributedCacheEntryOptions EntryOptions { get; internal set; } = null!;
+        public string? CacheInstanceName { get; set; }
     }
 }

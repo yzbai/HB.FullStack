@@ -132,7 +132,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+                result = await db.ScriptEvaluateAsync(luaScript, keys, argvs).ConfigureAwait(false);
 
             }
             catch (RedisConnectionException ex)
@@ -213,7 +213,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+                result = await db.ScriptEvaluateAsync(luaScript, keys, argvs).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -249,7 +249,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+                result = await db.ScriptEvaluateAsync(luaScript, keys, argvs).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {

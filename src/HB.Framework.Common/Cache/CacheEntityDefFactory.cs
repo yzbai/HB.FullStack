@@ -47,6 +47,8 @@ namespace Microsoft.Extensions.Caching.Distributed
                 return def;
             }
 
+            def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
+
             def.EntryOptions = new DistributedCacheEntryOptions
             {
                 SlidingExpiration = cacheEntityAttribute.SlidingAliveTime ?? CacheOptions.SlidingAliveTime
@@ -54,7 +56,8 @@ namespace Microsoft.Extensions.Caching.Distributed
 
             bool foundGuidKeyAttribute = false;
 
-            entityType.GetProperties().ForEach(propertyInfo => {
+            entityType.GetProperties().ForEach(propertyInfo =>
+            {
 
                 if (!foundGuidKeyAttribute)
                 {
@@ -71,7 +74,7 @@ namespace Microsoft.Extensions.Caching.Distributed
 
                 CacheDifferentDimensionKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheDifferentDimensionKeyAttribute>();
 
-                if(dimensionKeyAttribute!= null)
+                if (dimensionKeyAttribute != null)
                 {
                     def.OtherDimensions.Add(propertyInfo);
                 }

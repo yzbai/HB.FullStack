@@ -147,7 +147,7 @@
         #region Cache
         
         CacheEntityNotHaveGuidKeyAttribute = 828,
-        CacheNotFoundInstance = 829,
+        CacheLoadedLuaNotFound = 829,
 
         #endregion
     }

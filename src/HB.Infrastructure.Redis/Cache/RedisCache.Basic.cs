@@ -12,8 +12,6 @@ namespace HB.Infrastructure.Redis.Cache
 {
     internal partial class RedisCache
     {
-        #region Basic
-
         public async Task SetIntAsync(string key, int value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
         {
             try
@@ -55,7 +53,7 @@ namespace HB.Infrastructure.Redis.Cache
         public async Task<(string?, bool)> GetStringAsync(string key, CancellationToken token = default(CancellationToken))
         {
             byte[]? data = await GetAsync(key, token).ConfigureAwait(false);
-            
+
             if (data == null)
             {
                 return (null, false);
@@ -108,7 +106,5 @@ namespace HB.Infrastructure.Redis.Cache
 
             return await database.KeyDeleteAsync(key).ConfigureAwait(false);
         }
-
-        #endregion
     }
 }

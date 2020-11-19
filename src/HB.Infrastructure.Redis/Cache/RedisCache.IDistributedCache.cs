@@ -11,21 +11,13 @@ namespace HB.Infrastructure.Redis.Cache
     internal partial class RedisCache
     {
         // KEYS[1] = = key
-        // ARGV[1] = absolute-expiration - ticks as long (-1 for none)
-        // ARGV[2] = sliding-expiration - ticks as long (-1 for none)
-        // ARGV[3] = relative-expiration (long, in seconds, -1 for none) - Min(absolute-expiration - Now, sliding-expiration)
+        // ARGV[1] = absolute-expiration - unix time seconds as long (null for none)
+        // ARGV[2] = sliding-expiration - seconds  as long (null for none)
+        // ARGV[3] = ttl seconds 当前过期要设置的过期时间，由上面两个推算
         // ARGV[4] = data - byte[]
         // this order should not change LUA script depends on it
-        private const string SetScript = (@"
-                redis.call('HMSET', KEYS[1], 'absexp', ARGV[1], 'sldexp', ARGV[2], 'data', ARGV[4])
-                if ARGV[3] ~= '-1' then
-                  redis.call('EXPIRE', KEYS[1], ARGV[3])
-                end
-                return 1");
-        private const string AbsoluteExpirationKey = "absexp";
-        private const string SlidingExpirationKey = "sldexp";
-        private const string DataKey = "data";
-        private const long NotPresent = -1;
+        private const string _luaSet = @"redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4]) if(ARGV[3]~=-1) then redis.call('expire',KEYS[1], ARGV[3]) end return 1";
+        private const string _luaGetAndRefresh = @"local now = tonumber((redis.call('time'))[1]) local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') if(data[1]~= -1 and now >=tonumber(data[1])) then redis.call('del',KEYS[1]) return nil end local curexp=-1 if(data[1]~=-1 and data[2]~=-1) then curexp=data[1]-now if (tonumber(data[2])<curexp) then curexp=data[2] end elseif (data[1]~=-1) then curexp=data[1]-now elseif (data[2]~=-1) then curexp=data[2] end if(curexp~=-1) then redis.call('expire', KEYS[1], curexp) end return data";
 
         public byte[]? Get(string key)
         {
@@ -34,9 +26,7 @@ namespace HB.Infrastructure.Redis.Cache
                 throw new ArgumentNullException(nameof(key));
             }
 
-            IDatabase database = GetDefaultDatabase();
-
-            return GetAndRefresh(key, getData: true);
+            return GetAndRefresh(key);
         }
 
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken))
@@ -48,7 +38,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             token.ThrowIfCancellationRequested();
 
-            return await GetAndRefreshAsync(key, getData: true, token: token).ConfigureAwait(false);
+            return await GetAndRefreshAsync(key, token: token).ConfigureAwait(false);
         }
 
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -70,18 +60,20 @@ namespace HB.Infrastructure.Redis.Cache
 
             IDatabase database = GetDefaultDatabase();
 
-            var creationTime = DateTimeOffset.UtcNow;
+            options.Check();
 
-            var absoluteExpiration = GetAbsoluteExpiration(creationTime, options);
+            long? absoluteExpireUnixSeconds = options.AbsoluteExpiration?.ToUnixTimeSeconds();
+            long? slideSeconds = (long?)(options.SlidingExpiration?.TotalSeconds);
 
-            var result = database.ScriptEvaluate(SetScript, new RedisKey[] { DefaultInstanceName + key },
+            _ = database.ScriptEvaluate(GetDefaultLoadLuas().LoadedSetLua, new RedisKey[] { DefaultInstanceName + key },
                 new RedisValue[]
                 {
-                        absoluteExpiration?.Ticks ?? NotPresent,
-                        options.SlidingExpiration?.Ticks ?? NotPresent,
-                        GetExpirationInSeconds(creationTime, absoluteExpiration, options) ?? NotPresent,
+                        absoluteExpireUnixSeconds??-1,
+                        slideSeconds??-1,
+                        GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value
                 });
+
         }
 
         public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
@@ -105,18 +97,21 @@ namespace HB.Infrastructure.Redis.Cache
 
             IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
 
-            var creationTime = DateTimeOffset.UtcNow;
+            options.Check();
 
-            var absoluteExpiration = GetAbsoluteExpiration(creationTime, options);
+            long? absoluteExpireUnixSeconds = options.AbsoluteExpiration?.ToUnixTimeSeconds();
+            long? slideSeconds = (long?)(options.SlidingExpiration?.TotalSeconds);
 
-            await database.ScriptEvaluateAsync(SetScript, new RedisKey[] { DefaultInstanceName + key },
+
+            await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetLua, new RedisKey[] { DefaultInstanceName + key },
                 new RedisValue[]
                 {
-                        absoluteExpiration?.Ticks ?? NotPresent,
-                        options.SlidingExpiration?.Ticks ?? NotPresent,
-                        GetExpirationInSeconds(creationTime, absoluteExpiration, options) ?? NotPresent,
+                        absoluteExpireUnixSeconds??-1,
+                        slideSeconds??-1,
+                        GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value
                 }).ConfigureAwait(false);
+
         }
 
         public void Refresh(string key)
@@ -126,7 +121,7 @@ namespace HB.Infrastructure.Redis.Cache
                 throw new ArgumentNullException(nameof(key));
             }
 
-            GetAndRefresh(key, getData: false);
+            GetAndRefresh(key);
         }
 
         public async Task RefreshAsync(string key, CancellationToken token = default(CancellationToken))
@@ -138,10 +133,10 @@ namespace HB.Infrastructure.Redis.Cache
 
             token.ThrowIfCancellationRequested();
 
-            await GetAndRefreshAsync(key, getData: false, token: token).ConfigureAwait(false);
+            await GetAndRefreshAsync(key, token: token).ConfigureAwait(false);
         }
 
-        private byte[]? GetAndRefresh(string key, bool getData)
+        private byte[]? GetAndRefresh(string key)
         {
             if (key == null)
             {
@@ -150,9 +145,11 @@ namespace HB.Infrastructure.Redis.Cache
 
             IDatabase database = GetDefaultDatabase();
 
-            // This also resets the LRU status as desired.
-            // TODO: Can this be done in one operation on the server side? Probably, the trick would just be the DateTimeOffset math.
-            RedisValue[] results;
+            database
+
+            database.ScriptEvaluate
+
+            RedisValue[] results = await database.ScriptEvaluate()
 
             if (getData)
             {
@@ -178,7 +175,7 @@ namespace HB.Infrastructure.Redis.Cache
             return null;
         }
 
-        private async Task<byte[]?> GetAndRefreshAsync(string key, bool getData, CancellationToken token = default(CancellationToken))
+        private async Task<byte[]?> GetAndRefreshAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
@@ -310,41 +307,57 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
-        private static long? GetExpirationInSeconds(DateTimeOffset creationTime, DateTimeOffset? absoluteExpiration, DistributedCacheEntryOptions options)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="absoluteExpUnixSeconds"></param>
+        /// <param name="slidingSeconds"></param>
+        /// <returns></returns>
+        private static long? GetExpireSeconds(long? absoluteExpUnixSeconds, long? slidingSeconds)
         {
-            if (absoluteExpiration.HasValue && options.SlidingExpiration.HasValue)
-            {
-                return (long)Math.Min(
-                    (absoluteExpiration.Value - creationTime).TotalSeconds,
-                    options.SlidingExpiration.Value.TotalSeconds);
-            }
-            else if (absoluteExpiration.HasValue)
-            {
-                return (long)(absoluteExpiration.Value - creationTime).TotalSeconds;
-            }
-            else if (options.SlidingExpiration.HasValue)
-            {
-                return (long)options.SlidingExpiration.Value.TotalSeconds;
-            }
-            return null;
-        }
+            #region 算法1 
+            //考虑到slidingSeconds之后已经超过now，所以取小。实际没事，在get时，会检查是否过期
+            //但如果slidingSeconds过长，则会长时间存放不能及时销毁
 
-        private static DateTimeOffset? GetAbsoluteExpiration(DateTimeOffset creationTime, DistributedCacheEntryOptions options)
-        {
-            if (options.AbsoluteExpiration.HasValue && options.AbsoluteExpiration <= creationTime)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(DistributedCacheEntryOptions.AbsoluteExpiration),
-                    options.AbsoluteExpiration.Value,
-                    "The absolute expiration value must be in the future.");
-            }
+            long nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            if (options.AbsoluteExpirationRelativeToNow.HasValue)
+            if (absoluteExpUnixSeconds.HasValue && absoluteExpUnixSeconds <= nowUnixSeconds)
             {
-                return creationTime + options.AbsoluteExpirationRelativeToNow;
+                return 0;
+            }
+            else if (absoluteExpUnixSeconds.HasValue && slidingSeconds.HasValue)
+            {
+                return Math.Min(absoluteExpUnixSeconds.Value - nowUnixSeconds, slidingSeconds.Value);
+            }
+            else if (absoluteExpUnixSeconds.HasValue)
+            {
+                return absoluteExpUnixSeconds.Value - nowUnixSeconds;
+            }
+            else if (slidingSeconds.HasValue)
+            {
+                return slidingSeconds.Value;
+            }
+            else
+            {
+                return null;
             }
 
-            return options.AbsoluteExpiration;
+            #endregion
+
+            //如果临到期，会到存放不到一个SlidingSeconds的时间
+            //与算法1 有所取舍
+
+            //if (slidingSeconds != null)
+            //{
+            //    return slidingSeconds;
+            //}
+
+            //if (absoluteExpUnixSeconds == null)
+            //{
+            //    return null;
+            //}
+
+            //return absoluteExpUnixSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         private const string HmGetScript = (@"return redis.call('HMGET', KEYS[1], unpack(ARGV))");
@@ -365,6 +378,7 @@ namespace HB.Infrastructure.Redis.Cache
             string key,
             params string[] members)
         {
+
             var result = await cache.ScriptEvaluateAsync(
                 HmGetScript,
                 new RedisKey[] { key },
