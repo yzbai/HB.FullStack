@@ -7,6 +7,9 @@ namespace HB.Framework.Common.Entities
     [AttributeUsage(AttributeTargets.Class)]
     public class CacheEntityAttribute : Attribute
     {
+        public string? InstanceName { get; set; }
+
+
         public bool AllowMultipleRetrieve { get; set; }
 
         public TimeSpan? SlidingAliveTime { get; set; }

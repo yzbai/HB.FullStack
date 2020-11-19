@@ -31,7 +31,7 @@ namespace System
             return false;
         }
 
-        public Task ResetAsync(string resourceType, string resource)
+        public Task RemoveAsync(string resourceType, string resource)
         {
             string key = GetKey(resourceType, resource);
 

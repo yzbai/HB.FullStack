@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Redis.Direct
             try
             {
                 IDatabase database = await RedisInstanceManager.GetDatabaseAsync(GetRedisInstanceSetting(redisInstanceName), _logger).ConfigureAwait(false);
-
+                //database.lock
                 return await database.StringSetAsync(key, "", TimeSpan.FromSeconds(expireSeconds), When.NotExists).ConfigureAwait(false);
             }
             catch (Exception ex)

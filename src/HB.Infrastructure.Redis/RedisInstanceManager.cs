@@ -17,6 +17,66 @@ namespace HB.Infrastructure.Redis
         private static ConcurrentDictionary<string, ConnectionMultiplexer> _connectionDict = new ConcurrentDictionary<string, ConnectionMultiplexer>();      //instanceName : RedisConnection
         private static readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
+        public static IDatabase GetDatabase(RedisInstanceSetting setting, ILogger logger)
+        {
+            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached))
+            {
+                return cached.GetDatabase(setting.DatabaseNumber);
+            }
+
+            try
+            {
+                _connectionLock.Wait();
+
+                //Double check
+                if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached2))
+                {
+                    return cached2.GetDatabase(setting.DatabaseNumber);
+                }
+
+                ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(setting.ConnectionString);
+
+                //TODO: 调查参数
+                //configurationOptions.KeepAlive = 30;
+                //configurationOptions.ConnectTimeout = 10 * 1000;
+                //configurationOptions.SyncTimeout = 100 * 1000;
+                //configurationOptions.ReconnectRetryPolicy = new ExponentialRetry(5000);
+
+                IDatabase database = null!;
+
+                ReConnectPolicy(logger, setting.ConnectionString).Execute(() =>
+                {
+                    ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(configurationOptions);
+
+                    _connectionDict[setting.InstanceName] = connection;
+
+                    database = connection.GetDatabase(setting.DatabaseNumber);
+
+                    logger.LogInformation($"Redis 链接建立 Connected : {setting.InstanceName}");
+
+
+                });
+
+                _connectionLock.Release();
+
+                return database;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                _connectionLock.Release();
+
+                logger.LogCritical(ex, $"Redis Database获取失败.尝试重新获取。 SettingName:{setting.InstanceName}, Connection:{setting.ConnectionString}");
+
+                Close(setting);
+
+                Thread.Sleep(5000);
+
+                return GetDatabase(setting, logger);
+            }
+        }
+
         public static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting setting, ILogger logger)
         {
             if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached))
@@ -44,7 +104,7 @@ namespace HB.Infrastructure.Redis
 
                 IDatabase database = null!;
 
-                await ReConnectPolicy(logger, setting.ConnectionString).ExecuteAsync(async () =>
+                await AsyncReConnectPolicy(logger, setting.ConnectionString).ExecuteAsync(async () =>
                 {
                     ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(configurationOptions).ConfigureAwait(false);
 
@@ -69,18 +129,32 @@ namespace HB.Infrastructure.Redis
 
                 Close(setting);
 
-                await Task.Delay(1000).ConfigureAwait(false);
+                await Task.Delay(5000).ConfigureAwait(false);
 
                 return await GetDatabaseAsync(setting, logger).ConfigureAwait(false);
             }
         }
 
-        private static AsyncRetryPolicy ReConnectPolicy(ILogger logger, string connectionString)
+        private static AsyncRetryPolicy AsyncReConnectPolicy(ILogger logger, string connectionString)
         {
             //TODO: move this settings to options
             return Policy
                         .Handle<RedisConnectionException>()
                         .WaitAndRetryForeverAsync(
+                            count => TimeSpan.FromSeconds(5),
+                            (exception, retryCount, timeSpan) =>
+                            {
+                                RedisConnectionException ex = (RedisConnectionException)exception;
+                                logger.LogCritical(exception, $"Redis 建立链接时失败 Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
+                            });
+        }
+
+        private static RetryPolicy ReConnectPolicy(ILogger logger, string connectionString)
+        {
+            //TODO: move this settings to options
+            return Policy
+                        .Handle<RedisConnectionException>()
+                        .WaitAndRetryForever(
                             count => TimeSpan.FromSeconds(5),
                             (exception, retryCount, timeSpan) =>
                             {
