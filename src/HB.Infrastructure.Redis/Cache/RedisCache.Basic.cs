@@ -104,7 +104,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             token.ThrowIfCancellationRequested();
 
-            return await database.KeyDeleteAsync(key).ConfigureAwait(false);
+            return await database.KeyDeleteAsync(GetRealKey(key)).ConfigureAwait(false);
         }
     }
 }

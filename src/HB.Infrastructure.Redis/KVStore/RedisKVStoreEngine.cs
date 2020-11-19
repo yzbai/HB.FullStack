@@ -73,7 +73,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
                 string lua = string.Format(GlobalSettings.Culture, _luaBatchGetTemplate, stringBuilder.ToString());
 
-                RedisResult result = await db.ScriptEvaluateAsync(lua, new RedisKey[] { entityName, EntityVersionName(entityName) }).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(lua, new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) }).ConfigureAwait(false);
 
                 return MapResultToStringWithVersion(result);
             }
@@ -97,7 +97,7 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                RedisResult result = await db.ScriptEvaluateAsync(_luaGetAllTemplate, new RedisKey[] { entityName, EntityVersionName(entityName) }).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(_luaGetAllTemplate, new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) }).ConfigureAwait(false);
 
                 return MapGetAllResultToStringWithVersion(result);
             }
@@ -123,7 +123,7 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
 
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
+                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) };
 
                 IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
                 IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
@@ -169,7 +169,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
                 string tempListName = "lst" + SecurityUtil.CreateUniqueToken();
 
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName), tempListName };
+                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName), tempListName };
 
                 IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
                 IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
@@ -206,7 +206,7 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
 
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
+                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) };
                 RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t)
                     .Concat(entityJsons.Select(t => (RedisValue)t))
                     .Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
@@ -244,7 +244,7 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
 
-                RedisKey[] keys = new RedisKey[] { entityName, EntityVersionName(entityName) };
+                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) };
                 RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t).Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
 
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
@@ -279,7 +279,7 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                return await db.KeyDeleteAsync(entityName).ConfigureAwait(false);
+                return await db.KeyDeleteAsync(EntityNameKey(entityName)).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -307,15 +307,20 @@ namespace HB.Infrastructure.Redis.KVStore
         {
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
             {
-                return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
+                return await RedisInstanceManager.GetDatabaseAsync(setting).ConfigureAwait(false);
             }
 
             throw new KVStoreException($"Can not found Such Redis Instance: {instanceName}");
         }
 
-        private static string EntityVersionName(string entityName)
+        private string EntityNameKey(string entityName)
         {
-            return entityName + ":Version";
+            return _options.ApplicationName + entityName;
+        }
+
+        private string EntityVersionNameKey(string entityName)
+        {
+            return _options.ApplicationName+ entityName + "_V";
         }
 
         private static ErrorCode MapResultToErrorCode(RedisResult redisResult)

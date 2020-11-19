@@ -21,5 +21,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         public KVStoreSettings KVStoreSettings { get; set; } = new KVStoreSettings();
 
+        public string? ApplicationName { get; set; }
+
     }
 }
