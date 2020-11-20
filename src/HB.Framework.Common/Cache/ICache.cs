@@ -55,12 +55,6 @@ namespace HB.Framework.Common.Cache
 
         Task SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new();
 
-        /// <summary>
-        /// 可以存储空值
-        /// </summary>
-        Task SetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, TEntity? entity, CancellationToken token = default(CancellationToken))
-            where TEntity : Entity, new();
-
         Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new();
 
         bool IsEnabled<TEntity>() where TEntity : Entity, new();

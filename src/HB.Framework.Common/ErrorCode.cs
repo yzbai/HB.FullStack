@@ -145,9 +145,11 @@
         #endregion Cert
 
         #region Cache
-        
+
         CacheEntityNotHaveGuidKeyAttribute = 828,
         CacheLoadedLuaNotFound = 829,
+        CacheNoSuchDimensionKey = 830,
+        CacheNotEnabledForEntity = 831,
 
         #endregion
     }

@@ -116,7 +116,7 @@ namespace HB.Infrastructure.Redis.EventBus
                         _options.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
                         };
 
-                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
+                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting).ConfigureAwait(false);
 
                     //TODO: Use LoadedScript
                     int result = (int)await database.ScriptEvaluateAsync(
@@ -183,7 +183,7 @@ namespace HB.Infrastructure.Redis.EventBus
                 try
                 {
                     //1, Get Entity
-                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
+                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting).ConfigureAwait(false);
 
                     RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);
 

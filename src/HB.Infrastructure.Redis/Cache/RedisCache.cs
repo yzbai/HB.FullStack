@@ -6,7 +6,9 @@ using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -137,7 +139,7 @@ namespace HB.Infrastructure.Redis.Cache
 
         private string GetDimensionKey(string entityName, string dimensionKeyName)
         {
-            return _options.ApplicationName + entityName + dimensionKeyName;
+            return GetRealKey(entityName + dimensionKeyName);
         }
 
         /// <summary>
@@ -161,7 +163,10 @@ end
 
 local now = tonumber((redis.call('time'))[1]) 
 
-if(data[1]~= -1 and now >=tonumber(data[1])) then 
+data[1] = tonumber(data[1])
+data[2] = tonumber(data[2])
+
+if(data[1]~= -1 and now >=data[1]) then 
     redis.call('del',KEYS[1])
     redis.call('del',guid)
     return 8 
@@ -172,7 +177,7 @@ local curexp=-1
 if(data[1]~=-1 and data[2]~=-1) then 
     curexp=data[1]-now 
     
-    if (tonumber(data[2])<curexp) then 
+    if (data[2]<curexp) then 
         curexp=data[2] 
     end 
 elseif (data[1]~=-1) then 
@@ -189,9 +194,24 @@ end
 
 return data";
 
+        private const string _luaEntitySet = @"
+redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4]) 
+
+if(ARGV[3]~=-1) then 
+    redis.call('expire',KEYS[1], ARGV[3]) 
+end ";
+
+        private const string _luaEntityDimensionSetTemplate = @" redis.call('hset', '{0}', '{1}', '{2}') ";
+
+        private const string _luaEntityRemove = @" redis.call('del', KEYS[1]) ";
+        private const string _luaEntityDimensionRemoveTemplate = @" redis.call('hdel', '{0}', '{1}')";
+        private const string _luaEntityRemoveBy
+
         public async Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            ThrowIfNotCacheEnabled(entityDef);
 
             if (entityDef.GuidKeyProperty.Name == dimensionKeyName)
             {
@@ -199,28 +219,80 @@ return data";
                 return await GetAsync<TEntity>(dimensionKeyValue, token).ConfigureAwait(false);
             }
 
+            if (!entityDef.OtherDimensions.Any(p => p.Name == dimensionKeyName))
+            {
+                throw new CacheException(ErrorCode.CacheNoSuchDimensionKey, $"{entityDef.Name}, {dimensionKeyName}");
+            }
+
             IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
 
+            RedisResult result = await database.ScriptEvaluateAsync(
+                _luaEntityGetAndRefresh,
+                new RedisKey[] { GetDimensionKey(entityDef.Name, dimensionKeyName) },
+                new RedisValue[] { dimensionKeyValue }).ConfigureAwait(false);
 
+            if (result.IsNull)
+            {
+                return (null, false);
+            }
+
+            RedisResult[]? results = (RedisResult[])result;
+
+            if (results == null)
+            {
+                return (null, false);
+            }
+
+            TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])results[2]).ConfigureAwait(false);
+
+            return (entity, true);
         }
 
         public async Task SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
-        }
+            ThrowIfNotCacheEnabled(entityDef);
 
-        public async Task SetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, TEntity? entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
+            string guidRealKey = GetRealKey(entityDef.GuidKeyProperty.GetValue(entity).ToString());
+
+            StringBuilder luaBuilder = new StringBuilder(_luaEntitySet);
+
+            foreach (PropertyInfo property in entityDef.OtherDimensions)
+            {
+                luaBuilder.AppendFormat(CultureInfo.InvariantCulture,
+                    _luaEntityDimensionSetTemplate,
+                    GetDimensionKey(entityDef.Name, property.Name),
+                    property.GetValue(entity),
+                    guidRealKey);
+            }
+
+            long? absoluteExpireUnixSeconds = entityDef.EntryOptions.AbsoluteExpiration?.ToUnixTimeSeconds();
+            long? slideSeconds = (long?)(entityDef.EntryOptions.SlidingExpiration?.TotalSeconds);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+            byte[] data = await SerializeUtil.PackAsync(entity).ConfigureAwait(false);
+
+            await database.ScriptEvaluateAsync(luaBuilder.ToString(), new RedisKey[] { guidRealKey },
+                new RedisValue[]
+                {
+                    absoluteExpireUnixSeconds??-1,
+                    slideSeconds??-1,
+                    GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
+                    data
+                }).ConfigureAwait(false);
         }
 
         public async Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+
         }
 
         public bool IsEnabled<TEntity>() where TEntity : Entity, new()
@@ -237,25 +309,44 @@ return data";
         public async Task<(IEnumerable<TEntity?>, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
         }
 
         public async Task SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
         }
 
         public async Task SetEntitiesAsync<TEntity>(IEnumerable<string> dimensionKeyNames, IEnumerable<string> dimensionKeyValues, IEnumerable<TEntity?> entities, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
         }
 
         public async Task RemoveEntitiesAsync<TEntity>(IEnumerable<string> dimensionKeyNames, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName ?? DefaultInstanceName).ConfigureAwait(false);
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+        }
+
+        private static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
+        {
+            if (!entityDef.IsCacheable)
+            {
+                throw new CacheException(ErrorCode.CacheNotEnabledForEntity, $"{entityDef.Name}");
+            }
         }
 
         #endregion

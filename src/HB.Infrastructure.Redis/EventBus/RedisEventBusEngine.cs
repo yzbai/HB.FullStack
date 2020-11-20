@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using HB.Framework.Common;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -47,7 +45,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
-            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger).ConfigureAwait(false);
+            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting).ConfigureAwait(false);
 
             EventMessageEntity entity = new EventMessageEntity(eventName, jsonData);
 

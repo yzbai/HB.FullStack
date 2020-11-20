@@ -27,7 +27,10 @@ end
 
 local now = tonumber((redis.call('time'))[1]) 
 
-if(data[1]~= -1 and now >=tonumber(data[1])) then 
+data[1] = tonumber(data[1])
+data[2] = tonumber(data[2])
+
+if(data[1]~= -1 and now >=data[1]) then 
     redis.call('del',KEYS[1]) 
     return nil 
 end 
@@ -36,7 +39,7 @@ local curexp=-1
 
 if(data[1]~=-1 and data[2]~=-1) then 
     curexp=data[1]-now 
-    if (tonumber(data[2])<curexp) then 
+    if (data[2]<curexp) then 
         curexp=data[2] 
     end 
 elseif (data[1]~=-1) then 
@@ -314,6 +317,6 @@ return data";
             //return absoluteExpUnixSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
-       
+
     }
 }

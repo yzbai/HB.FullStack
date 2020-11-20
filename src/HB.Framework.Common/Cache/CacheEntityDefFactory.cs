@@ -49,10 +49,14 @@ namespace Microsoft.Extensions.Caching.Distributed
 
             def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
 
-            def.EntryOptions = new DistributedCacheEntryOptions
+            def.EntryOptions = new DistributedCacheEntryOptions();
+
+            def.EntryOptions.SlidingExpiration = cacheEntityAttribute.SlidingAliveTime ?? CacheOptions.SlidingAliveTime;
+
+            if (cacheEntityAttribute.MaxAliveTime != null)
             {
-                SlidingExpiration = cacheEntityAttribute.SlidingAliveTime ?? CacheOptions.SlidingAliveTime
-            };
+                def.EntryOptions.AbsoluteExpiration = DateTimeOffset.UtcNow + cacheEntityAttribute.MaxAliveTime;
+            }
 
             bool foundGuidKeyAttribute = false;
 
