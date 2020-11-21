@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.SQLite", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL", "src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj", "{94403123-B19B-43EA-A390-9368AD966083}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Business", "src\HB.Framework.Business\HB.Framework.Business.csproj", "{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{94403123-B19B-43EA-A390-9368AD966083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94403123-B19B-43EA-A390-9368AD966083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94403123-B19B-43EA-A390-9368AD966083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

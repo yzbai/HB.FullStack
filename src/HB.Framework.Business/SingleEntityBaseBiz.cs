@@ -1,4 +1,5 @@
 ﻿using HB.Framework.Common;
+using HB.Framework.Common.Cache;
 using HB.Framework.Common.Entities;
 using Microsoft.Extensions.Caching.Distributed;
 using System;
@@ -16,7 +17,7 @@ namespace HB.Framework.Business
         private static readonly int _semaphoreSlimTimeout = 5000;
 
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
-        protected readonly IDistributedCache _cache;
+        protected readonly ICache _cache;
 
         public SingleEntityBaseBiz(IDistributedCache cache)
         {
@@ -55,6 +56,12 @@ namespace HB.Framework.Business
 
         protected async virtual Task OnEntityUpdatingAsync(TEntity entity)
         {
+            //Cache
+            if (_cache.IsEnabled<TEntity>())
+            {
+                _cache.RemoveEntityAsync<TEntity>(entity).Fire();
+            }
+
             //Events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdating), entity, EventArgs.Empty).ConfigureAwait(false);
         }
@@ -62,7 +69,8 @@ namespace HB.Framework.Business
         protected async virtual Task OnEntityUpdatedAsync(TEntity entity)
         {
             //Cache
-            _cache.SetEntityAsync<TEntity>(entity).Fire();
+            //if (_cache.IsEnabled<TEntity>())
+            //_cache.SetEntityAsync<TEntity>(entity).Fire();
 
             //Events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdated), entity, EventArgs.Empty).ConfigureAwait(false);
@@ -71,7 +79,7 @@ namespace HB.Framework.Business
         protected async virtual Task OnEntityUpdateFailedAsync(TEntity? entity)
         {
             //Cache
-            if (entity != null)
+            if (entity != null && _cache.IsEnabled<TEntity>())
             {
                 _cache.RemoveEntityAsync<TEntity>(entity).Fire();
             }
@@ -89,7 +97,10 @@ namespace HB.Framework.Business
         protected async virtual Task OnEntityAddedAsync(TEntity entity)
         {
             //Cache
-            _cache.SetEntityAsync<TEntity>(entity).Fire();
+            //if (_cache.IsEnabled<TEntity>())
+            //{
+            //    _cache.SetEntityAsync<TEntity>(entity).Fire();
+            //}
 
             //Events
             await _asyncEventManager.RaiseEventAsync(nameof(EntityAdded), entity, EventArgs.Empty).ConfigureAwait(false);

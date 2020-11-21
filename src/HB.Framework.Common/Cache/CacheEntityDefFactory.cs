@@ -49,14 +49,9 @@ namespace Microsoft.Extensions.Caching.Distributed
 
             def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
 
-            def.EntryOptions = new DistributedCacheEntryOptions();
+            def.SlidingTime = cacheEntityAttribute.SlidingAliveTime;
 
-            def.EntryOptions.SlidingExpiration = cacheEntityAttribute.SlidingAliveTime ?? CacheOptions.SlidingAliveTime;
-
-            if (cacheEntityAttribute.MaxAliveTime != null)
-            {
-                def.EntryOptions.AbsoluteExpiration = DateTimeOffset.UtcNow + cacheEntityAttribute.MaxAliveTime;
-            }
+            def.AbsoluteTimeRelativeToNow = cacheEntityAttribute.MaxAliveTime;
 
             bool foundGuidKeyAttribute = false;
 
@@ -80,7 +75,7 @@ namespace Microsoft.Extensions.Caching.Distributed
 
                 if (dimensionKeyAttribute != null)
                 {
-                    def.OtherDimensions.Add(propertyInfo);
+                    def.Dimensions.Add(propertyInfo);
                 }
             });
 

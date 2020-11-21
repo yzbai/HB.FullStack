@@ -6,6 +6,6 @@ namespace HB.Framework.Common.Cache
 {
     public static class CacheOptions
     {
-        public static readonly TimeSpan SlidingAliveTime = TimeSpan.FromDays(1);
+
     }
 }

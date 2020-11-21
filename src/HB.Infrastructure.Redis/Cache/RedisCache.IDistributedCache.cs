@@ -17,7 +17,15 @@ namespace HB.Infrastructure.Redis.Cache
         // ARGV[3] = ttl seconds 当前过期要设置的过期时间，由上面两个推算
         // ARGV[4] = data - byte[]
         // this order should not change LUA script depends on it
-        private const string _luaSet = @"redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4]) if(ARGV[3]~=-1) then redis.call('expire',KEYS[1], ARGV[3]) end return 1";
+        private const string _luaSet = @"
+redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4]) 
+
+if(ARGV[3]~='-1') then 
+    redis.call('expire',KEYS[1], ARGV[3]) 
+end
+
+return 1";
+
         private const string _luaGetAndRefresh = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
 
@@ -111,7 +119,7 @@ return data";
                         value
                     });
             }
-            catch (RedisServerException ex) when ("NOSCRIPT".Equals(ex.Message.Substring(0, 8), StringComparison.InvariantCultureIgnoreCase))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -158,7 +166,7 @@ return data";
                         value
                     }).ConfigureAwait(false);
             }
-            catch (RedisServerException ex) when ("NOSCRIPT".Equals(ex.Message.Substring(0, 8), StringComparison.InvariantCultureIgnoreCase))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 

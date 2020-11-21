@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -51,7 +52,13 @@ namespace HB.Infrastructure.Redis.Cache
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
                     LoadedSetLua = server.ScriptLoad(_luaSet),
-                    LoadedGetAndRefreshLua = server.ScriptLoad(_luaGetAndRefresh)
+                    LoadedGetAndRefreshLua = server.ScriptLoad(_luaGetAndRefresh),
+
+                    LoadedEntityGetAndRefreshLua = server.ScriptLoad(_luaEntityGetAndRefresh),
+                    LoadedEntityGetAndRefreshByDimensionLua = server.ScriptLoad(_luaEntityGetAndRefreshByDimension),
+                    LoadedEntitySetLua = server.ScriptLoad(_luaEntitySet),
+                    LoadedEntityRemoveLua = server.ScriptLoad(_luaEntityRemove),
+                    LoadedEntityRemoveByDimensionLua = server.ScriptLoad(_luaEntityRemoveByDimension)
                 };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;
@@ -137,24 +144,73 @@ namespace HB.Infrastructure.Redis.Cache
 
         #region Entity
 
-        private string GetDimensionKey(string entityName, string dimensionKeyName)
+        private string GetDimensionKey(string entityName, string dimensionKeyName, string dimensionKeyValue)
         {
-            return GetRealKey(entityName + dimensionKeyName);
+            return GetRealKey(entityName + dimensionKeyName + dimensionKeyValue);
         }
 
         /// <summary>
-        /// 返回9 说明，dimension失效，要删除所有dimension
-        /// 返回8，说明，找到，但过期，删除所有dimension
-        /// 返回data，data[4]=7表示需要更新其他dimension
+        /// keys:guidkey
         /// </summary>
         private const string _luaEntityGetAndRefresh = @"
-local guid = redis.call('hget',KEYS[1], ARGV[1])
+local data = redis.call('hmget', KEYS[1], 'absexp', 'sldexp','data','dim')
+
+if (not data) then
+    return nil
+end
+
+local now = tonumber((redis.call('time'))[1]) 
+
+data[1] = tonumber(data[1])
+data[2] = tonumber(data[2])
+
+if(data[1]~= -1 and now >=data[1]) then 
+    redis.call('del',KEYS[1])
+    
+    if (data[4]~='') then
+        for i in string.gmatch(data[4], '%w+') do
+           redis.call('del', i) 
+        end
+    end
+    return 8 
+end 
+
+local curexp=-1
+
+if(data[1]==-1 and data[2]~=-1) then
+    curexp= data[2]
+else if(data[1]~=-1 and data[2]~=-1) then
+    curexp = data[1]-now
+    if (data[2]<curexp) then
+        curexp = data[2]
+    end
+else if(data[1]~=-1 and data[2]==-1) then
+    curexp = data[1]-now
+end
+
+if(curexp~=-1) then 
+    redis.call('expire', KEYS[1], curexp)
+    
+    if (data[4]~='') then
+        for i in string.gmatch(data[4], '%w+') do
+           redis.call('expire', i, curexp) 
+        end
+    end
+end 
+
+return data";
+
+        /// <summary>
+        /// KEYS:dimensionKey
+        /// </summary>
+        private const string _luaEntityGetAndRefreshByDimension = @"
+local guid = redis.call('get',KEYS[1])
 
 if (not guid) then
     return nil
 end
 
-local data= redis.call('hmget',guid, 'absexp', 'sldexp','data') 
+local data= redis.call('hmget',guid, 'absexp', 'sldexp','data','dim') 
 
 if (not data) then
     redis.call('del', KEYS[1])
@@ -167,12 +223,17 @@ data[1] = tonumber(data[1])
 data[2] = tonumber(data[2])
 
 if(data[1]~= -1 and now >=data[1]) then 
-    redis.call('del',KEYS[1])
     redis.call('del',guid)
+    
+    if (data[4]~='') then
+        for i in string.gmatch(data[4], '%w+') do
+           redis.call('del', i) 
+        end
+    end
     return 8 
 end 
 
-local curexp=-1 
+local curexp=-1
 
 if(data[1]~=-1 and data[2]~=-1) then 
     curexp=data[1]-now 
@@ -188,24 +249,79 @@ end
 
 if(curexp~=-1) then 
     redis.call('expire', guid, curexp)
-    redis.call('expire', KEYS[1], curexp) 
-    data[4]= 7
+    
+    if (data[4]~='') then
+        for i in string.gmatch(data[4], '%w+') do
+           redis.call('expire', i, curexp) 
+        end
+    end
 end 
 
 return data";
 
+        /// <summary>
+        /// keys: guidKey, dimensionkey1, dimensionkey2, dimensionkey3
+        /// argv: absexp_value, sldexp_value, expire_value, data_value, dimensionKeyJoinedString, 3(dimensionkey_count)
+        /// </summary>
         private const string _luaEntitySet = @"
-redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4]) 
+redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4], 'dim', ARGV[5]) 
 
-if(ARGV[3]~=-1) then 
+if(ARGV[3]~='-1') then 
     redis.call('expire',KEYS[1], ARGV[3]) 
-end ";
+end 
 
-        private const string _luaEntityDimensionSetTemplate = @" redis.call('hset', '{0}', '{1}', '{2}') ";
+for i=2, ARGV[6]+1 do
+    redis.call('set', KEYS[i], KEYS[1])
+    if (ARGV[3]~='-1') then
+        redis.call('expire', KEYS[i], ARGV[3])
+    end
+end";
 
-        private const string _luaEntityRemove = @" redis.call('del', KEYS[1]) ";
-        private const string _luaEntityDimensionRemoveTemplate = @" redis.call('hdel', '{0}', '{1}')";
-        private const string _luaEntityRemoveBy
+        /// <summary>
+        /// keys: guidKey
+        /// argv: 
+        /// </summary>
+        private const string _luaEntityRemove = @" 
+local data=redis.call('hget', KEYS[1], 'dim')
+
+redis.call('del', KEYS[1]) 
+
+if (not data) do
+    return 1
+end
+
+if(data[1]~='') then
+    for i in string.gmatch(data[1], '%w+') do
+        redis.call('del', i)
+    end
+end";
+
+        /// <summary>
+        /// keys:dimensionKey
+        /// </summary>
+        private const string _luaEntityRemoveByDimension = @"
+local guid = redis.call('get',KEYS[1])
+
+if (not guid) then
+    return nil
+end
+
+local data= redis.call('hmget',guid, 'absexp', 'sldexp','data','dim') 
+
+if (not data) then
+    redis.call('del', KEYS[1])
+    return 9
+end
+
+
+redis.call('del',guid)
+    
+if (data[4]~='') then
+    for i in string.gmatch(data[4], '%w+') do
+        redis.call('del', i) 
+    end
+end
+return 1";
 
         public async Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
@@ -213,24 +329,190 @@ end ";
 
             ThrowIfNotCacheEnabled(entityDef);
 
+            byte[] loadedScript;
+            string redisKey;
+
             if (entityDef.GuidKeyProperty.Name == dimensionKeyName)
             {
-                //mean dimensionKeyValue is a guid
-                return await GetAsync<TEntity>(dimensionKeyValue, token).ConfigureAwait(false);
+                loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntityGetAndRefreshLua;
+                redisKey = GetRealKey(dimensionKeyValue);
             }
-
-            if (!entityDef.OtherDimensions.Any(p => p.Name == dimensionKeyName))
+            else
             {
-                throw new CacheException(ErrorCode.CacheNoSuchDimensionKey, $"{entityDef.Name}, {dimensionKeyName}");
+                ThrowIfNotADimensionKeyName(dimensionKeyName, entityDef);
+
+                loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntityGetAndRefreshByDimensionLua;
+                redisKey = GetDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue);
             }
 
             IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
 
-            RedisResult result = await database.ScriptEvaluateAsync(
-                _luaEntityGetAndRefresh,
-                new RedisKey[] { GetDimensionKey(entityDef.Name, dimensionKeyName) },
-                new RedisValue[] { dimensionKeyValue }).ConfigureAwait(false);
+            try
+            {
+                RedisResult result = await database.ScriptEvaluateAsync(
+                    loadedScript,
+                    new RedisKey[] { redisKey },
+                    null).ConfigureAwait(false);
 
+                return await MapGetEntityRedisResultAsync<TEntity>(result).ConfigureAwait(false);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                return await GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token).ConfigureAwait(false);
+            }
+        }
+
+        public async Task SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            string guidRealKey = GetRealKey(entityDef.GuidKeyProperty.GetValue(entity).ToString());
+
+            DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? DateTimeOffset.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
+            long? absoluteExpireUnixSeconds = absulteExpireTime?.ToUnixTimeSeconds();
+            long? slideSeconds = (long?)(entityDef.SlidingTime?.TotalSeconds);
+            long? expireSeconds = GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds);
+
+            byte[] data = await SerializeUtil.PackAsync(entity).ConfigureAwait(false);
+
+            List<RedisKey> redisKeys = new List<RedisKey> { guidRealKey };
+
+            StringBuilder joinedDimensinKeyBuilder = new StringBuilder();
+
+            foreach (PropertyInfo property in entityDef.Dimensions)
+            {
+                string dimentionKey = GetDimensionKey(entityDef.Name, property.Name, property.GetValue(entity).ToString());
+                redisKeys.Add(dimentionKey);
+                joinedDimensinKeyBuilder.Append(dimentionKey);
+                joinedDimensinKeyBuilder.Append(' ');
+            }
+
+            if (joinedDimensinKeyBuilder.Length > 0)
+            {
+                joinedDimensinKeyBuilder.Remove(joinedDimensinKeyBuilder.Length - 1, 1);
+            }
+
+            List<RedisValue> redisValues = new List<RedisValue> {
+                absoluteExpireUnixSeconds ?? -1,
+                slideSeconds ?? -1,
+                expireSeconds ?? -1,
+                data,
+                joinedDimensinKeyBuilder.ToString(),
+                entityDef.Dimensions.Count };
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+            try
+            {
+                await database.ScriptEvaluateAsync(
+                    GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitySetLua,
+                    redisKeys.ToArray(),
+                    redisValues.ToArray()).ConfigureAwait(false);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                await SetEntityAsync<TEntity>(entity, token).ConfigureAwait(false);
+            }
+        }
+
+        public async Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            string redisKey;
+            byte[] loadedScript;
+            if (entityDef.GuidKeyProperty.Name == dimensionKeyName)
+            {
+                redisKey = GetRealKey(dimensionKeyValue);
+                loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntityRemoveLua;
+            }
+            else
+            {
+                redisKey = GetDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue);
+                loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntityRemoveByDimensionLua;
+            }
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+            try
+            {
+                await database.ScriptEvaluateAsync(loadedScript, new RedisKey[] { redisKey }, null).ConfigureAwait(false);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                await RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token).ConfigureAwait(false);
+            }
+        }
+
+        public bool IsEnabled<TEntity>() where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            return entityDef.IsCacheable;
+        }
+
+
+
+        #endregion
+
+        #region Batch Entity
+
+        public async Task<(IEnumerable<TEntity?>, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+            ITransaction transaction = database.CreateTransaction();
+
+            RedisResult redisResult = await transaction.ScriptEvaluateAsync("").ConfigureAwait(false);
+
+            transaction
+        }
+
+        public async Task SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+        }
+
+        public async Task RemoveEntitiesAsync<TEntity>(IEnumerable<string> dimensionKeyNames, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+            ThrowIfNotCacheEnabled(entityDef);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+
+        }
+
+        #endregion
+
+        #region Privates
+
+        private static async Task<(TEntity?, bool)> MapGetEntityRedisResultAsync<TEntity>(RedisResult result) where TEntity : Entity, new()
+        {
             if (result.IsNull)
             {
                 return (null, false);
@@ -248,97 +530,12 @@ end ";
             return (entity, true);
         }
 
-        public async Task SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        private static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
         {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            ThrowIfNotCacheEnabled(entityDef);
-
-            string guidRealKey = GetRealKey(entityDef.GuidKeyProperty.GetValue(entity).ToString());
-
-            StringBuilder luaBuilder = new StringBuilder(_luaEntitySet);
-
-            foreach (PropertyInfo property in entityDef.OtherDimensions)
+            if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                luaBuilder.AppendFormat(CultureInfo.InvariantCulture,
-                    _luaEntityDimensionSetTemplate,
-                    GetDimensionKey(entityDef.Name, property.Name),
-                    property.GetValue(entity),
-                    guidRealKey);
+                throw new CacheException(ErrorCode.CacheNoSuchDimensionKey, $"{entityDef.Name}, {dimensionKeyName}");
             }
-
-            long? absoluteExpireUnixSeconds = entityDef.EntryOptions.AbsoluteExpiration?.ToUnixTimeSeconds();
-            long? slideSeconds = (long?)(entityDef.EntryOptions.SlidingExpiration?.TotalSeconds);
-
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
-
-            byte[] data = await SerializeUtil.PackAsync(entity).ConfigureAwait(false);
-
-            await database.ScriptEvaluateAsync(luaBuilder.ToString(), new RedisKey[] { guidRealKey },
-                new RedisValue[]
-                {
-                    absoluteExpireUnixSeconds??-1,
-                    slideSeconds??-1,
-                    GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
-                    data
-                }).ConfigureAwait(false);
-        }
-
-        public async Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            ThrowIfNotCacheEnabled(entityDef);
-
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
-
-
-        }
-
-        public bool IsEnabled<TEntity>() where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            return entityDef.IsCacheable;
-        }
-
-        #endregion
-
-        #region Batch Entity
-
-        public async Task<(IEnumerable<TEntity?>, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            ThrowIfNotCacheEnabled(entityDef);
-
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
-        }
-
-        public async Task SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entity, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            ThrowIfNotCacheEnabled(entityDef);
-
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
-        }
-
-        public async Task SetEntitiesAsync<TEntity>(IEnumerable<string> dimensionKeyNames, IEnumerable<string> dimensionKeyValues, IEnumerable<TEntity?> entities, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            ThrowIfNotCacheEnabled(entityDef);
-
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
-        }
-
-        public async Task RemoveEntitiesAsync<TEntity>(IEnumerable<string> dimensionKeyNames, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            ThrowIfNotCacheEnabled(entityDef);
-
-            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
         }
 
         private static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
