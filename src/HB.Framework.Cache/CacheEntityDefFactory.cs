@@ -52,9 +52,9 @@ namespace HB.Framework.Cache
 
             def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
 
-            def.SlidingTime = cacheEntityAttribute.SlidingAliveTime;
+            def.SlidingTime = cacheEntityAttribute.SlidingSeconds == -1 ? null : (TimeSpan?)TimeSpan.FromSeconds(cacheEntityAttribute.SlidingSeconds);
 
-            def.AbsoluteTimeRelativeToNow = cacheEntityAttribute.MaxAliveTime;
+            def.AbsoluteTimeRelativeToNow = cacheEntityAttribute.MaxAliveSeconds == -1 ? null : (TimeSpan?)TimeSpan.FromSeconds(cacheEntityAttribute.MaxAliveSeconds);
 
             if (def.SlidingTime > def.AbsoluteTimeRelativeToNow)
             {

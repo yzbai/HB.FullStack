@@ -13,12 +13,12 @@ namespace HB.Framework.Common.Entities
         /// <summary>
         /// 在没有超多最多时间范围内，每次续命多久
         /// </summary>
-        public TimeSpan? SlidingAliveTime { get; set; }
+        public long SlidingSeconds { get; set; } = -1;
 
         /// <summary>
         /// 最多活多长时间
         /// </summary>
-        public TimeSpan? MaxAliveTime { get; set; }
+        public long MaxAliveSeconds { get; set; } = -1;
 
         public bool IsBatchEnabled { get; set; }
 

@@ -120,16 +120,16 @@ end";
         /// argv: 
         /// </summary>
         private const string _luaEntityRemove = @" 
-local data=redis.call('hget', KEYS[1], 'dim')
+local dim=redis.call('hget', KEYS[1], 'dim')
 
 redis.call('del', KEYS[1]) 
 
-if (not data) do
+if (not dim) then
     return 1
 end
 
-if(data[1]~='') then
-    for i in string.gmatch(data[1], '%w+') do
+if(dim~='') then
+    for i in string.gmatch(dim, '%w+') do
         redis.call('del', i)
     end
 end";
@@ -144,17 +144,17 @@ if (not guid) then
     return nil
 end
 
-local data= redis.call('hget',guid, 'dim') 
+local dim= redis.call('hget',guid, 'dim') 
 
-if (not data) then
+if (not dim) then
     redis.call('del', KEYS[1])
     return 9
 end
 
 redis.call('del',guid)
     
-if (data[1]~='') then
-    for i in string.gmatch(data[1], '%w+') do
+if (dim~='') then
+    for i in string.gmatch(dim, '%w+') do
         redis.call('del', i) 
     end
 end

@@ -34,6 +34,7 @@ namespace System
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
         }
 
+        [return: NotNullIfNotNull("entity")]
         public static string? ToJson(object? entity)
         {
             return JsonSerializer.Serialize(entity, _jsonSerializerOptions);
