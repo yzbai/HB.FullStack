@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using HB.Framework.Common.Cache;
 using HB.Framework.Common.Entities;
 
-namespace Microsoft.Extensions.Caching.Distributed
+namespace HB.Framework.Cache
 {
     public static class CacheEntityDefFactory
     {
         private static readonly Dictionary<Type, CacheEntityDef> _defDict = new Dictionary<Type, CacheEntityDef>();
 
-        private static object _lockObj = new object();
+        private static readonly object _lockObj = new object();
 
         public static CacheEntityDef Get<TEntity>() where TEntity : Entity, new()
         {
@@ -47,11 +46,20 @@ namespace Microsoft.Extensions.Caching.Distributed
                 return def;
             }
 
+            def.IsCacheable = true;
+
+            def.IsBatchEnabled = cacheEntityAttribute.IsBatchEnabled;
+
             def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
 
             def.SlidingTime = cacheEntityAttribute.SlidingAliveTime;
 
             def.AbsoluteTimeRelativeToNow = cacheEntityAttribute.MaxAliveTime;
+
+            if (def.SlidingTime > def.AbsoluteTimeRelativeToNow)
+            {
+                throw new CacheException(ErrorCode.CacheSlidingTimeBiggerThanMaxAlive, $"{def.Name}");
+            }
 
             bool foundGuidKeyAttribute = false;
 

@@ -33,32 +33,18 @@ if (not data) then
     return nil
 end
 
-local now = tonumber((redis.call('time'))[1]) 
-
-data[1] = tonumber(data[1])
-data[2] = tonumber(data[2])
-
-if(data[1]~= -1 and now >=data[1]) then 
-    redis.call('del',KEYS[1]) 
-    return nil 
-end 
-
-local curexp=-1 
-
-if(data[1]~=-1 and data[2]~=-1) then 
-    curexp=data[1]-now 
-    if (data[2]<curexp) then 
-        curexp=data[2] 
-    end 
-elseif (data[1]~=-1) then 
-    curexp=data[1]-now 
-elseif (data[2]~=-1) then 
-    curexp=data[2] 
+if(data[1]~='-1') then
+    local now = tonumber((redis.call('time'))[1]) 
+    local absexp = tonumber(data[1])
+    if(now>=absexp) then
+        redis.call('del', KEYS[1])
+        return nil
+    end
 end
 
-if(curexp~=-1) then 
-    redis.call('expire', KEYS[1], curexp) 
-end 
+if(data[2]~='-1') then
+    redis.call('expire', KEYS[1], data[2])
+end
 
 return data";
 
@@ -115,7 +101,7 @@ return data";
                     {
                         absoluteExpireUnixSeconds??-1,
                         slideSeconds??-1,
-                        GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
+                        GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value
                     });
             }
@@ -162,7 +148,7 @@ return data";
                     {
                         absoluteExpireUnixSeconds??-1,
                         slideSeconds??-1,
-                        GetExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
+                        GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value
                     }).ConfigureAwait(false);
             }
@@ -175,6 +161,7 @@ return data";
                 await SetAsync(key, value, options, token).ConfigureAwait(false);
             }
         }
+
 
         public void Refresh(string key)
         {
@@ -278,52 +265,68 @@ return data";
             // TODO: Error handling
         }
 
-        private static long? GetExpireSeconds(long? absoluteExpUnixSeconds, long? slidingSeconds)
+        private static long? GetInitialExpireSeconds(long? absoluteExpireUnixSeconds, long? slideSeconds)
         {
-            #region 算法1 
-            //考虑到slidingSeconds之后已经超过now，所以取小。实际没事，在get时，会检查是否过期
-            //但如果slidingSeconds过长，则会长时间存放不能及时销毁
-
-            long nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            if (absoluteExpUnixSeconds.HasValue && absoluteExpUnixSeconds <= nowUnixSeconds)
+            //参见Readme.txt
+            if (slideSeconds != null)
             {
-                return 0;
-            }
-            else if (absoluteExpUnixSeconds.HasValue && slidingSeconds.HasValue)
-            {
-                return Math.Min(absoluteExpUnixSeconds.Value - nowUnixSeconds, slidingSeconds.Value);
-            }
-            else if (absoluteExpUnixSeconds.HasValue)
-            {
-                return absoluteExpUnixSeconds.Value - nowUnixSeconds;
-            }
-            else if (slidingSeconds.HasValue)
-            {
-                return slidingSeconds.Value;
-            }
-            else
-            {
-                return null;
+                return slideSeconds.Value;
             }
 
-            #endregion
+            if (absoluteExpireUnixSeconds != null)
+            {
+                return absoluteExpireUnixSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
 
-            //如果临到期，会到存放不到一个SlidingSeconds的时间
-            //与算法1 有所取舍
-
-            //if (slidingSeconds != null)
-            //{
-            //    return slidingSeconds;
-            //}
-
-            //if (absoluteExpUnixSeconds == null)
-            //{
-            //    return null;
-            //}
-
-            //return absoluteExpUnixSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            return null;
         }
+
+        //private static long? GetExpireSeconds(long? absoluteExpUnixSeconds, long? slidingSeconds)
+        //{
+        //    #region 算法1 
+        //    //考虑到slidingSeconds之后已经超过now，所以取小。实际没事，在get时，会检查是否过期
+        //    //但如果slidingSeconds过长，则会长时间存放不能及时销毁
+
+        //    long nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        //    if (absoluteExpUnixSeconds.HasValue && absoluteExpUnixSeconds <= nowUnixSeconds)
+        //    {
+        //        return 0;
+        //    }
+        //    else if (absoluteExpUnixSeconds.HasValue && slidingSeconds.HasValue)
+        //    {
+        //        return Math.Min(absoluteExpUnixSeconds.Value - nowUnixSeconds, slidingSeconds.Value);
+        //    }
+        //    else if (absoluteExpUnixSeconds.HasValue)
+        //    {
+        //        return absoluteExpUnixSeconds.Value - nowUnixSeconds;
+        //    }
+        //    else if (slidingSeconds.HasValue)
+        //    {
+        //        return slidingSeconds.Value;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+
+        //    #endregion
+
+        //    //如果临到期，会到存放不到一个SlidingSeconds的时间
+        //    //与算法1 有所取舍
+
+        //    //if (slidingSeconds != null)
+        //    //{
+        //    //    return slidingSeconds;
+        //    //}
+
+        //    //if (absoluteExpUnixSeconds == null)
+        //    //{
+        //    //    return null;
+        //    //}
+
+        //    //return absoluteExpUnixSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        //}
 
 
     }

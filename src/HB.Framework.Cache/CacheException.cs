@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.Framework.Common.Cache
+namespace System
 {
     public class CacheException : FrameworkException
     {

@@ -25,5 +25,10 @@
         public byte[] LoadedEntityRemoveLua { get; set; } = null!;
         public byte[] LoadedEntityGetAndRefreshLua { get; internal set; } = null!;
         public byte[] LoadedEntityRemoveByDimensionLua { get; internal set; } = null!;
+        public byte[] LoadedEntitiesGetAndRefreshLua { get; internal set; } = null!;
+        public byte[] LoadedEntitiesGetAndRefreshByDimensionLua { get; internal set; } = null!;
+        public byte[] LoadedEntitiesSetLua { get; internal set; } = null!;
+        public byte[] LoadedEntitiesRemoveLua { get; internal set; } = null!;
+        public byte[] LoadedEntitiesRemoveByDimensionLua { get; internal set; } = null!;
     }
 }

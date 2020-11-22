@@ -150,6 +150,8 @@
         CacheLoadedLuaNotFound = 829,
         CacheNoSuchDimensionKey = 830,
         CacheNotEnabledForEntity = 831,
+        CacheSlidingTimeBiggerThanMaxAlive = 832,
+        CacheBatchNotEnabled = 833,
 
         #endregion
     }

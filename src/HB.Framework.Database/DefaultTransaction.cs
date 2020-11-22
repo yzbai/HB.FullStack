@@ -22,14 +22,14 @@ namespace HB.Framework.Database
 
         #region 事务
 
-        public async Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel isolationLevel)
+        public async Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel? isolationLevel = null)
         {
             IDbTransaction dbTransaction = await _databaseEngine.BeginTransactionAsync(databaseName, isolationLevel).ConfigureAwait(false);
 
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel isolationLevel) where T : Entity
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : Entity
         {
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 

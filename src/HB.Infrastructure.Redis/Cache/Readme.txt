@@ -1,0 +1,21 @@
+﻿关于Cache的过期问题：
+1，基本概念
+	AbsoluteTime是指最多活到哪一天，
+	AbsoluteRelativeToNow，是说最多活多少天。 AbsoluteTime = now + AbsoluteRelativeToNow
+	SlidingTime是指在不超过AbsoluteTime那天的范围内，只有每次访问才能续期多久
+
+	一般定义AbsoluteRelativeToNow，即意味着 这个数据最多用多久，就必须重新从数据库中取；
+	而SlidingTime 是为了LRU，即不经常用的消失掉
+
+2，Expire
+	存在AbsoluteTime，存在SlidingTime。 初始化时，expireTime = slidingTime，刷新时，expireTime = min(slidingTime, AbsoluteTime-now)
+	存在AbsoluteTime，不存在SlidingTime，初始化时，expireTime = AbsoluteTime -now, 刷新时，不操作
+	不存在AbsoluteTIme，存在SlidingTime，初始化时，expireTime = slidingTime，刷新时，expireTime=slidingTime
+	不存在AbsoluteTime，不存在SlidingTime，初始化时，不操作，刷新时，不操作
+
+	即不存在SlidingTime，刷新时不操作
+	存在时，有两种选择，
+	a，不管absoluteTime，只刷新slidingTime，有可能造成最多存储了 slidingTime-1秒, 但不影响取数据的过期判断，当slidingTime特别大时，有影响
+	b，精确计算，取min(slidingTime, AbsoluteTime-now)，由于采用lua脚本，所以redis服务器多花些响应时间。
+
+3，现在选择方案a。 如果想看方案b的lua脚本，请查看 commit  b435574ddc7c2865b3295adc8660e646473ad264

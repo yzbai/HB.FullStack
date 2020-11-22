@@ -48,7 +48,7 @@ namespace HB.Framework.Database.Engine
         /// </summary>
         /// <returns></returns>
         IDbCommand CreateEmptyCommand();
-        
+
 
         #endregion
 
@@ -66,7 +66,7 @@ namespace HB.Framework.Database.Engine
         /// 用于专有化的字符（`）
         /// </summary>
         string ReservedChar { get; }
-        
+
 
         /// <summary>
         /// 将名称引号化
@@ -158,7 +158,7 @@ namespace HB.Framework.Database.Engine
         /// </summary>
         /// <param name="isolationLevel"></param>
         /// <returns></returns>
-        Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null);
 
         Task CommitAsync(IDbTransaction transaction);
 

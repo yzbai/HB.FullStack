@@ -19,5 +19,14 @@ namespace HB.Framework.Database
             await database.AddAsync(entity, lastUser, transContext).ConfigureAwait(false);
             await entityAdded(entity).ConfigureAwait(false);
         }
+
+        public static async Task DeleteAsync<T>(this IDatabase database, T entity, Func<T, Task> entityDeleting, Func<T, Task> entityDeleted, string lastUser, TransactionContext? transContext) where T : Entity, new()
+        {
+            await entityDeleting(entity).ConfigureAwait(false);
+            await database.DeleteAsync(entity, lastUser, transContext).ConfigureAwait(false);
+            await entityDeleted(entity).ConfigureAwait(false);
+        }
+
+
     }
 }

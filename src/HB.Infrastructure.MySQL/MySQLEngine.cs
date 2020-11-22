@@ -297,12 +297,12 @@ namespace HB.Infrastructure.MySQL
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "<Pending>")]
-        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
             await conn.OpenAsync().ConfigureAwait(false);
 
-            return await conn.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
+            return await conn.BeginTransactionAsync(isolationLevel ?? IsolationLevel.RepeatableRead).ConfigureAwait(false);
         }
 
         public async Task CommitAsync(IDbTransaction transaction)

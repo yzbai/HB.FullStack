@@ -59,7 +59,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
             _historyTaskCTS = new CancellationTokenSource();
 
-            _duplicateChecker = new RedisSetDuplicateChecker(_instanceSetting, _options.EventBusEventMessageExpiredHours * 60 * 60, _logger);
+            _duplicateChecker = new RedisSetDuplicateChecker(_instanceSetting, _options.EventBusEventMessageExpiredHours * 60 * 60);
         }
 
         private async Task ScanHistoryAsync()
@@ -219,6 +219,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
                     string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
 
+                    //TODO: 这里应该用分布式锁
                     if (!RedisSetDuplicateChecker.Lock(AcksSetName, entity.Guid, out string token))
                     {
                         //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。

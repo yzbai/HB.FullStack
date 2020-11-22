@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Framework.Common.Cache
+namespace HB.Framework.Cache
 {
     public static class CacheOptions
     {

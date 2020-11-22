@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Extensions.Caching.Distributed
+namespace HB.Framework.Cache
 {
     public class CacheEntityDef
     {
@@ -19,5 +19,7 @@ namespace Microsoft.Extensions.Caching.Distributed
         public TimeSpan? AbsoluteTimeRelativeToNow { get; set; }
 
         public string? CacheInstanceName { get; set; }
+
+        public bool IsBatchEnabled { get; set; }
     }
 }

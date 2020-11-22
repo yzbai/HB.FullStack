@@ -10,8 +10,6 @@ namespace HB.Framework.Common.Entities
         public string? CacheInstanceName { get; set; }
 
 
-        public bool AllowMultipleRetrieve { get; set; }
-
         /// <summary>
         /// 在没有超多最多时间范围内，每次续命多久
         /// </summary>
@@ -22,9 +20,10 @@ namespace HB.Framework.Common.Entities
         /// </summary>
         public TimeSpan? MaxAliveTime { get; set; }
 
-        public CacheEntityAttribute(bool allowMultipleRetrieve = false)
+        public bool IsBatchEnabled { get; set; }
+
+        public CacheEntityAttribute()
         {
-            AllowMultipleRetrieve = allowMultipleRetrieve;
         }
     }
 }

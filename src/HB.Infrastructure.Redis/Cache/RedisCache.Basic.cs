@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common.Cache;
+﻿using HB.Framework.Common.Entities;
 using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
 using System;

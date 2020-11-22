@@ -16,15 +16,13 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
     {
         private readonly RedisInstanceSetting _setting;
         private readonly long _aliveSeconds;
-        private readonly ILogger _logger;
 
         private static readonly ConcurrentDictionary<string, string> _tokenDict = new ConcurrentDictionary<string, string>();
 
-        public RedisSetDuplicateChecker(RedisInstanceSetting setting, long aliveSeconds, ILogger logger)
+        public RedisSetDuplicateChecker(RedisInstanceSetting setting, long aliveSeconds)
         {
             _setting = setting;
             _aliveSeconds = aliveSeconds;
-            _logger = logger;
         }
 
         #region Lock & Release
@@ -65,7 +63,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             if (CheckToken(setName, id, token))
             {
-                IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting, _logger).ConfigureAwait(false);
+                IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting).ConfigureAwait(false);
 
                 if (await database.SortedSetRankAsync(setName, id).ConfigureAwait(false) == null)
                 {
@@ -82,7 +80,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             if (CheckToken(setName, id, token))
             {
-                IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting, _logger).ConfigureAwait(false);
+                IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting).ConfigureAwait(false);
 
                 await database.SortedSetAddAsync(setName, id, timestamp, CommandFlags.None).ConfigureAwait(false);
             }
@@ -94,7 +92,7 @@ namespace HB.Infrastructure.Redis.DuplicateCheck
         {
             long stopTimestamp = TimeUtil.CurrentTimestampSeconds() - _aliveSeconds;
 
-            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting, _logger).ConfigureAwait(false);
+            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_setting).ConfigureAwait(false);
 
             //寻找小于stopTimestamp的，删除他们
 
