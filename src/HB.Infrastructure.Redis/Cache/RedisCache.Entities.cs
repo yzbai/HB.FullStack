@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Redis.Cache
     {
         /// <summary>
         /// keys:guid1, guid2, guid3
-        /// argv:3(guid_number), sldexp
+        /// argv:3(guid_number), sldexp, nowInUnixSeconds
         /// </summary>
         private const string _luaEntitiesGetAndRefresh = @"
 local number = tonumber(ARGV[1])
@@ -31,7 +31,7 @@ for j =1,number do
     local data = redis.call('hmget', KEYS[j], 'absexp','data','dim')
 
     if(data[1]~='-1') then
-        local now = tonumber((redis.call('time'))[1])
+        local now = tonumber(ARGV[3])
         local absexp = tonumber(data[1])
         if(now>=absexp) then
             redis.call('del',KEYS[j])
@@ -62,7 +62,7 @@ return array
 
         /// <summary>
         /// KEYS:dimensionKey1, dimensionKey2, dimensionKey3
-        /// ARGV:3(dimensionKey count), sldexp
+        /// ARGV:3(entity_count), sldexp, nowInUnixSeconds
         /// </summary>
         private const string _luaEntitiesGetAndRefreshByDimension = @"
 
@@ -79,13 +79,13 @@ for j =1,number do
 
     local data= redis.call('hmget',guid, 'absexp','data','dim') 
 
-    if (not data) then
+    if (not data[1]) then
         redis.call('del', KEYS[j])
         return nil
     end
 
     if(data[1]~='-1') then
-        local now = tonumber((redis.call('time'))[1])
+        local now = tonumber(ARGV[3])
         local absexp = tonumber(data[1])
         if(now>=absexp) then
             redis.call('del',guid)
@@ -103,8 +103,8 @@ for j =1,number do
         redis.call('expire', guid, ARGV[2])
     
         if (data[3]~='') then
-            for j in string.gmatch(data[3], '%w+') do
-               redis.call('expire', j, ARGV[2]) 
+            for k in string.gmatch(data[3], '%w+') do
+               redis.call('expire', k, ARGV[2]) 
             end
         end
     end
@@ -149,8 +149,8 @@ for j=1, entityNum do
 
     redis.call('del', KEYS[j]) 
 
-    if(data and data[1]~='') then
-        for i in string.gmatch(data[1], '%w+') do
+    if(data and data~='') then
+        for i in string.gmatch(data, '%w+') do
             redis.call('del', i)
         end
     end
@@ -176,8 +176,8 @@ for j = 1, entityNum do
         else
             redis.call('del',guid)
     
-            if (data[1]~='') then
-                for i in string.gmatch(data[1], '%w+') do
+            if (data~='') then
+                for i in string.gmatch(data, '%w+') do
                     redis.call('del', i) 
                 end
             end
@@ -206,7 +206,7 @@ end
                 RedisResult result = await database.ScriptEvaluateAsync(
                     loadedScript,
                     redisKeys.ToArray(),
-                    new RedisValue[] { redisKeys.Count, entityDef.SlidingTime?.TotalSeconds ?? -1 }).ConfigureAwait(false);
+                    redisValues.ToArray()).ConfigureAwait(false);
 
                 if (result.IsNull)
                 {
@@ -359,6 +359,7 @@ end
 
             redisValues.Add(redisKeys.Count);
             redisValues.Add(entityDef.SlidingTime?.TotalSeconds ?? -1);
+            redisValues.Add(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
             return loadedScript;
         }

@@ -1,13 +1,17 @@
 ﻿using HB.Infrastructure.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System;
 
 namespace HB.Framework.Cache.Test
 {
     public class ServiceFixture
     {
+        private const string _connectionString = "127.0.0.1:6379";
         private readonly IServiceProvider _serviceProvider;
+        public const string ApplicationName = "Test";
+        public const string InstanceName = "Default";
 
         public ServiceFixture()
         {
@@ -29,11 +33,11 @@ namespace HB.Framework.Cache.Test
 
             services.AddRedisCache(options =>
             {
-                options.ApplicationName = "Test";
+                options.ApplicationName = ApplicationName;
                 options.ConnectionSettings.Add(new RedisInstanceSetting
                 {
-                    InstanceName = "Default",
-                    ConnectionString = "127.0.0.1:6379",
+                    InstanceName = InstanceName,
+                    ConnectionString = _connectionString,
                     DatabaseNumber = 0
                 });
             });
@@ -42,11 +46,13 @@ namespace HB.Framework.Cache.Test
 
             GlobalSettings.Logger = provider.GetRequiredService<ILogger<ServiceFixture>>();
 
+            RedisConnection = ConnectionMultiplexer.Connect(_connectionString);
+
             return provider;
         }
 
         public ICache Cache => _serviceProvider.GetRequiredService<ICache>();
 
-
+        public StackExchange.Redis.ConnectionMultiplexer RedisConnection { get; set; }
     }
 }

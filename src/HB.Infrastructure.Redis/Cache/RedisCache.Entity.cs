@@ -16,17 +16,17 @@ namespace HB.Infrastructure.Redis.Cache
     {
         /// <summary>
         /// keys:guidkey
-        /// argv:sldexp
+        /// argv:sldexp,nowInUnixSeconds
         /// </summary>
         private const string _luaEntityGetAndRefresh = @"
 local data = redis.call('hmget', KEYS[1], 'absexp','data','dim')
 
-if (not data) then
+if (not data[1]) then
     return nil
 end
 
 if(data[1]~='-1') then
-    local now = tonumber((redis.call('time'))[1])
+    local now = tonumber(ARGV[2])
     local absexp = tonumber(data[1])
     if(now>=absexp) then
         redis.call('del',KEYS[1])
@@ -54,7 +54,7 @@ return data";
 
         /// <summary>
         /// KEYS:dimensionKey
-        /// ARGV:sldexp
+        /// ARGV:sldexp, nowInUnixSeconds
         /// </summary>
         private const string _luaEntityGetAndRefreshByDimension = @"
 local guid = redis.call('get',KEYS[1])
@@ -65,13 +65,13 @@ end
 
 local data= redis.call('hmget',guid, 'absexp','data','dim') 
 
-if (not data) then
+if (not data[1]) then
     redis.call('del', KEYS[1])
     return nil
 end
 
 if(data[1]~='-1') then
-    local now = tonumber((redis.call('time'))[1])
+    local now = tonumber(ARGV[2])
     local absexp = tonumber(data[1])
     if(now>=absexp) then
         redis.call('del',guid)
@@ -266,6 +266,7 @@ return 1";
             }
 
             redisValues.Add(entityDef.SlidingTime?.TotalSeconds ?? -1);
+            redisValues.Add(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
             return loadedScript;
         }

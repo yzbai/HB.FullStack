@@ -192,7 +192,10 @@ namespace HB.Infrastructure.Redis.Cache
 
         private static void ThrowIfNotBactchEnabled(CacheEntityDef entityDef)
         {
-            throw new CacheException(ErrorCode.CacheBatchNotEnabled, $"{entityDef.Name}");
+            if (!entityDef.IsBatchEnabled)
+            {
+                throw new CacheException(ErrorCode.CacheBatchNotEnabled, $"{entityDef.Name}");
+            }
         }
 
     }
