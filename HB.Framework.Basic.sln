@@ -29,6 +29,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.DatabaseTests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Redis.Test", "test\HB.Infrastructure.Redis.Test\HB.Infrastructure.Redis.Test.csproj", "{883DB74C-29FF-409E-8269-F8CB3DCF608E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.DistributedLock", "src\HB.Framework.DistributedLock\HB.Framework.DistributedLock.csproj", "{876B10C8-62F2-4182-87B1-AB8EC7528A2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Framework.DistributedLock.Test", "test\HB.Framework.DistributedLock.Test\HB.Framework.DistributedLock.Test.csproj", "{4166D68A-C078-47A1-B781-7675E4F0EB80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +87,14 @@ Global
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4166D68A-C078-47A1-B781-7675E4F0EB80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4166D68A-C078-47A1-B781-7675E4F0EB80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4166D68A-C078-47A1-B781-7675E4F0EB80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4166D68A-C078-47A1-B781-7675E4F0EB80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +103,7 @@ Global
 		{E7873166-4E21-43EF-AA32-89C160ED63F9} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 		{282884AC-48B8-413C-A2BC-16B4E5B9A346} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
+		{4166D68A-C078-47A1-B781-7675E4F0EB80} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

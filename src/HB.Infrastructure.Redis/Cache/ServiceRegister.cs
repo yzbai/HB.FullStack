@@ -16,12 +16,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure<RedisCacheOptions>(configuration);
 
-            services.AddSingleton<ICache, RedisCache>();
-
-            services.AddSingleton<IDistributedCache>(provider => provider.GetRequiredService<ICache>());
+            AddCore(services);
 
             return services;
         }
+
 
         public static IServiceCollection AddRedisCache(this IServiceCollection services, Action<RedisCacheOptions> action)
         {
@@ -29,11 +28,16 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.Configure<RedisCacheOptions>(action);
 
+            AddCore(services);
+
+            return services;
+        }
+        private static void AddCore(IServiceCollection services)
+        {
             services.AddSingleton<ICache, RedisCache>();
 
             services.AddSingleton<IDistributedCache>(provider => provider.GetRequiredService<ICache>());
 
-            return services;
         }
     }
 }
