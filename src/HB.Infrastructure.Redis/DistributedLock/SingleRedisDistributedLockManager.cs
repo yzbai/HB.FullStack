@@ -164,6 +164,12 @@ return 1";
 
         private static async Task<DistributedLockStatus> AcquireResourceAsync(RedisLock redisLock, ILogger logger)
         {
+            if (redisLock.CancellationToken.HasValue && redisLock.CancellationToken.Value.IsCancellationRequested)
+            {
+                redisLock.Status = DistributedLockStatus.Cancelled;
+                redisLock.CancellationToken.Value.ThrowIfCancellationRequested();
+            }
+
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
@@ -198,7 +204,7 @@ return 1";
 
             var interval = redisLock.ExpiryTime.TotalMilliseconds / 2;
 
-            redisLock.AutoExtendTimer = new Timer(
+            redisLock.KeepAliveTimer = new Timer(
                 state => { ExtendLockLifetime(redisLock, logger); },
                 null,
                 (int)interval,
@@ -228,7 +234,10 @@ return 1";
                 if (rt != 1)
                 {
                     logger.LogError("RedisLock Extend Failed.");
+                    return;
                 }
+
+                redisLock.ExtendCount++;
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {

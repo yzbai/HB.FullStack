@@ -59,5 +59,7 @@ namespace HB.Framework.DistributedLock.Test
         public IDistributedLockManager DistributedLockManager => _serviceProvider.GetRequiredService<IDistributedLockManager>();
 
         public StackExchange.Redis.ConnectionMultiplexer RedisConnection { get; set; }
+
+        public ILogger Logger => _serviceProvider.GetRequiredService<ILogger<ServiceFixture>>();
     }
 }

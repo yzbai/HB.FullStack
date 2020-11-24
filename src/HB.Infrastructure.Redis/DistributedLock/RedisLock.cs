@@ -21,7 +21,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         internal SingleRedisDistributedLockOptions Options { get; set; }
 
-        internal Timer? AutoExtendTimer { get; set; }
+        internal Timer? KeepAliveTimer { get; set; }
 
         internal RedisLock(SingleRedisDistributedLockOptions options, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
         {
@@ -54,6 +54,9 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         public bool IsAcquired => Status == DistributedLockStatus.Acquired;
 
+        public int ExtendCount { get; set; }
+
+
         #region Disposable Pattern
 
         private bool _disposedValue;
@@ -67,15 +70,15 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    if (AutoExtendTimer != null)
+                    if (KeepAliveTimer != null)
                     {
                         lock (_lockObj)
                         {
-                            if (AutoExtendTimer != null)
+                            if (KeepAliveTimer != null)
                             {
-                                AutoExtendTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                                AutoExtendTimer.Dispose();
-                                AutoExtendTimer = null;
+                                KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                                KeepAliveTimer.Dispose();
+                                KeepAliveTimer = null;
                             }
                         }
                     }
@@ -102,18 +105,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    if (AutoExtendTimer != null)
-                    {
-                        lock (_lockObj)
-                        {
-                            if (AutoExtendTimer != null)
-                            {
-                                AutoExtendTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                                AutoExtendTimer.Dispose();
-                                AutoExtendTimer = null;
-                            }
-                        }
-                    }
+                    StopKeepAliveTimer();
 
                 }
 
@@ -127,6 +119,22 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 _disposedValue = true;
 
                 Status = DistributedLockStatus.Disposed;
+            }
+        }
+
+        public void StopKeepAliveTimer()
+        {
+            if (KeepAliveTimer != null)
+            {
+                lock (_lockObj)
+                {
+                    if (KeepAliveTimer != null)
+                    {
+                        KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                        KeepAliveTimer.Dispose();
+                        KeepAliveTimer = null;
+                    }
+                }
             }
         }
 
