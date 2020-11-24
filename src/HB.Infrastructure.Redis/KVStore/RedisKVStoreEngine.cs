@@ -74,7 +74,7 @@ return 1
         /// </summary>
         private const string _luaBatchAddOrUpdate = @"
 local count=tonumber(ARGV[1])
-for i = 1, count dot
+for i = 1, count do
     if (redis.call('HEXISTS',KEYS[1],ARGV[i+1])==1) then 
         redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
         local version= redis.call('HINCRBY',KEYS[2],ARGV[i+1],1) 

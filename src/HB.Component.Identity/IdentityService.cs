@@ -24,7 +24,7 @@ namespace HB.Component.Identity
 
         public async Task<TUser> CreateUserByMobileAsync<TUser>(string mobile, string? loginName, string? password, bool mobileConfirmed, string lastUser) where TUser : User, new()
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>().ConfigureAwait(false);
             try
             {
                 TUser user = await _userBiz.CreateByMobileAsync<TUser>(mobile, loginName, password, mobileConfirmed, lastUser, transactionContext).ConfigureAwait(false);
@@ -52,7 +52,7 @@ namespace HB.Component.Identity
 
         public async Task SetAccessFailedCountAsync<TUser>(string userGuid, long count, string lastUser) where TUser : User, new()
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>().ConfigureAwait(false);
             try
             {
                 await _userBiz.SetAccessFailedCountAsync<TUser>(userGuid, count, lastUser, transactionContext).ConfigureAwait(false);
@@ -68,7 +68,7 @@ namespace HB.Component.Identity
 
         public async Task SetLockoutAsync<TUser>(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null) where TUser : User, new()
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>().ConfigureAwait(false);
 
             try
             {
@@ -93,7 +93,7 @@ namespace HB.Component.Identity
             where TRole : Role, new()
             where TRoleOfUser : RoleOfUser, new()
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUserClaim>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUserClaim>().ConfigureAwait(false);
             try
             {
                 IEnumerable<Claim> claims = await _claimsFactory.CreateClaimsAsync<TUserClaim, TRole, TRoleOfUser>(user, transactionContext).ConfigureAwait(false);

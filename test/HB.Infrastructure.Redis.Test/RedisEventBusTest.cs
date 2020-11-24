@@ -41,7 +41,7 @@ namespace HB.Infrastructure.Redis.Test
             await _eventBus.UnSubscribeAsync(eventName).ConfigureAwait(false);
         }
 
-        public Task HandleAsync(string jsonData)
+        public Task HandleAsync(string jsonData, CancellationToken cancellationToken)
         {
             _output.WriteLine(jsonData);
             return Task.CompletedTask;

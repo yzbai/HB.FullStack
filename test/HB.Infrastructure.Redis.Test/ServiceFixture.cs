@@ -34,7 +34,8 @@ namespace HB.Infrastructure.Redis.Test
 
             serviceCollection.AddOptions();
 
-            serviceCollection.AddLogging(builder => {
+            serviceCollection.AddLogging(builder =>
+            {
                 builder.SetMinimumLevel(LogLevel.Trace);
                 builder.AddNLog();
             });
@@ -43,23 +44,33 @@ namespace HB.Infrastructure.Redis.Test
             serviceCollection.AddRedisEventBus(Configuration.GetSection("RedisEventBus"));
             serviceCollection.AddRedisKVStore(Configuration.GetSection("RedisKVStore"));
 
+
+
             Services = serviceCollection.BuildServiceProvider();
+
+            GlobalSettings.Logger = Services.GetRequiredService<ILogger<ServiceFixture>>();
         }
 
-        public IRedisDatabase RedisDatabase {
-            get {
+        public IRedisDatabase RedisDatabase
+        {
+            get
+            {
                 return Services.GetRequiredService<IRedisDatabase>();
             }
         }
 
-        public IKVStore KVStore {
-            get {
+        public IKVStore KVStore
+        {
+            get
+            {
                 return Services.GetRequiredService<IKVStore>();
             }
         }
 
-        public IEventBus EventBus {
-            get {
+        public IEventBus EventBus
+        {
+            get
+            {
                 return Services.GetRequiredService<IEventBus>();
             }
         }

@@ -58,7 +58,7 @@ namespace HB.Component.Authorization
         /// <exception cref="DatabaseException"></exception>
         public async Task SignOutAsync(string signInTokenGuid, string lastUser)
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
                 await _signInTokenBiz.DeleteAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
@@ -74,7 +74,7 @@ namespace HB.Component.Authorization
 
         public async Task SignOutAsync(string userGuid, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -122,7 +122,7 @@ namespace HB.Component.Authorization
                     break;
             }
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -264,7 +264,7 @@ namespace HB.Component.Authorization
             //SignInToken 验证
             TUser? user;
             SignInToken? signInToken;
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -422,7 +422,7 @@ namespace HB.Component.Authorization
         private async Task BlackSignInTokenAsync(SignInToken signInToken, string lastUser)
         {
             //TODO: 详细记录Black SiginInToken 的历史纪录
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
                 await _signInTokenBiz.DeleteAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
