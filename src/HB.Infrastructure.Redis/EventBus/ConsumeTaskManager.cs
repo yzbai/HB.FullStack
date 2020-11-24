@@ -65,15 +65,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
         private byte[] _loadedHistoryLua = null!;
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="options"></param>
-        /// <param name="redisInstanceSetting"></param>
-        /// <param name="eventType"></param>
-        /// <param name="eventHandler"></param>
-        /// <param name="logger"></param>
-        /// <exception cref="ObjectDisposedException">Ignore.</exception>
         public ConsumeTaskManager(
             RedisEventBusOptions options,
             RedisInstanceSetting redisInstanceSetting,

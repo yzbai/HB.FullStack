@@ -11,34 +11,112 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.KVStore
 {
-    internal partial class RedisKVStoreEngine : IKVStoreEngine
+    internal class RedisKVStoreEngine : IKVStoreEngine
     {
-        //private static readonly string luaAddScript = @"if redis.call('HSETNX',KEYS[1], ARGV[1], ARGV[2]) == 1 then redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) return 1 else return 9 end";
-        //private static readonly string luaDeleteScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HDEL', KEYS[2], ARGV[1]) return redis.call('HDEL', KEYS[1], ARGV[1]) end";
-        //private static readonly string luaUpdateScript = @"if redis.call('HGET', KEYS[2], ARGV[1]) ~= ARGV[2] then return 7 else redis.call('HSET', KEYS[2], ARGV[1], ARGV[3]) redis.call('HSET', KEYS[1], ARGV[1], ARGV[4]) return 1 end";
-        private const string _luaBatchAddExistCheckTemplate = @"if redis.call('HEXISTS',KEYS[1],ARGV[{0}])==1 then return 9 end ";
-        private const string _luaBatchAddTemplate = @"redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) redis.call('HSET',KEYS[2],ARGV[{0}],0) ";
-        private const string _luaBatchAddReturnTemplate = @"return 1";
+        /// <summary>
+        /// keys:entityNameKey, entityVersionKey
+        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
+        /// </summary>
+        private const string _luaBatchAdd = @"
+local count = tonumber(ARGV[1])
+for i = 1, count do
+    if (redis.call('hexists', KEYS[1], ARGV[i+1]) == 1) then
+        return 9
+    end
+end
 
-        private const string _luaBatchUpdateVersionCheckTemplate = @"if redis.call('HGET',KEYS[2],ARGV[{0}])~=ARGV[{1}] then return 7 end ";
-        private const string _luaBatchUpdateTemplate = @"redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) redis.call('HINCRBY',KEYS[2],ARGV[{0}],1) ";
-        private const string _luaBatchUpdateReturnTemplate = @"return 1";
+for i =1, count do
+    redis.call('hset', KEYS[1], ARGV[i+1], ARGV[count + i + 1])
+    redis.call('hset', KEYS[2], ARGV[i+1], 0)
+end
+return 1";
 
-        private const string _luaBatchDeleteVersionCheckTemplate = @"if redis.call('HGET',KEYS[2],ARGV[{0}])~=ARGV[{1}] then return 7 end ";
-        private const string _luaBatchDeleteTemplate = @"redis.call('HDEL',KEYS[1],ARGV[{0}]) redis.call('HDEL',KEYS[2],ARGV[{0}]) ";
-        private const string _luaBatchDeleteReturnTemplate = @"return 1";
+        /// <summary>
+        /// keys:entityNameKey, entityVersionKey
+        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value, entity1_version, entity2_version, entity3_version
+        /// </summary>
+        private const string _luaBatchUpdate = @"
+local count = tonumber(ARGV[1])
+for i =1,count do
+    if redis.call('HGET',KEYS[2],ARGV[i+1])~=ARGV[count + count + i + 1] then return 7 end
+end
 
-        private const string _luaBatchAddOrUpdateTemplate = @"if redis.call('HEXISTS',KEYS[1],ARGV[{0}])==1 then redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) local version= redis.call('HINCRBY',KEYS[2],ARGV[{0}],1) redis.call('RPUSH',KEYS[3],version) else redis.call('HSET',KEYS[1],ARGV[{0}],ARGV[{1}]) redis.call('HSET',KEYS[2],ARGV[{0}],0) redis.call('RPUSH',KEYS[3],0) end ";
-        private const string _luaBatchAddOrUpdateReturnTemplate = @" return redis.call('LRANGE',KEYS[3],0,-1) ";
+for i = 1, count do
+    redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
+    redis.call('HINCRBY',KEYS[2],ARGV[i+1],1)
+end
 
-        private const string _luaBatchGetTemplate = @" local array={{}} array[1]=redis.call('HMGET',KEYS[1],{0}) array[2]=redis.call('HMGET',KEYS[2],{0}) return array";
+return 1";
 
-        private const string _luaGetAllTemplate = @"local array={{}} array[1]=redis.call('HGETALL',KEYS[1]) array[2]=redis.call('HGETALL',KEYS[2]) return array";
+        /// <summary>
+        /// keys:entityNameKey, entityVersionKey
+        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_version, entity2_version, entity3_version
+        /// </summary>
+        private const string _luaBatchDelete = @"
+local count=tonumber(ARGV[1])
+for i = 1, count do
+    if redis.call('HGET',KEYS[2],ARGV[i+1])~=ARGV[count+i+1] then
+        return 7 
+    end
+end
+
+for i=1,count do
+    redis.call('HDEL',KEYS[1],ARGV[i+1]) 
+    redis.call('HDEL',KEYS[2],ARGV[i+1]) 
+end
+
+return 1
+";
+
+        /// <summary>
+        /// keys:entityNameKey, entityVersionKey, tempListKey
+        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
+        /// </summary>
+        private const string _luaBatchAddOrUpdate = @"
+local count=tonumber(ARGV[1])
+for i = 1, count dot
+    if (redis.call('HEXISTS',KEYS[1],ARGV[i+1])==1) then 
+        redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
+        local version= redis.call('HINCRBY',KEYS[2],ARGV[i+1],1) 
+        redis.call('RPUSH',KEYS[3],version) 
+    else 
+        redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
+        redis.call('HSET',KEYS[2],ARGV[i+1],0) 
+        redis.call('RPUSH',KEYS[3],0) 
+    end 
+end
+
+local result = redis.call('LRANGE',KEYS[3],0,-1)
+
+redis.call('DEL', KEYS[3])
+
+return result";
+
+        /// <summary>
+        /// keys:entityNameKey, entityVersionKey
+        /// argv:entity1_key, entity2_key, entity3_key
+        /// </summary>
+        private const string _luaBatchGet = @"
+local array={{}} 
+array[1]=redis.call('HMGET',KEYS[1],unpack(ARGV)) 
+array[2]=redis.call('HMGET',KEYS[2],unpack(ARGV)) 
+return array
+";
+
+        /// <summary>
+        /// keys:entityNameKey, entityVersionKey
+        /// </summary>
+        private const string _luaGetAll = @"
+local array={{}} 
+array[1]=redis.call('HGETALL',KEYS[1]) 
+array[2]=redis.call('HGETALL',KEYS[2]) 
+return array";
 
         private readonly RedisKVStoreOptions _options;
         private readonly ILogger _logger;
 
         private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
+        private readonly IDictionary<string, LoadedLuas> _loadedLuaDict = new Dictionary<string, LoadedLuas>();
 
         public KVStoreSettings Settings { get { return _options.KVStoreSettings; } }
 
@@ -49,6 +127,43 @@ namespace HB.Infrastructure.Redis.KVStore
             _logger = logger;
             _options = options.Value;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
+
+            InitLoadedLuas();
+        }
+
+        private void InitLoadedLuas()
+        {
+            foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
+            {
+                IServer server = RedisInstanceManager.GetServer(setting);
+                LoadedLuas loadedLuas = new LoadedLuas();
+
+                loadedLuas.LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd);
+                loadedLuas.LoadedBatchUpdateLua = server.ScriptLoad(_luaBatchUpdate);
+                loadedLuas.LoadedBatchDeleteLua = server.ScriptLoad(_luaBatchDelete);
+                loadedLuas.LodedeBatchAddOrUpdateLua = server.ScriptLoad(_luaBatchAddOrUpdate);
+                loadedLuas.LoadedBatchGetLua = server.ScriptLoad(_luaBatchGet);
+                loadedLuas.LoadedGetAllLua = server.ScriptLoad(_luaGetAll);
+
+                _loadedLuaDict[setting.InstanceName] = loadedLuas;
+            }
+        }
+
+        private LoadedLuas GetLoadedLuas(string instanceName)
+        {
+            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas loadedLuas))
+            {
+                return loadedLuas;
+            }
+
+            InitLoadedLuas();
+
+            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas loadedLuas2))
+            {
+                return loadedLuas2;
+            }
+
+            throw new CacheException(ErrorCode.CacheLoadedLuaNotFound, $"Can not found LoadedLua Redis Instance: {instanceName}");
         }
 
         public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
@@ -58,24 +173,31 @@ namespace HB.Infrastructure.Redis.KVStore
                 return new List<Tuple<string?, int>>();
             }
 
+            List<RedisKey> redisKeys = new List<RedisKey>();
+            List<RedisValue> redisValues = new List<RedisValue>();
+
+            PrepareEntityGetRedisInfo(entityName, entityKeys, redisKeys, redisValues);
+
+
+            IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchGetLua;
+
             try
             {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-
-                foreach (string key in entityKeys)
-                {
-                    stringBuilder.Append($"'{key}',");
-                }
-
-                stringBuilder.Remove(stringBuilder.Length - 1, 1);
-
-                string lua = string.Format(GlobalSettings.Culture, _luaBatchGetTemplate, stringBuilder.ToString());
-
-                RedisResult result = await db.ScriptEvaluateAsync(lua, new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) }).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(
+                    loadedScript,
+                    redisKeys.ToArray(),
+                    redisValues.ToArray()).ConfigureAwait(false);
 
                 return MapResultToStringWithVersion(result);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                return await EntityGetAsync(storeName, entityName, entityKeys).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -88,18 +210,45 @@ namespace HB.Infrastructure.Redis.KVStore
             catch (Exception ex)
             {
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
+            }
+        }
+
+        private void PrepareEntityGetRedisInfo(string entityName, IEnumerable<string> entityKeys, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        {
+            redisKeys.Add(EntityNameKey(entityName));
+            redisKeys.Add(EntityVersionNameKey(entityName));
+
+
+            foreach (string entityKey in entityKeys)
+            {
+                redisValues.Add(entityKey);
             }
         }
 
         public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName)
         {
+            IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+            byte[] loadedScript = GetLoadedLuas(storeName).LoadedGetAllLua;
+
+            List<RedisKey> redisKeys = new List<RedisKey>();
+
+            PrepareEntityGetAllRedisInfo(entityName, redisKeys);
+
             try
             {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                RedisResult result = await db.ScriptEvaluateAsync(_luaGetAllTemplate, new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) }).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(
+                    loadedScript,
+                    new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) }).ConfigureAwait(false);
 
                 return MapGetAllResultToStringWithVersion(result);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                return await EntityGetAllAsync(storeName, entityName).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -115,25 +264,43 @@ namespace HB.Infrastructure.Redis.KVStore
             }
         }
 
+        private void PrepareEntityGetAllRedisInfo(string entityName, List<RedisKey> redisKeys)
+        {
+            redisKeys.Add(EntityNameKey(entityName));
+            redisKeys.Add(EntityVersionNameKey(entityName));
+        }
+
         public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
-            RedisResult result = null!;
+            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
+
+            List<RedisKey> redisKeys = new List<RedisKey>();
+            List<RedisValue> redisValues = new List<RedisValue>();
+
+            PrepareEntityAddRedisInfo(entityName, entityKeys, entityJsons, redisKeys, redisValues);
 
             try
             {
-                string luaScript = AssembleBatchAddLuaScript(entityKeys.Count());
-
-                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) };
-
-                IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
-                IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
-
-                RedisValue[] argvs = argvs1.Concat(argvs2).ToArray();
-
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(
+                    loadedScript,
+                    redisKeys.ToArray(),
+                    redisValues.ToArray()).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript, keys, argvs).ConfigureAwait(false);
+                ErrorCode error = MapResultToErrorCode(result);
 
+                if (!error.IsSuccessful())
+                {
+                    throw new KVStoreException(error, entityName, "");
+                }
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                await EntityAddAsync(storeName, entityName, entityKeys, entityJsons).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -147,12 +314,26 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
+        }
 
-            ErrorCode error = MapResultToErrorCode(result);
+        private void PrepareEntityAddRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        {
+            /// keys:entityNameKey, entityVersionKey
+            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
 
-            if (!error.IsSuccessful())
+            redisKeys.Add(EntityNameKey(entityName));
+            redisKeys.Add(EntityVersionNameKey(entityName));
+
+            redisValues.Add(entityKeys.Count());
+
+            foreach (string entityKey in entityKeys)
             {
-                throw new KVStoreException(error, entityName, "");
+                redisValues.Add(entityKey);
+            }
+
+            foreach (string? json in entityJsons)
+            {
+                redisValues.Add(json);
             }
         }
 
@@ -161,26 +342,31 @@ namespace HB.Infrastructure.Redis.KVStore
         /// </summary>
         public async Task<IEnumerable<int>> EntityAddOrUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
-            RedisResult result = null!;
+            byte[] loadedScript = GetLoadedLuas(storeName).LodedeBatchAddOrUpdateLua;
+
+            List<RedisKey> redisKeys = new List<RedisKey>();
+            List<RedisValue> redisValues = new List<RedisValue>();
+
+            PrepareEntityAddOrUpdateRedisInfo(entityName, entityKeys, entityJsons, redisKeys, redisValues);
 
             try
             {
-                string luaScript = AssembleBatchAddOrUpdateScript(entityKeys.Count());
-
-                string tempListName = "lst" + SecurityUtil.CreateUniqueToken();
-
-                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName), tempListName };
-
-                IEnumerable<RedisValue> argvs1 = entityKeys.Select(str => (RedisValue)str);
-                IEnumerable<RedisValue> argvs2 = entityJsons.Select(bytes => (RedisValue)bytes);
-
-                RedisValue[] argvs = argvs1.Concat(argvs2).ToArray();
-
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript.ToString(GlobalSettings.Culture), keys, argvs).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(
+                    loadedScript,
+                    redisKeys.ToArray(),
+                    redisValues.ToArray()).ConfigureAwait(false);
 
-                await db.ScriptEvaluateAsync(@" redis.call('DEL', KEYS[1]) ", new RedisKey[] { tempListName }).ConfigureAwait(false);
+                return (int[])result;
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                return await EntityAddOrUpdateAsync(storeName, entityName, entityKeys, entityJsons).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -194,26 +380,63 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
+        }
 
-            return (int[])result;
+        private void PrepareEntityAddOrUpdateRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        {
+            /// keys:entityNameKey, entityVersionKey, tempListKey
+            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
+
+            redisKeys.Add(EntityNameKey(entityName));
+            redisKeys.Add(EntityVersionNameKey(entityName));
+            redisKeys.Add("tmpL" + SecurityUtil.CreateUniqueToken());
+
+
+            redisValues.Add(entityKeys.Count());
+
+            foreach (string entityKey in entityKeys)
+            {
+                redisValues.Add(entityKey);
+            }
+
+            foreach (string? json in entityJsons)
+            {
+                redisValues.Add(json);
+            }
         }
 
         public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions)
         {
-            RedisResult result = null!;
+            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
+
+            List<RedisKey> redisKeys = new List<RedisKey>();
+            List<RedisValue> redisValues = new List<RedisValue>();
+
+            PrepareEntityUpdateRedisInfo(entityName, entityKeys, entityJsons, entityVersions, redisKeys, redisValues);
 
             try
             {
-                string luaScript = AssembleBatchUpdateLuaScript(entityKeys.Count());
-
-                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) };
-                RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t)
-                    .Concat(entityJsons.Select(t => (RedisValue)t))
-                    .Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
-
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript, keys, argvs).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(
+                    loadedScript,
+                    redisKeys.ToArray(),
+                    redisValues.ToArray()).ConfigureAwait(false);
+
+                ErrorCode error = MapResultToErrorCode(result);
+
+                if (!error.IsSuccessful())
+                {
+                    throw new KVStoreException(error, entityName, "");
+                }
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                await EntityUpdateAsync(storeName, entityName, entityKeys, entityJsons, entityVersions).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -227,29 +450,66 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
+        }
 
-            ErrorCode error = MapResultToErrorCode(result);
+        private void PrepareEntityUpdateRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        {
+            /// keys:entityNameKey, entityVersionKey
+            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value, entity1_version, entity2_version, entity3_version
 
-            if (!error.IsSuccessful())
+            redisKeys.Add(EntityNameKey(entityName));
+            redisKeys.Add(EntityVersionNameKey(entityName));
+
+            redisValues.Add(entityKeys.Count());
+
+            foreach (string entityKey in entityKeys)
             {
-                throw new KVStoreException(error, entityName, "");
+                redisValues.Add(entityKey);
+            }
+
+            foreach (string? json in entityJsons)
+            {
+                redisValues.Add(json);
+            }
+
+            foreach (int version in entityVersions)
+            {
+                redisValues.Add(version);
             }
         }
 
         public async Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
         {
-            RedisResult result = null!;
+            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;
+
+            List<RedisKey> redisKeys = new List<RedisKey>();
+            List<RedisValue> redisValues = new List<RedisValue>();
+
+            PrepareEntityDeleteRedisInfo(entityName, entityKeys, entityVersions, redisKeys, redisValues);
 
             try
             {
-                string luaScript = AssembleBatchDeleteLuaScript(entityKeys.Count());
-
-                RedisKey[] keys = new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) };
-                RedisValue[] argvs = entityKeys.Select(t => (RedisValue)t).Concat(entityVersions.Select(t => (RedisValue)t)).ToArray();
-
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                result = await db.ScriptEvaluateAsync(luaScript, keys, argvs).ConfigureAwait(false);
+                RedisResult result = await db.ScriptEvaluateAsync(
+                    loadedScript,
+                    redisKeys.ToArray(),
+                    redisValues.ToArray()).ConfigureAwait(false);
+
+                ErrorCode error = MapResultToErrorCode(result);
+
+                if (!error.IsSuccessful())
+                {
+                    throw new KVStoreException(error, entityName, "");
+                }
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                await EntityDeleteAsync(storeName, entityName, entityKeys, entityVersions).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -263,15 +523,28 @@ namespace HB.Infrastructure.Redis.KVStore
             {
                 throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
             }
-
-            ErrorCode error = MapResultToErrorCode(result);
-
-            if (!error.IsSuccessful())
-            {
-                throw new KVStoreException(error, entityName, "");
-            }
         }
 
+        private void PrepareEntityDeleteRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        {
+            /// keys:entityNameKey, entityVersionKey
+            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_version, entity2_version, entity3_version
+            /// 
+            redisKeys.Add(EntityNameKey(entityName));
+            redisKeys.Add(EntityVersionNameKey(entityName));
+
+            redisValues.Add(entityKeys.Count());
+
+            foreach (string entityKey in entityKeys)
+            {
+                redisValues.Add(entityKey);
+            }
+
+            foreach (int version in entityVersions)
+            {
+                redisValues.Add(version);
+            }
+        }
 
         public async Task<bool> EntityDeleteAllAsync(string storeName, string entityName)
         {
@@ -320,7 +593,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
         private string EntityVersionNameKey(string entityName)
         {
-            return _options.ApplicationName+ entityName + "_V";
+            return _options.ApplicationName + entityName + "_V";
         }
 
         private static ErrorCode MapResultToErrorCode(RedisResult redisResult)
@@ -370,77 +643,6 @@ namespace HB.Infrastructure.Redis.KVStore
             });
 
             return rt;
-        }
-
-        private static string AssembleBatchAddLuaScript(int count)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchAddExistCheckTemplate, i + 1);
-            }
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchAddTemplate, i + 1, i + count + 1);
-            }
-
-            stringBuilder.Append(_luaBatchAddReturnTemplate);
-
-            return stringBuilder.ToString();
-        }
-
-        private static string AssembleBatchAddOrUpdateScript(int count)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchAddOrUpdateTemplate, i + 1, i + count + 1);
-            }
-
-            stringBuilder.Append(_luaBatchAddOrUpdateReturnTemplate);
-
-            return stringBuilder.ToString();
-        }
-
-        private static string AssembleBatchUpdateLuaScript(int count)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchUpdateVersionCheckTemplate, i + 1, i + count + count + 1);
-            }
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchUpdateTemplate, i + 1, i + count + 1);
-            }
-
-            stringBuilder.Append(_luaBatchUpdateReturnTemplate);
-
-            return stringBuilder.ToString();
-        }
-
-        private static string AssembleBatchDeleteLuaScript(int count)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchDeleteVersionCheckTemplate, i + 1, i + count + 1);
-            }
-
-            for (int i = 0; i < count; ++i)
-            {
-                stringBuilder.AppendFormat(GlobalSettings.Culture, _luaBatchDeleteTemplate, i + 1);
-            }
-
-            stringBuilder.Append(_luaBatchDeleteReturnTemplate);
-
-            return stringBuilder.ToString();
         }
     }
 }
