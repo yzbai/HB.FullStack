@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HB.Framework.DistributedLock;
 using HB.Framework.EventBus;
 using HB.Framework.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -23,14 +24,18 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private readonly RedisEventBusOptions _options;
 
+        private readonly IDistributedLockManager _lockManager;
+
         private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
 
-        private readonly IDictionary<string, ConsumeTaskManager> _consumeTaskManagers = new Dictionary<string, ConsumeTaskManager>();//eventType : ConsumeTaskManager
+        //eventType : ConsumeTaskManager
+        private readonly IDictionary<string, ConsumeTaskManager> _consumeTaskManagers = new Dictionary<string, ConsumeTaskManager>();
 
-        public RedisEventBusEngine(IOptions<RedisEventBusOptions> options, ILogger<RedisEventBusEngine> logger)
+        public RedisEventBusEngine(IOptions<RedisEventBusOptions> options, ILogger<RedisEventBusEngine> logger, IDistributedLockManager lockManager)
         {
             _logger = logger;
             _options = options.Value;
+            _lockManager = lockManager;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
         }
 
@@ -85,11 +90,12 @@ namespace HB.Infrastructure.Redis.EventBus
                     throw new EventBusException($"Handler already exists for EventType: {eventType}, BrokerName:{brokerName}");
                 }
 
-                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, eventType, eventHandler, _logger);
+                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventType, eventHandler, _logger);
 
                 _consumeTaskManagers.Add(eventType, consumeTaskManager);
             }
         }
+
         /// <summary>
         /// 停止处理
         /// </summary>

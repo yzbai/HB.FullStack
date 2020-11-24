@@ -51,7 +51,7 @@ namespace HB.Framework.Client
 
         public static bool CheckSyncFrequency(string userGuid, string resourceName)
         {
-            return _frequencyChecker.Check(_apiResourceType, userGuid + resourceName, _apiReousrceAliveTimespan);
+            return _frequencyChecker.Check(_apiResourceType + userGuid + resourceName, _apiReousrceAliveTimespan);
         }
 
         public static void ResetSyncFrequency(string userGuid, string resourceName)

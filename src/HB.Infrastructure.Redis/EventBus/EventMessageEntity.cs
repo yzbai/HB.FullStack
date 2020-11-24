@@ -9,7 +9,7 @@ namespace HB.Infrastructure.Redis.EventBus
     {
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
-        public long Timestamp { get; set; } = TimeUtil.CurrentTimestampSeconds();
+        public long Timestamp { get; set; } = TimeUtil.CurrentUnixTimeSeconds();
 
         public string EventName { get; set; } = null!;
 

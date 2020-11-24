@@ -4,6 +4,7 @@ using HB.Component.Identity;
 using HB.Component.Identity.Entities;
 using HB.Framework.Cache;
 using HB.Framework.Database;
+using HB.Framework.DistributedLock;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -17,32 +18,29 @@ namespace HB.Component.Authorization
 {
     internal class AuthorizationService : IAuthorizationService
     {
-        private readonly IDatabase _database;
         private readonly AuthorizationServerOptions _options;
         private readonly SignInOptions _signInOptions;
+        private readonly ITransaction _transaction;
+        private readonly IDistributedLockManager _lockManager;
+
         private readonly IIdentityService _identityService;
         private readonly ISignInTokenBiz _signInTokenBiz;
         private readonly IJwtBuilder _jwtBuilder;
         private readonly ICredentialBiz _credentialBiz;
-        private readonly DistributedCacheFrequencyChecker _frequencyChecker;
 
-        //private readonly ILogger logger;
-
-        public AuthorizationService(IDatabase database, IOptions<AuthorizationServerOptions> options, ICache distributedCache,
+        public AuthorizationService(IOptions<AuthorizationServerOptions> options, ITransaction transaction, IDistributedLockManager lockManager,
             ISignInTokenBiz signInTokenBiz, IIdentityService identityManager, IJwtBuilder jwtBuilder, ICredentialBiz credentialManager/*, ILogger<AuthorizationService> logger*/)
         {
-            _database = database;
             _options = options.Value;
             _signInOptions = _options.SignInOptions;
 
-            //this.logger = logger;
-            _frequencyChecker = new DistributedCacheFrequencyChecker(distributedCache);
+            _transaction = transaction;
+            _lockManager = lockManager;
 
-            _signInTokenBiz = signInTokenBiz;
             _identityService = identityManager;
+            _signInTokenBiz = signInTokenBiz;
             _jwtBuilder = jwtBuilder;
             _credentialBiz = credentialManager;
-
         }
 
         /// <exception cref="FileNotFoundException">证书文件不存在</exception>
@@ -60,33 +58,33 @@ namespace HB.Component.Authorization
         /// <exception cref="DatabaseException"></exception>
         public async Task SignOutAsync(string signInTokenGuid, string lastUser)
         {
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
             try
             {
                 await _signInTokenBiz.DeleteAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
 
         public async Task SignOutAsync(string userGuid, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
 
             try
             {
                 await _signInTokenBiz.DeleteByLogOffTypeAsync(userGuid, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
@@ -124,7 +122,7 @@ namespace HB.Component.Authorization
                     break;
             }
 
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
 
             try
             {
@@ -181,7 +179,7 @@ namespace HB.Component.Authorization
                     lastUser,
                     transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
                 //构造 Jwt
                 SignInResult result = new SignInResult
@@ -197,7 +195,7 @@ namespace HB.Component.Authorization
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
@@ -219,11 +217,12 @@ namespace HB.Component.Authorization
         {
             ThrowIf.NotValid(context);
 
-            //频率检查
-
             //解决并发涌入
+            using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
+                nameof(RefreshAccessTokenAsync) + context.DeviceId,
+                _options.RefreshIntervalTimeSpan).ConfigureAwait(false);
 
-            if (!(await _frequencyChecker.CheckAsync(nameof(RefreshAccessTokenAsync), context.DeviceId, _options.RefreshIntervalTimeSpan).ConfigureAwait(false)))
+            if (!distributedLock.IsAcquired)
             {
                 throw new AuthorizationException(ErrorCode.AuthorizationTooFrequent, $"Context:{SerializeUtil.ToJson(context)}");
             }
@@ -265,7 +264,7 @@ namespace HB.Component.Authorization
             //SignInToken 验证
             TUser? user;
             SignInToken? signInToken;
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
 
             try
             {
@@ -288,7 +287,7 @@ namespace HB.Component.Authorization
 
                 if (signInToken.ExpireAt < DateTimeOffset.UtcNow)
                 {
-                    await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                     await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
 
@@ -301,7 +300,7 @@ namespace HB.Component.Authorization
 
                 if (user == null)
                 {
-                    await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                     await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
 
@@ -313,12 +312,12 @@ namespace HB.Component.Authorization
 
                 await _signInTokenBiz.UpdateAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
 
@@ -423,16 +422,16 @@ namespace HB.Component.Authorization
         private async Task BlackSignInTokenAsync(SignInToken signInToken, string lastUser)
         {
             //TODO: 详细记录Black SiginInToken 的历史纪录
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
             try
             {
                 await _signInTokenBiz.DeleteAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                 throw;
             }

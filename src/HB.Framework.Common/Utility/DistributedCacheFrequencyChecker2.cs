@@ -5,13 +5,13 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace System
 {
-    public class DistributedCacheFrequencyChecker
+    public class DistributedCacheFrequencyChecker2
     {
         private const string _prefix = "Freq_C";
 
         private readonly IDistributedCache _cache;
 
-        public DistributedCacheFrequencyChecker(IDistributedCache cache)
+        public DistributedCacheFrequencyChecker2(IDistributedCache cache)
         {
             _cache = cache;
         }
