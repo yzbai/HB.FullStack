@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,15 @@ namespace HB.Framework.Cache
         void Dispose();
         Task<(T?, bool)> GetAsync<T>(string key, CancellationToken token = default) where T : class;
         Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
+
+        Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+            string dimensionKeyName = entityDef.GuidKeyProperty.Name;
+            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.GuidKeyProperty.GetValue(e).ToString());
+
+            return GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token);
+        }
         Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new();
 
         Task<(TEntity?, bool)> GetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()

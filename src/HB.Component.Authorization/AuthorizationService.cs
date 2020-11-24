@@ -2,6 +2,7 @@
 using HB.Component.Authorization.Entities;
 using HB.Component.Identity;
 using HB.Component.Identity.Entities;
+using HB.Framework.Cache;
 using HB.Framework.Database;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
@@ -27,7 +28,7 @@ namespace HB.Component.Authorization
 
         //private readonly ILogger logger;
 
-        public AuthorizationService(IDatabase database, IOptions<AuthorizationServerOptions> options, IDistributedCache distributedCache,
+        public AuthorizationService(IDatabase database, IOptions<AuthorizationServerOptions> options, ICache distributedCache,
             ISignInTokenBiz signInTokenBiz, IIdentityService identityManager, IJwtBuilder jwtBuilder, ICredentialBiz credentialManager/*, ILogger<AuthorizationService> logger*/)
         {
             _database = database;

@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HB.Framework.Cache\HB.Framework.Cache.csproj" />
     <ProjectReference Include="..\HB.Framework.Database\HB.Framework.Database.csproj" />
+    <ProjectReference Include="..\HB.Framework.DistributedLock\HB.Framework.DistributedLock.csproj" />
     <ProjectReference Include="..\HB.Framework.KVStore\HB.Framework.KVStore.csproj" />
   </ItemGroup>
 

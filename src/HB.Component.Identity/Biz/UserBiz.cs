@@ -1,6 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.Component.Identity.Entities;
 using HB.Framework.Business;
+using HB.Framework.Cache;
 using HB.Framework.Common;
 using HB.Framework.Common.Utility;
 using HB.Framework.Database;
@@ -14,12 +15,12 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    internal class UserBiz : SingleEntityBaseBiz<User>
+    internal class UserBiz : EntityBaseBiz<User>
     {
         private readonly IdentityOptions _identityOptions;
         private readonly IDatabase _db;
 
-        public UserBiz(IOptions<IdentityOptions> identityOptions, IDatabase database, IDistributedCache cache) : base(cache)
+        public UserBiz(IOptions<IdentityOptions> identityOptions, IDatabase database, ICache cache) : base(cache)
         {
             _identityOptions = identityOptions.Value;
             _db = database;
@@ -36,8 +37,8 @@ namespace HB.Component.Identity
         public async Task<User?> GetByGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                cacheKeyName: nameof(User.Guid),
-                cacheKeyValue: userGuid,
+                dimensionKeyName: nameof(User.Guid),
+                dimensionKeyValue: userGuid,
                 retrieve: () =>
                 {
                     return _db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);

@@ -120,7 +120,7 @@ namespace HB.Framework.DistributedLock.Test
 
             int extendCount;
 
-            using (IDistributedLock redisLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(2)))
+            using (IDistributedLock redisLock = await _lockManager.LockAsync(resources, TimeSpan.FromMilliseconds(100)))
             {
                 Assert.True(redisLock.IsAcquired);
 

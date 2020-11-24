@@ -1,5 +1,5 @@
 ﻿using System;
-using HB.Framework.Common.Sms;
+using HB.Framework.Common.Server;
 using HB.Infrastructure.Aliyun.Sms;
 using Microsoft.Extensions.Configuration;
 

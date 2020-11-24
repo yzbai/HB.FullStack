@@ -54,6 +54,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.DatabaseTests"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{00D7A435-780D-4623-88A8-BE1F0713DD82}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.Cache", "src\HB.Framework.Cache\HB.Framework.Cache.csproj", "{996F7D2C-0EEA-4E8E-AF28-C533FCE28A5A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Framework.DistributedLock", "src\HB.Framework.DistributedLock\HB.Framework.DistributedLock.csproj", "{547A4015-FB19-4B89-ACE3-866B89D04CAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -140,6 +144,14 @@ Global
 		{1CD1C0D9-ED0C-4E16-B479-B397D71E2FBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CD1C0D9-ED0C-4E16-B479-B397D71E2FBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CD1C0D9-ED0C-4E16-B479-B397D71E2FBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{996F7D2C-0EEA-4E8E-AF28-C533FCE28A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{996F7D2C-0EEA-4E8E-AF28-C533FCE28A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{996F7D2C-0EEA-4E8E-AF28-C533FCE28A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{996F7D2C-0EEA-4E8E-AF28-C533FCE28A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{547A4015-FB19-4B89-ACE3-866B89D04CAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{547A4015-FB19-4B89-ACE3-866B89D04CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{547A4015-FB19-4B89-ACE3-866B89D04CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{547A4015-FB19-4B89-ACE3-866B89D04CAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

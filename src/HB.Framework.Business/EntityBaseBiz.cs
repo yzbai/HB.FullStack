@@ -1,7 +1,9 @@
 ﻿using HB.Framework.Cache;
 using HB.Framework.Common;
 using HB.Framework.Common.Entities;
+using HB.Framework.DistributedLock;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,14 +14,29 @@ using System.Threading.Tasks;
 
 namespace HB.Framework.Business
 {
+    /// <summary>
+    /// 这里体现缓存的策略：
+    /// 所有的关于TEntity的update\delete都要经过这里，保证缓存的Invalidation正确
+    /// Service里面不要出现_database.Update / _database.Delete,全部由Biz来调用
+    /// Cache Strategy : Cache Aside
+    /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
     public abstract class EntityBaseBiz<TEntity> where TEntity : Entity, new()
     {
-        protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
-        protected readonly ICache _cache;
+        public static readonly TimeSpan OccupiedTime = TimeSpan.FromSeconds(10);
+        public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(5);
 
-        public EntityBaseBiz(ICache cache)
+        protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
+        protected readonly ILogger _logger;
+        protected readonly ICache _cache;
+        protected readonly IDistributedLockManager _lockManager;
+
+        public EntityBaseBiz(ILogger logger, ICache cache, IDistributedLockManager lockManager)
         {
+            _logger = logger;
             _cache = cache;
+            _lockManager = lockManager;
         }
 
         public event AsyncEventHandler<TEntity> EntityUpdating
@@ -136,10 +153,6 @@ namespace HB.Framework.Business
 
         #region Cache Strategy
 
-        //TODO: 这里必须用分布式锁，因为可能又多台Service服务器
-        //TODO: 有可能锁不住：从不同的dimension为同一个entity加缓存？
-        private static ConcurrentDictionary<string, SemaphoreSlim> guidSemaphoreDict = new ConcurrentDictionary<string, SemaphoreSlim>();
-
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<Task<TEntity?>> retrieve)
         {
             if (!ICache.IsEnabled<TEntity>())
@@ -189,105 +202,50 @@ namespace HB.Framework.Business
             return await retrieve().ConfigureAwait(false);
         }
 
-        private const int _semaphoreTimeoutMilliseconds = 2000;
-        private const int _semaphoreBatchTimeoutMilliseconds = 400;
-
         private async Task UpdateCacheAsync(TEntity entity)
         {
-            SemaphoreSlim curSlim = guidSemaphoreDict.GetOrAdd(entity.Guid, new SemaphoreSlim(1, 1));
+            using IDistributedLock distributedLock = await _lockManager.LockEntityAsync(entity, OccupiedTime, PatienceTime).ConfigureAwait(false);
 
-
-            if (await curSlim.WaitAsync(_semaphoreTimeoutMilliseconds).ConfigureAwait(false))
+            if (!distributedLock.IsAcquired)
             {
-                try
-                {
-                    //Double Check
-                    (TEntity? cached2, bool exists2) = await _cache.GetEntityAsync<TEntity>(entity).ConfigureAwait(false);
-
-                    if (exists2 && cached2!.Version >= entity.Version)
-                    {
-                        return;
-                    }
-
-                    //TODO: Log Missed!
-
-                    await _cache.SetEntityAsync(entity).ConfigureAwait(false);
-
-                }
-                finally
-                {
-                    curSlim.Release();
-                }
-            }
-            else
-            {
-                //TODO: Log 冲突
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD003:Avoid awaiting foreign Tasks", Justification = "<Pending>")]
-        private async Task UpdateCacheAsync(IEnumerable<TEntity> entities)
-        {
-            List<SemaphoreSlim> semaphores = new List<SemaphoreSlim>();
-
-            foreach (TEntity entity in entities)
-            {
-                semaphores.Add(guidSemaphoreDict.GetOrAdd(entity.Guid, new SemaphoreSlim(1, 1)));
-            }
-
-            CancellationTokenSource cts = new CancellationTokenSource(10000);
-
-            Dictionary<Task<bool>, SemaphoreSlim> dict = new Dictionary<Task<bool>, SemaphoreSlim>();
-
-            foreach (SemaphoreSlim semaphore in semaphores)
-            {
-                dict.Add(semaphore.WaitAsync(_semaphoreBatchTimeoutMilliseconds, cts.Token), semaphore);
-            }
-
-            List<SemaphoreSlim> successed = new List<SemaphoreSlim>();
-
-            while (dict.Any())
-            {
-                Task<bool> finished = await Task.WhenAny<bool>(dict.Keys).ConfigureAwait(false);
-
-                bool waitSuccess = await finished.ConfigureAwait(false);
-
-                if (waitSuccess)
-                {
-                    successed.Add(dict[finished]);
-                }
-                else
-                {
-                    cts.Cancel();
-                }
-
-                dict.Remove(finished);
-            }
-
-            if (cts.IsCancellationRequested)
-            {
-                //TODO: log this
-
-                foreach (SemaphoreSlim sm in successed)
-                {
-                    sm.Release();
-                }
-
+                _logger.LogWarning($"锁未能占用. Entity:{nameof(TEntity)}, Guid:{entity.Guid}, Lock Status:{distributedLock.Status}");
                 return;
             }
 
-            //获取了所有的locker
-            try
+            //Double Check
+            (TEntity? cached2, bool exists2) = await _cache.GetEntityAsync<TEntity>(entity).ConfigureAwait(false);
+
+            if (exists2 && cached2!.Version >= entity.Version)
             {
-                await _cache.SetEntitiesAsync(entities).ConfigureAwait(false);
+                return;
             }
-            finally
+
+            _logger.LogInformation($"Cache Missed. Entity:{nameof(TEntity)}, Guid:{entity.Guid}");
+
+            await _cache.SetEntityAsync(entity).ConfigureAwait(false);
+        }
+
+        private async Task UpdateCacheAsync(IEnumerable<TEntity> entities)
+        {
+            using IDistributedLock distributedLock = await _lockManager.LockEntitiesAsync(entities, OccupiedTime, PatienceTime).ConfigureAwait(false);
+
+            if (!distributedLock.IsAcquired)
             {
-                foreach (SemaphoreSlim semaphore in semaphores)
-                {
-                    semaphore.Release();
-                }
+                _logger.LogWarning($"锁未能占用. Entity:{nameof(TEntity)}, Guids:{entities.Select(e => e.Guid).ToJoinedString(",")}, Lock Status:{distributedLock.Status}");
+                return;
             }
+
+            //Double Check
+            (IEnumerable<TEntity>? cachedEntities, bool allExists) = await _cache.GetEntitiesAsync<TEntity>(entities).ConfigureAwait(false);
+
+            if (allExists)
+            {
+                return;
+            }
+
+            _logger.LogInformation($"Cache Missed. Entity:{nameof(TEntity)}, Guids:{entities.Select(e => e.Guid).ToJoinedString(",")}");
+
+            await _cache.SetEntitiesAsync(entities).ConfigureAwait(false);
         }
 
         #endregion

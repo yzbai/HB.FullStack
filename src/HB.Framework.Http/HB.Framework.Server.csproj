@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HB.Framework.Cache\HB.Framework.Cache.csproj" />
     <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
   </ItemGroup>
 

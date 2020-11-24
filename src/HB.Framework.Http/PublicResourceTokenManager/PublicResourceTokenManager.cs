@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using HB.Framework.Cache;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,11 +13,11 @@ namespace HB.Framework.Server
         private const string _prefix = "PRT_";
         private readonly int _tokenlength = 36 + _prefix.Length;
         private const string _defaultValue = "0";
-        private readonly IDistributedCache _cache;
+        private readonly ICache _cache;
         private readonly IDataProtector _dataProtector;
         private readonly ILogger _logger;
 
-        public PublicResourceTokenManager(IDistributedCache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenManager> logger)
+        public PublicResourceTokenManager(ICache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenManager> logger)
         {
             _cache = cache;
             _logger = logger;
