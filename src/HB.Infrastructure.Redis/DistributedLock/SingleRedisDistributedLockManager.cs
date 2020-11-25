@@ -16,6 +16,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
     internal class SingleRedisDistributedLockManager : IDistributedLockManager
     {
 
+        //TODO: 清理Log
 
 
         /// <summary>
@@ -41,12 +42,16 @@ return 1";
         /// </summary>
         private const string _luaUnlock = @"
 local count = tonumber(ARGV[1])
-
+local ok = 1
 for i = 1, count do
 	if (redis.call('get', KEYS[i]) == ARGV[i+1]) then
-		redis.pcall('del', KEYS[i])
+		if (redis.pcall('del', KEYS[i]) ~= 1) then
+            ok = 0
+        end
 	end
-end";
+end
+return ok
+";
 
         /// <summary>
         /// keys:resource1,resource2,resource3
@@ -65,8 +70,6 @@ for i =1, count do
     redis.call('set', KEYS[i], ARGV[i+2], 'PX', ARGV[2])
 end
 return 1";
-
-
 
         private readonly TimeSpan minimumExpiryTime = TimeSpan.FromMilliseconds(10);
         private readonly TimeSpan minimumRetryTime = TimeSpan.FromMilliseconds(10);
@@ -129,10 +132,13 @@ return 1";
 
                 while (!redisLock.IsAcquired && stopwatch.Elapsed <= redisLock.WaitTime)
                 {
+                    logger.LogDebug($"锁在等待... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+
                     redisLock.Status = await AcquireResourceAsync(redisLock, logger).ConfigureAwait(false);
 
                     if (!redisLock.IsAcquired)
                     {
+                        logger.LogDebug($"锁继续等待... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                         if (redisLock.CancellationToken == null)
                         {
                             await Task.Delay((int)redisLock.RetryTime.TotalMilliseconds).ConfigureAwait(false);
@@ -146,6 +152,7 @@ return 1";
 
                 if (!redisLock.IsAcquired)
                 {
+                    logger.LogDebug($"锁等待超时... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                     redisLock.Status = DistributedLockStatus.Expired;
                 }
 
@@ -153,12 +160,18 @@ return 1";
             }
             else
             {
+                //不等待
                 redisLock.Status = await AcquireResourceAsync(redisLock, logger).ConfigureAwait(false);
             }
 
             if (redisLock.IsAcquired)
             {
+                logger.LogDebug($"锁获取成功... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                 StartAutoExtendTimer(redisLock, logger);
+            }
+            else
+            {
+                logger.LogDebug($"锁获取失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
             }
         }
 
@@ -200,8 +213,6 @@ return 1";
 
         private static void StartAutoExtendTimer(RedisLock redisLock, ILogger logger)
         {
-            logger.LogDebug("Start Auto Timer");
-
             var interval = redisLock.ExpiryTime.TotalMilliseconds / 2;
 
             redisLock.KeepAliveTimer = new Timer(
@@ -213,7 +224,7 @@ return 1";
 
         private static void ExtendLockLifetime(RedisLock redisLock, ILogger logger)
         {
-            logger.LogDebug("Extending...");
+            logger.LogDebug($"锁在自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -260,10 +271,21 @@ return 1";
 
             try
             {
-                _ = await database.ScriptEvaluateAsync(
+                RedisResult result = await database.ScriptEvaluateAsync(
                     _loadedLuas.LoadedUnLockLua,
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
+
+                int rt = (int)result;
+
+                if (rt == 1)
+                {
+                    GlobalSettings.Logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                }
+                else
+                {
+                    ThrowIfUnlockFailed(redisLock);
+                }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -271,6 +293,16 @@ return 1";
 
                 await ReleaseResourceAsync(redisLock).ConfigureAwait(false);
             }
+            catch
+            {
+                GlobalSettings.Logger.LogDebug($"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                throw;
+            }
+        }
+
+        private static void ThrowIfUnlockFailed(RedisLock redisLock)
+        {
+            throw new FrameworkException(ErrorCode.DistributedLockUnLockFailed, $"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
         }
 
         private static void AddReleaseResourceRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues)

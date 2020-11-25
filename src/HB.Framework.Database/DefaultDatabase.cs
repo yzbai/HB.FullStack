@@ -5,6 +5,7 @@ using HB.Framework.Database.Engine;
 using HB.Framework.Database.Entities;
 using HB.Framework.Database.Properties;
 using HB.Framework.Database.SQL;
+using HB.Framework.DistributedLock;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace HB.Framework.Database
         private readonly ISQLBuilder _sqlBuilder;
         private readonly ITransaction _transaction;
         private readonly ILogger _logger;
+        private readonly IDistributedLockManager _lockManager;
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
@@ -41,7 +43,8 @@ namespace HB.Framework.Database
             IDatabaseEntityMapper modelMapper,
             ISQLBuilder sqlBuilder,
             ITransaction transaction,
-            ILogger<DefaultDatabase> logger)
+            ILogger<DefaultDatabase> logger,
+            IDistributedLockManager lockManager)
         {
             _databaseSettings = databaseEngine.DatabaseSettings;
             _databaseEngine = databaseEngine;
@@ -50,6 +53,7 @@ namespace HB.Framework.Database
             _sqlBuilder = sqlBuilder;
             _transaction = transaction;
             _logger = logger;
+            _lockManager = lockManager;
 
             if (_databaseSettings.Version < 0)
             {
@@ -67,6 +71,20 @@ namespace HB.Framework.Database
         /// <exception cref="HB.Framework.Database.DatabaseException"></exception>
         public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
+            _logger.LogDebug($"开始初始化数据库:{_databaseEngine.GetDatabaseNames().ToJoinedString(",")}");
+
+            using IDistributedLock distributedLock = await _lockManager.LockAsync(
+                resources: _databaseEngine.GetDatabaseNames(),
+                expiryTime: TimeSpan.FromMinutes(5),
+                waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
+
+            _logger.LogDebug($"获取了初始化数据库的锁:{_databaseEngine.GetDatabaseNames().ToJoinedString(",")}");
+
+            if (!distributedLock.IsAcquired)
+            {
+                ThrowIfDatabaseInitLockNotGet(_databaseEngine.GetDatabaseNames());
+            }
+
             if (_databaseSettings.AutomaticCreateTable)
             {
                 await AutoCreateTablesIfBrandNewAsync().ConfigureAwait(false);
@@ -81,7 +99,12 @@ namespace HB.Framework.Database
                 _logger.LogInformation("Database Migarate Finished.");
             }
 
-            _logger.LogInformation("Database Initialize Finished. Good To Go!");
+            _logger.LogInformation("数据初始化成功！");
+        }
+
+        private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
+        {
+            throw new DatabaseException(ErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
         }
 
         /// <summary>
@@ -91,45 +114,43 @@ namespace HB.Framework.Database
         /// <exception cref="HB.Framework.Database.DatabaseException"></exception>
         private async Task AutoCreateTablesIfBrandNewAsync()
         {
-            await _databaseEngine.GetDatabaseNames().ForEachAsync(
-                async databaseName =>
+            foreach (string databaseName in _databaseEngine.GetDatabaseNames())
+            {
+                TransactionContext transactionContext = await _transaction.BeginTransactionAsync(databaseName, IsolationLevel.Serializable).ConfigureAwait(false);
+
+                try
                 {
-                    TransactionContext transactionContext = await _transaction.BeginTransactionAsync(databaseName, IsolationLevel.Serializable).ConfigureAwait(false);
-
-                    try
+                    SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
+                    //表明是新数据库
+                    if (sys.Version == 0)
                     {
-                        SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
-                        //表明是新数据库
-                        if (sys.Version == 0)
+                        if (_databaseSettings.Version != 1)
                         {
-                            if (_databaseSettings.Version != 1)
-                            {
-                                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                                throw new DatabaseException(ErrorCode.DatabaseTableCreateError,
-                                                            "",
-                                                            $"Database:{databaseName} does not exists, database Version must be 1");
-                            }
-
-                            await CreateTablesByDatabaseAsync(databaseName, transactionContext).ConfigureAwait(false);
-
-                            await UpdateSystemVersionAsync(databaseName, 1, transactionContext.Transaction).ConfigureAwait(false);
+                            await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                            throw new DatabaseException(ErrorCode.DatabaseTableCreateError,
+                                                        "",
+                                                        $"Database:{databaseName} does not exists, database Version must be 1");
                         }
 
-                        await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+                        await CreateTablesByDatabaseAsync(databaseName, transactionContext).ConfigureAwait(false);
+
+                        await UpdateSystemVersionAsync(databaseName, 1, transactionContext.Transaction).ConfigureAwait(false);
                     }
-                    catch (Exception ex)
+
+                    await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+
+                    if (ex is DatabaseException)
                     {
-                        await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-
-                        if (ex is DatabaseException)
-                        {
-                            throw;
-                        }
-
-                        throw new DatabaseException(ErrorCode.DatabaseTableCreateError, null, $"Database:{databaseName}", ex);
+                        throw;
                     }
 
-                }).ConfigureAwait(false);
+                    throw new DatabaseException(ErrorCode.DatabaseTableCreateError, null, $"Database:{databaseName}", ex);
+                }
+            }
         }
 
         /// <summary>
@@ -160,10 +181,10 @@ namespace HB.Framework.Database
         /// <exception cref="HB.Framework.Database.DatabaseException"></exception>
         private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext)
         {
-            await _entityDefFactory
-                .GetAllDefsByDatabase(databaseName)
-                .ForEachAsync(async def => await CreateTableAsync(def, transactionContext).ConfigureAwait(false))
-                .ConfigureAwait(false);
+            foreach (DatabaseEntityDef entityDef in _entityDefFactory.GetAllDefsByDatabase(databaseName))
+            {
+                await CreateTableAsync(entityDef, transactionContext).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -178,62 +199,61 @@ namespace HB.Framework.Database
                 throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", Resources.MigrationVersionErrorMessage);
             }
 
-            await _databaseEngine.GetDatabaseNames().ForEachAsync(async databaseName =>
-             {
+            foreach (string databaseName in _databaseEngine.GetDatabaseNames())
+            {
+                TransactionContext transactionContext = await _transaction.BeginTransactionAsync(databaseName, IsolationLevel.Serializable).ConfigureAwait(false);
 
-                 TransactionContext transactionContext = await _transaction.BeginTransactionAsync(databaseName, IsolationLevel.Serializable).ConfigureAwait(false);
+                try
+                {
+                    SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
 
-                 try
-                 {
-                     SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
+                    if (sys.Version < _databaseSettings.Version)
+                    {
+                        if (migrations == null)
+                        {
+                            throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", $"Lack Migrations for {sys.DatabaseName}");
+                        }
 
-                     if (sys.Version < _databaseSettings.Version)
-                     {
-                         if (migrations == null)
-                         {
-                             throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", $"Lack Migrations for {sys.DatabaseName}");
-                         }
+                        IOrderedEnumerable<Migration> curOrderedMigrations = migrations
+                            .Where(m => m.TargetSchema.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
+                            .OrderBy(m => m.OldVersion);
 
-                         IOrderedEnumerable<Migration> curOrderedMigrations = migrations
-                             .Where(m => m.TargetSchema.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
-                             .OrderBy(m => m.OldVersion);
+                        if (curOrderedMigrations == null)
+                        {
+                            throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", $"Lack Migrations for {sys.DatabaseName}");
+                        }
 
-                         if (curOrderedMigrations == null)
-                         {
-                             throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", $"Lack Migrations for {sys.DatabaseName}");
-                         }
+                        if (!CheckMigration(sys.Version, _databaseSettings.Version, curOrderedMigrations))
+                        {
+                            throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", $"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
+                        }
 
-                         if (!CheckMigration(sys.Version, _databaseSettings.Version, curOrderedMigrations))
-                         {
-                             throw new DatabaseException(ErrorCode.DatabaseMigrateError, "", $"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
-                         }
+                        foreach (Migration migration in curOrderedMigrations)
+                        {
+                            IDbCommand command = _databaseEngine.CreateEmptyCommand();
+                            command.CommandType = CommandType.Text;
+                            command.CommandText = migration.SqlStatement;
+                            await _databaseEngine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, databaseName, command).ConfigureAwait(false);
+                        }
 
-                         await curOrderedMigrations.ForEachAsync(async migration =>
-                         {
-                             IDbCommand command = _databaseEngine.CreateEmptyCommand();
-                             command.CommandType = CommandType.Text;
-                             command.CommandText = migration.SqlStatement;
-                             await _databaseEngine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, databaseName, command).ConfigureAwait(false);
-                         }).ConfigureAwait(false);
+                        await UpdateSystemVersionAsync(sys.DatabaseName, _databaseSettings.Version, transactionContext.Transaction).ConfigureAwait(false);
+                    }
 
-                         await UpdateSystemVersionAsync(sys.DatabaseName, _databaseSettings.Version, transactionContext.Transaction).ConfigureAwait(false);
-                     }
+                    await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    //throw new DatabaseException(DatabaseError.MigrateError, "", $"Migration Failed at Database:{databaseName}", ex);
 
-                     await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-                 }
-                 catch (Exception ex)
-                 {
-                     await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                     //throw new DatabaseException(DatabaseError.MigrateError, "", $"Migration Failed at Database:{databaseName}", ex);
+                    if (ex is DatabaseException)
+                    {
+                        throw;
+                    }
 
-                     if (ex is DatabaseException)
-                     {
-                         throw;
-                     }
-
-                     throw new DatabaseException(ErrorCode.DatabaseMigrateError, null, $"Database:{databaseName}", ex);
-                 }
-             }).ConfigureAwait(false);
+                    throw new DatabaseException(ErrorCode.DatabaseMigrateError, null, $"Database:{databaseName}", ex);
+                }
+            }
         }
 
         private static bool CheckMigration(int startVersion, int endVersion, IOrderedEnumerable<Migration> curOrderedMigrations)
@@ -254,6 +274,8 @@ namespace HB.Framework.Database
 
             return curVersion == endVersion;
         }
+
+        public DatabaseEngineType EngineType => _databaseEngine.EngineType;
 
         #endregion
 
@@ -999,6 +1021,7 @@ namespace HB.Framework.Database
         #region 单体更改(Write)
 
         /// <summary>
+        /// 基于Guid
         /// item被重新赋值，反应Version变化。
         /// 在Update时不做Version检查
         /// </summary>
@@ -1008,10 +1031,9 @@ namespace HB.Framework.Database
 
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
 
-            if (!entityDef.DatabaseWriteable)
-            {
-                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Entity:{SerializeUtil.ToJson(item)}");
-            }
+            ThrowIfAddOrUpdateMultipleUnique(item, entityDef, lastUser);
+
+            ThrowIfNotWritable(item, entityDef);
 
             IDbCommand? dbCommand = null;
             IDataReader? reader = null;
@@ -1040,6 +1062,31 @@ namespace HB.Framework.Database
             }
         }
 
+        private static void ThrowIfNotWritable<T>(T item, DatabaseEntityDef entityDef) where T : Entity, new()
+        {
+            if (!entityDef.DatabaseWriteable)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Entity:{SerializeUtil.ToJson(item)}");
+            }
+        }
+
+        private static void ThrowIfAddOrUpdateMultipleUnique<T>(T item, DatabaseEntityDef entityDef, string lastUser) where T : Entity, new()
+        {
+            // Guid & Id is unique already
+            if (entityDef.UniqueFieldCount > 2)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseAddOrUpdateWhenMultipleUnique, entityDef.EntityFullName, $"Entity:{SerializeUtil.ToJson(item)}, LastUser:{lastUser}");
+            }
+        }
+
+        private static void ThrowIfAddOrUpdateMultipleUnique<T>(IEnumerable<T> items, DatabaseEntityDef entityDef, string lastUser) where T : Entity, new()
+        {
+            // Guid & Id is unique already
+            if (entityDef.UniqueFieldCount > 2)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseAddOrUpdateWhenMultipleUnique, entityDef.EntityFullName, $"Entities:{SerializeUtil.ToJson(items)}, LastUser:{lastUser}");
+            }
+        }
 
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
@@ -1111,6 +1158,7 @@ namespace HB.Framework.Database
 
                 if (rows == 1)
                 {
+                    item.Deleted = true;
                     return;
                 }
                 else if (rows == 0)
@@ -1164,7 +1212,7 @@ namespace HB.Framework.Database
                 if (rows == 1)
                 {
                     //反应Version变化
-                    item.Version++;
+                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, item.Version + 1);
                     return;
                 }
                 else if (rows == 0)
@@ -1194,17 +1242,17 @@ namespace HB.Framework.Database
         {
             ThrowIf.NotValid(items);
 
+            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+
+            ThrowIfAddOrUpdateMultipleUnique(items, entityDef, lastUser);
+
+
             if (!items.Any())
             {
                 return new List<Tuple<long, int>>();
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
-
-            if (!entityDef.DatabaseWriteable)
-            {
-                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Items:{SerializeUtil.ToJson(items)}");
-            }
+            ThrowIfNotWritable(items, entityDef);
 
             IDbCommand? dbCommand = null;
             IDataReader? reader = null;
@@ -1243,8 +1291,8 @@ namespace HB.Framework.Database
                 for (int i = 0; i < idAndVersions.Count; ++i)
                 {
                     T item = items.ElementAt(i);
-                    item.Id = idAndVersions[i].Item1;
-                    item.Version = idAndVersions[i].Item2;
+                    entityDef.GetProperty("Id")!.PropertyInfo.SetValue(item, idAndVersions[i].Item1);
+                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, idAndVersions[i].Item2);
                 }
 
                 return idAndVersions;
@@ -1258,6 +1306,14 @@ namespace HB.Framework.Database
             {
                 reader?.Dispose();
                 dbCommand?.Dispose();
+            }
+        }
+
+        private static void ThrowIfNotWritable<T>(IEnumerable<T> items, DatabaseEntityDef entityDef) where T : Entity, new()
+        {
+            if (!entityDef.DatabaseWriteable)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Items:{SerializeUtil.ToJson(items)}");
             }
         }
 
@@ -1322,8 +1378,10 @@ namespace HB.Framework.Database
                 for (int i = 0; i < items.Count(); ++i)
                 {
                     T item = items.ElementAt(i);
-                    item.Version = 0;
-                    item.Id = newIds[i];
+
+                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, 0);
+
+                    entityDef.GetProperty("Id")!.PropertyInfo.SetValue(item, newIds[i]);
                 }
 
                 return newIds;
@@ -1397,7 +1455,8 @@ namespace HB.Framework.Database
                 //反应Version变化
                 foreach (T item in items)
                 {
-                    item.Version++;
+                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, item.Version + 1);
+                    //item.Version++;
                 }
             }
             catch (Exception ex) when (!(ex is DatabaseException))
@@ -1467,6 +1526,11 @@ namespace HB.Framework.Database
                 {
                     throw new DatabaseException(ErrorCode.DatabaseNotFound, entityDef.EntityFullName, $"BatchDelete wrong number return. Some data item not found. Items:{SerializeUtil.ToJson(items)}");
                 }
+
+                items.ForEach(item =>
+                {
+                    item.Deleted = true;
+                });
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {

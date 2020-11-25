@@ -18,7 +18,7 @@ namespace HB.Framework.CommonTests
 
             outterCls.InnerCls = new InnerCls();
 
-            Assert.False(outterCls.IsValid());
+            Assert.True(outterCls.IsValid());
         }
     }
 

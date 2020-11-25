@@ -5,80 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace HB.Framework.Common
 {
-    public delegate Task AsyncEventHandler<TSender, TEventArgs>(TSender sender, TEventArgs args);
-
-    public delegate Task AsyncEventHandler(object sender, EventArgs args);
-
-    public delegate Task AsyncEventHandler<TSender>(TSender sender, EventArgs args);
-
-    internal class DelegateWrapper
-    {
-        public DelegateWrapper(WeakReference caller, MethodInfo handler)
-        {
-            CallerWeakReference = caller;
-            Handler = handler;
-        }
-
-        public WeakReference CallerWeakReference { get; set; }
-
-        public MethodInfo Handler { get; set; }
-    }
-
-    public class WeakAsyncEventManager
-    {
-        private readonly Dictionary<string, List<DelegateWrapper>> _delegateWrapperDict = new Dictionary<string, List<DelegateWrapper>>();
-
-        public void Add<TSender, TEventArgs>(AsyncEventHandler<TSender, TEventArgs> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
-        {
-            WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
-        }
-
-        public void Add<TSender>(AsyncEventHandler<TSender> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
-        {
-            WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
-        }
-
-        public void Add(AsyncEventHandler handlerDelegate, [CallerMemberName] string eventName = "")
-        {
-            WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
-        }
-
-        public void Remove<TSender, TEventArgs>(AsyncEventHandler<TSender, TEventArgs> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
-        {
-            WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
-        }
-
-        public void Remove<TSender>(AsyncEventHandler<TSender> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
-        {
-            WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
-        }
-
-        public void Remove(AsyncEventHandler handlerDelegate, [CallerMemberName] string eventName = "")
-        {
-            WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
-        }
-
-        public Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs) where TSender : class where TEventArgs : class
-        {
-            return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, TEventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
-        }
-
-        public Task RaiseEventAsync<TSender>(string eventName, TSender sender, EventArgs eventArgs) where TSender : class
-        {
-            return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
-        }
-
-        public Task RaiseEventAsync(string eventName, object sender, EventArgs eventArgs)
-        {
-            return WeakAsyncEventManagerExecutor.RaiseEventAsync<object, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
-        }
-    }
-
     static class WeakAsyncEventManagerExecutor
     {
         internal static void Add(string eventName, object caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
@@ -114,11 +44,11 @@ namespace HB.Framework.Common
             }
         }
 
-        internal static async Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict) where TSender : class where TEventArgs : class
+        internal static Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict) where TSender : class where TEventArgs : class
         {
             if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper> wrappers))
             {
-                return;
+                return Task.CompletedTask;
             }
 
             List<DelegateWrapper> toRemoves = new();
@@ -141,6 +71,8 @@ namespace HB.Framework.Common
             //clean
             toRemoves.ForEach(w => wrappers.Remove(w));
 
+            List<Task> tasks = new List<Task>();
+
             //Invoke
             for (int i = 0; i < toRaises.Count; ++i)
             {
@@ -160,8 +92,10 @@ namespace HB.Framework.Common
 
                 Task task = (Task)rtObj;
 
-                await task.ConfigureAwait(false);
+                tasks.Add(task);
             }
+
+            return Task.WhenAll(tasks);
         }
 
         static DynamicMethod TryGetDynamicMethod(in MethodInfo rtDynamicMethod)

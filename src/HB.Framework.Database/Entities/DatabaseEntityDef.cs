@@ -57,6 +57,8 @@ namespace HB.Framework.Database.Entities
 
         public int FieldCount { get; set; }
 
+        public int UniqueFieldCount { get; set; }
+
         #endregion
 
         #region 所含属性

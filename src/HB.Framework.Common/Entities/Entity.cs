@@ -18,7 +18,7 @@ namespace HB.Framework.Common.Entities
 
         [AutoIncrementPrimaryKey]
         [EntityProperty("Id")]
-        public long Id { get; set; } = -1;
+        public long Id { get; private set; } = -1;
 
         /// <summary>
         /// 资源ID，全局不变
@@ -30,7 +30,7 @@ namespace HB.Framework.Common.Entities
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
         [EntityProperty("Version")]
-        public int Version { get; set; } = 0;
+        public int Version { get; private set; } = -1;
 
         [EntityProperty("上一次更改者", Length = LastUserMaxLength)]
         public string LastUser { get; set; } = string.Empty;

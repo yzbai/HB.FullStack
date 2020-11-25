@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
+    <ProjectReference Include="..\HB.Framework.DistributedLock\HB.Framework.DistributedLock.csproj" />
   </ItemGroup>
 
   <ItemGroup>

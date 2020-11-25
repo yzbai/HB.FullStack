@@ -15,23 +15,26 @@ namespace HB.Framework.Database.Entities
         /// <summary>
         /// 所属实体名称
         /// </summary>
-        public DatabaseEntityDef EntityDef { get; set; }
-        /// <summary>
-        /// 属性名称
-        /// </summary>
-        public string PropertyName { get; set; }
-        /// <summary>
-        /// 属性类型
-        /// </summary>
-        public Type PropertyType { get; set; }
-        /// <summary>
-        /// Get方法
-        /// </summary>
-        public MethodInfo GetMethod { get; set; }
-        /// <summary>
-        /// Set方法
-        /// </summary>
-        public MethodInfo SetMethod { get; set; }
+        public DatabaseEntityDef EntityDef { get; private set; }
+
+        public PropertyInfo PropertyInfo { get; private set; }
+
+        ///// <summary>
+        ///// 属性名称
+        ///// </summary>
+        //public string PropertyName { get; set; }
+        ///// <summary>
+        ///// 属性类型
+        ///// </summary>
+        //public Type PropertyType { get; set; }
+        ///// <summary>
+        ///// Get方法
+        ///// </summary>
+        //public MethodInfo GetMethod { get; set; }
+        ///// <summary>
+        ///// Set方法
+        ///// </summary>
+        //public MethodInfo SetMethod { get; set; }
 
         #endregion
 
@@ -105,20 +108,21 @@ namespace HB.Framework.Database.Entities
         public DatabaseEntityPropertyDef(DatabaseEntityDef entityDef, PropertyInfo propertyInfo)
         {
             EntityDef = entityDef;
-            PropertyName = propertyInfo.Name;
-            PropertyType = propertyInfo.PropertyType;
-            GetMethod = propertyInfo.GetGetMethod();
-            SetMethod = propertyInfo.GetSetMethod();
+            PropertyInfo = propertyInfo;
+            //PropertyName = propertyInfo.Name;
+            //PropertyType = propertyInfo.PropertyType;
+            //GetMethod = propertyInfo.GetGetMethod();
+            //SetMethod = propertyInfo.GetSetMethod();
         }
         /// <summary>
         /// 获取值
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public object GetValue(object entity)
-        {
-            return GetMethod.Invoke(entity, null);
-        }
+        //public object GetValue(object entity)
+        //{
+        //    return GetMethod.Invoke(entity, null);
+        //}
         ///// <summary>
         ///// 获取数据库值表达
         ///// </summary>
@@ -135,9 +139,9 @@ namespace HB.Framework.Database.Entities
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="value"></param>
-        public void SetValue(object entity, object value)
-        {
-            SetMethod.Invoke(entity, new object[] { value });
-        }
+        //public void SetValue(object entity, object value)
+        //{
+        //    SetMethod.Invoke(entity, new object[] { value });
+        //}
     }
 }

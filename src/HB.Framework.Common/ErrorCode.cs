@@ -69,6 +69,10 @@
         DatabaseExecuterError = 241,
         DatabaseAffectedRowCountNotValid = 228,
 
+        DatabaseAddOrUpdateWhenMultipleUnique = 234,
+
+        DatabaseInitLockError = 235,
+
         #endregion Database
 
         #region KVStore
@@ -153,7 +157,12 @@
         CacheSlidingTimeBiggerThanMaxAlive = 832,
         CacheBatchNotEnabled = 833,
 
+
+
         #endregion
+
+
+        DistributedLockUnLockFailed = 934,
     }
 
     public static class ErrorCodeExtensions

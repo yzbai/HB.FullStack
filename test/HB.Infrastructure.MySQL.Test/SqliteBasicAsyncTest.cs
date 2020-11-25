@@ -1,4 +1,4 @@
-using HB.Framework.Database;
+Ôªøusing HB.Framework.Database;
 using HB.Framework.Database.SQL;
 using HB.Framework.DatabaseTests.Data;
 using System;
@@ -11,22 +11,18 @@ using Xunit.Abstractions;
 
 namespace HB.Framework.DatabaseTests
 {
-    //[TestCaseOrderer("HB.Framework.Database.Test.TestCaseOrdererByTestName", "HB.Framework.Database.Test")]
-    public class BasicAsyncTest : IClassFixture<ServiceFixture>
+    public class SqliteBasicAsyncTest
     {
-        private readonly IDatabase _mysql;
         private readonly IDatabase _sqlite;
-        private readonly ITransaction _mysqlTransaction;
         private readonly ITransaction _sqlIteTransaction;
         private readonly ITestOutputHelper _output;
-        private readonly IsolationLevel _isolationLevel = IsolationLevel.Serializable;
+        //private readonly IsolationLevel  = IsolationLevel.RepeatableRead;
 
         private IDatabase? GetDatabase(string databaseType)
         {
 
             return databaseType switch
             {
-                "MySQL" => _mysql,
                 "SQLite" => _sqlite,
                 _ => null
             };
@@ -37,7 +33,6 @@ namespace HB.Framework.DatabaseTests
 
             return databaseType switch
             {
-                "MySQL" => _mysqlTransaction,
                 "SQLite" => _sqlIteTransaction,
                 _ => null
             };
@@ -51,18 +46,13 @@ namespace HB.Framework.DatabaseTests
         /// <param name="serviceFixture"></param>
         /// <exception cref="DatabaseException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public BasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper)
         {
             _output = testOutputHelper;
 
-            _mysql = serviceFixture.MySQL;
-            _mysqlTransaction = serviceFixture.MySQLTransaction;
 
-            _sqlite = serviceFixture.SQLite;
-            _sqlIteTransaction = serviceFixture.SQLiteTransaction;
-
-            _mysql.InitializeAsync().Wait();
-            _sqlite.InitializeAsync().Wait();
+            _sqlite = ServiceFixture.SQLite;
+            _sqlIteTransaction = ServiceFixture.SQLiteTransaction;
         }
 
         /// <summary>
@@ -73,7 +63,7 @@ namespace HB.Framework.DatabaseTests
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_1_Batch_Add_PublisherEntityAsync(string databaseType)
         {
@@ -82,7 +72,7 @@ namespace HB.Framework.DatabaseTests
 
             IList<PublisherEntity> publishers = Mocker.GetPublishers();
 
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel).ConfigureAwait(false);
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
 
             try
             {
@@ -105,13 +95,13 @@ namespace HB.Framework.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_2_Batch_Update_PublisherEntityAsync(string databaseType)
         {
             IDatabase database = GetDatabase(databaseType)!;
             ITransaction transaction = GetTransaction(databaseType)!;
-            TransactionContext transContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
+            TransactionContext transContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
             {
@@ -122,7 +112,7 @@ namespace HB.Framework.DatabaseTests
                     PublisherEntity entity = lst.ElementAt(i);
                     //entity.Guid = Guid.NewGuid().ToString();
                     entity.Type = PublisherType.Online;
-                    entity.Name = "÷–sfasfafŒƒ√˚◊÷";
+                    entity.Name = "‰∏≠sfasfafÊñáÂêçÂ≠ó";
                     entity.Books = new List<string>() { "xxx", "tttt" };
                     entity.BookAuthors = new Dictionary<string, Author>()
                     {
@@ -152,13 +142,13 @@ namespace HB.Framework.DatabaseTests
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_3_Batch_Delete_PublisherEntityAsync(string databaseType)
         {
             IDatabase database = GetDatabase(databaseType)!;
             ITransaction transaction = GetTransaction(databaseType)!;
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
             {
@@ -188,13 +178,13 @@ namespace HB.Framework.DatabaseTests
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_4_Add_PublisherEntityAsync(string databaseType)
         {
             IDatabase database = GetDatabase(databaseType)!;
             ITransaction transaction = GetTransaction(databaseType)!;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
             {
@@ -229,13 +219,13 @@ namespace HB.Framework.DatabaseTests
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_5_Update_PublisherEntityAsync(string databaseType)
         {
             IDatabase database = GetDatabase(databaseType)!;
             ITransaction transaction = GetTransaction(databaseType)!;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
             {
@@ -258,7 +248,7 @@ namespace HB.Framework.DatabaseTests
                 await transaction.CommitAsync(tContext);
 
                 Assert.True(stored?.Books.Contains("New Book2"));
-                Assert.True(stored?.BookAuthors["New Book2"].Mobile == "15190208956");
+                //Assert.True(stored?.BookAuthors["New Book2"].Mobile == "15190208956");
 
             }
             catch (Exception ex)
@@ -277,23 +267,22 @@ namespace HB.Framework.DatabaseTests
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_6_Delete_PublisherEntityAsync(string databaseType)
         {
             IDatabase database = GetDatabase(databaseType)!;
             ITransaction transaction = GetTransaction(databaseType)!;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
             {
                 IList<PublisherEntity> testEntities = (await database.RetrieveAllAsync<PublisherEntity>(tContext)).ToList();
 
-                await testEntities.ForEachAsync(async entity =>
+                foreach (var entity in testEntities)
                 {
                     await database.DeleteAsync(entity, "lastUsre", tContext);
-
-                });
+                }
 
                 long count = await database.CountAsync<PublisherEntity>(tContext);
 
@@ -310,13 +299,13 @@ namespace HB.Framework.DatabaseTests
         }
 
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_7_AddOrUpdate_PublisherEntityAsync(string databaseType)
         {
             IDatabase database = GetDatabase(databaseType)!;
             ITransaction transaction = GetTransaction(databaseType)!;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
             {
@@ -350,7 +339,7 @@ namespace HB.Framework.DatabaseTests
         }
 
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_8_LastTimeTestAsync(string databaseType)
         {
@@ -382,7 +371,7 @@ namespace HB.Framework.DatabaseTests
 
             ITransaction transaction = GetTransaction(databaseType)!;
 
-            TransactionContext trans = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel).ConfigureAwait(false);
+            TransactionContext trans = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
 
             try
             {
@@ -417,7 +406,7 @@ namespace HB.Framework.DatabaseTests
         }
 
         [Theory]
-        [InlineData("MySQL")]
+
         [InlineData("SQLite")]
         public async Task Test_9_UpdateLastTimeTestAsync(string databaseType)
         {
@@ -425,8 +414,8 @@ namespace HB.Framework.DatabaseTests
 
             ITransaction transaction = GetTransaction(databaseType)!;
 
-            //TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>(_isolationLevel);
-            TransactionContext? transactionContext = null;
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            //TransactionContext? transactionContext = null;
 
             try
             {
@@ -473,11 +462,89 @@ namespace HB.Framework.DatabaseTests
 
                 await database.UpdateAsync(fetched, "xxx", transactionContext);
 
-                //await transaction.CommitAsync(transactionContext);
+                await transaction.CommitAsync(transactionContext);
             }
             catch
             {
-                //await transaction.RollbackAsync(transactionContext);
+                await transaction.RollbackAsync(transactionContext);
+                throw;
+            }
+
+        }
+
+        [Theory]
+
+        [InlineData("SQLite")]
+        public async Task Test_10_AddOrUpdate_VersionTestAsync(string databaseType)
+        {
+            IDatabase database = GetDatabase(databaseType)!;
+
+            ITransaction transaction = GetTransaction(databaseType)!;
+
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+
+            try
+            {
+
+                PublisherEntity item = Mocker.MockOne();
+
+                Assert.True(item.Version == -1);
+
+                await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+
+                Assert.True(item.Version == 0);
+
+                await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+
+                Assert.True(item.Version == 1);
+
+                await database.UpdateAsync(item, "sfa", transactionContext).ConfigureAwait(false);
+
+                Assert.True(item.Version == 2);
+
+
+
+                IEnumerable<PublisherEntity> items = Mocker.GetPublishers();
+
+                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
+
+                await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
+
+                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
+
+                await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
+
+                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 1));
+
+                await database.BatchUpdateAsync(items, "ss", transactionContext).ConfigureAwait(false);
+
+                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 2));
+
+
+                //add
+                item = Mocker.MockOne();
+
+                Assert.True(item.Version == -1);
+
+                await database.AddAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+
+                Assert.True(item.Version == 0);
+
+
+                //batch add
+                items = Mocker.GetPublishers();
+
+                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
+
+                await database.BatchAddAsync(items, "xx", transactionContext);
+
+                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
+
+                await transaction.CommitAsync(transactionContext);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(transactionContext);
                 throw;
             }
 

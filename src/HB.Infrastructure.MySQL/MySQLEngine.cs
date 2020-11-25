@@ -32,7 +32,14 @@ namespace HB.Infrastructure.MySQL
 
         public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory)
         {
-            MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+            try
+            {
+                MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+            }
+            catch (InvalidOperationException ex)
+            {
+                GlobalSettings.Logger.LogError(ex, $"Connections:{SerializeUtil.ToJson(options.Value.Connections)}");
+            }
 
             _options = options.Value;
 

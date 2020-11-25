@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 namespace HB.Framework.DatabaseTests
 {
     //[TestCaseOrderer("HB.Framework.Database.Test.TestCaseOrdererByTestName", "HB.Framework.Database.Test")]
-    public class MutipleTableTest : IClassFixture<ServiceFixture>
+    public class MutipleTableTest 
     {
         private readonly IDatabase _mysql;
         private readonly IDatabase _sqlite;
@@ -35,15 +35,12 @@ namespace HB.Framework.DatabaseTests
         /// <exception cref="ObjectDisposedException">Ignore.</exception>
         /// <exception cref="AggregateException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public MutipleTableTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public MutipleTableTest(ITestOutputHelper testOutputHelper)
         {
             _output = testOutputHelper;
 
-            _mysql = serviceFixture.MySQL;
-            _sqlite = serviceFixture.SQLite;
-
-            _mysql.InitializeAsync().Wait();
-            _sqlite.InitializeAsync().Wait();
+            _mysql = ServiceFixture.MySQL;
+            _sqlite = ServiceFixture.SQLite;
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
             AddSomeDataAsync().Wait();

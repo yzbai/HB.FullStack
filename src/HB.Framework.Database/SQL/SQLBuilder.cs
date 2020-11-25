@@ -311,17 +311,17 @@ namespace HB.Framework.Database.SQL
                     }
 
                     //当IsTableProperty为true时，DbParameterizedName一定不为null
-                    if (info.PropertyName == "Version")
+                    if (info.PropertyInfo.Name == "Version")
                     {
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, /*entity.Version + 1*/0, info.DbFieldType));
                     }
-                    else if (info.PropertyName == "Deleted")
+                    else if (info.PropertyInfo.Name == "Deleted")
                     {
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, 0, info.DbFieldType));
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
                     }
                 }
             }
@@ -352,17 +352,17 @@ namespace HB.Framework.Database.SQL
                     }
 
                     //当IsTableProperty为true时，DbParameterizedName一定不为null
-                    if (info.PropertyName == "Version")
+                    if (info.PropertyInfo.Name == "Version")
                     {
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, /*entity.Version + 1*/0, info.DbFieldType));
                     }
-                    else if (info.PropertyName == "Deleted")
+                    else if (info.PropertyInfo.Name == "Deleted")
                     {
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, 0, info.DbFieldType));
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
                     }
                 }
             }
@@ -387,19 +387,19 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    if (info.IsAutoIncrementPrimaryKey || info.PropertyName == "Deleted" || info.PropertyName == "Guid")
+                    if (info.IsAutoIncrementPrimaryKey || info.PropertyInfo.Name == "Deleted" || info.PropertyInfo.Name == "Guid")
                     {
                         continue;
                     }
 
                     //当IsTableProperty为true时，DbParameterizedName一定不为null
-                    if (info.PropertyName == "Version")
+                    if (info.PropertyInfo.Name == "Version")
                     {
                         parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, entity.Version + 1, info.DbFieldType));
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
                     }
                 }
             }
@@ -470,12 +470,12 @@ namespace HB.Framework.Database.SQL
 
                         args.AppendFormat(CultureInfo.InvariantCulture, " {0},", info.DbReservedName);
 
-                        if (info.PropertyName == "Version")
+                        if (info.PropertyInfo.Name == "Version")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, /*entity.Version + 1*/0, info.DbFieldType));
                         }
-                        else if (info.PropertyName == "Deleted")
+                        else if (info.PropertyInfo.Name == "Deleted")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
                             parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0, info.DbFieldType));
@@ -483,11 +483,11 @@ namespace HB.Framework.Database.SQL
                         else
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
                         }
 
                         //update pairs
-                        if (info.PropertyName == "Version" || info.PropertyName == "Guid" || info.PropertyName == "Deleted")
+                        if (info.PropertyInfo.Name == "Version" || info.PropertyInfo.Name == "Guid" || info.PropertyInfo.Name == "Deleted")
                         {
                             continue;
                         }
@@ -553,12 +553,12 @@ namespace HB.Framework.Database.SQL
 
                         args.AppendFormat(CultureInfo.InvariantCulture, " {0},", info.DbReservedName);
 
-                        if (info.PropertyName == "Version")
+                        if (info.PropertyInfo.Name == "Version")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
                             parameters.Add(_databaseEngine.CreateParameter(parameterizedName, /*entity.Version + 1*/0, info.DbFieldType));
                         }
-                        else if (info.PropertyName == "Deleted")
+                        else if (info.PropertyInfo.Name == "Deleted")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
                             parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0, info.DbFieldType));
@@ -566,7 +566,7 @@ namespace HB.Framework.Database.SQL
                         else
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
                         }
                     }
                 }
@@ -613,9 +613,9 @@ namespace HB.Framework.Database.SQL
                     {
                         if (info.IsAutoIncrementPrimaryKey) continue;
 
-                        if (info.PropertyName == "Deleted") continue;
+                        if (info.PropertyInfo.Name == "Deleted") continue;
 
-                        if (info.PropertyName == "Version")
+                        if (info.PropertyInfo.Name == "Version")
                         {
                             args.AppendFormat(CultureInfo.InvariantCulture, " {0}={1},", info.DbReservedName, parameterizedName);
                             parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1, info.DbFieldType));
@@ -624,7 +624,7 @@ namespace HB.Framework.Database.SQL
                         else
                         {
                             args.AppendFormat(CultureInfo.InvariantCulture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.GetValue(entity), info), info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
                         }
                     }
                 }
@@ -717,14 +717,14 @@ namespace HB.Framework.Database.SQL
                     continue;
                 }
 
-                if (info.PropertyName.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
+                if (info.PropertyInfo.Name.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
                 {
                     continue;
                 }
 
                 string dbTypeStatement = info.TypeConverter == null
-                    ? _databaseEngine.GetDbTypeStatement(info.PropertyType)
-                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyType);
+                    ? _databaseEngine.GetDbTypeStatement(info.PropertyInfo.PropertyType)
+                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyInfo.PropertyType);
 
                 string nullable = info.IsNullable ? "" : " NOT NULL ";
 
@@ -773,7 +773,7 @@ CREATE TABLE {definition.DbTableReservedName} (
                     continue;
                 }
 
-                if (info.PropertyName.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
+                if (info.PropertyInfo.Name.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
                 {
                     continue;
                 }
@@ -783,11 +783,11 @@ CREATE TABLE {definition.DbTableReservedName} (
                 if (info.DbLength == null || info.DbLength == 0)
                 {
                     if (info.DbFieldType == DbType.String
-                        || info.PropertyType == typeof(string)
-                        || info.PropertyType == typeof(char)
-                        || info.PropertyType.IsEnum
-                        || info.PropertyType.IsAssignableFrom(typeof(IList<string>))
-                        || info.PropertyType.IsAssignableFrom(typeof(IDictionary<string, string>)))
+                        || info.PropertyInfo.PropertyType == typeof(string)
+                        || info.PropertyInfo.PropertyType == typeof(char)
+                        || info.PropertyInfo.PropertyType.IsEnum
+                        || info.PropertyInfo.PropertyType.IsAssignableFrom(typeof(IList<string>))
+                        || info.PropertyInfo.PropertyType.IsAssignableFrom(typeof(IDictionary<string, string>)))
                     {
                         length = _entityDefFactory.GetVarcharDefaultLength();
                     }
@@ -799,14 +799,14 @@ CREATE TABLE {definition.DbTableReservedName} (
 
                 string binary = "";
 
-                if (info.PropertyType == typeof(string) || info.PropertyType == typeof(char) || info.PropertyType == typeof(char?))
+                if (info.PropertyInfo.PropertyType == typeof(string) || info.PropertyInfo.PropertyType == typeof(char) || info.PropertyInfo.PropertyType == typeof(char?))
                 {
                     binary = "";
                 }
 
                 string dbTypeStatement = info.TypeConverter == null
-                    ? _databaseEngine.GetDbTypeStatement(info.PropertyType)
-                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyType);
+                    ? _databaseEngine.GetDbTypeStatement(info.PropertyInfo.PropertyType)
+                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyInfo.PropertyType);
 
                 if (length >= 16383) //因为utf8mb4编码，一个汉字4个字节
                 {
@@ -815,7 +815,7 @@ CREATE TABLE {definition.DbTableReservedName} (
 
                 if (length >= 4194303)
                 {
-                    throw new DatabaseException($"字段长度太长。{info.EntityDef.EntityFullName} : {info.PropertyName}");
+                    throw new DatabaseException($"字段长度太长。{info.EntityDef.EntityFullName} : {info.PropertyInfo.Name}");
                 }
 
                 if (info.IsLengthFixed)

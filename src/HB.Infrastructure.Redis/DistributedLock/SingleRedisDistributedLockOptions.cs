@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         public RedisInstanceSetting ConnectionSetting { get; set; } = null!;
 
-        public int DefaultWaitMilliseconds { get; set; } = 10 * 1000;
+        public int DefaultWaitMilliseconds { get; set; } = 60 * 1000;
 
         public int DefaultRetryIntervalMilliseconds { get; set; } = 500;
 

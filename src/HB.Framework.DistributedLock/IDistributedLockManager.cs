@@ -35,24 +35,4 @@ namespace HB.Framework.DistributedLock
             return LockAsync(new string[] { resource }, expiryTime, TimeSpan.Zero, null, cancellationToken);
         }
     }
-
-    public interface IDistributedLock : IDisposable, IAsyncDisposable
-    {
-        DistributedLockStatus Status { get; }
-
-        bool IsAcquired { get; }
-
-        int ExtendCount { get; }
-
-    }
-
-    public enum DistributedLockStatus
-    {
-        Waiting,
-        Acquired,
-        Expired,
-        Failed,
-        Disposed,
-        Cancelled
-    }
 }

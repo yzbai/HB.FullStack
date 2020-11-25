@@ -82,7 +82,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    if (info.IsAutoIncrementPrimaryKey || info.PropertyName == "Version" || info.PropertyName == "Guid" || info.PropertyName == "Deleted")
+                    if (info.IsAutoIncrementPrimaryKey || info.PropertyInfo.Name == "Version" || info.PropertyInfo.Name == "Guid" || info.PropertyInfo.Name == "Deleted")
                     {
                         continue;
                     }
@@ -128,7 +128,7 @@ namespace HB.Framework.Database.SQL
             {
                 if (info.IsTableProperty)
                 {
-                    if (info.IsAutoIncrementPrimaryKey || info.PropertyName == "Deleted" || info.PropertyName == "Guid")
+                    if (info.IsAutoIncrementPrimaryKey || info.PropertyInfo.Name == "Deleted" || info.PropertyInfo.Name == "Guid")
                     {
                         continue;
                     }
@@ -234,6 +234,9 @@ namespace HB.Framework.Database.SQL
         {
             return databaseEngineType switch
             {
+                //found_rows()返回的查询语句的结果
+                //row_count表示修改时找到的条数
+                //默认下UserAffectRows=false，两者相同。当UserAffectedRow=true时，row_count()只会返回真正修改的行数，找到但值相同没有修改的不算
                 DatabaseEngineType.MySQL => $"row_count()", // $" found_rows() ",
                 DatabaseEngineType.SQLite => $" changes() ",
                 _ => "",

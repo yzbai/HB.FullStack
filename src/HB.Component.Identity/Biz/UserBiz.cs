@@ -6,7 +6,9 @@ using HB.Framework.Common;
 using HB.Framework.Common.Utility;
 using HB.Framework.Database;
 using HB.Framework.Database.SQL;
+using HB.Framework.DistributedLock;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -18,9 +20,9 @@ namespace HB.Component.Identity
     internal class UserBiz : EntityBaseBiz<User>
     {
         private readonly IdentityOptions _identityOptions;
-        private readonly IDatabase _db;
+        private readonly IDatabaseReader _db;
 
-        public UserBiz(IOptions<IdentityOptions> identityOptions, IDatabase database, ICache cache) : base(cache)
+        public UserBiz(IOptions<IdentityOptions> identityOptions, ILogger<UserBiz> logger, IDatabaseReader database, ICache cache, IDistributedLockManager lockManager) : base(logger, cache, lockManager)
         {
             _identityOptions = identityOptions.Value;
             _db = database;
@@ -47,7 +49,7 @@ namespace HB.Component.Identity
 
         public async Task<IEnumerable<User>> GetByGuidsAsync(IEnumerable<string> userGuids, TransactionContext? transContext = null)
         {
-            return await CacheAsideAsync(
+            return await TryCacheAsideAsync(
                 nameof(User.Guid),
                 userGuids,
                 () =>

@@ -22,6 +22,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ITransaction, DefaultTransaction>();
             services.AddSingleton<IDatabase, DefaultDatabase>();
 
+            services.AddSingleton<IDatabaseReader>(sp => sp.GetRequiredService<IDatabase>());
+            services.AddSingleton<IDatabaseWriter>(sp => sp.GetRequiredService<IDatabase>());
+
             return services;
         }
     }

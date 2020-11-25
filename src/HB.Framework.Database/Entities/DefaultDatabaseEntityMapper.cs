@@ -60,7 +60,7 @@ namespace HB.Framework.Database.Entities
 
                     object fieldValue = reader[i];
 
-                    if (property.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    if (property.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
                     {
                         //item = null;
                         //break;
@@ -68,12 +68,12 @@ namespace HB.Framework.Database.Entities
                     }
 
                     object? value = property.TypeConverter == null ?
-                        ValueConverterUtil.DbValueToTypeValue(fieldValue, property.PropertyType) :
+                        ValueConverterUtil.DbValueToTypeValue(fieldValue, property.PropertyInfo.PropertyType) :
                         property.TypeConverter.DbValueToTypeValue(fieldValue);
 
                     if (value != null)
                     {
-                        property.SetValue(item, value);
+                        property.PropertyInfo.SetValue(item, value);
                     }
                 }
 
@@ -137,7 +137,7 @@ namespace HB.Framework.Database.Entities
 
                     object fieldValue = reader[j];
 
-                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    if (pDef.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
                     {
                         //TSource 不可以为null
                         //t1 = null;
@@ -148,12 +148,12 @@ namespace HB.Framework.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyType) :
+                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
                         {
-                            pDef.SetValue(t1, value);
+                            pDef.PropertyInfo.SetValue(t1, value);
                         }
                     }
                 }
@@ -165,7 +165,7 @@ namespace HB.Framework.Database.Entities
 
                     object fieldValue = reader[j];
 
-                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    if (pDef.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
                     {
                         t2 = null;
                         break;
@@ -175,12 +175,12 @@ namespace HB.Framework.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyType) :
+                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
                         {
-                            pDef.SetValue(t2, value);
+                            pDef.PropertyInfo.SetValue(t2, value);
                         }
                     }
                 }
@@ -265,7 +265,7 @@ namespace HB.Framework.Database.Entities
 
                     object fieldValue = reader[j];
 
-                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    if (pDef.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
                     {
                         //t1 = null;
                         //break;
@@ -275,12 +275,12 @@ namespace HB.Framework.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyType) :
+                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
                         {
-                            pDef.SetValue(t1, value);
+                            pDef.PropertyInfo.SetValue(t1, value);
                         }
                     }
                 }
@@ -292,7 +292,7 @@ namespace HB.Framework.Database.Entities
 
                     object fieldValue = reader[j];
 
-                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    if (pDef.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
                     {
                         t2 = null;
                         break;
@@ -301,12 +301,12 @@ namespace HB.Framework.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyType) :
+                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
                         {
-                            pDef.SetValue(t2, value);
+                            pDef.PropertyInfo.SetValue(t2, value);
                         }
                     }
                 }
@@ -318,7 +318,7 @@ namespace HB.Framework.Database.Entities
 
                     object fieldValue = reader[j];
 
-                    if (pDef.PropertyName == "Id" && fieldValue == DBNull.Value)
+                    if (pDef.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
                     {
                         t3 = null;
                         break;
@@ -327,12 +327,12 @@ namespace HB.Framework.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyType) :
+                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
                         {
-                            pDef.SetValue(t3, value);
+                            pDef.PropertyInfo.SetValue(t3, value);
                         }
                     }
                 }
@@ -395,12 +395,12 @@ namespace HB.Framework.Database.Entities
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames[i]}.");
 
                     object? value = property.TypeConverter == null ?
-                        ValueConverterUtil.DbValueToTypeValue(reader[i], property.PropertyType) :
+                        ValueConverterUtil.DbValueToTypeValue(reader[i], property.PropertyInfo.PropertyType) :
                         property.TypeConverter.DbValueToTypeValue(reader[i]);
 
                     if (value != null)
                     {
-                        property.SetValue(item, value);
+                        property.PropertyInfo.SetValue(item, value);
                     }
                 }
             }

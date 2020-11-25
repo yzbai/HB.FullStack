@@ -88,7 +88,7 @@ namespace HB.Framework.Database
             //    throw new ArgumentNullException(nameof(context));
             //}
 
-            if (context.Status == TransactionStatus.Rollbacked)
+            if (context.Status == TransactionStatus.Rollbacked || context.Status == TransactionStatus.Commited)
             {
                 return;
             }

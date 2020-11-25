@@ -27,19 +27,6 @@ namespace System
             }
         }
 
-        public static async Task ForEachAsync<T>(this IEnumerable<T>? enumerable, Func<T, Task> action)
-        {
-            if (enumerable == null)
-            {
-                return;
-            }
-
-            foreach (T t in enumerable)
-            {
-                await action(t).ConfigureAwait(false);
-            }
-        }
-
         public static void Add<T>(this IList<T> original, IEnumerable<T> items)
         {
             items.ForEach(t => original.Add(t));

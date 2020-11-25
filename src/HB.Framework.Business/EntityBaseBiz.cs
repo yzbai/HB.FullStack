@@ -1,6 +1,7 @@
 ﻿using HB.Framework.Cache;
 using HB.Framework.Common;
 using HB.Framework.Common.Entities;
+using HB.Framework.Database;
 using HB.Framework.DistributedLock;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -31,13 +32,19 @@ namespace HB.Framework.Business
         protected readonly ILogger _logger;
         protected readonly ICache _cache;
         protected readonly IDistributedLockManager _lockManager;
+        protected readonly IDatabase _database;
 
-        public EntityBaseBiz(ILogger logger, ICache cache, IDistributedLockManager lockManager)
+        public EntityBaseBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IDistributedLockManager lockManager)
         {
             _logger = logger;
             _cache = cache;
             _lockManager = lockManager;
+
+            //Dirty trick
+            _database = (IDatabase)databaseReader;
         }
+
+        #region Events
 
         public event AsyncEventHandler<TEntity> EntityUpdating
         {
@@ -81,7 +88,7 @@ namespace HB.Framework.Business
             remove => _asyncEventManager.Remove(value);
         }
 
-        protected async virtual Task OnEntityUpdatingAsync(TEntity entity)
+        protected virtual Task OnEntityUpdatingAsync(TEntity entity)
         {
             //Cache
             if (ICache.IsEnabled<TEntity>())
@@ -90,20 +97,20 @@ namespace HB.Framework.Business
             }
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdating), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdating), entity, EventArgs.Empty);
         }
 
-        protected async virtual Task OnEntityUpdatedAsync(TEntity entity)
+        protected virtual Task OnEntityUpdatedAsync(TEntity entity)
         {
             //Cache 不主动添加，等待读取时添加,数据库由事务控制
             //if (_cache.IsEnabled<TEntity>())
             //_cache.SetEntityAsync<TEntity>(entity).Fire();
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdated), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdated), entity, EventArgs.Empty);
         }
 
-        protected async virtual Task OnEntityUpdateFailedAsync(TEntity? entity)
+        protected virtual Task OnEntityUpdateFailedAsync(TEntity? entity)
         {
             ////Cache Update之前就已经删除了
             //if (entity != null && ICache.IsEnabled<TEntity>())
@@ -112,16 +119,16 @@ namespace HB.Framework.Business
             //}
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityUpdateFailed), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdateFailed), entity, EventArgs.Empty);
         }
 
-        protected async virtual Task OnEntityAddingAsync(TEntity entity)
+        protected virtual Task OnEntityAddingAsync(TEntity entity)
         {
             //events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityAdding), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityAdding), entity, EventArgs.Empty);
         }
 
-        protected async virtual Task OnEntityAddedAsync(TEntity entity)
+        protected virtual Task OnEntityAddedAsync(TEntity entity)
         {
             //Cache 不主动添加，等待读取时添加,数据库由事务控制
             //if (_cache.IsEnabled<TEntity>())
@@ -130,10 +137,10 @@ namespace HB.Framework.Business
             //}
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityAdded), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityAdded), entity, EventArgs.Empty);
         }
 
-        protected virtual async Task OnEntityDeletingAsync(TEntity entity)
+        protected virtual Task OnEntityDeletingAsync(TEntity entity)
         {
             //Cache
             if (ICache.IsEnabled<TEntity>())
@@ -142,14 +149,16 @@ namespace HB.Framework.Business
             }
 
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityDeleting), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityDeleting), entity, EventArgs.Empty);
         }
 
-        protected virtual async Task OnEntityDeletedAsync(TEntity entity)
+        protected virtual Task OnEntityDeletedAsync(TEntity entity)
         {
             //Events
-            await _asyncEventManager.RaiseEventAsync(nameof(EntityDeleted), entity, EventArgs.Empty).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityDeleted), entity, EventArgs.Empty);
         }
+
+        #endregion
 
         #region Cache Strategy
 
@@ -178,7 +187,7 @@ namespace HB.Framework.Business
             return entity;
         }
 
-        protected async Task<IEnumerable<TEntity>> CacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<Task<IEnumerable<TEntity>>> retrieve)
+        protected async Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<Task<IEnumerable<TEntity>>> retrieve)
         {
             if (!ICache.IsBatchEnabled<TEntity>())
             {
@@ -247,6 +256,66 @@ namespace HB.Framework.Business
 
             await _cache.SetEntitiesAsync(entities).ConfigureAwait(false);
         }
+
+        #endregion
+
+        #region Database Wrapper
+
+        public async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
+        {
+            await OnEntityUpdatingAsync(entity).ConfigureAwait(false);
+
+            try
+            {
+                await _database.UpdateAsync(entity, lastUser, transContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await OnEntityUpdateFailedAsync(entity).ConfigureAwait(false);
+                throw;
+            }
+
+            await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
+        }
+
+        public async Task AddAsync(TEntity entity, string lastUser, TransactionContext? transContext)
+        {
+            await OnEntityAddingAsync(entity).ConfigureAwait(false);
+
+            await _database.AddAsync(entity, lastUser, transContext).ConfigureAwait(false);
+
+            await OnEntityAddedAsync(entity).ConfigureAwait(false);
+        }
+
+        public async Task DeleteAsync(TEntity entity, string lastUser, TransactionContext? transContext)
+        {
+            await OnEntityDeletingAsync(entity).ConfigureAwait(false);
+
+            await _database.DeleteAsync(entity, lastUser, transContext).ConfigureAwait(false);
+
+            await OnEntityDeletedAsync(entity).ConfigureAwait(false);
+        }
+
+        public async Task AddOrUpdateAsync(TEntity item, string lastUser, TransactionContext? transContext)
+        {
+            await Task.WhenAll(OnEntityUpdatingAsync(item), OnEntityAddingAsync(item)).ConfigureAwait(false);
+
+            await _database.AddOrUpdateAsync(item, lastUser, transContext);
+
+
+        }
+
+        public async Task<IEnumerable<long>> BatchAddAsync(IEnumerable items, Func<T, Task> entityAdding, Func<T, Task> entityAdded, string lastUser, TransactionContext transContext)
+        { }
+
+        public async Task BatchUpdateAsync(IEnumerable items, Func<T, Task> entityUpdating, Func<T, Task> entityUpdated, string lastUser, TransactionContext transContext)
+        { }
+
+        public async Task BatchDeleteAsync(IEnumerable items, Func<T, Task> entityDeleting, Func<T, Task> entityDeleted, string lastUser, TransactionContext transContext)
+        { }
+
+        public async Task<IEnumerable<Tuple<long, int>>> BatchAddOrUpdateAsync(IEnumerable items, Func<T, Task> entityAddOrUpdating, Func<T, Task> entityAddOrUpdated, string lastUser, TransactionContext transContext)
+        { }
 
         #endregion
     }

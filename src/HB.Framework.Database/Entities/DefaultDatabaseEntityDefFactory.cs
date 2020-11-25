@@ -32,8 +32,6 @@ namespace HB.Framework.Database.Entities
 
             IEnumerable<Type> allEntityTypes;
 
-
-
             if (_databaseSettings.AssembliesIncludeEntity.IsNullOrEmpty())
             {
                 allEntityTypes = ReflectUtil.GetAllTypeByCondition(entityTypeCondition);
@@ -192,7 +190,7 @@ namespace HB.Framework.Database.Entities
 
             #region 属性
 
-            foreach (PropertyInfo info in entityType.GetTypeInfo().GetProperties())
+            foreach (PropertyInfo info in entityType.GetProperties())
             {
                 IEnumerable<Attribute> atts2 = info.GetCustomAttributes(typeof(EntityPropertyIgnoreAttribute), false).Select(o => (Attribute)o);
 
@@ -200,9 +198,15 @@ namespace HB.Framework.Database.Entities
                 {
                     DatabaseEntityPropertyDef propertyDef = CreatePropertyDef(entityDef, info);
 
-                    entityDef.PropertyDict.Add(propertyDef.PropertyName, propertyDef);
-
                     entityDef.FieldCount++;
+
+                    if (propertyDef.IsUnique)
+                    {
+                        entityDef.UniqueFieldCount++;
+                    }
+
+                    entityDef.PropertyDict.Add(propertyDef.PropertyInfo.Name, propertyDef);
+
                 }
             }
 
@@ -274,16 +278,16 @@ namespace HB.Framework.Database.Entities
 
             if (propertyDef.IsTableProperty)
             {
-                propertyDef.DbReservedName = _databaseEngine.GetReservedStatement(propertyDef.PropertyName);
-                propertyDef.DbParameterizedName = _databaseEngine.GetParameterizedStatement(propertyDef.PropertyName);
+                propertyDef.DbReservedName = _databaseEngine.GetReservedStatement(propertyDef.PropertyInfo.Name);
+                propertyDef.DbParameterizedName = _databaseEngine.GetParameterizedStatement(propertyDef.PropertyInfo.Name);
 
                 if (propertyDef.TypeConverter != null)
                 {
-                    propertyDef.DbFieldType = propertyDef.TypeConverter.TypeToDbType(propertyDef.PropertyType);
+                    propertyDef.DbFieldType = propertyDef.TypeConverter.TypeToDbType(propertyDef.PropertyInfo.PropertyType);
                 }
                 else
                 {
-                    propertyDef.DbFieldType = _databaseEngine.GetDbType(propertyDef.PropertyType);
+                    propertyDef.DbFieldType = _databaseEngine.GetDbType(propertyDef.PropertyInfo.PropertyType);
                 }
             }
 
