@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common.Entities;
+﻿using HB.FullStack.Common.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

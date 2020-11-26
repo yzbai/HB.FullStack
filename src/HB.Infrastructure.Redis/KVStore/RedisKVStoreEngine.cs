@@ -1,5 +1,5 @@
-﻿using HB.Framework.KVStore;
-using HB.Framework.KVStore.Engine;
+﻿using HB.FullStack.KVStore;
+using HB.FullStack.KVStore.Engine;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

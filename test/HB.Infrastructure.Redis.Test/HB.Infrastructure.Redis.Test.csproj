@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HB.Framework.EventBus\HB.Framework.EventBus.csproj" />
+    <ProjectReference Include="..\..\src\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
   </ItemGroup>
 

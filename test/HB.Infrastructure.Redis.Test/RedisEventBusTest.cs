@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.Framework.EventBus.Abstractions;
+using HB.FullStack.EventBus.Abstractions;
 using Xunit;
 using Xunit.Abstractions;
 

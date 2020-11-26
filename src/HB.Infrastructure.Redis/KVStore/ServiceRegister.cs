@@ -1,4 +1,4 @@
-﻿using HB.Framework.KVStore.Engine;
+﻿using HB.FullStack.KVStore.Engine;
 using HB.Infrastructure.Redis.KVStore;
 using Microsoft.Extensions.Configuration;
 using System;

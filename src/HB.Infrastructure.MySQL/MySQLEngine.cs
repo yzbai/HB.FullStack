@@ -1,5 +1,5 @@
-﻿using HB.Framework.Database;
-using HB.Framework.Database.Engine;
+﻿using HB.FullStack.Database;
+using HB.FullStack.Database.Engine;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;

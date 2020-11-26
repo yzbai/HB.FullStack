@@ -1,4 +1,4 @@
-﻿using HB.Framework.Database;
+﻿using HB.FullStack.Database;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;

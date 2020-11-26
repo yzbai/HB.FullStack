@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.Framework.DistributedLock;
+using HB.FullStack.DistributedLock;
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DistributedLock

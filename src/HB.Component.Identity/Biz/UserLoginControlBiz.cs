@@ -1,7 +1,7 @@
 ﻿using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entities;
-using HB.Framework.Database;
-using HB.Framework.KVStore;
+using HB.FullStack.Database;
+using HB.FullStack.KVStore;
 using System;
 using System.Collections.Generic;
 using System.Text;

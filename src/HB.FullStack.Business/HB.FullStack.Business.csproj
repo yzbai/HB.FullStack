@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
+    <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.DistributedLock.csproj" />
+    <ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
+    <ProjectReference Include="..\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using HB.Framework.Common;
+using HB.FullStack.Common;
 
 namespace HB.Infrastructure.Redis.EventBus
 {

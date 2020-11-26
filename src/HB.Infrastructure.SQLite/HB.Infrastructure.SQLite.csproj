@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.Database\HB.Framework.Database.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
   </ItemGroup>
 
 </Project>

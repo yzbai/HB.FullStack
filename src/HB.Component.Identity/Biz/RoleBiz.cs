@@ -1,8 +1,8 @@
 ﻿using HB.Component.Identity.Entities;
-using HB.Framework.Business;
-using HB.Framework.Cache;
-using HB.Framework.Database;
-using HB.Framework.Database.SQL;
+using HB.FullStack.Business;
+using HB.FullStack.Cache;
+using HB.FullStack.Database;
+using HB.FullStack.Database.SQL;
 
 using System;
 using System.Collections.Generic;

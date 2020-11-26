@@ -22,7 +22,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\HB.Framework\src\HB.Framework.Business\HB.Framework.Business.csproj" />
+    <ProjectReference Include="..\..\..\HB.FullStack\src\HB.FullStack.Business\HB.FullStack.Business.csproj" />
   </ItemGroup>
  
 </Project>

@@ -2,12 +2,14 @@
 using HB.Component.Authorization.Entities;
 using HB.Component.Identity;
 using HB.Component.Identity.Entities;
-using HB.Framework.Cache;
-using HB.Framework.Database;
-using HB.Framework.DistributedLock;
+using HB.FullStack.Cache;
+using HB.FullStack.Database;
+using HB.FullStack.DistributedLock;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+
 using System;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -94,9 +96,6 @@ namespace HB.Component.Authorization
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Component.Authorization.AuthorizationException"></exception>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<SignInResult> SignInAsync<TUser, TUserClaim, TRole, TRoleOfUser>(SignInContext context, string lastUser)
             where TUser : User, new()
             where TUserClaim : UserClaim, new()
@@ -206,9 +205,6 @@ namespace HB.Component.Authorization
         /// </summary>
         /// <param name="context"></param>
         /// <returns>新的AccessToken</returns>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Component.Authorization.AuthorizationException"></exception>
         public async Task<string> RefreshAccessTokenAsync<TUser, TUserClaim, TRole, TRoleOfUser>(RefreshContext context, string lastUser)
             where TUser : User, new()
             where TUserClaim : UserClaim, new()
@@ -417,8 +413,6 @@ namespace HB.Component.Authorization
         /// </summary>
         /// <param name="signInToken"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
         private async Task BlackSignInTokenAsync(SignInToken signInToken, string lastUser)
         {
             //TODO: 详细记录Black SiginInToken 的历史纪录

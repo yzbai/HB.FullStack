@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common;
+﻿using HB.FullStack.Common;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

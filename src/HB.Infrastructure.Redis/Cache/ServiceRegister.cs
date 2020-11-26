@@ -1,4 +1,4 @@
-﻿using HB.Framework.Cache;
+﻿using HB.FullStack.Cache;
 using HB.Infrastructure.Redis.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;

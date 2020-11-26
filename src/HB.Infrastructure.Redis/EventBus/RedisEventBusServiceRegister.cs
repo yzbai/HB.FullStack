@@ -1,4 +1,4 @@
-﻿using HB.Framework.EventBus;
+﻿using HB.FullStack.EventBus;
 using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Configuration;
 using System;

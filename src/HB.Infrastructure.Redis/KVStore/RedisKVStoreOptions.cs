@@ -1,4 +1,4 @@
-﻿using HB.Framework.KVStore;
+﻿using HB.FullStack.KVStore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

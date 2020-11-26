@@ -1,6 +1,6 @@
-﻿using HB.Framework.Common.Entities;
-using HB.Framework.KVStore;
-using HB.Framework.KVStore.Entities;
+﻿using HB.FullStack.Common.Entities;
+using HB.FullStack.KVStore;
+using HB.FullStack.KVStore.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;

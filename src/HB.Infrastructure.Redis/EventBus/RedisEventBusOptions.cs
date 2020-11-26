@@ -1,4 +1,4 @@
-﻿using HB.Framework.EventBus;
+﻿using HB.FullStack.EventBus;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

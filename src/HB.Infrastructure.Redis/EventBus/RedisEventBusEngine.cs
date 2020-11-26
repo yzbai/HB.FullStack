@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HB.Framework.DistributedLock;
-using HB.Framework.EventBus;
-using HB.Framework.EventBus.Abstractions;
+using HB.FullStack.DistributedLock;
+using HB.FullStack.EventBus;
+using HB.FullStack.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;

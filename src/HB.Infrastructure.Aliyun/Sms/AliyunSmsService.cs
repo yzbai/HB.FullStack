@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Aliyun.Acs.Core.Http;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
-using HB.Framework.Common.Validate;
+using HB.FullStack.Common.Validate;
 using System.Text.Json;
 using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Properties;
 using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
-using HB.Framework.Common.Server;
+using HB.FullStack.Common.Server;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {

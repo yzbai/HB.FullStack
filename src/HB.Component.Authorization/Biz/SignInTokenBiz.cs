@@ -1,12 +1,12 @@
 ﻿using HB.Component.Authorization.Abstractions;
 using HB.Component.Authorization.Entities;
-using HB.Framework.Database;
-using HB.Framework.Database.SQL;
+using HB.FullStack.Database;
+using HB.FullStack.Database.SQL;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HB.Framework.KVStore;
+using HB.FullStack.KVStore;
 
 namespace HB.Component.Authorization
 {
@@ -31,8 +31,6 @@ namespace HB.Component.Authorization
         /// <param name="expireTimeSpan"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<SignInToken> CreateAsync(
             string userGuid,
             string deviceId,
@@ -60,9 +58,6 @@ namespace HB.Component.Authorization
             return token;
         }
 
-        /// <exception cref="System.ArgumentException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
         public async Task DeleteByLogOffTypeAsync(string userGuid, DeviceIdiom currentIdiom, LogOffType logOffType, string lastUser, TransactionContext transContext)
         {
             ThrowIf.Empty(userGuid, nameof(userGuid));
@@ -87,8 +82,6 @@ namespace HB.Component.Authorization
         /// <param name="userGuid"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="DatabaseException"></exception>
         public async Task DeleteByUserGuidAsync(string userGuid, string lastUser, TransactionContext transContext)
         {
             ThrowIf.NullOrEmpty(userGuid, nameof(userGuid));
@@ -105,8 +98,6 @@ namespace HB.Component.Authorization
         /// <param name="signInTokenGuid"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="DatabaseException"></exception>
         public async Task DeleteAsync(string signInTokenGuid, string lastUser, TransactionContext transContext)
         {
             ThrowIf.NullOrEmpty(signInTokenGuid, nameof(signInTokenGuid));
@@ -137,8 +128,6 @@ namespace HB.Component.Authorization
         /// <param name="signInToken"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="DatabaseException"></exception>
         public Task UpdateAsync(SignInToken signInToken, string lastUser, TransactionContext? transContext = null)
         {
             return _db.UpdateAsync(signInToken, lastUser, transContext);

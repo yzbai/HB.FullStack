@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using HB.Framework.EventBus.Abstractions;
-using HB.Framework.KVStore;
+using HB.FullStack.EventBus.Abstractions;
+using HB.FullStack.KVStore;
 using HB.Infrastructure.Redis.Direct;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

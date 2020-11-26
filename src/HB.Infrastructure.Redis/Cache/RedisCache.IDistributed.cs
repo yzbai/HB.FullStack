@@ -268,6 +268,15 @@ return data";
             // TODO: Error handling
         }
 
+        public async Task<bool> IsExistThenRemoveAsync(string key, CancellationToken token = default(CancellationToken))
+        {
+            IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
+
+            token.ThrowIfCancellationRequested();
+
+            return await database.KeyDeleteAsync(GetRealKey(key)).ConfigureAwait(false);
+        }
+
         //private static long? GetExpireSeconds(long? absoluteExpUnixSeconds, long? slidingSeconds)
         //{
         //    #region 算法1 

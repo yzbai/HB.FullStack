@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.Database\HB.Framework.Database.csproj" />
-    <ProjectReference Include="..\HB.Framework.EventBus\HB.Framework.EventBus.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
+    <ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
   </ItemGroup>
 
 </Project>

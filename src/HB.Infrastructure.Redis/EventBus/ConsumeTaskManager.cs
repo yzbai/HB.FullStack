@@ -1,6 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
-using HB.Framework.DistributedLock;
-using HB.Framework.EventBus.Abstractions;
+using HB.FullStack.DistributedLock;
+using HB.FullStack.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System;

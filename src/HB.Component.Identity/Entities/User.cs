@@ -1,5 +1,5 @@
-﻿using HB.Framework.Common.Entities;
-using HB.Framework.Database.Entities;
+﻿using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Entities;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
