@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using StackExchange.Redis;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -118,7 +120,7 @@ namespace HB.Framework.Cache.Test
         }
 
         [Theory]
-        [InlineData(20, 15)]
+        [InlineData(19, 15)]
         public async Task CacheEntities_Abs_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<Book>();
@@ -130,9 +132,10 @@ namespace HB.Framework.Cache.Test
 
             Book book = Mocker.MockOne();
 
-            book.Guid = "12345";
-            book.Name = "abc";
-            book.BookID = 222;
+            //typeof(Book).GetProperty("Guid").SetValue(book, "123");
+            //book.Guid = "12345";
+            //book.Name = "abc";
+            //book.BookID = 222;
 
 
             await _cache.SetEntityAsync(book).ConfigureAwait(false);
@@ -160,6 +163,41 @@ namespace HB.Framework.Cache.Test
             Assert.False(database.KeyExists(ServiceFixture.ApplicationName + book.Guid));
             Assert.False(database.KeyExists(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.BookID) + book.BookID));
             Assert.False(database.KeyExists(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.Name) + book.Name));
+        }
+
+        [Theory]
+        [InlineData(50, 40)]
+        [InlineData(null, 20)]
+        [InlineData(20, null)]
+        [InlineData(null, null)]
+        public async Task CacheEntities_Version_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<Book>();
+
+            entityDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
+            entityDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
+
+            IDatabase database = _redisConnection.GetDatabase();
+
+            IList<Book> books = Mocker.MockMany();
+
+            await _cache.RemoveEntitiesAsync<Book>("Guid", books.Select(b => b.Guid)).ConfigureAwait(false);
+
+            IEnumerable<bool> oks = await _cache.SetEntitiesAsync(books).ConfigureAwait(false);
+
+            Assert.True(oks.All(b => b));
+
+            IEnumerable<bool> oks1 = await _cache.SetEntitiesAsync(books).ConfigureAwait(false);
+
+            Assert.True(oks1.All(b => !b));
+
+            typeof(Book).GetProperty("Version")!.SetValue(books[0], books[0].Version + 1);
+
+            IEnumerable<bool> oks2 = await _cache.SetEntitiesAsync(books).ConfigureAwait(false);
+
+            Assert.True(oks2.ElementAt(0));
+
+            Assert.True(oks2.Count(b => b) == 1);
         }
     }
 }

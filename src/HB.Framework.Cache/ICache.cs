@@ -1,5 +1,7 @@
 ﻿using HB.Framework.Common.Entities;
+
 using Microsoft.Extensions.Caching.Distributed;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,8 +58,25 @@ namespace HB.Framework.Cache
             return RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token);
         }
         Task SetAsync<T>(string key, T? value, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class;
-        Task SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new();
-        Task SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entities"></param>
+        /// <param name="token"></param>
+        /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
+        Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new();
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entity"></param>
+        /// <param name="token"></param>
+        /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
+        Task<bool> SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new();
         Task SetIntAsync(string key, int value, DistributedCacheEntryOptions options, CancellationToken token = default);
         Task SetStringAsync(string key, string? value, DistributedCacheEntryOptions options, CancellationToken token = default);
 

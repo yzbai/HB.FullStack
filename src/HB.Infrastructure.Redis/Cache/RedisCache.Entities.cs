@@ -5,9 +5,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.Framework.Cache;
 using HB.Framework.Common.Entities;
+
 using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Cache
@@ -55,7 +58,7 @@ for j =1,number do
         end
     end
 
-    array[j]= data 
+    array[j]= data[2] 
 end
 return array
 ";
@@ -109,33 +112,41 @@ for j =1,number do
         end
     end
 
-    array[j]= data
+    array[j]= data[2]
 end
 return array";
 
         /// <summary>
+        /// 返回0为未更新，返回1为更新
         /// keys: entity1_guidKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_guidKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
-        /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_dimensionKeyJoinedString, entity2_data, entity2_dimensionKeyJoinedString
+        /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
         /// </summary>
         private const string _luaEntitiesSet = @"
 local entityNum = tonumber(ARGV[3])
 local dimNum = tonumber(ARGV[4])
-
+local rt={}
 for j=1, entityNum do
+    rt[j]=0
     local keyIndex= 1 + (j-1) *(dimNum+1)
-    redis.call('hmset', KEYS[keyIndex],'absexp',ARGV[1],'data',ARGV[5+(j-1)*2], 'dim', ARGV[6+(j-1)*2]) 
+    local cached=redis.call('hget', KEYS[keyIndex], 'version')
+    if((not cached) or tonumber(cached)< tonumber(ARGV[6+(j-1) * 3])) then
 
-    if(ARGV[2]~='-1') then 
-        redis.call('expire',KEYS[keyIndex], ARGV[2]) 
-    end 
+        redis.call('hmset', KEYS[keyIndex],'absexp',ARGV[1],'data',ARGV[5+(j-1)*3], 'version', ARGV[6+(j-1)*3], 'dim', ARGV[7+(j-1)*3]) 
 
-    for i=keyIndex+1, keyIndex+dimNum do
-        redis.call('set', KEYS[i], KEYS[keyIndex])
-        if (ARGV[2]~='-1') then
-            redis.call('expire', KEYS[i], ARGV[2])
+        if(ARGV[2]~='-1') then 
+            redis.call('expire',KEYS[keyIndex], ARGV[2]) 
+        end 
+
+        for i=keyIndex+1, keyIndex+dimNum do
+            redis.call('set', KEYS[i], KEYS[keyIndex])
+            if (ARGV[2]~='-1') then
+                redis.call('expire', KEYS[i], ARGV[2])
+            end
         end
+        rt[j]=1
     end
-end";
+end
+return rt";
 
         /// <summary>
         /// keys: guidKey1, guidKey2, guidKey3
@@ -208,29 +219,7 @@ end
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                if (result.IsNull)
-                {
-                    return (null, false);
-                }
-
-                RedisResult[]? results = (RedisResult[])result;
-
-                if (results == null)
-                {
-                    return (null, false);
-                }
-
-                List<TEntity> entities = new List<TEntity>();
-
-                foreach (RedisResult item in results)
-                {
-                    (TEntity? entity, bool _) = await MapGetEntityRedisResultAsync<TEntity>(item).ConfigureAwait(false);
-
-                    //因为lua中已经检查过全部存在，所以这里都不为null
-                    entities.Add(entity!);
-                }
-
-                return (entities, true);
+                return await MapGetEntitiesRedisResultAsync<TEntity>(result).ConfigureAwait(false);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -242,7 +231,7 @@ end
             }
         }
 
-        public async Task SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        public async Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
@@ -260,10 +249,21 @@ end
 
             try
             {
-                await database.ScriptEvaluateAsync(
+                RedisResult result = await database.ScriptEvaluateAsync(
                     GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesSetLua,
                     redisKeys.ToArray(),
-                    redisValues.ToArray()).ConfigureAwait(false); ;
+                    redisValues.ToArray()).ConfigureAwait(false);
+
+                List<bool> rts = new List<bool>();
+
+                RedisResult[] results = (RedisResult[])result;
+
+                foreach (RedisResult item in results)
+                {
+                    rts.Add((int)item == 1);
+                }
+
+                return rts;
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -271,7 +271,7 @@ end
 
                 InitLoadedLuas();
 
-                await SetEntitiesAsync<TEntity>(entities, token).ConfigureAwait(false);
+                return await SetEntitiesAsync<TEntity>(entities, token).ConfigureAwait(false);
             }
         }
 
@@ -365,6 +365,9 @@ end
         }
         private async Task AddSetEntitiesRedisInfoAsync<TEntity>(IEnumerable<TEntity> entities, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
+            /// keys: entity1_guidKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_guidKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
+            /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
+
             DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? DateTimeOffset.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
             long? absoluteExpireUnixSeconds = absulteExpireTime?.ToUnixTimeSeconds();
             long? slideSeconds = (long?)(entityDef.SlidingTime?.TotalSeconds);
@@ -399,6 +402,7 @@ end
                 byte[] data = await SerializeUtil.PackAsync(entity).ConfigureAwait(false);
 
                 redisValues.Add(data);
+                redisValues.Add(entity.Version);
                 redisValues.Add(joinedDimensinKeyBuilder.ToString());
             }
         }

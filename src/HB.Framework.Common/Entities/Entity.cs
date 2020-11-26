@@ -2,6 +2,11 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("HB.Framework.Database")]
+[assembly: InternalsVisibleTo("HB.Framework.Cache")]
+[assembly: InternalsVisibleTo("HB.Framework.KVStore")]
 
 namespace HB.Framework.Common.Entities
 {
@@ -18,7 +23,7 @@ namespace HB.Framework.Common.Entities
 
         [AutoIncrementPrimaryKey]
         [EntityProperty("Id")]
-        public long Id { get; private set; } = -1;
+        public long Id { get; internal set; } = -1;
 
         /// <summary>
         /// 资源ID，全局不变
@@ -27,21 +32,21 @@ namespace HB.Framework.Common.Entities
         [UniqueGuidEntityProperty]
         [KVStoreBackupKey]
         [CacheGuidKey]
-        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
+        public string Guid { get; internal set; } = SecurityUtil.CreateUniqueToken();
 
         [EntityProperty("Version")]
-        public int Version { get; private set; } = -1;
+        public int Version { get; internal set; } = -1;
 
         [EntityProperty("上一次更改者", Length = LastUserMaxLength)]
-        public string LastUser { get; set; } = string.Empty;
+        public string LastUser { get; internal set; } = string.Empty;
 
         /// <summary>
         /// UTC 时间
         /// </summary>
         [EntityProperty("上一次更改时间")]
-        public DateTimeOffset LastTime { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset LastTime { get; internal set; } = DateTimeOffset.UtcNow;
 
         [EntityProperty("逻辑删除标志")]
-        public bool Deleted { get; set; } = false;
+        public bool Deleted { get; internal set; } = false;
     }
 }

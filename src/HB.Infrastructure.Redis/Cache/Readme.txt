@@ -19,3 +19,8 @@
 	b，精确计算，取min(slidingTime, AbsoluteTime-now)，由于采用lua脚本，所以redis服务器多花些响应时间。
 
 3，现在选择方案a。 如果想看方案b的lua脚本，请查看 commit  b435574ddc7c2865b3295adc8660e646473ad264
+
+4, 无锁
+	一般更新缓存时，需要加上分布式锁。
+	这里采用无锁的办法，为每一个entity单独存储一个version，就像abs，dim等一样。只有比version大才能更新。
+	得益于redis的单队列，不会造成写脏数据。

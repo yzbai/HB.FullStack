@@ -16,7 +16,7 @@ namespace HB.Framework.DatabaseTests.Data
             {
                 books.Add(new BookEntity
                 {
-                    Guid = SecurityUtil.CreateUniqueToken(),
+                    //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),
                     Price = _random.NextDouble()
                 });

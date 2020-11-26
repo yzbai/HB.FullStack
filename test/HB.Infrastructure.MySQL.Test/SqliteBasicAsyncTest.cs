@@ -323,7 +323,7 @@ namespace HB.Framework.DatabaseTests
                 var affectedIds = await database.BatchAddOrUpdateAsync(publishers, "AddOrUpdaterrrr", tContext);
 
 
-                publishers[0].Guid = SecurityUtil.CreateUniqueToken();
+                //publishers[0].Guid = SecurityUtil.CreateUniqueToken();
 
                 await database.AddOrUpdateAsync(publishers[0], "single", tContext);
 

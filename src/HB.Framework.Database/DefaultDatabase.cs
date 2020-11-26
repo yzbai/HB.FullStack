@@ -1212,7 +1212,7 @@ namespace HB.Framework.Database
                 if (rows == 1)
                 {
                     //反应Version变化
-                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, item.Version + 1);
+                    item.Version++;
                     return;
                 }
                 else if (rows == 0)
@@ -1291,8 +1291,8 @@ namespace HB.Framework.Database
                 for (int i = 0; i < idAndVersions.Count; ++i)
                 {
                     T item = items.ElementAt(i);
-                    entityDef.GetProperty("Id")!.PropertyInfo.SetValue(item, idAndVersions[i].Item1);
-                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, idAndVersions[i].Item2);
+                    item.Id = idAndVersions[i].Item1;
+                    item.Version = idAndVersions[i].Item2;
                 }
 
                 return idAndVersions;
@@ -1379,9 +1379,8 @@ namespace HB.Framework.Database
                 {
                     T item = items.ElementAt(i);
 
-                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, 0);
-
-                    entityDef.GetProperty("Id")!.PropertyInfo.SetValue(item, newIds[i]);
+                    item.Id = newIds[i];
+                    item.Version = 0;
                 }
 
                 return newIds;
@@ -1455,8 +1454,7 @@ namespace HB.Framework.Database
                 //反应Version变化
                 foreach (T item in items)
                 {
-                    entityDef.GetProperty("Version")!.PropertyInfo.SetValue(item, item.Version + 1);
-                    //item.Version++;
+                    item.Version++;
                 }
             }
             catch (Exception ex) when (!(ex is DatabaseException))

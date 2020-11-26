@@ -4,10 +4,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.Framework.Cache;
 using HB.Framework.Common.Entities;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Cache
@@ -20,11 +23,11 @@ namespace HB.Infrastructure.Redis.Cache
         /// </summary>
         private const string _luaEntityGetAndRefresh = @"
 local data = redis.call('hmget', KEYS[1], 'absexp','data','dim')
-
+-- 无数据直接返回
 if (not data[1]) then
     return nil
 end
-
+-- 删除absexp过期的
 if(data[1]~='-1') then
     local now = tonumber(ARGV[2])
     local absexp = tonumber(data[1])
@@ -39,7 +42,7 @@ if(data[1]~='-1') then
         return nil 
     end
 end
-
+-- 更新expire
 if(ARGV[1]~='-1') then
     redis.call('expire', KEYS[1], ARGV[1])
     
@@ -50,7 +53,7 @@ if(ARGV[1]~='-1') then
     end
 end
 
-return data";
+return data[2]";
 
         /// <summary>
         /// KEYS:dimensionKey
@@ -95,25 +98,34 @@ if(ARGV[1]~='-1') then
     end
 end
 
-return data";
+return data[2]";
 
         /// <summary>
+        /// 说 存在 且 cached version 大于等于 new version，就不更新.返回9. 
+        /// 成功返回1
         /// keys: guidKey, dimensionkey1, dimensionkey2, dimensionkey3
-        /// argv: absexp_value, expire_value, data_value, dimensionKeyJoinedString, 3(dimensionkey_count)
+        /// argv: absexp_value, expire_value, data_value,version_value, dimensionKeyJoinedString, 3(dimensionkey_count)
         /// </summary>
         private const string _luaEntitySet = @"
-redis.call('hmset', KEYS[1],'absexp',ARGV[1],'data',ARGV[3], 'dim', ARGV[4]) 
+local cached=redis.call('hget', KEYS[1], 'version')
+if(cached and tonumber(cached) >= tonumber(ARGV[4])) then
+    return 9    
+end
+
+redis.call('hmset', KEYS[1],'absexp',ARGV[1],'data',ARGV[3], 'version', ARGV[4], 'dim', ARGV[5]) 
 
 if(ARGV[2]~='-1') then 
     redis.call('expire',KEYS[1], ARGV[2]) 
 end 
 
-for i=2, ARGV[5]+1 do
+for i=2, ARGV[6]+1 do
     redis.call('set', KEYS[i], KEYS[1])
     if (ARGV[2]~='-1') then
         redis.call('expire', KEYS[i], ARGV[2])
     end
-end";
+end
+
+return 1";
 
         /// <summary>
         /// keys: guidKey
@@ -132,7 +144,9 @@ if(dim~='') then
     for i in string.gmatch(dim, '%w+') do
         redis.call('del', i)
     end
-end";
+end
+return 1
+";
 
         /// <summary>
         /// keys:dimensionKey
@@ -141,14 +155,14 @@ end";
 local guid = redis.call('get',KEYS[1])
 
 if (not guid) then
-    return nil
+    return 8
 end
 
 local dim= redis.call('hget',guid, 'dim') 
 
 if (not dim) then
     redis.call('del', KEYS[1])
-    return 9
+    return 1
 end
 
 redis.call('del',guid)
@@ -192,7 +206,7 @@ return 1";
             }
         }
 
-        public async Task SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
+        public async Task<bool> SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
@@ -207,10 +221,12 @@ return 1";
 
             try
             {
-                await database.ScriptEvaluateAsync(
+                RedisResult result = await database.ScriptEvaluateAsync(
                     GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitySetLua,
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
+
+                return (int)result == 1;
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -218,7 +234,7 @@ return 1";
 
                 InitLoadedLuas();
 
-                await SetEntityAsync<TEntity>(entity, token).ConfigureAwait(false);
+                return await SetEntityAsync<TEntity>(entity, token).ConfigureAwait(false);
             }
         }
 
@@ -236,7 +252,12 @@ return 1";
 
             try
             {
-                await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray()).ConfigureAwait(false);
+                RedisResult result = await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray()).ConfigureAwait(false);
+
+                if ((int)result != 1)
+                {
+                    _logger.LogWarning($"Cache Remove NotFount. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
+                }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -273,6 +294,10 @@ return 1";
 
         private async Task AddSetEntityRedisInfoAsync<TEntity>(TEntity entity, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
+            /// keys: guidKey, dimensionkey1, dimensionkey2, dimensionkey3
+            /// argv: absexp_value, expire_value, data_value,version_value, dimensionKeyJoinedString, 3(dimensionkey_count)
+
+
             string guidRealKey = GetRealKey(entityDef.GuidKeyProperty.GetValue(entity).ToString());
 
             redisKeys.Add(guidRealKey);
@@ -303,6 +328,7 @@ return 1";
             redisValues.Add(absoluteExpireUnixSeconds ?? -1);
             redisValues.Add(expireSeconds ?? -1);
             redisValues.Add(data);
+            redisValues.Add(entity.Version);
             redisValues.Add(joinedDimensinKeyBuilder.ToString());
             redisValues.Add(entityDef.Dimensions.Count);
         }

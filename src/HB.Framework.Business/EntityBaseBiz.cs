@@ -3,8 +3,10 @@ using HB.Framework.Common;
 using HB.Framework.Common.Entities;
 using HB.Framework.Database;
 using HB.Framework.DistributedLock;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -43,6 +45,14 @@ namespace HB.Framework.Business
             //Dirty trick
             _database = (IDatabase)databaseReader;
         }
+        https://mp.weixin.qq.com/s?__biz=MjM5ODYxMDA5OQ==&mid=2651961341&idx=1&sn=e27916b8e96bd771c72c055f1f53e5be&chksm=bd2d02218a5a8b37ecffd78d20b65501645ac07c7ba2eb65b7e501a3eb9de023febe63bfdb36&scene=21#wechat_redirect
+
+            invalidate缓存时，应该在数据库update完成后
+
+
+
+
+
 
         #region Events
 
@@ -247,7 +257,8 @@ namespace HB.Framework.Business
             //Double Check
             (IEnumerable<TEntity>? cachedEntities, bool allExists) = await _cache.GetEntitiesAsync<TEntity>(entities).ConfigureAwait(false);
 
-            if (allExists)
+            //版本检查
+            if (allExis ts)
             {
                 return;
             }

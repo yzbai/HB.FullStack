@@ -1,9 +1,12 @@
 ﻿using HB.Framework.Cache;
 using HB.Framework.Common.Entities;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using StackExchange.Redis;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -162,16 +165,36 @@ namespace HB.Infrastructure.Redis.Cache
                 return (null, false);
             }
 
-            RedisResult[]? results = (RedisResult[])result;
+            TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])result).ConfigureAwait(false);
 
-            if (results == null)
+            return (entity, true);
+        }
+
+        private static async Task<(IEnumerable<TEntity>?, bool)> MapGetEntitiesRedisResultAsync<TEntity>(RedisResult result) where TEntity : Entity, new()
+        {
+            if (result.IsNull)
             {
                 return (null, false);
             }
 
-            TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])results[1]).ConfigureAwait(false);
+            RedisResult[]? results = (RedisResult[])result;
 
-            return (entity, true);
+            if (results == null || results.Length == 0)
+            {
+                return (null, false);
+            }
+
+            List<TEntity> entities = new List<TEntity>();
+
+            foreach (RedisResult item in results)
+            {
+                TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])item).ConfigureAwait(false);
+
+                //因为lua中已经检查过全部存在，所以这里都不为null
+                entities.Add(entity!);
+            }
+
+            return (entities, true);
         }
 
         private static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)

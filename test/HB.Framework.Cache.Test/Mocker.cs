@@ -11,7 +11,7 @@ namespace HB.Framework.Cache.Test
             return new Book
             {
                 Name = SecurityUtil.CreateUniqueToken(),
-                BookID = DateTimeOffset.UtcNow.Ticks,
+                BookID = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 Publisher = _random.Next().ToString(),
                 Price = _random.NextDouble() * 1000
             };
@@ -25,9 +25,9 @@ namespace HB.Framework.Cache.Test
             {
                 books.Add(new Book
                 {
-                    Guid = "Guid" + i.ToString(),
-                    Name = "Name" + i.ToString(),
-                    BookID = i,
+                    //Guid = "Guid" + i.ToString(),
+                    Name = SecurityUtil.CreateUniqueToken(),
+                    BookID = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + _random.Next(10000, 19999),
                     Publisher = _random.Next().ToString(),
                     Price = _random.NextDouble() * 1000
                 });
