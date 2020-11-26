@@ -1,4 +1,6 @@
 ﻿using HB.Framework.Common.Entities;
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,7 +37,7 @@ namespace HB.Framework.KVStore
         /// <returns></returns>
         Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
 
-        
+
 
         public Task DeleteAsync<T>(string key, int version) where T : Entity, new();
 
@@ -44,24 +46,28 @@ namespace HB.Framework.KVStore
 
         Task DeleteAllAsync<T>() where T : Entity, new();
 
-        /// <summary>
-        /// 返回最新Version
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        Task<int> AddOrUpdateAsync<T>(T item, string lastUser) where T : Entity, new();
-
-        /// <summary>
-        /// 返回最新的Versions
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="items"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
 
         string GetEntityKey<T>(T item) where T : Entity, new();
+
+
+        ///// <summary>
+        ///// 返回最新Version
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="item"></param>
+        ///// <param name="lastUser"></param>
+        ///// <returns></returns>
+        //[Obsolete("不检查version，淘汰")]
+        //Task<int> AddOrUpdateAsync<T>(T item, string lastUser) where T : Entity, new();
+
+        ///// <summary>
+        ///// 返回最新的Versions
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="items"></param>
+        ///// <param name="lastUser"></param>
+        ///// <returns></returns>
+        //[Obsolete("不检查version，淘汰")]
+        //Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new();
     }
 }

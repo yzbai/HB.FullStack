@@ -10,18 +10,19 @@ using HB.Framework.Cache;
 using HB.Framework.Common.Entities;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Cache
 {
-    internal partial class RedisCache
+    internal partial class RedisCache : RedisCacheBase, ICache
     {
         /// <summary>
         /// keys:guid1, guid2, guid3
         /// argv:3(guid_number), sldexp, nowInUnixSeconds
         /// </summary>
-        private const string _luaEntitiesGetAndRefresh = @"
+        public const string _luaEntitiesGetAndRefresh = @"
 local number = tonumber(ARGV[1])
 local existCount = redis.call('exists', unpack(KEYS))
 if (existCount ~= number) then
@@ -67,7 +68,7 @@ return array
         /// KEYS:dimensionKey1, dimensionKey2, dimensionKey3
         /// ARGV:3(entity_count), sldexp, nowInUnixSeconds
         /// </summary>
-        private const string _luaEntitiesGetAndRefreshByDimension = @"
+        public const string _luaEntitiesGetAndRefreshByDimension = @"
 
 local number = tonumber(ARGV[1])
 local existCount = redis.call('exists', unpack(KEYS))
@@ -121,7 +122,7 @@ return array";
         /// keys: entity1_guidKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_guidKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
         /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
         /// </summary>
-        private const string _luaEntitiesSet = @"
+        public const string _luaEntitiesSet = @"
 local entityNum = tonumber(ARGV[3])
 local dimNum = tonumber(ARGV[4])
 local rt={}
@@ -152,7 +153,7 @@ return rt";
         /// keys: guidKey1, guidKey2, guidKey3
         /// argv: 3(entity_num)
         /// </summary>
-        private const string _luaEntitiesRemove = @" 
+        public const string _luaEntitiesRemove = @" 
 local entityNum = tonumber(ARGV[1])
 for j=1, entityNum do
 
@@ -172,7 +173,7 @@ end
         /// keys:entity1_dimensionkey, entity2_dimensionkey, entity3_dimensionKey
         /// argv: 3(entity_count)
         /// </summary>
-        private const string _luaEntitiesRemoveByDimension = @"
+        public const string _luaEntitiesRemoveByDimension = @"
 local entityNum = tonumber(ARGV[1])
 
 for j = 1, entityNum do
@@ -196,6 +197,13 @@ for j = 1, entityNum do
     end
 end
 ";
+
+        private readonly ILogger<RedisCache> _logger;
+
+        public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options)
+        {
+            _logger = logger;
+        }
 
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
@@ -406,5 +414,33 @@ end
                 redisValues.Add(joinedDimensinKeyBuilder.ToString());
             }
         }
+
+        private static async Task<(IEnumerable<TEntity>?, bool)> MapGetEntitiesRedisResultAsync<TEntity>(RedisResult result) where TEntity : Entity, new()
+        {
+            if (result.IsNull)
+            {
+                return (null, false);
+            }
+
+            RedisResult[]? results = (RedisResult[])result;
+
+            if (results == null || results.Length == 0)
+            {
+                return (null, false);
+            }
+
+            List<TEntity> entities = new List<TEntity>();
+
+            foreach (RedisResult item in results)
+            {
+                TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])item).ConfigureAwait(false);
+
+                //因为lua中已经检查过全部存在，所以这里都不为null
+                entities.Add(entity!);
+            }
+
+            return (entities, true);
+        }
+
     }
 }

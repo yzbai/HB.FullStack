@@ -1,8 +1,11 @@
 ﻿using HB.Framework.KVStore;
 using HB.Framework.KVStore.Engine;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using StackExchange.Redis;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -340,6 +343,7 @@ return array";
         /// <summary>
         /// 返回最新的Version
         /// </summary>
+        [Obsolete("不做Version检查，所以淘汰")]
         public async Task<IEnumerable<int>> EntityAddOrUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LodedeBatchAddOrUpdateLua;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using HB.Framework.Common.Entities;
 using HB.Framework.KVStore.Engine;
 using HB.Framework.KVStore.Entities;
@@ -258,6 +259,7 @@ namespace HB.Framework.KVStore
         /// <param name="item"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
+        [Obsolete("不做Version检查，所以淘汰")]
         public async Task<int> AddOrUpdateAsync<T>(T item, string lastUser) where T : Entity, new()
         {
             IEnumerable<int> results = await AddOrUpdateAsync(new T[] { item }, lastUser).ConfigureAwait(false);
@@ -277,6 +279,7 @@ namespace HB.Framework.KVStore
         /// <param name="items"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
+        [Obsolete("不做Version检查，所以淘汰")]
         public async Task<IEnumerable<int>> AddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : Entity, new()
         {
             if (!items.Any())

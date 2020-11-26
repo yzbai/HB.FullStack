@@ -6,7 +6,9 @@ using HB.Framework.Database.Entities;
 using HB.Framework.Database.Properties;
 using HB.Framework.Database.SQL;
 using HB.Framework.DistributedLock;
+
 using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -1025,6 +1027,7 @@ namespace HB.Framework.Database
         /// item被重新赋值，反应Version变化。
         /// 在Update时不做Version检查
         /// </summary>
+        [Obsolete("不做Version检查，所以淘汰")]
         public async Task AddOrUpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new()
         {
             ThrowIf.NotValid(item);
@@ -1238,6 +1241,7 @@ namespace HB.Framework.Database
         /// 反应Version变化
         /// 返回最新的ID:Versions
         /// </summary>
+        [Obsolete("不做Version检查，所以淘汰")]
         public async Task<IEnumerable<Tuple<long, int>>> BatchAddOrUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : Entity, new()
         {
             ThrowIf.NotValid(items);

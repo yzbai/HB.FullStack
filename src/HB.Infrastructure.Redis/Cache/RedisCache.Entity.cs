@@ -21,7 +21,7 @@ namespace HB.Infrastructure.Redis.Cache
         /// keys:guidkey
         /// argv:sldexp,nowInUnixSeconds
         /// </summary>
-        private const string _luaEntityGetAndRefresh = @"
+        public const string _luaEntityGetAndRefresh = @"
 local data = redis.call('hmget', KEYS[1], 'absexp','data','dim')
 -- 无数据直接返回
 if (not data[1]) then
@@ -59,7 +59,7 @@ return data[2]";
         /// KEYS:dimensionKey
         /// ARGV:sldexp, nowInUnixSeconds
         /// </summary>
-        private const string _luaEntityGetAndRefreshByDimension = @"
+        public const string _luaEntityGetAndRefreshByDimension = @"
 local guid = redis.call('get',KEYS[1])
 
 if (not guid) then
@@ -106,7 +106,7 @@ return data[2]";
         /// keys: guidKey, dimensionkey1, dimensionkey2, dimensionkey3
         /// argv: absexp_value, expire_value, data_value,version_value, dimensionKeyJoinedString, 3(dimensionkey_count)
         /// </summary>
-        private const string _luaEntitySet = @"
+        public const string _luaEntitySet = @"
 local cached=redis.call('hget', KEYS[1], 'version')
 if(cached and tonumber(cached) >= tonumber(ARGV[4])) then
     return 9    
@@ -131,7 +131,7 @@ return 1";
         /// keys: guidKey
         /// argv: 
         /// </summary>
-        private const string _luaEntityRemove = @" 
+        public const string _luaEntityRemove = @" 
 local dim=redis.call('hget', KEYS[1], 'dim')
 
 redis.call('del', KEYS[1]) 
@@ -151,7 +151,7 @@ return 1
         /// <summary>
         /// keys:dimensionKey
         /// </summary>
-        private const string _luaEntityRemoveByDimension = @"
+        public const string _luaEntityRemoveByDimension = @"
 local guid = redis.call('get',KEYS[1])
 
 if (not guid) then
@@ -349,6 +349,18 @@ return 1";
             }
 
             return loadedScript;
+        }
+
+        private static async Task<(TEntity?, bool)> MapGetEntityRedisResultAsync<TEntity>(RedisResult result) where TEntity : Entity, new()
+        {
+            if (result.IsNull)
+            {
+                return (null, false);
+            }
+
+            TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])result).ConfigureAwait(false);
+
+            return (entity, true);
         }
     }
 }

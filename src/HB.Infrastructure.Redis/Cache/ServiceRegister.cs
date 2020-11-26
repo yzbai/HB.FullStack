@@ -1,7 +1,9 @@
 ﻿using HB.Framework.Cache;
 using HB.Infrastructure.Redis.Cache;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddSingleton<ICache, RedisCache>();
 
-            services.AddSingleton<IDistributedCache>(provider => provider.GetRequiredService<ICache>());
+            services.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<ICache>());
 
         }
     }

@@ -1,15 +1,13 @@
-﻿using AsyncAwaitBestPractices;
+﻿
 using HB.Component.Identity.Entities;
 using HB.Framework.Business;
 using HB.Framework.Cache;
-using HB.Framework.Common;
-using HB.Framework.Common.Utility;
 using HB.Framework.Database;
 using HB.Framework.Database.SQL;
-using HB.Framework.DistributedLock;
-using Microsoft.Extensions.Caching.Distributed;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,12 +18,13 @@ namespace HB.Component.Identity
     internal class UserBiz : EntityBaseBiz<User>
     {
         private readonly IdentityOptions _identityOptions;
-        private readonly IDatabaseReader _db;
+        private readonly IDatabaseReader _databaseReader;
 
-        public UserBiz(IOptions<IdentityOptions> identityOptions, ILogger<UserBiz> logger, IDatabaseReader database, ICache cache, IDistributedLockManager lockManager) : base(logger, cache, lockManager)
+        public UserBiz(IOptions<IdentityOptions> identityOptions, ILogger<UserBiz> logger, IDatabaseReader databaseReader, ICache cache)
+            : base(logger, databaseReader, cache)
         {
             _identityOptions = identityOptions.Value;
-            _db = database;
+            _databaseReader = databaseReader;
 
             EntityUpdating += (sender, args) =>
             {
@@ -41,9 +40,9 @@ namespace HB.Component.Identity
             return await TryCacheAsideAsync(
                 dimensionKeyName: nameof(User.Guid),
                 dimensionKeyValue: userGuid,
-                retrieve: () =>
+                dbRetrieve: db =>
                 {
-                    return _db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
+                    return db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -52,9 +51,9 @@ namespace HB.Component.Identity
             return await TryCacheAsideAsync(
                 nameof(User.Guid),
                 userGuids,
-                () =>
+                db =>
                 {
-                    return _db.RetrieveAsync<User>(u => SQLUtil.In(u.Guid, true, userGuids.ToArray()), transContext);
+                    return db.RetrieveAsync<User>(u => SQLUtil.In(u.Guid, true, userGuids.ToArray()), transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -63,9 +62,9 @@ namespace HB.Component.Identity
             return await TryCacheAsideAsync(
                 nameof(User.Mobile),
                 mobile,
-                () =>
+                db =>
                 {
-                    return _db.ScalarAsync<User>(u => u.Mobile == mobile, transContext);
+                    return db.ScalarAsync<User>(u => u.Mobile == mobile, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -74,9 +73,9 @@ namespace HB.Component.Identity
             return await TryCacheAsideAsync(
                 nameof(User.LoginName),
                 loginName,
-                () =>
+                db =>
                 {
-                    return _db.ScalarAsync<User>(u => u.LoginName == loginName, transContext);
+                    return db.ScalarAsync<User>(u => u.LoginName == loginName, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -85,61 +84,46 @@ namespace HB.Component.Identity
             return await TryCacheAsideAsync(
                 nameof(User.Email),
                 email,
-                () =>
+                db =>
                 {
-                    return _db.ScalarAsync<User>(u => u.Email == email, transContext);
+                    return db.ScalarAsync<User>(u => u.Email == email, transContext);
                 }).ConfigureAwait(false);
+        }
+
+        private async Task<long> CountUserByLoginNameAsync(string loginName, TransactionContext transContext)
+        {
+            return await _databaseReader.CountAsync<User>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
         }
 
         #endregion
 
-        #region Update
+        #region Write
 
         public async Task UpdateLoginNameAsync(string userGuid, string loginName, string lastUser, TransactionContext transContext)
         {
             ThrowIf.NotLoginName(loginName, nameof(loginName), false);
 
-            # region Existense Check
+            #region Existense Check
 
-            long count = await _db.CountAsync<User>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
+            long count = await CountUserByLoginNameAsync(loginName, transContext).ConfigureAwait(false);
 
             if (count != 0)
             {
                 throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
             }
 
-            //if (_bloomFilter.Exists(bloomFilterName: _identityOptions.BloomFilterName, loginName))
-            //{
-            //    throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
-            //}
-
             #endregion
 
             User? user = await GetByGuidAsync(userGuid, transContext).ConfigureAwait(false);
 
-            try
+            if (user == null)
             {
-                if (user == null)
-                {
-                    throw new IdentityException(ErrorCode.IdentityNotFound, $"userGuid:{userGuid}");
-                }
-
-                string? oldLoginName = user.LoginName;
-
-                user.LoginName = loginName;
-
-                await _db.UpdateAsync(user, OnEntityUpdatingAsync, OnEntityUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
-
-                //update bloomFilter
-                //_bloomFilter.Add(_identityOptions.BloomFilterName, loginName);
-                //_bloomFilter.Delete(_identityOptions.BloomFilterName, oldLoginName);
+                throw new IdentityException(ErrorCode.IdentityNotFound, $"userGuid:{userGuid}");
             }
-            catch
-            {
-                //有可能从cache中获取了旧数据，导致update失败
-                await OnEntityUpdateFailedAsync(user).ConfigureAwait(false);
-                throw;
-            }
+
+            user.LoginName = loginName;
+
+            await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
         }
 
         public async Task UpdatePasswordByMobileAsync(string mobile, string newPassword, string lastUser, TransactionContext transContext)
@@ -154,22 +138,11 @@ namespace HB.Component.Identity
                 throw new IdentityException(ErrorCode.IdentityNotFound, $"mobile:{mobile}");
             }
 
-            try
-            {
-                user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
+            user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
 
-                await _db.UpdateAsync(user, OnEntityUpdatingAsync, OnEntityUpdatedAsync, lastUser, transContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await OnEntityUpdateFailedAsync(user).ConfigureAwait(false);
-                throw;
-            }
+            await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
+
         }
-
-        #endregion
-
-        #region Create
 
         public async Task<User> CreateAsync(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext transContext)
         {
@@ -190,13 +163,8 @@ namespace HB.Component.Identity
                 throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
             }
 
-            //if (_bloomFilter.ExistAny(_identityOptions.BloomFilterName, new string?[] { mobile, email, loginName }))
-            //{
-            //    throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(TUser)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
-            //}
-
-            WhereExpression<User> where = _db.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
-            long count = await _db.CountAsync(where, transContext).ConfigureAwait(false);
+            WhereExpression<User> where = _databaseReader.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            long count = await _databaseReader.CountAsync(where, transContext).ConfigureAwait(false);
 
             if (count != 0)
             {
@@ -218,11 +186,10 @@ namespace HB.Component.Identity
 
             user.PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
 
-            await _db.AddAsync(user, OnEntityAddingAsync, OnEntityAddedAsync, lastUser, transContext).ConfigureAwait(false);
+            await AddAsync(user, lastUser, transContext).ConfigureAwait(false);
 
             return user;
         }
-
         #endregion
     }
 }
