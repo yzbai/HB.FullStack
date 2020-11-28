@@ -25,8 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1C19E62F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Cache.Test", "test\HB.FullStack.Cache.Test\HB.FullStack.Cache.Test.csproj", "{E7873166-4E21-43EF-AA32-89C160ED63F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DatabaseTests", "test\HB.Infrastructure.MySQL.Test\HB.FullStack.DatabaseTests.csproj", "{282884AC-48B8-413C-A2BC-16B4E5B9A346}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Redis.Test", "test\HB.Infrastructure.Redis.Test\HB.Infrastructure.Redis.Test.csproj", "{883DB74C-29FF-409E-8269-F8CB3DCF608E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DistributedLock", "src\HB.FullStack.DistributedLock\HB.FullStack.DistributedLock.csproj", "{876B10C8-62F2-4182-87B1-AB8EC7528A2B}"
@@ -38,6 +36,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.Authorization", "src\HB.Component.Authorization\HB.Component.Authorization.csproj", "{3E6AA465-9756-4F43-AFCA-3D1DA7E9F8D4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.CommonTests", "test\HB.FullStack.CommonTests\HB.FullStack.CommonTests.csproj", "{BEB46010-28E0-4D4F-A006-9D06259000A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DatabaseTests", "test\HB.FullStack.DatabaseTests\HB.FullStack.DatabaseTests.csproj", "{C1637ED7-417A-4C4D-8187-D3DB7F597EDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,10 +85,6 @@ Global
 		{E7873166-4E21-43EF-AA32-89C160ED63F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7873166-4E21-43EF-AA32-89C160ED63F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7873166-4E21-43EF-AA32-89C160ED63F9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{282884AC-48B8-413C-A2BC-16B4E5B9A346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{282884AC-48B8-413C-A2BC-16B4E5B9A346}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{282884AC-48B8-413C-A2BC-16B4E5B9A346}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{282884AC-48B8-413C-A2BC-16B4E5B9A346}.Release|Any CPU.Build.0 = Release|Any CPU
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -113,16 +109,20 @@ Global
 		{BEB46010-28E0-4D4F-A006-9D06259000A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEB46010-28E0-4D4F-A006-9D06259000A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEB46010-28E0-4D4F-A006-9D06259000A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1637ED7-417A-4C4D-8187-D3DB7F597EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1637ED7-417A-4C4D-8187-D3DB7F597EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1637ED7-417A-4C4D-8187-D3DB7F597EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1637ED7-417A-4C4D-8187-D3DB7F597EDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E7873166-4E21-43EF-AA32-89C160ED63F9} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
-		{282884AC-48B8-413C-A2BC-16B4E5B9A346} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 		{883DB74C-29FF-409E-8269-F8CB3DCF608E} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 		{4166D68A-C078-47A1-B781-7675E4F0EB80} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 		{BEB46010-28E0-4D4F-A006-9D06259000A5} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
+		{C1637ED7-417A-4C4D-8187-D3DB7F597EDE} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

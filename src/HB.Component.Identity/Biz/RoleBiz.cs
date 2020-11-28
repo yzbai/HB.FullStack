@@ -4,59 +4,77 @@ using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
 
-using System;
+using Microsoft.Extensions.Logging;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    /// <summary>
-    /// userGuid: Roles
-    /// </summary>
-    internal class UserRolesCacheItem : CacheItem<IEnumerable<Role>>
+    internal class RoleBiz : EntityBaseBiz<Role>
     {
-        private const string _prefix = "Role";
+        private readonly IDatabaseReader _databaseReader;
 
-        public UserRolesCacheItem(string userGuid) : base(_prefix + userGuid) { }
-        public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
-
-        public override TimeSpan? SlidingExpiration => null;
-    }
-
-    internal class RoleBiz
-    {
-        private readonly IDatabase _database;
-        private readonly ICache _cache;
-
-        public RoleBiz(IDatabase database, ICache cache)
+        public RoleBiz(ILogger<RoleBiz> logger, IDatabaseReader databaseReader, ICache cache) : base(logger, databaseReader, cache)
         {
-            _database = database;
-            _cache = cache;
+            _databaseReader = databaseReader;
         }
 
-        public async Task<IEnumerable<Role>> GetRolesByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
+        public async Task<IEnumerable<Role>?> GetRolesByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
-            //Cache First
-            UserRolesCacheItem cacheItem = new UserRolesCacheItem(userGuid);
 
-            if (await _cache.TryGetItemAsync(cacheItem).ConfigureAwait(false))
+            //return TryCacheAsideLooseAsync<CachedRolesByUserGuid, IEnumerable<Role>>(db =>
+            //{
+            //    var from = _databaseReader.From<Role>().RightJoin<RoleOfUser>((r, ru) => r.Guid == ru.RoleGuid);
+            //    var where = _databaseReader.Where<Role>().And<RoleOfUser>(ru => ru.UserGuid == userGuid);
+
+            //    return _databaseReader.RetrieveAsync(from, where, transContext);
+            //}, userGuid);
+
+            //Cache First
+            IEnumerable<Role>? roles = await CachedRolesByUserGuid.Key(userGuid).GetFromAsync(_cache).ConfigureAwait(false);
+
+            if (roles != null)
             {
-                return cacheItem.Value!;
+                return roles;
             }
 
-            //Cache Missed
+            //Cache Missed Retrieve Database
+            var from = _databaseReader.From<Role>().RightJoin<RoleOfUser>((r, ru) => r.Guid == ru.RoleGuid);
+            var where = _databaseReader.Where<Role>().And<RoleOfUser>(ru => ru.UserGuid == userGuid);
+
+            IEnumerable<Role> results = await _databaseReader.RetrieveAsync(from, where, transContext).ConfigureAwait(false);
+
+            //Update Cache
+            CachedRolesByUserGuid.Key(userGuid).Value(results).SetToAsync(_cache).Fire();
+
+            //Return
+            return results;
+
+            ////doble check
+            //roles = await RolesByUserGuidCacheItem.TryGetValueAsync(_cache, userGuid).ConfigureAwait(false);
+
+            //if (roles != null)
+            //{
+            //    return roles;
+            //}
+
+            //roles = retrieve();
+
+            //RolesByUserGuidCacheItem.SetAsync(_cache, userGuid, roles);
 
 
 
-            var from = _database.From<Role>().RightJoin<RoleOfUser>((r, ru) => r.Guid == ru.RoleGuid);
-            var where = _database.Where<Role>().And<RoleOfUser>(ru => ru.UserGuid == userGuid);
 
-            return await _database.RetrieveAsync(from, where, transContext).ConfigureAwait(false);
+
+
         }
 
         public static void AddRolesToUser()
         {
             // Invalidate Cache : Roles_{UserGuidValue}
+
+            CachedRolesByUserGuid.Remove(_cache, userGuid);
         }
 
         public static void DeleteRolesFromUser()

@@ -14,7 +14,7 @@ namespace HB.FullStack.Business
     {
         public static async Task<bool> TryGetItemAsync<T>(this IDistributedCache cache, CacheItem<T> cacheItem, CancellationToken cancellationToken = default) where T : class
         {
-            byte[]? bytes = await cache.GetAsync(cacheItem.Key, cancellationToken).ConfigureAwait(false);
+            byte[]? bytes = await cache.GetAsync(cacheItem.CacheKey, cancellationToken).ConfigureAwait(false);
 
             if (bytes == null)
             {
@@ -34,7 +34,9 @@ namespace HB.FullStack.Business
                 SlidingExpiration = cacheItem.SlidingExpiration
             };
 
-            return cache.SetAsync(cacheItem.Key, cacheItem.Value, entryOptions, cancellationToken);
+            return cache.SetAsync(cacheItem.CacheKey, cacheItem.Value, entryOptions, cancellationToken);
         }
+
+        public static
     }
 }

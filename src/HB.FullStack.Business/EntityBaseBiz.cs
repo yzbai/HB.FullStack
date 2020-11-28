@@ -35,7 +35,7 @@ namespace HB.FullStack.Business
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly ILogger _logger;
         protected readonly ICache _cache;
-        protected readonly IDatabase _database;
+        private readonly IDatabase _database;
 
         public EntityBaseBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache)
         {
@@ -158,6 +158,8 @@ namespace HB.FullStack.Business
 
         #region Cache Strategy
 
+
+
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
             if (!ICache.IsEnabled<TEntity>())
@@ -172,7 +174,14 @@ namespace HB.FullStack.Business
                 return cached;
             }
 
-            //常规做法是先获取锁（参看历史）。但如果仅从当前dimension来锁的话，有可能被别人从其他dimension操作同一个entity，所以这里改变常规做法，先做database retrieve
+            //常规做法是先获取锁（参看历史）。
+            //但如果仅从当前dimension来锁的话，有可能被别人从其他dimension操作同一个entity，
+            //所以这里改变常规做法，先做database retrieve
+
+            //以上是针对无version版本cache的。
+            //而且如果刚开始很多请求直接打到数据库上，数据库撑不住，还是得加锁。
+            //但可以考虑加单机本版的锁就可，这个锁主要为了降低数据库压力，不再是为了数据一致性（带version的cache自己解决）。
+            //所以可以使用单机版本的锁即可。一个主机同时放一个db请求，还是没问题的。
             TEntity? entity = await dbRetrieve(_database).ConfigureAwait(true);
 
             if (entity != null)
@@ -432,5 +441,49 @@ namespace HB.FullStack.Business
         }
 
         #endregion
+
+        protected async Task<TResult?> TryCacheAsideLooseAsync<TCacheItem, TResult>(Func<IDatabaseReader, Task<TResult>> dbRetrieve, params string[] keys)
+            where TResult : class where TCacheItem : CacheItem<TCacheItem, TResult>, new()
+        {
+            //Cache First
+            TResult? result = await CacheItem<TCacheItem, TResult>.Key(keys).GetFromAsync(_cache).ConfigureAwait(false);
+
+            if (result != null)
+            {
+                return result;
+            }
+
+            TResult dbRt = await dbRetrieve(_database).ConfigureAwait(false);
+
+            if (dbRt != null)
+            {
+                CacheItem<TCacheItem, TResult>.Key(keys).Value(dbRt).SetToAsync(_cache).Fire();
+            }
+
+            return dbRt;
+        }
+
+        protected async Task<TResult?> TryCacheAsideStrictAsync<TCacheItem, TResult>(Func<IDatabaseReader, Task<TResult>> dbRetrieve, params string[] keys)
+           where TResult : class where TCacheItem : CacheItem<TCacheItem, TResult>, new()
+        {
+            //Cache First
+            TResult? result = await CacheItem<TCacheItem, TResult>.Key(keys).GetFromAsync(_cache).ConfigureAwait(false);
+
+            if (result != null)
+            {
+                return result;
+            }
+
+
+
+            TResult dbRt = await dbRetrieve(_database).ConfigureAwait(false);
+
+            if (dbRt != null)
+            {
+                CacheItem<TCacheItem, TResult>.Key(keys).Value(dbRt).SetToAsync(_cache).Fire();
+            }
+
+            return dbRt;
+        }
     }
 }

@@ -279,45 +279,45 @@ namespace HB.FullStack.DatabaseTests
             }
         }
 
-        [Fact]
+        //[Fact]
 
 
-        public async Task Test_7_AddOrUpdate_PublisherEntityAsync()
-        {
-            IDatabase database = _mysql;
-            ITransaction transaction = _mysqlTransaction;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+        //public async Task Test_7_AddOrUpdate_PublisherEntityAsync()
+        //{
+        //    IDatabase database = _mysql;
+        //    ITransaction transaction = _mysqlTransaction;
+        //    TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
-            try
-            {
+        //    try
+        //    {
 
-                var publishers = Mocker.GetPublishers();
+        //        var publishers = Mocker.GetPublishers();
 
-                var newIds = await database.BatchAddAsync(publishers, "xx", tContext);
+        //        var newIds = await database.BatchAddAsync(publishers, "xx", tContext);
 
-                for (int i = 0; i < publishers.Count; i += 2)
-                {
-                    publishers[i].Name = "GGGGG" + i.ToString();
+        //        for (int i = 0; i < publishers.Count; i += 2)
+        //        {
+        //            publishers[i].Name = "GGGGG" + i.ToString();
 
-                }
+        //        }
 
-                var affectedIds = await database.BatchAddOrUpdateAsync(publishers, "AddOrUpdaterrrr", tContext);
-
-
-                //publishers[0].Guid = SecurityUtil.CreateUniqueToken();
-
-                await database.AddOrUpdateAsync(publishers[0], "single", tContext);
+        //        var affectedIds = await database.BatchAddOrUpdateAsync(publishers, "AddOrUpdaterrrr", tContext);
 
 
-                await transaction.CommitAsync(tContext);
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(tContext);
-                _output.WriteLine(ex.Message);
-                throw ex;
-            }
-        }
+        //        //publishers[0].Guid = SecurityUtil.CreateUniqueToken();
+
+        //        await database.AddOrUpdateAsync(publishers[0], "single", tContext);
+
+
+        //        await transaction.CommitAsync(tContext);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await transaction.RollbackAsync(tContext);
+        //        _output.WriteLine(ex.Message);
+        //        throw ex;
+        //    }
+        //}
 
         [Fact]
 
@@ -340,7 +340,7 @@ namespace HB.FullStack.DatabaseTests
 
             fetched = await database.ScalarAsync<PublisherEntity>(item.Id, null);
 
-            await database.AddOrUpdateAsync(item, "ss", null);
+            //await database.AddOrUpdateAsync(item, "ss", null);
 
             fetched = await database.ScalarAsync<PublisherEntity>(item.Id, null);
 
@@ -365,7 +365,7 @@ namespace HB.FullStack.DatabaseTests
 
                 var items2 = Mocker.GetPublishers();
 
-                await database.BatchAddOrUpdateAsync<PublisherEntity>(items2, "xx", trans);
+                //await database.BatchAddOrUpdateAsync<PublisherEntity>(items2, "xx", trans);
 
                 results = await database.RetrieveAsync<PublisherEntity>(item => SQLUtil.In(item.Guid, true, items2.Select(item => item.Guid).ToArray()), trans);
 
@@ -407,7 +407,7 @@ namespace HB.FullStack.DatabaseTests
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
 
-                await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+                //await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
 
 
                 await database.DeleteAsync(item, "xxx", transactionContext).ConfigureAwait(false);
@@ -453,82 +453,82 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
-        [Fact]
+        //[Fact]
 
 
-        public async Task Test_10_AddOrUpdate_VersionTestAsync()
-        {
-            IDatabase database = _mysql;
+        //public async Task Test_10_AddOrUpdate_VersionTestAsync()
+        //{
+        //    IDatabase database = _mysql;
 
-            ITransaction transaction = _mysqlTransaction;
+        //    ITransaction transaction = _mysqlTransaction;
 
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+        //    TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
 
-            try
-            {
+        //    try
+        //    {
 
-                PublisherEntity item = Mocker.MockOne();
+        //        PublisherEntity item = Mocker.MockOne();
 
-                Assert.True(item.Version == -1);
+        //        Assert.True(item.Version == -1);
 
-                await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+        //        //await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
 
-                Assert.True(item.Version == 0);
+        //        Assert.True(item.Version == 0);
 
-                await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+        //        //await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
 
-                Assert.True(item.Version == 1);
+        //        Assert.True(item.Version == 1);
 
-                await database.UpdateAsync(item, "sfa", transactionContext).ConfigureAwait(false);
+        //        await database.UpdateAsync(item, "sfa", transactionContext).ConfigureAwait(false);
 
-                Assert.True(item.Version == 2);
-
-
-
-                IEnumerable<PublisherEntity> items = Mocker.GetPublishers();
-
-                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
-
-                await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
-
-                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
-
-                await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
-
-                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 1));
-
-                await database.BatchUpdateAsync(items, "ss", transactionContext).ConfigureAwait(false);
-
-                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 2));
+        //        Assert.True(item.Version == 2);
 
 
-                //add
-                item = Mocker.MockOne();
 
-                Assert.True(item.Version == -1);
+        //        IEnumerable<PublisherEntity> items = Mocker.GetPublishers();
 
-                await database.AddAsync(item, "sfas", transactionContext).ConfigureAwait(false);
+        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
 
-                Assert.True(item.Version == 0);
+        //        await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
+
+        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
+
+        //        await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
+
+        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 1));
+
+        //        await database.BatchUpdateAsync(items, "ss", transactionContext).ConfigureAwait(false);
+
+        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 2));
 
 
-                //batch add
-                items = Mocker.GetPublishers();
+        //        //add
+        //        item = Mocker.MockOne();
 
-                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
+        //        Assert.True(item.Version == -1);
 
-                await database.BatchAddAsync(items, "xx", transactionContext);
+        //        await database.AddAsync(item, "sfas", transactionContext).ConfigureAwait(false);
 
-                Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
+        //        Assert.True(item.Version == 0);
 
-                await transaction.CommitAsync(transactionContext);
-            }
-            catch
-            {
-                await transaction.RollbackAsync(transactionContext);
-                throw;
-            }
 
-        }
+        //        //batch add
+        //        items = Mocker.GetPublishers();
+
+        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
+
+        //        await database.BatchAddAsync(items, "xx", transactionContext);
+
+        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
+
+        //        await transaction.CommitAsync(transactionContext);
+        //    }
+        //    catch
+        //    {
+        //        await transaction.RollbackAsync(transactionContext);
+        //        throw;
+        //    }
+
+        //}
     }
 }
