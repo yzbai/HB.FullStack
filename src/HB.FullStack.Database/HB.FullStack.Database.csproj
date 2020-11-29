@@ -31,7 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
-    <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.DistributedLock.csproj" />
+    <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,12 @@
 ﻿using AsyncAwaitBestPractices;
-using HB.FullStack.DistributedLock;
+
 using HB.FullStack.EventBus.Abstractions;
+using HB.FullStack.Lock.Distributed;
+
 using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

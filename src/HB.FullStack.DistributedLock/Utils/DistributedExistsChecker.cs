@@ -1,19 +1,22 @@
 ﻿#nullable enable
 
+using System;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace System
+namespace HB.FullStack.Lock
 {
-    public class DistributedCacheFrequencyChecker2
+    public class DistributedExistsChecker
     {
-        private const string _prefix = "Freq_C";
+        private readonly string _applicationName;
 
         private readonly IDistributedCache _cache;
 
-        public DistributedCacheFrequencyChecker2(IDistributedCache cache)
+        public DistributedExistsChecker(IDistributedCache cache, string applicaionName)
         {
             _cache = cache;
+            _applicationName = applicaionName;
         }
 
         public async Task<bool> CheckAsync(string resourceType, string resource, TimeSpan aliveTimeSpan)
@@ -38,9 +41,9 @@ namespace System
             return _cache.RemoveAsync(key);
         }
 
-        private static string GetKey(string resourceType, string resource)
+        private string GetKey(string resourceType, string resource)
         {
-            return $"{_prefix}:{resourceType}:{resource}";
+            return $"{_applicationName}{resourceType}{resource}";
         }
     }
 }

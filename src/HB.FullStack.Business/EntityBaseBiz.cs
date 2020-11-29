@@ -3,6 +3,7 @@ using HB.FullStack.Common;
 using HB.FullStack.Common.Entities;
 using HB.FullStack.Database;
 using HB.FullStack.DistributedLock;
+using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -30,17 +31,19 @@ namespace HB.FullStack.Business
     public abstract class EntityBaseBiz<TEntity> where TEntity : Entity, new()
     {
         public static readonly TimeSpan OccupiedTime = TimeSpan.FromSeconds(10);
-        public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(5);
+        public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(2);
 
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly ILogger _logger;
         protected readonly ICache _cache;
         private readonly IDatabase _database;
+        private readonly IMemoryLockManager _memoryLockManager;
 
-        public EntityBaseBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache)
+        public EntityBaseBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
         {
             _logger = logger;
             _cache = cache;
+            _memoryLockManager = memoryLockManager;
 
             //Dirty trick
             _database = (IDatabase)databaseReader;
@@ -158,8 +161,6 @@ namespace HB.FullStack.Business
 
         #region Cache Strategy
 
-
-
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
             if (!ICache.IsEnabled<TEntity>())
@@ -178,24 +179,44 @@ namespace HB.FullStack.Business
             //但如果仅从当前dimension来锁的话，有可能被别人从其他dimension操作同一个entity，
             //所以这里改变常规做法，先做database retrieve
 
-            //以上是针对无version版本cache的。
+            //以上是针对无version版本cache的。现在不用担心从其他dimension操作同一个entity了，cache会自带version来判断。
             //而且如果刚开始很多请求直接打到数据库上，数据库撑不住，还是得加锁。
             //但可以考虑加单机本版的锁就可，这个锁主要为了降低数据库压力，不再是为了数据一致性（带version的cache自己解决）。
             //所以可以使用单机版本的锁即可。一个主机同时放一个db请求，还是没问题的。
-            TEntity? entity = await dbRetrieve(_database).ConfigureAwait(true);
 
-            if (entity != null)
+            using var @lock = _memoryLockManager.Lock(typeof(TEntity).Name, dimensionKeyName + dimensionKeyValue, OccupiedTime, PatienceTime);
+
+            if (@lock.IsAcquired)
             {
-                UpdateCacheAsync(entity).Fire();
+                //double check
+                (cached, exists) = await _cache.GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue).ConfigureAwait(false);
 
-                _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
+                if (exists)
+                {
+                    return cached;
+                }
+
+                TEntity? entity = await dbRetrieve(_database).ConfigureAwait(true);
+
+                if (entity != null)
+                {
+                    UpdateCacheAsync(entity).Fire();
+
+                    _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
+                }
+                else
+                {
+                    _logger.LogInformation($"查询到空值. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
+                }
+
+                return entity;
             }
             else
             {
-                _logger.LogInformation($"查询到空值. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
-            }
+                _logger.LogError($"锁未能占用. Entity:{nameof(TEntity)}, dimensionKeyName:{dimensionKeyName},dimensionKeyValue:{dimensionKeyValue}, Lock Status:{@lock.Status}");
 
-            return entity;
+                return await dbRetrieve(_database).ConfigureAwait(false);
+            }
         }
 
         protected async Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
@@ -212,19 +233,39 @@ namespace HB.FullStack.Business
                 return cachedEntities!;
             }
 
-            IEnumerable<TEntity> entities = await dbRetrieve(_database).ConfigureAwait(false);
+            using var @lock = _memoryLockManager.Lock(typeof(TEntity).Name, dimensionKeyValues.Select(d => dimensionKeyName + d), OccupiedTime, PatienceTime);
 
-            if (entities.IsNotNullOrEmpty())
+            if (@lock.IsAcquired)
             {
-                UpdateCacheAsync(entities).Fire();
-                _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                //Double check
+                (cachedEntities, allExists) = await _cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
+
+                if (allExists)
+                {
+                    return cachedEntities!;
+                }
+
+                IEnumerable<TEntity> entities = await dbRetrieve(_database).ConfigureAwait(false);
+
+                if (entities.IsNotNullOrEmpty())
+                {
+                    UpdateCacheAsync(entities).Fire();
+                    _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                }
+                else
+                {
+                    _logger.LogInformation($"查询到空值. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                }
+
+                return entities;
             }
             else
             {
-                _logger.LogInformation($"查询到空值. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                _logger.LogError($"锁未能占用. Entity:{nameof(TEntity)}, dimensionKeyName:{dimensionKeyName},dimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}, Lock Status:{@lock.Status}");
+
+                return await dbRetrieve(_database).ConfigureAwait(false);
             }
 
-            return entities;
         }
 
         protected async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)

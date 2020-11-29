@@ -5,7 +5,7 @@ using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Properties;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.DistributedLock;
+using HB.FullStack.Lock.Distributed;
 
 using Microsoft.Extensions.Logging;
 

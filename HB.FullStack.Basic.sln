@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Cache.Test", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Redis.Test", "test\HB.Infrastructure.Redis.Test\HB.Infrastructure.Redis.Test.csproj", "{883DB74C-29FF-409E-8269-F8CB3DCF608E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DistributedLock", "src\HB.FullStack.DistributedLock\HB.FullStack.DistributedLock.csproj", "{876B10C8-62F2-4182-87B1-AB8EC7528A2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Lock", "src\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj", "{876B10C8-62F2-4182-87B1-AB8EC7528A2B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DistributedLock.Test", "test\HB.FullStack.DistributedLock.Test\HB.FullStack.DistributedLock.Test.csproj", "{4166D68A-C078-47A1-B781-7675E4F0EB80}"
 EndProject

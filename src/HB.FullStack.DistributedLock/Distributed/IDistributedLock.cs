@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.DistributedLock
+namespace HB.FullStack.Lock.Distributed
 {
     public interface IDistributedLock : IDisposable, IAsyncDisposable
     {

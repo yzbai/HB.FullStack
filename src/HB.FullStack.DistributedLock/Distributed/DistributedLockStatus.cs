@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.DistributedLock
+﻿namespace HB.FullStack.Lock.Distributed
 {
     public enum DistributedLockStatus
     {

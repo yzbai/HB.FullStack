@@ -5,10 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.FullStack.Cache;
-using HB.FullStack.DistributedLock;
+using HB.FullStack.Lock;
+using HB.FullStack.Lock.Distributed;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DistributedLock
@@ -213,13 +217,13 @@ return 1";
 
         private static void StartAutoExtendTimer(RedisLock redisLock, ILogger logger)
         {
-            var interval = redisLock.ExpiryTime.TotalMilliseconds / 2;
+            long interval = (long)redisLock.ExpiryTime.TotalMilliseconds / 2;
 
             redisLock.KeepAliveTimer = new Timer(
                 state => { ExtendLockLifetime(redisLock, logger); },
                 null,
-                (int)interval,
-                (int)interval);
+                interval,
+                interval);
         }
 
         private static void ExtendLockLifetime(RedisLock redisLock, ILogger logger)

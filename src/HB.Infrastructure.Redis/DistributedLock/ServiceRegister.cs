@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.DistributedLock;
+
+using HB.FullStack.Lock.Distributed;
 using HB.Infrastructure.Redis.DistributedLock;
+
 using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
