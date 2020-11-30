@@ -38,8 +38,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddSingleton<ICache, RedisCache>();
 
-            services.AddSingleton<IDistributedCache>(sp => sp.GetRequiredService<ICache>());
-
         }
     }
 }

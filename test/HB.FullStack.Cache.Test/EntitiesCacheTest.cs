@@ -51,6 +51,7 @@ namespace HB.FullStack.Cache.Test
             List<RedisKey> bookIdRedisKeys = new List<RedisKey>();
             List<RedisKey> bookNameRedisKeys = new List<RedisKey>();
 
+
             foreach (Book book in books)
             {
                 guidRedisKeys.Add(ServiceFixture.ApplicationName + book.Guid);
@@ -64,8 +65,8 @@ namespace HB.FullStack.Cache.Test
             Assert.True(exists == false && cached == null);
             Assert.True(exists2 == false && cached2 == null);
 
-            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Guid), guids).ConfigureAwait(false);
-            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Name), bookNames).ConfigureAwait(false);
+            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Guid), guids, books.Select(b => b.Version)).ConfigureAwait(false);
+            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Name), bookNames, books.Select(b => b.Version)).ConfigureAwait(false);
 
             stopwatch.Reset();
             stopwatch.Start();
@@ -97,7 +98,7 @@ namespace HB.FullStack.Cache.Test
 
             stopwatch.Reset();
             stopwatch.Start();
-            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Guid), guids).ConfigureAwait(false);
+            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Guid), guids, books.Select(b => b.Version)).ConfigureAwait(false);
             stopwatch.Stop();
             _outputHelper.WriteLine($"Delete 100 Items, Spend: {stopwatch.ElapsedMilliseconds}");
 
@@ -112,7 +113,7 @@ namespace HB.FullStack.Cache.Test
             Assert.True(guidRedisKeys.Count == database.KeyExists(bookIdRedisKeys.ToArray()));
             Assert.True(guidRedisKeys.Count == database.KeyExists(bookNameRedisKeys.ToArray()));
 
-            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Name), bookNames).ConfigureAwait(false);
+            await _cache.RemoveEntitiesAsync<Book>(nameof(Book.Name), bookNames, books.Select(b => b.Version)).ConfigureAwait(false);
 
             Assert.True(0 == database.KeyExists(bookIdRedisKeys.ToArray()));
             Assert.True(0 == database.KeyExists(bookNameRedisKeys.ToArray()));
@@ -181,7 +182,7 @@ namespace HB.FullStack.Cache.Test
 
             IList<Book> books = Mocker.MockMany();
 
-            await _cache.RemoveEntitiesAsync<Book>("Guid", books.Select(b => b.Guid)).ConfigureAwait(false);
+            await _cache.RemoveEntitiesAsync<Book>("Guid", books.Select(b => b.Guid), books.Select(b => b.Version)).ConfigureAwait(false);
 
             IEnumerable<bool> oks = await _cache.SetEntitiesAsync(books).ConfigureAwait(false);
 

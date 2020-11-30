@@ -3,6 +3,7 @@
 using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -407,7 +408,7 @@ namespace HB.FullStack.Database.SQL
             return AssembleCommand<T, T>(false, updateTemplate, null, condition, parameters);
         }
 
-        public IDbCommand CreateDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : Entity, new()
+        public IDbCommand CreateDeleteCommand<T>(WhereExpression<T> condition, int currentVersion, string lastUser) where T : Entity, new()
         {
             DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
 
@@ -421,9 +422,11 @@ namespace HB.FullStack.Database.SQL
 
             DatabaseEntityPropertyDef lastUserProperty = definition.GetProperty("LastUser")!;
             DatabaseEntityPropertyDef lastTimeProperty = definition.GetProperty("LastTime")!;
+            DatabaseEntityPropertyDef versionProperty = definition.GetProperty("Version")!;
 
             List<IDataParameter> parameters = new List<IDataParameter>
             {
+                _databaseEngine.CreateParameter(versionProperty.DbParameterizedName!, DbParameterValue_Statement(currentVersion+1, versionProperty), versionProperty.DbFieldType),
                 _databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName!, DbParameterValue_Statement(lastUser, lastUserProperty), lastUserProperty.DbFieldType),
                 _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, DbParameterValue_Statement(DateTimeOffset.UtcNow, lastTimeProperty), lastTimeProperty.DbFieldType)
             };
@@ -675,7 +678,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="type"></param>
         /// <param name="addDropStatement"></param>
         /// <returns></returns>
-        
+
         public IDbCommand CreateTableCommand(Type type, bool addDropStatement)
         {
             string sql = _databaseEngine.EngineType switch
@@ -699,7 +702,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="type"></param>
         /// <param name="addDropStatement"></param>
         /// <returns></returns>
-        
+
         private string SQLite_Table_Create_Statement(Type type, bool addDropStatement)
         {
             StringBuilder sql = new StringBuilder();
@@ -755,7 +758,7 @@ CREATE TABLE {definition.DbTableReservedName} (
         /// <param name="type"></param>
         /// <param name="addDropStatement"></param>
         /// <returns></returns>
-        
+
         private string MySQL_Table_Create_Statement(Type type, bool addDropStatement)
         {
             StringBuilder sql = new StringBuilder();

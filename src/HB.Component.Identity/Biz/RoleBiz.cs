@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    internal class RoleBiz : EntityBaseBiz<Role>
+    internal class RoleBiz : BaseEntityBiz<Role>
     {
         private readonly IDatabaseReader _databaseReader;
 

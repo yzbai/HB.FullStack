@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Cache
+namespace Microsoft.Extensions.Caching.Distributed
 {
     public static class IDistributedCacheExtensions
     {
@@ -22,7 +22,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex)
             {
-                throw new CacheException($"Cache SetIntAsync Error. Key:{key}, Value:{value}", ex);
+                throw new FrameworkException($"Cache SetIntAsync Error. Key:{key}, Value:{value}", ex);
             }
         }
 
@@ -41,7 +41,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex)
             {
-                throw new CacheException($"Cache GetIntAsync Error. Key:{key}", ex);
+                throw new FrameworkException($"Cache GetIntAsync Error. Key:{key}", ex);
             }
         }
 
@@ -55,7 +55,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex)
             {
-                throw new CacheException($"Cache SetAsync Error. Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
+                throw new FrameworkException($"Cache SetAsync Error. Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
             }
         }
 
@@ -69,7 +69,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex)
             {
-                throw new CacheException($"Cache GetAsync Error. Key:{key}", ex);
+                throw new FrameworkException($"Cache GetAsync Error. Key:{key}", ex);
             }
         }
 

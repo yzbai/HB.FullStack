@@ -28,7 +28,7 @@ namespace HB.FullStack.Business
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class EntityBaseBiz<TEntity> where TEntity : Entity, new()
+    public abstract class BaseEntityBiz<TEntity> where TEntity : Entity, new()
     {
         public static readonly TimeSpan OccupiedTime = TimeSpan.FromSeconds(10);
         public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(2);
@@ -39,7 +39,7 @@ namespace HB.FullStack.Business
         private readonly IDatabase _database;
         private readonly IMemoryLockManager _memoryLockManager;
 
-        public EntityBaseBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public BaseEntityBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
         {
             _logger = logger;
             _cache = cache;
@@ -159,11 +159,11 @@ namespace HB.FullStack.Business
 
         #endregion
 
-        #region Cache Strategy
+        #region Entity
 
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
-            if (!ICache.IsEnabled<TEntity>())
+            if (!ICache.IsEntityEnabled<TEntity>())
             {
                 return await dbRetrieve(_database).ConfigureAwait(false);
             }
@@ -200,7 +200,7 @@ namespace HB.FullStack.Business
 
                 if (entity != null)
                 {
-                    UpdateCacheAsync(entity).Fire();
+                    UpdateCache(entity);
 
                     _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
                 }
@@ -213,7 +213,7 @@ namespace HB.FullStack.Business
             }
             else
             {
-                _logger.LogError($"锁未能占用. Entity:{nameof(TEntity)}, dimensionKeyName:{dimensionKeyName},dimensionKeyValue:{dimensionKeyValue}, Lock Status:{@lock.Status}");
+                _logger.LogCritical($"锁未能占用. Entity:{nameof(TEntity)}, dimensionKeyName:{dimensionKeyName},dimensionKeyValue:{dimensionKeyValue}, Lock Status:{@lock.Status}");
 
                 return await dbRetrieve(_database).ConfigureAwait(false);
             }
@@ -221,7 +221,7 @@ namespace HB.FullStack.Business
 
         protected async Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
         {
-            if (!ICache.IsBatchEnabled<TEntity>())
+            if (!ICache.IsEntityBatchEnabled<TEntity>())
             {
                 return await dbRetrieve(_database).ConfigureAwait(false);
             }
@@ -249,7 +249,8 @@ namespace HB.FullStack.Business
 
                 if (entities.IsNotNullOrEmpty())
                 {
-                    UpdateCacheAsync(entities).Fire();
+                    UpdateCache(entities);
+
                     _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
                 }
                 else
@@ -283,10 +284,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            if (ICache.IsEnabled<TEntity>())
-            {
-                _cache.RemoveEntityAsync<TEntity>(entity).Fire();
-            }
+            InvalidateCache(entity);
 
             await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
         }
@@ -323,10 +321,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            if (ICache.IsEnabled<TEntity>())
-            {
-                _cache.RemoveEntityAsync(entity).Fire();
-            }
+            InvalidateCache(entity);
 
             await OnEntityDeletedAsync(entity).ConfigureAwait(false);
         }
@@ -383,6 +378,9 @@ namespace HB.FullStack.Business
                 throw;
             }
 
+            //Cache
+            InvalidateCache(entities);
+
             foreach (TEntity entity in entities)
             {
                 await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
@@ -410,13 +408,16 @@ namespace HB.FullStack.Business
                 throw;
             }
 
+            //Cache
+            InvalidateCache(entities);
+
             foreach (TEntity entity in entities)
             {
                 await OnEntityDeletedAsync(entity).ConfigureAwait(false);
             }
         }
 
-        private Task UpdateCacheAsync(TEntity entity)
+        private void UpdateCache(TEntity entity)
         {
             #region 普通缓存，加锁的做法
             //using IDistributedLock distributedLock = await _lockManager.LockEntityAsync(entity, OccupiedTime, PatienceTime).ConfigureAwait(false);
@@ -443,12 +444,12 @@ namespace HB.FullStack.Business
 
             #region 有版本控制的Cache. 就一句话，爽不爽
 
-            return _cache.SetEntityAsync(entity);
+            _cache.SetEntityAsync(entity).Fire();
 
             #endregion
         }
 
-        private Task UpdateCacheAsync(IEnumerable<TEntity> entities)
+        private void UpdateCache(IEnumerable<TEntity> entities)
         {
             #region 普通缓存，加锁的做法
             //using IDistributedLock distributedLock = await _lockManager.LockEntitiesAsync(entities, OccupiedTime, PatienceTime).ConfigureAwait(false);
@@ -475,13 +476,31 @@ namespace HB.FullStack.Business
 
             #region 有版本控制的Cache. 就一句话，爽不爽
 
-            return _cache.SetEntitiesAsync(entities);
+            _cache.SetEntitiesAsync(entities).Fire();
 
             #endregion
 
         }
 
+        private void InvalidateCache(TEntity entity)
+        {
+            if (ICache.IsEntityEnabled<TEntity>())
+            {
+                _cache.RemoveEntityAsync<TEntity>(entity).Fire();
+            }
+        }
+
+        private void InvalidateCache(IEnumerable<TEntity> entities)
+        {
+            if (ICache.IsEntityBatchEnabled<TEntity>())
+            {
+                _cache.RemoveEntitiesAsync(entities).Fire();
+            }
+        }
+
         #endregion
+
+        #region CacheItem
 
         protected async Task<TResult?> TryCacheAsideLooseAsync<TCacheItem, TResult>(Func<IDatabaseReader, Task<TResult>> dbRetrieve, params string[] keys)
             where TResult : class where TCacheItem : CacheItem<TCacheItem, TResult>, new()
@@ -526,5 +545,7 @@ namespace HB.FullStack.Business
 
             return dbRt;
         }
+
+        #endregion
     }
 }

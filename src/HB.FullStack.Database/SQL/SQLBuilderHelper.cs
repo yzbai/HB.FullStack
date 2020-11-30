@@ -2,6 +2,7 @@
 
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.Text;
 
@@ -150,9 +151,11 @@ namespace HB.FullStack.Database.SQL
             DatabaseEntityPropertyDef deletedProperty = modelDef.GetProperty("Deleted")!;
             DatabaseEntityPropertyDef lastUserProperty = modelDef.GetProperty("LastUser")!;
             DatabaseEntityPropertyDef lastTimeProperty = modelDef.GetProperty("LastTime")!;
+            DatabaseEntityPropertyDef versionProperty = modelDef.GetProperty("Version")!;
 
             StringBuilder args = new StringBuilder();
 
+            args.Append($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName},");
             args.Append($"{deletedProperty.DbReservedName}=1,");
             args.Append($"{lastUserProperty.DbReservedName}={lastUserProperty.DbParameterizedName},");
             args.Append($"{lastTimeProperty.DbReservedName}={lastTimeProperty.DbParameterizedName}");

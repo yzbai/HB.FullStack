@@ -15,10 +15,12 @@ namespace HB.FullStack.Cache
     /// string,int,generic 都可以存储空值
     /// Entity操作不可以 
     /// </summary>
-    public interface ICache : IDistributedCache
+    public interface ICache
     {
         void Close();
         void Dispose();
+
+        #region Entities
 
         Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
 
@@ -31,7 +33,17 @@ namespace HB.FullStack.Cache
             return GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token);
         }
 
-        Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new();
+        async Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            (IEnumerable<TEntity>? results, bool exist) = await GetEntitiesAsync<TEntity>(dimensionKeyName, new string[] { dimensionKeyValue }, token).ConfigureAwait(false);
+
+            if (exist)
+            {
+                return (results.ElementAt(0), true);
+            }
+
+            return (null, false);
+        }
 
         Task<(TEntity?, bool)> GetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
         {
@@ -43,9 +55,42 @@ namespace HB.FullStack.Cache
             return GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token);
         }
 
-        Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
-        Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new();
 
+        /// <summary>
+        /// 只能放在数据库Updated之后，因为version需要update之后的version
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="dimensionKeyName"></param>
+        /// <param name="dimensionKeyValues"></param>
+        /// <param name="updatedVersions"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new();
+
+        /// <summary>
+        /// 只能放在数据库Updated之后，因为version需要update之后的version
+        /// </summary>
+        Task RemoveEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+            string dimensionKeyName = entityDef.GuidKeyProperty.Name;
+            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.GuidKeyProperty.GetValue(e).ToString());
+            IEnumerable<int> updatedVersions = entities.Select(e => e.Version);
+
+            return RemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, updatedVersions, token);
+        }
+
+        /// <summary>
+        /// 只能放在数据库Updated之后，因为version需要update之后的version
+        /// </summary>
+        Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, int updatedVersion, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            return RemoveEntitiesAsync<TEntity>(dimensionKeyName, new string[] { dimensionKeyValue }, new int[] { updatedVersion }, token);
+        }
+
+        /// <summary>
+        /// 只能放在数据库Updated之后，因为version需要update之后的version
+        /// </summary>
         Task RemoveEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -53,10 +98,8 @@ namespace HB.FullStack.Cache
             string dimensionKeyName = entityDef.GuidKeyProperty.Name;
             string dimensionKeyValue = entityDef.GuidKeyProperty.GetValue(entity).ToString();
 
-            return RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token);
+            return RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, entity.Version, token);
         }
-
-        Task<bool> IsExistThenRemoveAsync(string key, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// 
@@ -75,20 +118,44 @@ namespace HB.FullStack.Cache
         /// <param name="entity"></param>
         /// <param name="token"></param>
         /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
-        Task<bool> SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new();
+        async Task<bool> SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            IEnumerable<bool> results = await SetEntitiesAsync<TEntity>(new TEntity[] { entity }, token).ConfigureAwait(false);
 
-        static bool IsBatchEnabled<TEntity>() where TEntity : Entity, new()
+            return results.ElementAt(0);
+        }
+
+        static bool IsEntityBatchEnabled<TEntity>() where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
             return entityDef.IsBatchEnabled;
         }
 
-        static bool IsEnabled<TEntity>() where TEntity : Entity, new()
+        static bool IsEntityEnabled<TEntity>() where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
             return entityDef.IsCacheable;
         }
+
+        #endregion
+
+        #region Timestamp Cache
+
+        Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken));
+
+        Task<bool> SetAsync(string key, byte[] value, long timestampInUnixMilliseconds, DistributedCacheEntryOptions options, CancellationToken token = default);
+
+        /// <summary>
+        /// 返回是否找到了
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="timestampInUnixMilliseconds"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        Task<bool> RemoveAsync(string key, long timestampInUnixMilliseconds, CancellationToken token = default(CancellationToken));
+
+        #endregion
     }
 }

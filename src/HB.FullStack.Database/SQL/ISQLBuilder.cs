@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using HB.FullStack.Common.Entities;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -27,10 +28,10 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         IDbCommand CreateBatchUpdateCommand<T>(IEnumerable<T> entities) where T : Entity, new();
 
-        
+
         IDbCommand CreateTableCommand(Type type, bool addDropStatement);
 
-        IDbCommand CreateDeleteCommand<T>(WhereExpression<T> condition, string lastUser) where T : Entity, new();
+        IDbCommand CreateDeleteCommand<T>(WhereExpression<T> condition, int currentVersion, string lastUser) where T : Entity, new();
 
         IDbCommand CreateRetrieveCommand<T>(SelectExpression<T>? selectCondition = null, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : Entity, new();

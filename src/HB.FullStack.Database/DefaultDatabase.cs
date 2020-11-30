@@ -1125,7 +1125,7 @@ namespace HB.FullStack.Database
         }
 
         /// <summary>
-        /// Version控制
+        /// Version控制,反应Version变化
         /// </summary>
         public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new()
         {
@@ -1147,12 +1147,13 @@ namespace HB.FullStack.Database
                 item.LastUser = lastUser;
                 item.LastTime = DateTimeOffset.UtcNow;
 
-                IDbCommand dbCommand = _sqlBuilder.CreateDeleteCommand(condition, lastUser);
+                IDbCommand dbCommand = _sqlBuilder.CreateDeleteCommand(condition, item.Version, lastUser);
 
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, dbCommand).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
+                    item.Version++;
                     item.Deleted = true;
                     return;
                 }
@@ -1466,7 +1467,7 @@ namespace HB.FullStack.Database
         }
 
         /// <summary>
-        /// BatchDeleteAsync
+        /// BatchDeleteAsync, 反应version的变化
         /// </summary>
         public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : Entity, new()
         {
@@ -1523,6 +1524,7 @@ namespace HB.FullStack.Database
 
                 items.ForEach(item =>
                 {
+                    item.Version++;
                     item.Deleted = true;
                 });
             }

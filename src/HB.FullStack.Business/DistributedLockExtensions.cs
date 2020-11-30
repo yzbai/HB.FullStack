@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Entities;
 using HB.FullStack.DistributedLock;
+using HB.FullStack.Lock.Distributed;
 
 namespace HB.FullStack.DistributedLock
 {
