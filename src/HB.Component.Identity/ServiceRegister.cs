@@ -1,4 +1,6 @@
 ﻿using HB.Component.Identity;
+using HB.Component.Identity.Biz;
+
 using System;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -13,9 +15,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //internal
             services.AddSingleton<UserBiz>();
+            services.AddSingleton<RoleOfUserBiz>();
             services.AddSingleton<UserClaimBiz>();
             services.AddSingleton<RoleBiz>();
             services.AddSingleton<ClaimsPrincipalFactory>();
+            services.AddSingleton<UserLoginControlBiz>();
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();

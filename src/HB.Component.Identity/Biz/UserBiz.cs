@@ -4,6 +4,7 @@ using HB.FullStack.Business;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
+using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,8 +21,8 @@ namespace HB.Component.Identity
         private readonly IdentityOptions _identityOptions;
         private readonly IDatabaseReader _databaseReader;
 
-        public UserBiz(IOptions<IdentityOptions> identityOptions, ILogger<UserBiz> logger, IDatabaseReader databaseReader, ICache cache)
-            : base(logger, databaseReader, cache)
+        public UserBiz(IOptions<IdentityOptions> identityOptions, ILogger<UserBiz> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+            : base(logger, databaseReader, cache, memoryLockManager)
         {
             _identityOptions = identityOptions.Value;
             _databaseReader = databaseReader;

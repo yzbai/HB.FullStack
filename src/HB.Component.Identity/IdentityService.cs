@@ -1,6 +1,7 @@
-﻿using HB.Component.Identity.Abstractions;
+﻿using HB.Component.Identity.Biz;
 using HB.Component.Identity.Entities;
 using HB.FullStack.Database;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,22 +13,24 @@ namespace HB.Component.Identity
     internal class IdentityService : IIdentityService
     {
         private readonly ITransaction _transaction;
-        private readonly IUserBiz _userBiz;
-        private readonly IClaimsPrincipalFactory _claimsFactory;
+        private readonly UserBiz _userBiz;
+        private readonly ClaimsPrincipalFactory _claimsFactory;
+        private readonly UserLoginControlBiz _userLoginControlBiz;
 
-        public IdentityService(ITransaction transaction, IUserBiz userBiz, IClaimsPrincipalFactory claimsFactory)
+        public IdentityService(ITransaction transaction, UserBiz userBiz, UserLoginControlBiz userLoginControlBiz, ClaimsPrincipalFactory claimsFactory)
         {
             _userBiz = userBiz;
             _transaction = transaction;
             _claimsFactory = claimsFactory;
+            _userLoginControlBiz = userLoginControlBiz;
         }
 
-        public async Task<TUser> CreateUserByMobileAsync<TUser>(string mobile, string? loginName, string? password, bool mobileConfirmed, string lastUser) where TUser : User, new()
+        public async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser)
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
             try
             {
-                TUser user = await _userBiz.CreateByMobileAsync<TUser>(mobile, loginName, password, mobileConfirmed, lastUser, transactionContext).ConfigureAwait(false);
+                User user = await _userBiz.CreateAsync(mobile, email, loginName, password, mobileConfirmed, emailConfirmed, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -40,22 +43,22 @@ namespace HB.Component.Identity
             }
         }
 
-        public Task<TUser?> GetUserByMobileAsync<TUser>(string mobile) where TUser : User, new()
+        public Task<User?> GetUserByMobileAsync(string mobile)
         {
-            return _userBiz.GetByMobileAsync<TUser>(mobile);
+            return _userBiz.GetByMobileAsync(mobile);
         }
 
-        public Task<TUser?> GetUserByLoginNameAsync<TUser>(string loginName) where TUser : User, new()
+        public Task<User?> GetUserByLoginNameAsync(string loginName)
         {
-            return _userBiz.GetByLoginNameAsync<TUser>(loginName);
+            return _userBiz.GetByLoginNameAsync(loginName);
         }
 
-        public async Task SetAccessFailedCountAsync<TUser>(string userGuid, long count, string lastUser) where TUser : User, new()
+        public async Task SetAccessFailedCountAsync(string userGuid, long count, string lastUser)
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
             try
             {
-                await _userBiz.SetAccessFailedCountAsync<TUser>(userGuid, count, lastUser, transactionContext).ConfigureAwait(false);
+                await _userLoginControlBiz.SetAccessFailedCountAsync(userGuid, count, lastUser).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -66,37 +69,22 @@ namespace HB.Component.Identity
             }
         }
 
-        public async Task SetLockoutAsync<TUser>(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null) where TUser : User, new()
+        public async Task SetLockoutAsync(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null)
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUser>().ConfigureAwait(false);
-
-            try
-            {
-                await _userBiz.SetLockoutAsync<TUser>(userGuid, lockout, lastUser, transactionContext, lockoutTimeSpan).ConfigureAwait(false);
-
-                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                throw;
-            }
+            await _userLoginControlBiz.SetLockoutAsync(userGuid, lockout, lastUser, lockoutTimeSpan).ConfigureAwait(false);
         }
 
-        public Task<TUser?> GetUserBySecurityStampAsync<TUser>(string userGuid, string? securityStamp) where TUser : User, new()
+        public async Task<User?> GetUserByUserGuidAsync(string userGuid)
         {
-            return _userBiz.GetUserBySecurityStampAsync<TUser>(userGuid, securityStamp);
+            return await _userBiz.GetByGuidAsync(userGuid, null).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Claim>> GetUserClaimAsync<TUserClaim, TRole, TRoleOfUser>(User user)
-            where TUserClaim : UserClaim, new()
-            where TRole : Role, new()
-            where TRoleOfUser : RoleOfUser, new()
+        public async Task<IEnumerable<Claim>> CreateUserClaimAsync(User user)
         {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TUserClaim>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<UserClaim>().ConfigureAwait(false);
             try
             {
-                IEnumerable<Claim> claims = await _claimsFactory.CreateClaimsAsync<TUserClaim, TRole, TRoleOfUser>(user, transactionContext).ConfigureAwait(false);
+                IEnumerable<Claim> claims = await _claimsFactory.CreateClaimsAsync(user, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 

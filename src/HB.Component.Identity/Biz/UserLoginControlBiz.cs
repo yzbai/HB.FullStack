@@ -1,7 +1,8 @@
-﻿using HB.Component.Identity.Abstractions;
-using HB.Component.Identity.Entities;
+﻿using HB.Component.Identity.Entities;
+using HB.FullStack.Business;
 using HB.FullStack.Database;
 using HB.FullStack.KVStore;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity.Biz
 {
-    internal class UserLoginControlBiz : IUserLoginControlBiz
+    internal class UserLoginControlBiz
     {
         private readonly IKVStore _kv;
         public UserLoginControlBiz(IKVStore kvStore)
@@ -29,7 +30,15 @@ namespace HB.Component.Identity.Biz
             uc.LockoutEnabled = lockout;
             uc.LockoutEndDate = DateTimeOffset.UtcNow + (lockoutTimeSpan ?? TimeSpan.FromDays(1));
 
-            await _kv.AddOrUpdateAsync(uc, lastUser).ConfigureAwait(false);
+            if (uc.Version == -1)
+            {
+                await _kv.AddAsync(uc, lastUser).ConfigureAwait(false);
+            }
+            else
+            {
+
+                await _kv.UpdateAsync(uc, lastUser).ConfigureAwait(false);
+            }
         }
 
         public async Task SetAccessFailedCountAsync(string userGuid, long count, string lastUser)
@@ -43,7 +52,14 @@ namespace HB.Component.Identity.Biz
 
             uc.LoginFailedCount = count;
 
-            await _kv.AddOrUpdateAsync(uc, lastUser).ConfigureAwait(false);
+            if (uc.Version == -1)
+            {
+                await _kv.AddAsync(uc, lastUser).ConfigureAwait(false);
+            }
+            else
+            {
+                await _kv.UpdateAsync(uc, lastUser).ConfigureAwait(false);
+            }
         }
     }
 }

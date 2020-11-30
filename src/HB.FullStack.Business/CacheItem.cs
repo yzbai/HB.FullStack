@@ -10,59 +10,92 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Business
 {
-    public abstract class Casche  Item<TCacheItem, TResult>
-        where TResult : class where TCacheItem : CadcheItem<TCacheItem, TResult>, new()
+    public abstract class CacheItem<TResult>
+        where TResult : class
     {
-        //internal CacheItem() { }
-
-        public abstract string Prefix { get; }
-
-    public abstract TimeSpan? AbsoluteExpirationRelativeToNow { get; }
-
-    public abstract TimeSpan? SlidingExpiration { get; }
-
-    public string CacheKey { get; private set; } = null!;
-
-    public TResult? CacheValue { get; private set; }
-
-    public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
-    {
-        return cache.GetAsync<TResult>(CacheKey, cancellationToken);
-    }
-
-    public Task SetToAsync(ICache cache, CancellationToken cancellationToken = default)
-    {
-        if (CacheValue == null)
+        private CacheItem() { ResourceType = this.GetType().Name; }
+        protected CacheItem(params string[] keys) : this()
         {
-            throw new ArgumentNullException(nameof(CacheValue));
+            CacheKey = ResourceType + keys.ToJoinedString("_");
+        }
+        public string ResourceType { get; private set; }
+
+        public abstract TimeSpan? AbsoluteExpirationRelativeToNow { get; }
+
+        public abstract TimeSpan? SlidingExpiration { get; }
+
+        public string CacheKey { get; private set; } = null!;
+
+        public TResult? CacheValue { get; private set; }
+
+        public long TimestampInUnixMilliseconds { get; private set; } = -1;
+
+        public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(CacheKey))
+            {
+                throw new ArgumentNullException(nameof(CacheKey));
+            }
+
+            return cache.GetAsync<TResult>(CacheKey, cancellationToken);
         }
 
-        return cache.SetAsync<TResult>(
-            CacheKey,
-            CacheValue,
-            new DistributedCacheEntryOptions
+        public Task SetToAsync(ICache cache, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(CacheKey))
             {
-                AbsoluteExpirationRelativeToNow = AbsoluteExpirationRelativeToNow,
-                SlidingExpiration = SlidingExpiration
-            },
-            cancellationToken);
+                throw new ArgumentNullException(nameof(CacheKey));
+            }
+
+            if (CacheValue == null)
+            {
+                throw new ArgumentNullException(nameof(CacheValue));
+            }
+
+            if (TimestampInUnixMilliseconds == -1)
+            {
+                throw new ArgumentException(nameof(TimestampInUnixMilliseconds));
+            }
+
+            return cache.SetAsync<TResult>(
+                CacheKey,
+                CacheValue,
+                TimestampInUnixMilliseconds,
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = AbsoluteExpirationRelativeToNow,
+                    SlidingExpiration = SlidingExpiration
+                },
+                cancellationToken);
+        }
+
+        public async Task<bool> RemoveFromAsync(ICache cache)
+        {
+            if (string.IsNullOrEmpty(CacheKey))
+            {
+                throw new ArgumentNullException(nameof(CacheKey));
+            }
+
+            if (TimestampInUnixMilliseconds == -1)
+            {
+                throw new ArgumentException(nameof(TimestampInUnixMilliseconds));
+            }
+
+            return await cache.RemoveAsync(CacheKey, TimestampInUnixMilliseconds).ConfigureAwait(false);
+        }
+
+        public CacheItem<TResult> Value(TResult result)
+        {
+            CacheValue = result;
+            return this;
+        }
+
+        public CacheItem<TResult> Timestamp(long nowInUnixMilliseconds)
+        {
+            TimestampInUnixMilliseconds = nowInUnixMilliseconds;
+
+            return this;
+        }
     }
-
-    public CacheItem<TCacheItem, TResult> Value(TResult result)
-    {
-        CacheValue = result;
-        return this;
-    }
-
-    public static TCacheItem Key(params string[] keys)
-    {
-        TCacheItem cacheItem = new TCacheItem();
-
-        cacheItem.CacheKey = cacheItem.Prefix + keys.ToJoinedString("_");
-
-        return cacheItem;
-    }
-
-}
 }
 

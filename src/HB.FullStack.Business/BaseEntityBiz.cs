@@ -200,20 +200,20 @@ namespace HB.FullStack.Business
 
                 if (entity != null)
                 {
-                    UpdateCache(entity);
+                    UpdateCache(new TEntity[] { entity });
 
-                    _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
+                    _logger.LogInformation($"缓存 Missed. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
                 }
                 else
                 {
-                    _logger.LogInformation($"查询到空值. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
+                    _logger.LogInformation($"查询到空值. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
                 }
 
                 return entity;
             }
             else
             {
-                _logger.LogCritical($"锁未能占用. Entity:{nameof(TEntity)}, dimensionKeyName:{dimensionKeyName},dimensionKeyValue:{dimensionKeyValue}, Lock Status:{@lock.Status}");
+                _logger.LogCritical($"锁未能占用. Entity:{typeof(TEntity).Name}, dimensionKeyName:{dimensionKeyName},dimensionKeyValue:{dimensionKeyValue}, Lock Status:{@lock.Status}");
 
                 return await dbRetrieve(_database).ConfigureAwait(false);
             }
@@ -251,18 +251,18 @@ namespace HB.FullStack.Business
                 {
                     UpdateCache(entities);
 
-                    _logger.LogInformation($"缓存 Missed. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                    _logger.LogInformation($"缓存 Missed. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
                 }
                 else
                 {
-                    _logger.LogInformation($"查询到空值. Entity:{nameof(TEntity)}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                    _logger.LogInformation($"查询到空值. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
                 }
 
                 return entities;
             }
             else
             {
-                _logger.LogError($"锁未能占用. Entity:{nameof(TEntity)}, dimensionKeyName:{dimensionKeyName},dimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}, Lock Status:{@lock.Status}");
+                _logger.LogError($"锁未能占用. Entity:{typeof(TEntity).Name}, dimensionKeyName:{dimensionKeyName},dimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}, Lock Status:{@lock.Status}");
 
                 return await dbRetrieve(_database).ConfigureAwait(false);
             }
@@ -284,7 +284,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            InvalidateCache(entity);
+            InvalidateCache(new TEntity[] { entity });
 
             await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
         }
@@ -321,7 +321,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            InvalidateCache(entity);
+            InvalidateCache(new TEntity[] { entity });
 
             await OnEntityDeletedAsync(entity).ConfigureAwait(false);
         }
@@ -417,38 +417,6 @@ namespace HB.FullStack.Business
             }
         }
 
-        private void UpdateCache(TEntity entity)
-        {
-            #region 普通缓存，加锁的做法
-            //using IDistributedLock distributedLock = await _lockManager.LockEntityAsync(entity, OccupiedTime, PatienceTime).ConfigureAwait(false);
-
-            //if (!distributedLock.IsAcquired)
-            //{
-            //    _logger.LogWarning($"锁未能占用. Entity:{nameof(TEntity)}, Guid:{entity.Guid}, Lock Status:{distributedLock.Status}");
-            //    return;
-            //}
-
-            ////Double Check
-            //(TEntity? cached2, bool exists2) = await _cache.GetEntityAsync<TEntity>(entity).ConfigureAwait(false);
-
-            //if (exists2 && cached2!.Version >= entity.Version)
-            //{
-            //    return;
-            //}
-
-            //_logger.LogInformation($"Cache Missed. Entity:{nameof(TEntity)}, Guid:{entity.Guid}");
-
-            //await _cache.SetEntityAsync(entity).ConfigureAwait(false);
-
-            #endregion
-
-            #region 有版本控制的Cache. 就一句话，爽不爽
-
-            _cache.SetEntityAsync(entity).Fire();
-
-            #endregion
-        }
-
         private void UpdateCache(IEnumerable<TEntity> entities)
         {
             #region 普通缓存，加锁的做法
@@ -482,14 +450,6 @@ namespace HB.FullStack.Business
 
         }
 
-        private void InvalidateCache(TEntity entity)
-        {
-            if (ICache.IsEntityEnabled<TEntity>())
-            {
-                _cache.RemoveEntityAsync<TEntity>(entity).Fire();
-            }
-        }
-
         private void InvalidateCache(IEnumerable<TEntity> entities)
         {
             if (ICache.IsEntityBatchEnabled<TEntity>())
@@ -502,48 +462,60 @@ namespace HB.FullStack.Business
 
         #region CacheItem
 
-        protected async Task<TResult?> TryCacheAsideLooseAsync<TCacheItem, TResult>(Func<IDatabaseReader, Task<TResult>> dbRetrieve, params string[] keys)
-            where TResult : class where TCacheItem : CacheItem<TCacheItem, TResult>, new()
+        protected async Task<TResult?> TryCacheAsideAsync<TResult>(CacheItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve)
+            where TResult : class
         {
             //Cache First
-            TResult? result = await CacheItem<TCacheItem, TResult>.Key(keys).GetFromAsync(_cache).ConfigureAwait(false);
+            TResult? result = await cacheItem.GetFromAsync(_cache).ConfigureAwait(false);
 
             if (result != null)
             {
                 return result;
             }
 
-            TResult dbRt = await dbRetrieve(_database).ConfigureAwait(false);
+            using var @lock = _memoryLockManager.Lock(cacheItem.ResourceType, cacheItem.CacheKey, OccupiedTime, PatienceTime);
 
-            if (dbRt != null)
+            if (@lock.IsAcquired)
             {
-                CacheItem<TCacheItem, TResult>.Key(keys).Value(dbRt).SetToAsync(_cache).Fire();
-            }
+                //Double Check
+                result = await cacheItem.GetFromAsync(_cache).ConfigureAwait(false);
 
-            return dbRt;
+                if (result != null)
+                {
+                    return result;
+                }
+
+                TResult dbRt = await dbRetrieve(_database).ConfigureAwait(false);
+                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                if (dbRt != null)
+                {
+                    UpdateCache(cacheItem.Value(dbRt).Timestamp(now));
+                    _logger.LogInformation($"缓存 Missed. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
+                }
+                else
+                {
+                    _logger.LogInformation($"查询到空值. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
+                }
+
+                return dbRt;
+            }
+            else
+            {
+                _logger.LogCritical($"锁未能占用. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}, Lock Status:{@lock.Status}");
+
+                return await dbRetrieve(_database).ConfigureAwait(false);
+            }
         }
 
-        protected async Task<TResult?> TryCacheAsideStrictAsync<TCacheItem, TResult>(Func<IDatabaseReader, Task<TResult>> dbRetrieve, params string[] keys)
-           where TResult : class where TCacheItem : CacheItem<TCacheItem, TResult>, new()
+        private void UpdateCache<TResult>(CacheItem<TResult> cacheItem) where TResult : class
         {
-            //Cache First
-            TResult? result = await CacheItem<TCacheItem, TResult>.Key(keys).GetFromAsync(_cache).ConfigureAwait(false);
+            cacheItem.SetToAsync(_cache).Fire();
+        }
 
-            if (result != null)
-            {
-                return result;
-            }
-
-
-
-            TResult dbRt = await dbRetrieve(_database).ConfigureAwait(false);
-
-            if (dbRt != null)
-            {
-                CacheItem<TCacheItem, TResult>.Key(keys).Value(dbRt).SetToAsync(_cache).Fire();
-            }
-
-            return dbRt;
+        protected void InvalidateCache<TResult>(CacheItem<TResult> cacheItem) where TResult : class
+        {
+            cacheItem.RemoveFromAsync(_cache).Fire();
         }
 
         #endregion

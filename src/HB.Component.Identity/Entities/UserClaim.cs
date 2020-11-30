@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Entities;
+
 using System;
 
 namespace HB.Component.Identity.Entities

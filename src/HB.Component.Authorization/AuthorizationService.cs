@@ -292,9 +292,9 @@ namespace HB.Component.Authorization
 
                 // User 信息变动验证
 
-                user = await _identityService.GetUserBySecurityStampAsync<TUser>(userGuid, claimsPrincipal.GetUserSecurityStamp()).ConfigureAwait(false);
+                user = await _identityService.GetUserByUserGuidAsync(userGuid, transactionContext);
 
-                if (user == null)
+                if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
                     await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 

@@ -2,24 +2,39 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using HB.Component.Identity.Abstractions;
 using HB.Component.Identity.Entities;
 using System;
+using HB.FullStack.Business;
+using HB.FullStack.Cache;
+using HB.FullStack.Lock.Memory;
+using HB.Component.Identity.CacheItems;
 
 namespace HB.Component.Identity
 {
-    internal class UserClaimBiz : IUserClaimBiz
+    internal class UserClaimBiz : BaseEntityBiz<UserClaim>
     {
-        private readonly IDatabase _db;
-
-        public UserClaimBiz(IDatabase database)
+        public UserClaimBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
-            _db = database;
         }
 
-        public Task<IEnumerable<TUserClaim>> GetAsync<TUserClaim>(string userGuid, TransactionContext? transContext = null) where TUserClaim : UserClaim, new()
+        public Task<IEnumerable<UserClaim>> GetByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
-            return _db.RetrieveAsync<TUserClaim>(uc => uc.UserGuid == userGuid, transContext);
+            return TryCacheAsideAsync(CachedUserClaimsByUserGuid.Key(userGuid), dbReader =>
+            {
+                return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserGuid == userGuid, transContext);
+            })!;
+        }
+
+        public Task AddToUserAsync(string userGuid, UserClaim userClaim, TransactionContext? transContext = null)
+        {
+            throw new NotImplementedException();
+            //InvalidateCache(CachedUserCliamsByUserGuid.Key(userGuid).Timestamp(now));
+        }
+
+        public Task DeleteFromUserAsync(string userGuid, UserClaim userClaim, TransactionContext? transContext = null)
+        {
+            throw new NotImplementedException();
+            //InvalidateCache(CachedUserCliamsByUserGuid.Key(userGuid).Timestamp(now));
         }
     }
 }

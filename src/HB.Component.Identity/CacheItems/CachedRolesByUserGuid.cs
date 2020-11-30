@@ -14,31 +14,22 @@ namespace HB.Component.Identity
     /// <summary>
     /// userGuid: Roles
     /// </summary>
-    internal class CachedRolesByUserGuid : CacheItem<CachedRolesByUserGuid, IEnumerable<Role>>
+    internal class CachedRolesByUserGuid : CacheItem<IEnumerable<Role>>
     {
-        //private const string _prefix = "Role";
-
-        //private readonly string _userGuid;
-
-        //public RolesByUserGuidCacheItem(string userGuid)
-        //{
-        //    _userGuid = userGuid;
-        //}
-
-
-        //public override string CacheKey => _prefix + _userGuid;
-
-
-        //public static RolesByUserGuidCacheItem Key(string userGuid)
-        //{
-        //    return new RolesByUserGuidCacheItem(userGuid);
-        //}
-
+        private CachedRolesByUserGuid(params string[] keys) : base(keys)
+        {
+        }
 
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => null;
 
-        public override string Prefix => "Role";
+
+        public static CachedRolesByUserGuid Key(string userGuid)
+        {
+            CachedRolesByUserGuid item = new CachedRolesByUserGuid(userGuid);
+
+            return item;
+        }
     }
 }

@@ -1,6 +1,7 @@
-﻿using HB.Component.Identity.Abstractions;
+﻿using HB.Component.Identity.Biz;
 using HB.Component.Identity.Entities;
 using HB.FullStack.Database;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace HB.Component.Identity
 {
-    internal class ClaimsPrincipalFactory : IClaimsPrincipalFactory
+    internal class ClaimsPrincipalFactory
     {
-        private readonly IRoleBiz _roleBiz;
-        private readonly IUserClaimBiz _userClaimBiz;
+        private readonly RoleOfUserBiz _roleOfUserBiz;
+        private readonly UserClaimBiz _userClaimBiz;
 
-        public ClaimsPrincipalFactory(IUserClaimBiz userClaims, IRoleBiz roleBiz)
+        public ClaimsPrincipalFactory(UserClaimBiz userClaims, RoleOfUserBiz roleOfUserBiz)
         {
             _userClaimBiz = userClaims;
-            _roleBiz = roleBiz;
+            _roleOfUserBiz = roleOfUserBiz;
         }
 
         /// <summary>
@@ -26,10 +27,7 @@ namespace HB.Component.Identity
         /// <param name="user"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Claim>> CreateClaimsAsync<TUserClaim, TRole, TRoleOfUser>(User user, TransactionContext transContext)
-            where TUserClaim : UserClaim, new()
-            where TRole : Role, new()
-            where TRoleOfUser : RoleOfUser, new()
+        public async Task<IEnumerable<Claim>> CreateClaimsAsync(User user, TransactionContext transContext)
         {
             IList<Claim> claims = new List<Claim>
             {
@@ -41,7 +39,7 @@ namespace HB.Component.Identity
                 //new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
             };
 
-            IEnumerable<TUserClaim> userClaims = await _userClaimBiz.GetAsync<TUserClaim>(user.Guid, transContext).ConfigureAwait(false);
+            IEnumerable<UserClaim> userClaims = await _userClaimBiz.GetByUserGuidAsync(user.Guid, transContext).ConfigureAwait(false);
 
             userClaims.ForEach(item =>
             {
@@ -51,7 +49,7 @@ namespace HB.Component.Identity
                 }
             });
 
-            IEnumerable<TRole> roles = await _roleBiz.GetByUserGuidAsync<TRole, TRoleOfUser>(user.Guid, transContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _roleOfUserBiz.GetRolesByUserGuidAsync(user.Guid, transContext).ConfigureAwait(false);
 
             roles.Select(r => r.Name).ForEach(roleName =>
             {
