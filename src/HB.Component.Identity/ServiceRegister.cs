@@ -1,7 +1,9 @@
-﻿using HB.Component.Identity;
-using HB.Component.Identity.Biz;
+﻿using HB.FullStack.Identity;
+
+using Microsoft.Extensions.Configuration;
 
 using System;
+using System.Linq;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -18,8 +20,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<RoleOfUserBiz>();
             services.AddSingleton<UserClaimBiz>();
             services.AddSingleton<RoleBiz>();
-            services.AddSingleton<ClaimsPrincipalFactory>();
             services.AddSingleton<UserLoginControlBiz>();
+            services.AddSingleton<SignInTokenBiz>();
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();
@@ -30,6 +32,38 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddIdentity(this IServiceCollection services)
         {
             return services.AddIdentity(o => { });
+        }
+
+        public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, Action<AuthorizationServiceOptions> action)
+        {
+            if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
+            {
+                throw new FrameworkException("AuthroizationService需要IdentityService");
+            }
+
+            services.AddOptions();
+
+            services.Configure(action);
+
+            services.AddSingleton<IAuthorizationService, AuthorizationService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, IConfiguration configuration)
+        {
+            if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
+            {
+                throw new FrameworkException("AuthroizationService需要IdentityService");
+            }
+
+            services.AddOptions();
+
+            services.Configure<AuthorizationServiceOptions>(configuration);
+
+            services.AddSingleton<IAuthorizationService, AuthorizationService>();
+
+            return services;
         }
     }
 

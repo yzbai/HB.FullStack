@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.Component.Identity.Entities;
+using HB.FullStack.Identity.Entities;
 using HB.FullStack.Business;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -11,7 +11,7 @@ using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.Component.Identity.Biz
+namespace HB.FullStack.Identity
 {
     public class RoleOfUserBiz : BaseEntityBiz<RoleOfUser>
     {
@@ -20,6 +20,8 @@ namespace HB.Component.Identity.Biz
         {
             _databaseReader = databaseReader;
         }
+
+        #region Cached RolesByUserGuid
 
         public Task<IEnumerable<Role>> GetRolesByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
@@ -71,5 +73,7 @@ namespace HB.Component.Identity.Biz
 
             InvalidateCache(CachedRolesByUserGuid.Key(userGuid).Timestamp(now));
         }
+
+        #endregion
     }
 }

@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using HB.Component.Identity;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Server;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -15,11 +18,13 @@ namespace HB.FullStack.Server.Filters
     {
         private readonly ILogger _logger;
         private readonly ISmsService _smsService;
+        private readonly IIdentityService _identityService;
 
-        public CheckSmsCodeFilter(ILogger<CheckSmsCodeFilter> logger, ISmsService smsService)
+        public CheckSmsCodeFilter(ILogger<CheckSmsCodeFilter> logger, ISmsService smsService, IIdentityService identityService)
         {
             _logger = logger;
             _smsService = smsService;
+            _identityService = identityService;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -36,7 +41,7 @@ namespace HB.FullStack.Server.Filters
                     string? smsCode = apiRequestType.GetProperty(ClientNames.SmsCode)?.GetValue(apiRequest)?.ToString();
                     string? mobile = apiRequestType.GetProperty(ClientNames.Mobile)?.GetValue(apiRequest)?.ToString();
 
-                    if (smsCode.IsNullOrEmpty() || smsCode.IsNullOrEmpty())
+                    if (smsCode.IsNullOrEmpty() || mobile.IsNullOrEmpty())
                     {
                         OnError(context);
                         return;
@@ -44,6 +49,7 @@ namespace HB.FullStack.Server.Filters
 
                     if (!_smsService.Validate(mobile!, smsCode!))
                     {
+                        _identityService.OnLoginBySmsFailedAsync(mobile).Fire();
                         OnError(context);
                         return;
                     }

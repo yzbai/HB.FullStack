@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using HB.FullStack.Lock.Distributed;
+
 using Xunit;
 
 namespace HB.FullStack.DistributedLock.Test

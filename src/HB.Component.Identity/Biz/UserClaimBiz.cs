@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using HB.Component.Identity.Entities;
+using HB.FullStack.Identity.Entities;
 using System;
 using HB.FullStack.Business;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
-using HB.Component.Identity.CacheItems;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
     internal class UserClaimBiz : BaseEntityBiz<UserClaim>
     {
         public UserClaimBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
+
+        #region Cached UserClaimsByUserGuid
 
         public Task<IEnumerable<UserClaim>> GetByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
@@ -36,5 +37,7 @@ namespace HB.Component.Identity
             throw new NotImplementedException();
             //InvalidateCache(CachedUserCliamsByUserGuid.Key(userGuid).Timestamp(now));
         }
+
+        #endregion
     }
 }

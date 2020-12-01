@@ -1,10 +1,11 @@
 using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.Component.Identity.Entities
+namespace HB.FullStack.Identity.Entities
 {
     /// <summary>
     /// ½ÇÉ«

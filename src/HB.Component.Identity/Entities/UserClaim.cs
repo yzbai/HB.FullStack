@@ -3,7 +3,7 @@ using HB.FullStack.Database.Entities;
 
 using System;
 
-namespace HB.Component.Identity.Entities
+namespace HB.FullStack.Identity.Entities
 {
     [DatabaseEntity]
     public class UserClaim : Entity

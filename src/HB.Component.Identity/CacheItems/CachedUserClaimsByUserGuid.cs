@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-using HB.Component.Identity.Entities;
+using HB.FullStack.Identity.Entities;
 using HB.FullStack.Business;
 
-namespace HB.Component.Identity.CacheItems
+namespace HB.FullStack.Identity
 {
+    /// <summary>
+    /// 关联实体：UserClaim
+    /// </summary>
     public class CachedUserClaimsByUserGuid : CacheItem<IEnumerable<UserClaim>>
     {
         private CachedUserClaimsByUserGuid(params string[] keys) : base(keys)

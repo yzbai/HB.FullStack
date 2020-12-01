@@ -1,10 +1,11 @@
 ﻿using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.Component.Identity.Entities
+namespace HB.FullStack.Identity.Entities
 {
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息

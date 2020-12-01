@@ -1,4 +1,4 @@
-﻿using HB.Component.Identity.Entities;
+﻿using HB.FullStack.Identity.Entities;
 using HB.FullStack.Business;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -11,16 +11,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
     internal class RoleBiz : BaseEntityBiz<Role>
     {
-
-        public RoleBiz(ILogger<RoleBiz> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
-            : base(logger, databaseReader, cache, memoryLockManager)
+        public RoleBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
-
-
     }
 }

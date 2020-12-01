@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using HB.FullStack.Cache;
+using HB.FullStack.Lock.Distributed;
 using HB.Infrastructure.Redis;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
 
 namespace HB.FullStack.DistributedLock.Test

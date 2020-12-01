@@ -1,5 +1,5 @@
 ﻿
-using HB.Component.Identity.Entities;
+using HB.FullStack.Identity.Entities;
 using HB.FullStack.Business;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -14,8 +14,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
+    /// <summary>
+    /// 所有的User这个Entity的增删改查都要经过这里
+    /// </summary>
     internal class UserBiz : BaseEntityBiz<User>
     {
         private readonly IdentityOptions _identityOptions;
@@ -34,7 +37,7 @@ namespace HB.Component.Identity
             };
         }
 
-        #region Read
+        #region Read 所有的查询都要经过这里
 
         public async Task<User?> GetByGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
@@ -91,59 +94,60 @@ namespace HB.Component.Identity
                 }).ConfigureAwait(false);
         }
 
-        private async Task<long> CountUserByLoginNameAsync(string loginName, TransactionContext transContext)
+        public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            return await _databaseReader.CountAsync<User>(u => u.LoginName == loginName, transContext).ConfigureAwait(false);
+            WhereExpression<User> where = _databaseReader.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            return _databaseReader.CountAsync(where, transContext);
         }
 
         #endregion
 
         #region Write
 
-        public async Task UpdateLoginNameAsync(string userGuid, string loginName, string lastUser, TransactionContext transContext)
-        {
-            ThrowIf.NotLoginName(loginName, nameof(loginName), false);
+        //public async Task UpdateLoginNameAsync(string userGuid, string loginName, string lastUser, TransactionContext transContext)
+        //{
+        //    ThrowIf.NotLoginName(loginName, nameof(loginName), false);
 
-            #region Existense Check
+        //    #region Existense Check
 
-            long count = await CountUserByLoginNameAsync(loginName, transContext).ConfigureAwait(false);
+        //    long count = await CountUserByLoginNameAsync(loginName, transContext).ConfigureAwait(false);
 
-            if (count != 0)
-            {
-                throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
-            }
+        //    if (count != 0)
+        //    {
+        //        throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
+        //    }
 
-            #endregion
+        //    #endregion
 
-            User? user = await GetByGuidAsync(userGuid, transContext).ConfigureAwait(false);
+        //    User? user = await GetByGuidAsync(userGuid, transContext).ConfigureAwait(false);
 
-            if (user == null)
-            {
-                throw new IdentityException(ErrorCode.IdentityNotFound, $"userGuid:{userGuid}");
-            }
+        //    if (user == null)
+        //    {
+        //        throw new IdentityException(ErrorCode.IdentityNotFound, $"userGuid:{userGuid}");
+        //    }
 
-            user.LoginName = loginName;
+        //    user.LoginName = loginName;
 
-            await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
-        }
+        //    await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
+        //}
 
-        public async Task UpdatePasswordByMobileAsync(string mobile, string newPassword, string lastUser, TransactionContext transContext)
-        {
-            ThrowIf.NotMobile(mobile, nameof(mobile), false);
-            ThrowIf.NotPassword(mobile, nameof(newPassword), false);
+        //public async Task UpdatePasswordByMobileAsync(string mobile, string newPassword, string lastUser, TransactionContext transContext)
+        //{
+        //    ThrowIf.NotMobile(mobile, nameof(mobile), false);
+        //    ThrowIf.NotPassword(mobile, nameof(newPassword), false);
 
-            User? user = await GetByMobileAsync(mobile, transContext).ConfigureAwait(false);
+        //    User? user = await GetByMobileAsync(mobile, transContext).ConfigureAwait(false);
 
-            if (user == null)
-            {
-                throw new IdentityException(ErrorCode.IdentityNotFound, $"mobile:{mobile}");
-            }
+        //    if (user == null)
+        //    {
+        //        throw new IdentityException(ErrorCode.IdentityNotFound, $"mobile:{mobile}");
+        //    }
 
-            user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
+        //    user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
 
-            await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
+        //    await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
 
-        }
+        //}
 
         public async Task<User> CreateAsync(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext transContext)
         {
@@ -152,7 +156,7 @@ namespace HB.Component.Identity
             ThrowIf.NotLoginName(loginName, nameof(loginName), true);
             ThrowIf.NotPassword(password, nameof(password), true);
 
-            #region Existense Check
+            #region 查重
 
             if (mobile == null && email == null && loginName == null)
             {
@@ -164,8 +168,7 @@ namespace HB.Component.Identity
                 throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
             }
 
-            WhereExpression<User> where = _databaseReader.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
-            long count = await _databaseReader.CountAsync(where, transContext).ConfigureAwait(false);
+            long count = await CountUserAsync(loginName, mobile, email, transContext).ConfigureAwait(false);
 
             if (count != 0)
             {

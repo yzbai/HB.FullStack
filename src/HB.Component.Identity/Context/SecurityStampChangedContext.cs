@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
     public class SecurityStampChangedContext
     {

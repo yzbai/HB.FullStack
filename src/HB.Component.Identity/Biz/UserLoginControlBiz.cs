@@ -1,4 +1,4 @@
-﻿using HB.Component.Identity.Entities;
+﻿using HB.FullStack.Identity.Entities;
 using HB.FullStack.Business;
 using HB.FullStack.Database;
 using HB.FullStack.KVStore;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.Component.Identity.Biz
+namespace HB.FullStack.Identity
 {
     internal class UserLoginControlBiz
     {
@@ -36,7 +36,6 @@ namespace HB.Component.Identity.Biz
             }
             else
             {
-
                 await _kv.UpdateAsync(uc, lastUser).ConfigureAwait(false);
             }
         }
@@ -60,6 +59,25 @@ namespace HB.Component.Identity.Biz
             {
                 await _kv.UpdateAsync(uc, lastUser).ConfigureAwait(false);
             }
+        }
+
+        internal async Task<UserLoginControl> GetOrCreateByUserGuidAsync(string userGuid)
+        {
+            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userGuid).ConfigureAwait(false);
+
+            if (uc == null)
+            {
+                uc = new UserLoginControl();
+
+                await _kv.AddAsync(uc, "default").ConfigureAwait(false);
+            }
+
+            return uc;
+        }
+
+        internal Task UpdateAsync(UserLoginControl userLoginControl, string lastUser)
+        {
+            return _kv.UpdateAsync<UserLoginControl>(userLoginControl, lastUser);
         }
     }
 }

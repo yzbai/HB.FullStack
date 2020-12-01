@@ -1,9 +1,10 @@
 ﻿using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.Component.Identity.Entities
+namespace HB.FullStack.Identity.Entities
 {
     /// <summary>
     /// 用户-角色 关系 实体

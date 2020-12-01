@@ -1,5 +1,4 @@
-﻿using HB.Component.Authorization.Abstractions;
-using HB.Component.Authorization.Entities;
+﻿using HB.FullStack.Identity.Entities;
 using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
 using System;
@@ -12,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
 
-namespace HB.Component.Authorization
+namespace HB.FullStack.Identity
 {
     internal class SignInTokenBiz : BaseEntityBiz<SignInToken>
     {

@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common.Api;
 using HB.FullStack.Server;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -11,9 +12,13 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+
 using Polly;
+
 using Serilog;
+
 using StackExchange.Redis;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,6 +95,7 @@ namespace System
                 throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
             }
 
+            //私钥
             X509SecurityKey tokenDecryptionKey = new X509SecurityKey(encryptCert);
 
             return

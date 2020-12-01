@@ -1,4 +1,4 @@
-﻿using HB.Component.Identity.Entities;
+﻿using HB.FullStack.Identity.Entities;
 using HB.FullStack.Business;
 using HB.FullStack.Cache;
 
@@ -9,10 +9,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
     /// <summary>
     /// userGuid: Roles
+    /// 关联实体：RoleOfUser
     /// </summary>
     internal class CachedRolesByUserGuid : CacheItem<IEnumerable<Role>>
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
     public class IdentityException : FrameworkException
     {

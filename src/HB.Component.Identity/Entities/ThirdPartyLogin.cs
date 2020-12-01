@@ -1,10 +1,10 @@
 ﻿using HB.FullStack.Database.Entities;
-using HB.Component.Identity;
+using HB.FullStack.Identity;
 using System;
-using HB.Component.Identity.Entities;
+using HB.FullStack.Identity.Entities;
 using HB.FullStack.Common.Entities;
 
-namespace HB.Component.Authorization.Entities
+namespace HB.FullStack.Identity.Entities
 {
     //[DatabaseEntity]
     //public class ThirdPartyLogin : Entity

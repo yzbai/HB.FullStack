@@ -31,9 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Lock", "src\HB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DistributedLock.Test", "test\HB.FullStack.DistributedLock.Test\HB.FullStack.DistributedLock.Test.csproj", "{4166D68A-C078-47A1-B781-7675E4F0EB80}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.Identity", "src\HB.Component.Identity\HB.Component.Identity.csproj", "{C4D3A082-48B1-4F0D-85B2-4D7EFAC9701C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Component.Authorization", "src\HB.Component.Authorization\HB.Component.Authorization.csproj", "{3E6AA465-9756-4F43-AFCA-3D1DA7E9F8D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Identity", "src\HB.Component.Identity\HB.FullStack.Identity.csproj", "{C4D3A082-48B1-4F0D-85B2-4D7EFAC9701C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.CommonTests", "test\HB.FullStack.CommonTests\HB.FullStack.CommonTests.csproj", "{BEB46010-28E0-4D4F-A006-9D06259000A5}"
 EndProject
@@ -101,10 +99,6 @@ Global
 		{C4D3A082-48B1-4F0D-85B2-4D7EFAC9701C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4D3A082-48B1-4F0D-85B2-4D7EFAC9701C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4D3A082-48B1-4F0D-85B2-4D7EFAC9701C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E6AA465-9756-4F43-AFCA-3D1DA7E9F8D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E6AA465-9756-4F43-AFCA-3D1DA7E9F8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E6AA465-9756-4F43-AFCA-3D1DA7E9F8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E6AA465-9756-4F43-AFCA-3D1DA7E9F8D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BEB46010-28E0-4D4F-A006-9D06259000A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BEB46010-28E0-4D4F-A006-9D06259000A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEB46010-28E0-4D4F-A006-9D06259000A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
