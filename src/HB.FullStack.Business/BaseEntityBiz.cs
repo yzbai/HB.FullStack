@@ -30,9 +30,6 @@ namespace HB.FullStack.Business
     /// <typeparam name="TEntity"></typeparam>
     public abstract class BaseEntityBiz<TEntity> where TEntity : Entity, new()
     {
-        public static readonly TimeSpan OccupiedTime = TimeSpan.FromSeconds(10);
-        public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(2);
-
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly ILogger _logger;
         protected readonly ICache _cache;
@@ -51,55 +48,55 @@ namespace HB.FullStack.Business
 
         #region Events
 
-        public event AsyncEventHandler<TEntity> EntityUpdating
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityUpdating
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityUpdated
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityUpdated
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity?> EntityUpdateFailed
+        public event AsyncEventHandler<TEntity?, DatabaseWriteEventArgs> EntityUpdateFailed
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityAdding
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityAdding
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityAdded
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityAdded
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityAddFailed
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityAddFailed
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityDeleting
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityDeleting
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityDeleted
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityDeleted
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<TEntity> EntityDeleteFailed
+        public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityDeleteFailed
         {
             add => _asyncEventManager.Add(value);
             remove => _asyncEventManager.Remove(value);
@@ -159,115 +156,7 @@ namespace HB.FullStack.Business
 
         #endregion
 
-        #region Entity
-
-        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
-        {
-            if (!ICache.IsEntityEnabled<TEntity>())
-            {
-                return await dbRetrieve(_database).ConfigureAwait(false);
-            }
-
-            (TEntity? cached, bool exists) = await _cache.GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue).ConfigureAwait(false);
-
-            if (exists)
-            {
-                return cached;
-            }
-
-            //常规做法是先获取锁（参看历史）。
-            //但如果仅从当前dimension来锁的话，有可能被别人从其他dimension操作同一个entity，
-            //所以这里改变常规做法，先做database retrieve
-
-            //以上是针对无version版本cache的。现在不用担心从其他dimension操作同一个entity了，cache会自带version来判断。
-            //而且如果刚开始很多请求直接打到数据库上，数据库撑不住，还是得加锁。
-            //但可以考虑加单机本版的锁就可，这个锁主要为了降低数据库压力，不再是为了数据一致性（带version的cache自己解决）。
-            //所以可以使用单机版本的锁即可。一个主机同时放一个db请求，还是没问题的。
-
-            using var @lock = _memoryLockManager.Lock(typeof(TEntity).Name, dimensionKeyName + dimensionKeyValue, OccupiedTime, PatienceTime);
-
-            if (@lock.IsAcquired)
-            {
-                //double check
-                (cached, exists) = await _cache.GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue).ConfigureAwait(false);
-
-                if (exists)
-                {
-                    return cached;
-                }
-
-                TEntity? entity = await dbRetrieve(_database).ConfigureAwait(true);
-
-                if (entity != null)
-                {
-                    UpdateCache(new TEntity[] { entity });
-
-                    _logger.LogInformation($"缓存 Missed. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
-                }
-                else
-                {
-                    _logger.LogInformation($"查询到空值. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValue:{dimensionKeyValue}");
-                }
-
-                return entity;
-            }
-            else
-            {
-                _logger.LogCritical($"锁未能占用. Entity:{typeof(TEntity).Name}, dimensionKeyName:{dimensionKeyName},dimensionKeyValue:{dimensionKeyValue}, Lock Status:{@lock.Status}");
-
-                return await dbRetrieve(_database).ConfigureAwait(false);
-            }
-        }
-
-        protected async Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
-        {
-            if (!ICache.IsEntityBatchEnabled<TEntity>())
-            {
-                return await dbRetrieve(_database).ConfigureAwait(false);
-            }
-
-            (IEnumerable<TEntity>? cachedEntities, bool allExists) = await _cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
-
-            if (allExists)
-            {
-                return cachedEntities!;
-            }
-
-            using var @lock = _memoryLockManager.Lock(typeof(TEntity).Name, dimensionKeyValues.Select(d => dimensionKeyName + d), OccupiedTime, PatienceTime);
-
-            if (@lock.IsAcquired)
-            {
-                //Double check
-                (cachedEntities, allExists) = await _cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
-
-                if (allExists)
-                {
-                    return cachedEntities!;
-                }
-
-                IEnumerable<TEntity> entities = await dbRetrieve(_database).ConfigureAwait(false);
-
-                if (entities.IsNotNullOrEmpty())
-                {
-                    UpdateCache(entities);
-
-                    _logger.LogInformation($"缓存 Missed. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
-                }
-                else
-                {
-                    _logger.LogInformation($"查询到空值. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
-                }
-
-                return entities;
-            }
-            else
-            {
-                _logger.LogError($"锁未能占用. Entity:{typeof(TEntity).Name}, dimensionKeyName:{dimensionKeyName},dimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}, Lock Status:{@lock.Status}");
-
-                return await dbRetrieve(_database).ConfigureAwait(false);
-            }
-
-        }
+        #region Database Write Wrapper
 
         protected async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
@@ -284,7 +173,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            InvalidateCache(new TEntity[] { entity });
+            CacheAsideStrategy.InvalidateCache(new TEntity[] { entity }, _cache);
 
             await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
         }
@@ -321,7 +210,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            InvalidateCache(new TEntity[] { entity });
+            CacheAsideStrategy.InvalidateCache(new TEntity[] { entity }, _cache);
 
             await OnEntityDeletedAsync(entity).ConfigureAwait(false);
         }
@@ -379,7 +268,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            InvalidateCache(entities);
+            CacheAsideStrategy.InvalidateCache(entities, _cache);
 
             foreach (TEntity entity in entities)
             {
@@ -409,7 +298,7 @@ namespace HB.FullStack.Business
             }
 
             //Cache
-            InvalidateCache(entities);
+            CacheAsideStrategy.InvalidateCache(entities, _cache);
 
             foreach (TEntity entity in entities)
             {
@@ -417,105 +306,57 @@ namespace HB.FullStack.Business
             }
         }
 
-        private void UpdateCache(IEnumerable<TEntity> entities)
-        {
-            #region 普通缓存，加锁的做法
-            //using IDistributedLock distributedLock = await _lockManager.LockEntitiesAsync(entities, OccupiedTime, PatienceTime).ConfigureAwait(false);
-
-            //if (!distributedLock.IsAcquired)
-            //{
-            //    _logger.LogWarning($"锁未能占用. Entity:{nameof(TEntity)}, Guids:{entities.Select(e => e.Guid).ToJoinedString(",")}, Lock Status:{distributedLock.Status}");
-            //    return;
-            //}
-
-            ////Double Check
-            //(IEnumerable<TEntity>? cachedEntities, bool allExists) = await _cache.GetEntitiesAsync<TEntity>(entities).ConfigureAwait(false);
-
-            ////版本检查
-            //if (allExis ts)
-            //{
-            //    return;
-            //}
-
-            //_logger.LogInformation($"Cache Missed. Entity:{nameof(TEntity)}, Guids:{entities.Select(e => e.Guid).ToJoinedString(",")}");
-
-            //await _cache.SetEntitiesAsync(entities).ConfigureAwait(false);
-            #endregion
-
-            #region 有版本控制的Cache. 就一句话，爽不爽
-
-            _cache.SetEntitiesAsync(entities).Fire();
-
-            #endregion
-
-        }
-
-        private void InvalidateCache(IEnumerable<TEntity> entities)
-        {
-            if (ICache.IsEntityBatchEnabled<TEntity>())
-            {
-                _cache.RemoveEntitiesAsync(entities).Fire();
-            }
-        }
-
         #endregion
 
-        #region CacheItem
+        #region Cache Strategy
 
-        protected async Task<TResult?> TryCacheAsideAsync<TResult>(CacheItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve)
-            where TResult : class
+        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
-            //Cache First
-            TResult? result = await cacheItem.GetFromAsync(_cache).ConfigureAwait(false);
+            var results = await CacheAsideStrategy.CacheAsideAsync<TEntity>(
+                dimensionKeyName,
+                new string[] { dimensionKeyValue },
+                async dbReader =>
+                {
+                    TEntity? single = await dbRetrieve(dbReader).ConfigureAwait(false);
 
-            if (result != null)
+                    if (single == null)
+                    {
+                        return new TEntity[0];
+                    }
+
+                    return new TEntity[] { single };
+                },
+                _database,
+                _cache,
+                _memoryLockManager,
+                _logger).ConfigureAwait(false);
+
+            if (results.IsNullOrEmpty())
             {
-                return result;
+                return null;
             }
 
-            using var @lock = _memoryLockManager.Lock(cacheItem.ResourceType, cacheItem.CacheKey, OccupiedTime, PatienceTime);
-
-            if (@lock.IsAcquired)
-            {
-                //Double Check
-                result = await cacheItem.GetFromAsync(_cache).ConfigureAwait(false);
-
-                if (result != null)
-                {
-                    return result;
-                }
-
-                TResult dbRt = await dbRetrieve(_database).ConfigureAwait(false);
-                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-                if (dbRt != null)
-                {
-                    UpdateCache(cacheItem.Value(dbRt).Timestamp(now));
-                    _logger.LogInformation($"缓存 Missed. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
-                }
-                else
-                {
-                    _logger.LogInformation($"查询到空值. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
-                }
-
-                return dbRt;
-            }
-            else
-            {
-                _logger.LogCritical($"锁未能占用. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}, Lock Status:{@lock.Status}");
-
-                return await dbRetrieve(_database).ConfigureAwait(false);
-            }
+            return results.ElementAt(0);
         }
 
-        private void UpdateCache<TResult>(CacheItem<TResult> cacheItem) where TResult : class
+        protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
         {
-            cacheItem.SetToAsync(_cache).Fire();
+            return CacheAsideStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, _database, _cache, _memoryLockManager, _logger);
         }
 
-        protected void InvalidateCache<TResult>(CacheItem<TResult> cacheItem) where TResult : class
+        protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
-            cacheItem.RemoveFromAsync(_cache).Fire();
+            return CacheAsideStrategy.CacheAsideAsync(cachedItem, dbRetrieve, _cache, _memoryLockManager, _database, _logger);
+        }
+
+        protected Task<IEnumerable<TResult>> TryCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        {
+            return CacheAsideStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, _cache, _memoryLockManager, _database, _logger)!;
+        }
+
+        protected void InvalidateCache<TResult>(CachedItem<TResult> cachedItem) where TResult : class
+        {
+            CacheAsideStrategy.InvalidateCache(cachedItem, _cache);
         }
 
         #endregion

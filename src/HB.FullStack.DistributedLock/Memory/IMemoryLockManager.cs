@@ -12,5 +12,10 @@ namespace HB.FullStack.Lock.Memory
         {
             return Lock(resourceType, new string[] { resource }, expiryTime, waitTime, cancellationToken);
         }
+
+        IMemoryLock NoWaitLock(string resourceType, string resource, TimeSpan expiryTime)
+        {
+            return Lock(resourceType, resource, expiryTime, TimeSpan.Zero);
+        }
     }
 }

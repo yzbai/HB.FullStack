@@ -32,7 +32,11 @@ namespace HB.FullStack.Server
         {
             string token = _prefix + Guid.NewGuid().ToString();
 
-            await _cache.SetString2Async(token, _defaultValue, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(expiredSeconds) }).ConfigureAwait(false);
+            await _cache.SetStringAsync(
+                token,
+                _defaultValue,
+                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(expiredSeconds) }).ConfigureAwait(false);
 
             return _dataProtector.Protect(token);
         }
@@ -68,9 +72,7 @@ namespace HB.FullStack.Server
             }
 
 
-            return await _cache.IsExistThenRemoveAsync(token).ConfigureAwait(false);
+            return await _cache.RemoveAsync(token, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()).ConfigureAwait(false);
         }
-
-
     }
 }

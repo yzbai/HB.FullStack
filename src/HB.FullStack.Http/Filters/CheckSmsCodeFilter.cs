@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.Component.Identity;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Server;
+using HB.FullStack.Identity;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -18,13 +18,13 @@ namespace HB.FullStack.Server.Filters
     {
         private readonly ILogger _logger;
         private readonly ISmsService _smsService;
-        private readonly IIdentityService _identityService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public CheckSmsCodeFilter(ILogger<CheckSmsCodeFilter> logger, ISmsService smsService, IIdentityService identityService)
+        public CheckSmsCodeFilter(ILogger<CheckSmsCodeFilter> logger, ISmsService smsService, IAuthorizationService authorizationService)
         {
             _logger = logger;
             _smsService = smsService;
-            _identityService = identityService;
+            _authorizationService = authorizationService;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -49,7 +49,7 @@ namespace HB.FullStack.Server.Filters
 
                     if (!_smsService.Validate(mobile!, smsCode!))
                     {
-                        _identityService.OnLoginBySmsFailedAsync(mobile).Fire();
+                        _authorizationService.OnSignInFailedBySmsAsync(mobile!, apiRequest.DeviceInfos.Name).Fire();
                         OnError(context);
                         return;
                     }

@@ -10,7 +10,7 @@ namespace HB.FullStack.Identity
     /// <summary>
     /// 关联实体：UserClaim
     /// </summary>
-    public class CachedUserClaimsByUserGuid : CacheItem<IEnumerable<UserClaim>>
+    public class CachedUserClaimsByUserGuid : CachedItem<IEnumerable<UserClaim>>
     {
         private CachedUserClaimsByUserGuid(params string[] keys) : base(keys)
         {

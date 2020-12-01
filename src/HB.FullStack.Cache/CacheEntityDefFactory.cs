@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+
 using HB.FullStack.Common.Entities;
 
 namespace HB.FullStack.Cache
@@ -48,7 +49,7 @@ namespace HB.FullStack.Cache
 
             def.IsCacheable = true;
 
-            def.IsBatchEnabled = cacheEntityAttribute.IsBatchEnabled;
+            //def.IsBatchEnabled = cacheEntityAttribute.IsBatchEnabled;
 
             def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
 

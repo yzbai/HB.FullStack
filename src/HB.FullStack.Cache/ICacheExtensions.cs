@@ -11,11 +11,11 @@ namespace HB.FullStack.Cache
 {
     public static class ICacheExtensions
     {
-        public static async Task SetIntAsync(this ICache cache, string key, int value, long timestampInUnixSeconds, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
+        public static async Task SetIntAsync(this ICache cache, string key, int value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
         {
             try
             {
-                await cache.SetStringAsync(key, Convert.ToString(value, CultureInfo.InvariantCulture), timestampInUnixSeconds, options, token).ConfigureAwait(false);
+                await cache.SetStringAsync(key, Convert.ToString(value, CultureInfo.InvariantCulture), utcTicks, options, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -42,13 +42,13 @@ namespace HB.FullStack.Cache
             }
         }
 
-        public static async Task SetStringAsync(this ICache cache, string key, string value, long timestampInUnixSeconds, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
+        public static async Task SetStringAsync(this ICache cache, string key, string value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
         {
             try
             {
                 byte[] bytes = await SerializeUtil.PackAsync(value).ConfigureAwait(false);
 
-                await cache.SetAsync(key, bytes, timestampInUnixSeconds, options, token).ConfigureAwait(false);
+                await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -70,13 +70,13 @@ namespace HB.FullStack.Cache
             }
         }
 
-        public static async Task SetAsync<T>(this ICache cache, string key, T value, long timestampInUnixSeconds, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken)) where T : class
+        public static async Task SetAsync<T>(this ICache cache, string key, T value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken)) where T : class
         {
             try
             {
                 byte[] bytes = await SerializeUtil.PackAsync(value).ConfigureAwait(false);
 
-                await cache.SetAsync(key, bytes, timestampInUnixSeconds, options, token).ConfigureAwait(false);
+                await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

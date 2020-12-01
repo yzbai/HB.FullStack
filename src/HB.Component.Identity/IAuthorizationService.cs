@@ -13,5 +13,7 @@ namespace HB.FullStack.Identity
         Task<SignInResult> SignInAsync(SignInContext context, string lastUser);
         Task SignOutAsync(string userGuid, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
         Task SignOutAsync(string signInTokenGuid, string lastUser);
+
+        Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
     }
 }

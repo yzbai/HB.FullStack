@@ -14,6 +14,17 @@ namespace HB.FullStack.Identity
     {
         public UserClaimBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
+            EntityUpdated += (entity, args) =>
+            {
+                InvalidateCache(CachedUserClaimsByUserGuid.Key(entity.UserGuid).Timestamp(args.UtcNowTicks));
+                return Task.CompletedTask;
+            };
+
+            EntityDeleted += (entity, args) =>
+            {
+                InvalidateCache(CachedUserClaimsByUserGuid.Key(entity.UserGuid).Timestamp(args.UtcNowTicks));
+                return Task.CompletedTask;
+            };
         }
 
         #region Cached UserClaimsByUserGuid
@@ -29,13 +40,11 @@ namespace HB.FullStack.Identity
         public Task AddToUserAsync(string userGuid, UserClaim userClaim, TransactionContext? transContext = null)
         {
             throw new NotImplementedException();
-            //InvalidateCache(CachedUserCliamsByUserGuid.Key(userGuid).Timestamp(now));
         }
 
         public Task DeleteFromUserAsync(string userGuid, UserClaim userClaim, TransactionContext? transContext = null)
         {
             throw new NotImplementedException();
-            //InvalidateCache(CachedUserCliamsByUserGuid.Key(userGuid).Timestamp(now));
         }
 
         #endregion

@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Cache.Test
 {
-    [CacheEntity(IsBatchEnabled = true)]
+    [CacheEntity]
     public class Book : Entity
     {
         [CacheDifferentDimensionKey]

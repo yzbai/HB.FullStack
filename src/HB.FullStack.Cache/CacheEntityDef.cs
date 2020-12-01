@@ -20,6 +20,6 @@ namespace HB.FullStack.Cache
 
         public string? CacheInstanceName { get; set; }
 
-        public bool IsBatchEnabled { get; set; }
+        //public bool IsBatchEnabled { get; set; }
     }
 }

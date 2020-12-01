@@ -125,12 +125,12 @@ namespace HB.FullStack.Cache
             return results.ElementAt(0);
         }
 
-        static bool IsEntityBatchEnabled<TEntity>() where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+        //static bool IsEntityBatchEnabled<TEntity>() where TEntity : Entity, new()
+        //{
+        //    CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
-            return entityDef.IsBatchEnabled;
-        }
+        //    return entityDef.IsBatchEnabled;
+        //}
 
         static bool IsEntityEnabled<TEntity>() where TEntity : Entity, new()
         {
@@ -145,7 +145,7 @@ namespace HB.FullStack.Cache
 
         Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken));
 
-        Task<bool> SetAsync(string key, byte[] value, long timestampInUnixMilliseconds, DistributedCacheEntryOptions options, CancellationToken token = default);
+        Task<bool> SetAsync(string key, byte[] value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default);
 
         /// <summary>
         /// 返回是否找到了
@@ -154,7 +154,7 @@ namespace HB.FullStack.Cache
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task<bool> RemoveAsync(string key, long timestampInUnixMilliseconds, CancellationToken token = default(CancellationToken));
+        Task<bool> RemoveAsync(string key, long utcTicks, CancellationToken token = default(CancellationToken));
 
         #endregion
     }

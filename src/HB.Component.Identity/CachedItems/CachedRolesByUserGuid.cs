@@ -15,7 +15,7 @@ namespace HB.FullStack.Identity
     /// userGuid: Roles
     /// 关联实体：RoleOfUser
     /// </summary>
-    internal class CachedRolesByUserGuid : CacheItem<IEnumerable<Role>>
+    internal class CachedRolesByUserGuid : CachedItem<IEnumerable<Role>>
     {
         private CachedRolesByUserGuid(params string[] keys) : base(keys)
         {
@@ -28,9 +28,7 @@ namespace HB.FullStack.Identity
 
         public static CachedRolesByUserGuid Key(string userGuid)
         {
-            CachedRolesByUserGuid item = new CachedRolesByUserGuid(userGuid);
-
-            return item;
+            return new CachedRolesByUserGuid(userGuid);
         }
     }
 }

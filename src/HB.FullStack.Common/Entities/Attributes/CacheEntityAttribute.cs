@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.Entities
         /// </summary>
         public long MaxAliveSeconds { get; set; } = -1;
 
-        public bool IsBatchEnabled { get; set; }
+        //public bool IsBatchEnabled { get; set; }
 
         public CacheEntityAttribute()
         {

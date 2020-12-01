@@ -10,11 +10,11 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Business
 {
-    public abstract class CacheItem<TResult>
+    public abstract class CachedItem<TResult>
         where TResult : class
     {
-        private CacheItem() { ResourceType = this.GetType().Name; }
-        protected CacheItem(params string[] keys) : this()
+        private CachedItem() { ResourceType = this.GetType().Name; }
+        protected CachedItem(params string[] keys) : this()
         {
             CacheKey = ResourceType + keys.ToJoinedString("_");
         }
@@ -28,7 +28,7 @@ namespace HB.FullStack.Business
 
         public TResult? CacheValue { get; private set; }
 
-        public long TimestampInUnixMilliseconds { get; private set; } = -1;
+        public long UtcTikcs { get; private set; } = -1;
 
         public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
         {
@@ -52,15 +52,15 @@ namespace HB.FullStack.Business
                 throw new ArgumentNullException(nameof(CacheValue));
             }
 
-            if (TimestampInUnixMilliseconds == -1)
+            if (UtcTikcs == -1)
             {
-                throw new ArgumentException(nameof(TimestampInUnixMilliseconds));
+                throw new ArgumentException(nameof(UtcTikcs));
             }
 
             return cache.SetAsync<TResult>(
                 CacheKey,
                 CacheValue,
-                TimestampInUnixMilliseconds,
+                UtcTikcs,
                 new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = AbsoluteExpirationRelativeToNow,
@@ -76,23 +76,23 @@ namespace HB.FullStack.Business
                 throw new ArgumentNullException(nameof(CacheKey));
             }
 
-            if (TimestampInUnixMilliseconds == -1)
+            if (UtcTikcs == -1)
             {
-                throw new ArgumentException(nameof(TimestampInUnixMilliseconds));
+                throw new ArgumentException(nameof(UtcTikcs));
             }
 
-            return await cache.RemoveAsync(CacheKey, TimestampInUnixMilliseconds).ConfigureAwait(false);
+            return await cache.RemoveAsync(CacheKey, UtcTikcs).ConfigureAwait(false);
         }
 
-        public CacheItem<TResult> Value(TResult result)
+        public CachedItem<TResult> Value(TResult result)
         {
             CacheValue = result;
             return this;
         }
 
-        public CacheItem<TResult> Timestamp(long nowInUnixMilliseconds)
+        public CachedItem<TResult> Timestamp(long utcTicks)
         {
-            TimestampInUnixMilliseconds = nowInUnixMilliseconds;
+            UtcTikcs = utcTicks;
 
             return this;
         }

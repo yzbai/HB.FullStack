@@ -165,14 +165,6 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
-        protected static void ThrowIfNotBactchEnabled(CacheEntityDef entityDef)
-        {
-            if (!entityDef.IsBatchEnabled)
-            {
-                throw new CacheException(ErrorCode.CacheBatchNotEnabled, $"{entityDef.Name}");
-            }
-        }
-
         protected static long? GetInitialExpireSeconds(long? absoluteExpireUnixSeconds, long? slideSeconds)
         {
             //参见Readme.txt

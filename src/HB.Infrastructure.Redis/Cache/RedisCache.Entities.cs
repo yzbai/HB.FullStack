@@ -240,7 +240,6 @@ end
 
             ThrowIf.NullOrEmpty(dimensionKeyValues, nameof(dimensionKeyValues));
             ThrowIfNotCacheEnabled(entityDef);
-            ThrowIfNotBactchEnabled(entityDef);
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -273,7 +272,6 @@ end
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
             ThrowIfNotCacheEnabled(entityDef);
-            ThrowIfNotBactchEnabled(entityDef);
             ThrowIf.NullOrEmpty(entities, nameof(entities));
 
 
@@ -328,7 +326,6 @@ end
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
             ThrowIfNotCacheEnabled(entityDef);
-            ThrowIfNotBactchEnabled(entityDef);
             ThrowIf.NullOrEmpty(dimensionKeyValues, nameof(dimensionKeyValues));
 
             List<RedisKey> redisKeys = new List<RedisKey>();

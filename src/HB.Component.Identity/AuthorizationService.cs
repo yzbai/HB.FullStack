@@ -28,6 +28,8 @@ namespace HB.FullStack.Identity
         private readonly UserClaimBiz _userClaimBiz;
         private readonly UserLoginControlBiz _userLoginControlBiz;
 
+        private readonly IIdentityService _identityService;
+
         //Jwt Signing
         private JsonWebKeySet _jsonWebKeySet = null!;
         private IEnumerable<SecurityKey> _issuerSigningKeys = null!;
@@ -43,7 +45,8 @@ namespace HB.FullStack.Identity
             SignInTokenBiz signInTokenBiz,
             RoleOfUserBiz roleOfUserBiz,
             UserClaimBiz userClaimBiz,
-            UserLoginControlBiz userLoginControlBiz)
+            UserLoginControlBiz userLoginControlBiz,
+            IIdentityService identityService)
         {
             _options = options.Value;
             _transaction = transaction;
@@ -54,6 +57,8 @@ namespace HB.FullStack.Identity
             _userClaimBiz = userClaimBiz;
             _userLoginControlBiz = userLoginControlBiz;
             _signInTokenBiz = signInTokenBiz;
+
+            _identityService = identityService;
 
             InitializeCredencials();
         }
@@ -154,8 +159,8 @@ namespace HB.FullStack.Identity
                 User? user = context.SignInType switch
                 {
                     SignInType.ByLoginNameAndPassword => await _userBiz.GetByLoginNameAsync(context.LoginName!, transactionContext).ConfigureAwait(false),
-                    SignInType.BySms => await _userBiz.GetByMobileAsync(context.Mobile!).ConfigureAwait(false),
-                    SignInType.ByMobileAndPassword => await _userBiz.GetByMobileAsync(context.Mobile!).ConfigureAwait(false),
+                    SignInType.BySms => await _userBiz.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
+                    SignInType.ByMobileAndPassword => await _userBiz.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
                     _ => null
                 };
 
@@ -189,7 +194,7 @@ namespace HB.FullStack.Identity
                 {
                     if (!PassowrdCheck(user, context.Password!))
                     {
-                        OnPasswordCheckFailed(userLoginControl, lastUser);
+                        OnSignInFailed(userLoginControl, lastUser);
 
                         throw new AuthorizationException(ErrorCode.AuthorizationPasswordWrong, $"SignInContext:{SerializeUtil.ToJson(context)}");
                     }
@@ -345,6 +350,20 @@ namespace HB.FullStack.Identity
             }
         }
 
+        public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
+        {
+            User? user = await _userBiz.GetByMobileAsync(mobile).ConfigureAwait(false);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            UserLoginControl userLoginControl = await _userLoginControlBiz.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
+
+            OnSignInFailed(userLoginControl, lastUser);
+        }
+
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
             IEnumerable<Role> roles = await _roleOfUserBiz.GetRolesByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
@@ -415,7 +434,7 @@ namespace HB.FullStack.Identity
             return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
-        private void OnPasswordCheckFailed(UserLoginControl userLoginControl, string lastUser)
+        private void OnSignInFailed(UserLoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
             {
@@ -484,5 +503,7 @@ namespace HB.FullStack.Identity
 
             return claims;
         }
+
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using HB.FullStack.Identity.Entities;
 using HB.FullStack.Database;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace HB.FullStack.Identity
 {
@@ -8,13 +9,11 @@ namespace HB.FullStack.Identity
     {
         private readonly ITransaction _transaction;
         private readonly UserBiz _userBiz;
-        private readonly UserLoginControlBiz _userLoginControlBiz;
 
-        public IdentityService(ITransaction transaction, UserBiz userBiz, UserLoginControlBiz userLoginControlBiz)
+        public IdentityService(ITransaction transaction, UserBiz userBiz)
         {
             _userBiz = userBiz;
             _transaction = transaction;
-            _userLoginControlBiz = userLoginControlBiz;
         }
 
         public async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser)
@@ -34,23 +33,5 @@ namespace HB.FullStack.Identity
                 throw;
             }
         }
-
-        public Task<User?> GetUserByMobileAsync(string mobile)
-        {
-            return _userBiz.GetByMobileAsync(mobile);
-        }
-
-        public Task<User?> GetUserByLoginNameAsync(string loginName)
-        {
-            return _userBiz.GetByLoginNameAsync(loginName);
-        }
-
-        public async Task<User?> GetUserByUserGuidAsync(string userGuid)
-        {
-            return await _userBiz.GetByGuidAsync(userGuid, null).ConfigureAwait(false);
-        }
-
-
-
     }
 }

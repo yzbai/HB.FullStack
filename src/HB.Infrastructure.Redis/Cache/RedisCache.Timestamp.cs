@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Redis.Cache
         // ARGV[2] = sliding-expiration - seconds  as long (null for none)
         // ARGV[3] = ttl seconds 当前过期要设置的过期时间，由上面两个推算
         // ARGV[4] = data - byte[]
-        // ARGV[5] = timestampInUnixMilliseconds
+        // ARGV[5] = utcTicks
         // this order should not change LUA script depends on it
         public const string _luaSetWithTimestamp = @"
 local minTimestamp = redis.call('get', '_minTS'..KEYS[1])
@@ -43,7 +43,7 @@ return 1";
 
         /// <summary>
         /// keys: key
-        /// argv:timestampInUnixMilliseconds, invalidationKey_expire_seconds
+        /// argv:utcTicks, invalidationKey_expire_seconds
         /// </summary>
         public const string _luaRemoveWithTimestamp = @"
 redis.call('set', '_minTS'..KEYS[1], ARGV[1], 'EX', ARGV[2])
@@ -52,7 +52,7 @@ return redis.call('del', KEYS[1])
 
         /// <summary>
         /// keys:key
-        /// argv:nowInUnixSeconds
+        /// argv:utcTicks
         /// </summary>
         public const string _luaGetAndRefresh = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
@@ -106,7 +106,7 @@ return data";
             }
         }
 
-        public async Task<bool> SetAsync(string key, byte[] value, long timestampInUnixMilliseconds, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public async Task<bool> SetAsync(string key, byte[] value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             if (key == null)
             {
@@ -141,7 +141,7 @@ return data";
                         slideSeconds??-1,
                         GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value,
-                        timestampInUnixMilliseconds
+                        utcTicks
                     }).ConfigureAwait(false);
 
                 int rt = (int)redisResult;
@@ -152,11 +152,11 @@ return data";
                 }
                 else if (rt == 8)
                 {
-                    _logger.LogWarning($"检测到，Cache Invalidation Concurrency冲突，已被阻止. key:{key}, Timestamp:{timestampInUnixMilliseconds}");
+                    _logger.LogWarning($"检测到，Cache Invalidation Concurrency冲突，已被阻止. key:{key}, Timestamp:{utcTicks}");
                 }
                 else if (rt == 9)
                 {
-                    _logger.LogWarning($"检测到，Cache Update Concurrency冲突，已被阻止. key:{key}, Timestamp:{timestampInUnixMilliseconds}");
+                    _logger.LogWarning($"检测到，Cache Update Concurrency冲突，已被阻止. key:{key}, Timestamp:{utcTicks}");
                 }
 
                 return false;
@@ -168,7 +168,7 @@ return data";
 
                 InitLoadedLuas();
 
-                return await SetAsync(key, value, timestampInUnixMilliseconds, options, token).ConfigureAwait(false);
+                return await SetAsync(key, value, utcTicks, options, token).ConfigureAwait(false);
             }
         }
 
@@ -179,7 +179,7 @@ return data";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> RemoveAsync(string key, long timestampInUnixMilliseconds, CancellationToken token = default(CancellationToken))
+        public async Task<bool> RemoveAsync(string key, long utcTicks, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
@@ -197,7 +197,7 @@ return data";
                     new RedisKey[] { GetRealKey(key) },
                     new RedisValue[]
                     {
-                        timestampInUnixMilliseconds,
+                        utcTicks,
                         _invalidationVersionExpirySeconds
                     }).ConfigureAwait(false);
 
@@ -209,7 +209,7 @@ return data";
 
                 InitLoadedLuas();
 
-                return await RemoveAsync(key, timestampInUnixMilliseconds, token).ConfigureAwait(false);
+                return await RemoveAsync(key, utcTicks, token).ConfigureAwait(false);
             }
         }
     }

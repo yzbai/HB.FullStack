@@ -19,9 +19,26 @@ namespace HB.FullStack.Identity
         public RoleOfUserBiz(ILogger<RoleOfUserBiz> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             _databaseReader = databaseReader;
+
+            EntityUpdated += (roleOfUser, args) =>
+            {
+                InvalidateCache(CachedRolesByUserGuid.Key(roleOfUser.UserGuid).Timestamp(args.UtcNowTicks));
+                return Task.CompletedTask;
+            };
+
+            EntityDeleted += (roleOfUser, args) =>
+            {
+                InvalidateCache(CachedRolesByUserGuid.Key(roleOfUser.UserGuid).Timestamp(args.UtcNowTicks));
+                return Task.CompletedTask;
+            };
         }
 
-        #region Cached RolesByUserGuid
+        #region Read
+
+        public Task<RoleOfUser?> GetByConditionAsync(string userGuid, string roleGuid, TransactionContext? transactionContext = null)
+        {
+            return _databaseReader.ScalarAsync<RoleOfUser>(ru => ru.UserGuid == userGuid && ru.RoleGuid == roleGuid, transactionContext);
+        }
 
         public Task<IEnumerable<Role>> GetRolesByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
         {
@@ -34,10 +51,17 @@ namespace HB.FullStack.Identity
             })!;
         }
 
+        public Task<long> CountByConditionAsync(string userGuid, string roleGuid, TransactionContext? transContext = null)
+        {
+            return _databaseReader.CountAsync<RoleOfUser>(ru => ru.UserGuid == userGuid && ru.RoleGuid == roleGuid, transContext);
+        }
+
+        #endregion
+
         public async Task AddRolesToUserAsync(string userGuid, string roleGuid, string lastUser, TransactionContext transContext)
         {
             //查重
-            long count = await _databaseReader.CountAsync<RoleOfUser>(ru => ru.UserGuid == userGuid && ru.RoleGuid == roleGuid, transContext).ConfigureAwait(false);
+            long count = await CountByConditionAsync(userGuid, roleGuid, transContext).ConfigureAwait(false);
 
             if (count != 0)
             {
@@ -47,19 +71,14 @@ namespace HB.FullStack.Identity
             RoleOfUser ru = new RoleOfUser { UserGuid = userGuid, RoleGuid = roleGuid };
 
             await UpdateAsync(ru, lastUser, transContext).ConfigureAwait(false);
-
-
-            //Invalidate Cache
-            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            InvalidateCache(CachedRolesByUserGuid.Key(userGuid).Timestamp(now));
         }
+
+
 
         public async Task DeleteRolesFromUserAsync(string userGuid, string roleGuid, string lastUser, TransactionContext transactionContext)
         {
             //查重
-
-            RoleOfUser? stored = await _databaseReader.ScalarAsync<RoleOfUser>(ru => ru.UserGuid == userGuid && ru.RoleGuid == roleGuid, transactionContext).ConfigureAwait(false);
+            RoleOfUser? stored = await GetByConditionAsync(userGuid, roleGuid, transactionContext).ConfigureAwait(false);
 
             if (stored == null)
             {
@@ -67,13 +86,8 @@ namespace HB.FullStack.Identity
             }
 
             await DeleteAsync(stored, lastUser, transactionContext).ConfigureAwait(false);
-
-            //Invalidate Cache
-            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            InvalidateCache(CachedRolesByUserGuid.Key(userGuid).Timestamp(now));
         }
 
-        #endregion
+
     }
 }

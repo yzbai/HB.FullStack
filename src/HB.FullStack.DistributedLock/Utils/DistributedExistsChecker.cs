@@ -7,43 +7,43 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Lock
 {
-    public class DistributedExistsChecker
-    {
-        private readonly string _applicationName;
+    //public class DistributedExistsChecker
+    //{
+    //    private readonly string _applicationName;
 
-        private readonly IDistributedCache _cache;
+    //    private readonly IDistributedCache _cache;
 
-        public DistributedExistsChecker(IDistributedCache cache, string applicaionName)
-        {
-            _cache = cache;
-            _applicationName = applicaionName;
-        }
+    //    public DistributedExistsChecker(IDistributedCache cache, string applicaionName)
+    //    {
+    //        _cache = cache;
+    //        _applicationName = applicaionName;
+    //    }
 
-        public async Task<bool> CheckAsync(string resourceType, string resource, TimeSpan aliveTimeSpan)
-        {
-            string key = GetKey(resourceType, resource);
+    //    public async Task<bool> CheckAsync(string resourceType, string resource, TimeSpan aliveTimeSpan)
+    //    {
+    //        string key = GetKey(resourceType, resource);
 
-            string? value = await _cache.GetStringAsync(key).ConfigureAwait(false);
+    //        string? value = await _cache.GetStringAsync(key).ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(value))
-            {
-                await _cache.SetStringAsync(key, "Hit", new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = aliveTimeSpan }).ConfigureAwait(false);
-                return true;
-            }
+    //        if (string.IsNullOrEmpty(value))
+    //        {
+    //            await _cache.SetStringAsync(key, "Hit", new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = aliveTimeSpan }).ConfigureAwait(false);
+    //            return true;
+    //        }
 
-            return false;
-        }
+    //        return false;
+    //    }
 
-        public Task RemoveAsync(string resourceType, string resource)
-        {
-            string key = GetKey(resourceType, resource);
+    //    public Task RemoveAsync(string resourceType, string resource)
+    //    {
+    //        string key = GetKey(resourceType, resource);
 
-            return _cache.RemoveAsync(key);
-        }
+    //        return _cache.RemoveAsync(key);
+    //    }
 
-        private string GetKey(string resourceType, string resource)
-        {
-            return $"{_applicationName}{resourceType}{resource}";
-        }
-    }
+    //    private string GetKey(string resourceType, string resource)
+    //    {
+    //        return $"{_applicationName}{resourceType}{resource}";
+    //    }
+    //}
 }
