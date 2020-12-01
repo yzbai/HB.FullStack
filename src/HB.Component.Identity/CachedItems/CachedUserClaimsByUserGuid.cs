@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using HB.FullStack.Identity.Entities;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 
 namespace HB.FullStack.Identity
 {

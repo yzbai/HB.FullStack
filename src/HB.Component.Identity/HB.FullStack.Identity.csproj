@@ -24,7 +24,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\HB.FullStack\src\HB.FullStack.Business\HB.FullStack.Business.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Business\HB.FullStack.Repository.csproj" />
   </ItemGroup>
  
 </Project>

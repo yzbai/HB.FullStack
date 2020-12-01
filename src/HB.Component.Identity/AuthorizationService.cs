@@ -22,11 +22,11 @@ namespace HB.FullStack.Identity
         private readonly ITransaction _transaction;
         private readonly IDistributedLockManager _lockManager;
 
-        private readonly UserBiz _userBiz;
-        private readonly SignInTokenBiz _signInTokenBiz;
-        private readonly RoleOfUserBiz _roleOfUserBiz;
-        private readonly UserClaimBiz _userClaimBiz;
-        private readonly UserLoginControlBiz _userLoginControlBiz;
+        private readonly UserRepo _userRepo;
+        private readonly SignInTokenRepo _signInTokenRepo;
+        private readonly RoleOfUserRepo _roleOfUserRepo;
+        private readonly UserClaimRepo _userClaimRepo;
+        private readonly UserLoginControlRepo _userLoginControlRepo;
 
         private readonly IIdentityService _identityService;
 
@@ -41,22 +41,22 @@ namespace HB.FullStack.Identity
         private SecurityKey _decryptionSecurityKey = null!;
 
         public AuthorizationService(IOptions<AuthorizationServiceOptions> options, ITransaction transaction, IDistributedLockManager lockManager,
-            UserBiz userBiz,
-            SignInTokenBiz signInTokenBiz,
-            RoleOfUserBiz roleOfUserBiz,
-            UserClaimBiz userClaimBiz,
-            UserLoginControlBiz userLoginControlBiz,
+            UserRepo userRepo,
+            SignInTokenRepo signInTokenRepo,
+            RoleOfUserRepo roleOfUserRepo,
+            UserClaimRepo userClaimRepo,
+            UserLoginControlRepo userLoginControlRepo,
             IIdentityService identityService)
         {
             _options = options.Value;
             _transaction = transaction;
             _lockManager = lockManager;
 
-            _userBiz = userBiz;
-            _roleOfUserBiz = roleOfUserBiz;
-            _userClaimBiz = userClaimBiz;
-            _userLoginControlBiz = userLoginControlBiz;
-            _signInTokenBiz = signInTokenBiz;
+            _userRepo = userRepo;
+            _roleOfUserRepo = roleOfUserRepo;
+            _userClaimRepo = userClaimRepo;
+            _userLoginControlRepo = userLoginControlRepo;
+            _signInTokenRepo = signInTokenRepo;
 
             _identityService = identityService;
 
@@ -102,7 +102,7 @@ namespace HB.FullStack.Identity
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
-                await _signInTokenBiz.DeleteByGuidAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByGuidAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -119,7 +119,7 @@ namespace HB.FullStack.Identity
 
             try
             {
-                await _signInTokenBiz.DeleteByLogOffTypeAsync(userGuid, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByLogOffTypeAsync(userGuid, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -158,9 +158,9 @@ namespace HB.FullStack.Identity
                 //查询用户
                 User? user = context.SignInType switch
                 {
-                    SignInType.ByLoginNameAndPassword => await _userBiz.GetByLoginNameAsync(context.LoginName!, transactionContext).ConfigureAwait(false),
-                    SignInType.BySms => await _userBiz.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
-                    SignInType.ByMobileAndPassword => await _userBiz.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
+                    SignInType.ByLoginNameAndPassword => await _userRepo.GetByLoginNameAsync(context.LoginName!, transactionContext).ConfigureAwait(false),
+                    SignInType.BySms => await _userRepo.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
+                    SignInType.ByMobileAndPassword => await _userRepo.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
                     _ => null
                 };
 
@@ -169,7 +169,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null && context.SignInType == SignInType.BySms)
                 {
-                    user = await _userBiz.CreateAsync(
+                    user = await _userRepo.CreateAsync(
                         mobile: context.Mobile!,
                         email: null,
                         loginName: context.LoginName,
@@ -187,7 +187,7 @@ namespace HB.FullStack.Identity
                     throw new AuthorizationException(ErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
                 }
 
-                UserLoginControl userLoginControl = await _userLoginControlBiz.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
+                UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
 
                 //密码检查
                 if (context.SignInType == SignInType.ByMobileAndPassword || context.SignInType == SignInType.ByLoginNameAndPassword)
@@ -204,10 +204,10 @@ namespace HB.FullStack.Identity
                 PreSignInCheck(user, userLoginControl, lastUser);
 
                 //注销其他客户端
-                await _signInTokenBiz.DeleteByLogOffTypeAsync(user.Guid, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByLogOffTypeAsync(user.Guid, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
 
                 //创建Token
-                SignInToken signInToken = await _signInTokenBiz.CreateAsync(
+                SignInToken signInToken = await _signInTokenRepo.CreateAsync(
                     user.Guid,
                     context.DeviceId,
                     context.DeviceInfos,
@@ -298,7 +298,7 @@ namespace HB.FullStack.Identity
 
             try
             {
-                signInToken = await _signInTokenBiz.GetByConditionAsync(
+                signInToken = await _signInTokenRepo.GetByConditionAsync(
                     claimsPrincipal.GetSignInTokenGuid(),
                     context.RefreshToken,
                     context.DeviceId,
@@ -321,7 +321,7 @@ namespace HB.FullStack.Identity
 
                 // User 信息变动验证
 
-                user = await _userBiz.GetByGuidAsync(userGuid, transactionContext).ConfigureAwait(false);
+                user = await _userRepo.GetByGuidAsync(userGuid, transactionContext).ConfigureAwait(false);
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
@@ -333,7 +333,7 @@ namespace HB.FullStack.Identity
                 // 更新SignInToken
                 signInToken.RefreshCount++;
 
-                await _signInTokenBiz.UpdateAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.UpdateAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
 
                 // 发布新的AccessToken
 
@@ -352,22 +352,22 @@ namespace HB.FullStack.Identity
 
         public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
         {
-            User? user = await _userBiz.GetByMobileAsync(mobile).ConfigureAwait(false);
+            User? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
 
             if (user == null)
             {
                 return;
             }
 
-            UserLoginControl userLoginControl = await _userLoginControlBiz.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
+            UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
 
             OnSignInFailed(userLoginControl, lastUser);
         }
 
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
-            IEnumerable<Role> roles = await _roleOfUserBiz.GetRolesByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
-            IEnumerable<UserClaim> userClaims = await _userClaimBiz.GetByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
+            IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
 
             IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
 
@@ -420,7 +420,7 @@ namespace HB.FullStack.Identity
             userLoginControl.LockoutEnabled = false;
             userLoginControl.LoginFailedCount = 0;
 
-            _userLoginControlBiz.UpdateAsync(userLoginControl, lastUser).Fire();
+            _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
 
             if (signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
             {
@@ -450,7 +450,7 @@ namespace HB.FullStack.Identity
                 userLoginControl.LoginFailedCount++;
             }
 
-            _userLoginControlBiz.UpdateAsync(userLoginControl, lastUser).Fire();
+            _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
         }
 
         private async Task BlackSignInTokenAsync(SignInToken signInToken, string lastUser)
@@ -459,7 +459,7 @@ namespace HB.FullStack.Identity
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
-                await _signInTokenBiz.DeleteByGuidAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByGuidAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }

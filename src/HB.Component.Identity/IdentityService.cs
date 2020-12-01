@@ -8,11 +8,11 @@ namespace HB.FullStack.Identity
     internal class IdentityService : IIdentityService
     {
         private readonly ITransaction _transaction;
-        private readonly UserBiz _userBiz;
+        private readonly UserRepo _userRepo;
 
-        public IdentityService(ITransaction transaction, UserBiz userBiz)
+        public IdentityService(ITransaction transaction, UserRepo userRepo)
         {
-            _userBiz = userBiz;
+            _userRepo = userRepo;
             _transaction = transaction;
         }
 
@@ -21,7 +21,7 @@ namespace HB.FullStack.Identity
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
             try
             {
-                User user = await _userBiz.CreateAsync(mobile, email, loginName, password, mobileConfirmed, emailConfirmed, lastUser, transactionContext).ConfigureAwait(false);
+                User user = await _userRepo.CreateAsync(mobile, email, loginName, password, mobileConfirmed, emailConfirmed, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 

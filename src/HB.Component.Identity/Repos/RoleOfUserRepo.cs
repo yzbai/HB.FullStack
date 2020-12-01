@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Identity.Entities;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
@@ -13,10 +13,10 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Identity
 {
-    public class RoleOfUserBiz : BaseEntityBiz<RoleOfUser>
+    public class RoleOfUserRepo : Repository<RoleOfUser>
     {
         private readonly IDatabaseReader _databaseReader;
-        public RoleOfUserBiz(ILogger<RoleOfUserBiz> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public RoleOfUserRepo(ILogger<RoleOfUserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             _databaseReader = databaseReader;
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Business
+namespace HB.FullStack.Repository
 {
     public class DatabaseWriteEventArgs : EventArgs
     {

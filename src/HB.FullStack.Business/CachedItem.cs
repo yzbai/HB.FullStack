@@ -8,7 +8,7 @@ using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Business
+namespace HB.FullStack.Repository
 {
     public abstract class CachedItem<TResult>
         where TResult : class

@@ -1,6 +1,6 @@
 ﻿
 using HB.FullStack.Identity.Entities;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
@@ -19,12 +19,12 @@ namespace HB.FullStack.Identity
     /// <summary>
     /// 所有的User这个Entity的增删改查都要经过这里
     /// </summary>
-    internal class UserBiz : BaseEntityBiz<User>
+    internal class UserRepo : Repository<User>
     {
         private readonly IdentityOptions _identityOptions;
         private readonly IDatabaseReader _databaseReader;
 
-        public UserBiz(IOptions<IdentityOptions> identityOptions, ILogger<UserBiz> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserRepo(IOptions<IdentityOptions> identityOptions, ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
             _identityOptions = identityOptions.Value;

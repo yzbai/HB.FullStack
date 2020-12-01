@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.SQLite", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL", "src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj", "{94403123-B19B-43EA-A390-9368AD966083}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Business", "src\HB.FullStack.Business\HB.FullStack.Business.csproj", "{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Repository", "src\HB.FullStack.Business\HB.FullStack.Repository.csproj", "{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Cache", "src\HB.FullStack.Cache\HB.FullStack.Cache.csproj", "{5257A177-EA20-41EE-B93E-B073849F03E9}"
 EndProject

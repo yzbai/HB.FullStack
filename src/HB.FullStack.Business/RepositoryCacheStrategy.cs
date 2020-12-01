@@ -11,9 +11,9 @@ using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Business
+namespace HB.FullStack.Repository
 {
-    internal static class CacheAsideStrategy
+    internal static class RepositoryCacheStrategy
     {
         public static readonly TimeSpan OccupiedTime = TimeSpan.FromSeconds(10);
         public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(2);

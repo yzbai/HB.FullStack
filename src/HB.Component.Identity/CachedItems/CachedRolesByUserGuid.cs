@@ -1,5 +1,5 @@
 ﻿using HB.FullStack.Identity.Entities;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;

@@ -1,5 +1,5 @@
 ﻿using HB.FullStack.Identity.Entities;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using HB.FullStack.Database;
 using HB.FullStack.KVStore;
 
@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Identity
 {
-    internal class UserLoginControlBiz
+    internal class UserLoginControlRepo
     {
         private readonly IKVStore _kv;
-        public UserLoginControlBiz(IKVStore kvStore)
+        public UserLoginControlRepo(IKVStore kvStore)
         {
             _kv = kvStore;
         }

@@ -1,5 +1,5 @@
 ﻿using HB.FullStack.Identity.Entities;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Identity
 {
-    internal class RoleBiz : BaseEntityBiz<Role>
+    internal class RoleRepo : Repository<Role>
     {
-        public RoleBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public RoleRepo(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
     }

@@ -6,18 +6,18 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HB.FullStack.KVStore;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
 
 namespace HB.FullStack.Identity
 {
-    internal class SignInTokenBiz : BaseEntityBiz<SignInToken>
+    internal class SignInTokenRepo : Repository<SignInToken>
     {
         private readonly IDatabaseReader _databaseReader;
 
-        public SignInTokenBiz(ILogger<SignInTokenBiz> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             _databaseReader = databaseReader;
         }

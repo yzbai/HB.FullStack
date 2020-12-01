@@ -4,15 +4,15 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using HB.FullStack.Identity.Entities;
 using System;
-using HB.FullStack.Business;
+using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
 
 namespace HB.FullStack.Identity
 {
-    internal class UserClaimBiz : BaseEntityBiz<UserClaim>
+    internal class UserClaimRepo : Repository<UserClaim>
     {
-        public UserClaimBiz(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public UserClaimRepo(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             EntityUpdated += (entity, args) =>
             {

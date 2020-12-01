@@ -16,12 +16,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(optionsSetup);
 
             //internal
-            services.AddSingleton<UserBiz>();
-            services.AddSingleton<RoleOfUserBiz>();
-            services.AddSingleton<UserClaimBiz>();
-            services.AddSingleton<RoleBiz>();
-            services.AddSingleton<UserLoginControlBiz>();
-            services.AddSingleton<SignInTokenBiz>();
+            services.AddSingleton<UserRepo>();
+            services.AddSingleton<RoleOfUserRepo>();
+            services.AddSingleton<UserClaimRepo>();
+            services.AddSingleton<RoleRepo>();
+            services.AddSingleton<UserLoginControlRepo>();
+            services.AddSingleton<SignInTokenRepo>();
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();
