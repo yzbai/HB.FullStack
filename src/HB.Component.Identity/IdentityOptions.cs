@@ -1,11 +1,13 @@
-﻿using HB.Framework.Common;
+﻿using HB.FullStack.Common;
+
 using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace HB.Component.Identity
+namespace HB.FullStack.Identity
 {
     public class IdentityOptions : IOptions<IdentityOptions>
     {
@@ -18,8 +20,8 @@ namespace HB.Component.Identity
         /// <summary>
         /// 用来查mobile，loginname，email是否重复的布隆表 名称
         /// </summary>
-        [Required]
-        public string BloomFilterName { get; set; } = null!;
+        //[Required]
+        //public string BloomFilterName { get; set; } = null!;
     }
 
     //public class IdentityEvents

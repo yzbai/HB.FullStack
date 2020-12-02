@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.DocumentStore\HB.Framework.DocumentStore.csproj" />
+    <ProjectReference Include="..\HB.FullStack.DocumentStore\HB.FullStack.DocumentStore.csproj" />
   </ItemGroup>
 
 </Project>

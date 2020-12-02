@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common.Sms;
+﻿using HB.FullStack.Common.Sms;
 using HB.Infrastructure.Aliyun.Oss;
 using HB.Infrastructure.Aliyun.Sms;
 using Microsoft.Extensions.Configuration;

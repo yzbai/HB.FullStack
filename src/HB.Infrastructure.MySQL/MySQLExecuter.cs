@@ -1,4 +1,4 @@
-﻿using HB.Framework.Database;
+﻿using HB.FullStack.Database;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;

@@ -1,17 +1,18 @@
-﻿using HB.Framework.Common.Entities;
+﻿using HB.FullStack.Common.Entities;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace HB.Component.Identity.Entities
+namespace HB.FullStack.Identity.Entities
 {
     [KVStoreEntity]
     public class UserLoginControl : Entity
     {
         [Required]
         [KVStoreKey]
-        [ForeignKey(typeof(IdentityUser))]
+        [ForeignKey(typeof(User))]
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = null!;
 
@@ -25,5 +26,7 @@ namespace HB.Component.Identity.Entities
         [EntityProperty]
         public long LoginFailedCount { get; set; }
 
+        [EntityProperty]
+        public DateTimeOffset? LoginFailedLastTime { get; set; }
     }
 }

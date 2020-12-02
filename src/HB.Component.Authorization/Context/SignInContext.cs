@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common;
+﻿using HB.FullStack.Common;
 using System;
 using System.ComponentModel.DataAnnotations;
 

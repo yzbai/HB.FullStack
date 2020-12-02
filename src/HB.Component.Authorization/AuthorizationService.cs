@@ -2,107 +2,117 @@
 using HB.Component.Authorization.Entities;
 using HB.Component.Identity;
 using HB.Component.Identity.Entities;
-using HB.Framework.Database;
+using HB.FullStack.Cache;
+using HB.FullStack.Database;
+using HB.FullStack.DistributedLock;
+using HB.FullStack.Lock.Distributed;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace HB.Component.Authorization
 {
     internal class AuthorizationService : IAuthorizationService
     {
-        private readonly IDatabase _database;
         private readonly AuthorizationServerOptions _options;
-        private readonly SignInOptions _signInOptions;
+        private readonly ITransaction _transaction;
+        private readonly IDistributedLockManager _lockManager;
+
         private readonly IIdentityService _identityService;
-        private readonly ISignInTokenBiz _signInTokenBiz;
-        private readonly IJwtBuilder _jwtBuilder;
-        private readonly ICredentialBiz _credentialBiz;
-        private readonly DistributedCacheFrequencyChecker _frequencyChecker;
+        private readonly SignInTokenBiz _signInTokenBiz;
 
-        //private readonly ILogger logger;
+        //Jwt Signing
+        private readonly JsonWebKeySet _jsonWebKeySet;
+        private readonly IEnumerable<SecurityKey> _issuerSigningKeys;
 
-        public AuthorizationService(IDatabase database, IOptions<AuthorizationServerOptions> options, IDistributedCache distributedCache,
-            ISignInTokenBiz signInTokenBiz, IIdentityService identityManager, IJwtBuilder jwtBuilder, ICredentialBiz credentialManager/*, ILogger<AuthorizationService> logger*/)
+        //Jwt Content Encrypt
+        private readonly EncryptingCredentials _encryptingCredentials;
+        private readonly SecurityKey _decryptionSecurityKey;
+
+        public AuthorizationService(IOptions<AuthorizationServerOptions> options, ITransaction transaction, IDistributedLockManager lockManager,
+            SignInTokenBiz signInTokenBiz, IIdentityService identityService/*, ILogger<AuthorizationService> logger*/)
         {
-            _database = database;
             _options = options.Value;
-            _signInOptions = _options.SignInOptions;
-
-            //this.logger = logger;
-            _frequencyChecker = new DistributedCacheFrequencyChecker(distributedCache);
+            _transaction = transaction;
+            _lockManager = lockManager;
+            _identityService = identityService;
 
             _signInTokenBiz = signInTokenBiz;
-            _identityService = identityManager;
-            _jwtBuilder = jwtBuilder;
-            _credentialBiz = credentialManager;
 
+            #region Initialize Jwt Signing Credentials
+
+            X509Certificate2? cert = CertificateUtil.GetBySubject(_options.SigningCertificateSubject);
+
+            if (cert == null)
+            {
+                throw new AuthorizationException(ErrorCode.JwtSigningCertNotFound, $"Subject:{_options.SigningCertificateSubject}");
+            }
+
+            _jsonWebKeySet = CredentialHelper.CreateJsonWebKeySet(cert);
+            _issuerSigningKeys = _jsonWebKeySet.GetSigningKeys();
+
+            #endregion
+
+            #region Initialize Jwt Content Encrypt/Decrypt Credentials
+
+            X509Certificate2? encryptionCert = CertificateUtil.GetBySubject(_options.EncryptingCertificateSubject);
+
+            if (encryptionCert == null)
+            {
+                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
+            }
+
+            _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);
+            _decryptionSecurityKey = CredentialHelper.GetSecurityKey(encryptionCert);
+
+            #endregion
         }
 
-        /// <exception cref="FileNotFoundException">证书文件不存在</exception>
-        /// <exception cref="ArgumentException">Json无法解析</exception>
-        public JsonWebKeySet GetJsonWebKeySet()
-        {
-            return _credentialBiz.JsonWebKeySet;
-        }
+        public JsonWebKeySet JsonWebKeySet => _jsonWebKeySet;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="signInTokenGuid"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task SignOutAsync(string signInTokenGuid, string lastUser)
         {
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
-                await _signInTokenBiz.DeleteAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenBiz.DeleteByGuidAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
 
         public async Task SignOutAsync(string userGuid, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
                 await _signInTokenBiz.DeleteByLogOffTypeAsync(userGuid, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
 
-        /// <summary>
-        /// SignInAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Component.Authorization.AuthorizationException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        public async Task<SignInResult> SignInAsync<TUser, TUserClaim, TRole, TRoleOfUser>(SignInContext context, string lastUser)
-            where TUser : IdentityUser, new()
-            where TUserClaim : IdentityUserClaim, new()
-            where TRole : IdentityRole, new()
-            where TRoleOfUser : IdentityRoleOfUser, new()
+        public async Task<SignInResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context);
 
@@ -123,16 +133,16 @@ namespace HB.Component.Authorization
                     break;
             }
 
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
                 //查询用户
-                TUser? user = context.SignInType switch
+                User? user = context.SignInType switch
                 {
-                    SignInType.ByLoginNameAndPassword => await _identityService.GetUserByLoginNameAsync<TUser>(context.LoginName!).ConfigureAwait(false),
-                    SignInType.BySms => await _identityService.GetUserByMobileAsync<TUser>(context.Mobile!).ConfigureAwait(false),
-                    SignInType.ByMobileAndPassword => await _identityService.GetUserByMobileAsync<TUser>(context.Mobile!).ConfigureAwait(false),
+                    SignInType.ByLoginNameAndPassword => await _identityService.GetUserByLoginNameAsync(context.LoginName!).ConfigureAwait(false),
+                    SignInType.BySms => await _identityService.GetUserByMobileAsync(context.Mobile!).ConfigureAwait(false),
+                    SignInType.ByMobileAndPassword => await _identityService.GetUserByMobileAsync(context.Mobile!).ConfigureAwait(false),
                     _ => null
                 };
 
@@ -141,7 +151,14 @@ namespace HB.Component.Authorization
 
                 if (user == null && context.SignInType == SignInType.BySms)
                 {
-                    user = await _identityService.CreateUserByMobileAsync<TUser>(context.Mobile!, context.LoginName, context.Password, true, lastUser).ConfigureAwait(false);
+                    user = await _identityService.CreateUserAsync(
+                        mobile: context.Mobile!,
+                        email: null,
+                        loginName: context.LoginName,
+                        password: context.Password,
+                        mobileConfirmed: true,
+                        emailConfirmed: false,
+                        lastUser: lastUser).ConfigureAwait(false);
 
                     newUserCreated = true;
                 }
@@ -176,53 +193,52 @@ namespace HB.Component.Authorization
                     context.DeviceVersion,
                     //context.DeviceAddress,
                     context.DeviceIp,
-                    context.RememberMe ? _signInOptions.RefreshTokenLongExpireTimeSpan : _signInOptions.RefreshTokenShortExpireTimeSpan,
+                    context.RememberMe ? _options.SignInOptions.RefreshTokenLongExpireTimeSpan : _options.SignInOptions.RefreshTokenShortExpireTimeSpan,
                     lastUser,
                     transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
-
                 //构造 Jwt
+
+
+
+                IEnumerable<Claim> claims = GetClaims(user, transactionContext);
+
                 SignInResult result = new SignInResult
                 (
-                    accessToken: await _jwtBuilder.BuildJwtAsync<TUserClaim, TRole, TRoleOfUser>(user, userToken, context.SignToWhere).ConfigureAwait(false),
+                    accessToken: await JwtHelper.BuildJwt(user, userToken, context.SignToWhere).ConfigureAwait(false),
                     refreshToken: userToken.RefreshToken,
                     newUserCreated: newUserCreated,
                     currentUser: user
                 );
+
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
                 return result;
 
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
 
         //TODO: 做好详细的历史纪录，各个阶段都要打log。一有风吹草动，就立马删除SignInToken
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
         /// <returns>新的AccessToken</returns>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
-        /// <exception cref="HB.Component.Authorization.AuthorizationException"></exception>
-        public async Task<string> RefreshAccessTokenAsync<TUser, TUserClaim, TRole, TRoleOfUser>(RefreshContext context, string lastUser)
-            where TUser : IdentityUser, new()
-            where TUserClaim : IdentityUserClaim, new()
-            where TRole : IdentityRole, new()
-            where TRoleOfUser : IdentityRoleOfUser, new()
+        public async Task<string> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
+            where User : User, new()
+            where TUserClaim : UserClaim, new()
+            where TRole : Role, new()
+            where TRoleOfUser : RoleOfUser, new()
         {
             ThrowIf.NotValid(context);
 
-            //频率检查
-
             //解决并发涌入
+            using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
+                nameof(RefreshAccessTokenAsync) + context.DeviceId,
+                _options.RefreshIntervalTimeSpan).ConfigureAwait(false);
 
-            if (!(await _frequencyChecker.CheckAsync(nameof(RefreshAccessTokenAsync), context.DeviceId, _options.RefreshIntervalTimeSpan).ConfigureAwait(false)))
+            if (!distributedLock.IsAcquired)
             {
                 throw new AuthorizationException(ErrorCode.AuthorizationTooFrequent, $"Context:{SerializeUtil.ToJson(context)}");
             }
@@ -262,9 +278,9 @@ namespace HB.Component.Authorization
 
 
             //SignInToken 验证
-            TUser? user;
+            User? user;
             SignInToken? signInToken;
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            //TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -273,7 +289,8 @@ namespace HB.Component.Authorization
                     context.RefreshToken,
                     context.DeviceId,
                     userGuid,
-                    transactionContext
+
+
                     ).ConfigureAwait(false);
 
                 if (signInToken == null || signInToken.Blacked)
@@ -287,7 +304,7 @@ namespace HB.Component.Authorization
 
                 if (signInToken.ExpireAt < DateTimeOffset.UtcNow)
                 {
-                    await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    //await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                     await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
 
@@ -296,11 +313,11 @@ namespace HB.Component.Authorization
 
                 // User 信息变动验证
 
-                user = await _identityService.GetUserBySecurityStampAsync<TUser>(userGuid, claimsPrincipal.GetUserSecurityStamp()).ConfigureAwait(false);
+                user = await _identityService.GetUserByUserGuidAsync(userGuid).ConfigureAwait(false);
 
-                if (user == null)
+                if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
-                    await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    //await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                     await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
 
@@ -312,27 +329,21 @@ namespace HB.Component.Authorization
 
                 await _signInTokenBiz.UpdateAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
 
             // 发布新的AccessToken
 
-            return await _jwtBuilder.BuildJwtAsync<TUserClaim, TRole, TRoleOfUser>(user, signInToken, claimsPrincipal.GetAudience()).ConfigureAwait(false);
+            return await _jwtBuilder.BuildJwtAsync(user, signInToken, claimsPrincipal.GetAudience()).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// PreSignInCheckAsync
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        /// <exception cref="HB.Component.Authorization.AuthorizationException"></exception>
-        private Task PreSignInCheckAsync<TUser>(TUser user, string lastUser) where TUser : IdentityUser, new()
+        private Task PreSignInCheckAsync(User user, string lastUser) where User : User, new()
         {
             ThrowIf.Null(user, nameof(user));
 
@@ -365,8 +376,8 @@ namespace HB.Component.Authorization
                     }
                 }
             }
-            Task setLockTask = _signInOptions.RequiredLockoutCheck ? _identityService.SetLockoutAsync<TUser>(user.Guid, false, lastUser) : Task.CompletedTask;
-            Task setAccessFailedCountTask = _signInOptions.RequiredMaxFailedCountCheck ? _identityService.SetAccessFailedCountAsync<TUser>(user.Guid, 0, lastUser) : Task.CompletedTask;
+            Task setLockTask = _signInOptions.RequiredLockoutCheck ? _identityService.SetLockoutAsync(user.Guid, false, lastUser) : Task.CompletedTask;
+            Task setAccessFailedCountTask = _signInOptions.RequiredMaxFailedCountCheck ? _identityService.SetAccessFailedCountAsync(user.Guid, 0, lastUser) : Task.CompletedTask;
 
             if (_signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
             {
@@ -376,27 +387,19 @@ namespace HB.Component.Authorization
             return Task.WhenAll(setLockTask, setAccessFailedCountTask);
         }
 
-        /// <summary>
-        /// PassowrdCheck
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        /// <exception cref="System.Reflection.TargetInvocationException">Ignore.</exception>
-        /// <exception cref="ObjectDisposedException">Ignore.</exception>
-        private static bool PassowrdCheck(IdentityUser user, string password)
+        private static bool PassowrdCheck(User user, string password)
         {
             string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
             return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
-        private Task OnPasswordCheckFailedAsync<TUser>(TUser user, string lastUser) where TUser : IdentityUser, new()
+        private Task OnPasswordCheckFailedAsync(User user, string lastUser)
         {
             Task setAccessFailedCountTask = Task.CompletedTask;
 
             if (_signInOptions.RequiredMaxFailedCountCheck)
             {
-                setAccessFailedCountTask = _identityService.SetAccessFailedCountAsync<TUser>(user.Guid, user.AccessFailedCount + 1, lastUser);
+                setAccessFailedCountTask = _identityService.SetAccessFailedCountAsync(user.Guid, user.AccessFailedCount + 1, lastUser);
             }
 
             Task setLockoutTask = Task.CompletedTask;
@@ -405,7 +408,7 @@ namespace HB.Component.Authorization
             {
                 if (user.AccessFailedCount + 1 > _signInOptions.LockoutAfterAccessFailedCount)
                 {
-                    setLockoutTask = _identityService.SetLockoutAsync<TUser>(user.Guid, true, lastUser, _signInOptions.LockoutTimeSpan);
+                    setLockoutTask = _identityService.SetLockoutAsync(user.Guid, true, lastUser, _signInOptions.LockoutTimeSpan);
                 }
             }
 
@@ -417,43 +420,24 @@ namespace HB.Component.Authorization
         /// </summary>
         /// <param name="signInToken"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.Framework.Common.ValidateErrorException"></exception>
         private async Task BlackSignInTokenAsync(SignInToken signInToken, string lastUser)
         {
             //TODO: 详细记录Black SiginInToken 的历史纪录
-            TransactionContext transactionContext = await _database.BeginTransactionAsync<SignInToken>(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
-                await _signInTokenBiz.DeleteAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenBiz.DeleteByGuidAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
 
-                await _database.CommitAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
             catch
             {
-                await _database.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
                 throw;
             }
         }
 
-        /// <summary>
-        /// ValidateTokenWithoutLifeCheck
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="SecurityTokenDecryptionFailedException"></exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException"></exception>
-        /// <exception cref="SecurityTokenException"></exception>
-        /// <exception cref="SecurityTokenExpiredException"></exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException"></exception>
-        /// <exception cref="SecurityTokenInvalidLifetimeException"></exception>
-        /// <exception cref="SecurityTokenInvalidSignatureException"></exception>
-        /// <exception cref="SecurityTokenNoExpirationException"></exception>
-        /// <exception cref="SecurityTokenNotYetValidException"></exception>
-        /// <exception cref="SecurityTokenReplayAddFailedException"></exception>
-        /// <exception cref="SecurityTokenReplayDetectedException"></exception>
-        /// <exception cref="HB.Component.Authorization.AuthorizationException"></exception>
         private ClaimsPrincipal ValidateTokenWithoutLifeCheck(RefreshContext context)
         {
             TokenValidationParameters parameters = new TokenValidationParameters
@@ -461,12 +445,44 @@ namespace HB.Component.Authorization
                 ValidateAudience = false,
                 ValidateLifetime = false,
                 ValidIssuer = _options.OpenIdConnectConfiguration.Issuer,
-                IssuerSigningKeys = _credentialBiz.IssuerSigningKeys,
-                TokenDecryptionKey = _credentialBiz.DecryptionSecurityKey
+                IssuerSigningKeys = _issuerSigningKeys,
+                TokenDecryptionKey = _decryptionSecurityKey
             };
             return new JwtSecurityTokenHandler().ValidateToken(context.AccessToken, parameters, out _);
         }
 
+        public static IEnumerable<Claim> GetClaims(User user, IEnumerable<Role> roles, IEnumerable<UserClaim> userClaims, SignInToken signInToken)
+        {
+            IList<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
+                new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
+                //new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
+                new Claim(ClaimExtensionTypes.LoginName, user.LoginName??""),
+                //new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
+                //new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
+            };
+
+            foreach (UserClaim item in userClaims)
+            {
+                if (item.AddToJwt)
+                {
+                    claims.Add(new Claim(item.ClaimType, item.ClaimValue));
+                }
+
+            }
+
+            foreach (Role item in roles)
+            {
+                claims.Add(new Claim(ClaimExtensionTypes.Role, item.Name));
+            }
+
+
+            claims.Add(new Claim(ClaimExtensionTypes.SignInTokenGuid, signInToken.Guid));
+            claims.Add(new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId));
+
+            return claims;
+        }
 
     }
 }

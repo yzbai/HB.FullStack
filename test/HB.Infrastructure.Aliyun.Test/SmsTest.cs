@@ -1,4 +1,4 @@
-﻿using HB.Framework.Common.Sms;
+﻿using HB.FullStack.Common.Sms;
 using HB.Infrastructure.Aliyun.Sms;
 using System;
 using Xunit;

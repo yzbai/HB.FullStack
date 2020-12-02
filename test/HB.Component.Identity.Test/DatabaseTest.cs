@@ -1,8 +1,8 @@
 using HB.Component.Identity.Entity;
-using HB.Framework.Common;
-using HB.Framework.Database;
-using HB.Framework.Database.Entity;
-using HB.Framework.Database.SQL;
+using HB.FullStack.Common;
+using HB.FullStack.Database;
+using HB.FullStack.Database.Entity;
+using HB.FullStack.Database.SQL;
 using System;
 using System.Collections.Generic;
 using Xunit;

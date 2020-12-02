@@ -22,8 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.EventBus\HB.Framework.EventBus.csproj" />
-    <ProjectReference Include="..\HB.Framework.KVStore\HB.Framework.KVStore.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
+    <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
+    <ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
+    <ProjectReference Include="..\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
   </ItemGroup>
 
 </Project>

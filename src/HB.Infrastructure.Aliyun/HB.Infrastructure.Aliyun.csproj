@@ -29,7 +29,8 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.Common\HB.Framework.Common.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
   </ItemGroup>
 
 

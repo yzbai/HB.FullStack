@@ -1,5 +1,5 @@
-﻿using HB.Framework.Database;
-using HB.Framework.Database.Engine;
+﻿using HB.FullStack.Database;
+using HB.FullStack.Database.Engine;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
@@ -32,7 +32,14 @@ namespace HB.Infrastructure.MySQL
 
         public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory)
         {
-            MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+            try
+            {
+                MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+            }
+            catch (InvalidOperationException ex)
+            {
+                GlobalSettings.Logger.LogError(ex, $"Connections:{SerializeUtil.ToJson(options.Value.Connections)}");
+            }
 
             _options = options.Value;
 
@@ -297,12 +304,12 @@ namespace HB.Infrastructure.MySQL
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "<Pending>")]
-        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
             await conn.OpenAsync().ConfigureAwait(false);
 
-            return await conn.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
+            return await conn.BeginTransactionAsync(isolationLevel ?? IsolationLevel.RepeatableRead).ConfigureAwait(false);
         }
 
         public async Task CommitAsync(IDbTransaction transaction)

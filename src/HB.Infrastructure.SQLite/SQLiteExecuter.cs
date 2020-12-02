@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
-using HB.Framework.Database;
+using HB.FullStack.Database;
 using Microsoft.Data.Sqlite;
 
 namespace HB.Infrastructure.SQLite

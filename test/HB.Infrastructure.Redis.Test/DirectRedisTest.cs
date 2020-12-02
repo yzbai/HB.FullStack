@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
-using HB.Framework.Common;
+using HB.FullStack.Common;
 using HB.Infrastructure.Redis.Direct;
 using Xunit;
 using Xunit.Abstractions;

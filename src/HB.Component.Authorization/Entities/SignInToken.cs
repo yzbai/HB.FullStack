@@ -1,16 +1,16 @@
-﻿using HB.Framework.Database.Entities;
+﻿using HB.FullStack.Database.Entities;
 using System;
 using System.ComponentModel.DataAnnotations;
 using HB.Component.Identity.Entities;
-using HB.Framework.Common.Entities;
+using HB.FullStack.Common.Entities;
 
 namespace HB.Component.Authorization.Entities
 {
-    [KVStoreEntity]
+    [DatabaseEntity]
     public class SignInToken : Entity
     {
         [Required]
-        [ForeignKey(typeof(IdentityUser))]
+        [ForeignKey(typeof(User))]
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = default!;
 
@@ -34,32 +34,42 @@ namespace HB.Component.Authorization.Entities
         [EntityProperty(NotNull = true)]
         public string DeviceId { get; set; } = default!;
 
-        [Required]
-        [EntityProperty(NotNull = true, Converter = typeof(DeviceInfosDatabaseTypeConverter))]
-        public DeviceInfos DeviceInfos { get; set; } = default!;
-
         [EntityProperty(NotNull = true)]
         public string DeviceVersion { get; set; } = default!;
 
-        [EntityProperty(NotNull = false)]
-        public string? DeviceAddress { get; set; }
 
         [EntityProperty(NotNull = true)]
         public string DeviceIp { get; set; } = default!;
 
         #endregion
+
+        #region Device Infos
+
+        [Required]
+        [EntityProperty]
+        public string DeviceName { get; set; } = null!;
+
+        [Required]
+        [EntityProperty]
+        public string DeviceModel { get; set; } = null!;
+
+        [Required]
+        [EntityProperty]
+        public string DeviceOSVersion { get; set; } = null!;
+
+        [Required]
+        [EntityProperty]
+        public string DevicePlatform { get; set; } = null!;
+
+        [Required]
+        [EntityProperty]
+        public DeviceIdiom DeviceIdiom { get; set; } = DeviceIdiom.Unknown;
+
+        [Required]
+        [EntityProperty]
+        public string DeviceType { get; set; } = null!;
+
+        #endregion
     }
 
-    public class DeviceInfosDatabaseTypeConverter : DatabaseTypeConverter
-    {
-        protected override object? StringDbValueToTypeValue(string stringValue)
-        {
-            return SerializeUtil.FromJson<DeviceInfos>(stringValue);
-        }
-
-        protected override string TypeValueToStringDbValue(object typeValue)
-        {
-            return SerializeUtil.ToJson(typeValue);
-        }
-    }
 }

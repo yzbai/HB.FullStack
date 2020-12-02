@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using HB.Framework.Database;
+using HB.FullStack.Database;
 using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.SQLite

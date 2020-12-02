@@ -1,4 +1,4 @@
-﻿using HB.Framework.KVStore;
+﻿using HB.FullStack.KVStore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -16,9 +16,12 @@ namespace HB.Infrastructure.Redis.KVStore
             }
         }
 
-        public IList<RedisInstanceSetting> ConnectionSettings { get; } = new List<RedisInstanceSetting>();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:集合属性应为只读", Justification = "<挂起>")]
+        public IList<RedisInstanceSetting> ConnectionSettings { get; set; } = new List<RedisInstanceSetting>();
 
         public KVStoreSettings KVStoreSettings { get; set; } = new KVStoreSettings();
+
+        public string? ApplicationName { get; set; }
 
     }
 }

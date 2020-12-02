@@ -4,8 +4,8 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using HB.Framework.Database;
-using HB.Framework.Database.Engine;
+using HB.FullStack.Database;
+using HB.FullStack.Database.Engine;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 
@@ -241,12 +241,12 @@ namespace HB.Infrastructure.SQLite
 
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         [SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "<Pending>")]
-        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));
             await conn.OpenAsync().ConfigureAwait(false);
 
-            return conn.BeginTransaction(isolationLevel);
+            return conn.BeginTransaction(isolationLevel ?? IsolationLevel.Serializable);
         }
 
         public async Task CommitAsync(IDbTransaction transaction)

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.Framework.EventBus\HB.Framework.EventBus.csproj" />
+    <ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
   </ItemGroup>
 
 </Project>

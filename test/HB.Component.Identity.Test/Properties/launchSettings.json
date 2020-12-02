@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "HB.Framework.Identity.Test": {
+    "HB.FullStack.Identity.Test": {
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development_HOME"

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.Framework.EventBus.Abstractions;
+using HB.FullStack.EventBus.Abstractions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -41,7 +41,7 @@ namespace HB.Infrastructure.Redis.Test
             await _eventBus.UnSubscribeAsync(eventName).ConfigureAwait(false);
         }
 
-        public Task HandleAsync(string jsonData)
+        public Task HandleAsync(string jsonData, CancellationToken cancellationToken)
         {
             _output.WriteLine(jsonData);
             return Task.CompletedTask;
