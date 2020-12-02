@@ -37,7 +37,7 @@ namespace HB.FullStack.Lock
         {
             lock (_locker)
             {
-                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                long now = TimeUtil.UtcNowUnixTimeMilliseconds;
 
                 Clear(now);
 

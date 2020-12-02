@@ -108,23 +108,23 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
             {
                 try
                 {
-                    string[] redisKeys = new string[] {
+                    RedisKey[] redisKeys = new RedisKey[] {
                         RedisEventBusEngine.HistoryQueueName(_eventType),
                         RedisEventBusEngine.AcksSetName(_eventType),
                         RedisEventBusEngine.QueueName(_eventType)
                         };
 
-                    string[] redisArgvs = new string[] {
-                        TimeUtil.CurrentUnixTimeSeconds().ToString(GlobalSettings.Culture),
-                        _options.EventBusConsumerAckTimeoutSeconds.ToString(GlobalSettings.Culture)
+                    RedisValue[] redisArgvs = new RedisValue[] {
+                        TimeUtil.UtcNowUnixTimeSeconds,
+                        _options.EventBusConsumerAckTimeoutSeconds
                         };
 
                     IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting).ConfigureAwait(false);
 
                     int result = (int)await database.ScriptEvaluateAsync(
                         _loadedHistoryLua,
-                        redisKeys.Select<string, RedisKey>(t => t).ToArray(),
-                        redisArgvs.Select<string, RedisValue>(t => t).ToArray()).ConfigureAwait(false);
+                        redisKeys,
+                        redisArgvs).ConfigureAwait(false);
 
                     if (result == 0)
                     {
@@ -192,7 +192,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
             {
                 try
                 {
-                    long now = TimeUtil.CurrentUnixTimeSeconds();
+                    long now = TimeUtil.UtcNowUnixTimeSeconds;
 
                     //1, Get Entity
                     IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting).ConfigureAwait(false);

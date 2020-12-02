@@ -113,11 +113,6 @@ namespace System
 
         #endregion Random String
 
-        public static long GetCurrentTimestamp()
-        {
-            TimeSpan ts = DateTimeOffset.UtcNow - new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
-            return Convert.ToInt64(ts.TotalSeconds);
-        }
 
         public static byte[] HexToByteArray(string hexString)
         {

@@ -93,11 +93,6 @@ namespace HB.FullStack.Common.Api
             return SecurityUtil.CreateRandomString(6);
         }
 
-        public static string GetTimestamp()
-        {
-            return SecurityUtil.GetCurrentTimestamp().ToString(GlobalSettings.Culture);
-        }
-
         public string? GetHeader(string name)
         {
             if (_headers.TryGetValue(name, out string value))

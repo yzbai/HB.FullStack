@@ -28,7 +28,7 @@ namespace HB.FullStack.Identity
             }
 
             uc.LockoutEnabled = lockout;
-            uc.LockoutEndDate = DateTimeOffset.UtcNow + (lockoutTimeSpan ?? TimeSpan.FromDays(1));
+            uc.LockoutEndDate = TimeUtil.UtcNow + (lockoutTimeSpan ?? TimeSpan.FromDays(1));
 
             if (uc.Version == -1)
             {

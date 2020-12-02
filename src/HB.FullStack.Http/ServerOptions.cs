@@ -6,9 +6,9 @@ using System.Text;
 
 namespace HB.FullStack.Server
 {
-    public class SiteOptions : IOptions<SiteOptions>
+    public class ServerOptions : IOptions<ServerOptions>
     {
-        public SiteOptions Value
+        public ServerOptions Value
         {
             get
             {

@@ -92,7 +92,7 @@ return data";
                 RedisResult result = await database.ScriptEvaluateAsync(
                     GetDefaultLoadLuas().LoadedGetAndRefreshLua,
                     new RedisKey[] { GetRealKey(key) },
-                    new RedisValue[] { DateTimeOffset.UtcNow.ToUnixTimeSeconds() }).ConfigureAwait(false);
+                    new RedisValue[] { TimeUtil.UtcNowUnixTimeSeconds }).ConfigureAwait(false);
 
                 return (byte[]?)result;
             }
@@ -127,7 +127,10 @@ return data";
 
             IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
 
-            options.Check();
+            if (options.AbsoluteExpirationRelativeToNow.HasValue)
+            {
+                options.AbsoluteExpiration = TimeUtil.UtcNow + options.AbsoluteExpirationRelativeToNow;
+            }
 
             long? absoluteExpireUnixSeconds = options.AbsoluteExpiration?.ToUnixTimeSeconds();
             long? slideSeconds = (long?)(options.SlidingExpiration?.TotalSeconds);

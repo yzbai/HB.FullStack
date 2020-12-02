@@ -104,7 +104,7 @@ namespace HB.FullStack.Repository
                 }
 
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
-                long now = DateTimeOffset.UtcNow.Ticks;
+                long now = TimeUtil.UtcNowTicks;
 
                 if (dbRt != null)
                 {

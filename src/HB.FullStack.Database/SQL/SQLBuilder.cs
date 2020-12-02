@@ -428,7 +428,7 @@ namespace HB.FullStack.Database.SQL
             {
                 _databaseEngine.CreateParameter(versionProperty.DbParameterizedName!, DbParameterValue_Statement(currentVersion+1, versionProperty), versionProperty.DbFieldType),
                 _databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName!, DbParameterValue_Statement(lastUser, lastUserProperty), lastUserProperty.DbFieldType),
-                _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, DbParameterValue_Statement(DateTimeOffset.UtcNow, lastTimeProperty), lastTimeProperty.DbFieldType)
+                _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, DbParameterValue_Statement(TimeUtil.UtcNow, lastTimeProperty), lastTimeProperty.DbFieldType)
             };
 
             return AssembleCommand<T, T>(false, deleteTemplate, null, condition, parameters);

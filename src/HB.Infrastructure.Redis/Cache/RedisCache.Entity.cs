@@ -334,7 +334,7 @@ namespace HB.Infrastructure.Redis.Cache
     //            }
 
     //            redisValues.Add(entityDef.SlidingTime?.TotalSeconds ?? -1);
-    //            redisValues.Add(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+    //            redisValues.Add(TimeUtil.UtcNowUnixTimeSeconds);
 
     //            return loadedScript;
     //        }
@@ -364,7 +364,7 @@ namespace HB.Infrastructure.Redis.Cache
     //                joinedDimensinKeyBuilder.Remove(joinedDimensinKeyBuilder.Length - 1, 1);
     //            }
 
-    //            DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? DateTimeOffset.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
+    //            DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? TimeUtil.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
     //            long? absoluteExpireUnixSeconds = absulteExpireTime?.ToUnixTimeSeconds();
     //            long? slideSeconds = (long?)(entityDef.SlidingTime?.TotalSeconds);
     //            long? expireSeconds = GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds);

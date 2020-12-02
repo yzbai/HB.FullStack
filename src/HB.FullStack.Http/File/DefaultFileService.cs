@@ -12,10 +12,10 @@ namespace HB.FullStack.Server.File
 {
     public class DefaultFileService : IFileService
     {
-        private readonly SiteOptions _siteOptions;
+        private readonly ServerOptions _siteOptions;
         private readonly ISecurityService _securityService;
 
-        public DefaultFileService(IOptions<SiteOptions> options, ISecurityService securityService)
+        public DefaultFileService(IOptions<ServerOptions> options, ISecurityService securityService)
         {
             _siteOptions = options.Value;
             _securityService = securityService;

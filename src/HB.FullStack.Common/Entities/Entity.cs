@@ -44,9 +44,14 @@ namespace HB.FullStack.Common.Entities
         /// UTC 时间
         /// </summary>
         [EntityProperty("上一次更改时间")]
-        public DateTimeOffset LastTime { get; internal set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset LastTime { get; internal set; } = TimeUtil.UtcNow;
 
         [EntityProperty("逻辑删除标志")]
         public bool Deleted { get; internal set; } = false;
+
+        public void OnlyForDtoMapping(string guid)
+        {
+            Guid = guid;
+        }
     }
 }

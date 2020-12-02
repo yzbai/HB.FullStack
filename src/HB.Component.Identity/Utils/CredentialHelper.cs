@@ -9,7 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace HB.FullStack.Identity
 {
-    internal static class CredentialHelper
+    public static class CredentialHelper
     {
         //private readonly AuthorizationServiceOptions _options;
 

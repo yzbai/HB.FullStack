@@ -35,7 +35,7 @@ namespace HB.FullStack.Server
             await _cache.SetStringAsync(
                 token,
                 _defaultValue,
-                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                TimeUtil.UtcNowTicks,
                 new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(expiredSeconds) }).ConfigureAwait(false);
 
             return _dataProtector.Protect(token);
@@ -72,7 +72,7 @@ namespace HB.FullStack.Server
             }
 
 
-            return await _cache.RemoveAsync(token, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()).ConfigureAwait(false);
+            return await _cache.RemoveAsync(token, TimeUtil.UtcNowTicks).ConfigureAwait(false);
         }
     }
 }

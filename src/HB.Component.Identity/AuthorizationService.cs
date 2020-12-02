@@ -312,7 +312,7 @@ namespace HB.FullStack.Identity
 
                 //验证SignInToken过期问题
 
-                if (signInToken.ExpireAt < DateTimeOffset.UtcNow)
+                if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
                     await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
 
@@ -400,7 +400,7 @@ namespace HB.FullStack.Identity
             }
 
             //4, Lockout 检查
-            if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > DateTimeOffset.UtcNow)
+            if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
             {
                 throw new AuthorizationException(ErrorCode.AuthorizationLockedOut, $"user:{SerializeUtil.ToJson(user)}");
             }
@@ -408,7 +408,7 @@ namespace HB.FullStack.Identity
             //5, 一段时间内,最大失败数检测
             if (signInOptions.RequiredMaxFailedCountCheck && userLoginControl.LoginFailedLastTime.HasValue)
             {
-                if (DateTimeOffset.UtcNow - userLoginControl.LoginFailedLastTime < TimeSpan.FromDays(signInOptions.AccessFailedRecoveryDays))
+                if (TimeUtil.UtcNow - userLoginControl.LoginFailedLastTime < TimeSpan.FromDays(signInOptions.AccessFailedRecoveryDays))
                 {
                     if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
                     {
@@ -441,7 +441,7 @@ namespace HB.FullStack.Identity
                 if (userLoginControl.LoginFailedCount + 1 > _options.SignInOptions.LockoutAfterAccessFailedCount)
                 {
                     userLoginControl.LockoutEnabled = true;
-                    userLoginControl.LockoutEndDate = DateTimeOffset.UtcNow + _options.SignInOptions.LockoutTimeSpan;
+                    userLoginControl.LockoutEndDate = TimeUtil.UtcNow + _options.SignInOptions.LockoutTimeSpan;
                 }
             }
 

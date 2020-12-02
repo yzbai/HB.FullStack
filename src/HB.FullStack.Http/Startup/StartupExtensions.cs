@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Common.Api;
+using HB.FullStack.Identity;
 using HB.FullStack.Server;
 
 using Microsoft.AspNetCore.Authentication;
@@ -95,9 +96,6 @@ namespace System
                 throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
             }
 
-            //私钥
-            X509SecurityKey tokenDecryptionKey = new X509SecurityKey(encryptCert);
-
             return
                 services
                 .AddAuthentication(options =>
@@ -119,7 +117,7 @@ namespace System
                         ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
-                        TokenDecryptionKey = tokenDecryptionKey
+                        TokenDecryptionKey = CredentialHelper.GetSecurityKey(encryptCert)
                     };
                     jwtOptions.Events = new JwtBearerEvents
                     {

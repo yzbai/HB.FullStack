@@ -1036,7 +1036,7 @@ namespace HB.FullStack.Database
             try
             {
                 item.LastUser = lastUser;
-                item.LastTime = DateTimeOffset.UtcNow;
+                item.LastTime = TimeUtil.UtcNow;
 
                 dbCommand = _sqlBuilder.CreateAddOrUpdateCommand(item);
 
@@ -1103,7 +1103,7 @@ namespace HB.FullStack.Database
             try
             {
                 item.LastUser = lastUser;
-                item.LastTime = DateTimeOffset.UtcNow;
+                item.LastTime = TimeUtil.UtcNow;
 
                 dbCommand = _sqlBuilder.CreateAddCommand(item);
 
@@ -1145,7 +1145,7 @@ namespace HB.FullStack.Database
             try
             {
                 item.LastUser = lastUser;
-                item.LastTime = DateTimeOffset.UtcNow;
+                item.LastTime = TimeUtil.UtcNow;
 
                 IDbCommand dbCommand = _sqlBuilder.CreateDeleteCommand(condition, item.Version, lastUser);
 
@@ -1200,7 +1200,7 @@ namespace HB.FullStack.Database
             try
             {
                 item.LastUser = lastUser;
-                item.LastTime = DateTimeOffset.UtcNow;
+                item.LastTime = TimeUtil.UtcNow;
 
                 IDbCommand dbCommand = _sqlBuilder.CreateUpdateCommand(condition, item);
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, dbCommand).ConfigureAwait(false);
@@ -1259,7 +1259,7 @@ namespace HB.FullStack.Database
                 items.ForEach(item =>
                 {
                     item.LastUser = lastUser;
-                    item.LastTime = DateTimeOffset.UtcNow;
+                    item.LastTime = TimeUtil.UtcNow;
                 });
 
                 dbCommand = _sqlBuilder.CreateBatchAddOrUpdateCommand(items);
@@ -1341,7 +1341,7 @@ namespace HB.FullStack.Database
                 items.ForEach(item =>
                 {
                     item.LastUser = lastUser;
-                    item.LastTime = DateTimeOffset.UtcNow;
+                    item.LastTime = TimeUtil.UtcNow;
                 });
 
                 IList<long> newIds = new List<long>();
@@ -1421,7 +1421,7 @@ namespace HB.FullStack.Database
                 items.ForEach(item =>
                 {
                     item.LastUser = lastUser;
-                    item.LastTime = DateTimeOffset.UtcNow;
+                    item.LastTime = TimeUtil.UtcNow;
                 });
 
                 dbCommand = _sqlBuilder.CreateBatchUpdateCommand(items);
@@ -1493,7 +1493,7 @@ namespace HB.FullStack.Database
                 items.ForEach(item =>
                 {
                     item.LastUser = lastUser;
-                    item.LastTime = DateTimeOffset.UtcNow;
+                    item.LastTime = TimeUtil.UtcNow;
                 });
 
                 dbCommand = _sqlBuilder.CreateBatchDeleteCommand(items);

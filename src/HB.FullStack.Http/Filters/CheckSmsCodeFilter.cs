@@ -47,7 +47,7 @@ namespace HB.FullStack.Server.Filters
                         return;
                     }
 
-                    if (!_smsService.Validate(mobile!, smsCode!))
+                    if (!await _smsService.ValidateAsync(mobile!, smsCode!).ConfigureAwait(false))
                     {
                         _authorizationService.OnSignInFailedBySmsAsync(mobile!, apiRequest.DeviceInfos.Name).Fire();
                         OnError(context);

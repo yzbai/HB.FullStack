@@ -105,7 +105,7 @@ namespace HB.FullStack.Lock.Memory
         {
             memoryLock.ExtendCount++;
 
-            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            long now = TimeUtil.UtcNowUnixTimeMilliseconds;
 
             for (int i = 0; i < memoryLock.ResourceKeys.Count; ++i)
             {
@@ -123,7 +123,7 @@ namespace HB.FullStack.Lock.Memory
         {
             //这里可以不加锁，因为已经上了资源锁
 
-            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            long now = TimeUtil.UtcNowUnixTimeMilliseconds;
 
             for (int i = 0; i < memoryLock.ResourceKeys.Count; ++i)
             {

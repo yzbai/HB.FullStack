@@ -4,13 +4,13 @@ namespace System
 {
     public static class TimeUtil
     {
-        //TODO: 对系统中的DateTime, DateTimeOffset,DateTime.UtcNow做出梳理和清理
+        public static long UtcNowTicks => DateTimeOffset.UtcNow.Ticks;
 
-        public static long CurrentUnixTimeSeconds()
-        {
-            return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
+        public static long UtcNowUnixTimeSeconds => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
+        public static DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
+        public static long UtcNowUnixTimeMilliseconds => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
+
 }

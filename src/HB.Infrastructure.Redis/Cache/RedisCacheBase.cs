@@ -175,7 +175,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             if (absoluteExpireUnixSeconds != null)
             {
-                return absoluteExpireUnixSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                return absoluteExpireUnixSeconds - TimeUtil.UtcNowUnixTimeSeconds;
             }
 
             return null;

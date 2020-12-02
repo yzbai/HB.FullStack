@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Properties;
 
@@ -118,7 +120,7 @@ namespace HB.FullStack.Client.Api
             //添加噪音
             IDictionary<string, string?> parameters = new Dictionary<string, string?>();
             parameters.Add(ClientNames.RandomStr, ApiRequest.GetRandomStr());
-            parameters.Add(ClientNames.Timestamp, ApiRequest.GetTimestamp());
+            parameters.Add(ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
             parameters.Add(ClientNames.DeviceId, request.DeviceId);

@@ -412,7 +412,7 @@ end
 
             redisValues.Add(redisKeys.Count);
             redisValues.Add(entityDef.SlidingTime?.TotalSeconds ?? -1);
-            redisValues.Add(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            redisValues.Add(TimeUtil.UtcNowUnixTimeSeconds);
 
             return loadedScript;
         }
@@ -421,7 +421,7 @@ end
             /// keys: entity1_guidKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_guidKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
             /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
 
-            DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? DateTimeOffset.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
+            DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? TimeUtil.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
             long? absoluteExpireUnixSeconds = absulteExpireTime?.ToUnixTimeSeconds();
             long? slideSeconds = (long?)(entityDef.SlidingTime?.TotalSeconds);
             long? expireSeconds = GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds);

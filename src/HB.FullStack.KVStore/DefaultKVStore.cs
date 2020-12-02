@@ -132,7 +132,7 @@ namespace HB.FullStack.KVStore
                 items.ForEach(t =>
                 {
                     t.LastUser = lastUser;
-                    t.LastTime = DateTimeOffset.UtcNow;
+                    t.LastTime = TimeUtil.UtcNow;
                 });
 
                 await _engine.EntityAddAsync(
@@ -184,7 +184,7 @@ namespace HB.FullStack.KVStore
                 items.ForEach(t =>
                 {
                     t.LastUser = lastUser;
-                    t.LastTime = DateTimeOffset.UtcNow;
+                    t.LastTime = TimeUtil.UtcNow;
                 });
 
                 await _engine.EntityUpdateAsync(
@@ -296,7 +296,7 @@ namespace HB.FullStack.KVStore
                 items.ForEach(t =>
                 {
                     t.LastUser = lastUser;
-                    t.LastTime = DateTimeOffset.UtcNow;
+                    t.LastTime = TimeUtil.UtcNow;
                 });
 
                 IEnumerable<int> versions = await _engine.EntityAddOrUpdateAsync(

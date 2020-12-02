@@ -64,7 +64,7 @@ namespace HB.FullStack.Identity
             {
                 UserGuid = userGuid,
                 RefreshToken = SecurityUtil.CreateUniqueToken(),
-                ExpireAt = DateTimeOffset.UtcNow + expireTimeSpan,
+                ExpireAt = TimeUtil.UtcNow + expireTimeSpan,
                 DeviceId = deviceId,
                 DeviceVersion = deviceVersion,
                 DeviceIp = ipAddress,

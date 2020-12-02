@@ -11,6 +11,7 @@ using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Properties;
 using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 using HB.FullStack.Common.Server;
+using HB.FullStack.Cache;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -19,9 +20,9 @@ namespace HB.Infrastructure.Aliyun.Sms
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;
         private readonly ILogger _logger;
-        private readonly IDistributedCache _cache;
+        private readonly ICache _cache;
 
-        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, IDistributedCache cache)
+        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, ICache cache)
         {
             _options = options.Value;
             _logger = logger;
@@ -32,7 +33,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
         }
 
-        //TODO: 等待阿里云增加异步方法，在此之外，调用这个方法，应该使用SafeFireAndForget
+        //TODO: 等待阿里云增加异步方法
         /// <summary>
         /// 
         /// </summary>
@@ -70,7 +71,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
                 if (sendResult != null && sendResult.IsSuccessful())
                 {
-                    CacheSmsCode(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
+                    SetSmsCodeToCache(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
                 }
                 else
                 {
@@ -88,32 +89,33 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
         }
 
-        public bool Validate(string mobile, string code)
+        public async Task<bool> ValidateAsync(string mobile, string code)
         {
             if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsPositiveNumber(code))
             {
                 return false;
             }
 
-            string cachedSmsCode = GetSmsCodeFromCache(mobile);
+            string? cachedSmsCode = await GetSmsCodeFromCacheAsync(mobile).ConfigureAwait(false);
 
             return string.Equals(code, cachedSmsCode, GlobalSettings.Comparison);
         }
 
-        private void CacheSmsCode(string mobile, string cachedSmsCode, int expireMinutes)
+        private void SetSmsCodeToCache(string mobile, string cachedSmsCode, int expireMinutes)
         {
-            _cache.SetString(
+            _cache.SetStringAsync(
                         GetCachedKey(mobile),
                         cachedSmsCode,
+                        TimeUtil.UtcNowTicks,
                         new DistributedCacheEntryOptions()
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
-                        });
+                        }).Fire();
         }
 
-        private string GetSmsCodeFromCache(string mobile)
+        private Task<string?> GetSmsCodeFromCacheAsync(string mobile)
         {
-            return _cache.GetString(GetCachedKey(mobile));
+            return _cache.GetStringAsync(GetCachedKey(mobile));
         }
 
         private static string GenerateNewSmsCode(int codeLength)
