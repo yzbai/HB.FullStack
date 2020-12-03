@@ -96,7 +96,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
         private void InitLodedLua()
         {
-            IServer server = RedisInstanceManager.GetServer(_instanceSetting);
+            IServer server = RedisInstanceManager.GetServer(_instanceSetting, _logger);
 
             _loadedHistoryLua = server.ScriptLoad(_hISTORY_REDIS_SCRIPT);
         }
@@ -119,7 +119,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                         _options.EventBusConsumerAckTimeoutSeconds
                         };
 
-                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting).ConfigureAwait(false);
+                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
                     int result = (int)await database.ScriptEvaluateAsync(
                         _loadedHistoryLua,
@@ -195,7 +195,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     long now = TimeUtil.UtcNowUnixTimeSeconds;
 
                     //1, Get Entity
-                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting).ConfigureAwait(false);
+                    IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
                     RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);
 

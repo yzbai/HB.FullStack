@@ -7,7 +7,7 @@ namespace HB.FullStack.Identity
 {
     public interface IAuthorizationService
     {
-        JsonWebKeySet JsonWebKeySet { get; }
+        string JsonWebKeySetJson { get; }
 
         Task<string> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
         Task<SignInResult> SignInAsync(SignInContext context, string lastUser);

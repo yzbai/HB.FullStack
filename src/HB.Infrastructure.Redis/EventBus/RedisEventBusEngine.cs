@@ -40,6 +40,8 @@ namespace HB.Infrastructure.Redis.EventBus
             _options = options.Value;
             _lockManager = lockManager;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
+
+            _logger.LogInformation($"RedisEventBusEngine初始化完成");
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
-            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting).ConfigureAwait(false);
+            IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger).ConfigureAwait(false);
 
             EventMessageEntity entity = new EventMessageEntity(eventName, jsonData);
 

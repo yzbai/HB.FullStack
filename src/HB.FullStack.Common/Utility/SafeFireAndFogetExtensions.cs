@@ -2,16 +2,25 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
 
-namespace System.Threading.Tasks
+
+namespace System
 {
     public static class SafeFireAndFogetExtensions
     {
-        public static void Fire(this Task task)
+        [Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+        [Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD003:Avoid awaiting foreign Tasks", Justification = "<Pending>")]
+        public static async void Fire(this Task task, string? message = null, bool continueOnCapturedContext = false)
         {
-            task.SafeFireAndForget(GlobalSettings.ExceptionHandler, false);
+            try
+            {
+                await task.ConfigureAwait(continueOnCapturedContext);
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.ExceptionHandler(ex, message);
+                throw;
+            }
         }
-
     }
 }

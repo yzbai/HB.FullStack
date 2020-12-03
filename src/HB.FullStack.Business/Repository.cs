@@ -44,6 +44,8 @@ namespace HB.FullStack.Repository
 
             //Dirty trick
             _database = (IDatabase)databaseReader;
+
+            _logger.LogInformation($"{this.GetType().Name} 初始化完成");
         }
 
         #region Events

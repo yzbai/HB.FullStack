@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using HB.FullStack.Lock;
 using HB.FullStack.Lock.Distributed;
 
+using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DistributedLock
@@ -14,6 +16,9 @@ namespace HB.Infrastructure.Redis.DistributedLock
     public class RedisLock : IDistributedLock
     {
         private const string _prefix = "HBRL_";
+
+        private ILogger _logger;
+
         internal IEnumerable<string> Resources { get; set; }
 
         internal IEnumerable<string> ResourceValues { get; set; }
@@ -26,9 +31,10 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         internal Timer? KeepAliveTimer { get; set; }
 
-        internal RedisLock(SingleRedisDistributedLockOptions options, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
+        internal RedisLock(SingleRedisDistributedLockOptions options, ILogger logger, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
         {
             Options = options;
+            _logger = logger;
             ExpiryTime = expiryTime;
             WaitTime = waitTime;
             RetryTime = retryTime;
@@ -91,7 +97,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-                SingleRedisDistributedLockManager.ReleaseResourceAsync(this).Fire();
+                SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
 
                 Resources = null!;
                 ResourceValues = null!;
@@ -115,7 +121,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-                await SingleRedisDistributedLockManager.ReleaseResourceAsync(this).ConfigureAwait(false);
+                await SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).ConfigureAwait(false);
 
                 Resources = null!;
                 ResourceValues = null!;

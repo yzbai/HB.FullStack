@@ -104,7 +104,7 @@ namespace HB.FullStack.Repository
                 }
 
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
-                long now = TimeUtil.UtcNowTicks;
+                UtcNowTicks now = TimeUtil.UtcNowTicks;
 
                 if (dbRt != null)
                 {
@@ -128,7 +128,7 @@ namespace HB.FullStack.Repository
 
         public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
-            if (!ICache.IsEntityEnabled<TEntity>())
+            if (ICache.IsEntityEnabled<TEntity>())
             {
                 cache.RemoveEntitiesAsync(entities).Fire();
             }

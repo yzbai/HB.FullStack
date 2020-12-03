@@ -8,7 +8,7 @@ namespace HB.FullStack.Repository
 {
     public class DatabaseWriteEventArgs : EventArgs
     {
-        public long UtcNowTicks { get; } = TimeUtil.UtcNowTicks;
+        public UtcNowTicks UtcNowTicks { get; } = TimeUtil.UtcNowTicks;
 
     }
 }

@@ -1,9 +1,12 @@
 ﻿using HB.FullStack.Database;
 using HB.FullStack.Database.Engine;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using MySqlConnector;
 using MySqlConnector.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -22,6 +25,8 @@ namespace HB.Infrastructure.MySQL
 
         private readonly MySQLOptions _options;
 
+        private readonly ILogger _logger;
+
         private readonly Dictionary<string, string> _connectionStringDict = new Dictionary<string, string>();
 
         public DatabaseCommonSettings DatabaseSettings => _options.CommonSettings;
@@ -30,7 +35,7 @@ namespace HB.Infrastructure.MySQL
 
         [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
 
-        public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory)
+        public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory, ILogger<MySQLEngine> logger)
         {
             try
             {
@@ -42,8 +47,11 @@ namespace HB.Infrastructure.MySQL
             }
 
             _options = options.Value;
+            _logger = logger;
 
             SetConnectionStrings();
+
+            _logger.LogInformation($"MySQLEngine初始化完成");
         }
 
         private void SetConnectionStrings()

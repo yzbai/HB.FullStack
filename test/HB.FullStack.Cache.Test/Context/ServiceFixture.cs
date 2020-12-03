@@ -1,16 +1,19 @@
 ﻿using HB.Infrastructure.Redis;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
+
 using System;
 
 namespace HB.FullStack.Cache.Test
 {
     public class ServiceFixture
     {
-        private const string _connectionString = "127.0.0.1:6379";
+        private const string _connectionString = "brlitetest.redis.rds.aliyuncs.com:6379,password=xMS22xtNPc&4RzgU,defaultDatabase=1";
         private readonly IServiceProvider _serviceProvider;
-        public const string ApplicationName = "Test";
+        public const string ApplicationName = "Cache.Test.";
         public const string InstanceName = "Default";
 
         public ServiceFixture()

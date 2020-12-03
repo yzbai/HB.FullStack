@@ -10,6 +10,10 @@
     <WarningsAsErrors />
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Cache\RedisCache.Entity.cs" />
+  </ItemGroup>
+
 
 
   <ItemGroup>
