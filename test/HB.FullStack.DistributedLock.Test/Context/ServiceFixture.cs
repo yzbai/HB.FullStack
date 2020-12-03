@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Distributed;
+using HB.FullStack.Lock.Memory;
 using HB.Infrastructure.Redis;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -17,9 +18,9 @@ namespace HB.FullStack.DistributedLock.Test
 {
     public class ServiceFixture
     {
-        private const string _connectionString = "127.0.0.1:6379";
+        private const string _connectionString = "brlitetest.redis.rds.aliyuncs.com:6379,password=xMS22xtNPc&4RzgU,defaultDatabase=1";
         private readonly IServiceProvider _serviceProvider;
-        public const string ApplicationName = "Test";
+        public const string ApplicationName = "LockTest";
         public const string InstanceName = "Default";
 
         public ServiceFixture()
@@ -51,6 +52,9 @@ namespace HB.FullStack.DistributedLock.Test
                 };
             });
 
+            services.AddMemoryCache();
+            services.AddMemoryLock();
+
             ServiceProvider provider = services.BuildServiceProvider();
 
             GlobalSettings.Logger = provider.GetRequiredService<ILogger<ServiceFixture>>();
@@ -61,6 +65,8 @@ namespace HB.FullStack.DistributedLock.Test
         }
 
         public IDistributedLockManager DistributedLockManager => _serviceProvider.GetRequiredService<IDistributedLockManager>();
+
+        public IMemoryLockManager MemoryLockManager => _serviceProvider.GetRequiredService<IMemoryLockManager>();
 
         public StackExchange.Redis.ConnectionMultiplexer RedisConnection { get; set; }
 

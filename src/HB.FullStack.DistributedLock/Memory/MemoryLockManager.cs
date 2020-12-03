@@ -90,6 +90,16 @@ namespace HB.FullStack.Lock.Memory
             return memoryLock;
         }
 
+        internal void StopKeepAliveTimer(MemoryLock memoryLock)
+        {
+            if (memoryLock.KeepAliveTimer != null)
+            {
+                memoryLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                memoryLock.KeepAliveTimer.Dispose();
+                memoryLock.KeepAliveTimer = null;
+            }
+        }
+
         private void StartAutoExtendTimer(MemoryLock memoryLock)
         {
             long interval = (long)memoryLock.ExpiryTime.TotalMilliseconds / 2;
@@ -154,12 +164,7 @@ namespace HB.FullStack.Lock.Memory
             //这里不加锁也没关系，因为不影响上面Acquire时的三个判断
             //比如：判断“存在但过期”，这里删掉了。不影响
 
-            if (memoryLock.KeepAliveTimer != null)
-            {
-                memoryLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                memoryLock.KeepAliveTimer.Dispose();
-                memoryLock.KeepAliveTimer = null;
-            }
+            StopKeepAliveTimer(memoryLock);
 
             for (int i = 0; i < memoryLock.ResourceKeys.Count; ++i)
             {

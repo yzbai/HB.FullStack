@@ -8,6 +8,6 @@ namespace HB.FullStack.Lock.Memory
         bool IsAcquired { get; }
         string ResourceType { get; set; }
         MemoryLockStatus Status { get; set; }
-
+        int ExtendCount { get; set; }
     }
 }
