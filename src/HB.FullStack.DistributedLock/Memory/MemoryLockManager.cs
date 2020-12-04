@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Lock.Memory
@@ -13,6 +14,7 @@ namespace HB.FullStack.Lock.Memory
     public class MemoryLockManager : IMemoryLockManager
     {
         private readonly MemoryLockOptions _options;
+        private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
 
         /// <summary>
@@ -21,9 +23,10 @@ namespace HB.FullStack.Lock.Memory
         /// </summary>
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _resourceTypeSemaphoreDict = new ConcurrentDictionary<string, SemaphoreSlim>();
 
-        public MemoryLockManager(IOptions<MemoryLockOptions> options, IMemoryCache memoryCache)
+        public MemoryLockManager(IOptions<MemoryLockOptions> options, ILogger<MemoryLockManager> logger, IMemoryCache memoryCache)
         {
             _options = options.Value;
+            _logger = logger;
             _memoryCache = memoryCache;
         }
 
@@ -113,6 +116,12 @@ namespace HB.FullStack.Lock.Memory
 
         private void ExtendLockLifetime(MemoryLock memoryLock)
         {
+            if (memoryLock.Status != MemoryLockStatus.Acquired)
+            {
+                _logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{memoryLock.ResourceKeys.ToJoinedString(",")}, Status:{memoryLock.Status}");
+                return;
+            }
+
             memoryLock.ExtendCount++;
 
             long now = TimeUtil.UtcNowUnixTimeMilliseconds;

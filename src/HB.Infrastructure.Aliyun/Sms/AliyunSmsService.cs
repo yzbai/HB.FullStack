@@ -7,7 +7,6 @@ using System;
 using Microsoft.Extensions.Caching.Distributed;
 using HB.FullStack.Common.Validate;
 using System.Text.Json;
-using Aliyun.Acs.Core.Exceptions;
 using HB.Infrastructure.Aliyun.Properties;
 using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 using HB.FullStack.Common.Server;
@@ -88,6 +87,13 @@ namespace HB.Infrastructure.Aliyun.Sms
                 throw new AliyunSmsException(Resources.AliyunSmsServiceDownErrorMessage, ex);
             }
         }
+
+#if DEBUG
+        public void SendValidationCode(string mobile, string smsCode, int expiryMinutes)
+        {
+            SetSmsCodeToCache(mobile, smsCode, expiryMinutes);
+        }
+#endif
 
         public async Task<bool> ValidateAsync(string mobile, string code)
         {

@@ -45,21 +45,21 @@ namespace HB.FullStack.Client
 
         #region facilities
 
-        private static readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();
+        //private static readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();
 
-        private const string _apiResourceType = "Api";
+        //private const string _apiResourceType = "Api";
 
-        private static readonly TimeSpan _apiReousrceAliveTimespan = TimeSpan.FromMinutes(2);
+        //private static readonly TimeSpan _apiReousrceAliveTimespan = TimeSpan.FromMinutes(2);
 
-        public static bool CheckSyncFrequency(string userGuid, string resourceName)
-        {
-            return _frequencyChecker.Check(_apiResourceType + userGuid + resourceName, _apiReousrceAliveTimespan);
-        }
+        //public static bool CheckSyncFrequency(string userGuid, string resourceName)
+        //{
+        //    return _frequencyChecker.Check(_apiResourceType + userGuid + resourceName, _apiReousrceAliveTimespan);
+        //}
 
-        public static void ResetSyncFrequency(string userGuid, string resourceName)
-        {
-            _frequencyChecker.Reset(_apiResourceType, userGuid + resourceName);
-        }
+        //public static void ResetSyncFrequency(string userGuid, string resourceName)
+        //{
+        //    _frequencyChecker.Reset(_apiResourceType, userGuid + resourceName);
+        //}
 
         #endregion
 

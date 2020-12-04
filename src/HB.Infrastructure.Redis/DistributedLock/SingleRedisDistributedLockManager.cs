@@ -193,7 +193,7 @@ return 1";
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues);
+            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues, logger);
 
             IDatabase database = await GetDatabaseAsync(redisLock.Options.ConnectionSetting, logger).ConfigureAwait(false);
 
@@ -231,12 +231,18 @@ return 1";
 
         private static void ExtendLockLifetime(RedisLock redisLock, ILogger logger)
         {
+            if (redisLock.Status != DistributedLockStatus.Acquired)
+            {
+                logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+                return;
+            }
+
             logger.LogDebug($"锁在自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues);
+            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues, logger);
 
             IDatabase database = GetDatabase(redisLock.Options.ConnectionSetting, logger);
 
@@ -251,7 +257,7 @@ return 1";
 
                 if (rt != 1)
                 {
-                    logger.LogError("RedisLock Extend Failed.");
+                    logger.LogError($"RedisLock 延期 失败. Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
                     return;
                 }
 
@@ -266,9 +272,28 @@ return 1";
                 ExtendLockLifetime(redisLock, logger);
             }
         }
+        private static void StopKeepAliveTimer(RedisLock redisLock, ILogger logger)
+        {
+            if (redisLock.KeepAliveTimer != null)
+            {
+                lock (redisLock.StopKeepAliveTimerLockObj)
+                {
+                    if (redisLock.KeepAliveTimer != null)
+                    {
+                        redisLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                        redisLock.KeepAliveTimer.Dispose();
+                        redisLock.KeepAliveTimer = null;
+
+                        logger.LogDebug($"锁停止自动延期，Resources:{redisLock.Resources.ToJoinedString(",")}");
+                    }
+                }
+            }
+        }
 
         internal static async Task ReleaseResourceAsync(RedisLock redisLock, ILogger logger)
         {
+            StopKeepAliveTimer(redisLock, logger);
+
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
@@ -287,7 +312,7 @@ return 1";
 
                 if (rt == 1)
                 {
-                    GlobalSettings.Logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                    logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                 }
                 else
                 {
@@ -302,7 +327,7 @@ return 1";
             }
             catch
             {
-                GlobalSettings.Logger.LogDebug($"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                logger.LogDebug($"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                 throw;
             }
         }
@@ -330,22 +355,32 @@ return 1";
             }
         }
 
-        private static void AddAcquireOrExtendRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private static void AddAcquireOrExtendRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues, ILogger logger)
         {
             /// keys: resource1, resource2, resource3
             /// argv: 3(resource_count), expire_milliseconds, resource1_value, resource2_value, resource3_value
 
-            foreach (string item in redisLock.Resources)
+            //有可能到这里，dispose了，redisLock.Resources都为空
+
+
+            try
             {
-                redisKeys.Add(item);
+                foreach (string item in redisLock.Resources)
+                {
+                    redisKeys.Add(item);
+                }
+
+                redisValues.Add(redisKeys.Count);
+                redisValues.Add((int)redisLock.ExpiryTime.TotalMilliseconds);
+
+                foreach (string item in redisLock.ResourceValues)
+                {
+                    redisValues.Add(item);
+                }
             }
-
-            redisValues.Add(redisKeys.Count);
-            redisValues.Add((int)redisLock.ExpiryTime.TotalMilliseconds);
-
-            foreach (string item in redisLock.ResourceValues)
+            catch (NullReferenceException ex)
             {
-                redisValues.Add(item);
+                logger.LogError(ex, $"在试图延长锁的时候，ResourceValues被清空. Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
             }
         }
 

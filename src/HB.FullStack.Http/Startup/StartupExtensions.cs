@@ -157,7 +157,6 @@ namespace System
                         },
                         OnTokenValidated = c =>
                         {
-                            //TODO: 因为DeviceId放在了Body中，所以这里有问题。
                             //验证DeviceId 与 JWT 中的DeviceId 是否一致
                             string? jwt_DeviceId = c.Principal?.GetDeviceId();
                             string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);

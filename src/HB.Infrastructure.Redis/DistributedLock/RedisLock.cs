@@ -31,6 +31,8 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         internal Timer? KeepAliveTimer { get; set; }
 
+        internal object StopKeepAliveTimerLockObj { get; private set; } = new object();
+
         internal RedisLock(SingleRedisDistributedLockOptions options, ILogger logger, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
         {
             Options = options;
@@ -70,36 +72,25 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         private bool _disposedValue;
 
-        private object _lockObj = new object();
+
 
         protected virtual void Dispose(bool disposing)
         {
+            _logger.LogDebug($"锁开始Dispose，Resources:{Resources.ToJoinedString(",")}");
+
             if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
-                    if (KeepAliveTimer != null)
-                    {
-                        lock (_lockObj)
-                        {
-                            if (KeepAliveTimer != null)
-                            {
-                                KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                                KeepAliveTimer.Dispose();
-                                KeepAliveTimer = null;
-                            }
-                        }
-                    }
-
+                    SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-                SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
 
-                Resources = null!;
+
+                //Resources = null!;
                 ResourceValues = null!;
                 _disposedValue = true;
 
@@ -109,41 +100,26 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         protected virtual async ValueTask DisposeAsync(bool disposing)
         {
+            _logger.LogDebug($"锁开始Dispose，Resources:{Resources.ToJoinedString(",")}");
+
             if (!_disposedValue)
             {
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    StopKeepAliveTimer();
+                    await SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).ConfigureAwait(false);
 
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-                await SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).ConfigureAwait(false);
 
-                Resources = null!;
+                //Resources = null!;
                 ResourceValues = null!;
                 _disposedValue = true;
 
                 Status = DistributedLockStatus.Disposed;
-            }
-        }
-
-        public void StopKeepAliveTimer()
-        {
-            if (KeepAliveTimer != null)
-            {
-                lock (_lockObj)
-                {
-                    if (KeepAliveTimer != null)
-                    {
-                        KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                        KeepAliveTimer.Dispose();
-                        KeepAliveTimer = null;
-                    }
-                }
             }
         }
 
