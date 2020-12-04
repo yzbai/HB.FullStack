@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Common.Entities
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class CacheDifferentDimensionKeyAttribute : Attribute
+    public class CacheDimensionKeyAttribute : Attribute
     {
 
     }

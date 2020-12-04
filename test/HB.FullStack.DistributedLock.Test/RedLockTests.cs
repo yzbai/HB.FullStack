@@ -148,7 +148,10 @@ namespace HB.FullStack.DistributedLock.Test
                 Assert.True(firstLock.IsAcquired);
 
                 Thread.Sleep(550); // should cause keep alive timer to fire once
-                ((RedisLock)firstLock).StopKeepAliveTimer(); // stop the keep alive timer to simulate process crash
+                //((RedisLock)firstLock).StopKeepAliveTimer(); // stop the keep alive timer to simulate process crash
+
+                firstLock.Dispose();
+
                 Thread.Sleep(1200); // wait until the key expires from redis
 
                 using (var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)))
@@ -180,16 +183,14 @@ namespace HB.FullStack.DistributedLock.Test
 
                 await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
                 {
-                    using (var secondLock = await _lockManager.LockAsync(
+                    using var secondLock = await _lockManager.LockAsync(
                         resources,
                         TimeSpan.FromSeconds(30),
                         TimeSpan.FromSeconds(100),
                         TimeSpan.FromSeconds(1),
-                        cts.Token))
-                    {
-                        // should never get here
-                        Assert.True(false);
-                    }
+                        cts.Token);
+                    // should never get here
+                    Assert.True(false);
                 }).ConfigureAwait(false);
             }
 
