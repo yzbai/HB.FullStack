@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 
 using StackExchange.Redis;
 
@@ -21,12 +22,16 @@ namespace HB.FullStack.Cache.Test
     {
         private readonly ICache _cache;
         private readonly ConnectionMultiplexer _redisConnection;
+        private readonly int _databaseNumber;
         private readonly ITestOutputHelper _outputHelper;
+        private readonly string _applicationName;
 
         public TimestampCacheTest(ServiceFixture serviceFixture, ITestOutputHelper outputHelper)
         {
-            _cache = serviceFixture.Cache;
-            _redisConnection = serviceFixture.RedisConnection;
+            _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
+            _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
+            _databaseNumber = Convert.ToInt32(ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]));
+            _applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
 
             _outputHelper = outputHelper;
         }
@@ -43,7 +48,7 @@ namespace HB.FullStack.Cache.Test
             entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
             entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-            IDatabase database = _redisConnection.GetDatabase();
+            IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             List<Book> books = Mocker.MockMany();
 
@@ -69,7 +74,7 @@ namespace HB.FullStack.Cache.Test
             entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
             entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-            IDatabase database = _redisConnection.GetDatabase();
+            IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             Book book = Mocker.MockOne();
 
@@ -81,7 +86,7 @@ namespace HB.FullStack.Cache.Test
 
             await _cache.SetAsync(book.Guid, book, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
 
-            Assert.True(database.KeyExists(ServiceFixture.ApplicationName + book.Guid));
+            Assert.True(database.KeyExists(_applicationName + book.Guid));
 
 
             await Task.Delay(10 * 1000);
@@ -112,7 +117,7 @@ namespace HB.FullStack.Cache.Test
             entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
             entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-            IDatabase database = _redisConnection.GetDatabase();
+            IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             Book book = Mocker.MockOne();
 

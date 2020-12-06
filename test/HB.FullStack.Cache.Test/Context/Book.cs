@@ -5,10 +5,10 @@ namespace HB.FullStack.Cache.Test
     [CacheEntity]
     public class Book : Entity
     {
-        [CacheDifferentDimensionKey]
+        [CacheDimensionKey]
         public string Name { get; set; } = null!;
 
-        [CacheDifferentDimensionKey]
+        [CacheDimensionKey]
         public long BookID { get; set; }
 
         public string? Publisher { get; set; }

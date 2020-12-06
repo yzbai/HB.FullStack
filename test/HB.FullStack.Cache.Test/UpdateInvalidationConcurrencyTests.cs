@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 
 using StackExchange.Redis;
 
@@ -19,12 +20,16 @@ namespace HB.FullStack.Cache.Test
     {
         private readonly ICache _cache;
         private readonly ConnectionMultiplexer _redisConnection;
+        private readonly int _databaseNumber;
         private readonly ITestOutputHelper _outputHelper;
+        private readonly string _applicationName;
 
         public UpdateInvalidationConcurrencyTests(ServiceFixture serviceFixture, ITestOutputHelper outputHelper)
         {
-            _cache = serviceFixture.Cache;
-            _redisConnection = serviceFixture.RedisConnection;
+            _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
+            _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
+            _databaseNumber = Convert.ToInt32(ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]));
+            _applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
 
             _outputHelper = outputHelper;
         }

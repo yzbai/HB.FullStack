@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
+    <RootNamespace>OrmBenchmark.ConsoleUI.NetCore</RootNamespace>
+    <AssemblyName>OrmBenchmark.Console.NetCore</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,38 +17,34 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\ServiceFixture.cs" Link="ServiceFixture.cs" />
+    <Compile Include="..\..\test\ServiceFixture.cs" Link="ServiceFixture.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\appsettings.Development.json" Link="appsettings.Development.json">
+    <Content Include="..\..\test\appsettings.Development.json" Link="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\appsettings.json" Link="appsettings.json">
+    <Content Include="..\..\test\appsettings.json" Link="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.9" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Benchmark.Database\HB.FullStack.Benchmark.Database.csproj" />
+    <ProjectReference Include="..\OrmBenchmark.Ado\OrmBenchmark.Ado.csproj" />
+    <ProjectReference Include="..\OrmBenchmark.Core\OrmBenchmark.Core.csproj" />
+    <ProjectReference Include="..\OrmBenchmark.Dapper\OrmBenchmark.Dapper.csproj" />
+    <ProjectReference Include="..\OrmBenchmark.EntityFramework\OrmBenchmark.EntityFramework.csproj" />
+    <ProjectReference Include="..\OrmBenchmark.OrmLite\OrmBenchmark.OrmLite.csproj" />
   </ItemGroup>
 
 </Project>

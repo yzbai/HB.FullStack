@@ -10,6 +10,7 @@ using HB.FullStack.Lock.Distributed;
 using HB.FullStack.Lock.Memory;
 using HB.Infrastructure.Redis.DistributedLock;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using StackExchange.Redis;
@@ -26,8 +27,8 @@ namespace HB.FullStack.DistributedLock.Test
         private readonly ILogger _logger;
         public MemoryLockTests(ServiceFixture serviceFixture)
         {
-            _lockManager = serviceFixture.MemoryLockManager;
-            _logger = serviceFixture.Logger;
+            _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IMemoryLockManager>();
+            _logger = GlobalSettings.Logger;
         }
 
 

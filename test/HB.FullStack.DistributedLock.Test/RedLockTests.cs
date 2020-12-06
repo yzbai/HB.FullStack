@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Lock.Distributed;
 using HB.Infrastructure.Redis.DistributedLock;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using StackExchange.Redis;
@@ -25,8 +26,8 @@ namespace HB.FullStack.DistributedLock.Test
         private readonly ILogger _logger;
         public RedLockTests(ServiceFixture serviceFixture)
         {
-            _lockManager = serviceFixture.DistributedLockManager;
-            _logger = serviceFixture.Logger;
+            _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IDistributedLockManager>();
+            _logger = GlobalSettings.Logger;
         }
 
 

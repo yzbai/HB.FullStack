@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using StackExchange.Redis;
 
 using Xunit;
@@ -16,12 +18,16 @@ namespace HB.FullStack.Cache.Test
     {
         private readonly ICache _cache;
         private readonly ConnectionMultiplexer _redisConnection;
+        private readonly int _databaseNumber;
         private readonly ITestOutputHelper _outputHelper;
+        private readonly string _applicationName;
 
         public EntitiesCacheTest(ServiceFixture serviceFixture, ITestOutputHelper outputHelper)
         {
-            _cache = serviceFixture.Cache;
-            _redisConnection = serviceFixture.RedisConnection;
+            _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
+            _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
+            _databaseNumber = Convert.ToInt32(ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]));
+            _applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
 
             _outputHelper = outputHelper;
         }
@@ -40,7 +46,7 @@ namespace HB.FullStack.Cache.Test
             entityDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
             entityDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-            IDatabase database = _redisConnection.GetDatabase();
+            IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             List<Book> books = Mocker.MockMany();
 
@@ -54,9 +60,9 @@ namespace HB.FullStack.Cache.Test
 
             foreach (Book book in books)
             {
-                guidRedisKeys.Add(ServiceFixture.ApplicationName + book.Guid);
-                bookIdRedisKeys.Add(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.BookID) + book.BookID);
-                bookNameRedisKeys.Add(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.Name) + book.Name);
+                guidRedisKeys.Add(_applicationName + book.Guid);
+                bookIdRedisKeys.Add(_applicationName + nameof(Book) + nameof(Book.BookID) + book.BookID);
+                bookNameRedisKeys.Add(_applicationName + nameof(Book) + nameof(Book.Name) + book.Name);
             }
 
             (IEnumerable<Book>? cached, bool exists) = await _cache.GetEntitiesAsync<Book>(nameof(Book.Name), bookNames).ConfigureAwait(false);
@@ -129,7 +135,7 @@ namespace HB.FullStack.Cache.Test
             entityDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
             entityDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-            IDatabase database = _redisConnection.GetDatabase();
+            IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             Book book = Mocker.MockOne();
 
@@ -141,9 +147,9 @@ namespace HB.FullStack.Cache.Test
 
             await _cache.SetEntityAsync(book).ConfigureAwait(false);
 
-            Assert.True(database.KeyExists(ServiceFixture.ApplicationName + book.Guid));
-            Assert.True(database.KeyExists(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.BookID) + book.BookID));
-            Assert.True(database.KeyExists(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.Name) + book.Name));
+            Assert.True(database.KeyExists(_applicationName + book.Guid));
+            Assert.True(database.KeyExists(_applicationName + nameof(Book) + nameof(Book.BookID) + book.BookID));
+            Assert.True(database.KeyExists(_applicationName + nameof(Book) + nameof(Book.Name) + book.Name));
 
 
             await Task.Delay(10 * 1000);
@@ -161,9 +167,9 @@ namespace HB.FullStack.Cache.Test
 
             Assert.False(exists4);
 
-            Assert.False(database.KeyExists(ServiceFixture.ApplicationName + book.Guid));
-            Assert.False(database.KeyExists(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.BookID) + book.BookID));
-            Assert.False(database.KeyExists(ServiceFixture.ApplicationName + nameof(Book) + nameof(Book.Name) + book.Name));
+            Assert.False(database.KeyExists(_applicationName + book.Guid));
+            Assert.False(database.KeyExists(_applicationName + nameof(Book) + nameof(Book.BookID) + book.BookID));
+            Assert.False(database.KeyExists(_applicationName + nameof(Book) + nameof(Book.Name) + book.Name));
         }
 
         [Theory]
@@ -178,7 +184,7 @@ namespace HB.FullStack.Cache.Test
             entityDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
             entityDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-            IDatabase database = _redisConnection.GetDatabase();
+            IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             IList<Book> books = Mocker.MockMany();
 

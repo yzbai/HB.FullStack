@@ -3,9 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using AutoFixture;
+
+using HB.FullStack;
 using HB.FullStack.Common;
 using HB.Infrastructure.Redis.Direct;
+
+using Microsoft.Extensions.DependencyInjection;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,7 +28,7 @@ namespace HB.Infrastructure.Redis.Test
         public DirectRedisTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
-            _redis = serviceFixture.ThrowIfNull(nameof(serviceFixture)).RedisDatabase;
+            _redis = serviceFixture.ServiceProvider.GetRequiredService<IRedisDatabase>();
         }
 
         [Theory]

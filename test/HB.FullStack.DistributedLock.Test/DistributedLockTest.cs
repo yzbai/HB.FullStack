@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Lock.Distributed;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Xunit;
 
 namespace HB.FullStack.DistributedLock.Test
@@ -13,7 +15,7 @@ namespace HB.FullStack.DistributedLock.Test
         private readonly IDistributedLockManager _lockManager;
         public DistributedLockTest(ServiceFixture serviceFixture)
         {
-            _lockManager = serviceFixture.DistributedLockManager;
+            _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IDistributedLockManager>();
         }
 
         [Fact]

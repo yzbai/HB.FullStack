@@ -1,4 +1,5 @@
-﻿using HB.FullStack.Common.Entities;
+﻿using HB.FullStack;
+using HB.FullStack.Common.Entities;
 using HB.FullStack.KVStore;
 using HB.FullStack.KVStore.Entities;
 
@@ -82,7 +83,7 @@ namespace HB.Infrastructure.Redis.Test
         public KVStoreTest(ITestOutputHelper output, ServiceFixture fixture)
         {
             _output = output;
-            _kvStore = fixture.ThrowIfNull(nameof(fixture)).KVStore;
+            _kvStore = fixture.ServiceProvider.GetRequiredService<IKVStore>();
         }
 
         [Fact]
