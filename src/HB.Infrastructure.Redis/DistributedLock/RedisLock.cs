@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using HB.FullStack.Lock;
 using HB.FullStack.Lock.Distributed;
 
+using Microsoft.Extensions.Logging;
+
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DistributedLock
@@ -14,6 +16,9 @@ namespace HB.Infrastructure.Redis.DistributedLock
     public class RedisLock : IDistributedLock
     {
         private const string _prefix = "HBRL_";
+
+        private ILogger _logger;
+
         internal IEnumerable<string> Resources { get; set; }
 
         internal IEnumerable<string> ResourceValues { get; set; }
@@ -26,9 +31,12 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         internal Timer? KeepAliveTimer { get; set; }
 
-        internal RedisLock(SingleRedisDistributedLockOptions options, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
+        internal object StopKeepAliveTimerLockObj { get; private set; } = new object();
+
+        internal RedisLock(SingleRedisDistributedLockOptions options, ILogger logger, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
         {
             Options = options;
+            _logger = logger;
             ExpiryTime = expiryTime;
             WaitTime = waitTime;
             RetryTime = retryTime;
@@ -64,36 +72,25 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         private bool _disposedValue;
 
-        private object _lockObj = new object();
+
 
         protected virtual void Dispose(bool disposing)
         {
+            _logger.LogDebug($"锁开始Dispose，Resources:{Resources.ToJoinedString(",")}");
+
             if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
-                    if (KeepAliveTimer != null)
-                    {
-                        lock (_lockObj)
-                        {
-                            if (KeepAliveTimer != null)
-                            {
-                                KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                                KeepAliveTimer.Dispose();
-                                KeepAliveTimer = null;
-                            }
-                        }
-                    }
-
+                    SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-                SingleRedisDistributedLockManager.ReleaseResourceAsync(this).Fire();
 
-                Resources = null!;
+
+                //Resources = null!;
                 ResourceValues = null!;
                 _disposedValue = true;
 
@@ -103,41 +100,26 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         protected virtual async ValueTask DisposeAsync(bool disposing)
         {
+            _logger.LogDebug($"锁开始Dispose，Resources:{Resources.ToJoinedString(",")}");
+
             if (!_disposedValue)
             {
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    StopKeepAliveTimer();
+                    await SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).ConfigureAwait(false);
 
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-                await SingleRedisDistributedLockManager.ReleaseResourceAsync(this).ConfigureAwait(false);
 
-                Resources = null!;
+                //Resources = null!;
                 ResourceValues = null!;
                 _disposedValue = true;
 
                 Status = DistributedLockStatus.Disposed;
-            }
-        }
-
-        public void StopKeepAliveTimer()
-        {
-            if (KeepAliveTimer != null)
-            {
-                lock (_lockObj)
-                {
-                    if (KeepAliveTimer != null)
-                    {
-                        KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                        KeepAliveTimer.Dispose();
-                        KeepAliveTimer = null;
-                    }
-                }
             }
         }
 

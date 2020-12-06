@@ -28,7 +28,7 @@ namespace HB.FullStack.Repository
 
         public TResult? CacheValue { get; private set; }
 
-        public long UtcTikcs { get; private set; } = -1;
+        public UtcNowTicks UtcTikcs { get; private set; } = UtcNowTicks.Empty;
 
         public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
         {
@@ -52,7 +52,7 @@ namespace HB.FullStack.Repository
                 throw new ArgumentNullException(nameof(CacheValue));
             }
 
-            if (UtcTikcs == -1)
+            if (UtcTikcs.IsEmpty())
             {
                 throw new ArgumentException(nameof(UtcTikcs));
             }
@@ -76,7 +76,7 @@ namespace HB.FullStack.Repository
                 throw new ArgumentNullException(nameof(CacheKey));
             }
 
-            if (UtcTikcs == -1)
+            if (UtcTikcs.IsEmpty())
             {
                 throw new ArgumentException(nameof(UtcTikcs));
             }
@@ -90,7 +90,7 @@ namespace HB.FullStack.Repository
             return this;
         }
 
-        public CachedItem<TResult> Timestamp(long utcTicks)
+        public CachedItem<TResult> Timestamp(UtcNowTicks utcTicks)
         {
             UtcTikcs = utcTicks;
 

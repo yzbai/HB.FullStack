@@ -12,6 +12,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="appsettings.Development.json" />
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ServiceFixture.cs" Link="ServiceFixture.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\appsettings.Development.json" Link="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\appsettings.json" Link="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,13 +51,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
+    <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
+    <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

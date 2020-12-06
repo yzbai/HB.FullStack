@@ -2,6 +2,8 @@ using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,7 +16,7 @@ using Xunit.Abstractions;
 namespace HB.FullStack.DatabaseTests
 {
     //[TestCaseOrderer("HB.FullStack.Database.Test.TestCaseOrdererByTestName", "HB.FullStack.Database.Test")]
-    public class MySQLBasicAsyncTest
+    public class MySQLBasicAsyncTest : IClassFixture<ServiceFixture>
     {
         private readonly IDatabase _mysql;
         private readonly ITransaction _mysqlTransaction;
@@ -27,12 +29,12 @@ namespace HB.FullStack.DatabaseTests
         /// <param name="serviceFixture"></param>
         /// <exception cref="DatabaseException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public MySQLBasicAsyncTest(ITestOutputHelper testOutputHelper)
+        public MySQLBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
 
-            _mysql = ServiceFixture.MySQL;
-            _mysqlTransaction = ServiceFixture.MySQLTransaction;
+            _mysql = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
+            _mysqlTransaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
 
         }
 

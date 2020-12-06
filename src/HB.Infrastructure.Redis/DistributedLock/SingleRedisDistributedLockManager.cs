@@ -75,8 +75,8 @@ for i =1, count do
 end
 return 1";
 
-        private readonly TimeSpan minimumExpiryTime = TimeSpan.FromMilliseconds(10);
-        private readonly TimeSpan minimumRetryTime = TimeSpan.FromMilliseconds(10);
+        private readonly TimeSpan _minimumExpiryTime = TimeSpan.FromMilliseconds(10);
+        private readonly TimeSpan _minimumRetryTime = TimeSpan.FromMilliseconds(10);
 
         private readonly SingleRedisDistributedLockOptions _options;
         private readonly ILogger _logger;
@@ -88,7 +88,9 @@ return 1";
             _options = options.Value;
             _logger = logger;
 
-            InitLoadedLuas(_options.ConnectionSetting);
+            InitLoadedLuas(_options.ConnectionSetting, _logger);
+
+            _logger.LogInformation($"SingleRedisDistributedLockManager初始化完成");
         }
 
         /// <summary>
@@ -101,20 +103,21 @@ return 1";
         /// <returns></returns>
         public async Task<IDistributedLock> LockAsync(IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan? waitTime, TimeSpan? retryInterval, CancellationToken? cancellationToken = null)
         {
-            if (expiryTime < minimumExpiryTime)
+            if (expiryTime < _minimumExpiryTime)
             {
-                _logger.LogWarning($"Expiry time {expiryTime.TotalMilliseconds}ms too low, setting to {minimumExpiryTime.TotalMilliseconds}ms");
-                expiryTime = minimumExpiryTime;
+                _logger.LogWarning($"Expiry time {expiryTime.TotalMilliseconds}ms too low, setting to {_minimumExpiryTime.TotalMilliseconds}ms");
+                expiryTime = _minimumExpiryTime;
             }
 
-            if (retryInterval != null && retryInterval.Value < minimumRetryTime)
+            if (retryInterval != null && retryInterval.Value < _minimumRetryTime)
             {
-                _logger.LogWarning($"Retry time {retryInterval.Value.TotalMilliseconds}ms too low, setting to {minimumRetryTime.TotalMilliseconds}ms");
-                retryInterval = minimumRetryTime;
+                _logger.LogWarning($"Retry time {retryInterval.Value.TotalMilliseconds}ms too low, setting to {_minimumRetryTime.TotalMilliseconds}ms");
+                retryInterval = _minimumRetryTime;
             }
 
             RedisLock redisLock = new RedisLock(
                 _options,
+                _logger,
                 resources,
                 expiryTime,
                 waitTime ?? TimeSpan.FromMilliseconds(_options.DefaultWaitMilliseconds),
@@ -190,9 +193,9 @@ return 1";
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues);
+            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues, logger);
 
-            IDatabase database = await GetDatabaseAsync(redisLock.Options.ConnectionSetting).ConfigureAwait(false);
+            IDatabase database = await GetDatabaseAsync(redisLock.Options.ConnectionSetting, logger).ConfigureAwait(false);
 
             try
             {
@@ -209,7 +212,7 @@ return 1";
             {
                 logger.LogError(ex, "NOSCRIPT, will try again.");
 
-                InitLoadedLuas(redisLock.Options.ConnectionSetting);
+                InitLoadedLuas(redisLock.Options.ConnectionSetting, logger);
 
                 return await AcquireResourceAsync(redisLock, logger).ConfigureAwait(false);
             }
@@ -228,14 +231,20 @@ return 1";
 
         private static void ExtendLockLifetime(RedisLock redisLock, ILogger logger)
         {
+            if (redisLock.Status != DistributedLockStatus.Acquired)
+            {
+                logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+                return;
+            }
+
             logger.LogDebug($"锁在自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues);
+            AddAcquireOrExtendRedisInfo(redisLock, redisKeys, redisValues, logger);
 
-            IDatabase database = GetDatabase(redisLock.Options.ConnectionSetting);
+            IDatabase database = GetDatabase(redisLock.Options.ConnectionSetting, logger);
 
             try
             {
@@ -248,7 +257,7 @@ return 1";
 
                 if (rt != 1)
                 {
-                    logger.LogError("RedisLock Extend Failed.");
+                    logger.LogError($"RedisLock 延期 失败. Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
                     return;
                 }
 
@@ -258,20 +267,39 @@ return 1";
             {
                 logger.LogError(ex, "NOSCRIPT, will try again.");
 
-                InitLoadedLuas(redisLock.Options.ConnectionSetting);
+                InitLoadedLuas(redisLock.Options.ConnectionSetting, logger);
 
                 ExtendLockLifetime(redisLock, logger);
             }
         }
-
-        internal static async Task ReleaseResourceAsync(RedisLock redisLock)
+        private static void StopKeepAliveTimer(RedisLock redisLock, ILogger logger)
         {
+            if (redisLock.KeepAliveTimer != null)
+            {
+                lock (redisLock.StopKeepAliveTimerLockObj)
+                {
+                    if (redisLock.KeepAliveTimer != null)
+                    {
+                        redisLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                        redisLock.KeepAliveTimer.Dispose();
+                        redisLock.KeepAliveTimer = null;
+
+                        logger.LogDebug($"锁停止自动延期，Resources:{redisLock.Resources.ToJoinedString(",")}");
+                    }
+                }
+            }
+        }
+
+        internal static async Task ReleaseResourceAsync(RedisLock redisLock, ILogger logger)
+        {
+            StopKeepAliveTimer(redisLock, logger);
+
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
             AddReleaseResourceRedisInfo(redisLock, redisKeys, redisValues);
 
-            IDatabase database = await GetDatabaseAsync(redisLock.Options.ConnectionSetting).ConfigureAwait(false);
+            IDatabase database = await GetDatabaseAsync(redisLock.Options.ConnectionSetting, logger).ConfigureAwait(false);
 
             try
             {
@@ -284,7 +312,7 @@ return 1";
 
                 if (rt == 1)
                 {
-                    GlobalSettings.Logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                    logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                 }
                 else
                 {
@@ -293,13 +321,13 @@ return 1";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                InitLoadedLuas(redisLock.Options.ConnectionSetting);
+                InitLoadedLuas(redisLock.Options.ConnectionSetting, logger);
 
-                await ReleaseResourceAsync(redisLock).ConfigureAwait(false);
+                await ReleaseResourceAsync(redisLock, logger).ConfigureAwait(false);
             }
             catch
             {
-                GlobalSettings.Logger.LogDebug($"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                logger.LogDebug($"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
                 throw;
             }
         }
@@ -327,28 +355,38 @@ return 1";
             }
         }
 
-        private static void AddAcquireOrExtendRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private static void AddAcquireOrExtendRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues, ILogger logger)
         {
             /// keys: resource1, resource2, resource3
             /// argv: 3(resource_count), expire_milliseconds, resource1_value, resource2_value, resource3_value
 
-            foreach (string item in redisLock.Resources)
+            //有可能到这里，dispose了，redisLock.Resources都为空
+
+
+            try
             {
-                redisKeys.Add(item);
+                foreach (string item in redisLock.Resources)
+                {
+                    redisKeys.Add(item);
+                }
+
+                redisValues.Add(redisKeys.Count);
+                redisValues.Add((int)redisLock.ExpiryTime.TotalMilliseconds);
+
+                foreach (string item in redisLock.ResourceValues)
+                {
+                    redisValues.Add(item);
+                }
             }
-
-            redisValues.Add(redisKeys.Count);
-            redisValues.Add((int)redisLock.ExpiryTime.TotalMilliseconds);
-
-            foreach (string item in redisLock.ResourceValues)
+            catch (NullReferenceException ex)
             {
-                redisValues.Add(item);
+                logger.LogError(ex, $"在试图延长锁的时候，ResourceValues被清空. Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
             }
         }
 
-        internal static void InitLoadedLuas(RedisInstanceSetting redisInstanceSetting)
+        internal static void InitLoadedLuas(RedisInstanceSetting redisInstanceSetting, ILogger logger)
         {
-            IServer server = RedisInstanceManager.GetServer(redisInstanceSetting);
+            IServer server = RedisInstanceManager.GetServer(redisInstanceSetting, logger);
 
             _loadedLuas = new LoadedLuas();
 
@@ -357,14 +395,14 @@ return 1";
             _loadedLuas.LoadedExtendLua = server.ScriptLoad(_luaExtend);
         }
 
-        internal static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting redisInstanceSetting)
+        internal static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting redisInstanceSetting, ILogger logger)
         {
-            return await RedisInstanceManager.GetDatabaseAsync(redisInstanceSetting).ConfigureAwait(false);
+            return await RedisInstanceManager.GetDatabaseAsync(redisInstanceSetting, logger).ConfigureAwait(false);
         }
 
-        internal static IDatabase GetDatabase(RedisInstanceSetting redisInstanceSetting)
+        internal static IDatabase GetDatabase(RedisInstanceSetting redisInstanceSetting, ILogger logger)
         {
-            return RedisInstanceManager.GetDatabase(redisInstanceSetting);
+            return RedisInstanceManager.GetDatabase(redisInstanceSetting, logger);
         }
     }
 }

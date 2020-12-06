@@ -1,5 +1,8 @@
-﻿using HB.FullStack.Common.Api;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Api;
+
 using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -200,7 +203,7 @@ namespace HB.FullStack.Client.Api
 
         private static readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
 
-        private static readonly MemoryFrequencyChecker _frequencyChecker = new MemoryFrequencyChecker();//TODO: 考虑内存占用
+        private static readonly MemorySimpleLocker _locker = new MemorySimpleLocker();
 
         private static readonly IDictionary<string, bool> _lastRefreshTokenResults = new Dictionary<string, bool>();
 
@@ -226,10 +229,7 @@ namespace HB.FullStack.Client.Api
                 string accessTokenHashKey = SecurityUtil.GetHash(accessToken!);
 
                 //不久前刷新过
-                if (!_frequencyChecker.Check(
-                    _refreshTokenFrequencyCheckResourceType,
-                    accessTokenHashKey,
-                    TimeSpan.FromSeconds(endpointSettings.JwtSettings.RefreshIntervalSeconds)))
+                if (!_locker.NoWaitLock(_refreshTokenFrequencyCheckResourceType, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.JwtSettings.RefreshIntervalSeconds)))
                 {
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -238,6 +238,19 @@ namespace HB.FullStack.Client.Api
 
                     return false;
                 }
+
+                //if (!_frequencyChecker.Check(
+                //    _refreshTokenFrequencyCheckResourceType,
+                //    accessTokenHashKey,
+                //    TimeSpan.FromSeconds(endpointSettings.JwtSettings.RefreshIntervalSeconds)))
+                //{
+                //    if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
+                //    {
+                //        return true;
+                //    }
+
+                //    return false;
+                //}
 
                 string? refreshToken = await ClientGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
 

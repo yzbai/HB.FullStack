@@ -135,7 +135,7 @@ namespace HB.FullStack.Identity
         /// 从证书获取JsonWebKeySet（公钥集合）
         /// </summary>
         /// <returns></returns>
-        public static JsonWebKeySet CreateJsonWebKeySet(X509Certificate2 cert)
+        public static string CreateJsonWebKeySetJson(X509Certificate2 cert)
         {
             //密钥
             X509SecurityKey securityKey = new X509SecurityKey(cert);
@@ -155,7 +155,15 @@ namespace HB.FullStack.Identity
 
             string jsonWebKeySetString = SerializeUtil.ToJson(new { Keys = jsonWebKeys });
 
-            return new JsonWebKeySet(jsonWebKeySetString);
+            return jsonWebKeySetString;
+            //return new JsonWebKeySet(jsonWebKeySetString);
+        }
+
+        public static IEnumerable<SecurityKey> GetIssuerSigningKeys(X509Certificate2 cert)
+        {
+            string jsonWebKeySetJson = CreateJsonWebKeySetJson(cert);
+
+            return new JsonWebKeySet(jsonWebKeySetJson).GetSigningKeys();
         }
 
         /// <summary>

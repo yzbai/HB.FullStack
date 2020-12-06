@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+
 using Microsoft.Extensions.Logging;
 
 namespace System
@@ -20,9 +21,9 @@ namespace System
 
         public static readonly string LogTag = "=HB_HB_HB=";
 
-        public static void ExceptionHandler(Exception ex)
+        public static void ExceptionHandler(Exception ex, string? message)
         {
-            Logger?.LogError(ex, null);
+            Logger.LogError(ex, message);
         }
     }
 }

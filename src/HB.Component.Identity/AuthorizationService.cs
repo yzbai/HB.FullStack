@@ -11,6 +11,7 @@ using HB.FullStack.Database;
 using HB.FullStack.Identity.Entities;
 using HB.FullStack.Lock.Distributed;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -19,6 +20,7 @@ namespace HB.FullStack.Identity
     internal class AuthorizationService : IAuthorizationService
     {
         private readonly AuthorizationServiceOptions _options;
+        private readonly ILogger _logger;
         private readonly ITransaction _transaction;
         private readonly IDistributedLockManager _lockManager;
 
@@ -31,7 +33,7 @@ namespace HB.FullStack.Identity
         private readonly IIdentityService _identityService;
 
         //Jwt Signing
-        private JsonWebKeySet _jsonWebKeySet = null!;
+        private string _jsonWebKeySetJson = null!;
         private IEnumerable<SecurityKey> _issuerSigningKeys = null!;
         private SigningCredentials _signingCredentials = null!;
 
@@ -40,7 +42,11 @@ namespace HB.FullStack.Identity
         private EncryptingCredentials _encryptingCredentials = null!;
         private SecurityKey _decryptionSecurityKey = null!;
 
-        public AuthorizationService(IOptions<AuthorizationServiceOptions> options, ITransaction transaction, IDistributedLockManager lockManager,
+        public AuthorizationService(
+            IOptions<AuthorizationServiceOptions> options,
+            ILogger<AuthorizationService> logger,
+            ITransaction transaction,
+            IDistributedLockManager lockManager,
             UserRepo userRepo,
             SignInTokenRepo signInTokenRepo,
             RoleOfUserRepo roleOfUserRepo,
@@ -49,6 +55,7 @@ namespace HB.FullStack.Identity
             IIdentityService identityService)
         {
             _options = options.Value;
+            _logger = logger;
             _transaction = transaction;
             _lockManager = lockManager;
 
@@ -63,7 +70,7 @@ namespace HB.FullStack.Identity
             InitializeCredencials();
         }
 
-        public JsonWebKeySet JsonWebKeySet => _jsonWebKeySet;
+        public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
         private void InitializeCredencials()
         {
@@ -77,8 +84,8 @@ namespace HB.FullStack.Identity
             }
 
             _signingCredentials = CredentialHelper.GetSigningCredentials(cert, _options.SigningAlgorithm);
-            _jsonWebKeySet = CredentialHelper.CreateJsonWebKeySet(cert);
-            _issuerSigningKeys = _jsonWebKeySet.GetSigningKeys();
+            _jsonWebKeySetJson = CredentialHelper.CreateJsonWebKeySetJson(cert);
+            _issuerSigningKeys = CredentialHelper.GetIssuerSigningKeys(cert);
 
             #endregion
 
@@ -390,19 +397,19 @@ namespace HB.FullStack.Identity
             //2, 手机验证
             if (signInOptions.RequireMobileConfirmed && !user.MobileConfirmed)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationMobileNotConfirmed, $"user:{SerializeUtil.ToJson(user)}");
+                throw new AuthorizationException(ErrorCode.AuthorizationMobileNotConfirmed, $"用户手机需要通过验证. UserGuid:{user.Guid}");
             }
 
             //3, 邮件验证
             if (signInOptions.RequireEmailConfirmed && !user.EmailConfirmed)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationEmailNotConfirmed, $"user:{SerializeUtil.ToJson(user)}");
+                throw new AuthorizationException(ErrorCode.AuthorizationEmailNotConfirmed, $"用户邮箱需要通过验证. UserGuid:{user.Guid}");
             }
 
             //4, Lockout 检查
             if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationLockedOut, $"user:{SerializeUtil.ToJson(user)}");
+                throw new AuthorizationException(ErrorCode.AuthorizationLockedOut, $"用户已经被锁定。LockoutEndDate:{userLoginControl.LockoutEndDate}, UserGuid:{user.Guid}");
             }
 
             //5, 一段时间内,最大失败数检测
@@ -412,15 +419,19 @@ namespace HB.FullStack.Identity
                 {
                     if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
                     {
-                        throw new AuthorizationException(ErrorCode.AuthorizationOverMaxFailedCount, $"user:{SerializeUtil.ToJson(user)}");
+                        throw new AuthorizationException(ErrorCode.AuthorizationOverMaxFailedCount, $"用户今日已经达到最大失败登陆数. UserGuid:{user.Guid}");
                     }
                 }
             }
 
-            userLoginControl.LockoutEnabled = false;
-            userLoginControl.LoginFailedCount = 0;
+            //重置LoginControl
+            if (userLoginControl.LockoutEnabled || userLoginControl.LoginFailedCount == 0)
+            {
+                userLoginControl.LockoutEnabled = false;
+                userLoginControl.LoginFailedCount = 0;
 
-            _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
+                _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
+            }
 
             if (signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
             {
@@ -438,10 +449,12 @@ namespace HB.FullStack.Identity
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
             {
-                if (userLoginControl.LoginFailedCount + 1 > _options.SignInOptions.LockoutAfterAccessFailedCount)
+                if (userLoginControl.LoginFailedCount > _options.SignInOptions.LockoutAfterAccessFailedCount)
                 {
                     userLoginControl.LockoutEnabled = true;
                     userLoginControl.LockoutEndDate = TimeUtil.UtcNow + _options.SignInOptions.LockoutTimeSpan;
+
+                    _logger.LogWarning($"有用户重复登陆失败，账户已锁定.UserGuid:{userLoginControl.UserGuid}, LastUser:{lastUser}");
                 }
             }
 

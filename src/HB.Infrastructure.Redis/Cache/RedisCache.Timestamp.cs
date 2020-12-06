@@ -57,7 +57,7 @@ return redis.call('del', KEYS[1])
         public const string _luaGetAndRefresh = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
 
-if (not data) then
+if (not data[3]) then
     return nil
 end
 
@@ -74,7 +74,7 @@ if(data[2]~='-1') then
     redis.call('expire', KEYS[1], data[2])
 end
 
-return data";
+return data[3]";
 
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken))
         {
@@ -106,7 +106,7 @@ return data";
             }
         }
 
-        public async Task<bool> SetAsync(string key, byte[] value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public async Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             if (key == null)
             {
@@ -144,7 +144,7 @@ return data";
                         slideSeconds??-1,
                         GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value,
-                        utcTicks
+                        utcTicks.Ticks
                     }).ConfigureAwait(false);
 
                 int rt = (int)redisResult;
@@ -182,7 +182,7 @@ return data";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> RemoveAsync(string key, long utcTicks, CancellationToken token = default(CancellationToken))
+        public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
@@ -200,7 +200,7 @@ return data";
                     new RedisKey[] { GetRealKey(key) },
                     new RedisValue[]
                     {
-                        utcTicks,
+                        utcTicks.Ticks,
                         _invalidationVersionExpirySeconds
                     }).ConfigureAwait(false);
 

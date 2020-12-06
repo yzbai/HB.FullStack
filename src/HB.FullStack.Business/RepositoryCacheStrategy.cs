@@ -104,8 +104,11 @@ namespace HB.FullStack.Repository
                 }
 
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
-                long now = TimeUtil.UtcNowTicks;
+                UtcNowTicks now = TimeUtil.UtcNowTicks;
 
+
+                // 如果TResult是集合类型，可能会存入空集合。而在EntityCache中是不会存入空集合的。
+                //这样设计是合理的，因为EntityCache是按Entity角度，存入的Entity会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
                 {
                     UpdateCache(cacheItem.Value(dbRt).Timestamp(now), cache);
@@ -128,7 +131,7 @@ namespace HB.FullStack.Repository
 
         public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
-            if (!ICache.IsEntityEnabled<TEntity>())
+            if (ICache.IsEntityEnabled<TEntity>())
             {
                 cache.RemoveEntitiesAsync(entities).Fire();
             }

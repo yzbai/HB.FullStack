@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,7 +11,7 @@ namespace HB.Infrastructure.Aliyun.Sms
     {
         public AliyunSmsOptions Value { get { return this; } }
 
-        [DisallowNull,NotNull]
+        [DisallowNull, NotNull]
         public string? RegionId { get; set; }
 
         [DisallowNull, NotNull]
@@ -49,6 +50,6 @@ namespace HB.Infrastructure.Aliyun.Sms
         public string? ParamProductValue { get; set; }
 
         [DisallowNull, NotNull]
-        public int ExpireMinutes { get; set; } = 10;
+        public int ExpireMinutes { get; set; } = 2;
     }
 }

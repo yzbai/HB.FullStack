@@ -48,5 +48,10 @@ namespace HB.FullStack.Lock.Memory
         {
             LockManager.Unlock(this);
         }
+
+        public void StopKeepAliveTimer()
+        {
+            LockManager.StopKeepAliveTimer(this);
+        }
     }
 }

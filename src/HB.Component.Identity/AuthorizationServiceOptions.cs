@@ -59,14 +59,14 @@ namespace HB.FullStack.Identity
         public TimeSpan RefreshTokenShortExpireTimeSpan { get; set; } = TimeSpan.FromDays(1);
         public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromMinutes(5);
         public TimeSpan LockoutTimeSpan { get; set; } = TimeSpan.FromHours(6);
-        public bool RequiredMaxFailedCountCheck { get; set; }
-        public bool RequiredLockoutCheck { get; set; }
+        public bool RequiredMaxFailedCountCheck { get; set; } = true;
+        public bool RequiredLockoutCheck { get; set; } = true;
         public bool RequireEmailConfirmed { get; set; }
         public bool RequireMobileConfirmed { get; set; }
         public bool RequireTwoFactorCheck { get; set; }
-        public long MaxFailedCount { get; set; } = 4;
-        public double AccessFailedRecoveryDays { get; set; } = 1;
-        public long LockoutAfterAccessFailedCount { get; set; } = 4;
+        public int MaxFailedCount { get; set; } = 4;
+        public int AccessFailedRecoveryDays { get; set; } = 1;
+        public int LockoutAfterAccessFailedCount { get; set; } = 4;
         public bool AllowOnlyOneAppClient { get; set; } = true;
     }
 

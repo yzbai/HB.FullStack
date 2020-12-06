@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddMemoryLock(this IServiceCollection services, IConfiguration configuration)
         {
-            if (!services.Any(sd => sd.ServiceType == typeof(MemoryCache)))
+            if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
             {
                 throw new FrameworkException($"MemoryLockManager需要MemoryCache服务");
             }
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddMemoryLock(this IServiceCollection services, Action<MemoryLockOptions> action)
         {
-            if (!services.Any(sd => sd.ServiceType == typeof(MemoryCache)))
+            if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
             {
                 throw new FrameworkException($"MemoryLockManager需要MemoryCache服务");
             }

@@ -132,13 +132,15 @@ return array";
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
 
             InitLoadedLuas();
+
+            _logger.LogInformation($"RedisKVStoreEngine初始化完成");
         }
 
         private void InitLoadedLuas()
         {
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
-                IServer server = RedisInstanceManager.GetServer(setting);
+                IServer server = RedisInstanceManager.GetServer(setting, _logger);
                 LoadedLuas loadedLuas = new LoadedLuas();
 
                 loadedLuas.LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd);
@@ -584,7 +586,7 @@ return array";
         {
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
             {
-                return await RedisInstanceManager.GetDatabaseAsync(setting).ConfigureAwait(false);
+                return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
             throw new KVStoreException($"Can not found Such Redis Instance: {instanceName}");

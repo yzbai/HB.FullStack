@@ -15,7 +15,7 @@ namespace HB.FullStack.Identity
 {
     internal class RoleRepo : Repository<Role>
     {
-        public RoleRepo(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
     }

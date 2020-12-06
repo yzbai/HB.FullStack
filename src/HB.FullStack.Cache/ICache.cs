@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Cache
 {
+
+
+
     /// <summary>
     /// string,int,generic 都可以存储空值
     /// Entity操作不可以 
@@ -72,6 +75,11 @@ namespace HB.FullStack.Cache
         /// </summary>
         Task RemoveEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
         {
+            if (!entities.Any())
+            {
+                return Task.CompletedTask;
+            }
+
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
             string dimensionKeyName = entityDef.GuidKeyProperty.Name;
             IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.GuidKeyProperty.GetValue(e).ToString());
@@ -145,16 +153,27 @@ namespace HB.FullStack.Cache
 
         Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken));
 
-        Task<bool> SetAsync(string key, byte[] value, long utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default);
+        /// <summary>
+        /// utcTicks是指数据刚刚从数据库中取出来后的时间
+        /// 所以数据库取出后需要赶紧记录UtcNowTicks
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="utcTicks"></param>
+        /// <param name="options"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default);
 
         /// <summary>
         /// 返回是否找到了
+        /// utcTicks是指数据刚刚从数据库中取出来后的时间
         /// </summary>
         /// <param name="key"></param>
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task<bool> RemoveAsync(string key, long utcTicks, CancellationToken token = default(CancellationToken));
+        Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default(CancellationToken));
 
         #endregion
     }

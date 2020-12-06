@@ -52,7 +52,7 @@ namespace HB.Infrastructure.Redis.Cache
     //        redis.call('del',KEYS[1])
 
     //        if (data[3]~='') then
-    //            for i in string.gmatch(data[3], '%w+') do
+    //            for i in string.gmatch(data[3], '%S+') do
     //               redis.call('del', i) 
     //            end
     //        end
@@ -64,7 +64,7 @@ namespace HB.Infrastructure.Redis.Cache
     //    redis.call('expire', KEYS[1], ARGV[1])
 
     //    if (data[3]~='') then
-    //        for j in string.gmatch(data[3], '%w+') do
+    //        for j in string.gmatch(data[3], '%S+') do
     //           redis.call('expire', j, ARGV[1]) 
     //        end
     //    end
@@ -97,7 +97,7 @@ namespace HB.Infrastructure.Redis.Cache
     //        redis.call('del',guid)
 
     //        if (data[3]~='') then
-    //            for i in string.gmatch(data[3], '%w+') do
+    //            for i in string.gmatch(data[3], '%S+') do
     //               redis.call('del', i) 
     //            end
     //        end
@@ -109,7 +109,7 @@ namespace HB.Infrastructure.Redis.Cache
     //    redis.call('expire', guid, ARGV[1])
 
     //    if (data[3]~='') then
-    //        for j in string.gmatch(data[3], '%w+') do
+    //        for j in string.gmatch(data[3], '%S+') do
     //           redis.call('expire', j, ARGV[1]) 
     //        end
     //    end
@@ -166,7 +166,7 @@ namespace HB.Infrastructure.Redis.Cache
     //end
 
     //if(dim~='') then
-    //    for i in string.gmatch(dim, '%w+') do
+    //    for i in string.gmatch(dim, '%S+') do
     //        redis.call('del', i)
     //    end
     //end
@@ -196,7 +196,7 @@ namespace HB.Infrastructure.Redis.Cache
     //redis.call('del',guid)
 
     //if (dim~='') then
-    //    for i in string.gmatch(dim, '%w+') do
+    //    for i in string.gmatch(dim, '%S+') do
     //        redis.call('del', i) 
     //    end
     //end

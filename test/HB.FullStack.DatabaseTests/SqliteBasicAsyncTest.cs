@@ -2,6 +2,8 @@
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public class SqliteBasicAsyncTest
+    public class SqliteBasicAsyncTest : IClassFixture<ServiceFixture>
     {
         private readonly IDatabase _sqlite;
         private readonly ITransaction _sqlIteTransaction;
@@ -48,13 +50,13 @@ namespace HB.FullStack.DatabaseTests
         /// <param name="serviceFixture"></param>
         /// <exception cref="DatabaseException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper)
+        public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
 
 
-            _sqlite = ServiceFixture.SQLite;
-            _sqlIteTransaction = ServiceFixture.SQLiteTransaction;
+            _sqlite = serviceFixture.ServiceProvider2.GetRequiredService<IDatabase>();
+            _sqlIteTransaction = serviceFixture.ServiceProvider2.GetRequiredService<ITransaction>();
         }
 
         /// <summary>

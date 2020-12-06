@@ -1,8 +1,10 @@
 ﻿using HB.FullStack.Database;
 using HB.FullStack.Database.Engine;
 using HB.Infrastructure.Redis;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,7 +13,7 @@ namespace HB.FullStack.DatabaseTests
 {
     public static class ServiceFixture
     {
-        private const string _connectionString = "127.0.0.1:6379";
+        private const string _connectionString = "brlitetest.redis.rds.aliyuncs.com:6379,password=xMS22xtNPc&4RzgU,defaultDatabase=1";
         public const string ApplicationName = "Test";
         public const string InstanceName = "Default";
 
@@ -71,21 +73,6 @@ namespace HB.FullStack.DatabaseTests
                     {
                         DatabaseName = "test_db",
                         ConnectionString = "server=rm-bp16d156f2r6b78438o.mysql.rds.aliyuncs.com;port=3306;user=brlite_test;password=EgvfXB2eWucbtm0C;database=test_db;SslMode=None;",
-                        IsMaster = true
-                    });
-                });
-            }
-
-            if (engineType == DatabaseEngineType.SQLite)
-            {
-                services.AddSQLite(options =>
-                {
-                    options.CommonSettings.Version = 1;
-
-                    options.Connections.Add(new DatabaseConnectionSettings
-                    {
-                        DatabaseName = "test2.db",
-                        ConnectionString = "Data Source=test2.db",
                         IsMaster = true
                     });
                 });

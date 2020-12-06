@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Lock.Memory
@@ -13,6 +14,7 @@ namespace HB.FullStack.Lock.Memory
     public class MemoryLockManager : IMemoryLockManager
     {
         private readonly MemoryLockOptions _options;
+        private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
 
         /// <summary>
@@ -21,9 +23,10 @@ namespace HB.FullStack.Lock.Memory
         /// </summary>
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _resourceTypeSemaphoreDict = new ConcurrentDictionary<string, SemaphoreSlim>();
 
-        public MemoryLockManager(IOptions<MemoryLockOptions> options, IMemoryCache memoryCache)
+        public MemoryLockManager(IOptions<MemoryLockOptions> options, ILogger<MemoryLockManager> logger, IMemoryCache memoryCache)
         {
             _options = options.Value;
+            _logger = logger;
             _memoryCache = memoryCache;
         }
 
@@ -90,6 +93,16 @@ namespace HB.FullStack.Lock.Memory
             return memoryLock;
         }
 
+        internal void StopKeepAliveTimer(MemoryLock memoryLock)
+        {
+            if (memoryLock.KeepAliveTimer != null)
+            {
+                memoryLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                memoryLock.KeepAliveTimer.Dispose();
+                memoryLock.KeepAliveTimer = null;
+            }
+        }
+
         private void StartAutoExtendTimer(MemoryLock memoryLock)
         {
             long interval = (long)memoryLock.ExpiryTime.TotalMilliseconds / 2;
@@ -103,6 +116,12 @@ namespace HB.FullStack.Lock.Memory
 
         private void ExtendLockLifetime(MemoryLock memoryLock)
         {
+            if (memoryLock.Status != MemoryLockStatus.Acquired)
+            {
+                _logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{memoryLock.ResourceKeys.ToJoinedString(",")}, Status:{memoryLock.Status}");
+                return;
+            }
+
             memoryLock.ExtendCount++;
 
             long now = TimeUtil.UtcNowUnixTimeMilliseconds;
@@ -154,12 +173,7 @@ namespace HB.FullStack.Lock.Memory
             //这里不加锁也没关系，因为不影响上面Acquire时的三个判断
             //比如：判断“存在但过期”，这里删掉了。不影响
 
-            if (memoryLock.KeepAliveTimer != null)
-            {
-                memoryLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                memoryLock.KeepAliveTimer.Dispose();
-                memoryLock.KeepAliveTimer = null;
-            }
+            StopKeepAliveTimer(memoryLock);
 
             for (int i = 0; i < memoryLock.ResourceKeys.Count; ++i)
             {

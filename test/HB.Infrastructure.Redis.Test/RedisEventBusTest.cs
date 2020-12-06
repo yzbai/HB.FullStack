@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using HB.FullStack;
 using HB.FullStack.EventBus.Abstractions;
+
+using Microsoft.Extensions.DependencyInjection;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,7 +22,7 @@ namespace HB.Infrastructure.Redis.Test
         public RedisEventBusTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
-            _eventBus = serviceFixture.ThrowIfNull(nameof(serviceFixture)).EventBus;
+            _eventBus = serviceFixture.ServiceProvider.GetRequiredService<IEventBus>();
         }
 
         [Fact]

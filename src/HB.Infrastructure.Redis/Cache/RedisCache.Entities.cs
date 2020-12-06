@@ -55,7 +55,7 @@ for j =1,number do
             redis.call('del',KEYS[j])
     
             if (data[3]~='') then
-                for i in string.gmatch(data[3], '%w+') do
+                for i in string.gmatch(data[3], '%S+') do
                    redis.call('del', i) 
                 end
             end
@@ -67,7 +67,7 @@ for j =1,number do
         redis.call('expire', KEYS[j], ARGV[2])
     
         if (data[3]~='') then
-            for k in string.gmatch(data[3], '%w+') do
+            for k in string.gmatch(data[3], '%S+') do
                redis.call('expire', k, ARGV[2]) 
             end
         end
@@ -109,7 +109,7 @@ for j =1,number do
             redis.call('del',guid)
     
             if (data[3]~='') then
-                for i in string.gmatch(data[3], '%w+') do
+                for i in string.gmatch(data[3], '%S+') do
                    redis.call('del', i) 
                 end
             end
@@ -121,7 +121,7 @@ for j =1,number do
         redis.call('expire', guid, ARGV[2])
     
         if (data[3]~='') then
-            for k in string.gmatch(data[3], '%w+') do
+            for k in string.gmatch(data[3], '%S+') do
                redis.call('expire', k, ARGV[2]) 
             end
         end
@@ -189,7 +189,7 @@ for j=1, entityNum do
     redis.call('del', KEYS[j]) 
 
     if(data and data~='') then
-        for i in string.gmatch(data, '%w+') do
+        for i in string.gmatch(data, '%S+') do
             redis.call('del', i)
         end
     end
@@ -218,7 +218,7 @@ for j = 1, entityNum do
             redis.call('del',guid)
     
             if (data~='') then
-                for i in string.gmatch(data, '%w+') do
+                for i in string.gmatch(data, '%S+') do
                     redis.call('del', i) 
                 end
             end
@@ -227,11 +227,9 @@ for j = 1, entityNum do
 end
 ";
 
-        private readonly ILogger<RedisCache> _logger;
-
-        public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options)
+        public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
         {
-            _logger = logger;
+            _logger.LogInformation($"RedisCache初始化完成");
         }
 
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()

@@ -69,6 +69,8 @@ namespace HB.FullStack.Identity
             {
                 uc = new UserLoginControl();
 
+                uc.UserGuid = userGuid;
+
                 await _kv.AddAsync(uc, "default").ConfigureAwait(false);
             }
 

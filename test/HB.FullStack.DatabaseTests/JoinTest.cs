@@ -1,6 +1,8 @@
 ﻿using HB.FullStack.Common.Entities;
 using HB.FullStack.Database;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,7 @@ using Xunit.Abstractions;
 namespace HB.FullStack.DatabaseTests
 {
     //[TestCaseOrderer("HB.FullStack.Database.Test.TestCaseOrdererByTestName", "HB.FullStack.Database.Test")]
-    public class MutipleTableTest
+    public class MutipleTableTest : IClassFixture<ServiceFixture>
     {
         private readonly IDatabase _mysql;
         private readonly IDatabase _sqlite;
@@ -37,12 +39,12 @@ namespace HB.FullStack.DatabaseTests
         /// <exception cref="ObjectDisposedException">Ignore.</exception>
         /// <exception cref="AggregateException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public MutipleTableTest(ITestOutputHelper testOutputHelper)
+        public MutipleTableTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
         {
             _output = testOutputHelper;
 
-            _mysql = ServiceFixture.MySQL;
-            _sqlite = ServiceFixture.SQLite;
+            _mysql = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
+            _sqlite = serviceFixture.ServiceProvider2.GetRequiredService<IDatabase>();
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
             AddSomeDataAsync().Wait();

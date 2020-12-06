@@ -80,7 +80,7 @@ namespace HB.FullStack.Cache
                     }
                 }
 
-                CacheDifferentDimensionKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheDifferentDimensionKeyAttribute>();
+                CacheDimensionKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheDimensionKeyAttribute>();
 
                 if (dimensionKeyAttribute != null)
                 {

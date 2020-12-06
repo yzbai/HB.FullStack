@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using StackExchange.Redis;
@@ -16,15 +17,19 @@ namespace HB.Infrastructure.Redis.Cache
         protected const int _invalidationVersionExpirySeconds = 60;
 
         private readonly RedisCacheOptions _options;
+        protected readonly ILogger _logger;
+
         private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
         private readonly IDictionary<string, LoadedLuas> _loadedLuaDict = new Dictionary<string, LoadedLuas>();
 
-        public RedisCacheBase(IOptions<RedisCacheOptions> options)
+        public RedisCacheBase(IOptions<RedisCacheOptions> options, ILogger logger)
         {
             _options = options.Value;
+            _logger = logger;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
 
             InitLoadedLuas();
+
         }
 
         public string DefaultInstanceName => _options.DefaultInstanceName ?? _options.ConnectionSettings[0].InstanceName;
@@ -49,7 +54,7 @@ namespace HB.Infrastructure.Redis.Cache
         {
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
-                IServer server = RedisInstanceManager.GetServer(setting);
+                IServer server = RedisInstanceManager.GetServer(setting, _logger);
                 LoadedLuas loadedLuas = new LoadedLuas();
 
 
@@ -108,7 +113,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
             {
-                return await RedisInstanceManager.GetDatabaseAsync(setting).ConfigureAwait(false);
+                return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
             throw new CacheException(ErrorCode.CacheLoadedLuaNotFound, $"Can not found Such Redis Instance: {instanceName}");
@@ -128,7 +133,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
             {
-                return RedisInstanceManager.GetDatabase(setting);
+                return RedisInstanceManager.GetDatabase(setting, _logger);
             }
 
             throw new CacheException(ErrorCode.CacheLoadedLuaNotFound, $"Can not found Such Redis Instance: {instanceName}");
