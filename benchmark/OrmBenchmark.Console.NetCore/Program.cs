@@ -1,5 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using HB.FullStack;
+using HB.FullStack.Benchmark.Database;
+using HB.FullStack.Database;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
 using OrmBenchmark.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -7,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Text;
 
 namespace OrmBenchmark.ConsoleUI.NetCore
 {
@@ -15,15 +23,17 @@ namespace OrmBenchmark.ConsoleUI.NetCore
         static void Main(string[] args)
         {
             // Set up configuration sources.
-            var builder = new ConfigurationBuilder()
-           .SetBasePath(Directory.GetCurrentDirectory())
-           .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-           .AddEnvironmentVariables();
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
-            IConfigurationRoot configuration = builder.Build();
-                        
-            string connStringName = configuration.GetValue<string>("DefaultConnectionStringName");
-            string connStr = configuration.GetConnectionString(connStringName);
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+               .AddEnvironmentVariables()
+               .SetBasePath(Environment.CurrentDirectory)
+               .AddJsonFile("appsettings.json", optional: false)
+               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: false);
+
+            IConfigurationRoot configuration = configurationBuilder.Build();
+
+            string connStr = configuration["MySQL:Connections:0:ConnectionString"];
 
             // Set up data directory
             string runDir = System.AppContext.BaseDirectory;
@@ -34,13 +44,25 @@ namespace OrmBenchmark.ConsoleUI.NetCore
 
             var benchmarker = new Benchmarker(connStr, 500);
 
-            benchmarker.RegisterOrmExecuter(new Ado.PureAdoExecuter());
+
+
+            //benchmarker.RegisterOrmExecuter(new Ado.PureAdoExecuter());
+
+            benchmarker.RegisterOrmExecuter(new Dapper.DapperExecuter());
+            benchmarker.RegisterOrmExecuter(new Dapper.DapperContribExecuter());
+            //benchmarker.RegisterOrmExecuter(new EntityFramework.EntityFrameworkExecuter());
+            //benchmarker.RegisterOrmExecuter(new EntityFramework.EntityFrameworNoTrackingExecuter());
+            //benchmarker.RegisterOrmExecuter(new OrmLite.OrmLiteNoQueryExecuter());
+            benchmarker.RegisterOrmExecuter(new FullStackDatabaseExecutor());
+
+
+
             //benchmarker.RegisterOrmExecuter(new Ado.PureAdoExecuterGetValues());
             //benchmarker.RegisterOrmExecuter(new SimpleData.SimpleDataExecuter());
-            benchmarker.RegisterOrmExecuter(new Dapper.DapperExecuter());
-            benchmarker.RegisterOrmExecuter(new Dapper.DapperBufferedExecuter());
-            benchmarker.RegisterOrmExecuter(new Dapper.DapperFirstOrDefaultExecuter());
-            benchmarker.RegisterOrmExecuter(new Dapper.DapperContribExecuter());
+
+            //benchmarker.RegisterOrmExecuter(new Dapper.DapperBufferedExecuter());
+            //benchmarker.RegisterOrmExecuter(new Dapper.DapperFirstOrDefaultExecuter());
+
             //benchmarker.RegisterOrmExecuter(new PetaPoco.PetaPocoExecuter());
             //benchmarker.RegisterOrmExecuter(new PetaPoco.PetaPocoFastExecuter());
             //benchmarker.RegisterOrmExecuter(new PetaPoco.PetaPocoFetchExecuter());
@@ -49,13 +71,15 @@ namespace OrmBenchmark.ConsoleUI.NetCore
             //benchmarker.RegisterOrmExecuter(new OrmToolkit.OrmToolkitNoQueryExecuter());
             ////benchmarker.RegisterOrmExecuter(new OrmToolkit.OrmToolkitAutoMapperExecuter());
             //benchmarker.RegisterOrmExecuter(new OrmToolkit.OrmToolkitTestExecuter());
-            //benchmarker.RegisterOrmExecuter(new EntityFramework.EntityFrameworkExecuter());
-            benchmarker.RegisterOrmExecuter(new EntityFramework.EntityFrameworNoTrackingExecuter());
+
+
             //benchmarker.RegisterOrmExecuter(new InsightDatabase.InsightDatabaseExecuter());
             //benchmarker.RegisterOrmExecuter(new InsightDatabase.InsightSingleDatabaseExecuter());
             //benchmarker.RegisterOrmExecuter(new OrmLite.OrmLiteExecuter());
-            benchmarker.RegisterOrmExecuter(new OrmLite.OrmLiteNoQueryExecuter());
+
+
             //benchmarker.RegisterOrmExecuter(new DevExpress.DevExpressQueryExecuter());
+
 
             Console.WriteLine("ORM Benchmark");
 
@@ -68,6 +92,10 @@ namespace OrmBenchmark.ConsoleUI.NetCore
             Console.WriteLine(ver);
             Console.WriteLine("Connection string: {0}", connStr);
             Console.Write("\nRunning...");
+
+            PrepareDatabaseAsync().Wait();
+
+
             benchmarker.Run(warmUp);
             Console.WriteLine("Finished.");
 
@@ -92,6 +120,46 @@ namespace OrmBenchmark.ConsoleUI.NetCore
             ShowResults(benchmarker.resultsForAllDynamicItems);
 
             Console.ReadLine();
+        }
+
+        private static async System.Threading.Tasks.Task PrepareDatabaseAsync()
+        {
+            ServiceFixture serviceFixture = new ServiceFixture();
+
+            IDatabase database = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
+
+            database.InitializeAsync().Wait();
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < 2000; ++i)
+            {
+                stringBuilder.Append('x');
+            }
+
+            string text = stringBuilder.ToString();
+
+            List<Post> posts = new List<Post>();
+
+            for (int i = 0; i < 5001; i++)
+            {
+                Post newItem = new Post { Text = text, CreationDate = TimeUtil.UtcNowUnixTimeMilliseconds, LastChangeDate = TimeUtil.UtcNowUnixTimeMilliseconds };
+                posts.Add(newItem);
+            }
+
+            ITransaction transaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<Post>().ConfigureAwait(false);
+            try
+            {
+                await database.BatchAddAsync(posts, "", transactionContext).ConfigureAwait(false);
+
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+            }
+
         }
 
         static void ShowResults(List<BenchmarkResult> results, bool showFirstRun = false, bool ignoreZeroTimes = true)

@@ -70,7 +70,9 @@ namespace HB.FullStack.Database.SQL
             {
                 command.CommandText += whereCondition.ToString();
 
-                foreach (KeyValuePair<string, object> pair in whereCondition.GetParameters())
+                IList<KeyValuePair<string, object>> tempParameters = whereCondition.GetParameters();
+
+                foreach (KeyValuePair<string, object> pair in tempParameters)
                 {
                     IDataParameter param = _databaseEngine.CreateParameter(pair.Key, pair.Value);
                     command.Parameters.Add(param);

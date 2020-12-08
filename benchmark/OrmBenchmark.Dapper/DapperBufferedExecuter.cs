@@ -1,5 +1,7 @@
 ﻿using Dapper;
+
 using OrmBenchmark.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -38,12 +40,12 @@ namespace OrmBenchmark.Dapper
             return conn.Query("select * from Posts where Id=@Id", param, buffered: true).First();
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObject()
         {
             return conn.Query<Post>("select * from Posts", null, buffered: true).ToList<IPost>();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
             return conn.Query("select * from Posts", null, buffered: true).ToList();
         }

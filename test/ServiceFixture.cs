@@ -42,6 +42,11 @@ namespace HB.FullStack
 
             services
                 .AddOptions()
+                .AddLogging(builder =>
+                {
+                    builder.AddConsole();
+                    builder.AddDebug();
+                })
                 .AddMemoryCache()
                 .AddMySQL(Configuration.GetSection("MySQL"))
                 .AddRedisCache(Configuration.GetSection("RedisCache"))

@@ -10,8 +10,8 @@ namespace OrmBenchmark.Core
         void Init(string connectionStrong);
         IPost GetItemAsObject(int Id);
         dynamic GetItemAsDynamic(int Id);
-        IList<IPost> GetAllItemsAsObject();
-        IList<dynamic> GetAllItemsAsDynamic();
+        IEnumerable<IPost> GetAllItemsAsObject();
+        IEnumerable<dynamic> GetAllItemsAsDynamic();
         void Finish();
     }
 }

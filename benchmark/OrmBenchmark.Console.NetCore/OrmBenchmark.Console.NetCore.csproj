@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\test\ServiceFixture.cs" Link="ServiceFixture.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="..\..\test\appsettings.Development.json" Link="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

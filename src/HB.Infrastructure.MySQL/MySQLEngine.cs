@@ -35,11 +35,11 @@ namespace HB.Infrastructure.MySQL
 
         [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
 
-        public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory, ILogger<MySQLEngine> logger)
+        public MySQLEngine(IOptions<MySQLOptions> options, /*ILoggerFactory loggerFactory,*/ ILogger<MySQLEngine> logger)
         {
             try
             {
-                MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+                //MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
             }
             catch (InvalidOperationException ex)
             {

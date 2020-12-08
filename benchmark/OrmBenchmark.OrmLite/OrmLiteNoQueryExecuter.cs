@@ -58,12 +58,12 @@ namespace OrmBenchmark.OrmLite
             return conn.Single<dynamic>(q);
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObject()
         {
             return conn.Select<Post>().ToList<IPost>();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
             var q = conn.From<Post>()
                 .Select(p => new

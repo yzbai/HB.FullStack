@@ -8,11 +8,13 @@ namespace HB.FullStack.DatabaseTests.Data
     {
         private static readonly Random _random = new Random();
 
-        public static IList<BookEntity> GetBooks()
+        public static IList<BookEntity> GetBooks(int? count = null)
         {
             List<BookEntity> books = new List<BookEntity>();
 
-            for (int i = 0; i < 5; ++i)
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
             {
                 books.Add(new BookEntity
                 {
@@ -43,11 +45,13 @@ namespace HB.FullStack.DatabaseTests.Data
             return entity;
         }
 
-        public static IList<PublisherEntity> GetPublishers()
+        public static IList<PublisherEntity> GetPublishers(int? count = null)
         {
             List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
 
-            for (int i = 0; i < 5; ++i)
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
             {
                 publisherEntities.Add(new PublisherEntity
                 {

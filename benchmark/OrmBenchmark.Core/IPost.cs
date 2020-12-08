@@ -6,10 +6,10 @@ namespace OrmBenchmark.Core
 {
     public interface IPost
     {
-        int Id { get; set; }
+        long Id { get; }
         string Text { get; set; }
-        DateTime CreationDate { get; set; }
-        DateTime LastChangeDate { get; set; }
+        long CreationDate { get; set; }
+        long LastChangeDate { get; set; }
         int? Counter1 { get; set; }
         int? Counter2 { get; set; }
         int? Counter3 { get; set; }

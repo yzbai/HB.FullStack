@@ -1,7 +1,10 @@
 ﻿#nullable enable
 
 using HB.FullStack.Common.Entities;
+
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 
@@ -14,9 +17,23 @@ namespace HB.FullStack.Database.Entities
     {
         private readonly IDatabaseEntityDefFactory _modelDefFactory;
 
+        private ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object>> _funcDict = new ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object>>();
+        private readonly object _funcDictLocker = new object();
+
         public DefaultDatabaseEntityMapper(IDatabaseEntityDefFactory modelDefFactory)
         {
             _modelDefFactory = modelDefFactory;
+        }
+
+        private static int GetColumnHash(IDataReader reader)
+        {
+            HashCode hashCode = new HashCode();
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                hashCode.Add(reader.GetName(i));
+            }
+            return hashCode.ToHashCode();
         }
 
         #region 表行与实体间映射
@@ -27,64 +44,47 @@ namespace HB.FullStack.Database.Entities
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-        
+
         public IList<T> ToList<T>(IDataReader reader)
             where T : Entity, new()
         {
-            IList<T> lst = new List<T>();
+            DatabaseEntityDef entityDef = _modelDefFactory.GetDef<T>();
 
-            //if (reader == null)
-            //{
-            //    return lst;
-            //}
+            Func<IDataReader, DatabaseEntityDef, object> mapFunc = GetMapFunc(entityDef, reader);
 
-            int len = reader.FieldCount;
-            string[] propertyNames = new string[len];
-
-
-            DatabaseEntityDef definition = _modelDefFactory.GetDef<T>();
-
-            for (int i = 0; i < len; ++i)
-            {
-                propertyNames[i] = reader.GetName(i);
-            }
+            List<T> lst = new List<T>();
 
             while (reader.Read())
             {
-                T item = new T();
+                object item = mapFunc.Invoke(reader, entityDef);
 
-                for (int i = 0; i < len; ++i)
-                {
-                    DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i])
-                        ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames[i]}.");
-
-                    object fieldValue = reader[i];
-
-                    if (property.PropertyInfo.Name == "Id" && fieldValue == DBNull.Value)
-                    {
-                        //item = null;
-                        //break;
-                        throw new DatabaseException($"Database value of Property 'Id' is null. Entity:{definition.EntityFullName}");
-                    }
-
-                    object? value = property.TypeConverter == null ?
-                        ValueConverterUtil.DbValueToTypeValue(fieldValue, property.PropertyInfo.PropertyType) :
-                        property.TypeConverter.DbValueToTypeValue(fieldValue);
-
-                    if (value != null)
-                    {
-                        property.PropertyInfo.SetValue(item, value);
-                    }
-                }
-
-                lst.Add(item);
-                //if (item != null && !item.Deleted)
-                //{
-                //    lst.Add(item);
-                //}
+                lst.Add((T)item);
             }
 
             return lst;
+        }
+
+        private Func<IDataReader, DatabaseEntityDef, object> GetMapFunc(DatabaseEntityDef entityDef, IDataReader reader)
+        {
+            string key = GetKey(entityDef, reader);
+
+            if (!_funcDict.ContainsKey(key))
+            {
+                lock (_funcDictLocker)
+                {
+                    if (!_funcDict.ContainsKey(key))
+                    {
+                        _funcDict[key] = EntityMapperHelper.CreateEntityMapperDelegate(entityDef, reader);
+                    }
+                }
+            }
+
+            return _funcDict[key];
+        }
+
+        private static string GetKey(DatabaseEntityDef entityDef, IDataReader reader)
+        {
+            return entityDef.DatabaseName + entityDef.EntityFullName + GetColumnHash(reader);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-        
+
         public IList<Tuple<TSource, TTarget?>> ToList<TSource, TTarget>(IDataReader reader)
             where TSource : Entity, new()
             where TTarget : Entity, new()
@@ -212,7 +212,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-        
+
         public IList<Tuple<TSource, TTarget2?, TTarget3?>> ToList<TSource, TTarget2, TTarget3>(IDataReader reader)
             where TSource : Entity, new()
             where TTarget2 : Entity, new()
@@ -369,7 +369,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="reader"></param>
         /// <param name="item"></param>
         /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-        
+
         public void ToObject<T>(IDataReader reader, T item) where T : Entity, new()
         {
             if (reader == null)
@@ -406,6 +406,6 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        #endregion        
+        #endregion
     }
 }

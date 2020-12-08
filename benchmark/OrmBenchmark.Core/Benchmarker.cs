@@ -39,7 +39,7 @@ namespace OrmBenchmark.Core
 
         public void Run(bool warmUp = false)
         {
-            PrepareDatabase();
+            //PrepareDatabase();
 
             results.Clear();
             resultsForDynamicItem.Clear();
@@ -73,7 +73,7 @@ namespace OrmBenchmark.Core
                     watch.Stop();
                     //if (obj?.Id != i)
                     //    throw new ApplicationException("Invalid object returned.");
-                    if (i == 1)
+                     if (i == 1)
                         firstItemExecTime = watch.ElapsedMilliseconds;
                 }
                 results.Add(new BenchmarkResult { Name = executer.Name, ExecTime = watch.ElapsedMilliseconds, FirstItemExecTime = firstItemExecTime });

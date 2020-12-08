@@ -1,5 +1,7 @@
 ﻿using OrmBenchmark.Core;
+
 using ServiceStack.OrmLite;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -39,12 +41,12 @@ namespace OrmBenchmark.OrmLite
             return conn.Single<dynamic>("select * from Posts where Id=@Id", param);
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObject()
         {
             return conn.Select<Post>("select * from Posts").ToList<IPost>();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
             return conn.Select<dynamic>("select * from Posts");
         }

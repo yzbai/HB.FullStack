@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Common.Entities;
+
 using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
@@ -23,10 +24,10 @@ namespace HB.FullStack.Database.Entities
         ///// 属性名称
         ///// </summary>
         //public string PropertyName { get; set; }
-        ///// <summary>
-        ///// 属性类型
-        ///// </summary>
-        //public Type PropertyType { get; set; }
+        /// <summary>
+        /// 属性类型
+        /// </summary>
+        public Type Type { get; set; }
         ///// <summary>
         ///// Get方法
         ///// </summary>
@@ -110,7 +111,7 @@ namespace HB.FullStack.Database.Entities
             EntityDef = entityDef;
             PropertyInfo = propertyInfo;
             //PropertyName = propertyInfo.Name;
-            //PropertyType = propertyInfo.PropertyType;
+            Type = propertyInfo.PropertyType;
             //GetMethod = propertyInfo.GetGetMethod();
             //SetMethod = propertyInfo.GetSetMethod();
         }

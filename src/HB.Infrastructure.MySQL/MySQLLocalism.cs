@@ -80,7 +80,7 @@ namespace HB.Infrastructure.MySQL
                 [typeof(bool?)] = new DbTypeInfo() { DatabaseType = DbType.Boolean, Statement = "BOOLEAN", IsValueQuoted = false },
                 [typeof(char?)] = new DbTypeInfo() { DatabaseType = DbType.StringFixedLength, Statement = "CHAR", IsValueQuoted = true },
                 [typeof(Guid?)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true },
-                [typeof(DateTime?)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true },
+                //[typeof(DateTime?)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true },
                 //[typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true },
                 [typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
                 //[typeof(TimeSpan?)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true },

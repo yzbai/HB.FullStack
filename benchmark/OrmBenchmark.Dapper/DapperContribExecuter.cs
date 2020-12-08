@@ -1,5 +1,9 @@
 ﻿using Dapper.Contrib.Extensions;
+
+using MySql.Data.MySqlClient;
+
 using OrmBenchmark.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -10,7 +14,7 @@ namespace OrmBenchmark.Dapper
 {
     public class DapperContribExecuter : IOrmExecuter
     {
-        SqlConnection conn;
+        MySqlConnection conn;
 
         public string Name
         {
@@ -22,7 +26,7 @@ namespace OrmBenchmark.Dapper
 
         public void Init(string connectionStrong)
         {
-            conn = new SqlConnection(connectionStrong);
+            conn = new MySqlConnection(connectionStrong);
             conn.Open();
         }
 
@@ -36,12 +40,12 @@ namespace OrmBenchmark.Dapper
             return null;
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObject()
         {
             return conn.GetAll<Post>().ToList<IPost>();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
             return null;
         }

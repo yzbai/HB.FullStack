@@ -724,7 +724,12 @@ namespace HB.FullStack.Database
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
             where T : Entity, new()
         {
-            return ScalarAsync<T>(t => t.Id == id && t.Deleted == false, transContext);
+            WhereExpression<T> where = Where<T>().Where("Id={0} and Deleted=0", id);
+
+            return ScalarAsync<T>(where, transContext);
+
+
+            //return ScalarAsync<T>(t => t.Id == id && t.Deleted == false, transContext);
         }
 
         //public Task<T> RetrieveScalaAsyncr<T>(Expression<Func<T, bool>> whereExpr, DatabaseTransactionContext transContext = false) where T : DatabaseEntity, new();

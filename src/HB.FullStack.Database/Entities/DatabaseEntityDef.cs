@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reflection;
 
 namespace HB.FullStack.Database.Entities
 {
@@ -9,6 +11,8 @@ namespace HB.FullStack.Database.Entities
     /// </summary>
     internal class DatabaseEntityDef
     {
+
+
         #region 自身描述
 
         /// <summary>
@@ -21,6 +25,8 @@ namespace HB.FullStack.Database.Entities
         public Type EntityType { get; set; }
 
         #endregion
+
+
 
         #region 针对数据库描述
         /// <summary>
@@ -89,6 +95,35 @@ namespace HB.FullStack.Database.Entities
             }
 
             return null;
+        }
+
+        public Type OnlyForEmitGetPropertyType(string propertyName)
+        {
+            return PropertyDict[propertyName].Type;
+        }
+
+        public DatabaseTypeConverter OnlyForEmitGetPropertyTypeConverter(string propertyName)
+        {
+            return PropertyDict[propertyName].TypeConverter!;
+        }
+
+        public MethodInfo OnlyForEmitGetPropertySetMethod(string propertyName)
+        {
+            PropertyInfo propertyInfo = PropertyDict[propertyName].PropertyInfo;//.GetSetMethod(true);
+
+            if (propertyInfo.DeclaringType == EntityType)
+            {
+                //return propertyInfo.SetMethod;
+                return propertyInfo.GetSetMethod(true);
+            }
+
+            return propertyInfo.DeclaringType.GetProperty(
+                   propertyInfo.Name,
+                   BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                   Type.DefaultBinder,
+                   propertyInfo.PropertyType,
+                   propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray(),
+                   null).GetSetMethod(true);
         }
     }
 

@@ -1,7 +1,10 @@
 ﻿using HB.FullStack.Database.Engine;
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
 
 namespace HB.FullStack.Database
 {

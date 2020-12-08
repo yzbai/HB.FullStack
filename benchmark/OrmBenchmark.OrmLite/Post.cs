@@ -1,5 +1,7 @@
 ﻿using OrmBenchmark.Core;
+
 using ServiceStack.DataAnnotations;
+
 using System;
 
 namespace OrmBenchmark.OrmLite
@@ -7,10 +9,10 @@ namespace OrmBenchmark.OrmLite
     [Alias("Posts")]
     public class Post : IPost
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Text { get; set; }
-        public DateTime CreationDate { get; set; }
-        public DateTime LastChangeDate { get; set; }
+        public long CreationDate { get; set; }
+        public long LastChangeDate { get; set; }
         public int? Counter1 { get; set; }
         public int? Counter2 { get; set; }
         public int? Counter3 { get; set; }

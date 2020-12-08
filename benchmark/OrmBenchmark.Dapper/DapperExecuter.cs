@@ -1,5 +1,9 @@
 ﻿using Dapper;
+
+using MySql.Data.MySqlClient;
+
 using OrmBenchmark.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -10,7 +14,7 @@ namespace OrmBenchmark.Dapper
 {
     public class DapperExecuter : IOrmExecuter
     {
-        SqlConnection conn;
+        MySqlConnection conn;
 
         public string Name
         {
@@ -22,30 +26,30 @@ namespace OrmBenchmark.Dapper
 
         public void Init(string connectionStrong)
         {
-            conn = new SqlConnection(connectionStrong);
+            conn = new MySqlConnection(connectionStrong);
             conn.Open();
         }
 
         public IPost GetItemAsObject(int Id)
         {
             object param = new { Id = Id };
-            return conn.Query<Post>("select * from Posts where Id=@Id", param, buffered: false).First();
+            return conn.Query<Post>("select * from posts where Id=@Id", param, buffered: false).First();
         }
 
         public dynamic GetItemAsDynamic(int Id)
         {
             object param = new { Id = Id };
-            return conn.Query("select * from Posts where Id=@Id", param, buffered: false).First();
+            return conn.Query("select * from posts where Id=@Id", param, buffered: false).First();
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObject()
         {
-            return conn.Query<Post>("select * from Posts", null, buffered: false).ToList<IPost>();
+            return conn.Query<Post>("select * from posts", null, buffered: false).ToList<IPost>();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
-            return conn.Query("select * from Posts", null, buffered: false).ToList();
+            return conn.Query("select * from posts", null, buffered: false).ToList();
         }
 
         public void Finish()

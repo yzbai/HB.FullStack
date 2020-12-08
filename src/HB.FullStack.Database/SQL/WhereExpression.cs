@@ -2,6 +2,7 @@
 
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -149,7 +150,8 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        public string SqlFormat(string sqlText, params object[] sqlParams)
+        //TODO: 可以改造的方向： 参数化，而不是组成一个sql，有注入风险
+        private string SqlFormat(string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
 
