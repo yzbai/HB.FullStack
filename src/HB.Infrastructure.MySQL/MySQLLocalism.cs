@@ -14,7 +14,7 @@ namespace HB.Infrastructure.MySQL
         public DbType DatabaseType { get; set; }
 
         /// <summary>
-        /// 表达
+        /// DbType在不同数据库中的表达，用来创建表的时候用
         /// </summary>
         public string Statement { get; set; } = default!;
 
@@ -62,7 +62,7 @@ namespace HB.Infrastructure.MySQL
                 [typeof(Guid)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true },
                 //[typeof(DateTime)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true },
                 //[typeof(DateTimeOffset)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true },
-                [typeof(DateTimeOffset)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
+                [typeof(DateTimeOffset)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = false },
                 //[typeof(TimeSpan)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true },
                 [typeof(TimeSpan)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
                 [typeof(byte[])] = new DbTypeInfo() { DatabaseType = DbType.Binary, Statement = "BLOB", IsValueQuoted = false },
@@ -82,7 +82,7 @@ namespace HB.Infrastructure.MySQL
                 [typeof(Guid?)] = new DbTypeInfo() { DatabaseType = DbType.Guid, Statement = "CHAR(36)", IsValueQuoted = true },
                 //[typeof(DateTime?)] = new DbTypeInfo() { DatabaseType = DbType.DateTime, Statement = "DATETIME", IsValueQuoted = true },
                 //[typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = true },
-                [typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
+                [typeof(DateTimeOffset?)] = new DbTypeInfo() { DatabaseType = DbType.DateTimeOffset, Statement = "DATETIME", IsValueQuoted = false },
                 //[typeof(TimeSpan?)] = new DbTypeInfo() { DatabaseType = DbType.Time, Statement = "DATETIME", IsValueQuoted = true },
                 [typeof(TimeSpan?)] = new DbTypeInfo() { DatabaseType = DbType.Int64, Statement = "BIGINT", IsValueQuoted = false },
                 [typeof(Object)] = new DbTypeInfo() { DatabaseType = DbType.Object, Statement = "", IsValueQuoted = true },

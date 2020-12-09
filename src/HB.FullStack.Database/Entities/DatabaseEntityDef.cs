@@ -76,8 +76,7 @@ namespace HB.FullStack.Database.Entities
         /// <summary>
         /// 属性枚举
         /// </summary>
-
-        public IEnumerable<DatabaseEntityPropertyDef> Properties { get { return PropertyDict.Values; } }
+        public List<DatabaseEntityPropertyDef> Properties { get; } = new List<DatabaseEntityPropertyDef>();
 
         #endregion
 

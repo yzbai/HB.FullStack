@@ -17,7 +17,8 @@ namespace ClassLibrary1
 
         public object Parse(Type destinationType, object value)
         {
-            return ValueConverterUtil.DbValueToTypeValue(value, destinationType);
+            return new DateTimeOffset((DateTime)value, TimeSpan.Zero);
+            //return ValueConverterUtil.DbValueToTypeValue(value, destinationType);
         }
     }
 

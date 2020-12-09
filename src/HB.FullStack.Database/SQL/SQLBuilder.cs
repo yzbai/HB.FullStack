@@ -4,6 +4,8 @@ using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 
+using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -30,12 +32,15 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// sql字典. 数据库名:TableName:操作-SQL语句
         /// </summary>
+
+        private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, string> _sqlStatementDict;
         private readonly IDatabaseEntityDefFactory _entityDefFactory;
         private readonly IDatabaseEngine _databaseEngine;
 
-        public SQLBuilder(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
+        public SQLBuilder(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory, ILogger<SQLBuilder> logger)
         {
+            _logger = logger;
             _databaseEngine = databaseEngine;
             _entityDefFactory = entityDefFactory;
             _sqlStatementDict = new ConcurrentDictionary<string, string>();
@@ -90,16 +95,17 @@ namespace HB.FullStack.Database.SQL
             return command;
         }
 
-        private object DbParameterValue_Statement(object propertyValue, DatabaseEntityPropertyDef info)
+        private static object DbParameterValue_Statement(object propertyValue, DatabaseEntityPropertyDef info)
         {
-            if (propertyValue == null)
-            {
-                return DBNull.Value;
-            }
+            //if (propertyValue == null)
+            //{
+            //    return DBNull.Value;
+            //}
 
             return info.TypeConverter == null ?
-                _databaseEngine.GetDbValueStatement(propertyValue, needQuoted: false) :
-                info.TypeConverter.TypeValueToDbValue(propertyValue);
+                //_databaseEngine.GetDbValueStatement(propertyValue, needQuoted: false) 
+                propertyValue
+                : info.TypeConverter.TypeValueToDbValue(propertyValue);
         }
 
         #region 单表查询
@@ -428,9 +434,9 @@ namespace HB.FullStack.Database.SQL
 
             List<IDataParameter> parameters = new List<IDataParameter>
             {
-                _databaseEngine.CreateParameter(versionProperty.DbParameterizedName!, DbParameterValue_Statement(currentVersion+1, versionProperty), versionProperty.DbFieldType),
-                _databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName!, DbParameterValue_Statement(lastUser, lastUserProperty), lastUserProperty.DbFieldType),
-                _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, DbParameterValue_Statement(TimeUtil.UtcNow, lastTimeProperty), lastTimeProperty.DbFieldType)
+                _databaseEngine.CreateParameter(versionProperty.DbParameterizedName!, currentVersion+1, versionProperty.DbFieldType),
+                _databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName!, lastUser, lastUserProperty.DbFieldType),
+                _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, TimeUtil.UtcNow, lastTimeProperty.DbFieldType)
             };
 
             return AssembleCommand<T, T>(false, deleteTemplate, null, condition, parameters);
@@ -707,7 +713,7 @@ namespace HB.FullStack.Database.SQL
 
         private string SQLite_Table_Create_Statement(Type type, bool addDropStatement)
         {
-            StringBuilder sql = new StringBuilder();
+            StringBuilder propertyInfoSql = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef(type);
 
             if (definition.DbTableReservedName.IsNullOrEmpty())
@@ -722,10 +728,10 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                if (info.PropertyInfo.Name.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
-                {
-                    continue;
-                }
+                //if (info.PropertyInfo.Name.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
+                //{
+                //    continue;
+                //}
 
                 string dbTypeStatement = info.TypeConverter == null
                     ? _databaseEngine.GetDbTypeStatement(info.PropertyInfo.PropertyType)
@@ -735,23 +741,31 @@ namespace HB.FullStack.Database.SQL
 
                 string defaultValue = info.DbDefaultValue.IsNullOrEmpty() ? "" : " DEFAULT " + info.DbDefaultValue;
 
-                string unique = info.IsUnique ? " UNIQUE " : "";
+                string unique = info.IsUnique && !info.IsForeignKey && !info.IsAutoIncrementPrimaryKey ? " UNIQUE " : "";
 
-                sql.AppendLine($" {info.DbReservedName} {dbTypeStatement} {nullable} {unique} {defaultValue} ,");
+                string primaryStatement = info.PropertyInfo.Name == "Id" ? " PRIMARY KEY AUTOINCREMENT " : "";
+
+                propertyInfoSql.AppendLine($" {info.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} {defaultValue} ,");
             }
+
+            propertyInfoSql.Remove(propertyInfoSql.Length - 1, 1);
 
             string dropStatement = addDropStatement ? $"Drop table if exists {definition.DbTableReservedName};" : string.Empty;
 
-            return
-    $@"{dropStatement}
-CREATE TABLE {definition.DbTableReservedName} (
-	""Id""    INTEGER PRIMARY KEY AUTOINCREMENT,
-	{sql}
-	""Deleted""   NUMERIC NOT NULL DEFAULT 0,
-	""LastUser"" TEXT,
-	""LastTime"" INTEGER NOT NULL,
-	""Version"" INTEGER NOT NULL
-);";
+            string tableCreateSql = $"{dropStatement} CREATE TABLE {definition.DbTableReservedName} ({propertyInfoSql});";
+
+            _logger.LogInformation($"Table创建：SQL:{tableCreateSql}");
+
+            return tableCreateSql;
+            //            $@"{dropStatement}
+            //CREATE TABLE {definition.DbTableReservedName} (
+            //	""Id""    INTEGER PRIMARY KEY AUTOINCREMENT,
+            //	{propertyInfoSql}
+            //	""Deleted""   NUMERIC NOT NULL DEFAULT 0,
+            //	""LastUser"" TEXT,
+            //	""LastTime"" INTEGER NOT NULL,
+            //	""Version"" INTEGER NOT NULL
+            //);";
         }
 
         /// <summary>
@@ -763,7 +777,7 @@ CREATE TABLE {definition.DbTableReservedName} (
 
         private string MySQL_Table_Create_Statement(Type type, bool addDropStatement)
         {
-            StringBuilder sql = new StringBuilder();
+            StringBuilder propertySqlBuilder = new StringBuilder();
             DatabaseEntityDef definition = _entityDefFactory.GetDef(type);
 
             if (definition.DbTableReservedName.IsNullOrEmpty())
@@ -778,40 +792,28 @@ CREATE TABLE {definition.DbTableReservedName} (
                     continue;
                 }
 
-                if (info.PropertyInfo.Name.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
-                {
-                    continue;
-                }
+                //if (info.PropertyInfo.Name.IsIn("Id", "Deleted", "LastUser", "LastTime", "Version"))
+                //{
+                //    continue;
+                //}
+
+                string dbTypeStatement = info.TypeConverter == null
+                    ? _databaseEngine.GetDbTypeStatement(info.PropertyInfo.PropertyType)
+                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyInfo.PropertyType);
 
                 int length = 0;
 
-                if (info.DbLength == null || info.DbLength == 0)
+                if (info.DbMaxLength == null || info.DbMaxLength == 0)
                 {
-                    if (info.DbFieldType == DbType.String
-                        || info.PropertyInfo.PropertyType == typeof(string)
-                        || info.PropertyInfo.PropertyType == typeof(char)
-                        || info.PropertyInfo.PropertyType.IsEnum
-                        || info.PropertyInfo.PropertyType.IsAssignableFrom(typeof(IList<string>))
-                        || info.PropertyInfo.PropertyType.IsAssignableFrom(typeof(IDictionary<string, string>)))
+                    if (info.DbFieldType == DbType.String || info.DbFieldType == DbType.StringFixedLength)
                     {
                         length = _entityDefFactory.GetVarcharDefaultLength();
                     }
                 }
                 else
                 {
-                    length = info.DbLength.Value;
+                    length = info.DbMaxLength.Value;
                 }
-
-                string binary = "";
-
-                if (info.PropertyInfo.PropertyType == typeof(string) || info.PropertyInfo.PropertyType == typeof(char) || info.PropertyInfo.PropertyType == typeof(char?))
-                {
-                    binary = "";
-                }
-
-                string dbTypeStatement = info.TypeConverter == null
-                    ? _databaseEngine.GetDbTypeStatement(info.PropertyInfo.PropertyType)
-                    : info.TypeConverter.TypeToDbTypeStatement(info.PropertyInfo.PropertyType);
 
                 if (length >= 16383) //因为utf8mb4编码，一个汉字4个字节
                 {
@@ -828,38 +830,53 @@ CREATE TABLE {definition.DbTableReservedName} (
                     dbTypeStatement = "CHAR";
                 }
 
-                sql.AppendFormat(CultureInfo.InvariantCulture, " {0} {1}{2} {6} {3} {4} {5},",
-                    info.DbReservedName,
-                    dbTypeStatement,
-                    (length == 0 || dbTypeStatement == "MEDIUMTEXT") ? "" : "(" + length + ")",
-                    info.IsNullable == true ? "" : " NOT NULL ",
-                    string.IsNullOrEmpty(info.DbDefaultValue) ? "" : "DEFAULT " + info.DbDefaultValue,
-                    !info.IsAutoIncrementPrimaryKey && !info.IsForeignKey && info.IsUnique ? " UNIQUE " : "",
-                    binary
-                    );
-                sql.AppendLine();
+                string lengthStatement = (length == 0 || dbTypeStatement == "MEDIUMTEXT") ? "" : "(" + length + ")";
+                string nullableStatement = info.IsNullable == true ? "" : " NOT NULL ";
+                string autoIncrementStatement = info.PropertyInfo.Name == "Id" ? "AUTO_INCREMENT" : "";
+                string defalutStatement = string.IsNullOrEmpty(info.DbDefaultValue) ? "" : "DEFAULT '" + info.DbDefaultValue + "'";
+                string uniqueStatement = !info.IsAutoIncrementPrimaryKey && !info.IsForeignKey && info.IsUnique ? " UNIQUE " : "";
+
+                propertySqlBuilder.Append($" {info.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {defalutStatement} {uniqueStatement},");
+
+                //sql.AppendFormat(CultureInfo.InvariantCulture, " {0} {1}{2} {6} {3} {4} {5},",
+                //    info.DbReservedName,
+                //    dbTypeStatement,
+                //    (length == 0 || dbTypeStatement == "MEDIUMTEXT") ? "" : "(" + length + ")",
+                //    info.IsNullable == true ? "" : " NOT NULL ",
+                //    string.IsNullOrEmpty(info.DbDefaultValue) ? "" : "DEFAULT '" + info.DbDefaultValue + "'",
+                //    !info.IsAutoIncrementPrimaryKey && !info.IsForeignKey && info.IsUnique ? " UNIQUE " : "",
+                //    binary
+                //    );
+                //sql.AppendLine();
             }
+
+
 
             string dropStatement = string.Empty;
 
             if (addDropStatement)
             {
-                dropStatement = string.Format(CultureInfo.InvariantCulture, "Drop table if exists {0};" + Environment.NewLine, definition.DbTableReservedName);
+                dropStatement = $"Drop table if exists {definition.DbTableReservedName};";
             }
 
-            return string.Format(CultureInfo.InvariantCulture,
-                "{2}" +
-                "CREATE TABLE {0} (" + Environment.NewLine +
-                "`Id` bigint(20) NOT NULL AUTO_INCREMENT," + Environment.NewLine +
-                "`Deleted` bit(1) NOT NULL DEFAULT b'0'," + Environment.NewLine +
-                "`LastUser` varchar(100) DEFAULT NULL," + Environment.NewLine +
-                //"`LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," + Environment.NewLine +
-                "`LastTime` bigint(20) NOT NULL ," + Environment.NewLine +
-                "`Version` int(11) NOT NULL DEFAULT '0'," + Environment.NewLine +
-                " {1} " +
-                " PRIMARY KEY (`Id`) " + Environment.NewLine +
-                " ) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;",
-                definition.DbTableReservedName, sql.ToString(), dropStatement);
+
+            string tableCreateSql = $"{dropStatement} create table {definition.DbTableReservedName} ( {propertySqlBuilder} PRIMARY KEY (`Id`)) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;";
+
+            _logger.LogInformation($"Table创建：SQL:{tableCreateSql}");
+
+            return tableCreateSql;
+            //"{2}" +
+            //"CREATE TABLE {0} (" + Environment.NewLine +
+            //"`Id` bigint(20) NOT NULL AUTO_INCREMENT," + Environment.NewLine +
+            //"`Deleted` bit(1) NOT NULL DEFAULT b'0'," + Environment.NewLine +
+            //"`LastUser` varchar(100) DEFAULT NULL," + Environment.NewLine +
+            ////"`LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," + Environment.NewLine +
+            //"`LastTime` bigint(20) NOT NULL ," + Environment.NewLine +
+            //"`Version` int(11) NOT NULL DEFAULT '0'," + Environment.NewLine +
+            //" {1} " +
+            //" PRIMARY KEY (`Id`) " + Environment.NewLine +
+            //" ) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;",
+            //    definition.DbTableReservedName, sql.ToString(), dropStatement);
         }
 
         #endregion

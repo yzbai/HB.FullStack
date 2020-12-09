@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Engine;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -205,8 +206,8 @@ namespace HB.FullStack.Database.Entities
                         entityDef.UniqueFieldCount++;
                     }
 
+                    entityDef.Properties.Add(propertyDef);
                     entityDef.PropertyDict.Add(propertyDef.PropertyInfo.Name, propertyDef);
-
                 }
             }
 
@@ -238,7 +239,7 @@ namespace HB.FullStack.Database.Entities
                     propertyDef.IsTableProperty = true;
                     propertyDef.IsNullable = !propertyAttr.NotNull;
                     propertyDef.IsUnique = propertyAttr.Unique;
-                    propertyDef.DbLength = propertyAttr.Length > 0 ? (int?)propertyAttr.Length : null;
+                    propertyDef.DbMaxLength = propertyAttr.Length > 0 ? (int?)propertyAttr.Length : null;
                     propertyDef.IsLengthFixed = propertyAttr.FixedLength;
                     propertyDef.DbDefaultValue = ValueConverterUtil.TypeValueToStringValue(propertyAttr.DefaultValue);
                     propertyDef.DbDescription = propertyAttr.Description;

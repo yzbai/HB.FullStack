@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -493,167 +494,116 @@ namespace HB.FullStack.DatabaseTests
 
         [Theory]
         [InlineData(1)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method", Justification = "<Pending>")]
         public async Task Test_EntityMapperPerformanceAsync(int index)
         {
             index++;
-            //IDatabase database = _mysql;
+            IDatabase database = _mysql;
 
-            //var books = Mocker.GetBooks(50000);
+            var books = Mocker.GetBooks(500);
 
-            //var trans = await _mysqlTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
+            var trans = await _mysqlTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
 
-            //try
-            //{
-            //    await database.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
-            //    await _mysqlTransaction.CommitAsync(trans).ConfigureAwait(false);
-            //}
-            //catch
-            //{
-            //    await _mysqlTransaction.RollbackAsync(trans).ConfigureAwait(false);
-            //}
+            IEnumerable<BookEntity> re = await database.RetrieveAsync<BookEntity>(b => b.Deleted, trans);
+
+            await database.AddAsync<BookEntity>(Mocker.GetBooks(1)[0], "", trans);
+
+            try
+            {
+
+                //await database.AddAsync<BookEntity>(books[0], "", trans);
+
+                await database.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await _mysqlTransaction.CommitAsync(trans).ConfigureAwait(false);
+            }
+            catch
+            {
+                await _mysqlTransaction.RollbackAsync(trans).ConfigureAwait(false);
+            }
 
 
             Stopwatch stopwatch = new Stopwatch();
 
             MySqlConnection mySqlConnection = new MySqlConnection(_mysqlConnectionString);
 
-            long time;
-
-            int loop = 10;
-
-            //Reflection
-
-            time = 0;
-            for (int cur = 0; cur < loop; ++cur)
-            {
-                await mySqlConnection.OpenAsync();
 
 
-                MySqlCommand command = new MySqlCommand("select * from tb_book", mySqlConnection);
+            //time = 0;
+            int loop = 100;
+            await WarmupDapperAsync(mySqlConnection).ConfigureAwait(false);
 
-                var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
-
-                List<BookEntity> list = new List<BookEntity>();
-                stopwatch.Start();
-                while (await reader.ReadAsync())
-                {
-                    BookEntity entity = new BookEntity();
-                    _mapper.ToObject<BookEntity>(reader, entity);
-
-                    list.Add(entity);
-                }
-
-                stopwatch.Stop();
-
-                time += stopwatch.ElapsedMilliseconds;
-
-
-                await reader.DisposeAsync().ConfigureAwait(false);
-                command.Dispose();
-
-                await mySqlConnection.CloseAsync();
-            }
-            _output.WriteLine((time / 10.0).ToString());
-
-            //Emit
-
-
-            time = 0;
-            for (int cur = 0; cur < loop; ++cur)
-            {
-
-                await mySqlConnection.OpenAsync().ConfigureAwait(false);
-
-                MySqlCommand command2 = new MySqlCommand("select * from tb_book", mySqlConnection);
-
-                var reader2 = await command2.ExecuteReaderAsync().ConfigureAwait(false);
-
-                var def = _defFactory.GetDef<BookEntity>();
-                var fun = EntityMapperHelper.CreateEntityMapperDelegate(def, reader2);
-                List<BookEntity> list2 = new List<BookEntity>();
-                stopwatch.Restart();
-                while (await reader2.ReadAsync())
-                {
-                    object obj = fun(reader2, def);
-
-                    list2.Add((BookEntity)obj);
-                }
-
-                stopwatch.Stop();
-
-                time += stopwatch.ElapsedMilliseconds;
-
-                await reader2.DisposeAsync().ConfigureAwait(false);
-                command2.Dispose();
-
-                await mySqlConnection.CloseAsync();
-            }
-            _output.WriteLine((time / 10.0).ToString());
-
-
-            //Dapper
-
-            time = 0;
-            for (int cur = 0; cur < loop; ++cur)
-            {
-                await mySqlConnection.OpenAsync().ConfigureAwait(false);
-
-                MySqlCommand command3 = new MySqlCommand("select * from tb_book", mySqlConnection);
-
-                var reader3 = await command3.ExecuteReaderAsync().ConfigureAwait(false);
-
-                Func<IDataReader, object> fun3 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader3);
-
-                List<BookEntity> list3 = new List<BookEntity>();
-                stopwatch.Restart();
-                while (await reader3.ReadAsync())
-                {
-                    object obj = fun3(reader3);
-
-                    list3.Add((BookEntity)obj);
-                }
-
-                stopwatch.Stop();
-
-                time += stopwatch.ElapsedMilliseconds;
-
-
-                command3.Dispose();
-
-                await mySqlConnection.CloseAsync();
-            }
-
-            _output.WriteLine((time / 10.0).ToString());
-
-
-            //coding
-
-            time = 0;
+            TimeSpan time0 = TimeSpan.Zero, time1 = TimeSpan.Zero, time2 = TimeSpan.Zero, time3 = TimeSpan.Zero;
             for (int cur = 0; cur < loop; ++cur)
             {
 
                 await mySqlConnection.OpenAsync();
 
 
-                MySqlCommand command0 = new MySqlCommand("select * from tb_book", mySqlConnection);
+                MySqlCommand command0 = new MySqlCommand("select * from tb_book limit 1000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
                 List<BookEntity> list0 = new List<BookEntity>();
+                List<BookEntity> list1 = new List<BookEntity>();
+                List<BookEntity> list2 = new List<BookEntity>();
+                List<BookEntity> list3 = new List<BookEntity>();
+
                 int len = reader0.FieldCount;
                 DatabaseEntityPropertyDef[] propertyDefs = new DatabaseEntityPropertyDef[len];
+                MethodInfo[] setMethods = new MethodInfo[len];
 
                 DatabaseEntityDef definition = _defFactory.GetDef<BookEntity>();
 
                 for (int i = 0; i < len; ++i)
                 {
                     propertyDefs[i] = definition.GetProperty(reader0.GetName(i))!;
+                    setMethods[i] = propertyDefs[i].PropertyInfo.GetSetMethod(true)!;
                 }
 
-                stopwatch.Restart();
 
-                while (await reader0.ReadAsync())
+                Func<IDataReader, DatabaseEntityDef, object> mapper0 = EntityMapperHelper2.CreateEntityMapperDelegate(definition, reader0);
+                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperHelper3.CreateEntityMapperDelegate(definition, reader0);
+
+
+                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
+
+
+
+                Stopwatch stopwatch0 = new Stopwatch();
+                Stopwatch stopwatch1 = new Stopwatch();
+                Stopwatch stopwatch2 = new Stopwatch();
+                Stopwatch stopwatch3 = new Stopwatch();
+
+
+
+
+                while (reader0.Read())
                 {
+                    stopwatch0.Start();
+
+                    object obj0 = mapper0(reader0, definition);
+
+                    list0.Add((BookEntity)obj0);
+                    stopwatch0.Stop();
+
+                    stopwatch1.Start();
+
+                    object obj1 = mapper1(reader0, definition);
+
+                    list1.Add((BookEntity)obj1);
+                    stopwatch1.Stop();
+
+
+
+                    stopwatch2.Start();
+                    object obj2 = mapper2(reader0);
+
+                    list2.Add((BookEntity)obj2);
+                    stopwatch2.Stop();
+
+
+                    stopwatch3.Start();
+
                     BookEntity item = new BookEntity();
 
                     for (int i = 0; i < len; ++i)
@@ -664,20 +614,22 @@ namespace HB.FullStack.DatabaseTests
                             ValueConverterUtil.DbValueToTypeValue(reader0[i], property.PropertyInfo.PropertyType) :
                             property.TypeConverter.DbValueToTypeValue(reader0[i]);
 
-                        if (value != null)
-                        {
-                            property.PropertyInfo.SetValue(item, value);
-                        }
+
+                        setMethods[i].Invoke(item, new object?[] { value });
+ 
                     }
 
-                    list0.Add(item);
+                    list3.Add(item);
+
+                    stopwatch3.Stop();
+
+
                 }
 
-                stopwatch.Stop();
-
-                time += stopwatch.ElapsedMilliseconds;
-
-                //
+                time0 += stopwatch0.Elapsed;
+                time1 += stopwatch1.Elapsed;
+                time2 += stopwatch2.Elapsed;
+                time3 += stopwatch3.Elapsed;
 
                 await reader0.DisposeAsync().ConfigureAwait(false);
                 command0.Dispose();
@@ -686,7 +638,43 @@ namespace HB.FullStack.DatabaseTests
 
             }
 
-            _output.WriteLine((time / 10.0).ToString());
+            _output.WriteLine("Sigil Coding : " + (time0.TotalMilliseconds / (loop * 1.0)).ToString());
+            _output.WriteLine("Emit Coding : " + (time1.TotalMilliseconds / (loop * 1.0)).ToString());
+            _output.WriteLine("Dapper : " + (time2.TotalMilliseconds / (loop * 1.0)).ToString());
+            _output.WriteLine("Reflection : " + (time3.TotalMilliseconds / (loop * 1.0)).ToString());
+
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method", Justification = "<Pending>")]
+        private static async Task WarmupDapperAsync(MySqlConnection mySqlConnection)
+        {
+            await mySqlConnection.OpenAsync().ConfigureAwait(false);
+
+            MySqlCommand command3 = new MySqlCommand("select * from tb_book limit 1", mySqlConnection);
+
+            var reader3 = await command3.ExecuteReaderAsync().ConfigureAwait(false);
+
+            Func<IDataReader, object> fun3 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader3);
+
+            List<BookEntity> list3 = new List<BookEntity>();
+
+            while (reader3.Read())
+            {
+                object obj = fun3(reader3);
+
+                //list3.Add((BookEntity)obj);
+            }
+
+
+            await reader3.DisposeAsync().ConfigureAwait(false);
+
+            command3.Dispose();
+
+            await mySqlConnection.CloseAsync();
+        }
+
+        private void WarmUpDapper()
+        {
 
         }
 

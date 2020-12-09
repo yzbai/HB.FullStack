@@ -95,7 +95,8 @@ namespace HB.FullStack.Database.SQL
                         return r.ToString();
                     }
 
-                    return $"{r}={context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)}";
+                    //return $"{r}={context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)}";
+                    return $"{r}=1";
                 }
 
             }
@@ -113,7 +114,8 @@ namespace HB.FullStack.Database.SQL
             {
                 if (b.Left is MemberExpression m && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    left = new PartialSqlString(string.Format(CultureInfo.InvariantCulture, "{0}={1}", VisitMemberAccess(m, context), context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)));
+                    //left = new PartialSqlString(string.Format(CultureInfo.InvariantCulture, "{0}={1}", VisitMemberAccess(m, context), context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)));
+                    left = new PartialSqlString($"{VisitMemberAccess(m, context)}=1");
                 }
                 else
                 {
@@ -123,7 +125,7 @@ namespace HB.FullStack.Database.SQL
 
                 if (b.Right is MemberExpression mm && mm.Expression != null && mm.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    right = new PartialSqlString(string.Format(CultureInfo.InvariantCulture, "{0}={1}", VisitMemberAccess(mm, context), context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)));
+                    right = new PartialSqlString($"{VisitMemberAccess(mm, context)}=1");
                 }
                 else
                 {

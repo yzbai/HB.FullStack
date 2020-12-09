@@ -90,7 +90,7 @@ namespace HB.FullStack.Database.Entities
         /// 数据库字段长度
         /// IsTableProperty为false时无意义
         /// </summary>
-        public int? DbLength { get; set; }
+        public int? DbMaxLength { get; set; }
         /// <summary>
         /// 数据库默认值
         /// IsTableProperty为false时无意义
