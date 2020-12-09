@@ -17,6 +17,10 @@ namespace HB.FullStack.Database
 {
     internal static class EntityMapperHelper3
     {
+        public static readonly MethodInfo GetItem = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
+        .Select(p => p.GetGetMethod()).First();
+
         internal static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapperDelegate(DatabaseEntityDef def, IDataReader reader)
         {
             //var returnType = def.EntityType;
@@ -89,7 +93,7 @@ namespace HB.FullStack.Database
                     //emitter.LoadArgument(0);// stack is now [...][reader]
                     EmitInt32(il, index);
                     //emitter.LoadConstant(index); // stack is now [...][reader][index]
-                    il.EmitCall(OpCodes.Callvirt, ReflectionHelper.GetItem, null);
+                    il.EmitCall(OpCodes.Callvirt, GetItem, null);
                     //emitter.CallVirtual(ReflectionHelper.GetItem);// stack is now [...][value-as-object]
 
                     if (propertyDef.TypeConverter == null)

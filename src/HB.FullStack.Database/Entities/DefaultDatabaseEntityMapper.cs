@@ -74,7 +74,7 @@ namespace HB.FullStack.Database.Entities
                 {
                     if (!_funcDict.ContainsKey(key))
                     {
-                        _funcDict[key] = EntityMapperHelper.CreateEntityMapperDelegate(entityDef, reader);
+                        _funcDict[key] = EntityMapperHelper3.CreateEntityMapperDelegate(entityDef, reader);
                     }
                 }
             }

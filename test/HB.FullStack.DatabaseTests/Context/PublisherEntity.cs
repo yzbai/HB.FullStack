@@ -1,6 +1,7 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Entities;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,13 +16,13 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty]
         public string Name { get; set; } = default!;
 
-        [EntityProperty]
+        [EntityProperty(Converter = typeof(PublisherBooksTypeConventer))]
         public IList<string> Books { get; set; } = default!;
 
         [EntityProperty(Converter = typeof(PublisherBookAuthorsTypeConventer))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(Length = EntityPropertyLength.MediumLength)]
+        [EntityProperty(Length = EntityPropertyLength.MediumLength, Converter = typeof(PublisherBookNamesTypeConventer))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -49,6 +50,36 @@ namespace HB.FullStack.DatabaseTests.Data
         protected override object? StringDbValueToTypeValue(string stringValue)
         {
             return SerializeUtil.FromJson<IDictionary<string, Author>>(stringValue);
+        }
+
+        protected override string TypeValueToStringDbValue(object typeValue)
+        {
+            return SerializeUtil.ToJson(typeValue);
+        }
+    }
+
+    public class PublisherBookNamesTypeConventer : DatabaseTypeConverter
+    {
+        public PublisherBookNamesTypeConventer() { }
+
+        protected override object? StringDbValueToTypeValue(string stringValue)
+        {
+            return SerializeUtil.FromJson<IDictionary<string, string>>(stringValue);
+        }
+
+        protected override string TypeValueToStringDbValue(object typeValue)
+        {
+            return SerializeUtil.ToJson(typeValue);
+        }
+    }
+
+    public class PublisherBooksTypeConventer : DatabaseTypeConverter
+    {
+        public PublisherBooksTypeConventer() { }
+
+        protected override object? StringDbValueToTypeValue(string stringValue)
+        {
+            return SerializeUtil.FromJson<IList<string>>(stringValue);
         }
 
         protected override string TypeValueToStringDbValue(object typeValue)

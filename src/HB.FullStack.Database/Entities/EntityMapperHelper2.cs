@@ -16,6 +16,10 @@ namespace HB.FullStack.Database
 {
     internal static class EntityMapperHelper2
     {
+        public static readonly MethodInfo GetItem = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
+        .Select(p => p.GetGetMethod()).First();
+
         internal static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapperDelegate(DatabaseEntityDef def, IDataReader reader)
         {
             //var returnType = def.EntityType;
@@ -65,7 +69,7 @@ namespace HB.FullStack.Database
 
                     emitter.LoadArgument(0);// stack is now [...][reader]
                     emitter.LoadConstant(index); // stack is now [...][reader][index]
-                    emitter.CallVirtual(ReflectionHelper.GetItem);// stack is now [...][value-as-object]
+                    emitter.CallVirtual(GetItem);// stack is now [...][value-as-object]
 
                     if (propertyDef.TypeConverter == null)
                     {
@@ -74,6 +78,8 @@ namespace HB.FullStack.Database
                         emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][value-as-object][EntityDef][PropertyName]
                         emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyType)));// stack is now [target][target][value-as-object][PropertyType]
                         emitter.Call(typeof(ValueConverterUtil).GetMethod(nameof(ValueConverterUtil.DbValueToTypeValue)));// stack is now [target][target][TypeValue]
+
+                        //TODO: 把ValueConverterUtil.DbValueToTypeValue也写到 这里
                     }
                     else
                     {

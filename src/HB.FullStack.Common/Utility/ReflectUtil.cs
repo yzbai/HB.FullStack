@@ -35,5 +35,10 @@ namespace System
                 .SelectMany(assemblyName => Assembly.Load(assemblyName).GetTypes())
                 .Where(t => condition(t));
         }
+
+        public static ConstructorInfo GetDefaultConstructor(this Type type)
+        {
+            return type.GetConstructor(Type.EmptyTypes);
+        }
     }
 }
