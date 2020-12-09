@@ -477,19 +477,50 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _mysql;
 
+            #region
+
+            var publisher3 = new PublisherEntity3();
+
+            await database.AddAsync(publisher3, "sss", null);
+
+            var stored3 = await database.ScalarAsync<PublisherEntity3>(publisher3.Id, null);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
+
+            #endregion
+
+            #region 
+
+            var publishers2 = Mocker.GetPublishers2();
+
+
+            foreach (PublisherEntity2 publisher in publishers2)
+            {
+                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
+            }
+
+
+            PublisherEntity2? publisher2 = await database.ScalarAsync<PublisherEntity2>(publishers2[0].Id, null).ConfigureAwait(false);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publishers2[0]));
+
+            #endregion
+
+            #region 
+
             var publishers = Mocker.GetPublishers();
 
 
             foreach (PublisherEntity publisher in publishers)
             {
-                await database.AddAsync(publisher, "", null).ConfigureAwait(false);
+                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
             }
 
 
             PublisherEntity? publisher1 = await database.ScalarAsync<PublisherEntity>(publishers[0].Id, null).ConfigureAwait(false);
 
             Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
-
+            #endregion
         }
 
         [Theory]
@@ -500,7 +531,7 @@ namespace HB.FullStack.DatabaseTests
             index++;
             IDatabase database = _mysql;
 
-            var books = Mocker.GetBooks(500);
+            var books = Mocker.GetBooks(5000);
 
             var trans = await _mysqlTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
 
@@ -539,7 +570,7 @@ namespace HB.FullStack.DatabaseTests
                 await mySqlConnection.OpenAsync();
 
 
-                MySqlCommand command0 = new MySqlCommand("select * from tb_book limit 1000", mySqlConnection);
+                MySqlCommand command0 = new MySqlCommand("select * from tb_book limit 10000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
@@ -616,7 +647,7 @@ namespace HB.FullStack.DatabaseTests
 
 
                         setMethods[i].Invoke(item, new object?[] { value });
- 
+
                     }
 
                     list3.Add(item);

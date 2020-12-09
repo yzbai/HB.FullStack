@@ -20,6 +20,8 @@ namespace HB.FullStack.Database
         .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
         .Select(p => p.GetGetMethod()).First();
 
+        public static readonly MethodInfo EnumParse = typeof(Enum).GetMethod(nameof(Enum.Parse), new Type[] { typeof(Type), typeof(string), typeof(bool) });
+
         internal static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapperDelegate(DatabaseEntityDef def, IDataReader reader)
         {
             //var returnType = def.EntityType;
@@ -46,6 +48,8 @@ namespace HB.FullStack.Database
                 }
 
                 Local returnValueLocal = emitter.DeclareLocal(def.EntityType);
+                Local enumStringTempLocal = emitter.DeclareLocal(typeof(string));
+                Local timespanZeroLocal = emitter.DeclareLocal(typeof(TimeSpan));
 
                 ConstructorInfo ctor = def.EntityType.GetDefaultConstructor();
 
@@ -54,43 +58,114 @@ namespace HB.FullStack.Database
 
                 emitter.LoadLocal(returnValueLocal); // [target]
 
-                int index = 0;
-
-                foreach (DatabaseEntityPropertyDef propertyDef in propertyDefs)
+                for (int index = 0; index < propertyDefs.Count; ++index)
                 {
+                    Label dbNullLabel = emitter.DefineLabel("nul_" + index);
+                    Label finishLable = emitter.DefineLabel("fi_" + index);
+
                     emitter.Duplicate(); // stack is now [target][target]
+
+                    DatabaseEntityPropertyDef propertyDef = propertyDefs[index];
 
                     if (propertyDef.TypeConverter != null)
                     {
                         emitter.LoadArgument(1);// stack is now [target][target][EntityDef]
                         emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][EntityDef][PropertyName]
-                        emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));// stack is now [target][target][TypeConverter]
+                        emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));
+                        // stack is now [target][target][TypeConverter]
                     }
 
                     emitter.LoadArgument(0);// stack is now [...][reader]
                     emitter.LoadConstant(index); // stack is now [...][reader][index]
                     emitter.CallVirtual(GetItem);// stack is now [...][value-as-object]
 
+                    //check DBNULL
+                    emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
+                    emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
+                    emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
+
+
                     if (propertyDef.TypeConverter == null)
                     {
-                        // stack is now [target][target][value-as-object]
-                        emitter.LoadArgument(1);// stack is now [target][target][value-as-object][EntityDef]
-                        emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][value-as-object][EntityDef][PropertyName]
-                        emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyType)));// stack is now [target][target][value-as-object][PropertyType]
-                        emitter.Call(typeof(ValueConverterUtil).GetMethod(nameof(ValueConverterUtil.DbValueToTypeValue)));// stack is now [target][target][TypeValue]
+                        if (propertyDef.Type.IsEnum || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType.IsEnum))
+                        {
+                            // stack is now [target][target][value-as-object]
 
-                        //TODO: 把ValueConverterUtil.DbValueToTypeValue也写到 这里
+                            emitter.CastClass<string>(); //stack is now [target][target][string]
+                            emitter.StoreLocal(enumStringTempLocal); //stack is now [target][target]
+
+                            if (propertyDef.NullableUnderlyingType != null)
+                            {
+                                emitter.LoadConstant(propertyDef.NullableUnderlyingType);
+                            }
+                            else
+                            {
+                                emitter.LoadConstant(propertyDef.Type);//stack is now[target][target][propertyType-token]
+
+                            }
+                            emitter.Call(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));//stack is now[target][target][propertyType]
+                            emitter.LoadLocal(enumStringTempLocal);//stack is now[target][target][propertyType][string]
+                            emitter.LoadConstant(true);//stack is now[target][target][propertyType][string][true]
+                            emitter.Call(EnumParse);//stack is now[target][target][value]
+
+                            if (propertyDef.NullableUnderlyingType != null)
+                            {
+                                emitter.UnboxAny(propertyDef.NullableUnderlyingType);
+                            }
+                            else
+                            {
+                                emitter.UnboxAny(propertyDef.Type);
+                            }
+
+                            //stack is now[target][target][typed-value]
+                        }
+
+
+                        else if (propertyDef.Type == typeof(DateTimeOffset) || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType == typeof(DateTimeOffset)))
+                        {
+                            // stack is now [target][target][value-as-object]
+
+
+                            emitter.UnboxAny(typeof(DateTime));//stack is now[target][target][datetime]
+                            emitter.LoadLocal(timespanZeroLocal); //stack is now[target][target][datetime][timespan.zero]
+                            ConstructorInfo dateTimeOffsetConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
+                            emitter.NewObject(dateTimeOffsetConstructorInfo);
+                            //stack is now[target][target][datetimeoffset]
+                            //??need unbox
+                        }
+                        else
+                        {
+                            // stack is now [target][target][value-as-object]
+
+
+                            if (propertyDef.NullableUnderlyingType != null)
+                            {
+                                emitter.UnboxAny(propertyDef.NullableUnderlyingType);
+                            }
+                            else
+                            {
+                                emitter.UnboxAny(propertyDef.Type);
+                            }
+
+                            //stack is now[target][target][typed-value]
+                        }
+
+                        if (propertyDef.NullableUnderlyingType != null)
+                        {
+                            //emitter.UnboxAny(propertyDef.NullableUnderlyingType);
+                            emitter.NewObject(propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
+                        }
                     }
                     else
                     {
                         // stack is now [target][target][TypeConverter][value-as-object]
                         emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
                         // stack is now [target][target][TypeValue]
+
+                        emitter.UnboxAny(propertyDef.Type);
                     }
 
                     // stack is now [target][target][TypeValue]
-
-                    emitter.UnboxAny(propertyDef.Type);
 
                     if (propertyDef.Type.IsValueType)
                     {
@@ -101,17 +176,24 @@ namespace HB.FullStack.Database
                         emitter.CallVirtual(GetPropertySetter(propertyDef.PropertyInfo, def.EntityType));
                     }
 
-                    //emitter.LoadArgument(1);// stack is now [target][target][TypeValue][EntityDef]
-                    //emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][TypeValue][EntityDef][PropertyName]
-                    //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertySetMethod)));// stack is now [target][target][TypeValue][SetMethod]
-                    //emitter.Call(typeof(ReflectionHelper).GetMethod(nameof(ReflectionHelper.SetPropertyValue))); //stack is now[target]
+                    //stack is now[target]
+                    emitter.Branch(finishLable);
 
-                    index++;
+                    emitter.MarkLabel(dbNullLabel);
+
+                    emitter.Pop();
+                    emitter.Pop();
+                    if (propertyDef.TypeConverter != null)
+                    {
+                        emitter.Pop();
+                    }
+
+                    emitter.MarkLabel(finishLable);
                 }
 
-                emitter.StoreLocal(returnValueLocal);
+                //emitter.StoreLocal(returnValueLocal);
 
-                emitter.LoadLocal(returnValueLocal);
+                //emitter.LoadLocal(returnValueLocal);
 
                 emitter.Return();
             }
@@ -134,43 +216,6 @@ namespace HB.FullStack.Database
                    null).GetSetMethod(true);
         }
 
-        public static void ThrowDataException(Exception ex, int index, IDataReader reader, object value)
-        {
-            Exception toThrow;
-            try
-            {
-                string name = "(n/a)", formattedValue = "(n/a)";
-                if (reader != null && index >= 0 && index < reader.FieldCount)
-                {
-                    name = reader.GetName(index);
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        // Otherwise we throw (=value) below, which isn't intuitive
-                        name = "(Unnamed Column)";
-                    }
-                    try
-                    {
-                        if (value == null || value is DBNull)
-                        {
-                            formattedValue = "<null>";
-                        }
-                        else
-                        {
-                            formattedValue = Convert.ToString(value, CultureInfo.InvariantCulture) + " - " + Type.GetTypeCode(value.GetType());
-                        }
-                    }
-                    catch (Exception valEx)
-                    {
-                        formattedValue = valEx.Message;
-                    }
-                }
-                toThrow = new DataException($"Error parsing column {index} ({name}={formattedValue})", ex);
-            }
-            catch
-            { // throw the **original** exception, wrapped as DataException
-                toThrow = new DataException(ex.Message, ex);
-            }
-            throw toThrow;
-        }
+
     }
 }

@@ -21,6 +21,8 @@ namespace HB.FullStack.Database
         .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
         .Select(p => p.GetGetMethod()).First();
 
+        public static readonly MethodInfo EnumParse = typeof(Enum).GetMethod(nameof(Enum.Parse), new Type[] { typeof(Type), typeof(string), typeof(bool) });
+
         internal static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapperDelegate(DatabaseEntityDef def, IDataReader reader)
         {
             //var returnType = def.EntityType;
@@ -60,6 +62,8 @@ namespace HB.FullStack.Database
                 }
 
                 LocalBuilder returnValueLocal = il.DeclareLocal(def.EntityType);
+                LocalBuilder enumStringTempLocal = il.DeclareLocal(typeof(string));
+                LocalBuilder timespanZeroLocal = il.DeclareLocal(typeof(TimeSpan));
 
                 ConstructorInfo ctor = def.EntityType.GetDefaultConstructor();
 
@@ -71,12 +75,15 @@ namespace HB.FullStack.Database
                 il.Emit(OpCodes.Ldloc, returnValueLocal);
                 //emitter.LoadLocal(returnValueLocal); // [target]
 
-                int index = 0;
-
-                foreach (DatabaseEntityPropertyDef propertyDef in propertyDefs)
+                for (int index = 0; index < propertyDefs.Count; ++index)
                 {
+                    Label dbNullLabel = il.DefineLabel();
+                    Label finishLable = il.DefineLabel();
+
                     il.Emit(OpCodes.Dup);
                     //emitter.Duplicate(); // stack is now [target][target]
+
+                    DatabaseEntityPropertyDef propertyDef = propertyDefs[index];
 
                     if (propertyDef.TypeConverter != null)
                     {
@@ -89,6 +96,8 @@ namespace HB.FullStack.Database
                         //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));// stack is now [target][target][TypeConverter]
                     }
 
+                    ///获取数据库值
+
                     il.Emit(OpCodes.Ldarg_0);
                     //emitter.LoadArgument(0);// stack is now [...][reader]
                     EmitInt32(il, index);
@@ -96,30 +105,117 @@ namespace HB.FullStack.Database
                     il.EmitCall(OpCodes.Callvirt, GetItem, null);
                     //emitter.CallVirtual(ReflectionHelper.GetItem);// stack is now [...][value-as-object]
 
+                    //check DBNULL
+                    il.Emit(OpCodes.Dup);
+                    //emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
+                    il.Emit(OpCodes.Isinst, typeof(DBNull));
+                    //emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
+                    il.Emit(OpCodes.Brtrue_S, dbNullLabel);
+                    //emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
+
                     if (propertyDef.TypeConverter == null)
                     {
-                        // stack is now [target][target][value-as-object]
-                        il.Emit(OpCodes.Ldarg_1);
-                        //emitter.LoadArgument(1);// stack is now [target][target][value-as-object][EntityDef]
-                        il.Emit(OpCodes.Ldstr, propertyDef.PropertyInfo.Name);
-                        //emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][value-as-object][EntityDef][PropertyName]
-                        il.EmitCall(OpCodes.Call, typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyType)), null);
-                        //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyType)));// stack is now [target][target][value-as-object][PropertyType]
-                        il.EmitCall(OpCodes.Call, typeof(ValueConverterUtil).GetMethod(nameof(ValueConverterUtil.DbValueToTypeValue)), null);
-                        //emitter.Call(typeof(ValueConverterUtil).GetMethod(nameof(ValueConverterUtil.DbValueToTypeValue)));// stack is now [target][target][TypeValue]
+                        if (propertyDef.Type.IsEnum || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType.IsEnum))
+                        {
+                            // stack is now [target][target][value-as-object]
+                            il.Emit(OpCodes.Castclass, typeof(string));
+                            //emitter.CastClass<string>(); //stack is now [target][target][string]
+
+                            il.Emit(OpCodes.Stloc, enumStringTempLocal);
+                            //emitter.StoreLocal(enumStringTempLocal); //stack is now [target][target]
+
+                            if (propertyDef.NullableUnderlyingType != null)
+                            {
+                                il.Emit(OpCodes.Ldtoken, propertyDef.NullableUnderlyingType);
+                                //emitter.LoadConstant(propertyDef.NullableUnderlyingType);
+                            }
+                            else
+                            {
+                                il.Emit(OpCodes.Ldtoken, propertyDef.Type);
+                                //emitter.LoadConstant(propertyDef.Type);//stack is now[target][target][propertyType-token]
+
+                            }
+
+                            il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)), null);
+                            //emitter.Call(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));//stack is now[target][target][propertyType]
+
+                            il.Emit(OpCodes.Ldloc, enumStringTempLocal);
+                            //emitter.LoadLocal(enumStringTempLocal);//stack is now[target][target][propertyType][string]
+
+                            il.Emit(OpCodes.Ldc_I4_1);
+                            //emitter.LoadConstant(true);//stack is now[target][target][propertyType][string][true]
+
+                            il.EmitCall(OpCodes.Call, EnumParse, null);
+                            //emitter.Call(EnumParse);//stack is now[target][target][value]
+
+                            if (propertyDef.NullableUnderlyingType != null)
+                            {
+                                il.Emit(OpCodes.Unbox_Any, propertyDef.NullableUnderlyingType);
+                                //emitter.UnboxAny(propertyDef.NullableUnderlyingType);
+                            }
+                            else
+                            {
+                                il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
+                                //emitter.UnboxAny(propertyDef.Type);
+                            }
+
+                            //stack is now[target][target][typed-value]
+                        }
+
+
+                        else if (propertyDef.Type == typeof(DateTimeOffset) || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType == typeof(DateTimeOffset)))
+                        {
+                            // stack is now [target][target][value-as-object]
+
+                            il.Emit(OpCodes.Unbox_Any, typeof(DateTime));
+                            //emitter.UnboxAny(typeof(DateTime));//stack is now[target][target][datetime]
+
+                            il.Emit(OpCodes.Ldloc, timespanZeroLocal);
+                            //emitter.LoadLocal(timespanZeroLocal); //stack is now[target][target][datetime][timespan.zero]
+                            ConstructorInfo dateTimeOffsetConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
+
+                            il.Emit(OpCodes.Newobj, dateTimeOffsetConstructorInfo);
+                            //emitter.NewObject(dateTimeOffsetConstructorInfo);
+                            //stack is now[target][target][datetimeoffset]
+                            //??need unbox
+                        }
+                        else
+                        {
+                            // stack is now [target][target][value-as-object]
+
+                            if (propertyDef.NullableUnderlyingType != null)
+                            {
+                                il.Emit(OpCodes.Unbox_Any, propertyDef.NullableUnderlyingType);
+                                //emitter.UnboxAny(propertyDef.NullableUnderlyingType);
+                            }
+                            else
+                            {
+                                il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
+                                //emitter.UnboxAny(propertyDef.Type);
+                            }
+
+                            //stack is now[target][target][typed-value]
+                        }
+
+                        if (propertyDef.NullableUnderlyingType != null)
+                        {
+                            il.Emit(OpCodes.Newobj, propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
+                            //emitter.NewObject(propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
+                        }
                     }
                     else
                     {
                         // stack is now [target][target][TypeConverter][value-as-object]
                         il.EmitCall(OpCodes.Callvirt, typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)), null);
                         //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
+
+                        il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
+                        //emitter.UnboxAny(propertyDef.Type);
+
                         // stack is now [target][target][TypeValue]
                     }
 
                     // stack is now [target][target][TypeValue]
-
-                    il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
-                    //emitter.UnboxAny(propertyDef.Type);
 
                     if (propertyDef.Type.IsValueType)
                     {
@@ -132,12 +228,25 @@ namespace HB.FullStack.Database
                         //emitter.CallVirtual(GetPropertySetter(propertyDef.PropertyInfo, def.EntityType));
                     }
 
-                    //emitter.LoadArgument(1);// stack is now [target][target][TypeValue][EntityDef]
-                    //emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][TypeValue][EntityDef][PropertyName]
-                    //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertySetMethod)));// stack is now [target][target][TypeValue][SetMethod]
-                    //emitter.Call(typeof(ReflectionHelper).GetMethod(nameof(ReflectionHelper.SetPropertyValue))); //stack is now[target]
+                    //stack is now[target]
+                    il.Emit(OpCodes.Br_S, finishLable);
+                    //emitter.Branch(finishLable);
 
-                    index++;
+                    il.MarkLabel(dbNullLabel);
+                    //emitter.MarkLabel(dbNullLabel);
+
+                    il.Emit(OpCodes.Pop);
+                    il.Emit(OpCodes.Pop);
+                    //emitter.Pop();
+                    //emitter.Pop();
+                    if (propertyDef.TypeConverter != null)
+                    {
+                        il.Emit(OpCodes.Pop);
+                    }
+
+                    il.MarkLabel(finishLable);
+                    //emitter.MarkLabel(finishLable);
+
                 }
 
                 //emitter.StoreLocal(returnValueLocal);

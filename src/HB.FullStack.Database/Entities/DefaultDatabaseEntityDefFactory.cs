@@ -288,7 +288,7 @@ namespace HB.FullStack.Database.Entities
                 }
                 else
                 {
-                    propertyDef.DbFieldType = _databaseEngine.GetDbType(propertyDef.PropertyInfo.PropertyType);
+                    propertyDef.DbFieldType = _databaseEngine.GetDbType(propertyDef.Type);
                 }
             }
 

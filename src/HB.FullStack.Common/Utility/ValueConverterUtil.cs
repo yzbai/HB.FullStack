@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Reflection;
 
 namespace System
 {
@@ -18,27 +19,46 @@ namespace System
         [Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public static object? DbValueToTypeValue(object dbValue, Type targetType)
         {
-            //if (dbValue.GetType() == typeof(DBNull))
-            //{
-            //    //return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
-            //    return default;
-            //}
-
-            if (targetType.IsEnum)
+            if (dbValue.GetType() == typeof(DBNull))
             {
-                return Enum.Parse(targetType, dbValue.ToString(), true);
+                //return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+                return default;
             }
-            else if (targetType == typeof(DateTimeOffset))
+
+            Type? underType = Nullable.GetUnderlyingType(targetType);
+
+            object rt;
+
+            if (targetType.IsEnum || (underType != null && underType.IsEnum))
             {
-                return new DateTimeOffset((DateTime)dbValue, TimeSpan.Zero);
+                if (underType == null)
+                {
+                    rt = Enum.Parse(targetType, dbValue.ToString(), true);
+                }
+                else
+                {
+                    rt = Enum.Parse(underType, dbValue.ToString(), true);
+                }
+            }
+            else if (targetType == typeof(DateTimeOffset) || (underType != null && underType == typeof(DateTimeOffset)))
+            {
+                rt = new DateTimeOffset((DateTime)dbValue, TimeSpan.Zero);
             }
             else
             {
-                return dbValue;
+                rt = dbValue;
             }
 
+            if (underType == null)
+            {
+                return rt;
+            }
 
+            ConstructorInfo ctor = targetType.GetConstructor(new Type[] { underType });
+
+            return ctor.Invoke(new object[] { rt });
         }
+
 
         /// <summary>
         /// 将C#值转换为字符串，便于拼接SQL字符串. 如果value不为null且不为DBNull，则返回不为null

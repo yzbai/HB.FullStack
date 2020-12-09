@@ -102,8 +102,18 @@ namespace HB.FullStack.Database.SQL
             //    return DBNull.Value;
             //}
 
+            if (propertyValue == null)
+            {
+                return null!;
+            }
+
+            if (info.Type.IsEnum || (info.NullableUnderlyingType != null && info.NullableUnderlyingType.IsEnum))
+            {
+                return propertyValue.ToString();
+            }
+
             return info.TypeConverter == null ?
-                //_databaseEngine.GetDbValueStatement(propertyValue, needQuoted: false) 
+                //_databaseEngine.GetDbValueStatement(propertyValue, needQuoted: false)
                 propertyValue
                 : info.TypeConverter.TypeValueToDbValue(propertyValue);
         }
@@ -322,15 +332,15 @@ namespace HB.FullStack.Database.SQL
                     //当IsTableProperty为true时，DbParameterizedName一定不为null
                     if (info.PropertyInfo.Name == "Version")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, /*entity.Version + 1*/0, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, /*entity.Version + 1*/0/*, info.DbFieldType*/));
                     }
                     else if (info.PropertyInfo.Name == "Deleted")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, 0, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, 0/*, info.DbFieldType*/));
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info)/*, info.DbFieldType*/));
                     }
                 }
             }
@@ -363,15 +373,15 @@ namespace HB.FullStack.Database.SQL
                     //当IsTableProperty为true时，DbParameterizedName一定不为null
                     if (info.PropertyInfo.Name == "Version")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, /*entity.Version + 1*/0, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, /*entity.Version + 1*/0/*, info.DbFieldType*/));
                     }
                     else if (info.PropertyInfo.Name == "Deleted")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, 0, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, 0/*, info.DbFieldType*/));
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info)/*, info.DbFieldType*/));
                     }
                 }
             }
@@ -404,11 +414,11 @@ namespace HB.FullStack.Database.SQL
                     //当IsTableProperty为true时，DbParameterizedName一定不为null
                     if (info.PropertyInfo.Name == "Version")
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, entity.Version + 1, info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, entity.Version + 1/*, info.DbFieldType*/));
                     }
                     else
                     {
-                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
+                        parameters.Add(_databaseEngine.CreateParameter(info.DbParameterizedName!, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info)/*, info.DbFieldType*/));
                     }
                 }
             }
@@ -434,9 +444,9 @@ namespace HB.FullStack.Database.SQL
 
             List<IDataParameter> parameters = new List<IDataParameter>
             {
-                _databaseEngine.CreateParameter(versionProperty.DbParameterizedName!, currentVersion+1, versionProperty.DbFieldType),
-                _databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName!, lastUser, lastUserProperty.DbFieldType),
-                _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, TimeUtil.UtcNow, lastTimeProperty.DbFieldType)
+                _databaseEngine.CreateParameter(versionProperty.DbParameterizedName!, currentVersion+1),
+                _databaseEngine.CreateParameter(lastUserProperty.DbParameterizedName!, lastUser),
+                _databaseEngine.CreateParameter(lastTimeProperty.DbParameterizedName!, TimeUtil.UtcNow)
             };
 
             return AssembleCommand<T, T>(false, deleteTemplate, null, condition, parameters);
@@ -484,17 +494,17 @@ namespace HB.FullStack.Database.SQL
                         if (info.PropertyInfo.Name == "Version")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, /*entity.Version + 1*/0, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, /*entity.Version + 1*/0/*, info.DbFieldType*/));
                         }
                         else if (info.PropertyInfo.Name == "Deleted")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0/*, info.DbFieldType*/));
                         }
                         else
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info)/*, info.DbFieldType*/));
                         }
 
                         //update pairs
@@ -567,17 +577,17 @@ namespace HB.FullStack.Database.SQL
                         if (info.PropertyInfo.Name == "Version")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, /*entity.Version + 1*/0, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, /*entity.Version + 1*/0/*, info.DbFieldType*/));
                         }
                         else if (info.PropertyInfo.Name == "Deleted")
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, 0/*, info.DbFieldType*/));
                         }
                         else
                         {
                             values.AppendFormat(CultureInfo.InvariantCulture, " {0},", parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info)/*, info.DbFieldType*/));
                         }
                     }
                 }
@@ -629,13 +639,13 @@ namespace HB.FullStack.Database.SQL
                         if (info.PropertyInfo.Name == "Version")
                         {
                             args.AppendFormat(CultureInfo.InvariantCulture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1, info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, entity.Version + 1/*, info.DbFieldType*/));
 
                         }
                         else
                         {
                             args.AppendFormat(CultureInfo.InvariantCulture, " {0}={1},", info.DbReservedName, parameterizedName);
-                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info), info.DbFieldType));
+                            parameters.Add(_databaseEngine.CreateParameter(parameterizedName, DbParameterValue_Statement(info.PropertyInfo.GetValue(entity), info)/*, info.DbFieldType*/));
                         }
                     }
                 }

@@ -28,6 +28,8 @@ namespace HB.FullStack.Database.Entities
         /// 属性类型
         /// </summary>
         public Type Type { get; set; }
+
+        public Type? NullableUnderlyingType { get; set; }
         ///// <summary>
         ///// Get方法
         ///// </summary>
@@ -112,6 +114,7 @@ namespace HB.FullStack.Database.Entities
             PropertyInfo = propertyInfo;
             //PropertyName = propertyInfo.Name;
             Type = propertyInfo.PropertyType;
+            NullableUnderlyingType = Nullable.GetUnderlyingType(Type);
             //GetMethod = propertyInfo.GetGetMethod();
             //SetMethod = propertyInfo.GetSetMethod();
         }

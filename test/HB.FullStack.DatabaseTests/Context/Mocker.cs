@@ -49,6 +49,7 @@ namespace HB.FullStack.DatabaseTests.Data
         {
             List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
 
+            Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
@@ -56,10 +57,29 @@ namespace HB.FullStack.DatabaseTests.Data
                 publisherEntities.Add(new PublisherEntity
                 {
                     Books = new List<string> { "a", "v", "c" },
-                    Type = PublisherType.Big,
+                    Type = (PublisherType)random.Next(0, 3),
                     Name = "Publisher" + i.ToString(),
                     BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
                     BookAuthors = new Dictionary<string, Author> { { "a", new Author { Mobile = "xxxx", Name = "tttt" } }, { "xxx", new Author { Mobile = "gggg", Name = "safas" } } }
+                });
+            }
+
+            return publisherEntities;
+        }
+
+        public static IList<PublisherEntity2> GetPublishers2(int? count = null)
+        {
+            List<PublisherEntity2> publisherEntities = new List<PublisherEntity2>();
+
+            Random random = new Random();
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                publisherEntities.Add(new PublisherEntity2
+                {
+                    Type = (PublisherType)random.Next(1, 3),
+                    Name = "Publisher" + i.ToString()
                 });
             }
 
