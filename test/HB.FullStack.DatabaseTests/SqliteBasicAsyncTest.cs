@@ -476,6 +476,57 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        [Fact]
+        public async Task Test_EntityMapperAsync()
+        {
+            IDatabase database = _sqlite;
+
+            #region
+
+            var publisher3 = new PublisherEntity3();
+
+            await database.AddAsync(publisher3, "sss", null);
+
+            var stored3 = await database.ScalarAsync<PublisherEntity3>(publisher3.Id, null);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
+
+            #endregion
+
+            #region 
+
+            var publishers2 = Mocker.GetPublishers2();
+
+
+            foreach (PublisherEntity2 publisher in publishers2)
+            {
+                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
+            }
+
+
+            PublisherEntity2? publisher2 = await database.ScalarAsync<PublisherEntity2>(publishers2[0].Id, null).ConfigureAwait(false);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publishers2[0]));
+
+            #endregion
+
+            #region 
+
+            var publishers = Mocker.GetPublishers();
+
+
+            foreach (PublisherEntity publisher in publishers)
+            {
+                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
+            }
+
+
+            PublisherEntity? publisher1 = await database.ScalarAsync<PublisherEntity>(publishers[0].Id, null).ConfigureAwait(false);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
+            #endregion
+        }
+
         //[Theory]
 
         //[InlineData("SQLite")]

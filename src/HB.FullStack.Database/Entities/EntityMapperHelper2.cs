@@ -83,7 +83,7 @@ namespace HB.FullStack.Database
                     emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
                     emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
                     emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
-
+                    //TODO: sigil版本的老出错，原生版本没问题，就这里的分支
 
                     if (propertyDef.TypeConverter == null)
                     {
@@ -119,8 +119,6 @@ namespace HB.FullStack.Database
 
                             //stack is now[target][target][typed-value]
                         }
-
-
                         else if (propertyDef.Type == typeof(DateTimeOffset) || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType == typeof(DateTimeOffset)))
                         {
                             // stack is now [target][target][value-as-object]

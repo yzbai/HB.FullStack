@@ -593,7 +593,7 @@ namespace HB.FullStack.DatabaseTests
 
 
                 Func<IDataReader, DatabaseEntityDef, object> mapper0 = EntityMapperHelper2.CreateEntityMapperDelegate(definition, reader0);
-                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperHelper3.CreateEntityMapperDelegate(definition, reader0);
+                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperHelper.CreateEntityMapperDelegate(definition, reader0);
 
 
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);

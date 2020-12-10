@@ -20,7 +20,7 @@ namespace OrmBenchmark.ConsoleUI.NetCore
 {
     class Program
     {
-        static void Main(string[] args)
+        static async System.Threading.Tasks.Task Main(string[] args)
         {
             // Set up configuration sources.
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
@@ -52,7 +52,7 @@ namespace OrmBenchmark.ConsoleUI.NetCore
             benchmarker.RegisterOrmExecuter(new Dapper.DapperContribExecuter());
             //benchmarker.RegisterOrmExecuter(new EntityFramework.EntityFrameworkExecuter());
             //benchmarker.RegisterOrmExecuter(new EntityFramework.EntityFrameworNoTrackingExecuter());
-            //benchmarker.RegisterOrmExecuter(new OrmLite.OrmLiteNoQueryExecuter());
+            benchmarker.RegisterOrmExecuter(new OrmLite.OrmLiteNoQueryExecuter());
             benchmarker.RegisterOrmExecuter(new FullStackDatabaseExecutor());
 
 
@@ -93,10 +93,10 @@ namespace OrmBenchmark.ConsoleUI.NetCore
             Console.WriteLine("Connection string: {0}", connStr);
             Console.Write("\nRunning...");
 
-            PrepareDatabaseAsync().Wait();
+            await PrepareDatabaseAsync().ConfigureAwait(false);
 
 
-            benchmarker.Run(warmUp);
+            await benchmarker.RunAsync(warmUp).ConfigureAwait(false);
             Console.WriteLine("Finished.");
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -128,7 +128,7 @@ namespace OrmBenchmark.ConsoleUI.NetCore
 
             IDatabase database = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
 
-            database.InitializeAsync().Wait();
+            await database.InitializeAsync().ConfigureAwait(false);
 
             StringBuilder stringBuilder = new StringBuilder();
 

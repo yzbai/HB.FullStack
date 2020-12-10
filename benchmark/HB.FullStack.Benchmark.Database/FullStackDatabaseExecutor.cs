@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 using HB.FullStack.Database;
 
@@ -13,6 +14,9 @@ namespace HB.FullStack.Benchmark.Database
     public class FullStackDatabaseExecutor : IOrmExecuter
     {
         private IDatabase _database = null!;
+        private ITransaction _transaction = null!;
+
+        private TransactionContext? _transactionContext;
 
         public string Name => "HB.FullStack.Database";
 
@@ -23,15 +27,15 @@ namespace HB.FullStack.Benchmark.Database
             _database = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
 
             _database.InitializeAsync().Wait();
+
+            _transaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
+
+            _transactionContext = _transaction.BeginTransactionAsync<Post>(System.Data.IsolationLevel.ReadUncommitted).Result;
         }
 
-        public IPost GetItemAsObject(int Id)
+        public async Task<IPost?> GetItemAsObjectAsync(int Id)
         {
-#pragma warning disable CS8603 // Possible null reference return.
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-            return _database.ScalarAsync<Post>(Id, null).Result;
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
-#pragma warning restore CS8603 // Possible null reference return.
+            return await _database.ScalarAsync<Post>(Id, _transactionContext).ConfigureAwait(false);
         }
 
         public dynamic GetItemAsDynamic(int Id)
@@ -43,11 +47,9 @@ namespace HB.FullStack.Benchmark.Database
 #pragma warning restore CS8603 // Possible null reference return.
         }
 
-        public IEnumerable<IPost> GetAllItemsAsObject()
+        public async Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync()
         {
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-            return _database.RetrieveAllAsync<Post>(null).Result;
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+            return await _database.RetrieveAllAsync<Post>(null).ConfigureAwait(false);
         }
 
         public IEnumerable<dynamic>? GetAllItemsAsDynamic()

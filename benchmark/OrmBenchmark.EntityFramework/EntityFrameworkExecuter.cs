@@ -26,7 +26,7 @@ namespace OrmBenchmark.EntityFramework
 
         }
 
-        public IPost GetItemAsObject(int Id)
+        public IPost GetItemAsObjectAsync(int Id)
         {
             return ctx.Posts.Where(p => p.Id == Id) as IPost;
 
@@ -52,7 +52,7 @@ namespace OrmBenchmark.EntityFramework
             });
         }
 
-        public IEnumerable<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObjectAsync()
         {
             return ctx.Posts.ToList<IPost>();
         }

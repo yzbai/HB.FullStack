@@ -15,7 +15,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database
 {
-    internal static class EntityMapperHelper3
+    internal static class EntityMapperHelper
     {
         public static readonly MethodInfo GetItem = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)
         .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
@@ -25,29 +25,13 @@ namespace HB.FullStack.Database
 
         internal static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapperDelegate(DatabaseEntityDef def, IDataReader reader)
         {
-            //var returnType = def.EntityType;
-
             var dm = new DynamicMethod("Deserialize" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader), typeof(DatabaseEntityDef) }, def.EntityType, true);
             var il = dm.GetILGenerator();
 
-
-
             GenerateDeserializerFromMap(def, reader, il);
-
 
             var funcType = System.Linq.Expressions.Expression.GetFuncType(typeof(IDataReader), typeof(DatabaseEntityDef), def.EntityType);
             return (Func<IDataReader, DatabaseEntityDef, object>)dm.CreateDelegate(funcType);
-
-
-
-            //var emitter = Emit<Func<IDataReader, DatabaseEntityDef, object>>.NewDynamicMethod("Deserialize" + Guid.NewGuid().ToString());
-
-            //GenerateDeserializerFromMap(def, reader, emitter);
-
-
-            //return emitter.CreateDelegate();
-            //var funcType = System.Linq.Expressions.Expression.GetFuncType(typeof(IDataReader), typeof(DatabaseEntityDef), returnType);
-            //return (Func<IDataReader, DatabaseEntityDef, object>)dm.CreateDelegate(funcType);
         }
 
         internal static void GenerateDeserializerFromMap(DatabaseEntityDef def, IDataReader reader, ILGenerator il)

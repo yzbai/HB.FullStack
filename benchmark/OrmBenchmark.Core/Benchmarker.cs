@@ -37,7 +37,7 @@ namespace OrmBenchmark.Core
             executers.Add(executer);
         }
 
-        public void Run(bool warmUp = false)
+        public async System.Threading.Tasks.Task RunAsync(bool warmUp = false)
         {
             //PrepareDatabase();
 
@@ -57,7 +57,7 @@ namespace OrmBenchmark.Core
                 {
                     Stopwatch watchForWaemUp = new Stopwatch();
                     watchForWaemUp.Start();
-                    executer.GetItemAsObject(IterationCount + 1);
+                    await executer.GetItemAsObjectAsync(IterationCount + 1).ConfigureAwait(false);
                     executer.GetItemAsDynamic(IterationCount + 1);
                     watchForWaemUp.Stop();
                     resultsWarmUp.Add(new BenchmarkResult { Name = executer.Name, ExecTime = watchForWaemUp.ElapsedMilliseconds });
@@ -69,11 +69,11 @@ namespace OrmBenchmark.Core
                 for (int i = 1; i <= IterationCount; i++)
                 {
                     watch.Start();
-                    var obj = executer.GetItemAsObject(i);
+                    var obj = await executer.GetItemAsObjectAsync(i).ConfigureAwait(false);
                     watch.Stop();
                     //if (obj?.Id != i)
                     //    throw new ApplicationException("Invalid object returned.");
-                     if (i == 1)
+                    if (i == 1)
                         firstItemExecTime = watch.ElapsedMilliseconds;
                 }
                 results.Add(new BenchmarkResult { Name = executer.Name, ExecTime = watch.ElapsedMilliseconds, FirstItemExecTime = firstItemExecTime });
@@ -96,7 +96,7 @@ namespace OrmBenchmark.Core
                 // All Objects
                 Stopwatch watchForAllItems = new Stopwatch();
                 watchForAllItems.Start();
-                executer.GetAllItemsAsObject();
+                await executer.GetAllItemsAsObjectAsync().ConfigureAwait(false);
                 watchForAllItems.Stop();
                 resultsForAllItems.Add(new BenchmarkResult { Name = executer.Name, ExecTime = watchForAllItems.ElapsedMilliseconds });
 

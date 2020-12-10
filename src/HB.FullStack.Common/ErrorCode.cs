@@ -73,6 +73,8 @@
 
         DatabaseInitLockError = 235,
 
+        DatabaseWrongWhereType = 236,
+
         #endregion Database
 
         #region KVStore
@@ -163,6 +165,7 @@
 
 
         DistributedLockUnLockFailed = 934,
+
     }
 
     public static class ErrorCodeExtensions

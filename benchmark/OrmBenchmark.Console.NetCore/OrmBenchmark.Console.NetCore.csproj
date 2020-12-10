@@ -36,10 +36,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.FullStack.Benchmark.Database\HB.FullStack.Benchmark.Database.csproj" />
-    <ProjectReference Include="..\OrmBenchmark.Ado\OrmBenchmark.Ado.csproj" />
     <ProjectReference Include="..\OrmBenchmark.Core\OrmBenchmark.Core.csproj" />
     <ProjectReference Include="..\OrmBenchmark.Dapper\OrmBenchmark.Dapper.csproj" />
-    <ProjectReference Include="..\OrmBenchmark.EntityFramework\OrmBenchmark.EntityFramework.csproj" />
     <ProjectReference Include="..\OrmBenchmark.OrmLite\OrmBenchmark.OrmLite.csproj" />
   </ItemGroup>
 

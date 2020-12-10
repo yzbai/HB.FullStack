@@ -25,7 +25,7 @@ namespace OrmBenchmark.Ado
             conn = new SqlConnection(connectionStrong);
             conn.Open();
         }
-        public IPost GetItemAsObject(int Id)
+        public IPost GetItemAsObjectAsync(int Id)
         {
             var cmd = conn.CreateCommand();
             cmd.CommandText = @"select * from Posts where Id = @Id";
@@ -84,7 +84,7 @@ namespace OrmBenchmark.Ado
             throw new NotImplementedException();
         }
 
-        public IEnumerable<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObjectAsync()
         {
             throw new NotImplementedException();
         }

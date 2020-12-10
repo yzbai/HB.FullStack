@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OrmBenchmark.Dapper
 {
@@ -28,26 +29,26 @@ namespace OrmBenchmark.Dapper
             conn.Open();
         }
 
-        public IPost GetItemAsObject(int Id)
+        public async Task<IPost> GetItemAsObjectAsync(int Id)
         {
             object param = new { Id = Id };
-            return conn.Query<Post>("select * from Posts where Id=@Id", param, buffered: true).First();
+
+            return (await conn.QueryAsync<Post>("select * from Posts where Id=@Id", param/*, buffered: true*/).ConfigureAwait(false)).First();
         }
 
         public dynamic GetItemAsDynamic(int Id)
         {
-            object param = new { Id = Id };
-            return conn.Query("select * from Posts where Id=@Id", param, buffered: true).First();
+            return null;
         }
 
-        public IEnumerable<IPost> GetAllItemsAsObject()
+        public async Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync()
         {
-            return conn.Query<Post>("select * from Posts", null, buffered: true).ToList<IPost>();
+            return await conn.QueryAsync<Post>("select * from Posts", null/*, buffered: true*/).ConfigureAwait(false);
         }
 
         public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
-            return conn.Query("select * from Posts", null, buffered: true).ToList();
+            return null;
         }
 
         public void Finish()

@@ -10,7 +10,6 @@ using System.Text;
 
 namespace HB.FullStack.Database.SQL
 {
-    //TODO: 太长，优化。可能优化方向，将having，order，等提出，变成OrderExpression等
     /// <summary>
     /// SQL条件.
     /// </summary>
@@ -48,13 +47,15 @@ namespace HB.FullStack.Database.SQL
             return _expressionContext.GetParameters();
         }
 
+        /// <summary>
+        /// 逻辑，如果有whereString，则不去解析_whereExpression
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             StringBuilder sql = new StringBuilder();
 
-            string? lamdaWhereString = _whereExpression?.ToStatement(_expressionContext);
-
-            bool hasLamdaWhere = !string.IsNullOrEmpty(lamdaWhereString);
+            bool hasLamdaWhere = _whereExpression != null;
             bool hasStringWhere = !string.IsNullOrEmpty(_whereString);
 
             if (WithWhereString && (hasLamdaWhere || hasStringWhere))
@@ -62,22 +63,23 @@ namespace HB.FullStack.Database.SQL
                 sql.Append(" WHERE ");
             }
 
-            if (hasLamdaWhere)
-            {
-                sql.Append("( ");
-                sql.Append(lamdaWhereString);
-                sql.Append(" ) ");
-            }
-
             if (hasStringWhere)
             {
-                if (hasLamdaWhere)
-                {
-                    sql.Append(" AND ");
-                }
+                //if (hasLamdaWhere)
+                //{
+                //    sql.Append(" AND ");
+                //}
 
                 sql.Append("( ");
                 sql.Append(_whereString);
+                sql.Append(" ) ");
+            }
+            else if (hasLamdaWhere)
+            {
+                string lamdaWhereString = _whereExpression!.ToStatement(_expressionContext);
+
+                sql.Append("( ");
+                sql.Append(lamdaWhereString);
                 sql.Append(" ) ");
             }
 

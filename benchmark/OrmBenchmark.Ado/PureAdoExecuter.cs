@@ -25,7 +25,7 @@ namespace OrmBenchmark.Ado
             conn = new MySqlConnection(connectionStrong);
             conn.Open();
         }
-        public IPost GetItemAsObject(int Id)
+        public IPost GetItemAsObjectAsync(int Id)
         {
             var cmd = conn.CreateCommand();
             cmd.CommandText = @"select * from Posts where Id = @Id";
@@ -91,7 +91,7 @@ namespace OrmBenchmark.Ado
             return obj;
         }
 
-        public IEnumerable<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObjectAsync()
         {
             var cmd = conn.CreateCommand();
             cmd.CommandText = @"select * from Posts";

@@ -25,16 +25,16 @@ namespace HB.FullStack.Database.Entities
             _modelDefFactory = modelDefFactory;
         }
 
-        private static int GetColumnHash(IDataReader reader)
-        {
-            HashCode hashCode = new HashCode();
+        //private static int GetColumnHash(IDataReader reader)
+        //{
+        //    HashCode hashCode = new HashCode();
 
-            for (int i = 0; i < reader.FieldCount; i++)
-            {
-                hashCode.Add(reader.GetName(i));
-            }
-            return hashCode.ToHashCode();
-        }
+        //    for (int i = 0; i < reader.FieldCount; i++)
+        //    {
+        //        hashCode.Add(reader.GetName(i));
+        //    }
+        //    return hashCode.ToHashCode();
+        //}
 
         #region 表行与实体间映射
 
@@ -66,7 +66,7 @@ namespace HB.FullStack.Database.Entities
 
         private Func<IDataReader, DatabaseEntityDef, object> GetMapFunc(DatabaseEntityDef entityDef, IDataReader reader)
         {
-            string key = GetKey(entityDef, reader);
+            string key = GetKey(entityDef);
 
             if (!_funcDict.ContainsKey(key))
             {
@@ -74,7 +74,7 @@ namespace HB.FullStack.Database.Entities
                 {
                     if (!_funcDict.ContainsKey(key))
                     {
-                        _funcDict[key] = EntityMapperHelper3.CreateEntityMapperDelegate(entityDef, reader);
+                        _funcDict[key] = EntityMapperHelper.CreateEntityMapperDelegate(entityDef, reader);
                     }
                 }
             }
@@ -82,9 +82,9 @@ namespace HB.FullStack.Database.Entities
             return _funcDict[key];
         }
 
-        private static string GetKey(DatabaseEntityDef entityDef, IDataReader reader)
+        private static string GetKey(DatabaseEntityDef entityDef)
         {
-            return entityDef.DatabaseName + entityDef.EntityFullName + GetColumnHash(reader);
+            return entityDef.DatabaseName + entityDef.EntityFullName;
         }
 
         /// <summary>
