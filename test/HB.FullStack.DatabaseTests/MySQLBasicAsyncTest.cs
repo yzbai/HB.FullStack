@@ -384,7 +384,7 @@ namespace HB.FullStack.DatabaseTests
 
                 var items2 = Mocker.GetPublishers();
 
-                //await database.BatchAddOrUpdateAsync<PublisherEntity>(items2, "xx", trans);
+                await database.BatchAddAsync<PublisherEntity>(items2, "xx", trans);
 
                 results = await database.RetrieveAsync<PublisherEntity>(item => SQLUtil.In(item.Guid, true, items2.Select(item => item.Guid).ToArray()), trans);
 

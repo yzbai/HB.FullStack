@@ -47,7 +47,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public string? Name2 { get; set; } = "Name2";
 
         [EntityProperty]
-        public string? Name3 { get; set; } = "xxxx";
+        public string? Name3 { get; set; } //= "xxxx";
 
 
         [EntityProperty]
@@ -57,7 +57,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
         [EntityProperty]
-        public PublisherType? Type3 { get; set; } = PublisherType.Online;
+        public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
         [EntityProperty]
         public int? Number { get; set; } = 12121221;
@@ -67,7 +67,7 @@ namespace HB.FullStack.DatabaseTests.Data
 
 
         [EntityProperty]
-        public DateTimeOffset? DDD { get; set; } = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
+        public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
 
         [EntityProperty]

@@ -19,6 +19,8 @@ namespace System
         [Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public static object? DbValueToTypeValue(object dbValue, Type targetType)
         {
+            Type dbType = dbValue.GetType();
+
             if (dbValue.GetType() == typeof(DBNull))
             {
                 //return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
@@ -42,11 +44,29 @@ namespace System
             }
             else if (targetType == typeof(DateTimeOffset) || (underType != null && underType == typeof(DateTimeOffset)))
             {
-                rt = new DateTimeOffset((DateTime)dbValue, TimeSpan.Zero);
+                if (dbType == typeof(string))
+                {
+                    rt = DateTimeOffset.Parse(dbValue.ToString(), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    rt = new DateTimeOffset((DateTime)dbValue, TimeSpan.Zero);
+                }
             }
             else
             {
-                rt = dbValue;
+                if (underType == null && dbType != targetType)
+                {
+                    rt = Convert.ChangeType(dbValue, targetType, CultureInfo.InvariantCulture);
+                }
+                else if (underType != null && dbType != underType)
+                {
+                    rt = Convert.ChangeType(dbValue, underType, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    rt = dbValue;
+                }
             }
 
             if (underType == null)

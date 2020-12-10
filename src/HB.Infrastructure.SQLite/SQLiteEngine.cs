@@ -4,8 +4,10 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+
 using HB.FullStack.Database;
 using HB.FullStack.Database.Engine;
+
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 
@@ -82,7 +84,7 @@ namespace HB.Infrastructure.SQLite
             SqliteParameter parameter = new SqliteParameter
             {
                 ParameterName = name,
-                Value = value,
+                Value = value ?? DBNull.Value,
                 DbType = dbType
             };
             return parameter;
@@ -93,7 +95,7 @@ namespace HB.Infrastructure.SQLite
             SqliteParameter parameter = new SqliteParameter
             {
                 ParameterName = name,
-                Value = value
+                Value = value ?? DBNull.Value
             };
             return parameter;
         }

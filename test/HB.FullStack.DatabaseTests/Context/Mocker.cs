@@ -34,7 +34,7 @@ namespace HB.FullStack.DatabaseTests.Data
                 Type = PublisherType.Online,
                 Name = "中文名字",
                 Books = new List<string>() { "Cat", "Dog" },
-                //BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
                 BookAuthors = new Dictionary<string, Author>()
                 {
                     { "Cat", new Author() { Mobile="111", Name="BB" } },

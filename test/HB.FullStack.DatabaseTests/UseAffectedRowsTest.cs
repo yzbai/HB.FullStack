@@ -76,7 +76,7 @@ namespace HB.FullStack.DatabaseTests
         [Fact]
         public void TestSQLite_Changes_Test()
         {
-            string connectString = $"Data Source=test2.db";
+            string connectString = $"Data Source=sqlite_test2.db";
             using SqliteConnection conn = new SqliteConnection(connectString);
             conn.Open();
 

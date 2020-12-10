@@ -81,26 +81,33 @@ namespace HB.FullStack.Database
 
             _logger.LogDebug($"获取了初始化数据库的锁:{_databaseEngine.GetDatabaseNames().ToJoinedString(",")}");
 
-            if (!distributedLock.IsAcquired)
+            try
             {
-                ThrowIfDatabaseInitLockNotGet(_databaseEngine.GetDatabaseNames());
-            }
+                if (!distributedLock.IsAcquired)
+                {
+                    ThrowIfDatabaseInitLockNotGet(_databaseEngine.GetDatabaseNames());
+                }
 
-            if (_databaseSettings.AutomaticCreateTable)
+                if (_databaseSettings.AutomaticCreateTable)
+                {
+                    await AutoCreateTablesIfBrandNewAsync().ConfigureAwait(false);
+
+                    _logger.LogInformation("Database Auto Create Tables Finished.");
+                }
+
+                if (migrations != null && migrations.Any())
+                {
+                    await MigarateAsync(migrations).ConfigureAwait(false);
+
+                    _logger.LogInformation("Database Migarate Finished.");
+                }
+
+                _logger.LogInformation("数据初始化成功！");
+            }
+            finally
             {
-                await AutoCreateTablesIfBrandNewAsync().ConfigureAwait(false);
-
-                _logger.LogInformation("Database Auto Create Tables Finished.");
+                distributedLock.Dispose();
             }
-
-            if (migrations != null && migrations.Any())
-            {
-                await MigarateAsync(migrations).ConfigureAwait(false);
-
-                _logger.LogInformation("Database Migarate Finished.");
-            }
-
-            _logger.LogInformation("数据初始化成功！");
         }
 
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)

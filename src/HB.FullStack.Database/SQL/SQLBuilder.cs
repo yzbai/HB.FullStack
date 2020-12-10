@@ -480,7 +480,7 @@ namespace HB.FullStack.Database.SQL
 
                 foreach (DatabaseEntityPropertyDef info in modelDef.Properties)
                 {
-                    string parameterizedName = info.DbParameterizedName + number.ToString(CultureInfo.InvariantCulture);
+                    string parameterizedName = info.DbParameterizedName + "_" + number.ToString(CultureInfo.InvariantCulture);
 
                     if (info.IsTableProperty)
                     {
@@ -563,7 +563,7 @@ namespace HB.FullStack.Database.SQL
 
                 foreach (DatabaseEntityPropertyDef info in definition.Properties)
                 {
-                    string parameterizedName = info.DbParameterizedName + number.ToString(CultureInfo.InvariantCulture);
+                    string parameterizedName = info.DbParameterizedName + "_" + number.ToString(CultureInfo.InvariantCulture);
 
                     if (info.IsTableProperty)
                     {
@@ -628,7 +628,8 @@ namespace HB.FullStack.Database.SQL
 
                 foreach (DatabaseEntityPropertyDef info in definition.Properties)
                 {
-                    string parameterizedName = info.DbParameterizedName + number.ToString(CultureInfo.InvariantCulture);
+                    //这里的"_"不可以去掉，因为有的参数本身就带数字，比如int Number1,
+                    string parameterizedName = info.DbParameterizedName + "_" + number.ToString(CultureInfo.InvariantCulture);
 
                     if (info.IsTableProperty)
                     {
@@ -755,7 +756,7 @@ namespace HB.FullStack.Database.SQL
 
                 string primaryStatement = info.PropertyInfo.Name == "Id" ? " PRIMARY KEY AUTOINCREMENT " : "";
 
-                propertyInfoSql.AppendLine($" {info.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} {defaultValue} ,");
+                propertyInfoSql.Append($" {info.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} {defaultValue} ,");
             }
 
             propertyInfoSql.Remove(propertyInfoSql.Length - 1, 1);
