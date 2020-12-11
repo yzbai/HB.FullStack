@@ -1,13 +1,19 @@
-﻿using HB.FullStack.Database;
+﻿using ClassLibrary1;
+
+using HB.FullStack.Database;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -21,6 +27,7 @@ namespace HB.FullStack.DatabaseTests
         private readonly ITransaction _sqlIteTransaction;
         private readonly ITestOutputHelper _output;
         //private readonly IsolationLevel  = IsolationLevel.RepeatableRead;
+        private readonly IDatabaseEntityDefFactory _defFactory;
 
         private IDatabase? GetDatabase(string databaseType)
         {
@@ -57,6 +64,8 @@ namespace HB.FullStack.DatabaseTests
 
             _sqlite = serviceFixture.ServiceProvider2.GetRequiredService<IDatabase>();
             _sqlIteTransaction = serviceFixture.ServiceProvider2.GetRequiredService<ITransaction>();
+
+            _defFactory = serviceFixture.ServiceProvider2.GetRequiredService<IDatabaseEntityDefFactory>();
 
             _sqlite.InitializeAsync().Wait();
         }
@@ -527,6 +536,151 @@ namespace HB.FullStack.DatabaseTests
 
             Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
             #endregion
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method", Justification = "<Pending>")]
+        public async Task Test_EntityMapperPerformanceAsync(int index)
+        {
+            index++;
+
+
+
+            IDatabase database = _sqlite;
+
+            var books = Mocker.GetBooks(500);
+
+            var trans = await _sqlIteTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
+
+            IEnumerable<BookEntity> re = await database.RetrieveAsync<BookEntity>(b => b.Deleted, trans);
+
+            await database.AddAsync<BookEntity>(Mocker.GetBooks(1)[0], "", trans);
+
+            try
+            {
+
+                //await database.AddAsync<BookEntity>(books[0], "", trans);
+
+                await database.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await _sqlIteTransaction.CommitAsync(trans).ConfigureAwait(false);
+            }
+            catch
+            {
+                await _sqlIteTransaction.RollbackAsync(trans).ConfigureAwait(false);
+            }
+
+
+            Stopwatch stopwatch = new Stopwatch();
+
+            SqliteConnection mySqlConnection = new SqliteConnection("Data Source=sqlite_test2.db");
+
+
+
+            //time = 0;
+            int loop = 100;
+
+            TimeSpan time0 = TimeSpan.Zero, time1 = TimeSpan.Zero, time2 = TimeSpan.Zero, time3 = TimeSpan.Zero;
+            for (int cur = 0; cur < loop; ++cur)
+            {
+
+                await mySqlConnection.OpenAsync();
+
+
+                SqliteCommand command0 = new SqliteCommand("select * from tb_book limit 1000", mySqlConnection);
+
+                var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
+
+                List<BookEntity> list1 = new List<BookEntity>();
+                List<BookEntity> list2 = new List<BookEntity>();
+                List<BookEntity> list3 = new List<BookEntity>();
+
+                int len = reader0.FieldCount;
+                DatabaseEntityPropertyDef[] propertyDefs = new DatabaseEntityPropertyDef[len];
+                MethodInfo[] setMethods = new MethodInfo[len];
+
+                DatabaseEntityDef definition = _defFactory.GetDef<BookEntity>();
+
+                for (int i = 0; i < len; ++i)
+                {
+                    propertyDefs[i] = definition.GetPropertyDef(reader0.GetName(i))!;
+                    setMethods[i] = propertyDefs[i].PropertyInfo.GetSetMethod(true)!;
+                }
+
+
+                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0);
+
+
+                //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
+                TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
+                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
+
+
+
+                Stopwatch stopwatch1 = new Stopwatch();
+                Stopwatch stopwatch2 = new Stopwatch();
+                Stopwatch stopwatch3 = new Stopwatch();
+
+
+
+
+                while (reader0.Read())
+                {
+                    stopwatch1.Start();
+
+                    object obj1 = mapper1(reader0, definition);
+
+                    list1.Add((BookEntity)obj1);
+                    stopwatch1.Stop();
+
+
+
+                    stopwatch2.Start();
+                    object obj2 = mapper2(reader0);
+
+                    list2.Add((BookEntity)obj2);
+                    stopwatch2.Stop();
+
+
+                    stopwatch3.Start();
+
+                    BookEntity item = new BookEntity();
+
+                    for (int i = 0; i < len; ++i)
+                    {
+                        DatabaseEntityPropertyDef property = propertyDefs[i];
+
+                        object? value = property.TypeConverter == null ?
+                            DatabaseTypeConverter.DbValueToTypeValue(reader0[i], property.PropertyInfo.PropertyType) :
+                            property.TypeConverter.DbValueToTypeValue(reader0[i]);
+
+
+                        setMethods[i].Invoke(item, new object?[] { value });
+
+                    }
+
+                    list3.Add(item);
+
+                    stopwatch3.Stop();
+
+
+                }
+
+                time1 += stopwatch1.Elapsed;
+                time2 += stopwatch2.Elapsed;
+                time3 += stopwatch3.Elapsed;
+
+                await reader0.DisposeAsync().ConfigureAwait(false);
+                command0.Dispose();
+
+                await mySqlConnection.CloseAsync();
+
+            }
+
+            _output.WriteLine("Emit Coding : " + (time1.TotalMilliseconds / (loop * 1.0)).ToString());
+            _output.WriteLine("Dapper : " + (time2.TotalMilliseconds / (loop * 1.0)).ToString());
+            _output.WriteLine("Reflection : " + (time3.TotalMilliseconds / (loop * 1.0)).ToString());
+
         }
 
         //[Theory]

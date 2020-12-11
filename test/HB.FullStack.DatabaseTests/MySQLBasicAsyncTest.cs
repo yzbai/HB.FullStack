@@ -561,7 +561,6 @@ namespace HB.FullStack.DatabaseTests
 
             //time = 0;
             int loop = 100;
-            await WarmupDapperAsync(mySqlConnection).ConfigureAwait(false);
 
             TimeSpan time0 = TimeSpan.Zero, time1 = TimeSpan.Zero, time2 = TimeSpan.Zero, time3 = TimeSpan.Zero;
             for (int cur = 0; cur < loop; ++cur)
@@ -574,7 +573,6 @@ namespace HB.FullStack.DatabaseTests
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
-                List<BookEntity> list0 = new List<BookEntity>();
                 List<BookEntity> list1 = new List<BookEntity>();
                 List<BookEntity> list2 = new List<BookEntity>();
                 List<BookEntity> list3 = new List<BookEntity>();
@@ -587,20 +585,18 @@ namespace HB.FullStack.DatabaseTests
 
                 for (int i = 0; i < len; ++i)
                 {
-                    propertyDefs[i] = definition.GetProperty(reader0.GetName(i))!;
+                    propertyDefs[i] = definition.GetPropertyDef(reader0.GetName(i))!;
                     setMethods[i] = propertyDefs[i].PropertyInfo.GetSetMethod(true)!;
                 }
 
 
-                Func<IDataReader, DatabaseEntityDef, object> mapper0 = EntityMapperHelper2.CreateEntityMapperDelegate(definition, reader0);
-                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperHelper.CreateEntityMapperDelegate(definition, reader0);
+                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0);
 
-
+                //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
 
 
 
-                Stopwatch stopwatch0 = new Stopwatch();
                 Stopwatch stopwatch1 = new Stopwatch();
                 Stopwatch stopwatch2 = new Stopwatch();
                 Stopwatch stopwatch3 = new Stopwatch();
@@ -610,13 +606,6 @@ namespace HB.FullStack.DatabaseTests
 
                 while (reader0.Read())
                 {
-                    stopwatch0.Start();
-
-                    object obj0 = mapper0(reader0, definition);
-
-                    list0.Add((BookEntity)obj0);
-                    stopwatch0.Stop();
-
                     stopwatch1.Start();
 
                     object obj1 = mapper1(reader0, definition);
@@ -642,7 +631,7 @@ namespace HB.FullStack.DatabaseTests
                         DatabaseEntityPropertyDef property = propertyDefs[i];
 
                         object? value = property.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(reader0[i], property.PropertyInfo.PropertyType) :
+                            DatabaseTypeConverter.DbValueToTypeValue(reader0[i], property.PropertyInfo.PropertyType) :
                             property.TypeConverter.DbValueToTypeValue(reader0[i]);
 
 
@@ -657,7 +646,6 @@ namespace HB.FullStack.DatabaseTests
 
                 }
 
-                time0 += stopwatch0.Elapsed;
                 time1 += stopwatch1.Elapsed;
                 time2 += stopwatch2.Elapsed;
                 time3 += stopwatch3.Elapsed;
@@ -669,43 +657,9 @@ namespace HB.FullStack.DatabaseTests
 
             }
 
-            _output.WriteLine("Sigil Coding : " + (time0.TotalMilliseconds / (loop * 1.0)).ToString());
             _output.WriteLine("Emit Coding : " + (time1.TotalMilliseconds / (loop * 1.0)).ToString());
             _output.WriteLine("Dapper : " + (time2.TotalMilliseconds / (loop * 1.0)).ToString());
             _output.WriteLine("Reflection : " + (time3.TotalMilliseconds / (loop * 1.0)).ToString());
-
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method", Justification = "<Pending>")]
-        private static async Task WarmupDapperAsync(MySqlConnection mySqlConnection)
-        {
-            await mySqlConnection.OpenAsync().ConfigureAwait(false);
-
-            MySqlCommand command3 = new MySqlCommand("select * from tb_book limit 1", mySqlConnection);
-
-            var reader3 = await command3.ExecuteReaderAsync().ConfigureAwait(false);
-
-            Func<IDataReader, object> fun3 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader3);
-
-            List<BookEntity> list3 = new List<BookEntity>();
-
-            while (reader3.Read())
-            {
-                object obj = fun3(reader3);
-
-                //list3.Add((BookEntity)obj);
-            }
-
-
-            await reader3.DisposeAsync().ConfigureAwait(false);
-
-            command3.Dispose();
-
-            await mySqlConnection.CloseAsync();
-        }
-
-        private void WarmUpDapper()
-        {
 
         }
 

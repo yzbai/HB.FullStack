@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Database
 {
-    public class EntityInfo
+    public class EntitySetting
     {
         [DisallowNull, NotNull]
         public string? EntityTypeFullName { get; set; }

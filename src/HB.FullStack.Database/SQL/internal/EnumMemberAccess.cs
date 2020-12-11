@@ -11,7 +11,7 @@ namespace HB.FullStack.Database.SQL
 
     internal class EnumMemberAccess : PartialSqlString
     {
-        /// <exception cref="System.ArgumentException"></exception>
+        
         public EnumMemberAccess(string text, Type enumType)
             : base(text)
         {

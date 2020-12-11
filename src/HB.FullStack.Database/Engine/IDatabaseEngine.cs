@@ -35,7 +35,7 @@ namespace HB.FullStack.Database.Engine
         /// <param name="value"></param>
         /// <param name="dbType"></param>
         /// <returns></returns>
-        IDataParameter CreateParameter(string name, object value, DbType dbType);
+        //IDataParameter CreateParameter(string name, object value, DbType dbType);
         /// <summary>
         /// 创建 参数
         /// </summary>
@@ -47,7 +47,7 @@ namespace HB.FullStack.Database.Engine
         /// 创建 空白命令
         /// </summary>
         /// <returns></returns>
-        IDbCommand CreateEmptyCommand();
+        IDbCommand CreateTextCommand(string commandText, IDataParameter[]? parameters = null);
 
 
         #endregion

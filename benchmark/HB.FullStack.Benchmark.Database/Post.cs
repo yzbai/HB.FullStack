@@ -11,7 +11,7 @@ namespace HB.FullStack.Benchmark.Database
     [DatabaseEntity(TableName = "Posts")]
     public class Post : Entity, IPost
     {
-        [EntityProperty(Length = 2000)]
+        [EntityProperty(MaxLength = 2000)]
         public string Text { get; set; } = null!;
 
         [EntityProperty]

@@ -15,42 +15,20 @@ namespace HB.FullStack.Database.Entities
     /// </summary>
     internal class DefaultDatabaseEntityMapper : IDatabaseEntityMapper
     {
-        private readonly IDatabaseEntityDefFactory _modelDefFactory;
+        private readonly IDatabaseEntityDefFactory _entityDefFactory;
 
-        private ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object>> _funcDict = new ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object>>();
-        private readonly object _funcDictLocker = new object();
+        private readonly ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object>> _mapperDict = new ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object>>();
+        private readonly object _mapperLocker = new object();
 
         public DefaultDatabaseEntityMapper(IDatabaseEntityDefFactory modelDefFactory)
         {
-            _modelDefFactory = modelDefFactory;
+            _entityDefFactory = modelDefFactory;
         }
 
-        //private static int GetColumnHash(IDataReader reader)
-        //{
-        //    HashCode hashCode = new HashCode();
-
-        //    for (int i = 0; i < reader.FieldCount; i++)
-        //    {
-        //        hashCode.Add(reader.GetName(i));
-        //    }
-        //    return hashCode.ToHashCode();
-        //}
-
-        #region 表行与实体间映射
-
-        /// <summary>
-        /// ToList
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-
-        public IList<T> ToList<T>(IDataReader reader)
+        public IList<T> ToList<T>(DatabaseEntityDef entityDef, IDataReader reader)
             where T : Entity, new()
         {
-            DatabaseEntityDef entityDef = _modelDefFactory.GetDef<T>();
-
-            Func<IDataReader, DatabaseEntityDef, object> mapFunc = GetMapFunc(entityDef, reader);
+            Func<IDataReader, DatabaseEntityDef, object> mapFunc = GetCachedMapFunc(entityDef, reader);
 
             List<T> lst = new List<T>();
 
@@ -64,36 +42,6 @@ namespace HB.FullStack.Database.Entities
             return lst;
         }
 
-        private Func<IDataReader, DatabaseEntityDef, object> GetMapFunc(DatabaseEntityDef entityDef, IDataReader reader)
-        {
-            string key = GetKey(entityDef);
-
-            if (!_funcDict.ContainsKey(key))
-            {
-                lock (_funcDictLocker)
-                {
-                    if (!_funcDict.ContainsKey(key))
-                    {
-                        _funcDict[key] = EntityMapperHelper.CreateEntityMapperDelegate(entityDef, reader);
-                    }
-                }
-            }
-
-            return _funcDict[key];
-        }
-
-        private static string GetKey(DatabaseEntityDef entityDef)
-        {
-            return entityDef.DatabaseName + entityDef.EntityFullName;
-        }
-
-        /// <summary>
-        /// ToList
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-
         public IList<Tuple<TSource, TTarget?>> ToList<TSource, TTarget>(IDataReader reader)
             where TSource : Entity, new()
             where TTarget : Entity, new()
@@ -105,8 +53,8 @@ namespace HB.FullStack.Database.Entities
             //    return lst;
             //}
 
-            DatabaseEntityDef definition1 = _modelDefFactory.GetDef<TSource>();
-            DatabaseEntityDef definition2 = _modelDefFactory.GetDef<TTarget>();
+            DatabaseEntityDef definition1 = _entityDefFactory.GetDef<TSource>();
+            DatabaseEntityDef definition2 = _entityDefFactory.GetDef<TTarget>();
 
             string[] propertyNames1 = new string[definition1.FieldCount];
             string[] propertyNames2 = new string[definition2.FieldCount];
@@ -132,7 +80,7 @@ namespace HB.FullStack.Database.Entities
 
                 for (int i = 0; i < definition1.FieldCount; ++i, ++j)
                 {
-                    DatabaseEntityPropertyDef pDef = definition1.GetProperty(propertyNames1[i])
+                    DatabaseEntityPropertyDef pDef = definition1.GetPropertyDef(propertyNames1[i])
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames1[i]}.");
 
                     object fieldValue = reader[j];
@@ -148,7 +96,7 @@ namespace HB.FullStack.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
+                            DatabaseTypeConverter.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
@@ -160,7 +108,7 @@ namespace HB.FullStack.Database.Entities
 
                 for (int i = 0; i < definition2.FieldCount; ++i, ++j)
                 {
-                    DatabaseEntityPropertyDef pDef = definition2.GetProperty(propertyNames2[i])
+                    DatabaseEntityPropertyDef pDef = definition2.GetPropertyDef(propertyNames2[i])
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames2[i]}."); ;
 
                     object fieldValue = reader[j];
@@ -175,7 +123,7 @@ namespace HB.FullStack.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
+                            DatabaseTypeConverter.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
@@ -225,9 +173,9 @@ namespace HB.FullStack.Database.Entities
             //    return lst;
             //}
 
-            DatabaseEntityDef definition1 = _modelDefFactory.GetDef<TSource>();
-            DatabaseEntityDef definition2 = _modelDefFactory.GetDef<TTarget2>();
-            DatabaseEntityDef definition3 = _modelDefFactory.GetDef<TTarget3>();
+            DatabaseEntityDef definition1 = _entityDefFactory.GetDef<TSource>();
+            DatabaseEntityDef definition2 = _entityDefFactory.GetDef<TTarget2>();
+            DatabaseEntityDef definition3 = _entityDefFactory.GetDef<TTarget3>();
 
             string[] propertyNames1 = new string[definition1.FieldCount];
             string[] propertyNames2 = new string[definition2.FieldCount];
@@ -260,7 +208,7 @@ namespace HB.FullStack.Database.Entities
 
                 for (int i = 0; i < definition1.FieldCount; ++i, ++j)
                 {
-                    DatabaseEntityPropertyDef pDef = definition1.GetProperty(propertyNames1[i])
+                    DatabaseEntityPropertyDef pDef = definition1.GetPropertyDef(propertyNames1[i])
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames1[i]}.");
 
                     object fieldValue = reader[j];
@@ -275,7 +223,7 @@ namespace HB.FullStack.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
+                            DatabaseTypeConverter.DbValueToTypeValue(fieldValue, pDef) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
@@ -287,7 +235,7 @@ namespace HB.FullStack.Database.Entities
 
                 for (int i = 0; i < definition2.FieldCount; ++i, ++j)
                 {
-                    DatabaseEntityPropertyDef pDef = definition2.GetProperty(propertyNames2[i])
+                    DatabaseEntityPropertyDef pDef = definition2.GetPropertyDef(propertyNames2[i])
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames2[i]}.");
 
                     object fieldValue = reader[j];
@@ -301,7 +249,7 @@ namespace HB.FullStack.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
+                            DatabaseTypeConverter.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
@@ -313,7 +261,7 @@ namespace HB.FullStack.Database.Entities
 
                 for (int i = 0; i < definition3.FieldCount; ++i, ++j)
                 {
-                    DatabaseEntityPropertyDef pDef = definition3.GetProperty(propertyNames3[i])
+                    DatabaseEntityPropertyDef pDef = definition3.GetPropertyDef(propertyNames3[i])
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames2[i]}.");
 
                     object fieldValue = reader[j];
@@ -327,7 +275,7 @@ namespace HB.FullStack.Database.Entities
                     if (pDef != null)
                     {
                         object? value = pDef.TypeConverter == null ?
-                            ValueConverterUtil.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
+                            DatabaseTypeConverter.DbValueToTypeValue(fieldValue, pDef.PropertyInfo.PropertyType) :
                             pDef.TypeConverter.DbValueToTypeValue(fieldValue);
 
                         if (value != null)
@@ -363,13 +311,6 @@ namespace HB.FullStack.Database.Entities
             return lst;
         }
 
-        /// <summary>
-        /// ToObject
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="item"></param>
-        /// <exception cref="IndexOutOfRangeException">Ignore.</exception>
-
         public void ToObject<T>(IDataReader reader, T item) where T : Entity, new()
         {
             if (reader == null)
@@ -380,7 +321,7 @@ namespace HB.FullStack.Database.Entities
             int len = reader.FieldCount;
             string[] propertyNames = new string[len];
 
-            DatabaseEntityDef definition = _modelDefFactory.GetDef<T>();
+            DatabaseEntityDef definition = _entityDefFactory.GetDef<T>();
 
             for (int i = 0; i < len; ++i)
             {
@@ -391,11 +332,11 @@ namespace HB.FullStack.Database.Entities
             {
                 for (int i = 0; i < len; ++i)
                 {
-                    DatabaseEntityPropertyDef property = definition.GetProperty(propertyNames[i])
+                    DatabaseEntityPropertyDef property = definition.GetPropertyDef(propertyNames[i])
                         ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {propertyNames[i]}.");
 
                     object? value = property.TypeConverter == null ?
-                        ValueConverterUtil.DbValueToTypeValue(reader[i], property.PropertyInfo.PropertyType) :
+                        DatabaseTypeConverter.DbValueToTypeValue(reader[i], property.PropertyInfo.PropertyType) :
                         property.TypeConverter.DbValueToTypeValue(reader[i]);
 
                     if (value != null)
@@ -406,6 +347,29 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        #endregion
+        private Func<IDataReader, DatabaseEntityDef, object> GetCachedMapFunc(DatabaseEntityDef entityDef, IDataReader reader)
+        {
+            string key = GetKey(entityDef);
+
+            if (!_mapperDict.ContainsKey(key))
+            {
+                lock (_mapperLocker)
+                {
+                    if (!_mapperDict.ContainsKey(key))
+                    {
+                        _mapperDict[key] = EntityMapperCreator.CreateEntityMapper(entityDef, reader);
+                    }
+                }
+            }
+
+            return _mapperDict[key];
+
+            static string GetKey(DatabaseEntityDef entityDef)
+            {
+                return entityDef.DatabaseName + entityDef.EntityFullName;
+            }
+        }
+
+#endregion
     }
 }

@@ -8,7 +8,7 @@
         ArgumentValidationError = 2,
         OutOfRange = 3,
         InvalidEntity = 4,
-        UseDateTime = 5,
+        UseDateTimeOffsetOnly = 5,
 
         #region API
 
@@ -74,6 +74,7 @@
         DatabaseInitLockError = 235,
 
         DatabaseWrongWhereType = 236,
+        DatabaseUnSupportedType = 237,
 
         #endregion Database
 

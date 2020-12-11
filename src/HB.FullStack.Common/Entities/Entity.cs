@@ -22,7 +22,7 @@ namespace HB.FullStack.Common.Entities
         public const int LastUserMaxLength = 100;
 
         [AutoIncrementPrimaryKey]
-        [EntityProperty("Id")]
+        [EntityProperty]
         public long Id { get; internal set; } = -1;
 
         /// <summary>
@@ -34,19 +34,19 @@ namespace HB.FullStack.Common.Entities
         [CacheGuidKey]
         public string Guid { get; internal set; } = SecurityUtil.CreateUniqueToken();
 
-        [EntityProperty("Version")]
+        [EntityProperty]
         public int Version { get; internal set; } = -1;
 
-        [EntityProperty("上一次更改者", Length = LastUserMaxLength)]
+        [EntityProperty]
         public string LastUser { get; internal set; } = string.Empty;
 
         /// <summary>
         /// UTC 时间
         /// </summary>
-        [EntityProperty("上一次更改时间")]
+        [EntityProperty]
         public DateTimeOffset LastTime { get; internal set; } = TimeUtil.UtcNow;
 
-        [EntityProperty("逻辑删除标志")]
+        [EntityProperty]
         public bool Deleted { get; internal set; } = false;
 
         public void OnlyForDtoMapping(string guid)

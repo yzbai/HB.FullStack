@@ -12,140 +12,44 @@ namespace HB.FullStack.Database.Entities
     /// </summary>
     internal class DatabaseEntityPropertyDef
     {
-        #region 自身描述
-        /// <summary>
-        /// 所属实体名称
-        /// </summary>
-        public DatabaseEntityDef EntityDef { get; private set; }
+        public DatabaseEntityDef EntityDef { get; set; } = null!;
 
-        public PropertyInfo PropertyInfo { get; private set; }
+        public string Name { get; set; } = null!;
 
-        ///// <summary>
-        ///// 属性名称
-        ///// </summary>
-        //public string PropertyName { get; set; }
-        /// <summary>
-        /// 属性类型
-        /// </summary>
-        public Type Type { get; set; }
+        public Type Type { get; set; } = null!;
 
         public Type? NullableUnderlyingType { get; set; }
-        ///// <summary>
-        ///// Get方法
-        ///// </summary>
-        //public MethodInfo GetMethod { get; set; }
-        ///// <summary>
-        ///// Set方法
-        ///// </summary>
-        //public MethodInfo SetMethod { get; set; }
 
-        #endregion
+        public MethodInfo GetMethod { get; set; } = null!;
 
-        #region 数据库
+        public MethodInfo SetMethod { get; set; } = null!;
 
-        /// <summary>
-        /// 是否是数据库表字段
-        /// </summary>
-        public bool IsTableProperty { get; set; }
-        /// <summary>
-        /// 数据库引号化后的名称
-        /// IsTableProperty为false时无意义
-        /// </summary>
-        public string? DbReservedName { get; set; }
-        /// <summary>
-        /// 数据库参数化后的名称
-        /// IsTableProperty为false时无意义
-        /// </summary>
-        public string? DbParameterizedName { get; set; }
-        /// <summary>
-        /// 数据库中对应类型
-        /// IsTableProperty为false时无意义
-        /// </summary>
-        public DbType DbFieldType { get; set; }
-        /// <summary>
-        /// 是否是主键
-        /// IsTableProperty为false时无意义
-        /// </summary>
+        public string DbReservedName { get; set; } = null!;
+
+        public string DbParameterizedName { get; set; } = null!;
+
         public bool IsAutoIncrementPrimaryKey { get; set; }
-        /// <summary>
-        /// 是否是外键
-        /// IsTableProperty为false时无意义
-        /// </summary>
+
         public bool IsForeignKey { get; set; }
-        /// <summary>
-        /// 是否唯一值
-        /// IsTableProperty为false时无意义
-        /// </summary>
+
         public bool IsUnique { get; set; }
 
-        /// <summary>
-        /// 是否可空
-        /// IsTableProperty为false时无意义
-        /// </summary>
         public bool IsNullable { get; set; }
 
-        /// <summary>
-        /// 长度是否限定
-        /// </summary>
         public bool IsLengthFixed { get; set; }
-        /// <summary>
-        /// 数据库字段长度
-        /// IsTableProperty为false时无意义
-        /// </summary>
+
         public int? DbMaxLength { get; set; }
-        /// <summary>
-        /// 数据库默认值
-        /// IsTableProperty为false时无意义
-        /// </summary>
-        public string? DbDefaultValue { get; set; }
-        /// <summary>
-        /// 数据库中备注、描述
-        /// IsTableProperty为false时无意义
-        /// </summary>
-        public string? DbDescription { get; set; }
 
-        #endregion
+        public CustomTypeConverter? TypeConverter { get; set; }
 
-        public DatabaseTypeConverter? TypeConverter { get; set; }
-
-        public DatabaseEntityPropertyDef(DatabaseEntityDef entityDef, PropertyInfo propertyInfo)
+        public object? GetValueFrom(object entity)
         {
-            EntityDef = entityDef;
-            PropertyInfo = propertyInfo;
-            //PropertyName = propertyInfo.Name;
-            Type = propertyInfo.PropertyType;
-            NullableUnderlyingType = Nullable.GetUnderlyingType(Type);
-            //GetMethod = propertyInfo.GetGetMethod();
-            //SetMethod = propertyInfo.GetSetMethod();
+            return GetMethod.Invoke(entity, null);
         }
-        /// <summary>
-        /// 获取值
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        //public object GetValue(object entity)
-        //{
-        //    return GetMethod.Invoke(entity, null);
-        //}
-        ///// <summary>
-        ///// 获取数据库值表达
-        ///// </summary>
-        ///// <param name="entity"></param>
-        ///// <returns></returns>
-        //public string GetDbValueStatement(object entity)
-        //{
-        //    object value = GetMethod.Invoke(entity, null);
-        //    return DatabaseEngine.GetDbValueStatement(value);
-        //}
 
-        /// <summary>
-        /// 赋值
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="value"></param>
-        //public void SetValue(object entity, object value)
-        //{
-        //    SetMethod.Invoke(entity, new object[] { value });
-        //}
+        public void SetValueTo(object entity, object? value)
+        {
+            SetMethod.Invoke(entity, new object?[] { value });
+        }
     }
 }

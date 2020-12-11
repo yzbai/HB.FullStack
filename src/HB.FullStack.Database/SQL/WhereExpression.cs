@@ -30,8 +30,6 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        public bool WithWhereString { get; set; } = true;
-
         internal WhereExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
         {
             _databaseEngine = databaseEngine;
@@ -47,68 +45,45 @@ namespace HB.FullStack.Database.SQL
             return _expressionContext.GetParameters();
         }
 
-        /// <summary>
-        /// 逻辑，如果有whereString，则不去解析_whereExpression
-        /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             StringBuilder sql = new StringBuilder();
 
-            bool hasLamdaWhere = _whereExpression != null;
             bool hasStringWhere = !string.IsNullOrEmpty(_whereString);
+            bool hasLamdaWhere = _whereExpression != null;
 
-            if (WithWhereString && (hasLamdaWhere || hasStringWhere))
+            if (hasLamdaWhere || hasLamdaWhere)
             {
                 sql.Append(" WHERE ");
             }
 
             if (hasStringWhere)
             {
-                //if (hasLamdaWhere)
-                //{
-                //    sql.Append(" AND ");
-                //}
-
-                sql.Append("( ");
-                sql.Append(_whereString);
-                sql.Append(" ) ");
+                sql.Append($" ({_whereString}) ");
             }
-            else if (hasLamdaWhere)
+
+            if (hasLamdaWhere)
             {
-                string lamdaWhereString = _whereExpression!.ToStatement(_expressionContext);
+                if (hasStringWhere)
+                {
+                    sql.Append(" AND ");
+                }
 
-                sql.Append("( ");
-                sql.Append(lamdaWhereString);
-                sql.Append(" ) ");
+                sql.Append($" ({_whereExpression!.ToStatement(_expressionContext)}) ");
             }
 
-            sql.Append(string.IsNullOrEmpty(_groupByString) ?
-                       "" :
-                       "\n" + _groupByString);
-
-            sql.Append(string.IsNullOrEmpty(_havingString) ?
-                       "" :
-                       "\n" + _havingString);
+            sql.Append($" {_groupByString} {_havingString} ");
 
             if (!_orderByString.IsNullOrEmpty())
             {
-                sql.AppendLine();
                 sql.Append(_orderByString);
             }
             else if (!_expressionContext.OrderByStatementBySQLUtilIn.IsNullOrEmpty())
             {
-                sql.AppendLine();
                 sql.Append(_expressionContext.OrderByStatementBySQLUtilIn);
             }
 
-            //sql.Append(string.IsNullOrEmpty(_orderByString) ?
-            //           "" :
-            //           "\n" + _orderByString);
-
-            sql.Append(string.IsNullOrEmpty(_limitString) ?
-                        "" :
-                        "\n" + _limitString);
+            sql.Append($" {_limitString} ");
 
             return sql.ToString();
         }
@@ -152,7 +127,7 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        //TODO: 可以改造的方向： 参数化，而不是组成一个sql，有注入风险
+        //TODO:  参数化，而不是组成一个sql，有注入风险
         private string SqlFormat(string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
@@ -199,6 +174,22 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
+        public WhereExpression<T> And(string sqlFilter, params object[] filterParams)
+        {
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(sqlFilter, filterParams);
+
+            if (_whereString.IsNullOrEmpty())
+            {
+                _whereString = sql;
+            }
+            else
+            {
+                _whereString = $" ({_whereString}) AND ({sql})";
+            }
+
+            return this;
+        }
+
         public WhereExpression<T> Or(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
@@ -212,6 +203,22 @@ namespace HB.FullStack.Database.SQL
                     _whereExpression = _whereExpression.Or(predicate);
                 }
             }
+            return this;
+        }
+
+        public WhereExpression<T> Or(string sqlFilter, params object[] filterParams)
+        {
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(sqlFilter, filterParams);
+
+            if (_whereString.IsNullOrEmpty())
+            {
+                _whereString = sql;
+            }
+            else
+            {
+                _whereString = $" ({_whereString}) OR ({sql})";
+            }
+
             return this;
         }
 

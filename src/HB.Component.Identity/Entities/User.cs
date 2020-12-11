@@ -22,20 +22,20 @@ namespace HB.FullStack.Identity.Entities
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [EntityProperty("用户名称", Length = 100, Unique = true)]
+        [EntityProperty("用户名称", MaxLength = 100, Unique = true)]
         public string? LoginName { get; set; }
         /// <summary>
         /// 唯一
         /// </summary>
         [Mobile]
-        [EntityProperty("手机号", Unique = true, Length = 14)]
+        [EntityProperty("手机号", Unique = true, MaxLength = 14)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [EntityProperty("邮箱", Unique = true, Length = 256)]
+        [EntityProperty("邮箱", Unique = true, MaxLength = 256)]
         public string? Email { get; set; }
 
         /// <summary>

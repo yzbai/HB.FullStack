@@ -15,13 +15,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddDatabase(this IServiceCollection services)
         {
-            services.AddSingleton<IDatabaseTypeConverterFactory, DatabaseTypeConverterFactory>();
+            services.AddSingleton<ICustomTypeConverterFactory, CustomTypeConverterFactory>();
             services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
             services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
             services.AddSingleton<ISQLBuilder, SQLBuilder>();
+
+            //public
             services.AddSingleton<ITransaction, DefaultTransaction>();
             services.AddSingleton<IDatabase, DefaultDatabase>();
-
             services.AddSingleton<IDatabaseReader>(sp => sp.GetRequiredService<IDatabase>());
             services.AddSingleton<IDatabaseWriter>(sp => sp.GetRequiredService<IDatabase>());
 

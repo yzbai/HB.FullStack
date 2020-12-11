@@ -17,8 +17,8 @@ namespace ClassLibrary1
 
         public object Parse(Type destinationType, object value)
         {
-            return new DateTimeOffset((DateTime)value, TimeSpan.Zero);
-            //return ValueConverterUtil.DbValueToTypeValue(value, destinationType);
+            //return new DateTimeOffset((DateTime)value, TimeSpan.Zero);
+            return DatabaseTypeConverter.DbValueToTypeValue(value, destinationType);
         }
     }
 
@@ -28,7 +28,7 @@ namespace ClassLibrary1
 
         static TypeHandlerHelper()
         {
-            AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
+
         }
 
         internal static bool HasTypeHandler(Type type) => TypeHandlers.ContainsKey(type);

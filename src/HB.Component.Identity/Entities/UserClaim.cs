@@ -12,10 +12,10 @@ namespace HB.FullStack.Identity.Entities
         [GuidEntityProperty(NotNull = true)]
         public string UserGuid { get; set; } = default!;
 
-        [EntityProperty("ClaimType", Length = 65530, NotNull = true)]
+        [EntityProperty("ClaimType", MaxLength = 65530, NotNull = true)]
         public string ClaimType { get; set; } = default!;
 
-        [EntityProperty("ClaimValue", Length = 65530, NotNull = true)]
+        [EntityProperty("ClaimValue", MaxLength = 65530, NotNull = true)]
         public string ClaimValue { get; set; } = default!;
 
         [EntityProperty]

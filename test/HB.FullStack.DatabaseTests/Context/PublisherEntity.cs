@@ -89,7 +89,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(PublisherBookAuthorsTypeConventer))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(Length = EntityPropertyLength.MediumLength, Converter = typeof(PublisherBookNamesTypeConventer))]
+        [EntityProperty(MaxLength = EntityPropertyLength.MediumLength, Converter = typeof(PublisherBookNamesTypeConventer))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -137,7 +137,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public string Mobile { get; set; } = default!;
     }
 
-    public class PublisherBookAuthorsTypeConventer : DatabaseTypeConverter
+    public class PublisherBookAuthorsTypeConventer : CustomTypeConverter
     {
         public PublisherBookAuthorsTypeConventer() { }
 
@@ -152,7 +152,7 @@ namespace HB.FullStack.DatabaseTests.Data
         }
     }
 
-    public class PublisherBookNamesTypeConventer : DatabaseTypeConverter
+    public class PublisherBookNamesTypeConventer : CustomTypeConverter
     {
         public PublisherBookNamesTypeConventer() { }
 
@@ -167,7 +167,7 @@ namespace HB.FullStack.DatabaseTests.Data
         }
     }
 
-    public class PublisherBooksTypeConventer : DatabaseTypeConverter
+    public class PublisherBooksTypeConventer : CustomTypeConverter
     {
         public PublisherBooksTypeConventer() { }
 

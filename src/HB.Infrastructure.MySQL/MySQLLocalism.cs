@@ -6,25 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HB.Infrastructure.MySQL
 {
-    internal class DbTypeInfo
-    {
-        /// <summary>
-        /// 数据库类型
-        /// </summary>
-        public DbType DatabaseType { get; set; }
-
-        /// <summary>
-        /// DbType在不同数据库中的表达，用来创建表的时候用
-        /// </summary>
-        public string Statement { get; set; } = default!;
-
-        /// <summary>
-        /// 这个类型的值是否需要引号化
-        /// </summary>
-        public bool IsValueQuoted { get; set; }
-
-    }
-
     internal static class MySQLLocalism
     {
         //参数化
@@ -91,11 +72,6 @@ namespace HB.Infrastructure.MySQL
             return _dbTypeInfoMap[trueType];
         }
 
-        public static DbType GetDbType(Type type)
-        {
-            return GetDbTypeInfo(type).DatabaseType;
-        }
-
         public static string GetDbTypeStatement(Type type)
         {
             return GetDbTypeInfo(type).Statement;
@@ -122,22 +98,22 @@ namespace HB.Infrastructure.MySQL
         /// </summary>
         /// <param name="value">类型值</param>
         /// <returns>数据库类型值的表达</returns>
-        [return: NotNullIfNotNull("value")]
-        public static string? GetDbValueStatement(object? value, bool needQuoted)
-        {
-            if (value == null)
-            {
-                return null;
-            }
+        //[return: NotNullIfNotNull("value")]
+        //public static string? GetDbValueStatement(object? value, bool needQuoted)
+        //{
+        //    if (value == null)
+        //    {
+        //        return null;
+        //    }
 
-            string valueStr = ValueConverterUtil.TypeValueToStringValue(value)!;
+        //    string valueStr = ValueConverterUtil.TypeValueToStringValue(value)!;
 
-            if (needQuoted && IsValueNeedQuoted(value.GetType()))
-            {
-                valueStr = GetQuoted(valueStr);
-            }
+        //    if (needQuoted && IsValueNeedQuoted(value.GetType()))
+        //    {
+        //        valueStr = GetQuoted(valueStr);
+        //    }
 
-            return valueStr;
-        }
+        //    return valueStr;
+        //}
     }
 }

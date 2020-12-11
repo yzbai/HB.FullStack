@@ -13,7 +13,7 @@ namespace HB.FullStack.Database
 
         public string TargetSchema { get; set; }
 
-        /// <exception cref="System.ArgumentException"></exception>
+        
         public Migration(string targetSchema, int oldVersion, int newVersion, string sql)
         {
             //if (targetSchema.IsNullOrEmpty())

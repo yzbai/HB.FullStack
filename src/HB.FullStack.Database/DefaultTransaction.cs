@@ -2,6 +2,7 @@
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Properties;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -26,17 +27,12 @@ namespace HB.FullStack.Database
         {
             IDbTransaction dbTransaction = await _databaseEngine.BeginTransactionAsync(databaseName, isolationLevel).ConfigureAwait(false);
 
-            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction);
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
         public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : Entity
         {
             DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
-
-            if (!entityDef.IsTableModel)
-            {
-                throw new DatabaseException(ErrorCode.DatabaseNotATableModel, entityDef.EntityFullName);
-            }
 
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }
@@ -69,7 +65,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Dispose();
+                    conn.Close();
                 }
 
                 context.Status = TransactionStatus.Commited;
@@ -109,7 +105,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Dispose();
+                    conn.Close();
                 }
 
                 context.Status = TransactionStatus.Rollbacked;

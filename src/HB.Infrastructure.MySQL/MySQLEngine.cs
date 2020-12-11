@@ -98,16 +98,16 @@ namespace HB.Infrastructure.MySQL
 
         #region 创建功能
 
-        public IDataParameter CreateParameter(string name, object value, DbType dbType)
-        {
-            MySqlParameter parameter = new MySqlParameter
-            {
-                ParameterName = name,
-                Value = value,
-                DbType = dbType
-            };
-            return parameter;
-        }
+        //public IDataParameter CreateParameter(string name, object value, DbType dbType)
+        //{
+        //    MySqlParameter parameter = new MySqlParameter
+        //    {
+        //        ParameterName = name,
+        //        Value = value,
+        //        DbType = dbType
+        //    };
+        //    return parameter;
+        //}
 
         public IDataParameter CreateParameter(string name, object value)
         {
@@ -119,9 +119,17 @@ namespace HB.Infrastructure.MySQL
             return parameter;
         }
 
-        public IDbCommand CreateEmptyCommand()
+        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "在DefaultDatabase中用完会Dispose")]
+        public IDbCommand CreateTextCommand(string commandText, IDataParameter[]? parameters = null)
         {
-            MySqlCommand command = new MySqlCommand();
+            MySqlCommand command = new MySqlCommand(commandText);
+            command.CommandType = CommandType.Text;
+
+            if (parameters != null)
+            {
+                command.Parameters.AddRange(parameters);
+            }
+
             return command;
         }
 
@@ -184,7 +192,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbParameters"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<Tuple<IDbCommand, IDataReader>> ExecuteSPReaderAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster = false)
         {
             if (Transaction == null)
@@ -206,7 +214,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="parameters"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<object> ExecuteSPScalarAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster = false)
         {
             if (Transaction == null)
@@ -227,7 +235,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="spName"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<int> ExecuteSPNonQueryAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> parameters)
         {
             if (Transaction == null)
@@ -251,7 +259,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbName"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand)
         {
             if (Transaction == null)
@@ -272,7 +280,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)
@@ -293,7 +301,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)

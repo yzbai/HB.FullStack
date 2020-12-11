@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+
 using Microsoft;
 
 namespace System
@@ -238,5 +239,14 @@ namespace System
         }
 
         #endregion Extensions
+
+        public static StringBuilder RemoveLast(this StringBuilder stringBuilder)
+        {
+            if (stringBuilder.Length > 0)
+            {
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+            }
+            return stringBuilder;
+        }
     }
 }

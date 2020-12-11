@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
@@ -11,32 +12,22 @@ using System.Xml.Linq;
 
 using HB.FullStack.Database.Entities;
 
-
-
 namespace HB.FullStack.Database
 {
-    internal static class EntityMapperHelper
+    internal static class EntityMapperCreator
     {
-        public static readonly MethodInfo GetItem = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-        .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
-        .Select(p => p.GetGetMethod()).First();
-
-        public static readonly MethodInfo EnumParse = typeof(Enum).GetMethod(nameof(Enum.Parse), new Type[] { typeof(Type), typeof(string), typeof(bool) });
-
-        public static readonly MethodInfo InvariantCulture = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static).GetGetMethod();
-
-        internal static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapperDelegate(DatabaseEntityDef def, IDataReader reader)
+        public static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapper(DatabaseEntityDef def, IDataReader reader)
         {
-            var dm = new DynamicMethod("Deserialize" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader), typeof(DatabaseEntityDef) }, def.EntityType, true);
-            var il = dm.GetILGenerator();
+            DynamicMethod dm = new DynamicMethod("Deserialize" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader), typeof(DatabaseEntityDef) }, def.EntityType, true);
+            ILGenerator il = dm.GetILGenerator();
 
-            GenerateDeserializerFromMap(def, reader, il);
+            EmitEntityMapper(def, reader, il);
 
-            var funcType = System.Linq.Expressions.Expression.GetFuncType(typeof(IDataReader), typeof(DatabaseEntityDef), def.EntityType);
+            var funcType = Expression.GetFuncType(typeof(IDataReader), typeof(DatabaseEntityDef), def.EntityType);
             return (Func<IDataReader, DatabaseEntityDef, object>)dm.CreateDelegate(funcType);
         }
 
-        internal static void GenerateDeserializerFromMap(DatabaseEntityDef def, IDataReader reader, ILGenerator il)
+        private static void EmitEntityMapper(DatabaseEntityDef def, IDataReader reader, ILGenerator il)
         {
             try
             {
@@ -44,7 +35,7 @@ namespace HB.FullStack.Database
 
                 for (int i = 0; i < reader.FieldCount; ++i)
                 {
-                    propertyDefs.Add(def.GetProperty(reader.GetName(i)) ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {reader.GetName(i)}."));
+                    propertyDefs.Add(def.GetPropertyDef(reader.GetName(i)) ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {reader.GetName(i)}."));
                 }
 
                 LocalBuilder returnValueLocal = il.DeclareLocal(def.EntityType);
@@ -57,7 +48,6 @@ namespace HB.FullStack.Database
                 //emitter.NewObject(ctor);
                 il.Emit(OpCodes.Stloc, returnValueLocal);
                 //emitter.StoreLocal(returnValueLocal);
-
                 il.Emit(OpCodes.Ldloc, returnValueLocal);
                 //emitter.LoadLocal(returnValueLocal); // [target]
 
@@ -77,20 +67,19 @@ namespace HB.FullStack.Database
                     {
                         il.Emit(OpCodes.Ldarg_1);
                         //emitter.LoadArgument(1);// stack is now [target][target][EntityDef]
-                        il.Emit(OpCodes.Ldstr, propertyDef.PropertyInfo.Name);
+                        il.Emit(OpCodes.Ldstr, propertyDef.Name);
                         //emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][EntityDef][PropertyName]
-
-                        il.EmitCall(OpCodes.Call, typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)), null);
+                        il.EmitCall(OpCodes.Call, _getPropertyTypeConverterMethod, null);
                         //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));// stack is now [target][target][TypeConverter]
                     }
 
-                    ///获取数据库值
+                    //===获取数据库值=========================================================================
 
                     il.Emit(OpCodes.Ldarg_0);
                     //emitter.LoadArgument(0);// stack is now [...][reader]
                     EmitInt32(il, index);
                     //emitter.LoadConstant(index); // stack is now [...][reader][index]
-                    il.EmitCall(OpCodes.Callvirt, GetItem, null);
+                    il.EmitCall(OpCodes.Callvirt, _dataReaderGetItemMethod, null);
                     //emitter.CallVirtual(ReflectionHelper.GetItem);// stack is now [...][value-as-object]
 
                     //check DBNULL
@@ -101,6 +90,8 @@ namespace HB.FullStack.Database
                     il.Emit(OpCodes.Brtrue_S, dbNullLabel);
                     //emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
 
+
+                    //===DbValueToTypeValue,逻辑同DatabaseConverty.DbValueToTypeValue一致======================
                     if (propertyDef.TypeConverter == null)
                     {
                         if (propertyDef.Type.IsEnum || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType.IsEnum))
@@ -121,10 +112,9 @@ namespace HB.FullStack.Database
                             {
                                 il.Emit(OpCodes.Ldtoken, propertyDef.Type);
                                 //emitter.LoadConstant(propertyDef.Type);//stack is now[target][target][propertyType-token]
-
                             }
 
-                            il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)), null);
+                            il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
                             //emitter.Call(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));//stack is now[target][target][propertyType]
 
                             il.Emit(OpCodes.Ldloc, enumStringTempLocal);
@@ -133,7 +123,7 @@ namespace HB.FullStack.Database
                             il.Emit(OpCodes.Ldc_I4_1);
                             //emitter.LoadConstant(true);//stack is now[target][target][propertyType][string][true]
 
-                            il.EmitCall(OpCodes.Call, EnumParse, null);
+                            il.EmitCall(OpCodes.Call, _enumParseMethod, null);
                             //emitter.Call(EnumParse);//stack is now[target][target][value]
 
                             if (propertyDef.NullableUnderlyingType != null)
@@ -149,8 +139,6 @@ namespace HB.FullStack.Database
 
                             //stack is now[target][target][typed-value]
                         }
-
-
                         else if (propertyDef.Type == typeof(DateTimeOffset) || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType == typeof(DateTimeOffset)))
                         {
                             // stack is now [target][target][value-as-object]
@@ -158,8 +146,8 @@ namespace HB.FullStack.Database
                             if (dbValueType == typeof(string))
                             {
                                 il.Emit(OpCodes.Castclass, typeof(string));//stack is now [target][target][string]
-                                il.EmitCall(OpCodes.Call, InvariantCulture, null);//stack is now [target][target][string][cultureInfo]
-                                il.EmitCall(OpCodes.Call, typeof(DateTimeOffset).GetMethod(nameof(DateTimeOffset.Parse), new Type[] { typeof(string), typeof(IFormatProvider) }), null);
+                                il.EmitCall(OpCodes.Call, _invariantCultureMethod, null);//stack is now [target][target][string][cultureInfo]
+                                il.EmitCall(OpCodes.Call, _dataTimeOffsetParseMethod, null);
                                 //stack is now [target][target][datetimeoffset]
                             }
                             else
@@ -170,9 +158,9 @@ namespace HB.FullStack.Database
 
                                 il.Emit(OpCodes.Ldloc, timespanZeroLocal);
                                 //emitter.LoadLocal(timespanZeroLocal); //stack is now[target][target][datetime][timespan.zero]
-                                ConstructorInfo dateTimeOffsetConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
 
-                                il.Emit(OpCodes.Newobj, dateTimeOffsetConstructorInfo);
+
+                                il.Emit(OpCodes.Newobj, _dateTimeOffsetConstructorInfo);
                                 //emitter.NewObject(dateTimeOffsetConstructorInfo);
                                 //stack is now[target][target][datetimeoffset]
                                 //??need unbox
@@ -212,7 +200,7 @@ namespace HB.FullStack.Database
                     else
                     {
                         // stack is now [target][target][TypeConverter][value-as-object]
-                        il.EmitCall(OpCodes.Callvirt, typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)), null);
+                        il.EmitCall(OpCodes.Callvirt, _typeConverterDbValueToTypeValueMethod, null);
                         //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
 
                         il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
@@ -221,16 +209,17 @@ namespace HB.FullStack.Database
                         // stack is now [target][target][TypeValue]
                     }
 
+                    //===赋值================================================================================
                     // stack is now [target][target][TypeValue]
 
                     if (propertyDef.Type.IsValueType)
                     {
-                        il.EmitCall(OpCodes.Call, GetPropertySetter(propertyDef.PropertyInfo, def.EntityType), null);
+                        il.EmitCall(OpCodes.Call, propertyDef.SetMethod, null);
                         //emitter.Call(GetPropertySetter(propertyDef.PropertyInfo, def.EntityType));
                     }
                     else
                     {
-                        il.EmitCall(OpCodes.Callvirt, GetPropertySetter(propertyDef.PropertyInfo, def.EntityType), null);
+                        il.EmitCall(OpCodes.Callvirt, propertyDef.SetMethod, null);
                         //emitter.CallVirtual(GetPropertySetter(propertyDef.PropertyInfo, def.EntityType));
                     }
 
@@ -269,7 +258,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public static MethodInfo? ResolveOperator(MethodInfo[] methods, Type from, Type to, string name)
+        private static MethodInfo? ResolveOperator(MethodInfo[] methods, Type from, Type to, string name)
         {
             for (int i = 0; i < methods.Length; i++)
             {
@@ -281,7 +270,7 @@ namespace HB.FullStack.Database
             return null;
         }
 
-        public static MethodInfo? GetOperator(Type from, Type to)
+        private static MethodInfo? GetOperator(Type from, Type to)
         {
             if (to == null) return null;
             MethodInfo[] fromMethods, toMethods;
@@ -291,7 +280,7 @@ namespace HB.FullStack.Database
                 ?? ResolveOperator(toMethods, from, to, "op_Explicit");
         }
 
-        public static void FlexibleConvertBoxedFromHeadOfStack(ILGenerator il, Type from, Type to)
+        private static void FlexibleConvertBoxedFromHeadOfStack(ILGenerator il, Type from, Type to)
         {
             MethodInfo? op;
             if (from == (to))
@@ -367,7 +356,7 @@ namespace HB.FullStack.Database
                 {
                     il.Emit(OpCodes.Ldtoken, to); // stack is now [target][target][value][member-type-token]
                     il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)), null); // stack is now [target][target][value][member-type]
-                    il.EmitCall(OpCodes.Call, InvariantCulture, null); // stack is now [target][target][value][member-type][culture]
+                    il.EmitCall(OpCodes.Call, _invariantCultureMethod, null); // stack is now [target][target][value][member-type][culture]
                     il.EmitCall(OpCodes.Call, typeof(Convert).GetMethod(nameof(Convert.ChangeType), new Type[] { typeof(object), typeof(Type), typeof(IFormatProvider) }), null); // stack is now [target][target][boxed-member-type-value]
                     il.Emit(OpCodes.Unbox_Any, to); // stack is now [target][target][typed-value]
                 }
@@ -401,7 +390,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        internal static MethodInfo GetPropertySetter(PropertyInfo propertyInfo, Type type)
+        private static MethodInfo GetPropertySetterMethod(PropertyInfo propertyInfo, Type type)
         {
             if (propertyInfo.DeclaringType == type) return propertyInfo.GetSetMethod(true);
 
@@ -414,43 +403,22 @@ namespace HB.FullStack.Database
                    null).GetSetMethod(true);
         }
 
-        public static void ThrowDataException(Exception ex, int index, IDataReader reader, object value)
-        {
-            Exception toThrow;
-            try
-            {
-                string name = "(n/a)", formattedValue = "(n/a)";
-                if (reader != null && index >= 0 && index < reader.FieldCount)
-                {
-                    name = reader.GetName(index);
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        // Otherwise we throw (=value) below, which isn't intuitive
-                        name = "(Unnamed Column)";
-                    }
-                    try
-                    {
-                        if (value == null || value is DBNull)
-                        {
-                            formattedValue = "<null>";
-                        }
-                        else
-                        {
-                            formattedValue = Convert.ToString(value, CultureInfo.InvariantCulture) + " - " + Type.GetTypeCode(value.GetType());
-                        }
-                    }
-                    catch (Exception valEx)
-                    {
-                        formattedValue = valEx.Message;
-                    }
-                }
-                toThrow = new DataException($"Error parsing column {index} ({name}={formattedValue})", ex);
-            }
-            catch
-            { // throw the **original** exception, wrapped as DataException
-                toThrow = new DataException(ex.Message, ex);
-            }
-            throw toThrow;
-        }
+        private static readonly MethodInfo _dataReaderGetItemMethod = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
+            .Select(p => p.GetGetMethod()).First();
+
+        private static readonly MethodInfo _enumParseMethod = typeof(Enum).GetMethod(nameof(Enum.Parse), new Type[] { typeof(Type), typeof(string), typeof(bool) });
+
+        private static readonly MethodInfo _invariantCultureMethod = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static).GetGetMethod();
+
+        private static readonly MethodInfo _getPropertyTypeConverterMethod = typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter));
+
+        private static readonly MethodInfo _getTypeFromHandleMethod = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
+
+        private static readonly MethodInfo _dataTimeOffsetParseMethod = typeof(DateTimeOffset).GetMethod(nameof(DateTimeOffset.Parse), new Type[] { typeof(string), typeof(IFormatProvider) });
+
+        private static readonly ConstructorInfo _dateTimeOffsetConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
+
+        private static readonly MethodInfo _typeConverterDbValueToTypeValueMethod = typeof(CustomTypeConverter).GetMethod(nameof(CustomTypeConverter.DbValueToTypeValue));
     }
 }

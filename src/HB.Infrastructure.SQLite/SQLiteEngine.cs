@@ -182,7 +182,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="dbName"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand)
         {
             if (Transaction == null)
@@ -203,7 +203,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)
@@ -224,7 +224,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)

@@ -40,5 +40,31 @@ namespace System
         {
             return type.GetConstructor(Type.EmptyTypes);
         }
+
+        public static MethodInfo GetPropertySetterMethod(PropertyInfo propertyInfo, Type type)
+        {
+            if (propertyInfo.DeclaringType == type) return propertyInfo.GetSetMethod(true);
+
+            return propertyInfo.DeclaringType.GetProperty(
+                   propertyInfo.Name,
+                   BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                   Type.DefaultBinder,
+                   propertyInfo.PropertyType,
+                   propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray(),
+                   null).GetSetMethod(true);
+        }
+
+        public static MethodInfo GetPropertyGetterMethod(PropertyInfo propertyInfo, Type type)
+        {
+            if (propertyInfo.DeclaringType == type) return propertyInfo.GetGetMethod(true);
+
+            return propertyInfo.DeclaringType.GetProperty(
+                   propertyInfo.Name,
+                   BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                   Type.DefaultBinder,
+                   propertyInfo.PropertyType,
+                   propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray(),
+                   null).GetGetMethod(true);
+        }
     }
 }

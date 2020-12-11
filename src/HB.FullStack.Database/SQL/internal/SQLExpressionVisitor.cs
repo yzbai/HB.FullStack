@@ -204,7 +204,7 @@ namespace HB.FullStack.Database.SQL
             if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
                 string memberName = m.Member.Name;
-                Type modelType = m.Expression.Type;
+                Type entityType = m.Expression.Type;
 
                 if (m.Expression.NodeType == ExpressionType.Convert)
                 {
@@ -212,7 +212,7 @@ namespace HB.FullStack.Database.SQL
 
                     if (obj is Type type)
                     {
-                        modelType = type;
+                        entityType = type;
                     }
                     else
                     {
@@ -222,8 +222,8 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
 
-                DatabaseEntityDef entityDef = context.EntityDefFactory.GetDef(modelType);
-                DatabaseEntityPropertyDef propertyDef = entityDef.GetProperty(m.Member.Name)
+                DatabaseEntityDef entityDef = context.EntityDefFactory.GetDef(entityType);
+                DatabaseEntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
                     ?? throw new DatabaseException($"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
 
                 string prefix = "";
@@ -233,8 +233,8 @@ namespace HB.FullStack.Database.SQL
                     prefix = entityDef.DbTableReservedName + ".";
                 }
 
-                if (propertyDef.PropertyInfo.PropertyType.IsEnum)
-                    return new EnumMemberAccess(prefix + propertyDef.DbReservedName, propertyDef.PropertyInfo.PropertyType);
+                if (propertyDef.Type.IsEnum)
+                    return new EnumMemberAccess(prefix + propertyDef.DbReservedName, propertyDef.Type);
 
                 return new PartialSqlString(prefix + propertyDef.DbReservedName);
             }
@@ -647,14 +647,9 @@ namespace HB.FullStack.Database.SQL
 
             DatabaseEntityDef entityDef = context.EntityDefFactory.GetDef(type);
 
-            DatabaseEntityPropertyDef? property = entityDef.GetProperty(name);
+            DatabaseEntityPropertyDef? property = entityDef.GetPropertyDef(name);
 
-            if (property == null)
-            {
-                return false;
-            }
-
-            return property.IsTableProperty;
+            return property != null;
         }
 
         private static object GetTrueExpression(SQLExpressionVisitorContenxt context)
