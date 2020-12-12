@@ -96,90 +96,25 @@ namespace HB.Infrastructure.MySQL
 
         #endregion 自身 & 构建
 
-        #region 创建功能
 
-        //public IDataParameter CreateParameter(string name, object value, DbType dbType)
-        //{
-        //    MySqlParameter parameter = new MySqlParameter
-        //    {
-        //        ParameterName = name,
-        //        Value = value,
-        //        DbType = dbType
-        //    };
-        //    return parameter;
-        //}
-
-        public IDataParameter CreateParameter(string name, object value)
-        {
-            MySqlParameter parameter = new MySqlParameter
-            {
-                ParameterName = name,
-                Value = value
-            };
-            return parameter;
-        }
-
-        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "在DefaultDatabase中用完会Dispose")]
-        public IDbCommand CreateTextCommand(string commandText, IDataParameter[]? parameters = null)
+        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null)
         {
             MySqlCommand command = new MySqlCommand(commandText);
             command.CommandType = CommandType.Text;
 
-            if (parameters != null)
+            if (parameterPairs == null)
             {
-                command.Parameters.AddRange(parameters);
+                return command;
+            }
+
+            foreach (var pair in parameterPairs)
+            {
+                command.Parameters.Add(new MySqlParameter(pair.Key, pair.Value));
             }
 
             return command;
         }
-
-        #endregion 创建功能
-
-        #region 方言
-
-        public string ParameterizedChar { get { return MySQLLocalism.ParameterizedChar; } }
-
-        public string QuotedChar { get { return MySQLLocalism.QuotedChar; } }
-
-        public string ReservedChar { get { return MySQLLocalism.ReservedChar; } }
-
-        public string GetQuotedStatement(string name)
-        {
-            return MySQLLocalism.GetQuoted(name);
-        }
-
-        public string GetParameterizedStatement(string name)
-        {
-            return MySQLLocalism.GetParameterized(name);
-        }
-
-        public string GetReservedStatement(string name)
-        {
-            return MySQLLocalism.GetReserved(name);
-        }
-
-        public DbType GetDbType(Type type)
-        {
-            return MySQLLocalism.GetDbType(type);
-        }
-
-        public string GetDbTypeStatement(Type type)
-        {
-            return MySQLLocalism.GetDbTypeStatement(type);
-        }
-
-        [return: NotNullIfNotNull("value")]
-        public string? GetDbValueStatement(object? value, bool needQuoted)
-        {
-            return MySQLLocalism.GetDbValueStatement(value, needQuoted);
-        }
-
-        public bool IsValueNeedQuoted(Type type)
-        {
-            return MySQLLocalism.IsValueNeedQuoted(type);
-        }
-
-        #endregion 方言
 
         #region SP 能力
 

@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -34,19 +33,17 @@ namespace HB.FullStack.Database
         private readonly DatabaseCommonSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
         private readonly IDatabaseEntityDefFactory _entityDefFactory;
-        private readonly IDatabaseEntityMapper _entityMapper;
-        private readonly ISQLBuilder _sqlBuilder;
+        private readonly IDbCommandBuilder _sqlBuilder;
         private readonly ITransaction _transaction;
         private readonly ILogger _logger;
         private readonly IDistributedLockManager _lockManager;
 
-        private string _deletedReservedName;
+        private readonly string _deletedReservedName;
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
             IDatabaseEntityDefFactory modelDefFactory,
-            IDatabaseEntityMapper modelMapper,
-            ISQLBuilder sqlBuilder,
+            IDbCommandBuilder sqlBuilder,
             ITransaction transaction,
             ILogger<DefaultDatabase> logger,
             IDistributedLockManager lockManager)
@@ -54,13 +51,12 @@ namespace HB.FullStack.Database
             _databaseSettings = databaseEngine.DatabaseSettings;
             _databaseEngine = databaseEngine;
             _entityDefFactory = modelDefFactory;
-            _entityMapper = modelMapper;
             _sqlBuilder = sqlBuilder;
             _transaction = transaction;
             _logger = logger;
             _lockManager = lockManager;
 
-            _deletedReservedName = _databaseEngine.GetReservedStatement(nameof(Entity.Deleted));
+            _deletedReservedName = SqlHelper.GetReserved(nameof(Entity.Deleted), _databaseEngine.EngineType);
 
             if (_databaseSettings.Version < 0)
             {
@@ -316,7 +312,7 @@ namespace HB.FullStack.Database
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : Entity, new()
         {
-            IEnumerable<T> lst = await RetrieveAsync<T>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
+            IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
             if (lst.IsNullOrEmpty())
             {
@@ -358,7 +354,7 @@ namespace HB.FullStack.Database
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
 
-                result = _entityMapper.ToList<TSelect>(selectDef, reader);
+                result = reader.ToEntities<TSelect>(selectDef);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
@@ -392,18 +388,13 @@ namespace HB.FullStack.Database
 
             try
             {
-                command = _sqlBuilder.CreateRetrieveCommand<T>(entityDef, fromCondition, whereCondition);
+                command = _sqlBuilder.CreateRetrieveCommand(entityDef, fromCondition, whereCondition);
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                result = _entityMapper.ToList<T>(reader);
+                result = reader.ToEntities<T>(entityDef);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
-                //if (ex is DatabaseException)
-                //{
-                //    throw;
-                //}
-
                 string detail = $" from:{fromCondition}, where:{whereCondition}";
 
                 throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, detail, ex);
@@ -428,7 +419,7 @@ namespace HB.FullStack.Database
 
             whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
 
-            return RetrieveAsync<T>(fromCondition, whereCondition, transContext);
+            return RetrieveAsync(fromCondition, whereCondition, transContext);
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
@@ -515,7 +506,7 @@ namespace HB.FullStack.Database
         {
             WhereExpression<T> where = Where<T>().Where("Id={0}", id);
 
-            return ScalarAsync<T>(where, transContext);
+            return ScalarAsync(where, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : Entity, new()
@@ -606,7 +597,7 @@ namespace HB.FullStack.Database
             {
                 command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceEntityDef, targetEntityDef);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                result = _entityMapper.ToList<TSource, TTarget>(reader);
+                result = reader.ToEntities<TSource, TTarget>(sourceEntityDef, targetEntityDef);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
@@ -705,7 +696,7 @@ namespace HB.FullStack.Database
             {
                 command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceEntityDef, targetEntityDef1, targetEntityDef2);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                result = _entityMapper.ToList<TSource, TTarget1, TTarget2>(reader);
+                result = reader.ToEntities<TSource, TTarget1, TTarget2>(sourceEntityDef, targetEntityDef1, targetEntityDef2);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
@@ -717,8 +708,6 @@ namespace HB.FullStack.Database
                 reader?.Dispose();
                 command?.Dispose();
             }
-
-
             return result;
         }
 

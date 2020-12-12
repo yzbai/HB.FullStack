@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Mapper\EntityMapperCreator3.cs" />
     <Compile Remove="SQL\SelectExpression.cs" />
   </ItemGroup>
 

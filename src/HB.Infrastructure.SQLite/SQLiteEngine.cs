@@ -77,82 +77,27 @@ namespace HB.Infrastructure.SQLite
 
         #endregion 自身 & 构建
 
-        #region 创建功能
-
-        public IDataParameter CreateParameter(string name, object value, DbType dbType)
+        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null)
         {
-            SqliteParameter parameter = new SqliteParameter
+            SqliteCommand command = new SqliteCommand(commandText)
             {
-                ParameterName = name,
-                Value = value ?? DBNull.Value,
-                DbType = dbType
+                CommandType = CommandType.Text
             };
-            return parameter;
-        }
 
-        public IDataParameter CreateParameter(string name, object value)
-        {
-            SqliteParameter parameter = new SqliteParameter
+            if (parameterPairs == null)
             {
-                ParameterName = name,
-                Value = value ?? DBNull.Value
-            };
-            return parameter;
-        }
+                return command;
+            }
 
-        public IDbCommand CreateEmptyCommand()
-        {
-            SqliteCommand command = new SqliteCommand();
+            foreach (var pair in parameterPairs)
+            {
+                command.Parameters.Add(new SqliteParameter(pair.Key, pair.Value));
+            }
+
             return command;
         }
 
-        #endregion 创建功能
-
-        #region 方言
-
-        public string ParameterizedChar { get { return SQLiteLocalism.ParameterizedChar; } }
-
-        public string QuotedChar { get { return SQLiteLocalism.QuotedChar; } }
-
-        public string ReservedChar { get { return SQLiteLocalism.ReservedChar; } }
-
-        public string GetQuotedStatement(string name)
-        {
-            return SQLiteLocalism.GetQuoted(name);
-        }
-
-        public string GetParameterizedStatement(string name)
-        {
-            return SQLiteLocalism.GetParameterized(name);
-        }
-
-        public string GetReservedStatement(string name)
-        {
-            return SQLiteLocalism.GetReserved(name);
-        }
-
-        public DbType GetDbType(Type type)
-        {
-            return SQLiteLocalism.GetDbType(type);
-        }
-
-        public string GetDbTypeStatement(Type type)
-        {
-            return SQLiteLocalism.GetDbTypeStatement(type);
-        }
-
-        [return: NotNullIfNotNull("value")]
-        public string? GetDbValueStatement(object? value, bool needQuoted)
-        {
-            return SQLiteLocalism.GetDbValueStatement(value, needQuoted);
-        }
-
-        public bool IsValueNeedQuoted(Type type)
-        {
-            return SQLiteLocalism.IsValueNeedQuoted(type);
-        }
-
-        #endregion 方言
 
         #region SP
 
@@ -182,7 +127,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="dbName"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        
+
         public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand)
         {
             if (Transaction == null)
@@ -203,7 +148,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        
+
         public Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)
@@ -224,7 +169,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        
+
         public Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)

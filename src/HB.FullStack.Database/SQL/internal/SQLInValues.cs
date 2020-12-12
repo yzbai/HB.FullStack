@@ -1,4 +1,6 @@
 ﻿using HB.FullStack.Database.Engine;
+
+using System;
 using System.Collections;
 using System.Text;
 
@@ -26,21 +28,21 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
-        public string ToSqlInString(IDatabaseEngine dbEngine)
+        public string ToSqlInString()
         {
             if (Count == 0)
                 return "NULL";
 
-            return SqlJoin(_values, dbEngine);
+            return SqlJoin(_values);
         }
 
-        public static string SqlJoin(IEnumerable values, IDatabaseEngine dbEngine)
+        public static string SqlJoin(IEnumerable values)
         {
             StringBuilder sb = new StringBuilder();
 
             foreach (object value in values)
             {
-                sb.Append(dbEngine.GetDbValueStatement(value, needQuoted: true));
+                sb.Append(TypeConverter.TypeValueToDbValueStatement(value, quotedIfNeed: true));
                 sb.Append(',');
             }
 

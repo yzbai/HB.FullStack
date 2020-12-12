@@ -8,7 +8,7 @@ namespace HB.FullStack.Database.SQL
     /// <summary>
     /// SQL语句辅助、工具类
     /// </summary>
-    public static class SQLUtil
+    public static class SqlStatement
     {
         #region 表达
 

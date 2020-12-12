@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.SQL;
 
 using System;
 using System.Collections.Generic;
@@ -20,16 +21,14 @@ namespace HB.FullStack.Database.Entities
         private readonly object _lockObj = new object();
         private readonly DatabaseCommonSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly ICustomTypeConverterFactory _typeConverterFactory;
 
         private readonly IDictionary<string, EntitySetting> _entitySchemaDict;
         private readonly IDictionary<Type, DatabaseEntityDef> _defDict = new Dictionary<Type, DatabaseEntityDef>();
 
-        public DefaultDatabaseEntityDefFactory(IDatabaseEngine databaseEngine, ICustomTypeConverterFactory typeConverterFactory)
+        public DefaultDatabaseEntityDefFactory(IDatabaseEngine databaseEngine)
         {
             _databaseSettings = databaseEngine.DatabaseSettings;
             _databaseEngine = databaseEngine;
-            _typeConverterFactory = typeConverterFactory;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -173,12 +172,13 @@ namespace HB.FullStack.Database.Entities
             entityDef.EntityFullName = entityType.FullName;
             entityDef.DatabaseName = dbSchema.DatabaseName;
             entityDef.TableName = dbSchema.TableName;
-            entityDef.DbTableReservedName = _databaseEngine.GetReservedStatement(entityDef.TableName!);
+            entityDef.DbTableReservedName = SqlHelper.GetReserved(entityDef.TableName!, _databaseEngine.EngineType);
             entityDef.DatabaseWriteable = !dbSchema.ReadOnly;
 
+            //确保Id排在第一位，在EntityMapper中，判断reader.GetValue(0)为DBNull,则为Null
+            var orderedProperties = entityType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
 
-
-            foreach (PropertyInfo info in entityType.GetProperties())
+            foreach (PropertyInfo info in orderedProperties)
             {
                 EntityPropertyAttribute entityPropertyAttribute = info.GetCustomAttribute<EntityPropertyAttribute>(true);
 
@@ -212,7 +212,7 @@ namespace HB.FullStack.Database.Entities
             propertyDef.Type = propertyInfo.PropertyType;
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType);
-            propertyDef.GetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType);
+            propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType);
 
 
             propertyDef.IsNullable = !propertyAttribute.NotNull;
@@ -220,12 +220,12 @@ namespace HB.FullStack.Database.Entities
             propertyDef.DbMaxLength = propertyAttribute.MaxLength > 0 ? (int?)propertyAttribute.MaxLength : null;
             propertyDef.IsLengthFixed = propertyAttribute.FixedLength;
 
-            propertyDef.DbReservedName = _databaseEngine.GetReservedStatement(propertyDef.Name);
-            propertyDef.DbParameterizedName = _databaseEngine.GetParameterizedStatement(propertyDef.Name);
+            propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, _databaseEngine.EngineType);
+            propertyDef.DbParameterizedName = SqlHelper.GetParameterized(propertyDef.Name);
 
             if (propertyAttribute.Converter != null)
             {
-                propertyDef.TypeConverter = _typeConverterFactory.GetTypeConverter(propertyAttribute.Converter);
+                propertyDef.TypeConverter = CustomTypeConverterFactory.GetTypeConverter(propertyAttribute.Converter);
             }
 
 

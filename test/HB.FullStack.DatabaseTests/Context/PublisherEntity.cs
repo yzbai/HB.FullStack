@@ -89,7 +89,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(PublisherBookAuthorsTypeConventer))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = EntityPropertyLength.MediumLength, Converter = typeof(PublisherBookNamesTypeConventer))]
+        [EntityProperty(MaxLength = EntityPropertyAttribute.MediumLength, Converter = typeof(PublisherBookNamesTypeConventer))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
@@ -17,8 +18,17 @@ namespace ClassLibrary1
 
         public object Parse(Type destinationType, object value)
         {
-            //return new DateTimeOffset((DateTime)value, TimeSpan.Zero);
-            return DatabaseTypeConverter.DbValueToTypeValue(value, destinationType);
+            Type dbValueType = value.GetType();
+
+            if (dbValueType == typeof(string))
+            {
+                return DateTimeOffset.Parse(value.ToString(), CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return new DateTimeOffset((DateTime)value, TimeSpan.Zero);
+            }
+
         }
     }
 

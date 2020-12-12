@@ -30,7 +30,7 @@ namespace HB.FullStack.KVStore
 
             for (int i = 0; i < count; ++i)
             {
-                builder.Append(ValueConverterUtil.TypeValueToStringValue(entityDef.KeyPropertyInfos[i].GetValue(item)));
+                builder.Append(entityDef.KeyPropertyInfos[i].GetValue(item));
 
                 if (i != count - 1)
                 {
@@ -39,6 +39,8 @@ namespace HB.FullStack.KVStore
             }
 
             return builder.ToString();
+
+
         }
 
         public string GetEntityKey<T>(T item) where T : Entity, new()

@@ -6,7 +6,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.SQL
 {
-    internal interface ISQLBuilder
+    internal interface IDbCommandBuilder
     {
         IDbCommand CreateAddCommand<T>(DatabaseEntityDef entityDef, T entity) where T : Entity, new();
         IDbCommand CreateBatchAddCommand<T>(DatabaseEntityDef entityDef, IEnumerable<T> entities) where T : Entity, new();

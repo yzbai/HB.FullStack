@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 
@@ -20,16 +21,14 @@ namespace HB.FullStack.Database.SQL
 
         public bool PrefixFieldWithTableName { get; set; } = true;
 
-        public string? OrderByStatementBySQLUtilIn { get; set; }
+        public string? OrderByStatementBySQLUtilIn_QuotedColName { get; set; }
 
-
-        public IDatabaseEngine DatabaesEngine { get; set; }
+        public string[]? OrderByStatementBySQLUtilIn_Ins { get; set; }
 
         public IDatabaseEntityDefFactory EntityDefFactory { get; set; }
 
-        public SQLExpressionVisitorContenxt(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory databaseEntityDefFactory)
+        public SQLExpressionVisitorContenxt(IDatabaseEntityDefFactory databaseEntityDefFactory)
         {
-            DatabaesEngine = databaseEngine;
             EntityDefFactory = databaseEntityDefFactory;
         }
 

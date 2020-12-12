@@ -5,13 +5,11 @@ using System.Collections.Generic;
 
 namespace HB.FullStack.Database.Entities
 {
-    internal class CustomTypeConverterFactory : ICustomTypeConverterFactory
+    internal static class CustomTypeConverterFactory
     {
-        private readonly IDictionary<Type, CustomTypeConverter> _converterDict = new Dictionary<Type, CustomTypeConverter>();
+        private static readonly IDictionary<Type, CustomTypeConverter> _converterDict = new Dictionary<Type, CustomTypeConverter>();
 
-        public CustomTypeConverterFactory() { }
-
-        public CustomTypeConverter? GetTypeConverter(Type type)
+        public static CustomTypeConverter? GetTypeConverter(Type type)
         {
             if (!type.IsSubclassOf(typeof(CustomTypeConverter)))
             {

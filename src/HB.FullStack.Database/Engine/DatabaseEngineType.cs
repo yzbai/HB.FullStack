@@ -8,6 +8,5 @@ namespace HB.FullStack.Database.Engine
     {
         MySQL,
         SQLite,
-        MSSQLSERVER
     }
 }

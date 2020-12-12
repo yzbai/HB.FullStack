@@ -74,7 +74,7 @@
         DatabaseInitLockError = 235,
 
         DatabaseWrongWhereType = 236,
-        DatabaseUnSupportedType = 237,
+        DatabaseUnSupported = 237,
 
         #endregion Database
 

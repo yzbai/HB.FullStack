@@ -4,6 +4,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 
+using HB.FullStack.Common.Entities.Attributes;
+
 [assembly: InternalsVisibleTo("HB.FullStack.Database")]
 [assembly: InternalsVisibleTo("HB.FullStack.Cache")]
 [assembly: InternalsVisibleTo("HB.FullStack.KVStore")]
@@ -21,6 +23,7 @@ namespace HB.FullStack.Common.Entities
     {
         public const int LastUserMaxLength = 100;
 
+        [PropertyOrder]
         [AutoIncrementPrimaryKey]
         [EntityProperty]
         public long Id { get; internal set; } = -1;
@@ -28,24 +31,29 @@ namespace HB.FullStack.Common.Entities
         /// <summary>
         /// 资源ID，全局不变
         /// </summary>
+        [PropertyOrder]
         [Required]
         [UniqueGuidEntityProperty]
         [KVStoreBackupKey]
         [CacheGuidKey]
         public string Guid { get; internal set; } = SecurityUtil.CreateUniqueToken();
 
+        [PropertyOrder]
         [EntityProperty]
         public int Version { get; internal set; } = -1;
 
+        [PropertyOrder]
         [EntityProperty]
         public string LastUser { get; internal set; } = string.Empty;
 
         /// <summary>
         /// UTC 时间
         /// </summary>
+        [PropertyOrder]
         [EntityProperty]
         public DateTimeOffset LastTime { get; internal set; } = TimeUtil.UtcNow;
 
+        [PropertyOrder]
         [EntityProperty]
         public bool Deleted { get; internal set; } = false;
 

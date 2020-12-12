@@ -7,7 +7,7 @@ namespace HB.FullStack.Database
 {
     public class TransactionContext
     {
-        private ITransaction _transactionManager;
+        private readonly ITransaction _transactionManager;
 
         public IDbTransaction Transaction { get; private set; }
 

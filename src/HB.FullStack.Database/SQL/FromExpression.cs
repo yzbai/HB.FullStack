@@ -41,13 +41,13 @@ namespace HB.FullStack.Database.SQL
             return $" FROM {_entityDefFactory.GetDef<T>().DbTableReservedName} {_statementBuilder}";
         }
 
-        internal FromExpression(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory databaseEntityDefFactory)
+        internal FromExpression(IDatabaseEntityDefFactory databaseEntityDefFactory)
         {
             _entityDefFactory = databaseEntityDefFactory;
 
-            _expressionContext = new SQLExpressionVisitorContenxt(databaseEngine, databaseEntityDefFactory)
+            _expressionContext = new SQLExpressionVisitorContenxt(databaseEntityDefFactory)
             {
-                ParamPlaceHolderPrefix = databaseEngine.ParameterizedChar + "f__"
+                ParamPlaceHolderPrefix = SqlHelper.ParameterizedChar + "f__"
             };
         }
 
