@@ -628,7 +628,7 @@ namespace HB.FullStack.DatabaseTests
                     {
                         DatabaseEntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConverter.DbValueToTypeValue(reader0[i], property);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property);
 
 
                         setMethods[i].Invoke(item, new object?[] { value });

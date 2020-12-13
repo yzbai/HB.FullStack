@@ -65,7 +65,7 @@ namespace HB.FullStack.Database.Entities
             return null;
         }
 
-        public CustomTypeConverter OnlyForEmitGetPropertyTypeConverter(string propertyName)
+        public TypeConverter OnlyForEmitGetPropertyTypeConverter(string propertyName)
         {
             return PropertyDict[propertyName].TypeConverter!;
         }

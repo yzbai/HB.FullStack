@@ -27,9 +27,13 @@ namespace HB.FullStack.Database.SQL
 
         public IDatabaseEntityDefFactory EntityDefFactory { get; set; }
 
-        public SQLExpressionVisitorContenxt(IDatabaseEntityDefFactory databaseEntityDefFactory)
+        public DatabaseEngineType EngineType { get; private set; }
+
+        public SQLExpressionVisitorContenxt(IDatabaseEntityDefFactory databaseEntityDefFactory, DatabaseEngineType engineType)
         {
             EntityDefFactory = databaseEntityDefFactory;
+
+            EngineType = engineType;
         }
 
         public void AddParameter(string key, object value)

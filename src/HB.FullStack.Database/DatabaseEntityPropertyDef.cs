@@ -40,7 +40,7 @@ namespace HB.FullStack.Database.Entities
 
         public int? DbMaxLength { get; set; }
 
-        public CustomTypeConverter? TypeConverter { get; set; }
+        public TypeConverter? TypeConverter { get; set; }
 
         public object? GetValueFrom(object entity)
         {

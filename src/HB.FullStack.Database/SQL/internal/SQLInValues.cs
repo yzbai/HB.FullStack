@@ -8,6 +8,7 @@ namespace HB.FullStack.Database.SQL
 {
     /// <summary>
     /// 工具类：输出 以逗号链接的值 字符串。（ex: value1,value2,value3）.
+    /// 目前只支持没有TypeConverter（全局或者属性特有）的属性
     /// </summary>
     internal class SQLInValues
     {
@@ -28,21 +29,21 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
-        public string ToSqlInString()
+        public string ToSqlInString(DatabaseEngineType engineType)
         {
             if (Count == 0)
                 return "NULL";
 
-            return SqlJoin(_values);
+            return SqlJoin(_values, engineType);
         }
 
-        public static string SqlJoin(IEnumerable values)
+        public static string SqlJoin(IEnumerable values, DatabaseEngineType engineType)
         {
             StringBuilder sb = new StringBuilder();
 
             foreach (object value in values)
             {
-                sb.Append(TypeConverter.TypeValueToDbValueStatement(value, quotedIfNeed: true));
+                sb.Append(TypeConvert.TypeValueToDbValueStatement(value, quotedIfNeed: true, engineType));
                 sb.Append(',');
             }
 

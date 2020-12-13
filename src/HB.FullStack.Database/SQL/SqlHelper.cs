@@ -144,9 +144,9 @@ namespace HB.FullStack.Database.SQL
             return _needQuotedTypes.Contains(type);
         }
 
-        public static bool IsDbFieldNeedLength(DatabaseEntityPropertyDef propertyDef)
+        public static bool IsDbFieldNeedLength(DatabaseEntityPropertyDef propertyDef, DatabaseEngineType engineType)
         {
-            DbType dbType = TypeConverter.TypeToDbType(propertyDef);
+            DbType dbType = TypeConvert.TypeToDbType(propertyDef, engineType);
 
             return dbType == DbType.String
                 || dbType == DbType.StringFixedLength
@@ -249,7 +249,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (DatabaseEntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
-                string dbTypeStatement = TypeConverter.TypeToDbTypeStatement(propertyDef, DatabaseEngineType.SQLite);
+                string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, DatabaseEngineType.SQLite);
 
                 string nullable = propertyDef.IsNullable ? "" : " NOT NULL ";
 
@@ -280,11 +280,11 @@ namespace HB.FullStack.Database.SQL
 
             foreach (DatabaseEntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
-                string dbTypeStatement = TypeConverter.TypeToDbTypeStatement(propertyDef, DatabaseEngineType.MySQL);
+                string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, DatabaseEngineType.MySQL);
 
                 int length = 0;
 
-                if (IsDbFieldNeedLength(propertyDef) && !dbTypeStatement.Contains('(', StringComparison.InvariantCulture))
+                if (IsDbFieldNeedLength(propertyDef, DatabaseEngineType.MySQL) && !dbTypeStatement.Contains('(', StringComparison.InvariantCulture))
                 {
                     if ((propertyDef.DbMaxLength == null || propertyDef.DbMaxLength == 0))
                     {

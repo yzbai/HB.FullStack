@@ -223,9 +223,9 @@ namespace HB.FullStack.Database.Entities
             propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, _databaseEngine.EngineType);
             propertyDef.DbParameterizedName = SqlHelper.GetParameterized(propertyDef.Name);
 
-            if (propertyAttribute.Converter != null)
+            if (propertyAttribute.TypeConverter is TypeConverter typeConverter)
             {
-                propertyDef.TypeConverter = CustomTypeConverterFactory.GetTypeConverter(propertyAttribute.Converter);
+                propertyDef.TypeConverter = typeConverter;
             }
 
 

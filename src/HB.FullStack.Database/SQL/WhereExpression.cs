@@ -19,6 +19,7 @@ namespace HB.FullStack.Database.SQL
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;
         private readonly List<string> _orderByProperties = new List<string>();
+        private DatabaseEngineType _engineType;
 
         private string _whereString = string.Empty;
         private string? _orderByString;
@@ -29,9 +30,11 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        internal WhereExpression(IDatabaseEntityDefFactory entityDefFactory)
+        internal WhereExpression(IDatabaseEntityDefFactory entityDefFactory, DatabaseEngineType engineType)
         {
-            _expressionContext = new SQLExpressionVisitorContenxt(entityDefFactory)
+            _engineType = engineType;
+
+            _expressionContext = new SQLExpressionVisitorContenxt(entityDefFactory, engineType)
             {
                 ParamPlaceHolderPrefix = SqlHelper.ParameterizedChar + "w__"
             };
@@ -99,7 +102,7 @@ namespace HB.FullStack.Database.SQL
         /// <returns></returns>
         public WhereExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(sqlFilter, filterParams);
+            _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
 
             return this;
         }
@@ -128,8 +131,14 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
+        /// <summary>
+        /// 只支持不带TypeConverter(全局或者属性特有)的字段
+        /// </summary>
+        /// <param name="sqlText"></param>
+        /// <param name="sqlParams"></param>
+        /// <returns></returns>
         //TODO:  参数化，而不是组成一个sql，有注入风险
-        private static string SqlFormat(string sqlText, params object[] sqlParams)
+        private static string SqlFormat(DatabaseEngineType engineType, string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
 
@@ -144,11 +153,11 @@ namespace HB.FullStack.Database.SQL
 
                     if (sqlParam is SQLInValues sqlInValues)
                     {
-                        escapedParams.Add(sqlInValues.ToSqlInString());
+                        escapedParams.Add(sqlInValues.ToSqlInString(engineType));
                     }
                     else
                     {
-                        escapedParams.Add(TypeConverter.TypeValueToDbValueStatement(sqlParam, quotedIfNeed: true));
+                        escapedParams.Add(TypeConvert.TypeValueToDbValueStatement(sqlParam, quotedIfNeed: true, engineType));
                     }
                 }
             }
@@ -177,7 +186,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(sqlFilter, filterParams);
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
 
             if (_whereString.IsNullOrEmpty())
             {
@@ -209,7 +218,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(sqlFilter, filterParams);
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
 
             if (_whereString.IsNullOrEmpty())
             {
@@ -265,7 +274,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
-            _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(sqlFilter, filterParams);
+            _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
 
             if (!string.IsNullOrEmpty(_havingString))
             {

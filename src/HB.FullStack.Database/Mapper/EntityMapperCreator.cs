@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Linq;
@@ -10,6 +9,7 @@ using System.Reflection.Emit;
 using System.Xml;
 using System.Xml.Linq;
 
+using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database
@@ -17,20 +17,20 @@ namespace HB.FullStack.Database
     internal static class EntityMapperCreator
     {
         /// <summary>
-        /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。 Reader因为返回字段顺序固定了，不用加入key中
+        /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
-        public static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapper(DatabaseEntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull)
+        public static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapper(DatabaseEntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("EntityMapper" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader), typeof(DatabaseEntityDef) }, def.EntityType, true);
             ILGenerator il = dm.GetILGenerator();
 
-            EmitEntityMapper(def, reader, startIndex, length, returnNullIfFirstNull, il);
+            EmitEntityMapper(def, reader, startIndex, length, returnNullIfFirstNull, engineType, il);
 
             var funcType = Expression.GetFuncType(typeof(IDataReader), typeof(DatabaseEntityDef), def.EntityType);
             return (Func<IDataReader, DatabaseEntityDef, object>)dm.CreateDelegate(funcType);
         }
 
-        private static void EmitEntityMapper(DatabaseEntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, ILGenerator il)
+        private static void EmitEntityMapper(DatabaseEntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType, ILGenerator il)
         {
             try
             {
@@ -77,6 +77,15 @@ namespace HB.FullStack.Database
                         //emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][EntityDef][PropertyName]
                         il.EmitCall(OpCodes.Call, _getPropertyTypeConverterMethod, null);
                         //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));// stack is now [target][target][TypeConverter]
+                    }
+
+                    Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+
+                    TypeConverter? globalConverter = TypeConvert.GetGlobalConverter(trueType, engineType);
+
+                    if (globalConverter != null && globalConverter.DbValueToTypeValue != null)
+                    {
+                        typeValue = globalConverter.DbValueToTypeValue(dbValue, trueType);
                     }
 
                     //===获取数据库值=========================================================================
@@ -150,12 +159,18 @@ namespace HB.FullStack.Database
 
                             if (dbValueType == typeof(string))
                             {
-                                il.Emit(OpCodes.Castclass, typeof(string));//stack is now [target][target][string]
+                                il.Emit(OpCodes.Unbox_Any, typeof(string));//stack is now [target][target][string]
                                 il.EmitCall(OpCodes.Call, _invariantCultureMethod, null);//stack is now [target][target][string][cultureInfo]
                                 il.EmitCall(OpCodes.Call, _dataTimeOffsetParseMethod, null);
                                 //stack is now [target][target][datetimeoffset]
                             }
-                            else
+                            else if (dbValueType == typeof(long))
+                            {
+                                il.Emit(OpCodes.Unbox_Any, typeof(long));//stack is now [target][target][long]
+                                il.Emit(OpCodes.Ldloc, timespanZeroLocal);
+                                il.Emit(OpCodes.Newobj, _dateTimeOffsetTicksConstructorInfo);
+                            }
+                            else if (dbValueType == typeof(DateTime))
                             {
                                 il.Emit(OpCodes.Unbox_Any, typeof(DateTime));
                                 //emitter.UnboxAny(typeof(DateTime));//stack is now[target][target][datetime]
@@ -164,10 +179,14 @@ namespace HB.FullStack.Database
                                 //emitter.LoadLocal(timespanZeroLocal); //stack is now[target][target][datetime][timespan.zero]
 
 
-                                il.Emit(OpCodes.Newobj, _dateTimeOffsetConstructorInfo);
+                                il.Emit(OpCodes.Newobj, _dateTimeOffsetDateTimeConstructorInfo);
                                 //emitter.NewObject(dateTimeOffsetConstructorInfo);
                                 //stack is now[target][target][datetimeoffset]
                                 //??need unbox
+                            }
+                            else
+                            {
+                                throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"不支持的时间类型:{dbValueType}");
                             }
                         }
                         else
@@ -296,7 +315,7 @@ namespace HB.FullStack.Database
         private static void FlexibleConvertBoxedFromHeadOfStack(ILGenerator il, Type from, Type to)
         {
             MethodInfo? op;
-            if (from == (to))
+            if (from == to)
             {
                 il.Emit(OpCodes.Unbox_Any, to); // stack is now [target][target][typed-value]
             }
@@ -430,7 +449,9 @@ namespace HB.FullStack.Database
 
         private static readonly MethodInfo _dataTimeOffsetParseMethod = typeof(DateTimeOffset).GetMethod(nameof(DateTimeOffset.Parse), new Type[] { typeof(string), typeof(IFormatProvider) });
 
-        private static readonly ConstructorInfo _dateTimeOffsetConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
+        private static readonly ConstructorInfo _dateTimeOffsetDateTimeConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
+
+        private static readonly ConstructorInfo _dateTimeOffsetTicksConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(long), typeof(TimeSpan) });
 
         private static readonly MethodInfo _customTypeConverterDbValueToTypeValueMethod = typeof(CustomTypeConverter).GetMethod(nameof(CustomTypeConverter.DbValueToTypeValue));
     }

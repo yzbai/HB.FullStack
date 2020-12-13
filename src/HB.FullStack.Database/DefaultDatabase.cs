@@ -354,7 +354,7 @@ namespace HB.FullStack.Database
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
 
-                result = reader.ToEntities<TSelect>(selectDef);
+                result = reader.ToEntities<TSelect>(_databaseEngine.EngineType, selectDef);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
@@ -391,7 +391,7 @@ namespace HB.FullStack.Database
                 command = _sqlBuilder.CreateRetrieveCommand(entityDef, fromCondition, whereCondition);
 
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                result = reader.ToEntities<T>(entityDef);
+                result = reader.ToEntities<T>(_databaseEngine.EngineType, entityDef);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
@@ -597,7 +597,7 @@ namespace HB.FullStack.Database
             {
                 command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceEntityDef, targetEntityDef);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                result = reader.ToEntities<TSource, TTarget>(sourceEntityDef, targetEntityDef);
+                result = reader.ToEntities<TSource, TTarget>(_databaseEngine.EngineType, sourceEntityDef, targetEntityDef);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
@@ -696,7 +696,7 @@ namespace HB.FullStack.Database
             {
                 command = _sqlBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceEntityDef, targetEntityDef1, targetEntityDef2);
                 reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                result = reader.ToEntities<TSource, TTarget1, TTarget2>(sourceEntityDef, targetEntityDef1, targetEntityDef2);
+                result = reader.ToEntities<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, sourceEntityDef, targetEntityDef1, targetEntityDef2);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {

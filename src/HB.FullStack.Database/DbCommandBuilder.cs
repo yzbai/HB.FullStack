@@ -4,8 +4,6 @@ using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 
-using Microsoft.Extensions.Logging;
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -66,12 +64,12 @@ namespace HB.FullStack.Database.SQL
 
         public FromExpression<T> NewFrom<T>() where T : Entity, new()
         {
-            return new FromExpression<T>(_entityDefFactory);
+            return new FromExpression<T>(_entityDefFactory, _databaseEngine.EngineType);
         }
 
         public WhereExpression<T> NewWhere<T>() where T : Entity, new()
         {
-            return new WhereExpression<T>(_entityDefFactory);
+            return new WhereExpression<T>(_entityDefFactory, _databaseEngine.EngineType);
         }
 
         public IDbCommand CreateRetrieveCommand<T>(DatabaseEntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
@@ -151,14 +149,14 @@ namespace HB.FullStack.Database.SQL
         {
             return _databaseEngine.CreateTextCommand(
                 GetCachedSql(SqlType.ADD, entityDef),
-                entity.ToParameters(entityDef));
+                entity.ToParameters(entityDef, _databaseEngine.EngineType));
         }
 
         public IDbCommand CreateUpdateCommand<T>(DatabaseEntityDef entityDef, T entity) where T : Entity, new()
         {
             return _databaseEngine.CreateTextCommand(
                 GetCachedSql(SqlType.UPDATE, entityDef),
-                entity.ToParameters(entityDef));
+                entity.ToParameters(entityDef, _databaseEngine.EngineType));
         }
 
         public IDbCommand CreateDeleteCommand<T>(DatabaseEntityDef entityDef, T entity) where T : Entity, new()
@@ -166,7 +164,7 @@ namespace HB.FullStack.Database.SQL
 
             return _databaseEngine.CreateTextCommand(
                 GetCachedSql(SqlType.DELETE, entityDef),
-                entity.ToParameters(entityDef));
+                entity.ToParameters(entityDef, _databaseEngine.EngineType));
         }
 
         public IDbCommand CreateBatchAddCommand<T>(DatabaseEntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
@@ -183,7 +181,7 @@ namespace HB.FullStack.Database.SQL
             {
                 string addCommandText = SqlHelper.CreateAddSql(entityDef, _databaseEngine.EngineType, false, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, number));
+                parameters.AddRange(entity.ToParameters(entityDef, _databaseEngine.EngineType, number));
 
                 innerBuilder.Append($"{addCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.GetLastInsertIdStatement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
 
@@ -208,7 +206,7 @@ namespace HB.FullStack.Database.SQL
             {
                 string updateCommandText = SqlHelper.CreateUpdateSql(entityDef, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, number));
+                parameters.AddRange(entity.ToParameters(entityDef, _databaseEngine.EngineType, number));
 
                 innerBuilder.Append($"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
 
@@ -233,7 +231,7 @@ namespace HB.FullStack.Database.SQL
             {
                 string deleteCommandText = SqlHelper.CreateDeleteSql(entityDef, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, number));
+                parameters.AddRange(entity.ToParameters(entityDef, _databaseEngine.EngineType, number));
 
                 innerBuilder.Append($"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
 

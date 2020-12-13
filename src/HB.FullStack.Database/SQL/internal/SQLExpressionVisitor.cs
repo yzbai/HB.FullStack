@@ -135,7 +135,7 @@ namespace HB.FullStack.Database.SQL
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     object result = Expression.Lambda(b).Compile().DynamicInvoke();
-                    return new PartialSqlString(TypeConverter.TypeValueToDbValueStatement(result, quotedIfNeed: true));
+                    return new PartialSqlString(TypeConvert.TypeValueToDbValueStatement(result, quotedIfNeed: true, context.EngineType));
                 }
 
                 if (left as PartialSqlString == null)
@@ -161,13 +161,13 @@ namespace HB.FullStack.Database.SQL
                 }
                 else if (left as PartialSqlString == null)
                 {
-                    left = TypeConverter.TypeValueToDbValueStatement(left, quotedIfNeed: true);
+                    left = TypeConvert.TypeValueToDbValueStatement(left, quotedIfNeed: true, context.EngineType);
                 }
                 else if (right as PartialSqlString == null)
                 {
                     if (!context.IsParameterized /*|| right == null*/)
                     {
-                        right = TypeConverter.TypeValueToDbValueStatement(right, quotedIfNeed: true);
+                        right = TypeConvert.TypeValueToDbValueStatement(right, quotedIfNeed: true, context.EngineType);
                     }
                     else
                     {
@@ -285,9 +285,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (c.Value == null)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 return new PartialSqlString("null");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             return c.Value;
@@ -409,7 +407,7 @@ namespace HB.FullStack.Database.SQL
                         {
                             sIn.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
-                                         TypeConverter.TypeValueToDbValueStatement(e, quotedIfNeed: true));
+                                         TypeConvert.TypeValueToDbValueStatement(e, quotedIfNeed: true, context.EngineType));
                         }
                         else
                         {
@@ -419,7 +417,7 @@ namespace HB.FullStack.Database.SQL
                             {
                                 sIn.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}",
                                          sIn.Length > 0 ? "," : "",
-                                         TypeConverter.TypeValueToDbValueStatement(el, quotedIfNeed: true));
+                                         TypeConvert.TypeValueToDbValueStatement(el, quotedIfNeed: true, context.EngineType));
                             }
                         }
                     }
@@ -457,14 +455,14 @@ namespace HB.FullStack.Database.SQL
                     {
                         if (!typeof(ICollection).GetTypeInfo().IsAssignableFrom(e.GetType()))
                         {
-                            sIn.Add(TypeConverter.TypeValueToDbValueStatement(e, quotedIfNeed: true));
+                            sIn.Add(TypeConvert.TypeValueToDbValueStatement(e, quotedIfNeed: true, context.EngineType));
                         }
                         else
                         {
                             ICollection listArgs = (ICollection)e;
                             foreach (object el in listArgs)
                             {
-                                sIn.Add(TypeConverter.TypeValueToDbValueStatement(el, quotedIfNeed: true));
+                                sIn.Add(TypeConvert.TypeValueToDbValueStatement(el, quotedIfNeed: true, context.EngineType));
                             }
                         }
                     }
@@ -524,7 +522,7 @@ namespace HB.FullStack.Database.SQL
                 object quotedColName0 = Visit(m.Object, context);
                 return new PartialSqlString(string.Format(CultureInfo.InvariantCulture, "LEFT( {0},{1})= {2} ", quotedColName0
                                                           , args0[0].ToString().Length,
-                                                          TypeConverter.TypeValueToDbValueStatement(args0[0], quotedIfNeed: true)));
+                                                          TypeConvert.TypeValueToDbValueStatement(args0[0], quotedIfNeed: true, context.EngineType)));
             }
 
             #endregion
