@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace HB.Infrastructure.Redis.Test
 {
-    public class DirectRedisTest : IClassFixture<ServiceFixture>
+    public class DirectRedisTest : IClassFixture<ServiceFixture_MySql>
     {
         private readonly Fixture _fixture = new Fixture();
 
@@ -25,7 +25,7 @@ namespace HB.Infrastructure.Redis.Test
 
         private readonly IRedisDatabase _redis;
 
-        public DirectRedisTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public DirectRedisTest(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             _output = testOutputHelper;
             _redis = serviceFixture.ServiceProvider.GetRequiredService<IRedisDatabase>();

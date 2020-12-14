@@ -59,7 +59,7 @@ namespace HB.FullStack.DatabaseTests.Data
                     Books = new List<string> { "a", "v", "c" },
                     Type = (PublisherType)random.Next(0, 3),
                     Name = "Publisher" + i.ToString(),
-                    BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                    //BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
                     BookAuthors = new Dictionary<string, Author> { { "a", new Author { Mobile = "xxxx", Name = "tttt" } }, { "xxx", new Author { Mobile = "gggg", Name = "safas" } } }
                 });
             }

@@ -11,24 +11,14 @@ namespace HB.FullStack.Database.Converter
 
         public string Statement => "VARCHAR";
 
-        public object TypeValueToDbValue(object? typeValue, Type propertyType)
+        public object TypeValueToDbValue(object typeValue, Type propertyType)
         {
-            if (typeValue == null)
-            {
-                return DBNull.Value;
-            }
-
             return SerializeUtil.ToJson(typeValue);
         }
 
-        public object? DbValueToTypeValue(object dbValue, Type dbValueType, Type propertyType)
+        public object DbValueToTypeValue(object dbValue, Type propertyType)
         {
-            if (dbValueType == typeof(DBNull))
-            {
-                return null;
-            }
-
-            return SerializeUtil.FromJson(propertyType, dbValue.ToString());
+            return SerializeUtil.FromJson(propertyType, dbValue.ToString())!;
         }
     }
 }

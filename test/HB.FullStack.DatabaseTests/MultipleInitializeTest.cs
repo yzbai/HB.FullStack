@@ -14,14 +14,14 @@ using Xunit.Abstractions;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public class MultipleInitializeTest : IClassFixture<ServiceFixture>
+    public class MultipleInitializeTest : IClassFixture<ServiceFixture_MySql>
     {
 
         private readonly IDatabase _mysql;
         private readonly ITransaction _mysqlTransaction;
         private readonly ITestOutputHelper _output;
 
-        public MultipleInitializeTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public MultipleInitializeTest(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             _output = testOutputHelper;
 

@@ -8,6 +8,7 @@ using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using MySqlConnector;
 
@@ -25,30 +26,21 @@ using Xunit.Abstractions;
 namespace HB.FullStack.DatabaseTests
 {
     //[TestCaseOrderer("HB.FullStack.Database.Test.TestCaseOrdererByTestName", "HB.FullStack.Database.Test")]
-    public class MySQLBasicAsyncTest : IClassFixture<ServiceFixture>
+    public class MySQLBasicAsyncTest : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IDatabase _mysql;
         private readonly ITransaction _mysqlTransaction;
         private readonly ITestOutputHelper _output;
         private readonly string _mysqlConnectionString;
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="testOutputHelper"></param>
-        /// <param name="serviceFixture"></param>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public MySQLBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public MySQLBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
+            TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
+
             _output = testOutputHelper;
 
             _mysql = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
             _mysqlTransaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
-
-            _mysql.InitializeAsync().Wait();
-
-
 
             _mysqlConnectionString = serviceFixture.Configuration["MySQL:Connections:0:ConnectionString"];
         }
@@ -473,6 +465,8 @@ namespace HB.FullStack.DatabaseTests
         [Fact]
         public async Task Test_EntityMapperAsync()
         {
+            GlobalSettings.Logger.LogInformation($"µ±Ç°Process,{Process.GetCurrentProcess().Id}");
+
             IDatabase database = _mysql;
 
             #region
@@ -555,7 +549,7 @@ namespace HB.FullStack.DatabaseTests
 
             MySqlConnection mySqlConnection = new MySqlConnection(_mysqlConnectionString);
 
-
+            TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
 
             //time = 0;
             int loop = 100;
@@ -628,10 +622,12 @@ namespace HB.FullStack.DatabaseTests
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], reader0.GetFieldType(i), property, Database.Engine.DatabaseEngineType.MySQL);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.DatabaseEngineType.MySQL);
 
-
-                        setMethods[i].Invoke(item, new object?[] { value });
+                        if (value != null)
+                        {
+                            setMethods[i].Invoke(item, new object?[] { value });
+                        }
 
                     }
 

@@ -24,6 +24,10 @@ namespace ClassLibrary1
             {
                 return DateTimeOffset.Parse(value.ToString(), CultureInfo.InvariantCulture);
             }
+            else if (dbValueType == typeof(long))
+            {
+                return new DateTimeOffset((long)value, TimeSpan.Zero);
+            }
             else
             {
                 return new DateTimeOffset((DateTime)value, TimeSpan.Zero);

@@ -59,7 +59,7 @@ namespace HB.Infrastructure.Redis.Test
     }
 
 
-    public class KVStoreTest : IClassFixture<ServiceFixture>
+    public class KVStoreTest : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IKVStore _kvStore;
         private readonly ITestOutputHelper _output;
@@ -80,7 +80,7 @@ namespace HB.Infrastructure.Redis.Test
             Type = UserType.Customer
         };
 
-        public KVStoreTest(ITestOutputHelper output, ServiceFixture fixture)
+        public KVStoreTest(ITestOutputHelper output, ServiceFixture_MySql fixture)
         {
             _output = output;
             _kvStore = fixture.ServiceProvider.GetRequiredService<IKVStore>();

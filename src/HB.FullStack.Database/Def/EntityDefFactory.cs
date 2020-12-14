@@ -8,6 +8,8 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
+using Microsoft.Extensions.Logging;
+
 namespace HB.FullStack.Database.Def
 {
     internal static class EntityDefFactory
@@ -143,6 +145,8 @@ namespace HB.FullStack.Database.Def
 
         private static EntityDef CreateEntityDef(Type entityType, DatabaseEngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
+            //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
+
             if (!entitySchemaDict!.TryGetValue(entityType.FullName, out EntitySetting dbSchema))
             {
                 throw new DatabaseException($"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");

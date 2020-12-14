@@ -10,10 +10,10 @@ using Xunit;
 
 namespace HB.FullStack.DistributedLock.Test
 {
-    public class DistributedLockTest : IClassFixture<ServiceFixture>
+    public class DistributedLockTest : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IDistributedLockManager _lockManager;
-        public DistributedLockTest(ServiceFixture serviceFixture)
+        public DistributedLockTest(ServiceFixture_MySql serviceFixture)
         {
             _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IDistributedLockManager>();
         }

@@ -23,48 +23,24 @@ using Xunit.Abstractions;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public class SqliteBasicAsyncTest : IClassFixture<ServiceFixture>
+    public class SqliteBasicAsyncTest : IClassFixture<ServiceFixture_Sqlite>
     {
         private readonly IDatabase _sqlite;
         private readonly ITransaction _sqlIteTransaction;
         private readonly ITestOutputHelper _output;
         //private readonly IsolationLevel  = IsolationLevel.RepeatableRead;
 
-        private IDatabase? GetDatabase(string databaseType)
-        {
-
-            return databaseType switch
-            {
-                "SQLite" => _sqlite,
-                _ => null
-            };
-        }
-
-        private ITransaction? GetTransaction(string databaseType)
-        {
-
-            return databaseType switch
-            {
-                "SQLite" => _sqlIteTransaction,
-                _ => null
-            };
-        }
 
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="testOutputHelper"></param>
-        /// <param name="serviceFixture"></param>
-        /// <exception cref="DatabaseException">Ignore.</exception>
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture_Sqlite serviceFixture)
         {
             _output = testOutputHelper;
 
 
-            _sqlite = serviceFixture.ServiceProvider2.GetRequiredService<IDatabase>();
-            _sqlIteTransaction = serviceFixture.ServiceProvider2.GetRequiredService<ITransaction>();
+            _sqlite = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
+            _sqlIteTransaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
 
 
             _sqlite.InitializeAsync().Wait();
@@ -77,13 +53,11 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
-        [Theory]
-
-        [InlineData("SQLite")]
-        public async Task Test_1_Batch_Add_PublisherEntityAsync(string databaseType)
+        [Fact]
+        public async Task Test_1_Batch_Add_PublisherEntityAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
 
             IList<PublisherEntity> publishers = Mocker.GetPublishers();
 
@@ -109,13 +83,13 @@ namespace HB.FullStack.DatabaseTests
         /// <param name="databaseType"></param>
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_2_Batch_Update_PublisherEntityAsync(string databaseType)
+
+        public async Task Test_2_Batch_Update_PublisherEntityAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
             TransactionContext transContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
@@ -156,13 +130,13 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_3_Batch_Delete_PublisherEntityAsync(string databaseType)
+
+        public async Task Test_3_Batch_Delete_PublisherEntityAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
             TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
@@ -192,13 +166,13 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_4_Add_PublisherEntityAsync(string databaseType)
+
+        public async Task Test_4_Add_PublisherEntityAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
             TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
@@ -233,13 +207,13 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_5_Update_PublisherEntityAsync(string databaseType)
+
+        public async Task Test_5_Update_PublisherEntityAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
             TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
@@ -281,13 +255,13 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_6_Delete_PublisherEntityAsync(string databaseType)
+
+        public async Task Test_6_Delete_PublisherEntityAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
             TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
 
             try
@@ -313,10 +287,10 @@ namespace HB.FullStack.DatabaseTests
             }
         }
 
-        //[Theory]
+        //[Fact]
 
-        //[InlineData("SQLite")]
-        //public async Task Test_7_AddOrUpdate_PublisherEntityAsync(string databaseType)
+        //
+        //public async Task Test_7_AddOrUpdate_PublisherEntityAsync()
         //{
         //    IDatabase database = GetDatabase(databaseType)!;
         //    ITransaction transaction = GetTransaction(databaseType)!;
@@ -353,12 +327,13 @@ namespace HB.FullStack.DatabaseTests
         //    }
         //}
 
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_8_LastTimeTestAsync(string databaseType)
+
+        public async Task Test_8_LastTimeTestAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
 
             PublisherEntity item = Mocker.MockOne();
 
@@ -384,7 +359,7 @@ namespace HB.FullStack.DatabaseTests
 
             var items = Mocker.GetPublishers();
 
-            ITransaction transaction = GetTransaction(databaseType)!;
+
 
             TransactionContext trans = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
 
@@ -420,14 +395,13 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
-        [Theory]
+        [Fact]
 
-        [InlineData("SQLite")]
-        public async Task Test_9_UpdateLastTimeTestAsync(string databaseType)
+
+        public async Task Test_9_UpdateLastTimeTestAsync()
         {
-            IDatabase database = GetDatabase(databaseType)!;
-
-            ITransaction transaction = GetTransaction(databaseType)!;
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
 
             TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>();
             //TransactionContext? transactionContext = null;
@@ -650,10 +624,12 @@ namespace HB.FullStack.DatabaseTests
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], reader0.GetFieldType(i), property, Database.Engine.DatabaseEngineType.SQLite);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.DatabaseEngineType.SQLite);
 
-
-                        setMethods[i].Invoke(item, new object?[] { value });
+                        if (value != null)
+                        {
+                            setMethods[i].Invoke(item, new object?[] { value });
+                        }
 
                     }
 
@@ -681,10 +657,10 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
-        //[Theory]
+        //[Fact]
 
-        //[InlineData("SQLite")]
-        //public async Task Test_10_AddOrUpdate_VersionTestAsync(string databaseType)
+        //
+        //public async Task Test_10_AddOrUpdate_VersionTestAsync()
         //{
         //    IDatabase database = GetDatabase(databaseType)!;
 

@@ -95,12 +95,19 @@ namespace HB.FullStack.Database.Converter
         /// <summary>
         /// 将DataReader.GetValue(i)得到的数据库值，转换为Entity的Type值. 逻辑同EntityMapperCreator一致
         /// </summary>
-        public static object? DbValueToTypeValue(object dbValue, Type dbValueType, EntityPropertyDef propertyDef, DatabaseEngineType engineType) //Type targetType)
+        public static object? DbValueToTypeValue(object dbValue, EntityPropertyDef propertyDef, DatabaseEngineType engineType) //Type targetType)
         {
+            Type dbValueType = dbValue.GetType();
+
+            if (dbValueType == typeof(DBNull))
+            {
+                return null;
+            }
+
             //查看属性TypeConverter
             if (propertyDef.TypeConverter != null)
             {
-                return propertyDef.TypeConverter.DbValueToTypeValue(dbValue, dbValueType, propertyDef.Type);
+                return propertyDef.TypeConverter.DbValueToTypeValue(dbValue, propertyDef.Type);
             }
 
             Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
@@ -111,15 +118,11 @@ namespace HB.FullStack.Database.Converter
 
             if (globalConverter != null)
             {
-                typeValue = globalConverter.DbValueToTypeValue(dbValue, dbValueType, trueType);
+                typeValue = globalConverter.DbValueToTypeValue(dbValue, trueType);
             }
             else
             {
                 //默认
-                if (dbValueType == typeof(DBNull))
-                {
-                    return default;
-                }
 
                 if (trueType.IsEnum)
                 {
@@ -148,6 +151,11 @@ namespace HB.FullStack.Database.Converter
 
         public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, DatabaseEngineType engineType)
         {
+            if (typeValue == null)
+            {
+                return DBNull.Value;
+            }
+
             //查看当前Property的TypeConvert
             if (propertyDef.TypeConverter != null)
             {
@@ -166,11 +174,6 @@ namespace HB.FullStack.Database.Converter
             }
 
             //默认
-            if (typeValue == null)
-            {
-                return DBNull.Value;
-            }
-
             if (trueType.IsEnum)
             {
                 return typeValue.ToString();

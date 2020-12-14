@@ -113,16 +113,21 @@ namespace HB.FullStack.Database.Mapper
                     il.EmitCall(OpCodes.Callvirt, _dataReaderGetItemMethod, null);
                     //emitter.CallVirtual(ReflectionHelper.GetItem);// stack is now [...][value-as-object]
 
+                    //处理Null
+                    il.Emit(OpCodes.Dup);
+                    //emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
+                    il.Emit(OpCodes.Isinst, typeof(DBNull));
+                    //emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
+                    il.Emit(OpCodes.Brtrue_S, dbNullLabel);
+                    //emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
+
                     //===DbValueToTypeValue,逻辑同DatabaseConverty.DbValueToTypeValue一致======================
                     if (propertyDef.TypeConverter != null)
                     {
                         // stack is now [target][target][TypeConverter][value-as-object]
-                        il.Emit(OpCodes.Ldtoken, dbValueType);
-                        il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
-
                         il.Emit(OpCodes.Ldtoken, propertyDef.Type);
                         il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
-                        //stack is now [target][target][TypeConverter][value-as-object][dbValueType][propertyType]
+                        //stack is now [target][target][TypeConverter][value-as-object][propertyType]
                         il.EmitCall(OpCodes.Callvirt, _getTypeConverterDbValueToTypeValueMethod, null);
                         //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
 
@@ -138,15 +143,13 @@ namespace HB.FullStack.Database.Mapper
                             //全局Converter
 
                             // stack is now [target][target][TypeConverter][value-as-object]
-                            il.Emit(OpCodes.Ldtoken, dbValueType);
-                            il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
                             il.Emit(OpCodes.Ldtoken, trueType);
                             il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
-                            //stack is now [target][target][TypeConverter][value-as-object][dbValueType][trueType]
+                            //stack is now [target][target][TypeConverter][value-as-object][trueType]
                             il.EmitCall(OpCodes.Callvirt, _getTypeConverterDbValueToTypeValueMethod, null);
                             //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
 
-                            il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
+                            il.Emit(OpCodes.Unbox_Any, trueType);
                             //emitter.UnboxAny(propertyDef.Type);
 
                             // stack is now [target][target][TypeValue]
@@ -155,13 +158,7 @@ namespace HB.FullStack.Database.Mapper
                         {
                             //默认
                             // stack is now [target][target][value-as-object]
-                            //check DBNULL
-                            il.Emit(OpCodes.Dup);
-                            //emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
-                            il.Emit(OpCodes.Isinst, typeof(DBNull));
-                            //emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
-                            il.Emit(OpCodes.Brtrue_S, dbNullLabel);
-                            //emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
+
 
                             if (trueType.IsEnum)
                             {
@@ -257,10 +254,10 @@ namespace HB.FullStack.Database.Mapper
                     il.Emit(OpCodes.Pop);
                     //emitter.Pop();
                     //emitter.Pop();
-                    //if (hasConverter)
-                    //{
-                    //    il.Emit(OpCodes.Pop);
-                    //}
+                    if (hasConverter)
+                    {
+                        il.Emit(OpCodes.Pop);
+                    }
 
                     if (firstProperty && returnNullIfFirstNull)
                     {

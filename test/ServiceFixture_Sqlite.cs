@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,19 +15,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using StackExchange.Redis;
+
 
 namespace HB.FullStack
 {
-    public class ServiceFixture
+    public class ServiceFixture_Sqlite
     {
         public IConfiguration Configuration { get; private set; }
 
         public IServiceProvider ServiceProvider { get; private set; }
 
-        public IServiceProvider ServiceProvider2 { get; private set; }
-
-        public ServiceFixture()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
+        public ServiceFixture_Sqlite()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
@@ -41,27 +41,6 @@ namespace HB.FullStack
             IServiceCollection services = new ServiceCollection();
 
             services
-                .AddOptions()
-                .AddLogging(builder =>
-                {
-                    builder.AddConsole();
-                    builder.AddDebug();
-                })
-                .AddMemoryCache()
-                .AddMySQL(Configuration.GetSection("MySQL"))
-                .AddRedisCache(Configuration.GetSection("RedisCache"))
-                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
-                .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
-                .AddMemoryLock()
-                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"));
-
-            ServiceProvider = services.BuildServiceProvider();
-
-            GlobalSettings.Logger = ServiceProvider.GetRequiredService<ILogger<ServiceFixture>>();
-
-            IServiceCollection services2 = new ServiceCollection();
-
-            services2
                 .AddOptions()
                 .AddLogging(builder =>
                 {
@@ -86,7 +65,12 @@ namespace HB.FullStack
                 .AddMemoryLock()
                 .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock")); ;
 
-            ServiceProvider2 = services2.BuildServiceProvider();
+            ServiceProvider = services.BuildServiceProvider();
+
+            GlobalSettings.Logger = ServiceProvider.GetRequiredService<ILogger<ServiceFixture_Sqlite>>();
+            ServiceProvider.GetRequiredService<IDatabase>().InitializeAsync().Wait();
+
+            GlobalSettings.Logger.LogInformation($"当前Process,{Process.GetCurrentProcess().Id}");
         }
     }
 }

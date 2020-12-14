@@ -14,12 +14,12 @@ using Xunit.Abstractions;
 
 namespace HB.Infrastructure.Redis.Test
 {
-    public class RedisEventBusTest : IClassFixture<ServiceFixture>, IEventHandler
+    public class RedisEventBusTest : IClassFixture<ServiceFixture_MySql>, IEventHandler
     {
         private readonly ITestOutputHelper _output;
         private readonly IEventBus _eventBus;
 
-        public RedisEventBusTest(ITestOutputHelper testOutputHelper, ServiceFixture serviceFixture)
+        public RedisEventBusTest(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             _output = testOutputHelper;
             _eventBus = serviceFixture.ServiceProvider.GetRequiredService<IEventBus>();

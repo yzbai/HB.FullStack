@@ -63,7 +63,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public int? Number { get; set; } = 12121221;
 
         [EntityProperty]
-        public int? Number1 { get; set; } = 111;
+        public int? Number1 { get; set; }
 
 
         [EntityProperty]

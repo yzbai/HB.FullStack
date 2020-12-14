@@ -12,21 +12,26 @@ namespace System
     {
         public static IEnumerable<Assembly> GetAllAssemblies()
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            return AppDomain.CurrentDomain.GetAssemblies();
+            //string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            return Directory
-                .GetFiles(path, "*.dll")
-                .Select(f => Assembly.LoadFile(f));
+            //return Directory
+            //    .GetFiles(path, "*.dll")
+            //    .Select(f => Assembly.LoadFile(f));
         }
 
         public static IEnumerable<Type> GetAllTypeByCondition(Func<Type, bool> condition)
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            return Directory
-                .GetFiles(path, "*.dll")
-                .SelectMany(file => Assembly.LoadFile(file).GetTypes())
-                .Where(t => condition(t));
+            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).Where(t => condition(t));
+
+            //通过File的方式会导致Type的HashCode不一致
+            //string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            //return Directory
+            //    .GetFiles(path, "*.dll")
+            //    .SelectMany(file => Assembly.LoadFile(file).GetTypes())
+            //    .Where(t => condition(t));
         }
 
         public static IEnumerable<Type> GetAllTypeByCondition(IList<string> assembliesToCheck, Func<Type, bool> condition)

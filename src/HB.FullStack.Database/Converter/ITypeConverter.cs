@@ -11,8 +11,8 @@ namespace HB.FullStack.Database.Converter
 
         string Statement { get; }
 
-        object TypeValueToDbValue(object? typeValue, Type propertyType);
+        object TypeValueToDbValue(object typeValue, Type propertyType);
 
-        object? DbValueToTypeValue(object dbValue, Type dbValueType, Type propertyType);
+        object DbValueToTypeValue(object dbValue, Type propertyType);
     }
 }

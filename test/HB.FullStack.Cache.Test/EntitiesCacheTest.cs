@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace HB.FullStack.Cache.Test
 {
-    public class EntitiesCacheTest : IClassFixture<ServiceFixture>
+    public class EntitiesCacheTest : IClassFixture<ServiceFixture_MySql>
     {
         private readonly ICache _cache;
         private readonly ConnectionMultiplexer _redisConnection;
@@ -22,7 +22,7 @@ namespace HB.FullStack.Cache.Test
         private readonly ITestOutputHelper _outputHelper;
         private readonly string _applicationName;
 
-        public EntitiesCacheTest(ServiceFixture serviceFixture, ITestOutputHelper outputHelper)
+        public EntitiesCacheTest(ServiceFixture_MySql serviceFixture, ITestOutputHelper outputHelper)
         {
             _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
             _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
