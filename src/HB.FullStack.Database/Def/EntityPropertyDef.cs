@@ -1,18 +1,16 @@
-﻿using HB.FullStack.Common.Entities;
-
-using System;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
 using System.Reflection;
 
-namespace HB.FullStack.Database.Entities
+using HB.FullStack.Database.Converter;
+
+namespace HB.FullStack.Database.Def
 {
     /// <summary>
     /// 实体内属性定义（一个）
     /// </summary>
-    internal class DatabaseEntityPropertyDef
+    internal class EntityPropertyDef
     {
-        public DatabaseEntityDef EntityDef { get; set; } = null!;
+        public EntityDef EntityDef { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -40,7 +38,7 @@ namespace HB.FullStack.Database.Entities
 
         public int? DbMaxLength { get; set; }
 
-        public TypeConverter? TypeConverter { get; set; }
+        public ITypeConverter? TypeConverter { get; set; }
 
         public object? GetValueFrom(object entity)
         {

@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -35,7 +35,6 @@ namespace HB.FullStack.Database.SQL
         {
             return predicate;
         }
-
 
         public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> first,
                                                        Expression<Func<T, bool>> second)

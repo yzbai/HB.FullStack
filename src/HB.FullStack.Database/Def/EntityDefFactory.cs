@@ -1,49 +1,43 @@
-﻿using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.SQL;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace HB.FullStack.Database.Entities
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.SQL;
+
+namespace HB.FullStack.Database.Def
 {
-    /// <summary>
-    /// 实体定义集合
-    /// 多线程公用
-    /// 单例
-    /// </summary>
-    internal class DefaultDatabaseEntityDefFactory : IDatabaseEntityDefFactory
+    internal static class EntityDefFactory
     {
         public const int DEFAULT_VARCHAR_LENGTH = 200;
 
-        private readonly object _lockObj = new object();
-        private readonly DatabaseCommonSettings _databaseSettings;
-        private readonly IDatabaseEngine _databaseEngine;
+        public static int VarcharDefaultLength { get; set; }
 
-        private readonly IDictionary<string, EntitySetting> _entitySchemaDict;
-        private readonly IDictionary<Type, DatabaseEntityDef> _defDict = new Dictionary<Type, DatabaseEntityDef>();
+        private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
-        public DefaultDatabaseEntityDefFactory(IDatabaseEngine databaseEngine)
+        public static void Initialize(IDatabaseEngine databaseEngine)
         {
-            _databaseSettings = databaseEngine.DatabaseSettings;
-            _databaseEngine = databaseEngine;
+            DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
+
+            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
 
             IEnumerable<Type> allEntityTypes;
 
-            if (_databaseSettings.AssembliesIncludeEntity.IsNullOrEmpty())
+            if (databaseSettings.AssembliesIncludeEntity.IsNullOrEmpty())
             {
                 allEntityTypes = ReflectUtil.GetAllTypeByCondition(entityTypeCondition);
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_databaseSettings.AssembliesIncludeEntity, entityTypeCondition);
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(databaseSettings.AssembliesIncludeEntity, entityTypeCondition);
             }
 
-            _entitySchemaDict = ConstructeSchemaDict(allEntityTypes);
+            IDictionary<string, EntitySetting> entitySchemaDict = ConstructeSchemaDict(databaseSettings, databaseEngine, allEntityTypes);
 
-            WarmUp(allEntityTypes);
+            WarmUp(allEntityTypes, databaseEngine.EngineType, entitySchemaDict);
 
             static bool entityTypeCondition(Type t)
             {
@@ -51,14 +45,14 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        private void WarmUp(IEnumerable<Type> allEntityTypes)
+        private static void WarmUp(IEnumerable<Type> allEntityTypes, DatabaseEngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
-            allEntityTypes.ForEach(t => _defDict[t] = CreateEntityDef(t));
+            allEntityTypes.ForEach(t => _defDict[t] = CreateEntityDef(t, engineType, entitySchemaDict));
         }
 
-        private IDictionary<string, EntitySetting> ConstructeSchemaDict(IEnumerable<Type> allEntityTypes)
+        private static IDictionary<string, EntitySetting> ConstructeSchemaDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allEntityTypes)
         {
-            IDictionary<string, EntitySetting> fileConfiguredDict = _databaseSettings.EntitySettings.ToDictionary(t => t.EntityTypeFullName);
+            IDictionary<string, EntitySetting> fileConfiguredDict = databaseSettings.EntitySettings.ToDictionary(t => t.EntityTypeFullName);
 
             IDictionary<string, EntitySetting> resusltEntitySchemaDict = new Dictionary<string, EntitySetting>();
 
@@ -75,7 +69,7 @@ namespace HB.FullStack.Database.Entities
 
                 if (attribute != null)
                 {
-                    entitySchema.DatabaseName = attribute.DatabaseName.IsNullOrEmpty() ? _databaseEngine.FirstDefaultDatabaseName : attribute.DatabaseName!;
+                    entitySchema.DatabaseName = attribute.DatabaseName.IsNullOrEmpty() ? databaseEngine.FirstDefaultDatabaseName : attribute.DatabaseName!;
 
                     if (attribute.TableName.IsNullOrEmpty())
                     {
@@ -123,7 +117,7 @@ namespace HB.FullStack.Database.Entities
                 //做最后的检查，有可能两者都没有定义
                 if (entitySchema.DatabaseName.IsNullOrEmpty())
                 {
-                    entitySchema.DatabaseName = _databaseEngine.FirstDefaultDatabaseName;
+                    entitySchema.DatabaseName = databaseEngine.FirstDefaultDatabaseName;
                 }
 
                 if (entitySchema.TableName.IsNullOrEmpty())
@@ -137,42 +131,31 @@ namespace HB.FullStack.Database.Entities
             return resusltEntitySchemaDict;
         }
 
-        public DatabaseEntityDef GetDef<T>() where T : Entity
+        public static EntityDef GetDef<T>() where T : Entity
         {
             return GetDef(typeof(T));
         }
 
-        public DatabaseEntityDef GetDef(Type entityType)
+        public static EntityDef GetDef(Type entityType)
         {
-            if (!_defDict.ContainsKey(entityType))
-            {
-                lock (_lockObj)
-                {
-                    if (!_defDict.ContainsKey(entityType))
-                    {
-                        _defDict[entityType] = CreateEntityDef(entityType);
-                    }
-                }
-            }
-
             return _defDict[entityType];
         }
 
-        private DatabaseEntityDef CreateEntityDef(Type entityType)
+        private static EntityDef CreateEntityDef(Type entityType, DatabaseEngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
-            if (!_entitySchemaDict.TryGetValue(entityType.FullName, out EntitySetting dbSchema))
+            if (!entitySchemaDict!.TryGetValue(entityType.FullName, out EntitySetting dbSchema))
             {
                 throw new DatabaseException($"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
             }
 
-            DatabaseEntityDef entityDef = new DatabaseEntityDef();
-
-
-            entityDef.EntityType = entityType;
-            entityDef.EntityFullName = entityType.FullName;
-            entityDef.DatabaseName = dbSchema.DatabaseName;
-            entityDef.TableName = dbSchema.TableName;
-            entityDef.DbTableReservedName = SqlHelper.GetReserved(entityDef.TableName!, _databaseEngine.EngineType);
+            EntityDef entityDef = new EntityDef
+            {
+                EntityType = entityType,
+                EntityFullName = entityType.FullName,
+                DatabaseName = dbSchema.DatabaseName,
+                TableName = dbSchema.TableName
+            };
+            entityDef.DbTableReservedName = SqlHelper.GetReserved(entityDef.TableName!, engineType);
             entityDef.DatabaseWriteable = !dbSchema.ReadOnly;
 
             //确保Id排在第一位，在EntityMapper中，判断reader.GetValue(0)为DBNull,则为Null
@@ -187,7 +170,7 @@ namespace HB.FullStack.Database.Entities
                     continue;
                 }
 
-                DatabaseEntityPropertyDef propertyDef = CreatePropertyDef(entityDef, info, entityPropertyAttribute);
+                EntityPropertyDef propertyDef = CreatePropertyDef(entityDef, info, entityPropertyAttribute, engineType);
 
                 entityDef.FieldCount++;
 
@@ -203,31 +186,30 @@ namespace HB.FullStack.Database.Entities
             return entityDef;
         }
 
-        private DatabaseEntityPropertyDef CreatePropertyDef(DatabaseEntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute)
+        private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, DatabaseEngineType engineType)
         {
-            DatabaseEntityPropertyDef propertyDef = new DatabaseEntityPropertyDef();
-
-            propertyDef.EntityDef = entityDef;
-            propertyDef.Name = propertyInfo.Name;
-            propertyDef.Type = propertyInfo.PropertyType;
+            EntityPropertyDef propertyDef = new EntityPropertyDef
+            {
+                EntityDef = entityDef,
+                Name = propertyInfo.Name,
+                Type = propertyInfo.PropertyType
+            };
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType);
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType);
-
 
             propertyDef.IsNullable = !propertyAttribute.NotNull;
             propertyDef.IsUnique = propertyAttribute.Unique;
             propertyDef.DbMaxLength = propertyAttribute.MaxLength > 0 ? (int?)propertyAttribute.MaxLength : null;
             propertyDef.IsLengthFixed = propertyAttribute.FixedLength;
 
-            propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, _databaseEngine.EngineType);
+            propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, engineType);
             propertyDef.DbParameterizedName = SqlHelper.GetParameterized(propertyDef.Name);
 
-            if (propertyAttribute.TypeConverter is TypeConverter typeConverter)
+            if (propertyAttribute.Converter != null)
             {
-                propertyDef.TypeConverter = typeConverter;
+                propertyDef.TypeConverter = (ITypeConverter)Activator.CreateInstance(propertyAttribute.Converter);
             }
-
 
             //判断是否是主键
             AutoIncrementPrimaryKeyAttribute? atts1 = propertyInfo.GetCustomAttribute<AutoIncrementPrimaryKeyAttribute>(false);
@@ -256,14 +238,14 @@ namespace HB.FullStack.Database.Entities
             return propertyDef;
         }
 
-        public int GetVarcharDefaultLength()
-        {
-            return _databaseSettings.DefaultVarcharLength == 0 ? DEFAULT_VARCHAR_LENGTH : _databaseSettings.DefaultVarcharLength;
-        }
-
-        public IEnumerable<DatabaseEntityDef> GetAllDefsByDatabase(string databaseName)
+        public static IEnumerable<EntityDef> GetAllDefsByDatabase(string databaseName)
         {
             return _defDict.Values.Where(def => databaseName.Equals(def.DatabaseName, GlobalSettings.ComparisonIgnoreCase));
+        }
+
+        public static ITypeConverter? GetPropertyTypeConverter(Type entityType, string propertyName)
+        {
+            return GetDef(entityType).GetPropertyDef(propertyName)!.TypeConverter;
         }
     }
 }

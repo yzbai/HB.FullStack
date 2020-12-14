@@ -29,7 +29,7 @@ namespace HB.FullStack.Common.Entities
         /// </summary>
         public bool Unique { get; set; }
 
-        public object? TypeConverter { get; set; }
+        public Type? Converter { get; set; }
 
         public EntityPropertyAttribute()
         {

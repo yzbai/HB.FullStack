@@ -1,6 +1,6 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.Converter;
 
 using System;
 using System.Collections.Generic;
@@ -83,13 +83,13 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty]
         public string Name { get; set; } = default!;
 
-        [EntityProperty(Converter = typeof(PublisherBooksTypeConventer))]
+        [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [EntityProperty(Converter = typeof(PublisherBookAuthorsTypeConventer))]
+        [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = EntityPropertyAttribute.MediumLength, Converter = typeof(PublisherBookNamesTypeConventer))]
+        [EntityProperty(MaxLength = EntityPropertyAttribute.MediumLength, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -135,50 +135,5 @@ namespace HB.FullStack.DatabaseTests.Data
         public string Name { get; set; } = default!;
 
         public string Mobile { get; set; } = default!;
-    }
-
-    public class PublisherBookAuthorsTypeConventer : CustomTypeConverter
-    {
-        public PublisherBookAuthorsTypeConventer() { }
-
-        protected override object? StringDbValueToTypeValue(string stringValue)
-        {
-            return SerializeUtil.FromJson<IDictionary<string, Author>>(stringValue);
-        }
-
-        protected override string TypeValueToStringDbValue(object typeValue)
-        {
-            return SerializeUtil.ToJson(typeValue);
-        }
-    }
-
-    public class PublisherBookNamesTypeConventer : CustomTypeConverter
-    {
-        public PublisherBookNamesTypeConventer() { }
-
-        protected override object? StringDbValueToTypeValue(string stringValue)
-        {
-            return SerializeUtil.FromJson<IDictionary<string, string>>(stringValue);
-        }
-
-        protected override string TypeValueToStringDbValue(object typeValue)
-        {
-            return SerializeUtil.ToJson(typeValue);
-        }
-    }
-
-    public class PublisherBooksTypeConventer : CustomTypeConverter
-    {
-        public PublisherBooksTypeConventer() { }
-
-        protected override object? StringDbValueToTypeValue(string stringValue)
-        {
-            return SerializeUtil.FromJson<IList<string>>(stringValue);
-        }
-
-        protected override string TypeValueToStringDbValue(object typeValue)
-        {
-            return SerializeUtil.ToJson(typeValue);
-        }
     }
 }

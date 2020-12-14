@@ -1,12 +1,12 @@
 #nullable enable
 
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.SQL
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;
         private readonly List<string> _orderByProperties = new List<string>();
-        private DatabaseEngineType _engineType;
+        private readonly DatabaseEngineType _engineType;
 
         private string _whereString = string.Empty;
         private string? _orderByString;
@@ -30,11 +30,11 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        internal WhereExpression(IDatabaseEntityDefFactory entityDefFactory, DatabaseEngineType engineType)
+        internal WhereExpression(DatabaseEngineType engineType)
         {
             _engineType = engineType;
 
-            _expressionContext = new SQLExpressionVisitorContenxt(entityDefFactory, engineType)
+            _expressionContext = new SQLExpressionVisitorContenxt(engineType)
             {
                 ParamPlaceHolderPrefix = SqlHelper.ParameterizedChar + "w__"
             };
@@ -150,7 +150,6 @@ namespace HB.FullStack.Database.SQL
                 }
                 else
                 {
-
                     if (sqlParam is SQLInValues sqlInValues)
                     {
                         escapedParams.Add(sqlInValues.ToSqlInString(engineType));
@@ -164,7 +163,7 @@ namespace HB.FullStack.Database.SQL
             return string.Format(GlobalSettings.Culture, sqlText, escapedParams.ToArray());
         }
 
-        #endregion
+        #endregion Where
 
         #region And & Or
 
@@ -232,7 +231,7 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        #endregion
+        #endregion And & Or
 
         #region Group By
 
@@ -263,7 +262,7 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        #endregion
+        #endregion Group By
 
         #region Having
 
@@ -306,7 +305,7 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        #endregion
+        #endregion Having
 
         #region Order By
 
@@ -357,7 +356,6 @@ namespace HB.FullStack.Database.SQL
 
             return this;
         }
-
 
         public WhereExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
@@ -423,7 +421,7 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
-        #endregion
+        #endregion Order By
 
         #region Limit
 
@@ -469,7 +467,9 @@ namespace HB.FullStack.Database.SQL
             _limitString = string.Format(GlobalSettings.Culture, "LIMIT {0}{1}", _limitSkip!.Value, rows);
         }
 
-        #endregion 
+        #endregion Limit
+
+
 
         #region Multiple
 
@@ -517,9 +517,6 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        #endregion
+        #endregion Multiple
     }
-
 }
-
-

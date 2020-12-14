@@ -32,6 +32,7 @@ namespace HB.FullStack.Database.SQL
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
                     return VisitUnary((UnaryExpression)exp);
+
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.Subtract:
@@ -56,31 +57,44 @@ namespace HB.FullStack.Database.SQL
                 case ExpressionType.LeftShift:
                 case ExpressionType.ExclusiveOr:
                     return VisitBinary((BinaryExpression)exp);
+
                 case ExpressionType.TypeIs:
                     return VisitTypeIs((TypeBinaryExpression)exp);
+
                 case ExpressionType.Conditional:
                     return VisitConditional((ConditionalExpression)exp);
+
                 case ExpressionType.Constant:
                     return VisitConstant((ConstantExpression)exp);
+
                 case ExpressionType.Parameter:
                     return VisitParameter((ParameterExpression)exp);
+
                 case ExpressionType.MemberAccess:
                     return VisitMemberAccess((MemberExpression)exp);
+
                 case ExpressionType.Call:
                     return VisitMethodCall((MethodCallExpression)exp);
+
                 case ExpressionType.Lambda:
                     return VisitLambda((LambdaExpression)exp);
+
                 case ExpressionType.New:
                     return VisitNew((NewExpression)exp);
+
                 case ExpressionType.NewArrayInit:
                 case ExpressionType.NewArrayBounds:
                     return VisitNewArray((NewArrayExpression)exp);
+
                 case ExpressionType.Invoke:
                     return VisitInvocation((InvocationExpression)exp);
+
                 case ExpressionType.MemberInit:
                     return VisitMemberInit((MemberInitExpression)exp);
+
                 case ExpressionType.ListInit:
                     return VisitListInit((ListInitExpression)exp);
+
                 default:
                     throw new DatabaseException($"Unhandled expression type: {exp.NodeType}");
             }
@@ -375,6 +389,4 @@ namespace HB.FullStack.Database.SQL
             return iv;
         }
     }
-
-
 }

@@ -1,7 +1,9 @@
 ﻿using ClassLibrary1;
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
@@ -27,7 +29,6 @@ namespace HB.FullStack.DatabaseTests
         private readonly ITransaction _sqlIteTransaction;
         private readonly ITestOutputHelper _output;
         //private readonly IsolationLevel  = IsolationLevel.RepeatableRead;
-        private readonly IDatabaseEntityDefFactory _defFactory;
 
         private IDatabase? GetDatabase(string databaseType)
         {
@@ -65,7 +66,6 @@ namespace HB.FullStack.DatabaseTests
             _sqlite = serviceFixture.ServiceProvider2.GetRequiredService<IDatabase>();
             _sqlIteTransaction = serviceFixture.ServiceProvider2.GetRequiredService<ITransaction>();
 
-            _defFactory = serviceFixture.ServiceProvider2.GetRequiredService<IDatabaseEntityDefFactory>();
 
             _sqlite.InitializeAsync().Wait();
         }
@@ -596,10 +596,10 @@ namespace HB.FullStack.DatabaseTests
                 List<BookEntity> list3 = new List<BookEntity>();
 
                 int len = reader0.FieldCount;
-                DatabaseEntityPropertyDef[] propertyDefs = new DatabaseEntityPropertyDef[len];
+                EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DatabaseEntityDef definition = _defFactory.GetDef<BookEntity>();
+                EntityDef definition = EntityDefFactory.GetDef<BookEntity>();
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -608,7 +608,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0, 0, definition.FieldCount, false);
+                Func<IDataReader, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.SQLite);
 
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
@@ -628,7 +628,7 @@ namespace HB.FullStack.DatabaseTests
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(reader0, definition);
+                    object obj1 = mapper1(reader0);
 
                     list1.Add((BookEntity)obj1);
                     stopwatch1.Stop();
@@ -648,9 +648,9 @@ namespace HB.FullStack.DatabaseTests
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DatabaseEntityPropertyDef property = propertyDefs[i];
+                        EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], reader0.GetFieldType(i), property, Database.Engine.DatabaseEngineType.SQLite);
 
 
                         setMethods[i].Invoke(item, new object?[] { value });

@@ -4,11 +4,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq.Expressions;
-using System.Text;
-using HB.FullStack.Database.Entities;
-using System.Reflection;
 using System.Globalization;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
+
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -22,10 +24,13 @@ namespace HB.FullStack.Database.SQL
             {
                 case ExpressionType.Lambda:
                     return VisitLambda((LambdaExpression)exp, context);
+
                 case ExpressionType.MemberAccess:
                     return VisitMemberAccess((MemberExpression)exp, context);
+
                 case ExpressionType.Constant:
                     return VisitConstant((ConstantExpression)exp);
+
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.Subtract:
@@ -50,6 +55,7 @@ namespace HB.FullStack.Database.SQL
                 case ExpressionType.LeftShift:
                 case ExpressionType.ExclusiveOr:
                     return VisitBinary((BinaryExpression)exp, context);
+
                 case ExpressionType.Negate:
                 case ExpressionType.NegateChecked:
                 case ExpressionType.Not:
@@ -59,17 +65,23 @@ namespace HB.FullStack.Database.SQL
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
                     return VisitUnary((UnaryExpression)exp, context);
+
                 case ExpressionType.Parameter:
                     return VisitParameter((ParameterExpression)exp);
+
                 case ExpressionType.Call:
                     return VisitMethodCall((MethodCallExpression)exp, context);
+
                 case ExpressionType.New:
                     return VisitNew((NewExpression)exp, context);
+
                 case ExpressionType.NewArrayInit:
                 case ExpressionType.NewArrayBounds:
                     return VisitNewArray((NewArrayExpression)exp, context);
+
                 case ExpressionType.MemberInit:
                     return VisitMemberInit((MemberInitExpression)exp);
+
                 default:
                     return exp.ToString();
             }
@@ -98,7 +110,6 @@ namespace HB.FullStack.Database.SQL
                     //return $"{r}={context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)}";
                     return $"{r}=1";
                 }
-
             }
             return Visit(lambda.Body, context);
         }
@@ -121,7 +132,6 @@ namespace HB.FullStack.Database.SQL
                 {
                     left = Visit(b.Left, context);
                 }
-
 
                 if (b.Right is MemberExpression mm && mm.Expression != null && mm.Expression.NodeType == ExpressionType.Parameter)
                 {
@@ -153,7 +163,6 @@ namespace HB.FullStack.Database.SQL
                 left = Visit(b.Left, context);
                 right = Visit(b.Right, context);
 
-
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     object result = Expression.Lambda(b).Compile().DynamicInvoke();
@@ -176,7 +185,6 @@ namespace HB.FullStack.Database.SQL
                         right = paramPlaceholder;
                     }
                 }
-
             }
 
             //TODO: Test  switch InvariantCultureIgnoreCase to OrdinalIgnoreCase
@@ -222,8 +230,8 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
 
-                DatabaseEntityDef entityDef = context.EntityDefFactory.GetDef(entityType);
-                DatabaseEntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
+                EntityDef entityDef = EntityDefFactory.GetDef(entityType);
+                EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
                     ?? throw new DatabaseException($"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
 
                 string prefix = "";
@@ -272,7 +280,6 @@ namespace HB.FullStack.Database.SQL
                 }
                 return r.ToString();
             }
-
         }
 
         private static object VisitParameter(ParameterExpression p/*, SQLExpressionVisitorContenxt context*/)
@@ -313,10 +320,11 @@ namespace HB.FullStack.Database.SQL
                     if (o as PartialSqlString == null)
                         return !((bool)o);
 
-                    if (IsTableField(u.Type, o, context))
+                    if (IsTableField(u.Type, o))
                         o += "=1";
 
                     return new PartialSqlString("NOT (" + o + ")");
+
                 case ExpressionType.Convert:
                     if (u.Method != null)
                         return Expression.Lambda(u).Compile().DynamicInvoke();
@@ -324,7 +332,6 @@ namespace HB.FullStack.Database.SQL
             }
 
             return Visit(u.Operand, context);
-
         }
 
         private static object VisitMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
@@ -355,14 +362,12 @@ namespace HB.FullStack.Database.SQL
                 {
                     list.Add(Visit(original[i], context));
                 }
-
             }
             return list;
         }
 
         private static object VisitNewArray(NewArrayExpression na, SQLExpressionVisitorContenxt context)
         {
-
             List<object> exprs = VisitExpressionList(na.Expressions, context);
             StringBuilder r = new StringBuilder();
             foreach (object e in exprs)
@@ -375,7 +380,6 @@ namespace HB.FullStack.Database.SQL
 
         private static List<object> VisitNewArrayFromExpressionList(NewArrayExpression na, SQLExpressionVisitorContenxt context)
         {
-
             List<object> exprs = VisitExpressionList(na.Expressions, context);
             return exprs;
         }
@@ -484,13 +488,16 @@ namespace HB.FullStack.Database.SQL
                     }
 
                     break;
+
                 case "Desc":
                     statement = string.Format(CultureInfo.InvariantCulture, "{0} DESC", quotedColName);
                     break;
+
                 case "As":
                     statement = string.Format(CultureInfo.InvariantCulture, "{0} As {1}", quotedColName,
                         SqlHelper.GetQuoted(RemoveQuoteFromAlias(args[0].ToString())));
                     break;
+
                 case "Sum":
                 case "Count":
                 case "Min":
@@ -502,9 +509,11 @@ namespace HB.FullStack.Database.SQL
                                          quotedColName,
                                          args.Count == 1 ? string.Format(CultureInfo.InvariantCulture, ",{0}", args[0]) : "");
                     break;
+
                 case "Plain":
                     statement = quotedColName.ToString();
                     break;
+
                 default:
                     throw new NotSupportedException();
             }
@@ -515,6 +524,7 @@ namespace HB.FullStack.Database.SQL
         private static object VisitColumnAccessMethod(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             #region Mysql,其他数据库可能需要重写
+
             //TODO: Mysql,其他数据库可能需要重写
             if (m.Method.Name == "StartsWith")
             {
@@ -525,7 +535,7 @@ namespace HB.FullStack.Database.SQL
                                                           TypeConvert.TypeValueToDbValueStatement(args0[0], quotedIfNeed: true, context.EngineType)));
             }
 
-            #endregion
+            #endregion Mysql,其他数据库可能需要重写
 
             List<object> args = VisitExpressionList(m.Arguments, context);
             object quotedColName = Visit(m.Object, context);
@@ -536,30 +546,38 @@ namespace HB.FullStack.Database.SQL
                 case "Trim":
                     statement = string.Format(CultureInfo.InvariantCulture, "ltrim(rtrim({0}))", quotedColName);
                     break;
+
                 case "LTrim":
                     statement = string.Format(CultureInfo.InvariantCulture, "ltrim({0})", quotedColName);
                     break;
+
                 case "RTrim":
                     statement = string.Format(CultureInfo.InvariantCulture, "rtrim({0})", quotedColName);
                     break;
+
                 case "ToUpper":
                     statement = string.Format(CultureInfo.InvariantCulture, "upper({0})", quotedColName);
                     break;
+
                 case "ToLower":
                     statement = string.Format(CultureInfo.InvariantCulture, "lower({0})", quotedColName);
                     break;
+
                 case "StartsWith":
                     statement = string.Format(CultureInfo.InvariantCulture, "upper({0}) like {1} ", quotedColName,
                         SqlHelper.GetQuoted(args[0].ToString().ToUpper(CultureInfo.InvariantCulture) + "%"));
                     break;
+
                 case "EndsWith":
                     statement = string.Format(CultureInfo.InvariantCulture, "upper({0}) like {1}", quotedColName,
                         SqlHelper.GetQuoted("%" + args[0].ToString().ToUpper(CultureInfo.InvariantCulture)));
                     break;
+
                 case "Contains":
                     statement = string.Format(CultureInfo.InvariantCulture, "upper({0}) like {1}", quotedColName,
                         SqlHelper.GetQuoted("%" + args[0].ToString().ToUpper(CultureInfo.InvariantCulture) + "%"));
                     break;
+
                 case "Substring":
                     int startIndex = int.Parse(args[0].ToString(), CultureInfo.InvariantCulture) + 1;
                     if (args.Count == 2)
@@ -575,6 +593,7 @@ namespace HB.FullStack.Database.SQL
                                          quotedColName,
                                          startIndex);
                     break;
+
                 default:
                     throw new NotSupportedException();
             }
@@ -613,7 +632,6 @@ namespace HB.FullStack.Database.SQL
 
         private static string RemoveQuoteFromAlias(string exp)
         {
-
             if ((exp.StartsWith("\"", GlobalSettings.Comparison) || exp.StartsWith("`", GlobalSettings.Comparison) || exp.StartsWith("'", GlobalSettings.Comparison))
                 &&
                 (exp.EndsWith("\"", GlobalSettings.Comparison) || exp.EndsWith("`", GlobalSettings.Comparison) || exp.EndsWith("'", GlobalSettings.Comparison)))
@@ -624,22 +642,20 @@ namespace HB.FullStack.Database.SQL
             return exp;
         }
 
-        private static bool IsTableField(Type type, object quotedExp, SQLExpressionVisitorContenxt context)
+        private static bool IsTableField(Type type, object quotedExp)
         {
             string name = quotedExp.ToString().Replace(SqlHelper.QuotedChar, "", GlobalSettings.Comparison);
 
-            DatabaseEntityDef entityDef = context.EntityDefFactory.GetDef(type);
+            EntityDef entityDef = EntityDefFactory.GetDef(type);
 
-            DatabaseEntityPropertyDef? property = entityDef.GetPropertyDef(name);
+            EntityPropertyDef? property = entityDef.GetPropertyDef(name);
 
             return property != null;
         }
 
         private static readonly object _trueExpression = new PartialSqlString("(1=1)");
 
-
         private static readonly object _falseExpression = new PartialSqlString("(1=0)");
-
 
         private static bool IsArrayMethod(MethodCallExpression m)
         {

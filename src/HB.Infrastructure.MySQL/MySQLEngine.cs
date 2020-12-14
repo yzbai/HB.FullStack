@@ -100,8 +100,10 @@ namespace HB.Infrastructure.MySQL
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null)
         {
-            MySqlCommand command = new MySqlCommand(commandText);
-            command.CommandType = CommandType.Text;
+            MySqlCommand command = new MySqlCommand(commandText)
+            {
+                CommandType = CommandType.Text
+            };
 
             if (parameterPairs == null)
             {
@@ -254,7 +256,6 @@ namespace HB.Infrastructure.MySQL
         #region 事务
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));

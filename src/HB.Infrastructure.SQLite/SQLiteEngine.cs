@@ -187,7 +187,6 @@ namespace HB.Infrastructure.SQLite
         #region 事务
 
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        [SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Entities;
@@ -13,7 +12,6 @@ namespace HB.FullStack.Database
         Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new();
 
         Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new();
-
 
         Task<IEnumerable<long>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : Entity, new();
 

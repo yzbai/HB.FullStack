@@ -1,7 +1,9 @@
 using ClassLibrary1;
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
@@ -28,7 +30,6 @@ namespace HB.FullStack.DatabaseTests
         private readonly IDatabase _mysql;
         private readonly ITransaction _mysqlTransaction;
         private readonly ITestOutputHelper _output;
-        private readonly IDatabaseEntityDefFactory _defFactory;
         private readonly string _mysqlConnectionString;
 
         /// <summary>
@@ -47,7 +48,6 @@ namespace HB.FullStack.DatabaseTests
 
             _mysql.InitializeAsync().Wait();
 
-            _defFactory = serviceFixture.ServiceProvider.GetRequiredService<IDatabaseEntityDefFactory>();
 
 
             _mysqlConnectionString = serviceFixture.Configuration["MySQL:Connections:0:ConnectionString"];
@@ -576,10 +576,10 @@ namespace HB.FullStack.DatabaseTests
                 List<BookEntity> list3 = new List<BookEntity>();
 
                 int len = reader0.FieldCount;
-                DatabaseEntityPropertyDef[] propertyDefs = new DatabaseEntityPropertyDef[len];
+                EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DatabaseEntityDef definition = _defFactory.GetDef<BookEntity>();
+                EntityDef definition = EntityDefFactory.GetDef<BookEntity>();
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -588,7 +588,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, DatabaseEntityDef, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0, 0, definition.FieldCount, false);
+                Func<IDataReader, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.MySQL);
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
@@ -606,7 +606,7 @@ namespace HB.FullStack.DatabaseTests
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(reader0, definition);
+                    object obj1 = mapper1(reader0);
 
                     list1.Add((BookEntity)obj1);
                     stopwatch1.Stop();
@@ -626,9 +626,9 @@ namespace HB.FullStack.DatabaseTests
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DatabaseEntityPropertyDef property = propertyDefs[i];
+                        EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], reader0.GetFieldType(i), property, Database.Engine.DatabaseEngineType.MySQL);
 
 
                         setMethods[i].Invoke(item, new object?[] { value });

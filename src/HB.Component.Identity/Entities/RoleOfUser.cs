@@ -1,7 +1,5 @@
 ﻿using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Entities;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Identity.Entities

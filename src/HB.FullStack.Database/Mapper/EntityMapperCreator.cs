@@ -6,35 +6,34 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Xml;
-using System.Xml.Linq;
 
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
 
-namespace HB.FullStack.Database
+namespace HB.FullStack.Database.Mapper
 {
     internal static class EntityMapperCreator
     {
         /// <summary>
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
-        public static Func<IDataReader, DatabaseEntityDef, object> CreateEntityMapper(DatabaseEntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+        public static Func<IDataReader, object> CreateEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
         {
-            DynamicMethod dm = new DynamicMethod("EntityMapper" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader), typeof(DatabaseEntityDef) }, def.EntityType, true);
+            DynamicMethod dm = new DynamicMethod("EntityMapper" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader) }, def.EntityType, true);
             ILGenerator il = dm.GetILGenerator();
 
             EmitEntityMapper(def, reader, startIndex, length, returnNullIfFirstNull, engineType, il);
 
-            var funcType = Expression.GetFuncType(typeof(IDataReader), typeof(DatabaseEntityDef), def.EntityType);
-            return (Func<IDataReader, DatabaseEntityDef, object>)dm.CreateDelegate(funcType);
+            var funcType = Expression.GetFuncType(typeof(IDataReader), def.EntityType);
+            return (Func<IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
-        private static void EmitEntityMapper(DatabaseEntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType, ILGenerator il)
+        private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType, ILGenerator il)
         {
             try
             {
-                List<DatabaseEntityPropertyDef> propertyDefs = new List<DatabaseEntityPropertyDef>();
+                List<EntityPropertyDef> propertyDefs = new List<EntityPropertyDef>();
 
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
@@ -59,6 +58,8 @@ namespace HB.FullStack.Database
 
                 for (int index = 0; index < propertyDefs.Count; ++index)
                 {
+                    bool hasConverter = false;
+
                     Label dbNullLabel = il.DefineLabel();
                     Label finishLable = il.DefineLabel();
 
@@ -67,25 +68,40 @@ namespace HB.FullStack.Database
                     il.Emit(OpCodes.Dup);
                     //emitter.Duplicate(); // stack is now [target][target]
 
-                    DatabaseEntityPropertyDef propertyDef = propertyDefs[index];
-
-                    if (propertyDef.TypeConverter != null)
-                    {
-                        il.Emit(OpCodes.Ldarg_1);
-                        //emitter.LoadArgument(1);// stack is now [target][target][EntityDef]
-                        il.Emit(OpCodes.Ldstr, propertyDef.Name);
-                        //emitter.LoadConstant(propertyDef.PropertyInfo.Name);// stack is now [target][target][EntityDef][PropertyName]
-                        il.EmitCall(OpCodes.Call, _getPropertyTypeConverterMethod, null);
-                        //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));// stack is now [target][target][TypeConverter]
-                    }
-
+                    EntityPropertyDef propertyDef = propertyDefs[index];
                     Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
 
-                    TypeConverter? globalConverter = TypeConvert.GetGlobalConverter(trueType, engineType);
-
-                    if (globalConverter != null && globalConverter.DbValueToTypeValue != null)
+                    //======属性自定义Converter
+                    if (propertyDef.TypeConverter != null)
                     {
-                        typeValue = globalConverter.DbValueToTypeValue(dbValue, trueType);
+                        il.Emit(OpCodes.Ldtoken, def.EntityType);
+                        il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                        il.Emit(OpCodes.Ldstr, propertyDef.Name);
+                        //emitter.LoadConstant(propertyDef.PropertyInfo.Name);
+                        // stack is now [target][target][EntityType][PropertyName]
+                        il.EmitCall(OpCodes.Call, _getPropertyTypeConverterMethod, null);
+                        //emitter.Call(typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter)));
+                        // stack is now [target][target][TypeConverter]
+
+                        hasConverter = true;
+                    }
+                    else
+                    {
+                        //======全局Converter
+
+                        ITypeConverter? globalTypeConverter = TypeConvert.GetGlobalTypeConverter(trueType, engineType);
+
+                        if (globalTypeConverter != null)
+                        {
+                            il.Emit(OpCodes.Ldtoken, trueType);
+                            il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                            EmitInt32(il, (int)engineType);
+
+                            il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);
+                            //stack is now [target][target][TypeConverter]
+
+                            hasConverter = true;
+                        }
                     }
 
                     //===获取数据库值=========================================================================
@@ -97,104 +113,88 @@ namespace HB.FullStack.Database
                     il.EmitCall(OpCodes.Callvirt, _dataReaderGetItemMethod, null);
                     //emitter.CallVirtual(ReflectionHelper.GetItem);// stack is now [...][value-as-object]
 
-                    //check DBNULL
-                    il.Emit(OpCodes.Dup);
-                    //emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
-                    il.Emit(OpCodes.Isinst, typeof(DBNull));
-                    //emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
-                    il.Emit(OpCodes.Brtrue_S, dbNullLabel);
-                    //emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
-
                     //===DbValueToTypeValue,逻辑同DatabaseConverty.DbValueToTypeValue一致======================
-                    if (propertyDef.TypeConverter == null)
+                    if (propertyDef.TypeConverter != null)
                     {
-                        if (propertyDef.Type.IsEnum || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType.IsEnum))
+                        // stack is now [target][target][TypeConverter][value-as-object]
+                        il.Emit(OpCodes.Ldtoken, dbValueType);
+                        il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+
+                        il.Emit(OpCodes.Ldtoken, propertyDef.Type);
+                        il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                        //stack is now [target][target][TypeConverter][value-as-object][dbValueType][propertyType]
+                        il.EmitCall(OpCodes.Callvirt, _getTypeConverterDbValueToTypeValueMethod, null);
+                        //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
+
+                        il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
+                        //emitter.UnboxAny(propertyDef.Type);
+
+                        // stack is now [target][target][TypeValue]
+                    }
+                    else
+                    {
+                        if (hasConverter)
                         {
-                            // stack is now [target][target][value-as-object]
-                            il.Emit(OpCodes.Castclass, typeof(string));
-                            //emitter.CastClass<string>(); //stack is now [target][target][string]
+                            //全局Converter
 
-                            il.Emit(OpCodes.Stloc, enumStringTempLocal);
-                            //emitter.StoreLocal(enumStringTempLocal); //stack is now [target][target]
-
-                            if (propertyDef.NullableUnderlyingType != null)
-                            {
-                                il.Emit(OpCodes.Ldtoken, propertyDef.NullableUnderlyingType);
-                                //emitter.LoadConstant(propertyDef.NullableUnderlyingType);
-                            }
-                            else
-                            {
-                                il.Emit(OpCodes.Ldtoken, propertyDef.Type);
-                                //emitter.LoadConstant(propertyDef.Type);//stack is now[target][target][propertyType-token]
-                            }
-
+                            // stack is now [target][target][TypeConverter][value-as-object]
+                            il.Emit(OpCodes.Ldtoken, dbValueType);
                             il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
-                            //emitter.Call(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));//stack is now[target][target][propertyType]
+                            il.Emit(OpCodes.Ldtoken, trueType);
+                            il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                            //stack is now [target][target][TypeConverter][value-as-object][dbValueType][trueType]
+                            il.EmitCall(OpCodes.Callvirt, _getTypeConverterDbValueToTypeValueMethod, null);
+                            //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
 
-                            il.Emit(OpCodes.Ldloc, enumStringTempLocal);
-                            //emitter.LoadLocal(enumStringTempLocal);//stack is now[target][target][propertyType][string]
+                            il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
+                            //emitter.UnboxAny(propertyDef.Type);
 
-                            il.Emit(OpCodes.Ldc_I4_1);
-                            //emitter.LoadConstant(true);//stack is now[target][target][propertyType][string][true]
-
-                            il.EmitCall(OpCodes.Call, _enumParseMethod, null);
-                            //emitter.Call(EnumParse);//stack is now[target][target][value]
-
-                            if (propertyDef.NullableUnderlyingType != null)
-                            {
-                                il.Emit(OpCodes.Unbox_Any, propertyDef.NullableUnderlyingType);
-                                //emitter.UnboxAny(propertyDef.NullableUnderlyingType);
-                            }
-                            else
-                            {
-                                il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
-                                //emitter.UnboxAny(propertyDef.Type);
-                            }
-
-                            //stack is now[target][target][typed-value]
-                        }
-                        else if (propertyDef.Type == typeof(DateTimeOffset) || (propertyDef.NullableUnderlyingType != null && propertyDef.NullableUnderlyingType == typeof(DateTimeOffset)))
-                        {
-                            // stack is now [target][target][value-as-object]
-
-                            if (dbValueType == typeof(string))
-                            {
-                                il.Emit(OpCodes.Unbox_Any, typeof(string));//stack is now [target][target][string]
-                                il.EmitCall(OpCodes.Call, _invariantCultureMethod, null);//stack is now [target][target][string][cultureInfo]
-                                il.EmitCall(OpCodes.Call, _dataTimeOffsetParseMethod, null);
-                                //stack is now [target][target][datetimeoffset]
-                            }
-                            else if (dbValueType == typeof(long))
-                            {
-                                il.Emit(OpCodes.Unbox_Any, typeof(long));//stack is now [target][target][long]
-                                il.Emit(OpCodes.Ldloc, timespanZeroLocal);
-                                il.Emit(OpCodes.Newobj, _dateTimeOffsetTicksConstructorInfo);
-                            }
-                            else if (dbValueType == typeof(DateTime))
-                            {
-                                il.Emit(OpCodes.Unbox_Any, typeof(DateTime));
-                                //emitter.UnboxAny(typeof(DateTime));//stack is now[target][target][datetime]
-
-                                il.Emit(OpCodes.Ldloc, timespanZeroLocal);
-                                //emitter.LoadLocal(timespanZeroLocal); //stack is now[target][target][datetime][timespan.zero]
-
-
-                                il.Emit(OpCodes.Newobj, _dateTimeOffsetDateTimeConstructorInfo);
-                                //emitter.NewObject(dateTimeOffsetConstructorInfo);
-                                //stack is now[target][target][datetimeoffset]
-                                //??need unbox
-                            }
-                            else
-                            {
-                                throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"不支持的时间类型:{dbValueType}");
-                            }
+                            // stack is now [target][target][TypeValue]
                         }
                         else
                         {
+                            //默认
                             // stack is now [target][target][value-as-object]
+                            //check DBNULL
+                            il.Emit(OpCodes.Dup);
+                            //emitter.Duplicate(); //stack is now [...][value-as-object][value-as-object]
+                            il.Emit(OpCodes.Isinst, typeof(DBNull));
+                            //emitter.IsInstance(typeof(DBNull));//stack is now [...][value-as-object][DbNull/null]
+                            il.Emit(OpCodes.Brtrue_S, dbNullLabel);
+                            //emitter.BranchIfTrue(dbNullLabel);//stack is now [...][value-as-object]
 
-                            if (dbValueType == propertyDef.Type || dbValueType == propertyDef.NullableUnderlyingType)
+                            if (trueType.IsEnum)
                             {
+                                // stack is now [target][target][value-as-object]
+                                il.Emit(OpCodes.Castclass, typeof(string));
+                                //emitter.CastClass<string>(); //stack is now [target][target][string]
+
+                                il.Emit(OpCodes.Stloc, enumStringTempLocal);
+                                //emitter.StoreLocal(enumStringTempLocal); //stack is now [target][target]
+
+                                if (propertyDef.NullableUnderlyingType != null)
+                                {
+                                    il.Emit(OpCodes.Ldtoken, propertyDef.NullableUnderlyingType);
+                                    //emitter.LoadConstant(propertyDef.NullableUnderlyingType);
+                                }
+                                else
+                                {
+                                    il.Emit(OpCodes.Ldtoken, propertyDef.Type);
+                                    //emitter.LoadConstant(propertyDef.Type);//stack is now[target][target][propertyType-token]
+                                }
+
+                                il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                                //emitter.Call(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));//stack is now[target][target][propertyType]
+
+                                il.Emit(OpCodes.Ldloc, enumStringTempLocal);
+                                //emitter.LoadLocal(enumStringTempLocal);//stack is now[target][target][propertyType][string]
+
+                                il.Emit(OpCodes.Ldc_I4_1);
+                                //emitter.LoadConstant(true);//stack is now[target][target][propertyType][string][true]
+
+                                il.EmitCall(OpCodes.Call, _enumParseMethod, null);
+                                //emitter.Call(EnumParse);//stack is now[target][target][value]
+
                                 if (propertyDef.NullableUnderlyingType != null)
                                 {
                                     il.Emit(OpCodes.Unbox_Any, propertyDef.NullableUnderlyingType);
@@ -205,13 +205,24 @@ namespace HB.FullStack.Database
                                     il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
                                     //emitter.UnboxAny(propertyDef.Type);
                                 }
+
+                                //stack is now[target][target][typed-value]
                             }
                             else
                             {
-                                FlexibleConvertBoxedFromHeadOfStack(il, dbValueType, propertyDef.NullableUnderlyingType ?? propertyDef.Type);
-                            }
+                                // stack is now [target][target][value-as-object]
 
-                            //stack is now[target][target][typed-value]
+                                if (dbValueType == trueType)
+                                {
+                                    il.Emit(OpCodes.Unbox_Any, trueType);
+                                }
+                                else
+                                {
+                                    FlexibleConvertBoxedFromHeadOfStack(il, dbValueType, trueType);
+                                }
+
+                                //stack is now[target][target][typed-value]
+                            }
                         }
 
                         if (propertyDef.NullableUnderlyingType != null)
@@ -219,17 +230,6 @@ namespace HB.FullStack.Database
                             il.Emit(OpCodes.Newobj, propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
                             //emitter.NewObject(propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
                         }
-                    }
-                    else
-                    {
-                        // stack is now [target][target][TypeConverter][value-as-object]
-                        il.EmitCall(OpCodes.Callvirt, _customTypeConverterDbValueToTypeValueMethod, null);
-                        //emitter.CallVirtual(typeof(DatabaseTypeConverter).GetMethod(nameof(DatabaseTypeConverter.DbValueToTypeValue)));
-
-                        il.Emit(OpCodes.Unbox_Any, propertyDef.Type);
-                        //emitter.UnboxAny(propertyDef.Type);
-
-                        // stack is now [target][target][TypeValue]
                     }
 
                     //===赋值================================================================================
@@ -257,10 +257,10 @@ namespace HB.FullStack.Database
                     il.Emit(OpCodes.Pop);
                     //emitter.Pop();
                     //emitter.Pop();
-                    if (propertyDef.TypeConverter != null)
-                    {
-                        il.Emit(OpCodes.Pop);
-                    }
+                    //if (hasConverter)
+                    //{
+                    //    il.Emit(OpCodes.Pop);
+                    //}
 
                     if (firstProperty && returnNullIfFirstNull)
                     {
@@ -443,16 +443,20 @@ namespace HB.FullStack.Database
 
         private static readonly MethodInfo _invariantCultureMethod = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static).GetGetMethod();
 
-        private static readonly MethodInfo _getPropertyTypeConverterMethod = typeof(DatabaseEntityDef).GetMethod(nameof(DatabaseEntityDef.OnlyForEmitGetPropertyTypeConverter));
+        private static readonly MethodInfo _getPropertyTypeConverterMethod = typeof(EntityDefFactory).GetMethod(nameof(EntityDefFactory.GetPropertyTypeConverter));
+
+        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(TypeConvert).GetMethod(nameof(TypeConvert.GetGlobalTypeConverter), new Type[] { typeof(Type), typeof(int) });
 
         private static readonly MethodInfo _getTypeFromHandleMethod = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
 
-        private static readonly MethodInfo _dataTimeOffsetParseMethod = typeof(DateTimeOffset).GetMethod(nameof(DateTimeOffset.Parse), new Type[] { typeof(string), typeof(IFormatProvider) });
+        private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.DbValueToTypeValue));
 
-        private static readonly ConstructorInfo _dateTimeOffsetDateTimeConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
+        //private static readonly MethodInfo _dataTimeOffsetParseMethod = typeof(DateTimeOffset).GetMethod(nameof(DateTimeOffset.Parse), new Type[] { typeof(string), typeof(IFormatProvider) });
 
-        private static readonly ConstructorInfo _dateTimeOffsetTicksConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(long), typeof(TimeSpan) });
+        //private static readonly ConstructorInfo _dateTimeOffsetDateTimeConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(DateTime), typeof(TimeSpan) });
 
-        private static readonly MethodInfo _customTypeConverterDbValueToTypeValueMethod = typeof(CustomTypeConverter).GetMethod(nameof(CustomTypeConverter.DbValueToTypeValue));
+        //private static readonly ConstructorInfo _dateTimeOffsetTicksConstructorInfo = typeof(DateTimeOffset).GetConstructor(new Type[] { typeof(long), typeof(TimeSpan) });
+
+        //private static readonly MethodInfo _customTypeConverterDbValueToTypeValueMethod = typeof(TypeConverter).GetMethod(nameof(TypeConverter.DbValueToTypeValue));
     }
 }

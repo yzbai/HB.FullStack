@@ -1,26 +1,25 @@
 ﻿#nullable enable
 
-using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.Text;
+
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.SQL
 {
     internal static class SqlHelper
     {
-        public static string CreateAddSql(DatabaseEntityDef entityDef, DatabaseEngineType engineType, bool returnId, int number = 0)
+        public static string CreateAddSql(EntityDef entityDef, DatabaseEngineType engineType, bool returnId, int number = 0)
         {
             StringBuilder args = new StringBuilder();
             StringBuilder values = new StringBuilder();
 
-            foreach (DatabaseEntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
                 if (propertyDef.IsAutoIncrementPrimaryKey)
                 {
@@ -40,11 +39,11 @@ namespace HB.FullStack.Database.SQL
             return $"insert into {entityDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
         }
 
-        public static string CreateUpdateSql(DatabaseEntityDef entityDef, int number = 0)
+        public static string CreateUpdateSql(EntityDef entityDef, int number = 0)
         {
             StringBuilder args = new StringBuilder();
 
-            foreach (DatabaseEntityPropertyDef propertyInfo in entityDef.PropertyDefs)
+            foreach (EntityPropertyDef propertyInfo in entityDef.PropertyDefs)
             {
                 if (propertyInfo.IsAutoIncrementPrimaryKey || propertyInfo.Name == nameof(Entity.Guid))
                 {
@@ -56,9 +55,9 @@ namespace HB.FullStack.Database.SQL
 
             args.RemoveLast();
 
-            DatabaseEntityPropertyDef idProperty = entityDef.GetPropertyDef(nameof(Entity.Id))!;
-            DatabaseEntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
-            DatabaseEntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+            EntityPropertyDef idProperty = entityDef.GetPropertyDef(nameof(Entity.Id))!;
+            EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
+            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
             StringBuilder where = new StringBuilder();
 
@@ -69,20 +68,20 @@ namespace HB.FullStack.Database.SQL
             return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where};";
         }
 
-        public static string CreateDeleteSql(DatabaseEntityDef entityDef, int number = 0)
+        public static string CreateDeleteSql(EntityDef entityDef, int number = 0)
         {
             return CreateUpdateSql(entityDef, number);
         }
 
-        public static string CreateSelectSql(params DatabaseEntityDef[] entityDefs)
+        public static string CreateSelectSql(params EntityDef[] entityDefs)
         {
             StringBuilder builder = new StringBuilder("SELECT ");
 
-            foreach (DatabaseEntityDef entityDef in entityDefs)
+            foreach (EntityDef entityDef in entityDefs)
             {
                 string DbTableReservedName = entityDef.DbTableReservedName;
 
-                foreach (DatabaseEntityPropertyDef propertyDef in entityDef.PropertyDefs)
+                foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
                 {
                     builder.Append($"{DbTableReservedName}.{propertyDef.DbReservedName},");
                 }
@@ -105,10 +104,12 @@ namespace HB.FullStack.Database.SQL
                 _ => throw new DatabaseException(ErrorCode.DatabaseUnSupported)
             };
         }
+
         /// <summary>
         /// 用于参数化的字符（@）,用于参数化查询
         /// </summary>
         public const string ParameterizedChar = "@";
+
         /// <summary>
         /// 用于引号化的字符(')，用于字符串
         /// </summary>
@@ -144,7 +145,7 @@ namespace HB.FullStack.Database.SQL
             return _needQuotedTypes.Contains(type);
         }
 
-        public static bool IsDbFieldNeedLength(DatabaseEntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        public static bool IsDbFieldNeedLength(EntityPropertyDef propertyDef, DatabaseEngineType engineType)
         {
             DbType dbType = TypeConvert.TypeToDbType(propertyDef, engineType);
 
@@ -243,11 +244,11 @@ namespace HB.FullStack.Database.SQL
             throw new DatabaseException(ErrorCode.DatabaseUnSupported);
         }
 
-        public static string SQLite_Table_Create_Statement(DatabaseEntityDef entityDef, bool addDropStatement)
+        public static string SQLite_Table_Create_Statement(EntityDef entityDef, bool addDropStatement)
         {
             StringBuilder propertyInfoSql = new StringBuilder();
 
-            foreach (DatabaseEntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
                 string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, DatabaseEngineType.SQLite);
 
@@ -269,7 +270,7 @@ namespace HB.FullStack.Database.SQL
             return tableCreateSql;
         }
 
-        public static string MySQL_Table_Create_Statement(DatabaseEntityDef entityDef, bool addDropStatement, int varcharDefaultLength)
+        public static string MySQL_Table_Create_Statement(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength)
         {
             StringBuilder propertySqlBuilder = new StringBuilder();
 
@@ -278,7 +279,7 @@ namespace HB.FullStack.Database.SQL
                 throw new DatabaseException($"Type : {entityDef.EntityFullName} has null or empty DbTableReservedName");
             }
 
-            foreach (DatabaseEntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
                 string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, DatabaseEngineType.MySQL);
 
@@ -324,7 +325,7 @@ namespace HB.FullStack.Database.SQL
             return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} PRIMARY KEY (`Id`)) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;";
         }
 
-        public static string GetTableCreateSql(DatabaseEntityDef entityDef, bool addDropStatement, int varcharDefaultLength, DatabaseEngineType engineType)
+        public static string GetTableCreateSql(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength, DatabaseEngineType engineType)
         {
             return engineType switch
             {
@@ -376,8 +377,8 @@ namespace HB.FullStack.Database.SQL
 
         private const string _mysql_tbSysInfoCreate =
         @"CREATE TABLE `tb_sys_info` (
-	`Id` int (11) NOT NULL AUTO_INCREMENT, 
-	`Name` varchar(100) DEFAULT NULL, 
+	`Id` int (11) NOT NULL AUTO_INCREMENT,
+	`Name` varchar(100) DEFAULT NULL,
 	`Value` varchar(1024) DEFAULT NULL,
 	PRIMARY KEY(`Id`),
 	UNIQUE KEY `Name_UNIQUE` (`Name`)
@@ -394,7 +395,7 @@ INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', @databaseName)
         private const string _sqlite_tbSysInfoCreate =
         @"CREATE TABLE ""tb_sys_info"" (
 	""Id"" INTEGER PRIMARY KEY AUTOINCREMENT,
-	""Name"" TEXT UNIQUE, 
+	""Name"" TEXT UNIQUE,
 	""Value"" TEXT
 );
 INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('Version', '1');

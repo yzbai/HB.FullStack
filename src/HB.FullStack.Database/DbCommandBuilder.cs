@@ -1,31 +1,31 @@
 ﻿#nullable enable
 
-using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace HB.FullStack.Database.SQL
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.SQL;
+
+namespace HB.FullStack.Database
 {
     internal class DbCommandBuilder : IDbCommandBuilder
     {
         private readonly ConcurrentDictionary<string, string> _commandTextCache;
-        private readonly IDatabaseEntityDefFactory _entityDefFactory;
         private readonly IDatabaseEngine _databaseEngine;
 
-        public DbCommandBuilder(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory entityDefFactory)
+        public DbCommandBuilder(IDatabaseEngine databaseEngine)
         {
             _databaseEngine = databaseEngine;
-            _entityDefFactory = entityDefFactory;
             _commandTextCache = new ConcurrentDictionary<string, string>();
         }
 
-        private string GetCachedSql(SqlType commandTextType, params DatabaseEntityDef[] entityDefs)
+        private string GetCachedSql(SqlType commandTextType, params EntityDef[] entityDefs)
         {
             string cacheKey = GetCommandTextCacheKey(commandTextType, entityDefs);
 
@@ -45,11 +45,11 @@ namespace HB.FullStack.Database.SQL
 
             return commandText;
 
-            static string GetCommandTextCacheKey(SqlType textType, params DatabaseEntityDef[] entityDefs)
+            static string GetCommandTextCacheKey(SqlType textType, params EntityDef[] entityDefs)
             {
                 StringBuilder builder = new StringBuilder(entityDefs[0].DatabaseName);
 
-                foreach (DatabaseEntityDef entityDef in entityDefs)
+                foreach (EntityDef entityDef in entityDefs)
                 {
                     builder.Append($"{entityDef.TableName}_");
                 }
@@ -64,15 +64,15 @@ namespace HB.FullStack.Database.SQL
 
         public FromExpression<T> NewFrom<T>() where T : Entity, new()
         {
-            return new FromExpression<T>(_entityDefFactory, _databaseEngine.EngineType);
+            return new FromExpression<T>(_databaseEngine.EngineType);
         }
 
         public WhereExpression<T> NewWhere<T>() where T : Entity, new()
         {
-            return new WhereExpression<T>(_entityDefFactory, _databaseEngine.EngineType);
+            return new WhereExpression<T>(_databaseEngine.EngineType);
         }
 
-        public IDbCommand CreateRetrieveCommand<T>(DatabaseEntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
+        public IDbCommand CreateRetrieveCommand<T>(EntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : Entity, new()
         {
             return AssembleRetrieveCommand(GetCachedSql(SqlType.SELECT, entityDef), fromCondition, whereCondition);
@@ -84,7 +84,7 @@ namespace HB.FullStack.Database.SQL
             return AssembleRetrieveCommand("SELECT COUNT(1) ", fromCondition, whereCondition);
         }
 
-        public IDbCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DatabaseEntityDef[] returnEntityDefs)
+        public IDbCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
             where T1 : Entity, new()
             where T2 : Entity, new()
         {
@@ -94,7 +94,7 @@ namespace HB.FullStack.Database.SQL
                 whereCondition);
         }
 
-        public IDbCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DatabaseEntityDef[] returnEntityDefs)
+        public IDbCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
             where T1 : Entity, new()
             where T2 : Entity, new()
             where T3 : Entity, new()
@@ -105,7 +105,7 @@ namespace HB.FullStack.Database.SQL
                 whereCondition);
         }
 
-        public IDbCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params DatabaseEntityDef[] returnEntityDefs)
+        public IDbCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params EntityDef[] returnEntityDefs)
             where TSelect : Entity, new()
             where TFrom : Entity, new()
             where TWhere : Entity, new()
@@ -141,33 +141,32 @@ namespace HB.FullStack.Database.SQL
             return _databaseEngine.CreateTextCommand(sql, parameters);
         }
 
-        #endregion
+        #endregion 查询
 
         #region 更改
 
-        public IDbCommand CreateAddCommand<T>(DatabaseEntityDef entityDef, T entity) where T : Entity, new()
+        public IDbCommand CreateAddCommand<T>(EntityDef entityDef, T entity) where T : Entity, new()
         {
             return _databaseEngine.CreateTextCommand(
                 GetCachedSql(SqlType.ADD, entityDef),
                 entity.ToParameters(entityDef, _databaseEngine.EngineType));
         }
 
-        public IDbCommand CreateUpdateCommand<T>(DatabaseEntityDef entityDef, T entity) where T : Entity, new()
+        public IDbCommand CreateUpdateCommand<T>(EntityDef entityDef, T entity) where T : Entity, new()
         {
             return _databaseEngine.CreateTextCommand(
                 GetCachedSql(SqlType.UPDATE, entityDef),
                 entity.ToParameters(entityDef, _databaseEngine.EngineType));
         }
 
-        public IDbCommand CreateDeleteCommand<T>(DatabaseEntityDef entityDef, T entity) where T : Entity, new()
+        public IDbCommand CreateDeleteCommand<T>(EntityDef entityDef, T entity) where T : Entity, new()
         {
-
             return _databaseEngine.CreateTextCommand(
                 GetCachedSql(SqlType.DELETE, entityDef),
                 entity.ToParameters(entityDef, _databaseEngine.EngineType));
         }
 
-        public IDbCommand CreateBatchAddCommand<T>(DatabaseEntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
+        public IDbCommand CreateBatchAddCommand<T>(EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -193,7 +192,7 @@ namespace HB.FullStack.Database.SQL
             return _databaseEngine.CreateTextCommand(commandText, parameters);
         }
 
-        public IDbCommand CreateBatchUpdateCommand<T>(DatabaseEntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
+        public IDbCommand CreateBatchUpdateCommand<T>(EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -218,7 +217,7 @@ namespace HB.FullStack.Database.SQL
             return _databaseEngine.CreateTextCommand(commandText, parameters);
         }
 
-        public IDbCommand CreateBatchDeleteCommand<T>(DatabaseEntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
+        public IDbCommand CreateBatchDeleteCommand<T>(EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -243,13 +242,13 @@ namespace HB.FullStack.Database.SQL
             return _databaseEngine.CreateTextCommand(commandText, parameters);
         }
 
-        #endregion
+        #endregion 更改
 
         #region Management
 
-        public IDbCommand CreateTableCreateCommand(DatabaseEntityDef entityDef, bool addDropStatement)
+        public IDbCommand CreateTableCreateCommand(EntityDef entityDef, bool addDropStatement)
         {
-            string sql = SqlHelper.GetTableCreateSql(entityDef, addDropStatement, _entityDefFactory.GetVarcharDefaultLength(), _databaseEngine.EngineType);
+            string sql = SqlHelper.GetTableCreateSql(entityDef, addDropStatement, EntityDefFactory.VarcharDefaultLength, _databaseEngine.EngineType);
 
             return _databaseEngine.CreateTextCommand(sql);
         }
@@ -294,6 +293,6 @@ namespace HB.FullStack.Database.SQL
             return _databaseEngine.CreateTextCommand(sql, parameters);
         }
 
-        #endregion
+        #endregion Management
     }
 }

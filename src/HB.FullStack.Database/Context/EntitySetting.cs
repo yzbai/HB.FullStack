@@ -14,10 +14,9 @@ namespace HB.FullStack.Database
 
         [DisallowNull, NotNull]
         public string? TableName { get; set; }
-        
+
         public string? Description { get; set; }
 
         public bool ReadOnly { get; set; }
-
     }
 }

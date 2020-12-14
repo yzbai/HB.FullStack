@@ -1,8 +1,6 @@
 ﻿#nullable enable
 
-using System;
-
-namespace HB.FullStack.Database
+namespace System
 {
     public class DatabaseEngineException : DatabaseException
     {

@@ -90,8 +90,6 @@ namespace HB.FullStack.Database.SQL
             return value;
         }
 
-        #endregion
+        #endregion 表达
     }
-
 }
-

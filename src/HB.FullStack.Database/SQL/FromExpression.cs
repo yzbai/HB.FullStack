@@ -1,14 +1,14 @@
 ﻿#nullable enable
 
-using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-using HB.FullStack.Database.Properties;
-
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Properties;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -27,8 +27,6 @@ namespace HB.FullStack.Database.SQL
 
         private readonly SQLExpressionVisitorContenxt _expressionContext;
 
-        private readonly IDatabaseEntityDefFactory _entityDefFactory;
-
         public SqlJoinType? JoinType { get; set; }
 
         public IList<KeyValuePair<string, object>> GetParameters()
@@ -38,14 +36,12 @@ namespace HB.FullStack.Database.SQL
 
         public override string ToString()
         {
-            return $" FROM {_entityDefFactory.GetDef<T>().DbTableReservedName} {_statementBuilder}";
+            return $" FROM {EntityDefFactory.GetDef<T>().DbTableReservedName} {_statementBuilder}";
         }
 
-        internal FromExpression(IDatabaseEntityDefFactory databaseEntityDefFactory, DatabaseEngineType engineType)
+        internal FromExpression(DatabaseEngineType engineType)
         {
-            _entityDefFactory = databaseEntityDefFactory;
-
-            _expressionContext = new SQLExpressionVisitorContenxt(databaseEntityDefFactory, engineType)
+            _expressionContext = new SQLExpressionVisitorContenxt(engineType)
             {
                 ParamPlaceHolderPrefix = SqlHelper.ParameterizedChar + "f__"
             };
@@ -183,7 +179,7 @@ namespace HB.FullStack.Database.SQL
 
         private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr) where Target : Entity
         {
-            DatabaseEntityDef targetDef = _entityDefFactory.GetDef<Target>();
+            EntityDef targetDef = EntityDefFactory.GetDef<Target>();
 
             _statementBuilder.Append(' ');
             _statementBuilder.Append(joinType);
@@ -195,7 +191,5 @@ namespace HB.FullStack.Database.SQL
 
             return this;
         }
-
-
     }
 }

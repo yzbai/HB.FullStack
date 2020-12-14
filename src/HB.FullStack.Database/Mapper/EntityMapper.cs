@@ -1,33 +1,33 @@
 ﻿#nullable enable
 
-using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
-namespace HB.FullStack.Database.Entities
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
+
+namespace HB.FullStack.Database.Mapper
 {
     internal static class EntityMapper
     {
-        private static readonly ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object?>> _mapperDict = new ConcurrentDictionary<string, Func<IDataReader, DatabaseEntityDef, object?>>();
+        private static readonly ConcurrentDictionary<string, Func<IDataReader, object?>> _mapperDict = new ConcurrentDictionary<string, Func<IDataReader, object?>>();
 
         private static readonly object _mapperLocker = new object();
 
-        public static IList<T> ToEntities<T>(this IDataReader reader, DatabaseEngineType engineType, DatabaseEntityDef entityDef)
+        public static IList<T> ToEntities<T>(this IDataReader reader, DatabaseEngineType engineType, EntityDef entityDef)
             where T : Entity, new()
         {
-            Func<IDataReader, DatabaseEntityDef, object?> mapFunc = GetCachedMapFunc(reader, entityDef, 0, reader.FieldCount, false, engineType);
+            Func<IDataReader, object?> mapFunc = GetCachedMapFunc(reader, entityDef, 0, reader.FieldCount, false, engineType);
 
             List<T> lst = new List<T>();
 
             while (reader.Read())
             {
-                object item = mapFunc.Invoke(reader, entityDef)!;
+                object item = mapFunc.Invoke(reader)!;
 
                 lst.Add((T)item);
             }
@@ -35,7 +35,7 @@ namespace HB.FullStack.Database.Entities
             return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget?>> ToEntities<TSource, TTarget>(this IDataReader reader, DatabaseEngineType engineType, DatabaseEntityDef sourceEntityDef, DatabaseEntityDef targetEntityDef)
+        public static IList<Tuple<TSource, TTarget?>> ToEntities<TSource, TTarget>(this IDataReader reader, DatabaseEngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef)
             where TSource : Entity, new()
             where TTarget : Entity, new()
         {
@@ -46,8 +46,8 @@ namespace HB.FullStack.Database.Entities
 
             while (reader.Read())
             {
-                object source = sourceFunc.Invoke(reader, sourceEntityDef)!;
-                object? target = targetFunc.Invoke(reader, targetEntityDef);
+                object source = sourceFunc.Invoke(reader)!;
+                object? target = targetFunc.Invoke(reader);
 
                 lst.Add(new Tuple<TSource, TTarget?>((TSource)source, (TTarget?)target));
             }
@@ -55,7 +55,7 @@ namespace HB.FullStack.Database.Entities
             return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToEntities<TSource, TTarget2, TTarget3>(this IDataReader reader, DatabaseEngineType engineType, DatabaseEntityDef sourceEntityDef, DatabaseEntityDef targetEntityDef1, DatabaseEntityDef targetEntityDef2)
+        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToEntities<TSource, TTarget2, TTarget3>(this IDataReader reader, DatabaseEngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef1, EntityDef targetEntityDef2)
             where TSource : Entity, new()
             where TTarget2 : Entity, new()
             where TTarget3 : Entity, new()
@@ -68,9 +68,9 @@ namespace HB.FullStack.Database.Entities
 
             while (reader.Read())
             {
-                object source = sourceFunc.Invoke(reader, sourceEntityDef)!;
-                object? target1 = targetFunc1.Invoke(reader, targetEntityDef1);
-                object? target2 = targetFunc2.Invoke(reader, targetEntityDef2);
+                object source = sourceFunc.Invoke(reader)!;
+                object? target1 = targetFunc1.Invoke(reader);
+                object? target2 = targetFunc2.Invoke(reader);
 
                 lst.Add(new Tuple<TSource, TTarget2?, TTarget3?>((TSource)source, (TTarget2?)target1, (TTarget3?)target2));
             }
@@ -78,7 +78,7 @@ namespace HB.FullStack.Database.Entities
             return lst;
         }
 
-        private static Func<IDataReader, DatabaseEntityDef, object?> GetCachedMapFunc(IDataReader reader, DatabaseEntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+        private static Func<IDataReader, object?> GetCachedMapFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
         {
             string key = GetKey(entityDef, startIndex, length, returnNullIfFirstNull, engineType);
 
@@ -95,14 +95,14 @@ namespace HB.FullStack.Database.Entities
 
             return _mapperDict[key];
 
-            static string GetKey(DatabaseEntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+            static string GetKey(EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
             {
                 return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
             }
         }
 
         //TODO: 优化
-        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, DatabaseEntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
+        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
 

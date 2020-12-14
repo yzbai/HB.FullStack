@@ -1,14 +1,5 @@
 ﻿#nullable enable
 
-using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-using HB.FullStack.Database.Properties;
-using HB.FullStack.Database.SQL;
-using HB.FullStack.Lock.Distributed;
-
-using Microsoft.Extensions.Logging;
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,6 +7,16 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.Properties;
+using HB.FullStack.Database.SQL;
+using HB.FullStack.Lock.Distributed;
+
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Database
 {
@@ -32,7 +33,6 @@ namespace HB.FullStack.Database
     {
         private readonly DatabaseCommonSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly IDatabaseEntityDefFactory _entityDefFactory;
         private readonly IDbCommandBuilder _sqlBuilder;
         private readonly ITransaction _transaction;
         private readonly ILogger _logger;
@@ -42,7 +42,6 @@ namespace HB.FullStack.Database
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
-            IDatabaseEntityDefFactory modelDefFactory,
             IDbCommandBuilder sqlBuilder,
             ITransaction transaction,
             ILogger<DefaultDatabase> logger,
@@ -50,11 +49,12 @@ namespace HB.FullStack.Database
         {
             _databaseSettings = databaseEngine.DatabaseSettings;
             _databaseEngine = databaseEngine;
-            _entityDefFactory = modelDefFactory;
             _sqlBuilder = sqlBuilder;
             _transaction = transaction;
             _logger = logger;
             _lockManager = lockManager;
+
+            EntityDefFactory.Initialize(databaseEngine);
 
             _deletedReservedName = SqlHelper.GetReserved(nameof(Entity.Deleted), _databaseEngine.EngineType);
 
@@ -147,7 +147,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private Task<int> CreateTableAsync(DatabaseEntityDef def, TransactionContext transContext)
+        private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext)
         {
             IDbCommand command = _sqlBuilder.CreateTableCreateCommand(def, false);
 
@@ -158,7 +158,7 @@ namespace HB.FullStack.Database
 
         private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext)
         {
-            foreach (DatabaseEntityDef entityDef in _entityDefFactory.GetAllDefsByDatabase(databaseName))
+            foreach (EntityDef entityDef in EntityDefFactory.GetAllDefsByDatabase(databaseName))
             {
                 await CreateTableAsync(entityDef, transactionContext).ConfigureAwait(false);
             }
@@ -247,7 +247,7 @@ namespace HB.FullStack.Database
 
         public DatabaseEngineType EngineType => _databaseEngine.EngineType;
 
-        #endregion
+        #endregion Initialize
 
         #region SystemInfo
 
@@ -290,7 +290,7 @@ namespace HB.FullStack.Database
             await _databaseEngine.ExecuteCommandNonQueryAsync(transaction, databaseName, command).ConfigureAwait(false);
         }
 
-        #endregion
+        #endregion SystemInfo
 
         #region 条件构造
 
@@ -304,7 +304,7 @@ namespace HB.FullStack.Database
             return _sqlBuilder.NewWhere<T>();
         }
 
-        #endregion
+        #endregion 条件构造
 
         #region 单表查询 From, Where
 
@@ -338,9 +338,9 @@ namespace HB.FullStack.Database
                 whereCondition = Where<TWhere>();
             }
 
-            DatabaseEntityDef selectDef = _entityDefFactory.GetDef<TSelect>();
-            DatabaseEntityDef fromDef = _entityDefFactory.GetDef<TFrom>();
-            DatabaseEntityDef whereDef = _entityDefFactory.GetDef<TWhere>();
+            EntityDef selectDef = EntityDefFactory.GetDef<TSelect>();
+            EntityDef fromDef = EntityDefFactory.GetDef<TFrom>();
+            EntityDef whereDef = EntityDefFactory.GetDef<TWhere>();
 
             whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedReservedName}=0");
 
@@ -378,7 +378,7 @@ namespace HB.FullStack.Database
                 whereCondition = Where<T>();
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedReservedName}=0");
 
@@ -411,7 +411,6 @@ namespace HB.FullStack.Database
         public Task<IEnumerable<T>> PageAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
             where T : Entity, new()
         {
-
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
@@ -430,7 +429,7 @@ namespace HB.FullStack.Database
                 whereCondition = Where<T>();
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedReservedName}=0");
 
@@ -451,7 +450,7 @@ namespace HB.FullStack.Database
             return count;
         }
 
-        #endregion
+        #endregion 单表查询 From, Where
 
         #region 单表查询, Where
 
@@ -497,7 +496,7 @@ namespace HB.FullStack.Database
             return CountAsync<T>(null, null, transContext);
         }
 
-        #endregion
+        #endregion 单表查询, Where
 
         #region 单表查询, Expression Where
 
@@ -550,7 +549,7 @@ namespace HB.FullStack.Database
             return CountAsync(null, whereCondition, transContext);
         }
 
-        #endregion
+        #endregion 单表查询, Expression Where
 
         #region 双表查询
 
@@ -563,8 +562,8 @@ namespace HB.FullStack.Database
                 whereCondition = Where<TSource>();
             }
 
-            DatabaseEntityDef sourceEntityDef = _entityDefFactory.GetDef<TSource>();
-            DatabaseEntityDef targetEntityDef = _entityDefFactory.GetDef<TTarget>();
+            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>();
+            EntityDef targetEntityDef = EntityDefFactory.GetDef<TTarget>();
 
             switch (fromCondition.JoinType)
             {
@@ -572,16 +571,20 @@ namespace HB.FullStack.Database
                     whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
+
                 case SqlJoinType.RIGHT:
                     whereCondition.And($"{targetEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And<TTarget>(t => t.Deleted == false);
                     break;
+
                 case SqlJoinType.INNER:
                     whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
+
                 case SqlJoinType.FULL:
                     break;
+
                 case SqlJoinType.CROSS:
                     whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
@@ -591,7 +594,6 @@ namespace HB.FullStack.Database
             IList<Tuple<TSource, TTarget?>> result;
             IDbCommand? command = null;
             IDataReader? reader = null;
-
 
             try
             {
@@ -647,7 +649,7 @@ namespace HB.FullStack.Database
             return lst.ElementAt(0);
         }
 
-        #endregion
+        #endregion 双表查询
 
         #region 三表查询
 
@@ -661,9 +663,9 @@ namespace HB.FullStack.Database
                 whereCondition = Where<TSource>();
             }
 
-            DatabaseEntityDef sourceEntityDef = _entityDefFactory.GetDef<TSource>();
-            DatabaseEntityDef targetEntityDef1 = _entityDefFactory.GetDef<TTarget1>();
-            DatabaseEntityDef targetEntityDef2 = _entityDefFactory.GetDef<TTarget2>();
+            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>();
+            EntityDef targetEntityDef1 = EntityDefFactory.GetDef<TTarget1>();
+            EntityDef targetEntityDef2 = EntityDefFactory.GetDef<TTarget2>();
 
             switch (fromCondition.JoinType)
             {
@@ -671,22 +673,25 @@ namespace HB.FullStack.Database
                     whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
+
                 case SqlJoinType.RIGHT:
                     whereCondition.And($"{targetEntityDef2.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And<TTarget2>(t => t.Deleted == false);
                     break;
+
                 case SqlJoinType.INNER:
                     whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
+
                 case SqlJoinType.FULL:
                     break;
+
                 case SqlJoinType.CROSS:
                     whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
             }
-
 
             IList<Tuple<TSource, TTarget1?, TTarget2?>> result;
             IDbCommand? command = null;
@@ -747,7 +752,7 @@ namespace HB.FullStack.Database
             return lst.ElementAt(0);
         }
 
-        #endregion
+        #endregion 三表查询
 
         #region 单体更改(Write)
 
@@ -758,7 +763,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item);
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -811,7 +816,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item);
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -869,7 +874,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item);
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -915,7 +920,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        #endregion
+        #endregion 单体更改(Write)
 
         #region 批量更改(Write)
 
@@ -931,7 +936,7 @@ namespace HB.FullStack.Database
                 return new List<long>();
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -1008,7 +1013,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -1089,7 +1094,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -1160,7 +1165,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        #endregion
+        #endregion 批量更改(Write)
 
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
         {

@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
 
-namespace HB.FullStack.Database.Entities
+namespace HB.FullStack.Database.Def
 {
     /// <summary>
     /// 实体定义
     /// </summary>
-    internal class DatabaseEntityDef
+    internal class EntityDef
     {
         /// <summary>
         /// 实体名
         /// </summary>
         public string EntityFullName { get; set; } = null!;
+
         /// <summary>
         /// 实体类型
         /// </summary>
@@ -36,6 +34,7 @@ namespace HB.FullStack.Database.Entities
         /// 在IsTableDomain为false时没有意义
         /// </summary>
         public string TableName { get; set; } = null!;
+
         /// <summary>
         /// 数据库专有化后的名称
         /// 在IsTableDomain为false时没有意义
@@ -49,13 +48,14 @@ namespace HB.FullStack.Database.Entities
         /// <summary>
         /// 属性字典
         /// </summary>
-        public Dictionary<string, DatabaseEntityPropertyDef> PropertyDict { get; } = new Dictionary<string, DatabaseEntityPropertyDef>();
+        public Dictionary<string, EntityPropertyDef> PropertyDict { get; } = new Dictionary<string, EntityPropertyDef>();
+
         /// <summary>
         /// 属性枚举
         /// </summary>
-        public List<DatabaseEntityPropertyDef> PropertyDefs { get; } = new List<DatabaseEntityPropertyDef>();
+        public List<EntityPropertyDef> PropertyDefs { get; } = new List<EntityPropertyDef>();
 
-        public DatabaseEntityPropertyDef? GetPropertyDef(string propertyName)
+        public EntityPropertyDef? GetPropertyDef(string propertyName)
         {
             if (PropertyDict.ContainsKey(propertyName))
             {
@@ -64,13 +64,5 @@ namespace HB.FullStack.Database.Entities
 
             return null;
         }
-
-        public TypeConverter OnlyForEmitGetPropertyTypeConverter(string propertyName)
-        {
-            return PropertyDict[propertyName].TypeConverter!;
-        }
     }
-
-
 }
-

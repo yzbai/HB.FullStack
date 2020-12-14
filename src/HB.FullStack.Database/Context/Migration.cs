@@ -1,7 +1,8 @@
 ﻿#nullable enable
 
-using HB.FullStack.Database.Properties;
 using System;
+
+using HB.FullStack.Database.Properties;
 
 namespace HB.FullStack.Database
 {
@@ -13,7 +14,6 @@ namespace HB.FullStack.Database
 
         public string TargetSchema { get; set; }
 
-        
         public Migration(string targetSchema, int oldVersion, int newVersion, string sql)
         {
             //if (targetSchema.IsNullOrEmpty())
