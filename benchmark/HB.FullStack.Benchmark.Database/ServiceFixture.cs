@@ -1,93 +1,92 @@
-﻿using HB.FullStack.Database;
-using HB.FullStack.Database.Engine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using HB.FullStack.Cache;
+using HB.FullStack.Database;
+using HB.FullStack.Lock.Distributed;
+using HB.FullStack.Lock.Memory;
 using HB.Infrastructure.Redis;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using StackExchange.Redis;
 
-namespace HB.FullStack.DatabaseTests
+namespace HB.FullStack
 {
-    public static class ServiceFixture
+    public class ServiceFixture
     {
-        private const string _connectionString = "brlitetest.redis.rds.aliyuncs.com:6379,password=xMS22xtNPc&4RzgU,defaultDatabase=1";
-        public const string ApplicationName = "Test";
-        public const string InstanceName = "Default";
+        public IConfiguration Configuration { get; private set; }
 
-        private static readonly IServiceProvider _mySQLserviceProvider;
-        private static readonly IServiceProvider _sqliteserviceProvider;
+        public IServiceProvider ServiceProvider { get; private set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        static ServiceFixture()
+        public IServiceProvider ServiceProvider2 { get; private set; }
+
+        public ServiceFixture()
         {
-            _mySQLserviceProvider = BuildServices(DatabaseEngineType.MySQL);
-            _sqliteserviceProvider = BuildServices(DatabaseEngineType.SQLite);
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+               .AddEnvironmentVariables()
+               .SetBasePath(Environment.CurrentDirectory)
+               .AddJsonFile("appsettings.json", optional: false)
+               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: false);
 
-            //GlobalSettings.Logger = _mySQLserviceProvider.GetRequiredService<ILogger<ServiceFixture>>();
-            GlobalSettings.Logger = Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+            Configuration = configurationBuilder.Build();
 
-            GlobalSettings.Logger.LogInformation("ServiceFixture初始化");
-
-            List<Task> tasks = new List<Task>();
-            tasks.Add(MySQL.InitializeAsync());
-            tasks.Add(SQLite.InitializeAsync());
-
-            Task.WhenAll(tasks).Wait();
-        }
-
-        private static IServiceProvider BuildServices(DatabaseEngineType engineType)
-        {
             IServiceCollection services = new ServiceCollection();
 
-            services.AddOptions();
-
-            services.AddLogging(builder =>
-            {
-                builder.SetMinimumLevel(LogLevel.Trace);
-                builder.AddConsole();
-                builder.AddDebug();
-            });
-
-            services.AddSingleRedisDistributedLock(options =>
-            {
-                options.ApplicationName = ApplicationName;
-                options.ConnectionSetting = new RedisInstanceSetting
+            services
+                .AddOptions()
+                .AddLogging(builder =>
                 {
-                    InstanceName = InstanceName + engineType.ToString(),
-                    ConnectionString = _connectionString,
-                    DatabaseNumber = 0
-                };
-            });
+                    builder.AddConsole();
+                    builder.AddDebug();
+                })
+                .AddMemoryCache()
+                .AddMySQL(Configuration.GetSection("MySQL"))
+                .AddRedisCache(Configuration.GetSection("RedisCache"))
+                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
+                .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
+                .AddMemoryLock()
+                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"));
 
-            if (engineType == DatabaseEngineType.MySQL)
-            {
-                services.AddMySQL(options =>
+            ServiceProvider = services.BuildServiceProvider();
+
+            GlobalSettings.Logger = ServiceProvider.GetRequiredService<ILogger<ServiceFixture>>();
+
+            IServiceCollection services2 = new ServiceCollection();
+
+            services2
+                .AddOptions()
+                .AddLogging(builder =>
+                {
+                    builder.AddConsole();
+                    builder.AddDebug();
+                })
+                .AddMemoryCache()
+                .AddSQLite(options =>
                 {
                     options.CommonSettings.Version = 1;
 
                     options.Connections.Add(new DatabaseConnectionSettings
                     {
-                        DatabaseName = "test_db",
-                        ConnectionString = "server=rm-bp16d156f2r6b78438o.mysql.rds.aliyuncs.com;port=3306;user=brlite_test;password=EgvfXB2eWucbtm0C;database=test_db;SslMode=None;",
+                        DatabaseName = "sqlite_test2.db",
+                        ConnectionString = "Data Source=sqlite_test2.db",
                         IsMaster = true
                     });
-                });
-            }
+                })
+                .AddRedisCache(Configuration.GetSection("RedisCache"))
+                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
+                .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
+                .AddMemoryLock()
+                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock")); ;
 
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-
-            return serviceProvider;
+            ServiceProvider2 = services2.BuildServiceProvider();
         }
-
-        public static IDatabase MySQL => _mySQLserviceProvider.GetRequiredService<IDatabase>();
-        public static ITransaction MySQLTransaction => _mySQLserviceProvider.GetRequiredService<ITransaction>();
-
-        public static IDatabase SQLite => _sqliteserviceProvider.GetRequiredService<IDatabase>();
-        public static ITransaction SQLiteTransaction => _sqliteserviceProvider.GetRequiredService<ITransaction>();
-
     }
 }

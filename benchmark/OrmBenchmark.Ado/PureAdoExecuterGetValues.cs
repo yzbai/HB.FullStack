@@ -1,4 +1,5 @@
 ﻿using OrmBenchmark.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -24,7 +25,7 @@ namespace OrmBenchmark.Ado
             conn = new SqlConnection(connectionStrong);
             conn.Open();
         }
-        public IPost GetItemAsObject(int Id)
+        public IPost GetItemAsObjectAsync(int Id)
         {
             var cmd = conn.CreateCommand();
             cmd.CommandText = @"select * from Posts where Id = @Id";
@@ -83,12 +84,12 @@ namespace OrmBenchmark.Ado
             throw new NotImplementedException();
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObjectAsync()
         {
             throw new NotImplementedException();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
             throw new NotImplementedException();
         }

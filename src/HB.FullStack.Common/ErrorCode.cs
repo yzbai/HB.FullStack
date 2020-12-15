@@ -8,7 +8,7 @@
         ArgumentValidationError = 2,
         OutOfRange = 3,
         InvalidEntity = 4,
-        UseDateTime = 5,
+        UseDateTimeOffsetOnly = 5,
 
         #region API
 
@@ -72,6 +72,9 @@
         DatabaseAddOrUpdateWhenMultipleUnique = 234,
 
         DatabaseInitLockError = 235,
+
+        DatabaseWrongWhereType = 236,
+        DatabaseUnSupported = 237,
 
         #endregion Database
 
@@ -163,6 +166,7 @@
 
 
         DistributedLockUnLockFailed = 934,
+
     }
 
     public static class ErrorCodeExtensions

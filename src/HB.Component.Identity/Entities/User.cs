@@ -1,9 +1,6 @@
 ﻿using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Entities;
 
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Identity.Entities
 {
@@ -19,48 +16,50 @@ namespace HB.FullStack.Identity.Entities
         public string SecurityStamp { get; set; } = default!;
 
         /// <summary>
+        /// "用户名称"
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [EntityProperty("用户名称", Length = 100, Unique = true)]
+        [EntityProperty(MaxLength = 100, Unique = true)]
         public string? LoginName { get; set; }
         /// <summary>
+        /// "手机号",
         /// 唯一
         /// </summary>
         [Mobile]
-        [EntityProperty("手机号", Unique = true, Length = 14)]
+        [EntityProperty(Unique = true, MaxLength = 14)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [EntityProperty("邮箱", Unique = true, Length = 256)]
+        [EntityProperty(Unique = true, MaxLength = 256)]
         public string? Email { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         [Password]
-        [EntityProperty("密码")]
+        [EntityProperty]
         public string? PasswordHash { get; set; }
 
         /// <summary>
-        /// 
+        /// "手机号码是否验证"
         /// </summary>
-        [EntityProperty("手机号码是否验证")]
+        [EntityProperty]
         public bool MobileConfirmed { get; set; }
 
         /// <summary>
-        /// 
+        /// "邮箱是否验证"
         /// </summary>
-        [EntityProperty("邮箱是否验证")]
+        [EntityProperty]
         public bool EmailConfirmed { get; set; }
 
         /// <summary>
-        /// 
+        /// "Two Factor"
         /// </summary>
-        [EntityProperty("Two Factor")]
+        [EntityProperty]
         public bool TwoFactorEnabled { get; set; }
     }
 }

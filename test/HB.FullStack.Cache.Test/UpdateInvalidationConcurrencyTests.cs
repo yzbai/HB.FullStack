@@ -16,7 +16,7 @@ namespace HB.FullStack.Cache.Test
     //TODO: Update与Update之间并行冲突
     //TODO：Update与Invalidation之间并行冲突
 
-    public class UpdateInvalidationConcurrencyTests : IClassFixture<ServiceFixture>
+    public class UpdateInvalidationConcurrencyTests : IClassFixture<ServiceFixture_MySql>
     {
         private readonly ICache _cache;
         private readonly ConnectionMultiplexer _redisConnection;
@@ -24,7 +24,7 @@ namespace HB.FullStack.Cache.Test
         private readonly ITestOutputHelper _outputHelper;
         private readonly string _applicationName;
 
-        public UpdateInvalidationConcurrencyTests(ServiceFixture serviceFixture, ITestOutputHelper outputHelper)
+        public UpdateInvalidationConcurrencyTests(ServiceFixture_MySql serviceFixture, ITestOutputHelper outputHelper)
         {
             _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
             _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);

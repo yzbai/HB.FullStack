@@ -1,15 +1,17 @@
 ﻿#nullable enable
-using HB.FullStack.Database.Properties;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+
+using HB.FullStack.Database.Properties;
 
 namespace HB.FullStack.Database
 {
     /// <summary>
     /// 内部表tb_sys_info中的键值对
     /// </summary>
-    class SystemInfo
+    internal class SystemInfo
     {
         private readonly IDictionary<string, string> _sysDict = new Dictionary<string, string>();
 
@@ -47,7 +49,6 @@ namespace HB.FullStack.Database
                 _sysDict[SystemInfoNames.Version] = value.ToString(GlobalSettings.Culture);
             }
         }
-
 
         public SystemInfo(string databaseName)
         {

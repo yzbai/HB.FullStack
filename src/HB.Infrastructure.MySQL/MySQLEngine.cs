@@ -35,11 +35,11 @@ namespace HB.Infrastructure.MySQL
 
         [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
 
-        public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory, ILogger<MySQLEngine> logger)
+        public MySQLEngine(IOptions<MySQLOptions> options, /*ILoggerFactory loggerFactory,*/ ILogger<MySQLEngine> logger)
         {
             try
             {
-                MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
+                //MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
             }
             catch (InvalidOperationException ex)
             {
@@ -96,82 +96,27 @@ namespace HB.Infrastructure.MySQL
 
         #endregion 自身 & 构建
 
-        #region 创建功能
 
-        public IDataParameter CreateParameter(string name, object value, DbType dbType)
+        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null)
         {
-            MySqlParameter parameter = new MySqlParameter
+            MySqlCommand command = new MySqlCommand(commandText)
             {
-                ParameterName = name,
-                Value = value,
-                DbType = dbType
+                CommandType = CommandType.Text
             };
-            return parameter;
-        }
 
-        public IDataParameter CreateParameter(string name, object value)
-        {
-            MySqlParameter parameter = new MySqlParameter
+            if (parameterPairs == null)
             {
-                ParameterName = name,
-                Value = value
-            };
-            return parameter;
-        }
+                return command;
+            }
 
-        public IDbCommand CreateEmptyCommand()
-        {
-            MySqlCommand command = new MySqlCommand();
+            foreach (var pair in parameterPairs)
+            {
+                command.Parameters.Add(new MySqlParameter(pair.Key, pair.Value));
+            }
+
             return command;
         }
-
-        #endregion 创建功能
-
-        #region 方言
-
-        public string ParameterizedChar { get { return MySQLLocalism.ParameterizedChar; } }
-
-        public string QuotedChar { get { return MySQLLocalism.QuotedChar; } }
-
-        public string ReservedChar { get { return MySQLLocalism.ReservedChar; } }
-
-        public string GetQuotedStatement(string name)
-        {
-            return MySQLLocalism.GetQuoted(name);
-        }
-
-        public string GetParameterizedStatement(string name)
-        {
-            return MySQLLocalism.GetParameterized(name);
-        }
-
-        public string GetReservedStatement(string name)
-        {
-            return MySQLLocalism.GetReserved(name);
-        }
-
-        public DbType GetDbType(Type type)
-        {
-            return MySQLLocalism.GetDbType(type);
-        }
-
-        public string GetDbTypeStatement(Type type)
-        {
-            return MySQLLocalism.GetDbTypeStatement(type);
-        }
-
-        [return: NotNullIfNotNull("value")]
-        public string? GetDbValueStatement(object? value, bool needQuoted)
-        {
-            return MySQLLocalism.GetDbValueStatement(value, needQuoted);
-        }
-
-        public bool IsValueNeedQuoted(Type type)
-        {
-            return MySQLLocalism.IsValueNeedQuoted(type);
-        }
-
-        #endregion 方言
 
         #region SP 能力
 
@@ -184,7 +129,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbParameters"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<Tuple<IDbCommand, IDataReader>> ExecuteSPReaderAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster = false)
         {
             if (Transaction == null)
@@ -206,7 +151,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="parameters"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<object> ExecuteSPScalarAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster = false)
         {
             if (Transaction == null)
@@ -227,7 +172,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="spName"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<int> ExecuteSPNonQueryAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> parameters)
         {
             if (Transaction == null)
@@ -251,7 +196,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbName"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand)
         {
             if (Transaction == null)
@@ -272,7 +217,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)
@@ -293,7 +238,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="DatabaseEngineException"></exception>
         public Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
         {
             if (Transaction == null)
@@ -311,7 +256,6 @@ namespace HB.Infrastructure.MySQL
         #region 事务
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));

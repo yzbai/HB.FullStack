@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OrmBenchmark.Core
 {
@@ -8,10 +9,12 @@ namespace OrmBenchmark.Core
     {
         string Name { get; }
         void Init(string connectionStrong);
-        IPost GetItemAsObject(int Id);
+
         dynamic GetItemAsDynamic(int Id);
-        IList<IPost> GetAllItemsAsObject();
-        IList<dynamic> GetAllItemsAsDynamic();
+
+        IEnumerable<dynamic> GetAllItemsAsDynamic();
         void Finish();
+        Task<IPost> GetItemAsObjectAsync(int Id);
+        Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync();
     }
 }

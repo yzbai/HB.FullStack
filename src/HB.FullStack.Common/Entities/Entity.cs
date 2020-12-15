@@ -4,6 +4,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 
+using HB.FullStack.Common.Entities.Attributes;
+
 [assembly: InternalsVisibleTo("HB.FullStack.Database")]
 [assembly: InternalsVisibleTo("HB.FullStack.Cache")]
 [assembly: InternalsVisibleTo("HB.FullStack.KVStore")]
@@ -21,32 +23,38 @@ namespace HB.FullStack.Common.Entities
     {
         public const int LastUserMaxLength = 100;
 
+        [PropertyOrder]
         [AutoIncrementPrimaryKey]
-        [EntityProperty("Id")]
+        [EntityProperty]
         public long Id { get; internal set; } = -1;
 
         /// <summary>
         /// 资源ID，全局不变
         /// </summary>
+        [PropertyOrder]
         [Required]
         [UniqueGuidEntityProperty]
         [KVStoreBackupKey]
         [CacheGuidKey]
         public string Guid { get; internal set; } = SecurityUtil.CreateUniqueToken();
 
-        [EntityProperty("Version")]
+        [PropertyOrder]
+        [EntityProperty]
         public int Version { get; internal set; } = -1;
 
-        [EntityProperty("上一次更改者", Length = LastUserMaxLength)]
+        [PropertyOrder]
+        [EntityProperty]
         public string LastUser { get; internal set; } = string.Empty;
 
         /// <summary>
         /// UTC 时间
         /// </summary>
-        [EntityProperty("上一次更改时间")]
+        [PropertyOrder]
+        [EntityProperty]
         public DateTimeOffset LastTime { get; internal set; } = TimeUtil.UtcNow;
 
-        [EntityProperty("逻辑删除标志")]
+        [PropertyOrder]
+        [EntityProperty]
         public bool Deleted { get; internal set; } = false;
 
         public void OnlyForDtoMapping(string guid)

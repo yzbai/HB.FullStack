@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
+
 using HB.FullStack.Database;
+
 using Microsoft.Data.Sqlite;
 
 namespace HB.Infrastructure.SQLite
@@ -20,7 +22,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="sqliteTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -33,7 +35,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Task<IDataReader> ExecuteCommandReaderAsync(string connectString, IDbCommand dbCommand)
         {
             SqliteConnection conn = new SqliteConnection(connectString);
@@ -47,7 +49,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="isOwnedConnection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             SqliteDataReader? reader = null;
@@ -86,11 +88,11 @@ namespace HB.Infrastructure.SQLite
 
                 if (ex is SqliteException sqliteException)
                 {
-                    throw new DatabaseException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
+                    throw new DatabaseEngineException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
                 }
                 else
                 {
-                    throw new DatabaseException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
+                    throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
                 }
             }
         }
@@ -105,7 +107,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Task<object> ExecuteCommandScalarAsync(string connectString, IDbCommand dbCommand)
         {
 #pragma warning disable CA2000 // Dispose objects before losing scope
@@ -120,7 +122,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="sqliteTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Task<object> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -134,7 +136,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="isOwnedConnection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<object> ExecuteCommandScalarAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             object rtObj;
@@ -152,11 +154,11 @@ namespace HB.Infrastructure.SQLite
             }
             catch (SqliteException sqliteException)
             {
-                throw new DatabaseException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
+                throw new DatabaseEngineException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
             }
             catch (Exception ex)
             {
-                throw new DatabaseException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
+                throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
             }
             finally
             {
@@ -179,7 +181,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Task<int> ExecuteCommandNonQueryAsync(string connectString, IDbCommand dbCommand)
         {
 #pragma warning disable CA2000 // Dispose objects before losing scope
@@ -195,7 +197,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="sqliteTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -209,7 +211,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="isOwnedConnection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, bool isOwnedConnection, SqliteCommand command)
         {
             int rtInt = -1;
@@ -227,11 +229,11 @@ namespace HB.Infrastructure.SQLite
             }
             catch (SqliteException sqliteException)
             {
-                throw new DatabaseException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
+                throw new DatabaseEngineException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
             }
             catch (Exception ex)
             {
-                throw new DatabaseException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
+                throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
             }
             finally
             {

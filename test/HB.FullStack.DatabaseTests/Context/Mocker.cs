@@ -8,11 +8,13 @@ namespace HB.FullStack.DatabaseTests.Data
     {
         private static readonly Random _random = new Random();
 
-        public static IList<BookEntity> GetBooks()
+        public static IList<BookEntity> GetBooks(int? count = null)
         {
             List<BookEntity> books = new List<BookEntity>();
 
-            for (int i = 0; i < 5; ++i)
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
             {
                 books.Add(new BookEntity
                 {
@@ -25,14 +27,14 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
-        public static PublisherEntity MockOne()
+        public static PublisherEntity MockOnePublisherEntity()
         {
             PublisherEntity entity = new PublisherEntity
             {
                 Type = PublisherType.Online,
                 Name = "中文名字",
                 Books = new List<string>() { "Cat", "Dog" },
-                //BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
                 BookAuthors = new Dictionary<string, Author>()
                 {
                     { "Cat", new Author() { Mobile="111", Name="BB" } },
@@ -43,19 +45,41 @@ namespace HB.FullStack.DatabaseTests.Data
             return entity;
         }
 
-        public static IList<PublisherEntity> GetPublishers()
+        public static IList<PublisherEntity> GetPublishers(int? count = null)
         {
             List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
 
-            for (int i = 0; i < 5; ++i)
+            Random random = new Random();
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
             {
                 publisherEntities.Add(new PublisherEntity
                 {
                     Books = new List<string> { "a", "v", "c" },
-                    Type = PublisherType.Big,
+                    Type = (PublisherType)random.Next(0, 3),
                     Name = "Publisher" + i.ToString(),
-                    BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                    //BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
                     BookAuthors = new Dictionary<string, Author> { { "a", new Author { Mobile = "xxxx", Name = "tttt" } }, { "xxx", new Author { Mobile = "gggg", Name = "safas" } } }
+                });
+            }
+
+            return publisherEntities;
+        }
+
+        public static IList<PublisherEntity2> GetPublishers2(int? count = null)
+        {
+            List<PublisherEntity2> publisherEntities = new List<PublisherEntity2>();
+
+            Random random = new Random();
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                publisherEntities.Add(new PublisherEntity2
+                {
+                    Type = (PublisherType)random.Next(1, 3),
+                    Name = "Publisher" + i.ToString()
                 });
             }
 

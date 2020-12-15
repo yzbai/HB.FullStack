@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OrmBenchmark.OrmLite
 {
@@ -29,61 +30,24 @@ namespace OrmBenchmark.OrmLite
             conn = dbFactory.Open();
         }
 
-        public IPost GetItemAsObject(int Id)
+        public async Task<IPost> GetItemAsObjectAsync(int Id)
         {
-            return conn.SingleById<Post>(Id);
+            return await conn.SingleByIdAsync<Post>(Id).ConfigureAwait(false);
         }
 
         public dynamic GetItemAsDynamic(int Id)
         {
-            var q = conn.From<Post>()
-                .Where(p => p.Id == Id)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Text,
-                    p.CreationDate,
-                    p.LastChangeDate,
-                    p.Counter1,
-                    p.Counter2,
-                    p.Counter3,
-                    p.Counter4,
-                    p.Counter5,
-                    p.Counter6,
-                    p.Counter7,
-                    p.Counter8,
-                    p.Counter9
-                });
-
-            return conn.Single<dynamic>(q);
+            return null;
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public async Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync()
         {
-            return conn.Select<Post>().ToList<IPost>();
+            return await conn.SelectAsync<Post>().ConfigureAwait(false);
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
-            var q = conn.From<Post>()
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Text,
-                    p.CreationDate,
-                    p.LastChangeDate,
-                    p.Counter1,
-                    p.Counter2,
-                    p.Counter3,
-                    p.Counter4,
-                    p.Counter5,
-                    p.Counter6,
-                    p.Counter7,
-                    p.Counter8,
-                    p.Counter9
-                });
-
-            return conn.Select<dynamic>(q);
+            return null;
         }
         public void Finish()
         {

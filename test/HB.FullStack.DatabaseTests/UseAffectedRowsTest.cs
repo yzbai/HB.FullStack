@@ -1,7 +1,11 @@
 ﻿using HB.FullStack.DatabaseTests.Data;
+
 using Microsoft.Data.Sqlite;
+
 using MySqlConnector;
+
 using System;
+
 using Xunit;
 
 namespace HB.FullStack.DatabaseTests
@@ -16,10 +20,6 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <exception cref="Xunit.Sdk.NotEqualException">Ignore.</exception>
         [Theory]
-        [InlineData(true, "server=rm-bp16d156f2r6b78438o.mysql.rds.aliyuncs.com;port=3306;user=brlite_test;password=EgvfXB2eWucbtm0C;database=test_db;SslMode=None;")]
-        [InlineData(false, "server=rm-bp16d156f2r6b78438o.mysql.rds.aliyuncs.com;port=3306;user=brlite_test;password=EgvfXB2eWucbtm0C;database=test_db;SslMode=None;")]
-        [InlineData(null, "server=rm-bp16d156f2r6b78438o.mysql.rds.aliyuncs.com;port=3306;user=brlite_test;password=EgvfXB2eWucbtm0C;database=test_db;SslMode=None;")]
-
         [InlineData(true, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(false, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(null, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
@@ -76,7 +76,7 @@ namespace HB.FullStack.DatabaseTests
         [Fact]
         public void TestSQLite_Changes_Test()
         {
-            string connectString = $"Data Source=test2.db";
+            string connectString = $"Data Source=sqlite_test2.db";
             using SqliteConnection conn = new SqliteConnection(connectString);
             conn.Open();
 

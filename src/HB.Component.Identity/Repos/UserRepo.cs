@@ -57,7 +57,7 @@ namespace HB.FullStack.Identity
                 userGuids,
                 db =>
                 {
-                    return db.RetrieveAsync<User>(u => SQLUtil.In(u.Guid, true, userGuids.ToArray()), transContext);
+                    return db.RetrieveAsync<User>(u => SqlStatement.In(u.Guid, true, userGuids.ToArray()), transContext);
                 }).ConfigureAwait(false);
         }
 

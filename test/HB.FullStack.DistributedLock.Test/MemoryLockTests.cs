@@ -19,13 +19,13 @@ using Xunit;
 
 namespace HB.FullStack.DistributedLock.Test
 {
-    public class MemoryLockTests : IClassFixture<ServiceFixture>
+    public class MemoryLockTests : IClassFixture<ServiceFixture_MySql>
     {
 
         private readonly IMemoryLockManager _lockManager;
 
         private readonly ILogger _logger;
-        public MemoryLockTests(ServiceFixture serviceFixture)
+        public MemoryLockTests(ServiceFixture_MySql serviceFixture)
         {
             _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IMemoryLockManager>();
             _logger = GlobalSettings.Logger;

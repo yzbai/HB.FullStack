@@ -7,7 +7,7 @@ namespace HB.FullStack.Common.Entities
         public GuidEntityPropertyAttribute()
         {
             FixedLength = true;
-            Length = 32;
+            MaxLength = 32;
             //NotNull = true;
         }
     }

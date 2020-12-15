@@ -12,12 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.Development.json" />
-    <None Remove="appsettings.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\ServiceFixture.cs" Link="ServiceFixture.cs" />
+    <Compile Include="..\ServiceFixture_Mysql.cs" Link="ServiceFixture_MySql.cs" />
+    <Compile Include="..\ServiceFixture_Sqlite.cs" Link="ServiceFixture_Sqlite.cs" />
   </ItemGroup>
 
   <ItemGroup>

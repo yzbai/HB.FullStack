@@ -1,8 +1,6 @@
 ﻿#nullable enable
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Entities;
-using HB.FullStack.Database.SQL;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,13 +13,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddDatabase(this IServiceCollection services)
         {
-            services.AddSingleton<IDatabaseTypeConverterFactory, DatabaseTypeConverterFactory>();
-            services.AddSingleton<IDatabaseEntityDefFactory, DefaultDatabaseEntityDefFactory>();
-            services.AddSingleton<IDatabaseEntityMapper, DefaultDatabaseEntityMapper>();
-            services.AddSingleton<ISQLBuilder, SQLBuilder>();
+            services.AddSingleton<IDbCommandBuilder, DbCommandBuilder>();
+
+            //public
             services.AddSingleton<ITransaction, DefaultTransaction>();
             services.AddSingleton<IDatabase, DefaultDatabase>();
-
             services.AddSingleton<IDatabaseReader>(sp => sp.GetRequiredService<IDatabase>());
             services.AddSingleton<IDatabaseWriter>(sp => sp.GetRequiredService<IDatabase>());
 

@@ -11,14 +11,7 @@ namespace HB.FullStack.Common
             return rt.ThrowIfNull(nameof(rt));
         }
 
-        /// <summary>
-        /// Cast
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        /// <exception cref="MissingMethodException">Ignore.</exception>
-        /// <exception cref="MethodAccessException">Ignore.</exception>
+
         public static Delegate Cast(Delegate source, Type type)
         {
             ThrowIf.Null(source, nameof(source));

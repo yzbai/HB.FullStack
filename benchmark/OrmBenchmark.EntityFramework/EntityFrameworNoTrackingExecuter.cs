@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 #endif
 using OrmBenchmark.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace OrmBenchmark.EntityFramework
             ctx = new OrmBenchmarkContext(connectionStrong);
         }
 
-        public IPost GetItemAsObject(int Id)
+        public IPost GetItemAsObjectAsync(int Id)
         {
             return ctx.Posts.AsNoTracking().Where(p => p.Id == Id) as IPost;
 
@@ -34,7 +35,8 @@ namespace OrmBenchmark.EntityFramework
 
         public dynamic GetItemAsDynamic(int Id)
         {
-            return ctx.Posts.AsNoTracking().Where(p => p.Id == Id).Select(p => new {
+            return ctx.Posts.AsNoTracking().Where(p => p.Id == Id).Select(p => new
+            {
                 p.Id,
                 p.Text,
                 p.CreationDate,
@@ -51,14 +53,15 @@ namespace OrmBenchmark.EntityFramework
             });
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public IEnumerable<IPost> GetAllItemsAsObjectAsync()
         {
             return ctx.Posts.AsNoTracking().ToList<IPost>();
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
-            return ctx.Posts.AsNoTracking().Select(p => new {
+            return ctx.Posts.AsNoTracking().Select(p => new
+            {
                 p.Id,
                 p.Text,
                 p.CreationDate,

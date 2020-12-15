@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\ServiceFixture.cs" Link="ServiceFixture.cs" />
+    <Compile Include="..\ServiceFixture_MySql.cs" Link="ServiceFixture_MySql.cs" />
   </ItemGroup>
 
   <ItemGroup>

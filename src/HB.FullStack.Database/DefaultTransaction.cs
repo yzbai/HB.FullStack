@@ -1,23 +1,21 @@
-﻿using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-using HB.FullStack.Database.Properties;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
-using System.Text;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Properties;
 
 namespace HB.FullStack.Database
 {
     internal class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly IDatabaseEntityDefFactory _entityDefFactory;
-        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDatabaseEntityDefFactory databaseEntityDefFactory)
+
+        public DefaultTransaction(IDatabaseEngine datbaseEngine)
         {
             _databaseEngine = datbaseEngine;
-            _entityDefFactory = databaseEntityDefFactory;
         }
 
         #region 事务
@@ -26,17 +24,12 @@ namespace HB.FullStack.Database
         {
             IDbTransaction dbTransaction = await _databaseEngine.BeginTransactionAsync(databaseName, isolationLevel).ConfigureAwait(false);
 
-            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction);
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
         public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : Entity
         {
-            DatabaseEntityDef entityDef = _entityDefFactory.GetDef<T>();
-
-            if (!entityDef.IsTableModel)
-            {
-                throw new DatabaseException(ErrorCode.DatabaseNotATableModel, entityDef.EntityFullName);
-            }
+            EntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }
@@ -69,7 +62,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Dispose();
+                    conn.Close();
                 }
 
                 context.Status = TransactionStatus.Commited;
@@ -109,7 +102,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Dispose();
+                    conn.Close();
                 }
 
                 context.Status = TransactionStatus.Rollbacked;
@@ -121,6 +114,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        #endregion
+        #endregion 事务
     }
 }

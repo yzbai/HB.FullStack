@@ -1,17 +1,17 @@
-﻿using HB.FullStack.Database.Properties;
-using System;
+﻿using System;
+
+using HB.FullStack.Database.Properties;
 
 namespace HB.FullStack.Database.SQL
 {
     /// <summary>
     /// Wrapper of String & Enum
-    /// 
+    ///
     /// </summary>
-    /// 
+    ///
 
     internal class EnumMemberAccess : PartialSqlString
     {
-        /// <exception cref="System.ArgumentException"></exception>
         public EnumMemberAccess(string text, Type enumType)
             : base(text)
         {

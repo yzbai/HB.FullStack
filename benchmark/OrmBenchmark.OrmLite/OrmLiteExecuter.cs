@@ -1,10 +1,13 @@
 ﻿using OrmBenchmark.Core;
+
 using ServiceStack.OrmLite;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OrmBenchmark.OrmLite
 {
@@ -27,26 +30,25 @@ namespace OrmBenchmark.OrmLite
             conn = dbFactory.Open();
         }
 
-        public IPost GetItemAsObject(int Id)
+        public async Task<IPost> GetItemAsObjectAsync(int Id)
         {
             object param = new { Id = Id };
-            return conn.Single<Post>("select * from Posts where Id=@Id", param);
+            return await conn.SingleAsync<Post>("select * from Posts where Id=@Id", param).ConfigureAwait(false);
         }
 
         public dynamic GetItemAsDynamic(int Id)
         {
-            object param = new { Id = Id };
-            return conn.Single<dynamic>("select * from Posts where Id=@Id", param);
+            return null;
         }
 
-        public IList<IPost> GetAllItemsAsObject()
+        public async Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync()
         {
-            return conn.Select<Post>("select * from Posts").ToList<IPost>();
+            return await conn.SelectAsync<Post>("select * from Posts").ConfigureAwait(false);
         }
 
-        public IList<dynamic> GetAllItemsAsDynamic()
+        public IEnumerable<dynamic> GetAllItemsAsDynamic()
         {
-            return conn.Select<dynamic>("select * from Posts");
+            return null;
         }
         public void Finish()
         {

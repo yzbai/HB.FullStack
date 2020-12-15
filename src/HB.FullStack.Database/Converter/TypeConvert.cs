@@ -1,0 +1,309 @@
+﻿#nullable enable
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Reflection;
+
+using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.SQL;
+
+namespace HB.FullStack.Database.Converter
+{
+    internal static class TypeConvert
+    {
+        private class ConverterInfo
+        {
+            public string Statement { get; set; } = null!;
+
+            public DbType DbType { get; set; }
+
+            public ITypeConverter? TypeConverter { get; set; }
+        }
+
+        private static readonly Dictionary<Type, ConverterInfo> _mysqlGlobalConverterInfos = new Dictionary<Type, ConverterInfo>
+        {
+            [typeof(byte)] = new ConverterInfo { Statement = "TINYINT", DbType = DbType.Byte },
+            [typeof(sbyte)] = new ConverterInfo { Statement = "TINYINT", DbType = DbType.SByte },
+            [typeof(short)] = new ConverterInfo { Statement = "SMALLINT", DbType = DbType.Int16 },
+            [typeof(ushort)] = new ConverterInfo { Statement = "SMALLINT", DbType = DbType.UInt16 },
+            [typeof(int)] = new ConverterInfo { Statement = "INT", DbType = DbType.Int32 },
+            [typeof(uint)] = new ConverterInfo { Statement = "INT", DbType = DbType.UInt32 },
+            [typeof(long)] = new ConverterInfo { Statement = "BIGINT", DbType = DbType.Int64 },
+            [typeof(ulong)] = new ConverterInfo { Statement = "BIGINT", DbType = DbType.UInt64 },
+            [typeof(float)] = new ConverterInfo { Statement = "FLOAT", DbType = DbType.Single },
+            [typeof(double)] = new ConverterInfo { Statement = "DOUBLE", DbType = DbType.Double },
+            [typeof(decimal)] = new ConverterInfo { Statement = "DECIMAL", DbType = DbType.Decimal },
+            [typeof(bool)] = new ConverterInfo { Statement = "TINYINT", DbType = DbType.Boolean },
+            [typeof(string)] = new ConverterInfo { Statement = "VARCHAR", DbType = DbType.String },
+            [typeof(char)] = new ConverterInfo { Statement = "CHAR", DbType = DbType.StringFixedLength },
+            [typeof(Guid)] = new ConverterInfo { Statement = "CHAR(36)", DbType = DbType.Guid },
+            [typeof(DateTimeOffset)] = new ConverterInfo { Statement = "DATETIME(6)", DbType = DbType.DateTimeOffset },
+            [typeof(byte[])] = new ConverterInfo { Statement = "Binary", DbType = DbType.Binary }
+        };
+
+        private static readonly Dictionary<Type, ConverterInfo> _sqliteGlobalConverterInfos = new Dictionary<Type, ConverterInfo>
+        {
+            [typeof(byte)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.Byte },
+            [typeof(sbyte)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.SByte },
+            [typeof(short)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.Int16 },
+            [typeof(ushort)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.UInt16 },
+            [typeof(int)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.Int32 },
+            [typeof(uint)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.UInt32 },
+            [typeof(long)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.Int64 },
+            [typeof(ulong)] = new ConverterInfo { Statement = "INTEGER", DbType = DbType.UInt64 },
+            [typeof(float)] = new ConverterInfo { Statement = "DOUBLE", DbType = DbType.Single },
+            [typeof(double)] = new ConverterInfo { Statement = "DOUBLE", DbType = DbType.Double },
+            [typeof(decimal)] = new ConverterInfo { Statement = "DECIMAL", DbType = DbType.Decimal },
+            [typeof(bool)] = new ConverterInfo { Statement = "BOOL", DbType = DbType.Boolean },
+            [typeof(string)] = new ConverterInfo { Statement = "VARCHAR", DbType = DbType.String },
+            [typeof(char)] = new ConverterInfo { Statement = "CHAR", DbType = DbType.StringFixedLength },
+            [typeof(Guid)] = new ConverterInfo { Statement = "CHAR(36)", DbType = DbType.Guid },
+            [typeof(DateTimeOffset)] = new ConverterInfo { Statement = "VARCHAR", DbType = DbType.DateTimeOffset },
+            [typeof(byte[])] = new ConverterInfo { Statement = "BLOB", DbType = DbType.Binary }
+        };
+
+        static TypeConvert()
+        {
+            //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetConverter(), DatabaseEngineType.MySQL);
+
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetConverter(), DatabaseEngineType.SQLite);
+        }
+
+        public static void RegisterGlobalTypeConverter(Type type, ITypeConverter typeConverter, DatabaseEngineType engineType)
+        {
+            Dictionary<Type, ConverterInfo> globalConverterInfos = engineType switch
+            {
+                DatabaseEngineType.MySQL => _mysqlGlobalConverterInfos,
+                DatabaseEngineType.SQLite => _sqliteGlobalConverterInfos,
+                _ => throw new NotImplementedException(),
+            };
+
+            ConverterInfo converterInfo = new ConverterInfo
+            {
+                DbType = typeConverter.DbType,
+                Statement = typeConverter.Statement,
+                TypeConverter = typeConverter
+            };
+
+            globalConverterInfos[type] = converterInfo;
+        }
+
+        /// <summary>
+        /// 将DataReader.GetValue(i)得到的数据库值，转换为Entity的Type值. 逻辑同EntityMapperCreator一致
+        /// </summary>
+        public static object? DbValueToTypeValue(object dbValue, EntityPropertyDef propertyDef, DatabaseEngineType engineType) //Type targetType)
+        {
+            Type dbValueType = dbValue.GetType();
+
+            if (dbValueType == typeof(DBNull))
+            {
+                return null;
+            }
+
+            //查看属性TypeConverter
+            if (propertyDef.TypeConverter != null)
+            {
+                return propertyDef.TypeConverter.DbValueToTypeValue(dbValue, propertyDef.Type);
+            }
+
+            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+            object? typeValue;
+
+            //查看全局TypeConverter
+            ITypeConverter? globalConverter = GetGlobalTypeConverter(trueType, engineType);
+
+            if (globalConverter != null)
+            {
+                typeValue = globalConverter.DbValueToTypeValue(dbValue, trueType);
+            }
+            else
+            {
+                //默认
+
+                if (trueType.IsEnum)
+                {
+                    typeValue = Enum.Parse(trueType, dbValue.ToString(), true);
+                }
+                else if (trueType != dbValueType)
+                {
+                    typeValue = Convert.ChangeType(dbValue, trueType, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    typeValue = dbValue;
+                }
+            }
+
+            //处理Nullable
+            if (propertyDef.NullableUnderlyingType == null)
+            {
+                return typeValue;
+            }
+
+            ConstructorInfo ctor = propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType });
+
+            return ctor.Invoke(new object?[] { typeValue });
+        }
+
+        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        {
+            if (typeValue == null)
+            {
+                return DBNull.Value;
+            }
+
+            //查看当前Property的TypeConvert
+            if (propertyDef.TypeConverter != null)
+            {
+                return propertyDef.TypeConverter.TypeValueToDbValue(typeValue, propertyDef.Type);
+            }
+
+            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+
+            //查看全局TypeConvert
+
+            ITypeConverter? globalConverter = GetGlobalTypeConverter(trueType, engineType);
+
+            if (globalConverter != null)
+            {
+                return globalConverter.TypeValueToDbValue(typeValue, trueType);
+            }
+
+            //默认
+            if (trueType.IsEnum)
+            {
+                return typeValue.ToString();
+            }
+
+            return typeValue;
+        }
+
+        /// <summary>
+        /// 没有考虑属性自定义的TypeConvert
+        /// </summary>
+        /// <param name="typeValue"></param>
+        /// <param name="quotedIfNeed"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        public static string TypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, DatabaseEngineType engineType)
+        {
+            if (typeValue == null)
+            {
+                return "null";
+            }
+
+            Type type = typeValue.GetType();
+            EntityPropertyDef propertyDef = new EntityPropertyDef
+            {
+                Type = type,
+                NullableUnderlyingType = Nullable.GetUnderlyingType(type),
+                TypeConverter = null
+            };
+
+            object dbValue = TypeValueToDbValue(typeValue, propertyDef, engineType);
+
+            string statement = dbValue switch
+            {
+                //null => "null",
+                //Enum e => e.ToString(),
+                DBNull _ => "null",
+                DateTime _ => throw new DatabaseException(ErrorCode.UseDateTimeOffsetOnly),
+                DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", CultureInfo.InvariantCulture),
+                bool b => b ? "1" : "0",
+                _ => dbValue.ToString()
+            };
+
+            if (!quotedIfNeed || statement == "null" || !SqlHelper.IsValueNeedQuoted(dbValue!.GetType()))
+            {
+                return statement;
+            }
+
+            return SqlHelper.GetQuoted(statement);
+        }
+
+        public static DbType TypeToDbType(EntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        {
+            //查看属性的TypeConvert
+            if (propertyDef.TypeConverter != null)
+            {
+                return propertyDef.TypeConverter.DbType;
+            }
+
+            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+
+            //查看全局TypeConvert
+            ConverterInfo? converterInfo = GetGlobalConverterInfo(trueType, engineType);
+
+            if (converterInfo != null)
+            {
+                return converterInfo.DbType;
+            }
+
+            //默认处理
+            if (trueType.IsEnum)
+            {
+                return DbType.String;
+            }
+
+            throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
+        }
+
+        public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        {
+            //查看属性自定义
+            if (propertyDef.TypeConverter != null)
+            {
+                return propertyDef.TypeConverter.Statement;
+            }
+
+            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+
+            //查看全局TypeConvert
+            ConverterInfo? converterInfo = GetGlobalConverterInfo(trueType, engineType);
+
+            if (converterInfo != null)
+            {
+                return converterInfo.Statement;
+            }
+
+            //默认处理
+            if (trueType.IsEnum)
+            {
+                return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
+            }
+
+            throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
+        }
+
+        public static ITypeConverter? GetGlobalTypeConverter(Type trueType, DatabaseEngineType engineType)
+        {
+            return GetGlobalConverterInfo(trueType, engineType)?.TypeConverter;
+        }
+
+        public static ITypeConverter? GetGlobalTypeConverter(Type trueType, int engineType)
+        {
+            return GetGlobalConverterInfo(trueType, (DatabaseEngineType)engineType)?.TypeConverter;
+        }
+
+        private static ConverterInfo? GetGlobalConverterInfo(Type trueType, DatabaseEngineType engineType)
+        {
+            Dictionary<Type, ConverterInfo> typeConvertSettings = engineType switch
+            {
+                DatabaseEngineType.MySQL => _mysqlGlobalConverterInfos,
+                DatabaseEngineType.SQLite => _sqliteGlobalConverterInfos,
+                _ => throw new NotImplementedException(),
+            };
+
+            if (typeConvertSettings.TryGetValue(trueType, out ConverterInfo converterInfo))
+            {
+                return converterInfo;
+            }
+
+            return null;
+        }
+    }
+}

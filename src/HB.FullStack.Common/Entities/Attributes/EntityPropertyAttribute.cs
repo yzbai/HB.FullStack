@@ -10,22 +10,14 @@ namespace HB.FullStack.Common.Entities
     [AttributeUsage(AttributeTargets.Property)]
     public class EntityPropertyAttribute : Attribute
     {
+        public const int MediumLength = 2048;
+
         public bool FixedLength { get; set; }
 
         /// <summary>
         /// 字段长度
         /// </summary>
-        public int Length { get; set; }
-
-        /// <summary>
-        /// 字段默认值，Null表示没有没有默认值
-        /// </summary>
-        public object? DefaultValue { get; set; }
-
-        /// <summary>
-        /// 字段描述、备注
-        /// </summary>
-        public string? Description { get; set; }
+        public int MaxLength { get; set; }
 
         /// <summary>
         /// 字段是否可空
@@ -41,11 +33,6 @@ namespace HB.FullStack.Common.Entities
 
         public EntityPropertyAttribute()
         {
-        }
-
-        public EntityPropertyAttribute(string desc)
-        {
-            Description = desc;
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -20,17 +20,15 @@ namespace HB.FullStack.Database.SQL
 
         public bool PrefixFieldWithTableName { get; set; } = true;
 
-        public string? OrderByStatementBySQLUtilIn { get; set; }
+        public string? OrderByStatementBySQLUtilIn_QuotedColName { get; set; }
 
+        public string[]? OrderByStatementBySQLUtilIn_Ins { get; set; }
 
-        public IDatabaseEngine DatabaesEngine { get; set; }
+        public DatabaseEngineType EngineType { get; private set; }
 
-        public IDatabaseEntityDefFactory EntityDefFactory { get; set; }
-
-        public SQLExpressionVisitorContenxt(IDatabaseEngine databaseEngine, IDatabaseEntityDefFactory databaseEntityDefFactory)
+        public SQLExpressionVisitorContenxt(DatabaseEngineType engineType)
         {
-            DatabaesEngine = databaseEngine;
-            EntityDefFactory = databaseEntityDefFactory;
+            EngineType = engineType;
         }
 
         public void AddParameter(string key, object value)
@@ -42,6 +40,5 @@ namespace HB.FullStack.Database.SQL
         {
             return _parameters;
         }
-
     }
 }
