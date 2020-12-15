@@ -10,18 +10,22 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
 
+using Sigil;
+
 namespace HB.FullStack.Database.Mapper
 {
     internal static class EntityMapper
     {
-        private static readonly ConcurrentDictionary<string, Func<IDataReader, object?>> _mapperDict = new ConcurrentDictionary<string, Func<IDataReader, object?>>();
+        #region ToEntity
 
-        private static readonly object _mapperLocker = new object();
+        private static readonly ConcurrentDictionary<string, Func<IDataReader, object?>> _toEntityFuncDict = new ConcurrentDictionary<string, Func<IDataReader, object?>>();
+
+        private static readonly object _toEntityFuncDictLocker = new object();
 
         public static IList<T> ToEntities<T>(this IDataReader reader, DatabaseEngineType engineType, EntityDef entityDef)
             where T : Entity, new()
         {
-            Func<IDataReader, object?> mapFunc = GetCachedMapFunc(reader, entityDef, 0, reader.FieldCount, false, engineType);
+            Func<IDataReader, object?> mapFunc = GetCachedToEntityFunc(reader, entityDef, 0, reader.FieldCount, false, engineType);
 
             List<T> lst = new List<T>();
 
@@ -39,8 +43,8 @@ namespace HB.FullStack.Database.Mapper
             where TSource : Entity, new()
             where TTarget : Entity, new()
         {
-            var sourceFunc = GetCachedMapFunc(reader, sourceEntityDef, 0, sourceEntityDef.FieldCount, false, engineType);
-            var targetFunc = GetCachedMapFunc(reader, targetEntityDef, sourceEntityDef.FieldCount, reader.FieldCount - sourceEntityDef.FieldCount, true, engineType);
+            var sourceFunc = GetCachedToEntityFunc(reader, sourceEntityDef, 0, sourceEntityDef.FieldCount, false, engineType);
+            var targetFunc = GetCachedToEntityFunc(reader, targetEntityDef, sourceEntityDef.FieldCount, reader.FieldCount - sourceEntityDef.FieldCount, true, engineType);
 
             IList<Tuple<TSource, TTarget?>> lst = new List<Tuple<TSource, TTarget?>>();
 
@@ -60,9 +64,9 @@ namespace HB.FullStack.Database.Mapper
             where TTarget2 : Entity, new()
             where TTarget3 : Entity, new()
         {
-            var sourceFunc = GetCachedMapFunc(reader, sourceEntityDef, 0, sourceEntityDef.FieldCount, false, engineType);
-            var targetFunc1 = GetCachedMapFunc(reader, targetEntityDef1, sourceEntityDef.FieldCount, targetEntityDef1.FieldCount, true, engineType);
-            var targetFunc2 = GetCachedMapFunc(reader, targetEntityDef2, sourceEntityDef.FieldCount + targetEntityDef1.FieldCount, reader.FieldCount - (sourceEntityDef.FieldCount + targetEntityDef1.FieldCount), true, engineType);
+            var sourceFunc = GetCachedToEntityFunc(reader, sourceEntityDef, 0, sourceEntityDef.FieldCount, false, engineType);
+            var targetFunc1 = GetCachedToEntityFunc(reader, targetEntityDef1, sourceEntityDef.FieldCount, targetEntityDef1.FieldCount, true, engineType);
+            var targetFunc2 = GetCachedToEntityFunc(reader, targetEntityDef2, sourceEntityDef.FieldCount + targetEntityDef1.FieldCount, reader.FieldCount - (sourceEntityDef.FieldCount + targetEntityDef1.FieldCount), true, engineType);
 
             IList<Tuple<TSource, TTarget2?, TTarget3?>> lst = new List<Tuple<TSource, TTarget2?, TTarget3?>>();
 
@@ -78,22 +82,22 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
-        private static Func<IDataReader, object?> GetCachedMapFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+        private static Func<IDataReader, object?> GetCachedToEntityFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
         {
             string key = GetKey(entityDef, startIndex, length, returnNullIfFirstNull, engineType);
 
-            if (!_mapperDict.ContainsKey(key))
+            if (!_toEntityFuncDict.ContainsKey(key))
             {
-                lock (_mapperLocker)
+                lock (_toEntityFuncDictLocker)
                 {
-                    if (!_mapperDict.ContainsKey(key))
+                    if (!_toEntityFuncDict.ContainsKey(key))
                     {
-                        _mapperDict[key] = EntityMapperCreator.CreateEntityMapper(entityDef, reader, startIndex, length, returnNullIfFirstNull, engineType);
+                        _toEntityFuncDict[key] = EntityMapperDelegateCreator.CreateToEntityDelegate(entityDef, reader, startIndex, length, returnNullIfFirstNull, engineType);
                     }
                 }
             }
 
-            return _mapperDict[key];
+            return _toEntityFuncDict[key];
 
             static string GetKey(EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
             {
@@ -101,8 +105,15 @@ namespace HB.FullStack.Database.Mapper
             }
         }
 
-        //TODO: 优化
-        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
+        #endregion
+
+        #region ToParameters
+
+        private static readonly ConcurrentDictionary<string, Func<object, int, KeyValuePair<string, object>[]>> _toParametersFuncDict = new ConcurrentDictionary<string, Func<object, int, KeyValuePair<string, object>[]>>();
+
+        private static readonly object _toParameterFuncDictLocker = new object();
+
+        public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
 
@@ -115,5 +126,37 @@ namespace HB.FullStack.Database.Mapper
 
             return parameters;
         }
+
+        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
+        {
+            Func<object, int, KeyValuePair<string, object>[]> func = GetCachedToParametersFunc(entityDef, engineType);
+
+            return func(entity, number);
+        }
+
+        private static Func<object, int, KeyValuePair<string, object>[]> GetCachedToParametersFunc(EntityDef entityDef, DatabaseEngineType engineType)
+        {
+            string key = GetKey(entityDef, engineType);
+
+            if (!_toParametersFuncDict.ContainsKey(key))
+            {
+                lock (_toParameterFuncDictLocker)
+                {
+                    if (!_toParametersFuncDict.ContainsKey(key))
+                    {
+                        _toParametersFuncDict[key] = EntityMapperDelegateCreator.CreateToParametersDelegate(entityDef, engineType);
+                    }
+                }
+            }
+
+            return _toParametersFuncDict[key];
+
+            static string GetKey(EntityDef entityDef, DatabaseEngineType engineType)
+            {
+                return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_ToParameters";
+            }
+        }
+
+        #endregion
     }
 }

@@ -181,7 +181,7 @@ namespace HB.FullStack.DatabaseTests
 
                 for (int i = 0; i < 10; ++i)
                 {
-                    PublisherEntity entity = Mocker.MockOne();
+                    PublisherEntity entity = Mocker.MockOnePublisherEntity();
 
                     await database.AddAsync(entity, "lastUsre", tContext);
 
@@ -335,7 +335,7 @@ namespace HB.FullStack.DatabaseTests
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
 
-            PublisherEntity item = Mocker.MockOne();
+            PublisherEntity item = Mocker.MockOnePublisherEntity();
 
             await database.AddAsync(item, "xx", null).ConfigureAwait(false);
 
@@ -409,7 +409,7 @@ namespace HB.FullStack.DatabaseTests
             try
             {
 
-                PublisherEntity item = Mocker.MockOne();
+                PublisherEntity item = Mocker.MockOnePublisherEntity();
 
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
@@ -439,7 +439,7 @@ namespace HB.FullStack.DatabaseTests
 
 
 
-                item = Mocker.MockOne();
+                item = Mocker.MockOnePublisherEntity();
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
@@ -582,7 +582,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, object> mapper1 = EntityMapperCreator.CreateEntityMapper(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.SQLite);
+                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.SQLite);
 
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset

@@ -27,7 +27,7 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
-        public static PublisherEntity MockOne()
+        public static PublisherEntity MockOnePublisherEntity()
         {
             PublisherEntity entity = new PublisherEntity
             {
