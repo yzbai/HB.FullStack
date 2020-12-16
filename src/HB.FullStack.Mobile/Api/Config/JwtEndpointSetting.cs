@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Client.Api
 {
-    public class JwtSettings : ValidatableObject
+    public class JwtEndpointSetting : ValidatableObject
     {
         /// <summary>
         /// 刷新token的站点名

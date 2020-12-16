@@ -161,7 +161,12 @@ namespace HB.FullStack.Client.Api
 
         private HttpClient GetHttpClient(EndpointSettings endpoint)
         {
-            return _httpClientFactory.CreateClient(EndpointSettings.GetHttpClientName(endpoint));
+            return _httpClientFactory.CreateClient(GetHttpClientName(endpoint));
+        }
+
+        public static string GetHttpClientName(EndpointSettings endpoint)
+        {
+            return endpoint.ProductName + "_" + endpoint.Version;
         }
 
         private static async Task<bool> TrySetJwtAsync(JwtApiRequest request)
@@ -229,7 +234,7 @@ namespace HB.FullStack.Client.Api
                 string accessTokenHashKey = SecurityUtil.GetHash(accessToken!);
 
                 //不久前刷新过
-                if (!_locker.NoWaitLock(_refreshTokenFrequencyCheckResourceType, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.JwtSettings.RefreshIntervalSeconds)))
+                if (!_locker.NoWaitLock(_refreshTokenFrequencyCheckResourceType, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.JwtEndpoint.RefreshIntervalSeconds)))
                 {
                     if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
                     {
@@ -258,10 +263,10 @@ namespace HB.FullStack.Client.Api
                 {
                     //开始刷新
                     RefreshJwtApiRequest refreshRequest = new RefreshJwtApiRequest(
-                        endpointSettings.JwtSettings!.ProductName!,
-                        endpointSettings.JwtSettings!.Version!,
+                        endpointSettings.JwtEndpoint!.ProductName!,
+                        endpointSettings.JwtEndpoint!.Version!,
                         HttpMethod.Put,
-                        endpointSettings.JwtSettings!.ResourceName!,
+                        endpointSettings.JwtEndpoint!.ResourceName!,
                         accessToken!,
                         refreshToken!
                         );
@@ -269,8 +274,8 @@ namespace HB.FullStack.Client.Api
                     await SetDeviceInfoAlwaysAsync(refreshRequest).ConfigureAwait(false);
 
                     EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(
-                        e => e.ProductName == endpointSettings.JwtSettings.ProductName &&
-                        e.Version == endpointSettings.JwtSettings.Version);
+                        e => e.ProductName == endpointSettings.JwtEndpoint.ProductName &&
+                        e.Version == endpointSettings.JwtEndpoint.Version);
 
                     HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
 

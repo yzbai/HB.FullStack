@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             options.Endpoints.ForEach(endpoint =>
             {
-                services.AddHttpClient(EndpointSettings.GetHttpClientName(endpoint), httpClient =>
+                services.AddHttpClient(ApiClient.GetHttpClientName(endpoint), httpClient =>
                 {
                     httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");

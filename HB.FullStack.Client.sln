@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Database", "sr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{4E2001B7-3C68-469E-A556-B338453AB7F7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3093C20A-F386-4D8F-A8D6-0DD3ADAD0AA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Client.Tests", "test\HB.FullStack.Client.Tests\HB.FullStack.Client.Tests.csproj", "{8E163DAD-9B55-42FB-AE1F-761400AC6F50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +51,10 @@ Global
 		{7DFDB4B1-81B1-4519-B923-FE5D1F3F7C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DFDB4B1-81B1-4519-B923-FE5D1F3F7C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DFDB4B1-81B1-4519-B923-FE5D1F3F7C7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E163DAD-9B55-42FB-AE1F-761400AC6F50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E163DAD-9B55-42FB-AE1F-761400AC6F50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E163DAD-9B55-42FB-AE1F-761400AC6F50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E163DAD-9B55-42FB-AE1F-761400AC6F50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +63,7 @@ Global
 		{95F1B0BC-2423-476D-81F2-F468CFF02F80} = {4E2001B7-3C68-469E-A556-B338453AB7F7}
 		{061D01D3-6117-4FD9-A57D-9C46CF79ACE4} = {4E2001B7-3C68-469E-A556-B338453AB7F7}
 		{7DFDB4B1-81B1-4519-B923-FE5D1F3F7C7A} = {4E2001B7-3C68-469E-A556-B338453AB7F7}
+		{8E163DAD-9B55-42FB-AE1F-761400AC6F50} = {3093C20A-F386-4D8F-A8D6-0DD3ADAD0AA9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B6D5B52-8E75-4988-BBE8-8FF769AFD8EA}
