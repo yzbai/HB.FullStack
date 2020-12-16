@@ -51,8 +51,8 @@ namespace HB.FullStack.Common
                 return Task.CompletedTask;
             }
 
-            List<DelegateWrapper> toRemoves = new();
-            List<(object, MethodInfo)> toRaises = new();
+            List<DelegateWrapper> toRemoves = new List<DelegateWrapper>();
+            List<(object, MethodInfo)> toRaises = new List<(object, MethodInfo)>();
 
             foreach (DelegateWrapper wrapper in wrappers)
             {

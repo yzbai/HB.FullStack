@@ -26,12 +26,7 @@ namespace HB.FullStack.Client.Api
 
         public bool NeedHttpMethodOveride { get; set; } = true;
 
-        public JwtSettings JwtSettings { get; set; } = new JwtSettings();
+        public JwtEndpointSetting JwtEndpoint { get; set; } = new JwtEndpointSetting();
 
-
-        public static string GetHttpClientName(EndpointSettings endpoint)
-        {
-            return endpoint.ProductName + "_" + endpoint.Version;
-        }
     }
 }
