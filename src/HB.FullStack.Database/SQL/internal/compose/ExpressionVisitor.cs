@@ -15,7 +15,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="exp"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        
         protected virtual Expression? Visit(Expression? exp)
         {
             if (exp == null)
@@ -105,7 +105,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="binding"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        
         protected virtual MemberBinding VisitBinding(MemberBinding binding)
         {
             return binding.BindingType switch

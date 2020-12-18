@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using HB.FullStack.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Lock.Distributed;
-using HB.FullStack.Lock.Memory;
-using HB.Infrastructure.Redis;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +38,6 @@ namespace HB.FullStack
                     builder.AddConsole();
                     builder.AddDebug();
                 })
-                .AddMemoryCache()
                 .AddSQLite(options =>
                 {
                     options.CommonSettings.Version = 1;
@@ -58,12 +48,7 @@ namespace HB.FullStack
                         ConnectionString = "Data Source=sqlite_test2.db",
                         IsMaster = true
                     });
-                })
-                .AddRedisCache(Configuration.GetSection("RedisCache"))
-                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
-                .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
-                .AddMemoryLock()
-                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock")); ;
+                });
 
             ServiceProvider = services.BuildServiceProvider();
 

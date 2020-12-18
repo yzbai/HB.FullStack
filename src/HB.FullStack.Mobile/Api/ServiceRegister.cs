@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services"></param>
         /// <param name="options"></param>
-        /// <exception cref="InvalidOperationException">Ignore.</exception>
+        
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
             options.Endpoints.ForEach(endpoint =>

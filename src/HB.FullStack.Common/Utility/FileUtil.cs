@@ -137,10 +137,10 @@ namespace System
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        /// <exception cref="IOException"></exception>
-        /// <exception cref="System.ObjectDisposedException"></exception>
-        /// <exception cref="System.Reflection.TargetInvocationException"></exception>
-        /// <exception cref="System.UnauthorizedAccessException"></exception>
+        
+        
+        
+        
         public static byte[] ComputeFileHash(string filePath)
         {
             int runCount = 1;

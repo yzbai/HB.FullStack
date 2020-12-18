@@ -7,7 +7,7 @@ namespace HB.FullStack.Server
     /// </summary>
     public interface IPublicResourceTokenManager
     {
-        /// <exception cref="EncoderFallbackException"></exception>
+        
         Task<string> GetNewTokenAsync(int expiredSeconds = 60);
 
         Task<bool> CheckTokenAsync(string? token);

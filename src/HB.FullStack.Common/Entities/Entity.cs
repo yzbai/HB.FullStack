@@ -28,6 +28,7 @@ namespace HB.FullStack.Common.Entities
         [EntityProperty]
         public long Id { get; internal set; } = -1;
 
+        //TODO: 思考这里最好是internal set，但是由于dto转换，不能，思考解决办法
         /// <summary>
         /// 资源ID，全局不变
         /// </summary>
@@ -36,7 +37,7 @@ namespace HB.FullStack.Common.Entities
         [UniqueGuidEntityProperty]
         [KVStoreBackupKey]
         [CacheGuidKey]
-        public string Guid { get; internal set; } = SecurityUtil.CreateUniqueToken();
+        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
         [PropertyOrder]
         [EntityProperty]
@@ -56,10 +57,5 @@ namespace HB.FullStack.Common.Entities
         [PropertyOrder]
         [EntityProperty]
         public bool Deleted { get; internal set; } = false;
-
-        public void OnlyForDtoMapping(string guid)
-        {
-            Guid = guid;
-        }
     }
 }

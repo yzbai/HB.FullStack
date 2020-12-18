@@ -24,9 +24,9 @@ namespace HB.FullStack.Database.SQL
 
         public string[]? OrderByStatementBySQLUtilIn_Ins { get; set; }
 
-        public DatabaseEngineType EngineType { get; private set; }
+        public EngineType EngineType { get; private set; }
 
-        public SQLExpressionVisitorContenxt(DatabaseEngineType engineType)
+        public SQLExpressionVisitorContenxt(EngineType engineType)
         {
             EngineType = engineType;
         }

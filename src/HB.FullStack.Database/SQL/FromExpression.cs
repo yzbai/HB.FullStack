@@ -34,12 +34,12 @@ namespace HB.FullStack.Database.SQL
             return _expressionContext.GetParameters();
         }
 
-        public override string ToString()
+        public string ToStatement()
         {
             return $" FROM {EntityDefFactory.GetDef<T>().DbTableReservedName} {_statementBuilder}";
         }
 
-        internal FromExpression(DatabaseEngineType engineType)
+        internal FromExpression(EngineType engineType)
         {
             _expressionContext = new SQLExpressionVisitorContenxt(engineType)
             {

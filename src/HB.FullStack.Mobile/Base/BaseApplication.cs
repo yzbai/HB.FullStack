@@ -92,6 +92,7 @@ namespace HB.FullStack.Client.Base
 
         }
 
+        protected abstract void PerformLogin();
 
 
         private static IRemoteLoggingService? _remoteLoggingService;
@@ -114,12 +115,11 @@ namespace HB.FullStack.Client.Base
                     case ErrorCode.ApiNoAuthority:
                     case ErrorCode.ApiTokenRefresherError:
                     case ErrorCode.ApiTokenExpired:
-                        DependencyService.Resolve<ILoginService>()?.PerformLogin();
+                        Application.Current.PerformLogin();
                         break;
                     default: break;
                 }
             }
-
         }
 
         public static void Log(LogLevel logLevel, Exception? ex, string? message = null)

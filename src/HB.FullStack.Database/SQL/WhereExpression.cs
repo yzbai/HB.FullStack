@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.SQL
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;
         private readonly List<string> _orderByProperties = new List<string>();
-        private readonly DatabaseEngineType _engineType;
+        private readonly EngineType _engineType;
 
         private string _whereString = string.Empty;
         private string? _orderByString;
@@ -30,7 +30,7 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        internal WhereExpression(DatabaseEngineType engineType)
+        internal WhereExpression(EngineType engineType)
         {
             _engineType = engineType;
 
@@ -45,7 +45,7 @@ namespace HB.FullStack.Database.SQL
             return _expressionContext.GetParameters();
         }
 
-        public string ToString(DatabaseEngineType engineType)
+        public string ToStatement(EngineType engineType)
         {
             StringBuilder sql = new StringBuilder();
 
@@ -92,6 +92,7 @@ namespace HB.FullStack.Database.SQL
             return sql.ToString();
         }
 
+
         #region Where
 
         /// <summary>
@@ -107,15 +108,15 @@ namespace HB.FullStack.Database.SQL
             return this;
         }
 
-        public WhereExpression<T> Where()
-        {
-            if (_whereExpression != null)
-            {
-                _whereExpression = null; //Where() clears the expression
-            }
+        //public WhereExpression<T> Where()
+        //{
+        //    if (_whereExpression != null)
+        //    {
+        //        _whereExpression = null; //Where() clears the expression
+        //    }
 
-            return Where(string.Empty);
-        }
+        //    return Where(string.Empty);
+        //}
 
         public WhereExpression<T> Where(Expression<Func<T, bool>> predicate)
         {
@@ -138,7 +139,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="sqlParams"></param>
         /// <returns></returns>
         //TODO:  参数化，而不是组成一个sql，有注入风险
-        private static string SqlFormat(DatabaseEngineType engineType, string sqlText, params object[] sqlParams)
+        private static string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
 

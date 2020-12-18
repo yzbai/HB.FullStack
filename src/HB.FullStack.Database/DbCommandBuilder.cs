@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Text;
 
 using HB.FullStack.Common.Entities;
@@ -11,21 +10,15 @@ using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
+using Microsoft;
 
 namespace HB.FullStack.Database
 {
-    internal class DbCommandBuilder : IDbCommandBuilder
+    internal static class DbCommandBuilder
     {
-        private readonly ConcurrentDictionary<string, string> _commandTextCache;
-        private readonly IDatabaseEngine _databaseEngine;
+        private static readonly ConcurrentDictionary<string, string> _commandTextCache = new ConcurrentDictionary<string, string>();
 
-        public DbCommandBuilder(IDatabaseEngine databaseEngine)
-        {
-            _databaseEngine = databaseEngine;
-            _commandTextCache = new ConcurrentDictionary<string, string>();
-        }
-
-        private string GetCachedSql(SqlType commandTextType, params EntityDef[] entityDefs)
+        private static string GetCachedSql(EngineType engineType, SqlType commandTextType, params EntityDef[] entityDefs)
         {
             string cacheKey = GetCommandTextCacheKey(commandTextType, entityDefs);
 
@@ -33,10 +26,11 @@ namespace HB.FullStack.Database
             {
                 commandText = commandTextType switch
                 {
-                    SqlType.ADD => SqlHelper.CreateAddSql(entityDefs[0], _databaseEngine.EngineType, true),
-                    SqlType.UPDATE => SqlHelper.CreateUpdateSql(entityDefs[0]),
-                    SqlType.DELETE => SqlHelper.CreateDeleteSql(entityDefs[0]),
-                    SqlType.SELECT => SqlHelper.CreateSelectSql(entityDefs),
+                    SqlType.AddEntity => SqlHelper.CreateAddEntitySql(entityDefs[0], engineType, true),
+                    SqlType.UpdateEntity => SqlHelper.CreateUpdateEntitySql(entityDefs[0]),
+                    SqlType.DeleteEntity => SqlHelper.CreateDeleteEntitySql(entityDefs[0]),
+                    SqlType.SelectEntity => SqlHelper.CreateSelectEntitySql(entityDefs),
+                    SqlType.Delete => SqlHelper.CreateDeleteSql(entityDefs[0]),
                     _ => throw new NotImplementedException(),
                 };
 
@@ -62,61 +56,54 @@ namespace HB.FullStack.Database
 
         #region 查询
 
-        public FromExpression<T> NewFrom<T>() where T : Entity, new()
-        {
-            return new FromExpression<T>(_databaseEngine.EngineType);
-        }
-
-        public WhereExpression<T> NewWhere<T>() where T : Entity, new()
-        {
-            return new WhereExpression<T>(_databaseEngine.EngineType);
-        }
-
-        public IDbCommand CreateRetrieveCommand<T>(EntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
+        public static EngineCommand CreateRetrieveCommand<T>(EngineType engineType, EntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : Entity, new()
         {
-            return AssembleRetrieveCommand(GetCachedSql(SqlType.SELECT, entityDef), fromCondition, whereCondition);
+            return AssembleRetrieveCommand(GetCachedSql(engineType, SqlType.SelectEntity, entityDef), fromCondition, whereCondition, engineType);
         }
 
-        public IDbCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
+        public static EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : Entity, new()
         {
-            return AssembleRetrieveCommand("SELECT COUNT(1) ", fromCondition, whereCondition);
+            return AssembleRetrieveCommand("SELECT COUNT(1) ", fromCondition, whereCondition, engineType);
         }
 
-        public IDbCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
+        public static EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
             where T1 : Entity, new()
             where T2 : Entity, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(SqlType.SELECT, returnEntityDefs),
+                GetCachedSql(engineType, SqlType.SelectEntity, returnEntityDefs),
                 fromCondition,
-                whereCondition);
+                whereCondition,
+                engineType);
         }
 
-        public IDbCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
+        public static EngineCommand CreateRetrieveCommand<T1, T2, T3>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
             where T1 : Entity, new()
             where T2 : Entity, new()
             where T3 : Entity, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(SqlType.SELECT, returnEntityDefs),
+                GetCachedSql(engineType, SqlType.SelectEntity, returnEntityDefs),
                 fromCondition,
-                whereCondition);
+                whereCondition,
+                engineType);
         }
 
-        public IDbCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params EntityDef[] returnEntityDefs)
+        public static EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType engineType, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params EntityDef[] returnEntityDefs)
             where TSelect : Entity, new()
             where TFrom : Entity, new()
             where TWhere : Entity, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(SqlType.SELECT, returnEntityDefs),
+                GetCachedSql(engineType, SqlType.SelectEntity, returnEntityDefs),
                 fromCondition,
-                whereCondition);
+                whereCondition,
+                engineType);
         }
 
-        private IDbCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectText, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition)
+        private static EngineCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectText, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, EngineType engineType)
             where TFrom : Entity, new()
             where TWhere : Entity, new()
         {
@@ -125,48 +112,57 @@ namespace HB.FullStack.Database
 
             if (fromCondition == null)
             {
-                fromCondition = NewFrom<TFrom>();
+                fromCondition = new FromExpression<TFrom>(engineType);
             }
 
-            sql += fromCondition.ToString();
+            sql += fromCondition.ToStatement();
             parameters.AddRange(fromCondition.GetParameters());
 
             if (whereCondition != null)
             {
-                sql += whereCondition.ToString(_databaseEngine.EngineType);
+                sql += whereCondition.ToStatement(engineType);
 
                 parameters.AddRange(whereCondition.GetParameters());
             }
 
-            return _databaseEngine.CreateTextCommand(sql, parameters);
+            return new EngineCommand(sql, parameters);
         }
 
         #endregion 查询
 
         #region 更改
 
-        public IDbCommand CreateAddCommand<T>(EntityDef entityDef, T entity) where T : Entity, new()
+        public static EngineCommand CreateAddCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : Entity, new()
         {
-            return _databaseEngine.CreateTextCommand(
-                GetCachedSql(SqlType.ADD, entityDef),
-                entity.ToParameters(entityDef, _databaseEngine.EngineType));
+            return new EngineCommand(
+                GetCachedSql(engineType, SqlType.AddEntity, entityDef),
+                entity.ToParameters(entityDef, engineType));
         }
 
-        public IDbCommand CreateUpdateCommand<T>(EntityDef entityDef, T entity) where T : Entity, new()
+        public static EngineCommand CreateUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : Entity, new()
         {
-            return _databaseEngine.CreateTextCommand(
-                GetCachedSql(SqlType.UPDATE, entityDef),
-                entity.ToParameters(entityDef, _databaseEngine.EngineType));
+            return new EngineCommand(
+                GetCachedSql(engineType, SqlType.UpdateEntity, entityDef),
+                entity.ToParameters(entityDef, engineType));
         }
 
-        public IDbCommand CreateDeleteCommand<T>(EntityDef entityDef, T entity) where T : Entity, new()
+        public static EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : Entity, new()
         {
-            return _databaseEngine.CreateTextCommand(
-                GetCachedSql(SqlType.DELETE, entityDef),
-                entity.ToParameters(entityDef, _databaseEngine.EngineType));
+            return new EngineCommand(
+                GetCachedSql(engineType, SqlType.DeleteEntity, entityDef),
+                entity.ToParameters(entityDef, engineType));
         }
 
-        public IDbCommand CreateBatchAddCommand<T>(EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
+        public static EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, WhereExpression<T> whereExpression) where T : Entity, new()
+        {
+            Requires.NotNull(whereExpression, nameof(whereExpression));
+
+            string sql = GetCachedSql(engineType, SqlType.Delete, entityDef) + whereExpression.ToStatement(engineType);
+
+            return new EngineCommand(sql, whereExpression.GetParameters());
+        }
+
+        public static EngineCommand CreateBatchAddCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -178,21 +174,21 @@ namespace HB.FullStack.Database
 
             foreach (T entity in entities)
             {
-                string addCommandText = SqlHelper.CreateAddSql(entityDef, _databaseEngine.EngineType, false, number);
+                string addCommandText = SqlHelper.CreateAddEntitySql(entityDef, engineType, false, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, _databaseEngine.EngineType, number));
+                parameters.AddRange(entity.ToParameters(entityDef, engineType, number));
 
-                innerBuilder.Append($"{addCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.GetLastInsertIdStatement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
+                innerBuilder.Append($"{addCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.GetLastInsertIdStatement(engineType), engineType)}");
 
                 number++;
             }
 
-            string commandText = $"{SqlHelper.TempTable_Drop(tempTableName, _databaseEngine.EngineType)}{SqlHelper.TempTable_Create_Id(tempTableName, _databaseEngine.EngineType)}{innerBuilder}{SqlHelper.TempTable_Select_Id(tempTableName, _databaseEngine.EngineType)}{SqlHelper.TempTable_Drop(tempTableName, _databaseEngine.EngineType)}";
+            string commandText = $"{SqlHelper.TempTable_Drop(tempTableName, engineType)}{SqlHelper.TempTable_Create_Id(tempTableName, engineType)}{innerBuilder}{SqlHelper.TempTable_Select_Id(tempTableName, engineType)}{SqlHelper.TempTable_Drop(tempTableName, engineType)}";
 
-            return _databaseEngine.CreateTextCommand(commandText, parameters);
+            return new EngineCommand(commandText, parameters);
         }
 
-        public IDbCommand CreateBatchUpdateCommand<T>(EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
+        public static EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -203,21 +199,21 @@ namespace HB.FullStack.Database
 
             foreach (T entity in entities)
             {
-                string updateCommandText = SqlHelper.CreateUpdateSql(entityDef, number);
+                string updateCommandText = SqlHelper.CreateUpdateEntitySql(entityDef, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, _databaseEngine.EngineType, number));
+                parameters.AddRange(entity.ToParameters(entityDef, engineType, number));
 
-                innerBuilder.Append($"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
+                innerBuilder.Append($"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(engineType), engineType)}");
 
                 number++;
             }
 
-            string commandText = $"{SqlHelper.TempTable_Drop(tempTableName, _databaseEngine.EngineType)}{SqlHelper.TempTable_Create_Id(tempTableName, _databaseEngine.EngineType)}{innerBuilder}{SqlHelper.TempTable_Select_Id(tempTableName, _databaseEngine.EngineType)}{SqlHelper.TempTable_Drop(tempTableName, _databaseEngine.EngineType)}";
+            string commandText = $"{SqlHelper.TempTable_Drop(tempTableName, engineType)}{SqlHelper.TempTable_Create_Id(tempTableName, engineType)}{innerBuilder}{SqlHelper.TempTable_Select_Id(tempTableName, engineType)}{SqlHelper.TempTable_Drop(tempTableName, engineType)}";
 
-            return _databaseEngine.CreateTextCommand(commandText, parameters);
+            return new EngineCommand(commandText, parameters);
         }
 
-        public IDbCommand CreateBatchDeleteCommand<T>(EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
+        public static EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities) where T : Entity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -228,70 +224,72 @@ namespace HB.FullStack.Database
 
             foreach (T entity in entities)
             {
-                string deleteCommandText = SqlHelper.CreateDeleteSql(entityDef, number);
+                string deleteCommandText = SqlHelper.CreateDeleteEntitySql(entityDef, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, _databaseEngine.EngineType, number));
+                parameters.AddRange(entity.ToParameters(entityDef, engineType, number));
 
-                innerBuilder.Append($"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(_databaseEngine.EngineType), _databaseEngine.EngineType)}");
+                innerBuilder.Append($"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(engineType), engineType)}");
 
                 number++;
             }
 
-            string commandText = $"{SqlHelper.TempTable_Drop(tempTableName, _databaseEngine.EngineType)}{SqlHelper.TempTable_Create_Id(tempTableName, _databaseEngine.EngineType)}{innerBuilder}{SqlHelper.TempTable_Select_Id(tempTableName, _databaseEngine.EngineType)}{SqlHelper.TempTable_Drop(tempTableName, _databaseEngine.EngineType)}";
+            string commandText = $"{SqlHelper.TempTable_Drop(tempTableName, engineType)}{SqlHelper.TempTable_Create_Id(tempTableName, engineType)}{innerBuilder}{SqlHelper.TempTable_Select_Id(tempTableName, engineType)}{SqlHelper.TempTable_Drop(tempTableName, engineType)}";
 
-            return _databaseEngine.CreateTextCommand(commandText, parameters);
+            return new EngineCommand(commandText, parameters);
         }
 
         #endregion 更改
 
         #region Management
 
-        public IDbCommand CreateTableCreateCommand(EntityDef entityDef, bool addDropStatement)
+        public static EngineCommand CreateTableCreateCommand(EngineType engineType, EntityDef entityDef, bool addDropStatement)
         {
-            string sql = SqlHelper.GetTableCreateSql(entityDef, addDropStatement, EntityDefFactory.VarcharDefaultLength, _databaseEngine.EngineType);
+            string sql = SqlHelper.GetTableCreateSql(entityDef, addDropStatement, EntityDefFactory.VarcharDefaultLength, engineType);
 
-            return _databaseEngine.CreateTextCommand(sql);
+            return new EngineCommand(sql);
         }
 
-        public IDbCommand CreateIsTableExistCommand(string databaseName, string tableName)
+        public static EngineCommand CreateIsTableExistCommand(EngineType engineType, string databaseName, string tableName)
         {
-            string sql = SqlHelper.GetIsTableExistSql(_databaseEngine.EngineType);
+            string sql = SqlHelper.GetIsTableExistSql(engineType);
 
-            KeyValuePair<string, object>[] parameters = new KeyValuePair<string, object>[] {
+            var parameters = new List<KeyValuePair<string, object>> {
                 new KeyValuePair<string, object>("@tableName", tableName ),
                 new KeyValuePair<string, object>( "@databaseName", databaseName)
             };
 
-            return _databaseEngine.CreateTextCommand(sql, parameters);
+            return new EngineCommand(sql, parameters);
         }
 
-        public IDbCommand CreateSystemInfoRetrieveCommand()
+        public static EngineCommand CreateSystemInfoRetrieveCommand(EngineType engineType)
         {
-            string sql = SqlHelper.GetSystemInfoRetrieveSql(_databaseEngine.EngineType);
+            string sql = SqlHelper.GetSystemInfoRetrieveSql(engineType);
 
-            return _databaseEngine.CreateTextCommand(sql);
+            return new EngineCommand(sql);
         }
 
-        public IDbCommand CreateSystemVersionUpdateCommand(string databaseName, int version)
+        public static EngineCommand CreateSystemVersionUpdateCommand(EngineType engineType, string databaseName, int version)
         {
             string sql;
-            KeyValuePair<string, object>[] parameters;
+            List<KeyValuePair<string, object>> parameters;
 
             if (version == 1)
             {
-                sql = SqlHelper.GetSystemInfoCreateSql(_databaseEngine.EngineType);
+                sql = SqlHelper.GetSystemInfoCreateSql(engineType);
 
-                parameters = new KeyValuePair<string, object>[] { new KeyValuePair<string, object>("@databaseName", databaseName) };
+                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("@databaseName", databaseName) };
             }
             else
             {
-                sql = SqlHelper.GetSystemInfoUpdateVersionSql(_databaseEngine.EngineType);
+                sql = SqlHelper.GetSystemInfoUpdateVersionSql(engineType);
 
-                parameters = new KeyValuePair<string, object>[] { new KeyValuePair<string, object>("@Value", version) };
+                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("@Value", version) };
             }
 
-            return _databaseEngine.CreateTextCommand(sql, parameters);
+            return new EngineCommand(sql, parameters);
         }
+
+
 
         #endregion Management
     }

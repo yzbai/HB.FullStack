@@ -14,6 +14,10 @@ namespace HB.FullStack.Database
 
         WhereExpression<T> Where<T>() where T : Entity, new();
 
+        WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : Entity, new();
+
+        WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : Entity, new();
+
         Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : Entity, new();
 
         Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : Entity, new();

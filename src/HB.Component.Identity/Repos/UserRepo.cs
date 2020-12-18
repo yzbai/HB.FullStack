@@ -96,7 +96,7 @@ namespace HB.FullStack.Identity
 
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            WhereExpression<User> where = _databaseReader.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            WhereExpression<User> where = _databaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
             return _databaseReader.CountAsync(where, transContext);
         }
 

@@ -16,9 +16,6 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
 {
-    /// <summary>
-    /// MySql数据库
-    /// </summary>
     internal class MySQLEngine : IDatabaseEngine
     {
         #region 自身 & 构建
@@ -31,9 +28,11 @@ namespace HB.Infrastructure.MySQL
 
         public DatabaseCommonSettings DatabaseSettings => _options.CommonSettings;
 
-        public DatabaseEngineType EngineType => DatabaseEngineType.MySQL;
+        public EngineType EngineType => EngineType.MySQL;
 
         [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
+
+        public IEnumerable<string> DatabaseNames { get; private set; }
 
         public MySQLEngine(IOptions<MySQLOptions> options, /*ILoggerFactory loggerFactory,*/ ILogger<MySQLEngine> logger)
         {
@@ -48,6 +47,8 @@ namespace HB.Infrastructure.MySQL
 
             _options = options.Value;
             _logger = logger;
+
+            DatabaseNames = _options.Connections.Select(s => s.DatabaseName);
 
             SetConnectionStrings();
 
@@ -89,28 +90,24 @@ namespace HB.Infrastructure.MySQL
             return _connectionStringDict[dbName + "_0"];
         }
 
-        public IEnumerable<string> GetDatabaseNames()
-        {
-            return _options.Connections.Select(s => s.DatabaseName);
-        }
 
         #endregion 自身 & 构建
 
 
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null)
+        private static MySqlCommand CreateTextCommand(EngineCommand engineCommand)
         {
-            MySqlCommand command = new MySqlCommand(commandText)
+            MySqlCommand command = new MySqlCommand(engineCommand.CommandText)
             {
                 CommandType = CommandType.Text
             };
 
-            if (parameterPairs == null)
+            if (engineCommand.Parameters == null)
             {
                 return command;
             }
 
-            foreach (var pair in parameterPairs)
+            foreach (var pair in engineCommand.Parameters)
             {
                 command.Parameters.Add(new MySqlParameter(pair.Key, pair.Value));
             }
@@ -118,136 +115,48 @@ namespace HB.Infrastructure.MySQL
             return command;
         }
 
-        #region SP 能力
-
-        /// <summary>
-        /// ExecuteSPReaderAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="spName"></param>
-        /// <param name="dbParameters"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseEngineException"></exception>
-        public Task<Tuple<IDbCommand, IDataReader>> ExecuteSPReaderAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster = false)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSPReaderAsync(GetConnectionString(dbName, useMaster), spName, dbParameters);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSPReaderAsync((MySqlTransaction)Transaction, spName, dbParameters);
-            }
-        }
-
-        /// <summary>
-        /// ExecuteSPScalarAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="spName"></param>
-        /// <param name="parameters"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseEngineException"></exception>
-        public Task<object> ExecuteSPScalarAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster = false)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSPScalarAsync(GetConnectionString(dbName, useMaster), spName, parameters);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSPScalarAsync((MySqlTransaction)Transaction, spName, parameters);
-            }
-        }
-
-        /// <summary>
-        /// ExecuteSPNonQueryAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="spName"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseEngineException"></exception>
-        public Task<int> ExecuteSPNonQueryAsync(IDbTransaction? Transaction, string dbName, string spName, IList<IDataParameter> parameters)
-        {
-            if (Transaction == null)
-            {
-                return MySQLExecuter.ExecuteSPNonQueryAsync(GetConnectionString(dbName, true), spName, parameters);
-            }
-            else
-            {
-                return MySQLExecuter.ExecuteSPNonQueryAsync((MySqlTransaction)Transaction, spName, parameters);
-            }
-        }
-
-        #endregion SP 能力
 
         #region Command 能力
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseEngineException"></exception>
-        public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
         {
+            using MySqlCommand command = CreateTextCommand(engineCommand);
+
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), dbCommand);
+                return await MySQLExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), command).ConfigureAwait(false);
             }
             else
             {
-                return MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)Transaction, dbCommand);
+                return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="dbCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseEngineException"></exception>
-        public Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
+            using MySqlCommand command = CreateTextCommand(engineCommand);
+
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), dbCommand);
+                return await MySQLExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
             }
             else
             {
-                return MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)Transaction, dbCommand);
+                return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="dbCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseEngineException"></exception>
-        public Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
+        public async Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
+            using MySqlCommand command = CreateTextCommand(engineCommand);
+
             if (Transaction == null)
             {
-                return MySQLExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), dbCommand);
+                return await MySQLExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
             }
             else
             {
-                return MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)Transaction, dbCommand);
+                return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
             }
         }
 
@@ -278,7 +187,7 @@ namespace HB.Infrastructure.MySQL
             {
                 if (connection != null)
                 {
-                    await connection.CloseAsync().ConfigureAwait(false);
+                    await connection.DisposeAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -297,7 +206,7 @@ namespace HB.Infrastructure.MySQL
             {
                 if (connection != null)
                 {
-                    await connection.CloseAsync().ConfigureAwait(false);
+                    await connection.DisposeAsync().ConfigureAwait(false);
                 }
             }
         }

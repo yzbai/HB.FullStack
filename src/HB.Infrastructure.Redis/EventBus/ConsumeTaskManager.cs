@@ -184,8 +184,8 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// <summary>
         /// CosumeTaskProcedure
         /// </summary>
-        /// <exception cref="ObjectDisposedException">Ignore.</exception>
-        /// <exception cref="AggregateException">Ignore.</exception>
+        
+        
         private async Task CosumeAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
@@ -321,8 +321,8 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// <summary>
         /// Cancel
         /// </summary>
-        /// <exception cref="ObjectDisposedException">Ignore.</exception>
-        /// <exception cref="AggregateException">Ignore.</exception>
+        
+        
         public async Task CancelAsync()
         {
             _consumeTaskCTS.Cancel();
@@ -351,9 +351,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// <summary>
         /// Start
         /// </summary>
-        /// <exception cref="InvalidOperationException">Ignore.</exception>
-        /// <exception cref="ObjectDisposedException">Ignore.</exception>
-        /// <exception cref="TaskSchedulerException">Ignore.</exception>
+        
+        
+        
         public void Start()
         {
             _consumeTask = CosumeAsync(_consumeTaskCTS.Token);
@@ -373,9 +373,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// Dispose
         /// </summary>
         /// <param name="disposing"></param>
-        /// <exception cref="ObjectDisposedException">Ignore.</exception>
-        /// <exception cref="AggregateException">Ignore.</exception>
-        /// <exception cref="InvalidOperationException">Ignore.</exception>
+        
+        
+        
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)

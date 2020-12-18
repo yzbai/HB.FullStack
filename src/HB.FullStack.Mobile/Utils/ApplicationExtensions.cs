@@ -23,6 +23,15 @@ namespace Xamarin.Forms
             }
         }
 
+        public static void PerformLogin(this Application application)
+        {
+            if (application is BaseApplication baseApplication)
+            {
+                baseApplication.PerformLogin();
+            }
+
+        }
+
         public static void LogUsage(this Application application, UsageType usageType, string? name)
         {
             if (application is BaseApplication)

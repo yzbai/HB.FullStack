@@ -19,7 +19,7 @@ namespace HB.FullStack.Common
         /// <summary>Initialized a new instance of <see cref="BloomFilter"/> with the specified desired capacity and false-positive probability.</summary>
         /// <param name="n">The approximate amount of objects that the filter will contain.</param>
         /// <param name="p">The false-positive probability.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="n"/> or <paramref name="p"/> is out of range.</exception>
+        
         public BloomFilter(int n, double p)
         {
             if (n < 0)
@@ -41,7 +41,7 @@ namespace HB.FullStack.Common
         /// <summary>Initialized a new instance of <see cref="BloomFilter"/> with the specified width and depth.</summary>
         /// <param name="m">The length of the array implementing the filter.</param>
         /// <param name="k">The number of hash functions to apply.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="m"/> or <paramref name="k"/> is negative.</exception>
+        
         public BloomFilter(int m, int k)
         {
             if (m < 0)
@@ -63,7 +63,7 @@ namespace HB.FullStack.Common
         /// <summary>Adds an object to the <see cref="BloomFilter"/>.
         /// <code>Complexity: O(1)</code></summary>
         /// <param name="obj">The object to add to the <see cref="BloomFilter"/>.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="obj"/> is <c>null</c>.</exception>
+        
         public void Add(object obj)
         {
             if (obj == null)

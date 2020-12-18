@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Database.Engine;
 
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
+[assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
 
 namespace HB.FullStack.Database
 {
@@ -17,6 +18,10 @@ namespace HB.FullStack.Database
         /// <returns></returns>
         Task InitializeAsync(IEnumerable<Migration>? migrations = null);
 
-        DatabaseEngineType EngineType { get; }
+        EngineType EngineType { get; }
+
+        IEnumerable<string> DatabaseNames { get; }
+
+        internal IDatabaseEngine DatabaseEngine { get; }
     }
 }

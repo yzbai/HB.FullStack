@@ -13,8 +13,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddDatabase(this IServiceCollection services)
         {
-            services.AddSingleton<IDbCommandBuilder, DbCommandBuilder>();
-
             //public
             services.AddSingleton<ITransaction, DefaultTransaction>();
             services.AddSingleton<IDatabase, DefaultDatabase>();

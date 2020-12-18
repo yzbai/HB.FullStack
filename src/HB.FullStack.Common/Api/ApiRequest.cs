@@ -103,7 +103,7 @@ namespace HB.FullStack.Common.Api
             return null;
         }
 
-        /// <exception cref="System.ArgumentException"></exception>
+        
         public void SetHeader(string name, string value)
         {
             _headers[name] = value;

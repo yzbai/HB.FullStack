@@ -47,7 +47,7 @@ namespace HB.FullStack.Database.Def
             }
         }
 
-        private static void WarmUp(IEnumerable<Type> allEntityTypes, DatabaseEngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private static void WarmUp(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             allEntityTypes.ForEach(t => _defDict[t] = CreateEntityDef(t, engineType, entitySchemaDict));
         }
@@ -143,7 +143,7 @@ namespace HB.FullStack.Database.Def
             return _defDict[entityType];
         }
 
-        private static EntityDef CreateEntityDef(Type entityType, DatabaseEngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
@@ -190,7 +190,7 @@ namespace HB.FullStack.Database.Def
             return entityDef;
         }
 
-        private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, DatabaseEngineType engineType)
+        private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, EngineType engineType)
         {
             EntityPropertyDef propertyDef = new EntityPropertyDef
             {

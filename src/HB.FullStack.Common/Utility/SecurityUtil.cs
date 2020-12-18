@@ -36,8 +36,8 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        /// <exception cref="System.Reflection.TargetInvocationException"></exception>
-        /// <exception cref="System.ObjectDisposedException"></exception>
+        
+        
         public static string GetHash(string item)
         {
             using SHA256 sha256Obj = SHA256.Create();
@@ -51,10 +51,10 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        /// <exception cref="System.Reflection.TargetInvocationException"></exception>
-        /// <exception cref="System.ObjectDisposedException"></exception>
-        /// <exception cref="System.Runtime.Serialization.SerializationException"></exception>
-        /// <exception cref="System.Security.SecurityException"></exception>
+        
+        
+        
+        
         public static async Task<string> GetHashAsync<T>([DisallowNull] T item) where T : class
         {
             using SHA256 sha256Obj = SHA256.Create();
@@ -69,8 +69,8 @@ namespace System
         /// <param name="pwd"></param>
         /// <param name="salt"></param>
         /// <returns></returns>
-        /// <exception cref="System.Reflection.TargetInvocationException">Ignore.</exception>
-        /// <exception cref="System.ObjectDisposedException">Ignore.</exception>
+        
+        
         public static string EncryptPwdWithSalt(string pwd, string salt)
         {
             return GetHash(pwd + salt);

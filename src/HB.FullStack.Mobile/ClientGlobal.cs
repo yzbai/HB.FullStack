@@ -22,8 +22,8 @@ namespace HB.FullStack.Client
     public static class ClientGlobal
     {
         private static string? _deviceId;
-        private static DeviceInfos? _deviceInfos;
         private static string? _deviceVersion;
+        private static DeviceInfos? _deviceInfos;
         private static string? _deviceAddress;
 
         private static string? _currentUserGuid;
@@ -86,20 +86,17 @@ namespace HB.FullStack.Client
             return _deviceId!;
         }
 
-        public static string DeviceId
+        public static string GetDeviceId()
         {
-            get
+            if (_deviceId.IsNullOrEmpty())
             {
-                if (_deviceId.IsNullOrEmpty())
-                {
-                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
 
-                    return joinableTaskFactory.Run(async () => { return await GetDeviceIdAsync().ConfigureAwait(false); });
-                }
-
-                return _deviceId!;
+                return joinableTaskFactory.Run(async () => { return await GetDeviceIdAsync().ConfigureAwait(false); });
             }
+
+            return _deviceId!;
         }
 
         public static DeviceInfos DeviceInfos
@@ -130,10 +127,12 @@ namespace HB.FullStack.Client
 
         public static async Task<string> GetDeviceAddressAsync()
         {
+            //TODO:隔一段时间取一次地理位置
             if (_deviceAddress.IsNotNullOrEmpty())
             {
                 return _deviceAddress!;
             }
+
 
             //_deviceAddress = await PreferenceGetAsync(ClientNames.DeviceAddress).ConfigureAwait(false);
 
@@ -149,40 +148,34 @@ namespace HB.FullStack.Client
             return _deviceAddress!;
         }
 
-        public static string DeviceAddress
+        public static string GetDeviceAddress()
         {
-            get
+            if (_deviceAddress.IsNullOrEmpty())
             {
-                if (_deviceAddress.IsNullOrEmpty())
-                {
-                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
 
-                    return joinableTaskFactory.Run(async () => { return await GetDeviceAddressAsync().ConfigureAwait(false); });
-                }
-
-                return _deviceAddress!;
+                return joinableTaskFactory.Run(async () => { return await GetDeviceAddressAsync().ConfigureAwait(false); });
             }
+
+            return _deviceAddress!;
         }
 
         #endregion
 
         #region User
 
-        public static bool IsLogined
+        public static bool IsLogined()
         {
-            get
+            if (_isLogined == null)
             {
-                if (_isLogined == null)
-                {
-                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
 
-                    return joinableTaskFactory.Run(async () => { return await IsLoginedAsync().ConfigureAwait(false); });
-                }
-
-                return _isLogined.Value;
+                return joinableTaskFactory.Run(async () => { return await IsLoginedAsync().ConfigureAwait(false); });
             }
+
+            return _isLogined.Value;
         }
 
         public static async Task<bool> IsLoginedAsync()
@@ -197,20 +190,17 @@ namespace HB.FullStack.Client
             return _isLogined.Value;
         }
 
-        public static string? CurrentUserGuid
+        public static string? GetCurrentUserGuid()
         {
-            get
+            if (_currentUserGuid == null)
             {
-                if (_currentUserGuid == null)
-                {
-                    using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
-                    JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
 
-                    return joinableTaskFactory.Run(async () => { return await GetCurrentUserGuidAsync().ConfigureAwait(false); });
-                }
-
-                return _currentUserGuid;
+                return joinableTaskFactory.Run(async () => { return await GetCurrentUserGuidAsync().ConfigureAwait(false); });
             }
+
+            return _currentUserGuid;
         }
 
         public static async Task<string?> GetCurrentUserGuidAsync()
@@ -246,6 +236,40 @@ namespace HB.FullStack.Client
             _currentLoginName = loginName;
 
             await PreferenceSetAsync(ClientNames.CurrentLoginName, loginName).ConfigureAwait(false);
+        }
+
+        public static async Task<string?> GetCurrentMobileAsync()
+        {
+            if (_currentMobile.IsNullOrEmpty())
+            {
+                _currentMobile = await PreferenceGetAsync(ClientNames.Mobile).ConfigureAwait(false);
+            }
+
+            return _currentMobile;
+        }
+
+        public static async Task SetCurrentMobileAsync(string? mobile)
+        {
+            _currentMobile = mobile;
+
+            await PreferenceSetAsync(ClientNames.Mobile, mobile).ConfigureAwait(false);
+        }
+
+        public static async Task<string?> GetCurrentEmailAsync()
+        {
+            if (_currentEmail.IsNullOrEmpty())
+            {
+                _currentEmail = await PreferenceGetAsync(ClientNames.Email).ConfigureAwait(false);
+            }
+
+            return _currentEmail;
+        }
+
+        public static async Task SetCurrentEmailAsync(string? email)
+        {
+            _currentEmail = email;
+
+            await PreferenceSetAsync(ClientNames.Email, email).ConfigureAwait(false);
         }
 
         #endregion
@@ -287,6 +311,10 @@ namespace HB.FullStack.Client
             _refreshToken = refreshToken;
             await PreferenceSetAsync(ClientNames.RefreshToken, refreshToken).ConfigureAwait(false);
         }
+
+        #endregion
+
+        #region Events
 
         public static async Task OnJwtRefreshSucceedAsync(string newAccessToken)
         {
@@ -365,40 +393,6 @@ namespace HB.FullStack.Client
                 Application.Current.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
                 return;
             }
-        }
-
-        public static async Task<string?> GetCurrentMobileAsync()
-        {
-            if (_currentMobile.IsNullOrEmpty())
-            {
-                _currentMobile = await PreferenceGetAsync(ClientNames.Mobile).ConfigureAwait(false);
-            }
-
-            return _currentMobile;
-        }
-
-        public static async Task SetCurrentMobileAsync(string? mobile)
-        {
-            _currentMobile = mobile;
-
-            await PreferenceSetAsync(ClientNames.Mobile, mobile).ConfigureAwait(false);
-        }
-
-        public static async Task<string?> GetCurrentEmailAsync()
-        {
-            if (_currentEmail.IsNullOrEmpty())
-            {
-                _currentEmail = await PreferenceGetAsync(ClientNames.Email).ConfigureAwait(false);
-            }
-
-            return _currentEmail;
-        }
-
-        public static async Task SetCurrentEmailAsync(string? email)
-        {
-            _currentEmail = email;
-
-            await PreferenceSetAsync(ClientNames.Email, email).ConfigureAwait(false);
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common.Api;
 using HB.FullStack.Identity;
+using HB.FullStack.Lock.Distributed;
 using HB.FullStack.Server;
 
 using Microsoft.AspNetCore.Authentication;
@@ -12,14 +13,13 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 using Polly;
 
 using Serilog;
-
 using StackExchange.Redis;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -208,6 +208,37 @@ namespace System
                 .PartManager.ApplicationParts.Add(new AssemblyPart(httpFrameworkAssembly));
 
             return services;
+        }
+
+        public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager)
+        {
+            GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
+
+            using IDistributedLock distributedLock = await lockManager.LockAsync(
+                resources: database.DatabaseNames,
+                expiryTime: TimeSpan.FromMinutes(5),
+                waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
+
+            try
+            {
+                if (!distributedLock.IsAcquired)
+                {
+                    ThrowIfDatabaseInitLockNotGet(database.DatabaseNames);
+                }
+
+                GlobalSettings.Logger.LogDebug($"获取了初始化数据库的锁:{database.DatabaseNames.ToJoinedString(",")}");
+
+                await database.InitializeAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                await distributedLock.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+
+        private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
+        {
+            throw new DatabaseException(ErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
         }
     }
 }

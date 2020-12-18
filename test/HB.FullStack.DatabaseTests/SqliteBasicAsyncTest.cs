@@ -51,8 +51,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
         public async Task Test_1_Batch_Add_PublisherEntityAsync()
         {
@@ -82,7 +82,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="Exception">Ignore.</exception>
+
         [Fact]
 
 
@@ -128,8 +128,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -164,8 +164,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -205,8 +205,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -253,8 +253,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -582,7 +582,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.SQLite);
+                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
 
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
@@ -624,7 +624,7 @@ namespace HB.FullStack.DatabaseTests
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.DatabaseEngineType.SQLite);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
 
                         if (value != null)
                         {

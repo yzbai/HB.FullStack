@@ -29,7 +29,7 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
-        public string ToSqlInString(DatabaseEngineType engineType)
+        public string ToSqlInString(EngineType engineType)
         {
             if (Count == 0)
                 return "NULL";
@@ -37,7 +37,7 @@ namespace HB.FullStack.Database.SQL
             return SqlJoin(_values, engineType);
         }
 
-        public static string SqlJoin(IEnumerable values, DatabaseEngineType engineType)
+        public static string SqlJoin(IEnumerable values, EngineType engineType)
         {
             StringBuilder sb = new StringBuilder();
 

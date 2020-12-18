@@ -62,7 +62,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Close();
+                    conn.Dispose();
                 }
 
                 context.Status = TransactionStatus.Commited;
@@ -102,7 +102,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Close();
+                    conn.Dispose();
                 }
 
                 context.Status = TransactionStatus.Rollbacked;

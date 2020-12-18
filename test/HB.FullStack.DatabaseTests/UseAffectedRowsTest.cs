@@ -18,7 +18,7 @@ namespace HB.FullStack.DatabaseTests
         /// <summary>
         /// TestUseAffectedRow_When_True_Test
         /// </summary>
-        /// <exception cref="Xunit.Sdk.NotEqualException">Ignore.</exception>
+        
         [Theory]
         [InlineData(true, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(false, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]

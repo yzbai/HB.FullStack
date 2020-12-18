@@ -23,7 +23,7 @@ namespace HB.FullStack.Repository
     /// Update时先操作数据库，再操作缓存。只在读取时，更新缓存
     /// 这里体现缓存的策略：
     /// 所有的关于TEntity的update\delete都要经过这里，保证缓存的Invalidation正确
-    /// Service里面不要出现_database.Update / _database.Delete,全部由Biz来调用
+    /// Service里面不要出现_database.Update / _database.Delete,全部由Repo来调用
     /// Cache Strategy : Cache Aside
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>

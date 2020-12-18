@@ -51,8 +51,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -84,7 +84,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="Exception">Ignore.</exception>
+
         [Fact]
 
 
@@ -130,8 +130,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -166,8 +166,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -207,8 +207,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -255,8 +255,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -583,7 +583,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.MySQL);
+                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
@@ -623,7 +623,7 @@ namespace HB.FullStack.DatabaseTests
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.DatabaseEngineType.MySQL);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.MySQL);
 
                         if (value != null)
                         {
@@ -657,9 +657,9 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [Theory]
-        [InlineData(DatabaseEngineType.MySQL)]
-        [InlineData(DatabaseEngineType.SQLite)]
-        public void EntityMapper_ToParameter_Test(DatabaseEngineType engineType)
+        [InlineData(EngineType.MySQL)]
+        [InlineData(EngineType.SQLite)]
+        public void EntityMapper_ToParameter_Test(EngineType engineType)
         {
             PublisherEntity publisherEntity = Mocker.MockOnePublisherEntity();
 
@@ -691,7 +691,7 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
-        private void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, DatabaseEngineType engineType)
+        private void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
         {
             var dict = results.ToDictionary(kv => kv.Key);
 
@@ -708,9 +708,9 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [Theory]
-        [InlineData(DatabaseEngineType.MySQL)]
-        [InlineData(DatabaseEngineType.SQLite)]
-        public void EntityMapper_ToParameter_Performance_Test(DatabaseEngineType engineType)
+        [InlineData(EngineType.MySQL)]
+        [InlineData(EngineType.SQLite)]
+        public void EntityMapper_ToParameter_Performance_Test(EngineType engineType)
         {
             var entities = Mocker.GetPublishers(1000000);
 

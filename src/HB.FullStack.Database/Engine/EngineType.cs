@@ -3,7 +3,7 @@
 //
 namespace HB.FullStack.Database.Engine
 {
-    public enum DatabaseEngineType
+    public enum EngineType
     {
         MySQL = 0,
         SQLite = 1,

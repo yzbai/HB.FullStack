@@ -27,7 +27,7 @@ namespace HB.FullStack.Server
             _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenManager));
         }
 
-        /// <exception cref="EncoderFallbackException"></exception>
+        
         public async Task<string> GetNewTokenAsync(int expiredSeconds)
         {
             string token = _prefix + Guid.NewGuid().ToString();

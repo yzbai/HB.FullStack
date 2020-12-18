@@ -16,40 +16,21 @@ namespace HB.Infrastructure.SQLite
     {
         #region Command Reader
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
-        public static Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandReaderAsync(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
+            return await ExecuteCommandReaderAsync(sqliteTransaction.Connection, false, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
         /// <returns></returns>
-        
-        public static Task<IDataReader> ExecuteCommandReaderAsync(string connectString, IDbCommand dbCommand)
+
+        public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
         {
+            //这里无法用Using，因为reader要用
             SqliteConnection conn = new SqliteConnection(connectString);
-            return ExecuteCommandReaderAsync(conn, true, (SqliteCommand)dbCommand);
+            return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             SqliteDataReader? reader = null;
@@ -65,25 +46,25 @@ namespace HB.Infrastructure.SQLite
 
                 if (isOwnedConnection)
                 {
-                    reader = (SqliteDataReader)await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+                    reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
                 }
                 else
                 {
-                    reader = (SqliteDataReader)await command.ExecuteReaderAsync().ConfigureAwait(false);
+                    reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
                 }
 
                 return reader;
             }
             catch (Exception ex)
             {
-                if (isOwnedConnection)
-                {
-                    await connection.CloseAsync().ConfigureAwait(false);
-                }
-
                 if (reader != null)
                 {
-                    await reader.CloseAsync().ConfigureAwait(false);
+                    await reader.DisposeAsync().ConfigureAwait(false);
+                }
+
+                if (isOwnedConnection)
+                {
+                    await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
                 if (ex is SqliteException sqliteException)
@@ -101,43 +82,19 @@ namespace HB.Infrastructure.SQLite
 
         #region Command Scalar
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
-        public static Task<object> ExecuteCommandScalarAsync(string connectString, IDbCommand dbCommand)
+        public static async Task<object> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
         {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            SqliteConnection conn = new SqliteConnection(connectString);
-#pragma warning restore CA2000 // Dispose objects before losing scope
-            return ExecuteCommandScalarAsync(conn, true, (SqliteCommand)dbCommand);
+            using SqliteConnection conn = new SqliteConnection(connectString);
+            return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
-        public static Task<object> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
+        public static async Task<object> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandScalarAsync(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
+            return await ExecuteCommandScalarAsync(sqliteTransaction.Connection, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
-        private static async Task<object> ExecuteCommandScalarAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
+        private static async Task<object> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
         {
             object rtObj;
 
@@ -160,13 +117,6 @@ namespace HB.Infrastructure.SQLite
             {
                 throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
             }
-            finally
-            {
-                if (isOwnedConnection)
-                {
-                    await connection.CloseAsync().ConfigureAwait(false);
-                }
-            }
 
             return rtObj;
         }
@@ -175,47 +125,25 @@ namespace HB.Infrastructure.SQLite
 
         #region Comand NonQuery
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
-        public static Task<int> ExecuteCommandNonQueryAsync(string connectString, IDbCommand dbCommand)
-        {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            SqliteConnection conn = new SqliteConnection(connectString);
-#pragma warning restore CA2000 // Dispose objects before losing scope
 
-            return ExecuteCommandNonQueryAsync(conn, true, (SqliteCommand)dbCommand);
+
+        public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, SqliteCommand dbCommand)
+        {
+            using SqliteConnection conn = new SqliteConnection(connectString);
+
+            return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
-        public static Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, IDbCommand dbCommand)
+
+        public static async Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return ExecuteCommandNonQueryAsync(sqliteTransaction.Connection, false, (SqliteCommand)dbCommand);
+            return await ExecuteCommandNonQueryAsync(sqliteTransaction.Connection, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
-        private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, bool isOwnedConnection, SqliteCommand command)
-        {
-            int rtInt = -1;
 
+        private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, SqliteCommand command)
+        {
             try
             {
                 if (conn.State != ConnectionState.Open)
@@ -225,7 +153,7 @@ namespace HB.Infrastructure.SQLite
 
                 command.Connection = conn;
 
-                rtInt = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                return await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
             catch (SqliteException sqliteException)
             {
@@ -235,15 +163,6 @@ namespace HB.Infrastructure.SQLite
             {
                 throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
             }
-            finally
-            {
-                if (isOwnedConnection)
-                {
-                    await conn.CloseAsync().ConfigureAwait(false);
-                }
-            }
-
-            return rtInt;
         }
 
         #endregion Comand NonQuery
