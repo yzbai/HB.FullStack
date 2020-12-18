@@ -333,9 +333,9 @@ namespace HB.FullStack.Database
                 whereCondition = new WhereExpression<TWhere>(EngineType);
             }
 
-            EntityDef selectDef = EntityDefFactory.GetDef<TSelect>();
-            EntityDef fromDef = EntityDefFactory.GetDef<TFrom>();
-            EntityDef whereDef = EntityDefFactory.GetDef<TWhere>();
+            EntityDef selectDef = EntityDefFactory.GetDef<TSelect>()!;
+            EntityDef fromDef = EntityDefFactory.GetDef<TFrom>()!;
+            EntityDef whereDef = EntityDefFactory.GetDef<TWhere>()!;
 
             whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedReservedName}=0");
 
@@ -362,7 +362,7 @@ namespace HB.FullStack.Database
                 whereCondition = new WhereExpression<T>(EngineType);
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedReservedName}=0");
 
@@ -402,7 +402,7 @@ namespace HB.FullStack.Database
                 whereCondition = new WhereExpression<T>(EngineType);
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedReservedName}=0");
 
@@ -521,8 +521,8 @@ namespace HB.FullStack.Database
                 whereCondition = new WhereExpression<TSource>(EngineType);
             }
 
-            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>();
-            EntityDef targetEntityDef = EntityDefFactory.GetDef<TTarget>();
+            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>()!;
+            EntityDef targetEntityDef = EntityDefFactory.GetDef<TTarget>()!;
 
             switch (fromCondition.JoinType)
             {
@@ -611,9 +611,9 @@ namespace HB.FullStack.Database
                 whereCondition = new WhereExpression<TSource>(EngineType);
             }
 
-            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>();
-            EntityDef targetEntityDef1 = EntityDefFactory.GetDef<TTarget1>();
-            EntityDef targetEntityDef2 = EntityDefFactory.GetDef<TTarget2>();
+            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>()!;
+            EntityDef targetEntityDef1 = EntityDefFactory.GetDef<TTarget1>()!;
+            EntityDef targetEntityDef2 = EntityDefFactory.GetDef<TTarget2>()!;
 
             switch (fromCondition.JoinType)
             {
@@ -701,7 +701,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item);
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -746,7 +746,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item);
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -804,7 +804,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item);
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -866,7 +866,7 @@ namespace HB.FullStack.Database
                 return new List<long>();
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -935,7 +935,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -1008,7 +1008,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {

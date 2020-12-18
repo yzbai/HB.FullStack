@@ -36,7 +36,7 @@ namespace HB.FullStack.Database.SQL
 
         public string ToStatement()
         {
-            return $" FROM {EntityDefFactory.GetDef<T>().DbTableReservedName} {_statementBuilder}";
+            return $" FROM {EntityDefFactory.GetDef<T>()!.DbTableReservedName} {_statementBuilder}";
         }
 
         internal FromExpression(EngineType engineType)
@@ -179,7 +179,7 @@ namespace HB.FullStack.Database.SQL
 
         private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr) where Target : Entity
         {
-            EntityDef targetDef = EntityDefFactory.GetDef<Target>();
+            EntityDef targetDef = EntityDefFactory.GetDef<Target>()!;
 
             _statementBuilder.Append(' ');
             _statementBuilder.Append(joinType);

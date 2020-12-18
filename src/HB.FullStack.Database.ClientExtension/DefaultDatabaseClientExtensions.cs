@@ -17,7 +17,7 @@ namespace HB.FullStack.Database.ClientExtension
     {
         public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : Entity, new()
         {
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -28,14 +28,14 @@ namespace HB.FullStack.Database.ClientExtension
             {
                 WhereExpression<T> where = database.Where(whereExpr).And(t => !t.Deleted);
 
-                IDbCommand dbCommand = database.DbCommandBuilder.CreateDeleteCommand(entityDef, where);
+                var command = DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
 
-                await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, dbCommand).ConfigureAwait(false);
+                await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
 
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
-                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, ex); ;
+                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, "", ex); ;
             }
         }
     }

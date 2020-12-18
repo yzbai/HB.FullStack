@@ -230,7 +230,7 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
 
-                EntityDef entityDef = EntityDefFactory.GetDef(entityType);
+                EntityDef entityDef = EntityDefFactory.GetDef(entityType)!;
                 EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
                     ?? throw new DatabaseException($"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
 
@@ -646,7 +646,12 @@ namespace HB.FullStack.Database.SQL
         {
             string name = quotedExp.ToString().Replace(SqlHelper.QuotedChar, "", GlobalSettings.Comparison);
 
-            EntityDef entityDef = EntityDefFactory.GetDef(type);
+            EntityDef? entityDef = EntityDefFactory.GetDef(type);
+
+            if (entityDef == null)
+            {
+                return false;
+            }
 
             EntityPropertyDef? property = entityDef.GetPropertyDef(name);
 

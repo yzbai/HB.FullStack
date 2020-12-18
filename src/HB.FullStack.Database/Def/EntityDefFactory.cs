@@ -133,14 +133,19 @@ namespace HB.FullStack.Database.Def
             return resusltEntitySchemaDict;
         }
 
-        public static EntityDef GetDef<T>() where T : Entity
+        public static EntityDef? GetDef<T>() where T : Entity
         {
             return GetDef(typeof(T));
         }
 
-        public static EntityDef GetDef(Type entityType)
+        public static EntityDef? GetDef(Type entityType)
         {
-            return _defDict[entityType];
+            if (_defDict.TryGetValue(entityType, out EntityDef entityDef))
+            {
+                return entityDef;
+            }
+
+            return null;
         }
 
         private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
@@ -251,7 +256,7 @@ namespace HB.FullStack.Database.Def
 
         public static ITypeConverter? GetPropertyTypeConverter(Type entityType, string propertyName)
         {
-            return GetDef(entityType).GetPropertyDef(propertyName)!.TypeConverter;
+            return GetDef(entityType)?.GetPropertyDef(propertyName)!.TypeConverter;
         }
     }
 }
