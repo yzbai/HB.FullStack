@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,7 +97,7 @@ namespace HB.FullStack.Client.Api
 
             if (!request.IsValid())
             {
-                throw new ApiException(ErrorCode.ApiModelValidationError);
+                throw new ApiException(ErrorCode.ApiModelValidationError, System.Net.HttpStatusCode.BadRequest);
             }
 
             try
@@ -111,7 +112,7 @@ namespace HB.FullStack.Client.Api
 
                     if (!jwtAdded)
                     {
-                        throw new ApiException(ErrorCode.ApiNoAuthority);
+                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
                     }
                 }
 
@@ -119,7 +120,7 @@ namespace HB.FullStack.Client.Api
                 {
                     if (!TrySetApiKey(apiKeyRequest))
                     {
-                        throw new ApiException(ErrorCode.ApiNoAuthority);
+                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
                     }
                 }
 
@@ -141,7 +142,7 @@ namespace HB.FullStack.Client.Api
 
                 if (!response.IsSuccessful)
                 {
-                    throw new ApiException(response.ErrCode, response.Message);
+                    throw new ApiException(response.ErrCode, (HttpStatusCode)response.HttpCode, response.Message);
                 }
 
                 //TODO: 小心检查随后
@@ -151,11 +152,9 @@ namespace HB.FullStack.Client.Api
             {
                 throw;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ErrorCode.ApiError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
+                throw new ApiException(ErrorCode.ApiError, HttpStatusCode.BadRequest, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 

@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using HB.FullStack.Common.Entities.Attributes;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Database")]
+[assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
 [assembly: InternalsVisibleTo("HB.FullStack.Cache")]
 [assembly: InternalsVisibleTo("HB.FullStack.KVStore")]
 

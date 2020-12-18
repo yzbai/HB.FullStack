@@ -47,7 +47,7 @@ namespace HB.FullStack.Client.Api
             }
         }
 
-        
+
         public static HttpRequestMessage ToHttpRequestMessage(this ApiRequest request)
         {
             HttpMethod httpMethod = request.GetHttpMethod();
@@ -144,7 +144,7 @@ namespace HB.FullStack.Client.Api
             return requestUrlBuilder.ToString();
         }
 
-        
+
         public static async Task<ApiResponse<T>> ToApiResponseAsync<T>(this HttpResponseMessage httpResponse) where T : class
         {
             if (httpResponse.IsSuccessStatusCode)

@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Def;
-using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
-namespace HB.FullStack.Database.ClientExtension
+namespace HB.FullStack.Database
 {
     /// <summary>
-    /// 只在客户端使用，因此不考虑并发，Version检测等等
+    /// 只在客户端使用，因此不考虑并发，Version检测, 事务等等
     /// </summary>
     public static class DatabaseClientExtensions
     {
@@ -37,6 +36,32 @@ namespace HB.FullStack.Database.ClientExtension
             {
                 throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, "", ex); ;
             }
+        }
+
+        private static TransactionContext GetFakeTransactionContext()
+        {
+            return new TransactionContext(null!, TransactionStatus.InTransaction, null!);
+        }
+
+        public static Task UpdateAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : Entity, new()
+        {
+            TransactionContext context = transContext ?? GetFakeTransactionContext();
+
+            return database.BatchUpdateAsync(items, "", context);
+        }
+
+        public static Task DeleteAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : Entity, new()
+        {
+            TransactionContext context = transContext ?? GetFakeTransactionContext();
+
+            return database.BatchDeleteAsync(items, "", context);
+        }
+
+        public static Task<IEnumerable<long>> AddAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : Entity, new()
+        {
+            TransactionContext context = transContext ?? GetFakeTransactionContext();
+
+            return database.BatchAddAsync<T>(items, "", context);
         }
     }
 }

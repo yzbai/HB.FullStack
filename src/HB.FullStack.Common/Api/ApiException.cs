@@ -1,29 +1,32 @@
-﻿namespace System
+﻿using System.Net;
+
+namespace System
 {
+    [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]
     public class ApiException : FrameworkException
     {
-        public ApiException(string? message) : base(message)
+        public HttpStatusCode HttpCode { get; }
+
+        //public ApiException(string? message) : base(message)
+        //{
+        //}
+
+        //public ApiException(string? message, Exception? innerException) : base(message, innerException)
+        //{
+        //}
+
+        //public ApiException()
+        //{
+        //}
+
+        public ApiException(ErrorCode errorCode, HttpStatusCode httpCode, string? message = null) : base(errorCode, message)
         {
+            HttpCode = httpCode;
         }
 
-        public ApiException(string? message, Exception? innerException) : base(message, innerException)
+        public ApiException(ErrorCode errorCode, HttpStatusCode httpCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
         {
-        }
-
-        public ApiException()
-        {
-        }
-
-        public ApiException(ErrorCode errorCode, string? message) : base(errorCode, message)
-        {
-        }
-
-        public ApiException(ErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
-        {
-        }
-
-        public ApiException(ErrorCode errorCode) : base(errorCode)
-        {
+            HttpCode = httpCode;
         }
     }
 }
