@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
+using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Common.Api
 {
@@ -11,42 +12,34 @@ namespace HB.FullStack.Common.Api
     {
         #region Common Parameters
 
-        [Required]
         public string DeviceId { get; set; } = null!;
 
-        [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
-        [Required]
         public string DeviceVersion { get; set; } = null!;
 
         public string? PublicResourceToken { get; set; }
 
         #endregion Common Parameters
 
-        #region Settings
 
         //All use fields & Get Methods instead of Properties, for avoid mvc binding & json searilize
-        private readonly string _productName;
+#pragma warning disable CA1051 // Do not declare visible instance fields
+        protected string _endpointName = null!;
+        protected string _apiVersion = null!;
+        protected string _resourceName = null!;
 
-        private readonly string _apiVersion;
-        private readonly HttpMethod _httpMethod;
-        private readonly string _resourceName;
-        private readonly string? _condition;
-        private bool _needHttpMethodOveride = true;
-        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
+        protected HttpMethod _httpMethod = null!;
+        protected string? _condition;
+        protected bool _needHttpMethodOveride = true;
+        protected readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
-        /// <summary>
-        /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供
-        /// </summary>
-        /// <param name="productName"></param>
-        /// <param name="apiVersion"></param>
-        /// <param name="httpMethod"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
-        public ApiRequest(string productName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition = null)
+        protected ApiRequest() { }
+
+        protected ApiRequest(string endPointName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition)
         {
-            _productName = productName;
+            _endpointName = endPointName;
             _apiVersion = apiVersion;
             _httpMethod = httpMethod;
             _resourceName = resourceName;
@@ -55,7 +48,7 @@ namespace HB.FullStack.Common.Api
 
         public string GetProductName()
         {
-            return _productName;
+            return _endpointName;
         }
 
         public string GetApiVersion()
@@ -103,7 +96,7 @@ namespace HB.FullStack.Common.Api
             return null;
         }
 
-        
+
         public void SetHeader(string name, string value)
         {
             _headers[name] = value;
@@ -113,7 +106,29 @@ namespace HB.FullStack.Common.Api
         {
             return _headers;
         }
+    }
 
-        #endregion Settings
+    public abstract class ApiRequest<T> : ApiRequest where T : Resource
+    {
+
+        /// <summary>
+        /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供
+        /// </summary>
+        /// <param name="httpMethod"></param>
+        /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
+        public ApiRequest(HttpMethod httpMethod, string? condition)
+        {
+            ResourceDef def = ResourceDefFactory.Get<T>();
+
+            _endpointName = def.EndpointName;
+            _apiVersion = def.ApiVersion;
+            _resourceName = def.Name;
+            _httpMethod = httpMethod;
+            _condition = condition;
+        }
+
+        public ApiRequest(string endPointName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition) : base(endPointName, apiVersion, httpMethod, resourceName, condition)
+        {
+        }
     }
 }

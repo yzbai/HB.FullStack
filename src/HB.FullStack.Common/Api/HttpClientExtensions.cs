@@ -1,54 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Properties;
+using HB.FullStack.Common.Resources;
 
-namespace HB.FullStack.Client.Api
+namespace System.Net.Http
 {
-    public static class ApiExtensions
+    public static class HttpClientApiExtensions
     {
-        private static readonly string[] _jsonContentTypes = new string[] { "application/json", "application/problem+json" };
+        public static async Task<T?> GetSingleAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
+        {
+            using HttpResponseMessage responseMessage = await httpClient.SendAsync(request).ConfigureAwait(false);
 
-        public static async Task<ApiResponse<T>> GetResponseAsync<T>(this ApiRequest request, HttpClient httpClient) where T : class
+            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+
+            return await responseMessage.DeSerializeJsonAsync<T>().ConfigureAwait(false);
+        }
+
+        public static async Task<IEnumerable<T>?> GetAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
+        {
+            using HttpResponseMessage responseMessage = await httpClient.SendAsync(request).ConfigureAwait(false);
+
+            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+
+            return await responseMessage.DeSerializeJsonAsync<IEnumerable<T>>().ConfigureAwait(false);
+        }
+
+        public static async Task NonQueryAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
+        {
+            using HttpResponseMessage responseMessage = await httpClient.SendAsync(request).ConfigureAwait(false);
+
+            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+        }
+
+        private static async Task<HttpResponseMessage> SendAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
         {
             try
             {
                 using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
-                using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-
-                return await responseMessage.ToApiResponseAsync<T>().ConfigureAwait(false);
+                return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw new ApiException(ErrorCode.ApiError, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
+                throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadRequest, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
             }
         }
 
-        public static async Task<ApiResponse> GetResponseAsync(this ApiRequest request, HttpClient httpClient)
-        {
-            try
-            {
-                using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
-
-                using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-
-                return await responseMessage.ToApiResponseAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new ApiException(ErrorCode.ApiError, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
-            }
-        }
-
-
-        public static HttpRequestMessage ToHttpRequestMessage(this ApiRequest request)
+        private static HttpRequestMessage ToHttpRequestMessage<T>(this ApiRequest<T> request) where T : Resource
         {
             HttpMethod httpMethod = request.GetHttpMethod();
 
@@ -63,7 +64,7 @@ namespace HB.FullStack.Client.Api
             //Get的参数也放到body中去
             //if (request.GetHttpMethod() != HttpMethod.Get)
             //{
-            if (request is BufferedFileApiRequest bufferedRequest)
+            if (request is BufferedFileApiRequest<T> bufferedRequest)
             {
                 MultipartFormDataContent content = new MultipartFormDataContent();
 
@@ -144,68 +145,23 @@ namespace HB.FullStack.Client.Api
             return requestUrlBuilder.ToString();
         }
 
-
-        public static async Task<ApiResponse<T>> ToApiResponseAsync<T>(this HttpResponseMessage httpResponse) where T : class
+        public static async Task ThrowIfNotSuccessedAsync(HttpResponseMessage responseMessage)
         {
-            if (httpResponse.IsSuccessStatusCode)
+            if (responseMessage.IsSuccessStatusCode)
             {
-                T? data = await httpResponse.DeSerializeJsonAsync<T>().ConfigureAwait(false);
-                return new ApiResponse<T>(data, (int)httpResponse.StatusCode);
+                return;
             }
 
-            ApiError? apiError = await httpResponse.DeSerializeJsonAsync<ApiError>().ConfigureAwait(false);
+            ApiError? apiError = await responseMessage.DeSerializeJsonAsync<ApiError>().ConfigureAwait(false);
 
             if (apiError == null)
             {
-                return new ApiResponse<T>((int)httpResponse.StatusCode, Resources.InternalServerErrorMessage, ErrorCode.ApiError);
+                throw new ApiException(ErrorCode.ApiUnkown, responseMessage.StatusCode, responseMessage.ReasonPhrase);
             }
-
-            return new ApiResponse<T>((int)httpResponse.StatusCode, apiError.Message, apiError.Code);
-        }
-
-        public static async Task<ApiResponse> ToApiResponseAsync(this HttpResponseMessage httpResponse)
-        {
-            if (httpResponse.IsSuccessStatusCode)
+            else
             {
-                return new ApiResponse((int)httpResponse.StatusCode);
+                throw new ApiException(apiError.Code, responseMessage.StatusCode, apiError.Message, apiError.ModelStates);
             }
-
-            ApiError? apiError = await httpResponse.DeSerializeJsonAsync<ApiError>().ConfigureAwait(false);
-
-            if (apiError == null)
-            {
-                return new ApiResponse((int)httpResponse.StatusCode, Resources.InternalServerErrorMessage, ErrorCode.ApiError);
-            }
-
-            return new ApiResponse((int)httpResponse.StatusCode, apiError.Message, apiError.Code);
-        }
-
-        public static async Task<T?> DeSerializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
-        {
-            if (typeof(T) == typeof(object))
-            {
-                return null;
-            }
-
-            string? mediaType = responseMessage.Content.Headers.ContentType?.MediaType;
-
-            if (!_jsonContentTypes.Contains(mediaType))
-            {
-                return null;
-            }
-
-            //using MemoryStream memoryStream = new MemoryStream();
-            //await responseMessage.Content.CopyToAsync(memoryStream).ConfigureAwait(false);
-
-            ////Stream responseStream = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
-
-            //T? data = await SerializeUtil.FromJsonAsync<T>(memoryStream).ConfigureAwait(false);
-
-            string jsonString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            T? data = SerializeUtil.FromJson<T>(jsonString);
-
-            return data;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 
 namespace System
 {
@@ -28,5 +29,14 @@ namespace System
         {
             HttpCode = httpCode;
         }
+
+        public ApiException(ErrorCode errorCode, HttpStatusCode httpCode, string? message, IDictionary<string, IEnumerable<string>>? modelStates = null) : this(errorCode, httpCode, message)
+        {
+            ModelStates = modelStates;
+        }
+
+#pragma warning disable CA2227 // Collection properties should be read only
+        public IDictionary<string, IEnumerable<string>>? ModelStates { get; set; }
+#pragma warning restore CA2227 // Collection properties should be read only
     }
 }

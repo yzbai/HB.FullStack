@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using AsyncAwaitBestPractices;
@@ -102,15 +103,21 @@ namespace HB.FullStack.Client.Base
         {
             Log(LogLevel.Error, ex, null);
 
-            if (ex is FrameworkException fex)
+
+            if (ex is ApiException apiEx)
             {
-                switch (fex.ErrorCode)
+                switch (apiEx.ErrorCode)
                 {
-                    case ErrorCode.ApiNoInternet:
-                        Device.BeginInvokeOnMainThread(() =>
+                    case ErrorCode.ApiUnkown:
+
+                        if (apiEx.HttpCode.IsNoInternet())
                         {
-                            Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
-                        });
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
+                            });
+                        }
+
                         break;
                     case ErrorCode.ApiNoAuthority:
                     case ErrorCode.ApiTokenRefresherError:

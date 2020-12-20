@@ -63,5 +63,14 @@ namespace HB.FullStack.Database
 
             return database.BatchAddAsync<T>(items, "", context);
         }
+
+        public static async Task SetAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext? transContext = null) where T : Entity, new()
+        {
+            TransactionContext context = transContext ?? GetFakeTransactionContext();
+
+            await database.DeleteAsync<T>(whereExpr, context).ConfigureAwait(false);
+
+            await database.AddAsync<T>(newItems, context);
+        }
     }
 }

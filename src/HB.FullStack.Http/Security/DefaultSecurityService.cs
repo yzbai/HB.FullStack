@@ -49,12 +49,12 @@ namespace HB.FullStack.Server.Security
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedExtensions.IsNullOrEmpty())
             {
-                throw new ApiException(ErrorCode.ApiUploadEmptyFile);
+                throw new ApiException(ErrorCode.ApiUploadEmptyFile, System.Net.HttpStatusCode.BadRequest);
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw new ApiException(ErrorCode.ApiUploadOverSize);
+                throw new ApiException(ErrorCode.ApiUploadOverSize, System.Net.HttpStatusCode.BadRequest);
             }
 
             try
@@ -68,13 +68,13 @@ namespace HB.FullStack.Server.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw new ApiException(ErrorCode.ApiUploadEmptyFile);
+                    throw new ApiException(ErrorCode.ApiUploadEmptyFile, System.Net.HttpStatusCode.BadRequest);
                 }
 
                 if (!IsValidFileExtensionAndSignature(
                     formFile.FileName, memoryStream, permittedExtensions))
                 {
-                    throw new ApiException(ErrorCode.ApiUploadWrongType);
+                    throw new ApiException(ErrorCode.ApiUploadWrongType, System.Net.HttpStatusCode.BadRequest);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace HB.FullStack.Server.Security
             }
             catch (Exception ex)
             {
-                throw new ApiException(ErrorCode.ApiError, $"文件名称{formFile.FileName}", ex);
+                throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadRequest, $"文件名称{formFile.FileName}", ex);
             }
         }
 

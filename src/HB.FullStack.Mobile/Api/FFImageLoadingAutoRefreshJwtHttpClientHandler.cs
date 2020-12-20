@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Web;
-using HB.FullStack.Common.Api;
 using Microsoft.Extensions.Options;
 using Xamarin.Forms;
 using Microsoft.Extensions.Logging;
@@ -37,35 +33,38 @@ namespace HB.FullStack.Client.Api
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            await AddDeviceInfoAsync(request).ConfigureAwait(false);
-            await AddAuthorizationAsync(request).ConfigureAwait(false);
+            AddDeviceInfo(request);
+            AddAuthInfo(request);
 
             HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                ApiResponse response = await responseMessage.ToApiResponseAsync().ConfigureAwait(false);
-
-                if (response.HttpCode == 401 && response.ErrCode == ErrorCode.ApiTokenExpired)
+                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+            }
+            catch (ApiException ex)
+            {
+                if (ex.HttpCode == System.Net.HttpStatusCode.Unauthorized && ex.ErrorCode == ErrorCode.ApiTokenExpired)
                 {
                     EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
 
                     if (endpointSettings != null)
                     {
-                        await _apiClient.RefreshJwtAsync(endpointSettings).ConfigureAwait(false);
+                        await TokenRefresher.RefreshAccessTokenAsync(_apiClient, endpointSettings).ConfigureAwait(false);
+
+                        return responseMessage;
                     }
                 }
 
-                //刷新后，等待下次自动Retry
-                return responseMessage;
+                throw;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                Application.Current.Log(Microsoft.Extensions.Logging.LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
-                return responseMessage;
+                Application.Current.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
+
             }
+
+            return responseMessage;
         }
 
         private EndpointSettings? GetEndpointByUri(Uri requestUri)
@@ -78,25 +77,19 @@ namespace HB.FullStack.Client.Api
             });
         }
 
-        private static async Task AddAuthorizationAsync(HttpRequestMessage request)
+        private static void AddAuthInfo(HttpRequestMessage request)
         {
-            string? token = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+            string? token = ClientGlobal.GetAccessToken();
 
             request.Headers.Add("Authorization", "Bearer " + token);
         }
 
-        private class DeviceWrapper
+        private static void AddDeviceInfo(HttpRequestMessage request)
         {
-            public string DeviceId { get; set; } = null!;
-            public string DeviceVersion { get; set; } = null!;
-            public DeviceInfos DeviceInfos { get; set; } = null!;
-        }
+            string deviceId = ClientGlobal.GetDeviceId();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:丢失范围之前释放对象", Justification = "<挂起>")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:不捕获常规异常类型", Justification = "<挂起>")]
-        private static async Task AddDeviceInfoAsync(HttpRequestMessage request)
-        {
-            string deviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
+            // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
+            request.RequestUri = request.RequestUri.AddQuery(ClientNames.DeviceId, deviceId);
 
             DeviceWrapper deviceWrapper = new DeviceWrapper
             {
@@ -105,10 +98,9 @@ namespace HB.FullStack.Client.Api
                 DeviceInfos = ClientGlobal.DeviceInfos
             };
 
-            // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
-            request.RequestUri = request.RequestUri.AddQuery(ClientNames.DeviceId, deviceId);
-            
+#pragma warning disable CA2000 // Dispose objects before losing scope
             StringContent deviceContent = new StringContent(SerializeUtil.ToJson(deviceWrapper), Encoding.UTF8, "application/json");
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             if (request.Content == null)
             {
@@ -126,7 +118,7 @@ namespace HB.FullStack.Client.Api
 
                     multipartContent.Add(request.Content);
                     multipartContent.Add(deviceContent);
-               
+
                     request.Content = multipartContent;
                 }
                 catch (Exception ex)
@@ -134,6 +126,13 @@ namespace HB.FullStack.Client.Api
                     Application.Current.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
                 }
             }
+        }
+
+        private class DeviceWrapper
+        {
+            public string DeviceId { get; set; } = null!;
+            public string DeviceVersion { get; set; } = null!;
+            public DeviceInfos DeviceInfos { get; set; } = null!;
         }
     }
 }

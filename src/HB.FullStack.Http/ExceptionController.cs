@@ -9,7 +9,7 @@ using System.Text;
 namespace HB.FullStack.Server
 {
     [ApiController]
-    public class ExceptionController : ExtendedController
+    public class ExceptionController : BaseController
     {
         private readonly ILogger _logger;
 
@@ -25,7 +25,7 @@ namespace HB.FullStack.Server
 
             _logger.LogError(exceptionHandlerFeature.Error, "Error From ExceptionController");
 
-            ApiError apiErrorResponse = new ApiError(ErrorCode.ApiError, exceptionHandlerFeature.Error.Message);
+            ApiError apiErrorResponse = new ApiError(ErrorCode.ApiUnkown, exceptionHandlerFeature.Error.Message);
 
             return new BadRequestObjectResult(apiErrorResponse)
             {

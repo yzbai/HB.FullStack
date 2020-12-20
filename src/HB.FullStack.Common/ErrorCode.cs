@@ -12,7 +12,7 @@
 
         #region API
 
-        ApiError = 19,
+
 
         //401
         ApiNoAuthority = 14,
@@ -34,8 +34,7 @@
         ApiUploadWrongType = 150,
         ApiSmsCodeInvalid = 152,
 
-        //502
-        ApiNoInternet = 145,
+        ApiUnkown = 153,
 
         #endregion API
 

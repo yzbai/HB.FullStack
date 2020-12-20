@@ -2,10 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Common.Api
 {
-    public class ApiError
+    public class ApiError : Resource
     {
         public ErrorCode Code { get; set; }
 

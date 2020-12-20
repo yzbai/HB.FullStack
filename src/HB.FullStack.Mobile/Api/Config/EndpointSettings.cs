@@ -10,7 +10,7 @@ namespace HB.FullStack.Client.Api
         /// 产品名，一般为站点类名
         /// </summary>
         [Required]
-        public string? ProductName { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// 版本

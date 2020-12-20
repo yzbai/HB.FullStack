@@ -276,6 +276,20 @@ namespace HB.FullStack.Client
 
         #region Token
 
+        //TODO: 可能不同的Endpoint有不同的AccessToken。以后考虑
+        public static string? GetAccessToken()
+        {
+            if (_accessToken.IsNullOrEmpty())
+            {
+                using JoinableTaskContext joinableTaskContext = new JoinableTaskContext();
+                JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(joinableTaskContext);
+
+                return joinableTaskFactory.Run(async () => { return await GetAccessTokenAsync().ConfigureAwait(false); });
+            }
+
+            return _accessToken!;
+        }
+
         public static async Task<string?> GetAccessTokenAsync()
         {
             if (_accessToken.IsNotNullOrEmpty())
@@ -316,12 +330,12 @@ namespace HB.FullStack.Client
 
         #region Events
 
-        public static async Task OnJwtRefreshSucceedAsync(string newAccessToken)
+        public static async Task OnAccessTokenRefreshSucceedAsync(string newAccessToken)
         {
             await SetAccessTokenAsync(newAccessToken).ConfigureAwait(false);
         }
 
-        public static async Task OnJwtRefreshFailedAsync()
+        public static async Task OnAccessTokenRefreshFailedAsync()
         {
             await SetAccessTokenAsync(null).ConfigureAwait(false);
             await SetRefreshTokenAsync(null).ConfigureAwait(false);
@@ -344,7 +358,7 @@ namespace HB.FullStack.Client
 
         public static async Task OnLoginFailedAsync()
         {
-            await OnJwtRefreshFailedAsync().ConfigureAwait(false);
+            await OnAccessTokenRefreshFailedAsync().ConfigureAwait(false);
 
             _isLogined = false;
         }
