@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Database.SQL
@@ -20,7 +21,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="list"></param>
         /// <returns></returns>
         [SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "<Pending>")]
-        public static bool In<T>(T value, bool returnByOrder, object[] list)
+        public static bool In<T>(T value, bool returnByOrder, IEnumerable list)
         {
             bool do_not_delete_used_in_expression_analysis = returnByOrder;
 

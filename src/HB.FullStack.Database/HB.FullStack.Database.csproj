@@ -24,6 +24,10 @@
     <Compile Remove="SQL\SelectExpression.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Def\EntityDefFactory.cs~RF1231f09.TMP" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">

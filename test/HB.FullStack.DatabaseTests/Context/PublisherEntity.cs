@@ -1,7 +1,8 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
-
+using HB.FullStack.Database.Def;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,8 +11,8 @@ using System.Text;
 namespace HB.FullStack.DatabaseTests.Data
 {
 
-    [DatabaseEntity]
-    public class PublisherEntity3 : Entity
+    [CacheEntity]
+    public class PublisherEntity3 : DatabaseEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -30,8 +31,8 @@ namespace HB.FullStack.DatabaseTests.Data
         public string Name3 { get; set; } = "xxxx";
     }
 
-    [DatabaseEntity]
-    public class PublisherEntity2 : Entity
+    [CacheEntity]
+    public class PublisherEntity2 : DatabaseEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -76,8 +77,8 @@ namespace HB.FullStack.DatabaseTests.Data
 
     }
 
-    [DatabaseEntity]
-    public class PublisherEntity : Entity
+    [CacheEntity]
+    public class PublisherEntity : DatabaseEntity
     {
 
         [EntityProperty]
@@ -89,7 +90,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = EntityPropertyAttribute.MediumLength, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = Consts.MediumLength, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]

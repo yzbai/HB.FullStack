@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.KVStore
 {
     /// <summary>
     /// 可以多个Key

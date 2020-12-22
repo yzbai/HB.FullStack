@@ -279,22 +279,22 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : Entity, new()
+        public FromExpression<T> From<T>() where T : DatabaseEntity, new()
         {
             return new FromExpression<T>(EngineType);
         }
 
-        public WhereExpression<T> Where<T>() where T : Entity, new()
+        public WhereExpression<T> Where<T>() where T : DatabaseEntity, new()
         {
             return new WhereExpression<T>(EngineType);
         }
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : Entity, new()
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new()
         {
             return new WhereExpression<T>(EngineType).Where(sqlFilter, filterParams);
         }
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : Entity, new()
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseEntity, new()
         {
             return new WhereExpression<T>(EngineType).Where(predicate);
         }
@@ -305,7 +305,7 @@ namespace HB.FullStack.Database
 
         /// <returns></returns>
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -324,9 +324,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, TransactionContext? transContext = null)
-            where TSelect : Entity, new()
-            where TFrom : Entity, new()
-            where TWhere : Entity, new()
+            where TSelect : DatabaseEntity, new()
+            where TFrom : DatabaseEntity, new()
+            where TWhere : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -355,7 +355,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -382,7 +382,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -395,7 +395,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -424,43 +424,43 @@ namespace HB.FullStack.Database
         #region 单表查询, Where
 
         public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return RetrieveAsync<T>(null, null, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return PageAsync(null, whereCondition, pageNumber, perPageCount, transContext);
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return PageAsync<T>(null, null, pageNumber, perPageCount, transContext);
         }
 
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return CountAsync(null, condition, transContext);
         }
 
         public Task<long> CountAsync<T>(TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             return CountAsync<T>(null, null, transContext);
         }
@@ -470,14 +470,14 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             WhereExpression<T> where = Where<T>("Id={0}", id);
 
             return ScalarAsync(where, transContext);
         }
 
-        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : Entity, new()
+        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -485,7 +485,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -493,7 +493,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(EngineType);
 
@@ -501,7 +501,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : Entity, new()
+            where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -513,8 +513,8 @@ namespace HB.FullStack.Database
         #region 双表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : Entity, new()
-            where TTarget : Entity, new()
+            where TSource : DatabaseEntity, new()
+            where TTarget : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -564,8 +564,8 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<Tuple<TSource, TTarget?>>> PageAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where TSource : Entity, new()
-            where TTarget : Entity, new()
+            where TSource : DatabaseEntity, new()
+            where TTarget : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -578,8 +578,8 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : Entity, new()
-            where TTarget : Entity, new()
+            where TSource : DatabaseEntity, new()
+            where TTarget : DatabaseEntity, new()
         {
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -602,9 +602,9 @@ namespace HB.FullStack.Database
         #region 三表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : Entity, new()
-            where TTarget1 : Entity, new()
-            where TTarget2 : Entity, new()
+            where TSource : DatabaseEntity, new()
+            where TTarget1 : DatabaseEntity, new()
+            where TTarget2 : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -655,9 +655,9 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> PageAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where TSource : Entity, new()
-            where TTarget1 : Entity, new()
-            where TTarget2 : Entity, new()
+            where TSource : DatabaseEntity, new()
+            where TTarget1 : DatabaseEntity, new()
+            where TTarget2 : DatabaseEntity, new()
         {
             if (whereCondition == null)
             {
@@ -670,9 +670,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : Entity, new()
-            where TTarget1 : Entity, new()
-            where TTarget2 : Entity, new()
+            where TSource : DatabaseEntity, new()
+            where TTarget1 : DatabaseEntity, new()
+            where TTarget2 : DatabaseEntity, new()
         {
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -697,7 +697,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
         /// </summary>
-        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new()
+        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item);
 
@@ -742,7 +742,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>
-        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new()
+        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item);
 
@@ -800,7 +800,7 @@ namespace HB.FullStack.Database
         ///  版本控制，如果item中Version未赋值，会无法更改
         ///  反应Version变化
         /// </summary>
-        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : Entity, new()
+        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item);
 
@@ -857,7 +857,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-        public async Task<IEnumerable<long>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : Entity, new()
+        public async Task<IEnumerable<long>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items);
 
@@ -926,7 +926,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : Entity, new()
+        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items);
 
@@ -999,7 +999,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
-        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : Entity, new()
+        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items);
 

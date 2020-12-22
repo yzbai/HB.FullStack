@@ -8,6 +8,37 @@ namespace HB.FullStack.DatabaseTests.Data
     {
         private static readonly Random _random = new Random();
 
+
+        public static Book MockOne()
+        {
+            return new Book
+            {
+                Name = SecurityUtil.CreateUniqueToken(),
+                BookID = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                Publisher = _random.Next().ToString(),
+                Price = _random.NextDouble() * 1000
+            };
+        }
+
+        public static List<Book> MockMany()
+        {
+            List<Book> books = new List<Book>();
+
+            for (int i = 0; i < 100; ++i)
+            {
+                books.Add(new Book
+                {
+                    //Guid = "Guid" + i.ToString(),
+                    Name = SecurityUtil.CreateUniqueToken(),
+                    BookID = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + _random.Next(10000, 19999),
+                    Publisher = _random.Next().ToString(),
+                    Price = _random.NextDouble() * 1000
+                });
+            }
+
+            return books;
+        }
+
         public static IList<BookEntity> GetBooks(int? count = null)
         {
             List<BookEntity> books = new List<BookEntity>();
@@ -45,7 +76,7 @@ namespace HB.FullStack.DatabaseTests.Data
             return entity;
         }
 
-        public static IList<PublisherEntity> GetPublishers(int? count = null)
+        public static List<PublisherEntity> GetPublishers(int? count = null)
         {
             List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
 

@@ -43,26 +43,25 @@ namespace HB.FullStack.DatabaseTests
             B b1 = new B { Name = "b1" };
             B b2 = new B { Name = "b2" };
 
-            AB a1b1 = new AB { AId = a1.Guid, BId = b1.Guid };
-            AB a1b2 = new AB { AId = a1.Guid, BId = b2.Guid };
-
-            AB a2b1 = new AB { AId = a2.Guid, BId = b1.Guid };
-            AB a3b2 = new AB { AId = a3.Guid, BId = b2.Guid };
-
-            C c1 = new C { AId = a1.Guid };
-            C c2 = new C { AId = a2.Guid };
-            C c3 = new C { AId = a3.Guid };
-            C c4 = new C { AId = a1.Guid };
-            C c5 = new C { AId = a2.Guid };
-            C c6 = new C { AId = a3.Guid };
-
-
             await _sqlite.AddAsync(a2, "lastUsre", null);
             await _sqlite.AddAsync(a1, "lastUsre", null);
             await _sqlite.AddAsync(a3, "lastUsre", null);
 
             await _sqlite.AddAsync(b1, "lastUsre", null);
             await _sqlite.AddAsync(b2, "lastUsre", null);
+
+            AB a1b1 = new AB { AId = a1.Id, BId = b1.Id };
+            AB a1b2 = new AB { AId = a1.Id, BId = b2.Id };
+
+            AB a2b1 = new AB { AId = a2.Id, BId = b1.Id };
+            AB a3b2 = new AB { AId = a3.Id, BId = b2.Id };
+
+            C c1 = new C { AId = a1.Id };
+            C c2 = new C { AId = a2.Id };
+            C c3 = new C { AId = a3.Id };
+            C c4 = new C { AId = a1.Id };
+            C c5 = new C { AId = a2.Id };
+            C c6 = new C { AId = a3.Id };
 
             await _sqlite.AddAsync(a1b1, "lastUsre", null);
             await _sqlite.AddAsync(a1b2, "lastUsre", null);
@@ -84,8 +83,8 @@ namespace HB.FullStack.DatabaseTests
 
             var from = database
                 .From<A>()
-                .LeftJoin<AB>((a, ab) => ab.AId == a.Guid)
-                .LeftJoin<AB, B>((ab, b) => ab.BId == b.Guid);
+                .LeftJoin<AB>((a, ab) => ab.AId == a.Id)
+                .LeftJoin<AB, B>((ab, b) => ab.BId == b.Id);
 
 
             try
@@ -109,7 +108,7 @@ namespace HB.FullStack.DatabaseTests
             IDatabase database = _sqlite;
             var from = database
                 .From<C>()
-                .LeftJoin<A>((c, a) => c.AId == a.Guid);
+                .LeftJoin<A>((c, a) => c.AId == a.Id);
 
 
             try

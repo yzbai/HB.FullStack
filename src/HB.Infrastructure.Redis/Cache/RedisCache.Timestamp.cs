@@ -91,7 +91,7 @@ return data[3]";
             {
                 RedisResult result = await database.ScriptEvaluateAsync(
                     GetDefaultLoadLuas().LoadedGetAndRefreshLua,
-                    new RedisKey[] { GetRealKey(key) },
+                    new RedisKey[] { GetRealKey("", key) },
                     new RedisValue[] { TimeUtil.UtcNowUnixTimeSeconds }).ConfigureAwait(false);
 
                 return (byte[]?)result;
@@ -137,7 +137,7 @@ return data[3]";
 
             try
             {
-                RedisResult redisResult = await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetWithTimestampLua, new RedisKey[] { GetRealKey(key) },
+                RedisResult redisResult = await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetWithTimestampLua, new RedisKey[] { GetRealKey("", key) },
                     new RedisValue[]
                     {
                         absoluteExpireUnixSeconds??-1,
@@ -197,7 +197,7 @@ return data[3]";
             {
                 RedisResult redisResult = await database.ScriptEvaluateAsync(
                     GetDefaultLoadLuas().LoadedRemoveWithTimestampLua,
-                    new RedisKey[] { GetRealKey(key) },
+                    new RedisKey[] { GetRealKey("", key) },
                     new RedisValue[]
                     {
                         utcTicks.Ticks,

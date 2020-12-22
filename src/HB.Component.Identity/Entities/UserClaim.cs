@@ -1,15 +1,16 @@
 ﻿using HB.FullStack.Common.Entities;
-
+using HB.FullStack.Database.Def;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
-    [DatabaseEntity]
-    public class UserClaim : Entity
+    public class UserClaim : DatabaseEntity
     {
+        [Required]
         [ForeignKey(typeof(User))]
-        [GuidEntityProperty(NotNull = true)]
-        public string UserGuid { get; set; } = default!;
+        [EntityProperty(NotNull = true)]
+        public long UserId { get; set; }
 
         [EntityProperty(MaxLength = 65530, NotNull = true)]
         public string ClaimType { get; set; } = default!;

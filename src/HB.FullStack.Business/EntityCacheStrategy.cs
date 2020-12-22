@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,12 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Repository
 {
-    internal static class RepositoryCacheStrategy
+    internal static class EntityCacheStrategy
     {
-        public static readonly TimeSpan OccupiedTime = TimeSpan.FromSeconds(10);
-        public static readonly TimeSpan PatienceTime = TimeSpan.FromSeconds(2);
-
-        public static async Task<IEnumerable<TEntity>> CacheAsideAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve,
+        public static async Task<IEnumerable<TEntity>> CacheAsideAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve,
             IDatabase database, ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TEntity : Entity, new()
         {
             if (!ICache.IsEntityEnabled<TEntity>())
@@ -42,7 +40,13 @@ namespace HB.FullStack.Repository
             //但可以考虑加单机本版的锁就可，这个锁主要为了降低数据库压力，不再是为了数据一致性（带version的cache自己解决）。
             //所以可以使用单机版本的锁即可。一个主机同时放一个db请求，还是没问题的。
 
-            using var @lock = memoryLockManager.Lock(typeof(TEntity).Name, dimensionKeyValues.Select(d => dimensionKeyName + d), OccupiedTime, PatienceTime);
+            List<string> resources = new List<string>();
+            foreach (object dimensionKeyValue in dimensionKeyValues)
+            {
+                resources.Add(dimensionKeyName + dimensionKeyValue.ToString());
+            }
+
+            using var @lock = memoryLockManager.Lock(typeof(TEntity).Name, resources, Consts.OccupiedTime, Consts.PatienceTime);
 
             if (@lock.IsAcquired)
             {
@@ -78,75 +82,6 @@ namespace HB.FullStack.Repository
 
         }
 
-        public static async Task<TResult?> CacheAsideAsync<TResult>(
-            CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
-            ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
-            where TResult : class
-        {
-            //Cache First
-            TResult? result = await cacheItem.GetFromAsync(cache).ConfigureAwait(false);
-
-            if (result != null)
-            {
-                return result;
-            }
-
-            using var @lock = memoryLockManager.Lock(cacheItem.ResourceType, cacheItem.CacheKey, OccupiedTime, PatienceTime);
-
-            if (@lock.IsAcquired)
-            {
-                //Double Check
-                result = await cacheItem.GetFromAsync(cache).ConfigureAwait(false);
-
-                if (result != null)
-                {
-                    return result;
-                }
-
-                TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
-                UtcNowTicks now = TimeUtil.UtcNowTicks;
-
-
-                // 如果TResult是集合类型，可能会存入空集合。而在EntityCache中是不会存入空集合的。
-                //这样设计是合理的，因为EntityCache是按Entity角度，存入的Entity会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
-                if (dbRt != null)
-                {
-                    UpdateCache(cacheItem.Value(dbRt).Timestamp(now), cache);
-                    logger.LogInformation($"缓存 Missed. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
-                }
-                else
-                {
-                    logger.LogInformation($"查询到空值. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
-                }
-
-                return dbRt;
-            }
-            else
-            {
-                logger.LogCritical($"锁未能占用. Entity:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}, Lock Status:{@lock.Status}");
-
-                return await dbRetrieve(database).ConfigureAwait(false);
-            }
-        }
-
-        public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
-        {
-            if (ICache.IsEntityEnabled<TEntity>())
-            {
-                cache.RemoveEntitiesAsync(entities).Fire();
-            }
-        }
-
-        public static void InvalidateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
-        {
-            cacheItem.RemoveFromAsync(cache).Fire();
-        }
-
-        private static void UpdateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
-        {
-            cacheItem.SetToAsync(cache).Fire();
-        }
-
         private static void UpdateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             #region 普通缓存，加锁的做法
@@ -179,5 +114,14 @@ namespace HB.FullStack.Repository
             #endregion
 
         }
+
+        public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
+        {
+            if (ICache.IsEntityEnabled<TEntity>())
+            {
+                cache.RemoveEntitiesAsync(entities).Fire();
+            }
+        }
+
     }
 }

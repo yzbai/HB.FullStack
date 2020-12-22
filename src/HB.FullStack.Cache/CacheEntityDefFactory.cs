@@ -62,19 +62,18 @@ namespace HB.FullStack.Cache
                 throw new CacheException(ErrorCode.CacheSlidingTimeBiggerThanMaxAlive, $"{def.Name}");
             }
 
-            bool foundGuidKeyAttribute = false;
+            bool foundkeyAttribute = false;
 
             entityType.GetProperties().ForEach(propertyInfo =>
             {
-
-                if (!foundGuidKeyAttribute)
+                if (!foundkeyAttribute)
                 {
-                    CacheGuidKeyAttribute? guidKeyAttribute = propertyInfo.GetCustomAttribute<CacheGuidKeyAttribute>();
+                    CacheKeyAttribute? keyAttribute = propertyInfo.GetCustomAttribute<CacheKeyAttribute>();
 
-                    if (guidKeyAttribute != null)
+                    if (keyAttribute != null)
                     {
-                        def.GuidKeyProperty = propertyInfo;
-                        foundGuidKeyAttribute = true;
+                        def.KeyProperty = propertyInfo;
+                        foundkeyAttribute = true;
 
                         return;
                     }
@@ -88,9 +87,9 @@ namespace HB.FullStack.Cache
                 }
             });
 
-            if (def.GuidKeyProperty == null)
+            if (def.KeyProperty == null)
             {
-                throw new CacheException(ErrorCode.CacheEntityNotHaveGuidKeyAttribute, $"entity:{entityType.FullName}");
+                throw new CacheException(ErrorCode.CacheEntityNotHaveKeyAttribute, $"entity:{entityType.FullName}");
             }
 
             return def;

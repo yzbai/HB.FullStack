@@ -8,16 +8,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace HB.FullStack.Identity
 {
     /// <summary>
-    /// userGuid: Roles
+    /// userid: Roles
     /// 关联实体：RoleOfUser
     /// </summary>
-    internal class CachedRolesByUserGuid : CachedItem<IEnumerable<Role>>
+    internal class CachedRolesByUserId : CachedItem<IEnumerable<Role>>
     {
-        private CachedRolesByUserGuid(params string[] keys) : base(keys)
+        private CachedRolesByUserId(params string[] keys) : base(keys)
         {
         }
 
@@ -26,9 +28,9 @@ namespace HB.FullStack.Identity
         public override TimeSpan? SlidingExpiration => null;
 
 
-        public static CachedRolesByUserGuid Key(string userGuid)
+        public static CachedRolesByUserId Key(long userId)
         {
-            return new CachedRolesByUserGuid(userGuid);
+            return new CachedRolesByUserId(userId.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

@@ -4,11 +4,13 @@
     {
         public const string Role = ClaimsIdentity.DefaultRoleClaimType;
 
-        public const string SignInTokenGuid = "HB.SignInTokenGuid";
+        public const string SignInTokenId = "HB.SignInTokenId";
 
         public const string SecurityStamp = "HB.SecurityStamp";
 
         public const string Audience = "aud";
+
+        public const string UserId = "HB.UserId";
 
         public const string UserGuid = "HB.UserGuid";
 

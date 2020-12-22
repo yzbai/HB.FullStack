@@ -9,18 +9,18 @@ using System.Reflection;
 
 namespace HB.FullStack.KVStore.Entities
 {
-    internal class DefaultKVStoreModelDefFactory : IKVStoreEntityDefFactory
+    internal static class EntityDefFactory
     {
-        private readonly object _lockObj = new object();
-        private readonly IKVStoreEngine _kvStoreEngine;
-        private readonly KVStoreSettings _settings;
-        private readonly IDictionary<string, KVStoreEntitySchema> _typeSchemaDict = new Dictionary<string, KVStoreEntitySchema>();
-        private readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict = new ConcurrentDictionary<Type, KVStoreEntityDef>();
+        private static readonly object _lockObj = new object();
+        private static IDictionary<string, KVStoreEntitySchema> _typeSchemaDict = null!;
+        private static readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict = new ConcurrentDictionary<Type, KVStoreEntityDef>();
+        private static KVStoreSettings _settings = null!;
+        private static string? _firstDefaultInstanceName = null!;
 
-        public DefaultKVStoreModelDefFactory(IKVStoreEngine kVStoreEngine)
+        public static void Initialize(IKVStoreEngine kVStoreEngine)
         {
-            _kvStoreEngine = kVStoreEngine;
-            _settings = _kvStoreEngine.Settings;
+            _settings = kVStoreEngine.Settings;
+            _firstDefaultInstanceName = kVStoreEngine.FirstDefaultInstanceName;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -30,25 +30,25 @@ namespace HB.FullStack.KVStore.Entities
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(_settings.AssembliesIncludeEntity, kvstoreEntityTypeCondition);
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(kVStoreEngine.Settings.AssembliesIncludeEntity, kvstoreEntityTypeCondition);
             }
 
             _typeSchemaDict = ConstructeSchemaDict(allEntityTypes);
 
             static bool kvstoreEntityTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(Entity)) && t.GetCustomAttribute<KVStoreEntityAttribute>() != null;
+                return t.IsSubclassOf(typeof(KVStoreEntity)) && !t.IsAbstract;
             }
         }
 
-        private IDictionary<string, KVStoreEntitySchema> ConstructeSchemaDict(IEnumerable<Type> allEntityTypes)
+        private static IDictionary<string, KVStoreEntitySchema> ConstructeSchemaDict(IEnumerable<Type> allEntityTypes)
         {
             IDictionary<string, KVStoreEntitySchema> filedDict = _settings.KVStoreEntities.ToDictionary(t => t.EntityTypeFullName);
             IDictionary<string, KVStoreEntitySchema> resultDict = new Dictionary<string, KVStoreEntitySchema>();
 
             allEntityTypes.ForEach(type =>
             {
-                KVStoreEntityAttribute attribute = type.GetCustomAttribute<KVStoreEntityAttribute>();
+                KVStoreAttribute attribute = type.GetCustomAttribute<KVStoreAttribute>();
 
                 filedDict.TryGetValue(type.FullName, out KVStoreEntitySchema fileConfigured);
 
@@ -56,7 +56,7 @@ namespace HB.FullStack.KVStore.Entities
 
                 if (attribute != null)
                 {
-                    instanceName = attribute.InstanceName.IsNullOrEmpty() ? _kvStoreEngine.FirstDefaultInstanceName : attribute.InstanceName!;
+                    instanceName = attribute.InstanceName.IsNullOrEmpty() ? _firstDefaultInstanceName : attribute.InstanceName!;
                 }
 
                 if (fileConfigured != null)
@@ -66,7 +66,7 @@ namespace HB.FullStack.KVStore.Entities
 
                 if (instanceName.IsNullOrEmpty())
                 {
-                    instanceName = _kvStoreEngine.FirstDefaultInstanceName;
+                    instanceName = _firstDefaultInstanceName;
                 }
 
                 KVStoreEntitySchema entitySchema = new KVStoreEntitySchema
@@ -81,23 +81,12 @@ namespace HB.FullStack.KVStore.Entities
             return resultDict;
         }
 
-        /// <summary>
-        /// GetDef
-        /// </summary>
-        /// <returns></returns>
-        
-        public KVStoreEntityDef GetDef<T>()
+        public static KVStoreEntityDef GetDef<T>()
         {
             return GetDef(typeof(T));
         }
 
-        /// <summary>
-        /// GetDef
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        
-        public KVStoreEntityDef GetDef(Type type)
+        public static KVStoreEntityDef GetDef(Type type)
         {
             if (!_defDict.ContainsKey(type))
             {
@@ -113,13 +102,7 @@ namespace HB.FullStack.KVStore.Entities
             return _defDict[type];
         }
 
-        /// <summary>
-        /// CreateEntityDef
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        
-        private KVStoreEntityDef CreateEntityDef(Type type)
+        private static KVStoreEntityDef CreateEntityDef(Type type)
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))
             {

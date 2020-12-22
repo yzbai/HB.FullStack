@@ -43,7 +43,7 @@ namespace HB.FullStack.Database.Def
 
             static bool entityTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(Entity)) && !t.IsAbstract && t.GetCustomAttribute<DatabaseEntityAttribute>() != null;
+                return t.IsSubclassOf(typeof(DatabaseEntity)) && !t.IsAbstract;
             }
         }
 
@@ -60,7 +60,7 @@ namespace HB.FullStack.Database.Def
 
             allEntityTypes.ForEach(type =>
             {
-                DatabaseEntityAttribute attribute = type.GetCustomAttribute<DatabaseEntityAttribute>();
+                DatabaseAttribute attribute = type.GetCustomAttribute<DatabaseAttribute>();
 
                 fileConfiguredDict.TryGetValue(type.FullName, out EntitySetting fileConfigured);
 
@@ -133,7 +133,7 @@ namespace HB.FullStack.Database.Def
             return resusltEntitySchemaDict;
         }
 
-        public static EntityDef? GetDef<T>() where T : Entity
+        public static EntityDef? GetDef<T>() where T : DatabaseEntity
         {
             return GetDef(typeof(T));
         }
@@ -176,7 +176,18 @@ namespace HB.FullStack.Database.Def
 
                 if (entityPropertyAttribute == null)
                 {
-                    continue;
+                    if (info.Name == nameof(Entity.Version) || info.Name == nameof(Entity.Deleted) || info.Name == nameof(Entity.LastTime))
+                    {
+                        entityPropertyAttribute = new EntityPropertyAttribute();
+                    }
+                    else if (info.Name == nameof(Entity.LastUser))
+                    {
+                        entityPropertyAttribute = new EntityPropertyAttribute { MaxLength = Consts.LastUserMaxLength };
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
 
                 EntityPropertyDef propertyDef = CreatePropertyDef(entityDef, info, entityPropertyAttribute, engineType);

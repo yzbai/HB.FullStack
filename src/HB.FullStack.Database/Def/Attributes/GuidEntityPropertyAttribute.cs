@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.Database.Def
 {
     public class GuidEntityPropertyAttribute : EntityPropertyAttribute
     {

@@ -368,7 +368,7 @@ namespace HB.FullStack.DatabaseTests
                 await database.BatchAddAsync<PublisherEntity>(items, "xx", trans).ConfigureAwait(false);
 
 
-                var results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Guid, true, items.Select(item => item.Guid).ToArray()), trans).ConfigureAwait(false);
+                var results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await database.BatchUpdateAsync<PublisherEntity>(items, "xx", trans);
 
@@ -376,7 +376,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.BatchAddAsync<PublisherEntity>(items2, "xx", trans);
 
-                results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Guid, true, items2.Select(item => item.Guid).ToArray()), trans);
+                results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans);
 
                 await database.BatchUpdateAsync<PublisherEntity>(items2, "xx", trans);
 
@@ -561,7 +561,7 @@ namespace HB.FullStack.DatabaseTests
                 await mySqlConnection.OpenAsync();
 
 
-                SqliteCommand command0 = new SqliteCommand("select * from tb_book limit 1000", mySqlConnection);
+                SqliteCommand command0 = new SqliteCommand("select * from tb_bookentity limit 1000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
@@ -594,9 +594,6 @@ namespace HB.FullStack.DatabaseTests
                 Stopwatch stopwatch1 = new Stopwatch();
                 Stopwatch stopwatch2 = new Stopwatch();
                 Stopwatch stopwatch3 = new Stopwatch();
-
-
-
 
                 while (reader0.Read())
                 {

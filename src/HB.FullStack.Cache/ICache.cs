@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,20 +26,20 @@ namespace HB.FullStack.Cache
 
         #region Entities
 
-        Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
+        Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
 
         Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            string dimensionKeyName = entityDef.GuidKeyProperty.Name;
-            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.GuidKeyProperty.GetValue(e).ToString());
+            string dimensionKeyName = entityDef.KeyProperty.Name;
+            var dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e));
 
             return GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token);
         }
 
-        async Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new()
+        async Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new()
         {
-            (IEnumerable<TEntity>? results, bool exist) = await GetEntitiesAsync<TEntity>(dimensionKeyName, new string[] { dimensionKeyValue }, token).ConfigureAwait(false);
+            (IEnumerable<TEntity>? results, bool exist) = await GetEntitiesAsync<TEntity>(dimensionKeyName, new object[] { dimensionKeyValue }, token).ConfigureAwait(false);
 
             if (exist)
             {
@@ -52,8 +53,8 @@ namespace HB.FullStack.Cache
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
-            string dimensionKeyName = entityDef.GuidKeyProperty.Name;
-            string dimensionKeyValue = entityDef.GuidKeyProperty.GetValue(entity).ToString();
+            string dimensionKeyName = entityDef.KeyProperty.Name;
+            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity).ToString();
 
             return GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token);
         }
@@ -68,7 +69,7 @@ namespace HB.FullStack.Cache
         /// <param name="updatedVersions"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new();
+        Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new();
 
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
@@ -81,8 +82,8 @@ namespace HB.FullStack.Cache
             }
 
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            string dimensionKeyName = entityDef.GuidKeyProperty.Name;
-            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.GuidKeyProperty.GetValue(e).ToString());
+            string dimensionKeyName = entityDef.KeyProperty.Name;
+            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e).ToString());
             IEnumerable<int> updatedVersions = entities.Select(e => e.Version);
 
             return RemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, updatedVersions, token);
@@ -91,9 +92,9 @@ namespace HB.FullStack.Cache
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
         /// </summary>
-        Task RemoveEntityAsync<TEntity>(string dimensionKeyName, string dimensionKeyValue, int updatedVersion, CancellationToken token = default) where TEntity : Entity, new()
+        Task RemoveEntityAsync<TEntity>(string dimensionKeyName, object dimensionKeyValue, int updatedVersion, CancellationToken token = default) where TEntity : Entity, new()
         {
-            return RemoveEntitiesAsync<TEntity>(dimensionKeyName, new string[] { dimensionKeyValue }, new int[] { updatedVersion }, token);
+            return RemoveEntitiesAsync<TEntity>(dimensionKeyName, new object[] { dimensionKeyValue }, new int[] { updatedVersion }, token);
         }
 
         /// <summary>
@@ -103,8 +104,8 @@ namespace HB.FullStack.Cache
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
-            string dimensionKeyName = entityDef.GuidKeyProperty.Name;
-            string dimensionKeyValue = entityDef.GuidKeyProperty.GetValue(entity).ToString();
+            string dimensionKeyName = entityDef.KeyProperty.Name;
+            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity).ToString();
 
             return RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, entity.Version, token);
         }
@@ -132,13 +133,6 @@ namespace HB.FullStack.Cache
 
             return results.ElementAt(0);
         }
-
-        //static bool IsEntityBatchEnabled<TEntity>() where TEntity : Entity, new()
-        //{
-        //    CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-        //    return entityDef.IsBatchEnabled;
-        //}
 
         static bool IsEntityEnabled<TEntity>() where TEntity : Entity, new()
         {

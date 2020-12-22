@@ -2,10 +2,10 @@
 
 using System;
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.Database.Def
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class DatabaseEntityAttribute : Attribute
+    public class DatabaseAttribute : Attribute
     {
         public string? DatabaseName { get; set; }
 
@@ -17,12 +17,12 @@ namespace HB.FullStack.Common.Entities
 
         public string SuffixToRemove { get; set; } = "Entity";
 
-        public DatabaseEntityAttribute()
+        public DatabaseAttribute()
         {
 
         }
 
-        public DatabaseEntityAttribute(string databaseName)
+        public DatabaseAttribute(string databaseName)
         {
             DatabaseName = databaseName;
         }

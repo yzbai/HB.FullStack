@@ -1,13 +1,19 @@
+using System;
+using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities
 {
     /// <summary>
     /// ½ÇÉ«
     /// </summary>
-    [DatabaseEntity]
-    public class Role : Entity
+    public class Role : DatabaseEntity
     {
+        [Required]
+        [UniqueGuidEntityProperty]
+        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
+
         [EntityProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;
 

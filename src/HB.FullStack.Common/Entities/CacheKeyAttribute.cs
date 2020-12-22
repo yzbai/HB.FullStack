@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Common.Entities
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class CacheGuidKeyAttribute : Attribute
+    public class CacheKeyAttribute : Attribute
     {
 
     }

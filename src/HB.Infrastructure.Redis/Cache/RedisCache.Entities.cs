@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -20,21 +21,21 @@ namespace HB.Infrastructure.Redis.Cache
     /// Entity in Redis:
     /// 
     ///                                 |------ abexp    :  value
-    /// Guid----------------------------|------ slidexp  :  value        //same as IDistributed way
+    /// Id------------------------------|------ slidexp  :  value        //same as IDistributed way
     ///                                 |------ data     :  jsonString
     /// 
     /// 
-    ///                                 |------- DimensionKeyValue_1   :  Guid
+    ///                                 |------- DimensionKeyValue_1   :  Id
     /// EntityName_DimensionKeyName-----|......
-    ///                                 |------- DimensionKeyValue_n   :  Guid
+    ///                                 |------- DimensionKeyValue_n   :  Id
     ///                                 
     /// 所以EntityName_DimensionKeyName 这个key是一个索引key
     /// </summary>
     internal partial class RedisCache : RedisCacheBase, ICache
     {
         /// <summary>
-        /// keys:guid1, guid2, guid3
-        /// argv:3(guid_number), sldexp, nowInUnixSeconds
+        /// keys:id1, id2, id3
+        /// argv:3(id_number), sldexp, nowInUnixSeconds
         /// </summary>
         public const string _luaEntitiesGetAndRefresh = @"
 local number = tonumber(ARGV[1])
@@ -93,9 +94,9 @@ end
 local array={}
 
 for j =1,number do
-    local guid = redis.call('get',KEYS[j])
+    local id = redis.call('get',KEYS[j])
 
-    local data= redis.call('hmget',guid, 'absexp','data','dim') 
+    local data= redis.call('hmget',id, 'absexp','data','dim') 
 
     if (not data[1]) then
         redis.call('del', KEYS[j])
@@ -106,7 +107,7 @@ for j =1,number do
         local now = tonumber(ARGV[3])
         local absexp = tonumber(data[1])
         if(now>=absexp) then
-            redis.call('del',guid)
+            redis.call('del',id)
     
             if (data[3]~='') then
                 for i in string.gmatch(data[3], '%S+') do
@@ -118,7 +119,7 @@ for j =1,number do
     end
 
     if(ARGV[2]~='-1') then
-        redis.call('expire', guid, ARGV[2])
+        redis.call('expire', id, ARGV[2])
     
         if (data[3]~='') then
             for k in string.gmatch(data[3], '%S+') do
@@ -133,7 +134,7 @@ return array";
 
         /// <summary>
         /// 返回0为未更新，返回1为更新
-        /// keys: entity1_guidKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_guidKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
+        /// keys: entity1_idKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_idKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
         /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
         /// </summary>
         public const string _luaEntitiesSet = @"
@@ -175,7 +176,7 @@ end
 return rt";
 
         /// <summary>
-        /// keys: guidKey1, guidKey2, guidKey3
+        /// keys: idKey1, idKey2, idKey3
         /// argv: 3(entity_num), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
         /// </summary>
         public const string _luaEntitiesRemove = @" 
@@ -204,18 +205,18 @@ end
 local entityNum = tonumber(ARGV[1])
 
 for j = 1, entityNum do
-    local guid = redis.call('get',KEYS[j])
+    local id = redis.call('get',KEYS[j])
 
-    if (guid) then
+    if (id) then
 
-        redis.call('set', '_minV'..guid, ARGV[j+2], 'EX', ARGV[2])
+        redis.call('set', '_minV'..id, ARGV[j+2], 'EX', ARGV[2])
 
-        local data= redis.call('hget',guid, 'dim') 
+        local data= redis.call('hget',id, 'dim') 
 
         if (not data) then
             redis.call('del', KEYS[1])
         else
-            redis.call('del',guid)
+            redis.call('del',id)
     
             if (data~='') then
                 for i in string.gmatch(data, '%S+') do
@@ -232,11 +233,11 @@ end
             _logger.LogInformation($"RedisCache初始化完成");
         }
 
-        public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
-            ThrowIf.NullOrEmpty(dimensionKeyValues, nameof(dimensionKeyValues));
+            ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
             ThrowIfNotCacheEnabled(entityDef);
 
             List<RedisKey> redisKeys = new List<RedisKey>();
@@ -299,11 +300,11 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogWarning($"检测到，Cache Invalidation Concurrency冲突，已被阻止. Entity:{entityDef.Name}, Guid:{entities.ElementAt(i).Guid}");
+                        _logger.LogWarning($"检测到，Cache Invalidation Concurrency冲突，已被阻止. Entity:{entityDef.Name}, Id:{SerializeUtil.ToJson(entities.ElementAt(i))}");
                     }
                     else if (rt == 9)
                     {
-                        _logger.LogWarning($"检测到，Cache Update Concurrency冲突，已被阻止. Entity:{entityDef.Name}, Guid:{entities.ElementAt(i).Guid}");
+                        _logger.LogWarning($"检测到，Cache Update Concurrency冲突，已被阻止. Entity:{entityDef.Name}, Id:{SerializeUtil.ToJson(entities.ElementAt(i))}");
                     }
                 }
 
@@ -319,12 +320,11 @@ end
             }
         }
 
-
-        public async Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
+        public async Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default(CancellationToken)) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
             ThrowIfNotCacheEnabled(entityDef);
-            ThrowIf.NullOrEmpty(dimensionKeyValues, nameof(dimensionKeyValues));
+            ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -348,15 +348,15 @@ end
 
         }
 
-        private byte[] AddRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, IEnumerable<int> updatedVersions, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
+        private byte[] AddRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             byte[] loadedScript;
 
-            if (entityDef.GuidKeyProperty.Name == dimensionKeyName)
+            if (entityDef.KeyProperty.Name == dimensionKeyName)
             {
-                foreach (string dimensionKeyValue in dimensionKeyValues)
+                foreach (object dimensionKeyValue in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetRealKey(dimensionKeyValue));
+                    redisKeys.Add(GetRealKey(entityDef.Name, dimensionKeyValue.ToString()));
                 }
 
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesRemoveLua;
@@ -373,7 +373,7 @@ end
 
             /// argv: 3(entity_count), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
 
-            redisValues.Add(dimensionKeyValues.Count());
+            redisValues.Add(redisKeys.Count);
             redisValues.Add(_invalidationVersionExpirySeconds);
 
             foreach (int updatedVersion in updatedVersions)
@@ -385,17 +385,17 @@ end
         }
 
 
-        private byte[] AddGetEntitiesRedisInfo(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private byte[] AddGetEntitiesRedisInfo(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
             byte[] loadedScript;
 
-            if (entityDef.GuidKeyProperty.Name == dimensionKeyName)
+            if (entityDef.KeyProperty.Name == dimensionKeyName)
             {
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesGetAndRefreshLua;
 
-                foreach (string dk in dimensionKeyValues)
+                foreach (object dk in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetRealKey(dk));
+                    redisKeys.Add(GetRealKey(entityDef.Name, dk.ToString()));
                 }
             }
             else
@@ -414,9 +414,10 @@ end
 
             return loadedScript;
         }
+
         private async Task AddSetEntitiesRedisInfoAsync<TEntity>(IEnumerable<TEntity> entities, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
-            /// keys: entity1_guidKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_guidKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
+            /// keys: entity1_idKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_idKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
             /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
 
             DateTimeOffset? absulteExpireTime = entityDef.AbsoluteTimeRelativeToNow != null ? TimeUtil.UtcNow + entityDef.AbsoluteTimeRelativeToNow : null;
@@ -431,9 +432,9 @@ end
 
             foreach (TEntity entity in entities)
             {
-                string guidRealKey = GetRealKey(entityDef.GuidKeyProperty.GetValue(entity).ToString());
+                string idRealKey = GetRealKey(entityDef.Name, entityDef.KeyProperty.GetValue(entity).ToString());
 
-                redisKeys.Add(guidRealKey);
+                redisKeys.Add(idRealKey);
 
                 StringBuilder joinedDimensinKeyBuilder = new StringBuilder();
 
@@ -484,7 +485,5 @@ end
 
             return (entities, true);
         }
-
-
     }
 }

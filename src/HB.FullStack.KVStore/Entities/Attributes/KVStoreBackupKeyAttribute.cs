@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.KVStore
 {
     /// <summary>
     /// 当KVStoreEntity中没有显示使用KVStoreKeyAttribute标记key时，寻找此属性代表的BackupKey

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.DatabaseTests
 {
-    [DatabaseEntity]
-    public class A : Entity
+
+    public class A : DatabaseEntity
     {
 
 
@@ -15,32 +16,32 @@ namespace HB.FullStack.DatabaseTests
         public string Name { get; set; } = default!;
     }
 
-    [DatabaseEntity]
-    public class B : Entity
+
+    public class B : DatabaseEntity
     {
 
         [EntityProperty]
         public string Name { get; set; } = default!;
     }
 
-    [DatabaseEntity]
-    public class AB : Entity
+
+    public class AB : DatabaseEntity
     {
 
         [EntityProperty]
-        public string AId { get; set; } = default!;
+        public long AId { get; set; } = default!;
 
         [EntityProperty]
-        public string BId { get; set; } = default!;
+        public long BId { get; set; } = default!;
     }
 
-    [DatabaseEntity]
-    public class C : Entity
+
+    public class C : DatabaseEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
 
         [EntityProperty]
-        public string AId { get; set; } = default!;
+        public long AId { get; set; } = default!;
     }
 }

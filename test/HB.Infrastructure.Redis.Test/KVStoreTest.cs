@@ -24,8 +24,8 @@ namespace HB.Infrastructure.Redis.Test
         Admin
     }
 
-    [KVStoreEntity]
-    public class UserEntity : Entity
+    [KVStore]
+    public class UserEntity : KVStoreEntity
     {
 
         public string? UserName { get; set; }
@@ -45,7 +45,7 @@ namespace HB.Infrastructure.Redis.Test
             if (x == null && y != null) { return false; }
             if (x != null && y == null) { return false; }
 
-            return x!.Id == y!.Id
+            return x!.Guid == y!.Guid
                 && x.UserName == y.UserName
                 && x.CreateTime == y.CreateTime
                 && x.Activated == y.Activated
@@ -91,10 +91,7 @@ namespace HB.Infrastructure.Redis.Test
         {
             UserEntity? fetched = await _kvStore.GetAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
 
-            if (fetched != null)
-            {
-                await _kvStore.DeleteAsync<UserEntity>(fetched.Guid, fetched.Version).ConfigureAwait(false);
-            }
+            Assert.True(fetched == null);
 
             await _kvStore.AddAsync(_userEntity1, "xx").ConfigureAwait(false);
 

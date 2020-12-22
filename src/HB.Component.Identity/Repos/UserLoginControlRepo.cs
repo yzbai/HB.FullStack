@@ -18,13 +18,13 @@ namespace HB.FullStack.Identity
             _kv = kvStore;
         }
 
-        public async Task SetLockoutAsync(string userGuid, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null)
+        public async Task SetLockoutAsync(long userId, bool lockout, string lastUser, TimeSpan? lockoutTimeSpan = null)
         {
-            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userGuid).ConfigureAwait(false);
+            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userId).ConfigureAwait(false);
 
             if (uc == null)
             {
-                uc = new UserLoginControl { UserGuid = userGuid };
+                uc = new UserLoginControl { UserId = userId };
             }
 
             uc.LockoutEnabled = lockout;
@@ -40,13 +40,13 @@ namespace HB.FullStack.Identity
             }
         }
 
-        public async Task SetAccessFailedCountAsync(string userGuid, long count, string lastUser)
+        public async Task SetAccessFailedCountAsync(long userId, long count, string lastUser)
         {
-            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userGuid).ConfigureAwait(false);
+            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userId).ConfigureAwait(false);
 
             if (uc == null)
             {
-                uc = new UserLoginControl { UserGuid = userGuid };
+                uc = new UserLoginControl { UserId = userId };
             }
 
             uc.LoginFailedCount = count;
@@ -61,15 +61,15 @@ namespace HB.FullStack.Identity
             }
         }
 
-        internal async Task<UserLoginControl> GetOrCreateByUserGuidAsync(string userGuid)
+        internal async Task<UserLoginControl> GetOrCreateByUserIdAsync(long userId)
         {
-            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userGuid).ConfigureAwait(false);
+            UserLoginControl? uc = await _kv.GetAsync<UserLoginControl>(userId).ConfigureAwait(false);
 
             if (uc == null)
             {
                 uc = new UserLoginControl();
 
-                uc.UserGuid = userGuid;
+                uc.UserId = userId;
 
                 await _kv.AddAsync(uc, "default").ConfigureAwait(false);
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 using HB.FullStack.Identity.Entities;
@@ -10,9 +11,9 @@ namespace HB.FullStack.Identity
     /// <summary>
     /// 关联实体：UserClaim
     /// </summary>
-    public class CachedUserClaimsByUserGuid : CachedItem<IEnumerable<UserClaim>>
+    public class CachedUserClaimsByUserId : CachedItem<IEnumerable<UserClaim>>
     {
-        private CachedUserClaimsByUserGuid(params string[] keys) : base(keys)
+        private CachedUserClaimsByUserId(params string[] keys) : base(keys)
         {
         }
 
@@ -20,9 +21,9 @@ namespace HB.FullStack.Identity
 
         public override TimeSpan? SlidingExpiration => null;
 
-        public static CachedUserClaimsByUserGuid Key(string userGuid)
+        public static CachedUserClaimsByUserId Key(long userId)
         {
-            CachedUserClaimsByUserGuid item = new CachedUserClaimsByUserGuid(userGuid);
+            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString(CultureInfo.InvariantCulture));
 
             return item;
         }

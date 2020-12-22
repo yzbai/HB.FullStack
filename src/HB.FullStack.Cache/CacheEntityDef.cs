@@ -6,7 +6,7 @@ namespace HB.FullStack.Cache
 {
     public class CacheEntityDef
     {
-        public PropertyInfo GuidKeyProperty { get; internal set; } = null!;
+        public PropertyInfo KeyProperty { get; internal set; } = null!;
 
         public List<PropertyInfo> Dimensions { get; private set; } = new List<PropertyInfo>();
 

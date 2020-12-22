@@ -2,16 +2,16 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities
 {
-    [DatabaseEntity]
-    public class SignInToken : Entity
+    public class SignInToken : DatabaseEntity
     {
         [Required]
         [ForeignKey(typeof(User))]
-        [GuidEntityProperty(NotNull = true)]
-        public string UserGuid { get; set; } = default!;
+        [EntityProperty(NotNull = true)]
+        public long UserId { get; set; }
 
         [Required]
         [EntityProperty(NotNull = true)]

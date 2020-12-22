@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 
 namespace System
@@ -17,6 +18,11 @@ namespace System
             return null;
         }
 
+        public static long GetUserId(this ClaimsPrincipal principal)
+        {
+            return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.UserId), CultureInfo.InvariantCulture);
+        }
+
         public static string? GetUserGuid(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.UserGuid);
@@ -32,9 +38,9 @@ namespace System
             return principal.GetClaimValue(ClaimExtensionTypes.Audience);
         }
 
-        public static string? GetSignInTokenGuid(this ClaimsPrincipal principal)
+        public static long GetSignInTokenId(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.SignInTokenGuid);
+            return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId), CultureInfo.InvariantCulture);
         }
 
         public static string? GetDeviceId(this ClaimsPrincipal principal)

@@ -126,7 +126,7 @@
         AuthorizationNotFound = 517,
         AuthorizationTooFrequent = 518,
         AuthorizationInvalideAccessToken = 519,
-        AuthorizationInvalideUserGuid = 520,
+        AuthorizationInvalideUserId = 520,
         AuthorizationNoTokenInStore = 521,
         AuthorizationUserSecurityStampChanged = 522,
         AuthorizationUpdateSignInTokenError = 523,
@@ -152,7 +152,7 @@
 
         #region Cache
 
-        CacheEntityNotHaveGuidKeyAttribute = 828,
+        CacheEntityNotHaveKeyAttribute = 828,
         CacheLoadedLuaNotFound = 829,
         CacheNoSuchDimensionKey = 830,
         CacheNotEnabledForEntity = 831,

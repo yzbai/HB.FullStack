@@ -45,7 +45,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (EntityPropertyDef propertyInfo in entityDef.PropertyDefs)
             {
-                if (propertyInfo.IsAutoIncrementPrimaryKey || propertyInfo.Name == nameof(Entity.Guid))
+                if (propertyInfo.IsAutoIncrementPrimaryKey || propertyInfo.Name == "Guid")
                 {
                     continue;
                 }
@@ -55,7 +55,7 @@ namespace HB.FullStack.Database.SQL
 
             args.RemoveLast();
 
-            EntityPropertyDef idProperty = entityDef.GetPropertyDef(nameof(Entity.Id))!;
+            EntityPropertyDef idProperty = entityDef.GetPropertyDef(nameof(DatabaseEntity.Id))!;
             EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
             EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 

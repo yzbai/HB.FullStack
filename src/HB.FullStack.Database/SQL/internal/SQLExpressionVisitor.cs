@@ -451,7 +451,7 @@ namespace HB.FullStack.Database.SQL
                     Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
                     Func<object> getter = lambda.Compile();
 
-                    object[] inArgs = (object[])getter();
+                    IEnumerable inArgs = (IEnumerable)getter();
 
                     List<string> sIn = new List<string>();
 

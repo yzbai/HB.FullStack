@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.KVStore
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class KVStoreEntityAttribute : Attribute
+    public class KVStoreAttribute : Attribute
     {
         public string? InstanceName { get; set; }
     }

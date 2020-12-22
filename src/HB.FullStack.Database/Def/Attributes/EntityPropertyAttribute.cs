@@ -1,8 +1,9 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.Database.Def
 {
     /// <summary>
     /// 对TableDomain中的属性的数据库表字段描述
@@ -10,7 +11,7 @@ namespace HB.FullStack.Common.Entities
     [AttributeUsage(AttributeTargets.Property)]
     public class EntityPropertyAttribute : Attribute
     {
-        public const int MediumLength = 2048;
+        public int PropertyOrder { get; set; }
 
         public bool FixedLength { get; set; }
 
@@ -31,8 +32,9 @@ namespace HB.FullStack.Common.Entities
 
         public Type? Converter { get; set; }
 
-        public EntityPropertyAttribute()
+        public EntityPropertyAttribute([CallerLineNumber] int propertyOrder = 0)
         {
+            PropertyOrder = propertyOrder;
         }
     }
 }

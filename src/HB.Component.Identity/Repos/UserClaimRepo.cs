@@ -16,37 +16,33 @@ namespace HB.FullStack.Identity
         {
             EntityUpdated += (entity, args) =>
             {
-                InvalidateCache(CachedUserClaimsByUserGuid.Key(entity.UserGuid).Timestamp(args.UtcNowTicks));
+                InvalidateCache(CachedUserClaimsByUserId.Key(entity.UserId).Timestamp(args.UtcNowTicks));
                 return Task.CompletedTask;
             };
 
             EntityDeleted += (entity, args) =>
             {
-                InvalidateCache(CachedUserClaimsByUserGuid.Key(entity.UserGuid).Timestamp(args.UtcNowTicks));
+                InvalidateCache(CachedUserClaimsByUserId.Key(entity.UserId).Timestamp(args.UtcNowTicks));
                 return Task.CompletedTask;
             };
         }
 
-        #region Cached UserClaimsByUserGuid
-
-        public Task<IEnumerable<UserClaim>> GetByUserGuidAsync(string userGuid, TransactionContext? transContext = null)
+        public Task<IEnumerable<UserClaim>> GetByUserIdAsync(long userId, TransactionContext? transContext = null)
         {
-            return TryCacheAsideAsync(CachedUserClaimsByUserGuid.Key(userGuid), dbReader =>
+            return TryCacheAsideAsync(CachedUserClaimsByUserId.Key(userId), dbReader =>
             {
-                return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserGuid == userGuid, transContext);
+                return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
             })!;
         }
 
-        public Task AddToUserAsync(string userGuid, UserClaim userClaim, TransactionContext? transContext = null)
+        public Task AddToUserAsync(long userId, UserClaim userClaim, TransactionContext? transContext = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteFromUserAsync(string userGuid, UserClaim userClaim, TransactionContext? transContext = null)
+        public Task DeleteFromUserAsync(long userId, UserClaim userClaim, TransactionContext? transContext = null)
         {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 }

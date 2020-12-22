@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -104,12 +105,12 @@ namespace HB.FullStack.Identity
             #endregion
         }
 
-        public async Task SignOutAsync(string signInTokenGuid, string lastUser)
+        public async Task SignOutAsync(long signInTokenId, string lastUser)
         {
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
-                await _signInTokenRepo.DeleteByGuidAsync(signInTokenGuid, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByIdAsync(signInTokenId, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -120,13 +121,13 @@ namespace HB.FullStack.Identity
             }
         }
 
-        public async Task SignOutAsync(string userGuid, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
+        public async Task SignOutAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
-                await _signInTokenRepo.DeleteByLogOffTypeAsync(userGuid, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByLogOffTypeAsync(userId, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -194,7 +195,7 @@ namespace HB.FullStack.Identity
                     throw new AuthorizationException(ErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
                 }
 
-                UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
+                UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserIdAsync(user.Id).ConfigureAwait(false);
 
                 //密码检查
                 if (context.SignInType == SignInType.ByMobileAndPassword || context.SignInType == SignInType.ByLoginNameAndPassword)
@@ -211,11 +212,11 @@ namespace HB.FullStack.Identity
                 PreSignInCheck(user, userLoginControl, lastUser);
 
                 //注销其他客户端
-                await _signInTokenRepo.DeleteByLogOffTypeAsync(user.Guid, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByLogOffTypeAsync(user.Id, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
 
                 //创建Token
                 SignInToken signInToken = await _signInTokenRepo.CreateAsync(
-                    user.Guid,
+                    user.Id,
                     context.DeviceId,
                     context.DeviceInfos,
                     context.DeviceVersion,
@@ -290,13 +291,12 @@ namespace HB.FullStack.Identity
                 throw new AuthorizationException(ErrorCode.AuthorizationInvalideDeviceId, $"Context: {SerializeUtil.ToJson(context)}");
             }
 
-            string? userGuid = claimsPrincipal.GetUserGuid();
+            long userId = claimsPrincipal.GetUserId();
 
-            if (string.IsNullOrEmpty(userGuid))
+            if (userId <= 0)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationInvalideUserGuid, $"Context: {SerializeUtil.ToJson(context)}");
+                throw new AuthorizationException(ErrorCode.AuthorizationInvalideUserId, $"Context: {SerializeUtil.ToJson(context)}");
             }
-
 
             //SignInToken 验证
             User? user;
@@ -306,10 +306,10 @@ namespace HB.FullStack.Identity
             try
             {
                 signInToken = await _signInTokenRepo.GetByConditionAsync(
-                    claimsPrincipal.GetSignInTokenGuid(),
+                    claimsPrincipal.GetSignInTokenId(),
                     context.RefreshToken,
                     context.DeviceId,
-                    userGuid,
+                    userId,
                     transactionContext).ConfigureAwait(false);
 
                 if (signInToken == null || signInToken.Blacked)
@@ -328,7 +328,7 @@ namespace HB.FullStack.Identity
 
                 // User 信息变动验证
 
-                user = await _userRepo.GetByGuidAsync(userGuid, transactionContext).ConfigureAwait(false);
+                user = await _userRepo.GetByIdAsync(userId, transactionContext).ConfigureAwait(false);
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
@@ -366,15 +366,15 @@ namespace HB.FullStack.Identity
                 return;
             }
 
-            UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserGuidAsync(user.Guid).ConfigureAwait(false);
+            UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserIdAsync(user.Id).ConfigureAwait(false);
 
             OnSignInFailed(userLoginControl, lastUser);
         }
 
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
-            IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
-            IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserGuidAsync(user.Guid, transactionContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
 
             IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
 
@@ -397,19 +397,19 @@ namespace HB.FullStack.Identity
             //2, 手机验证
             if (signInOptions.RequireMobileConfirmed && !user.MobileConfirmed)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationMobileNotConfirmed, $"用户手机需要通过验证. UserGuid:{user.Guid}");
+                throw new AuthorizationException(ErrorCode.AuthorizationMobileNotConfirmed, $"用户手机需要通过验证. UserId:{user.Id}");
             }
 
             //3, 邮件验证
             if (signInOptions.RequireEmailConfirmed && !user.EmailConfirmed)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationEmailNotConfirmed, $"用户邮箱需要通过验证. UserGuid:{user.Guid}");
+                throw new AuthorizationException(ErrorCode.AuthorizationEmailNotConfirmed, $"用户邮箱需要通过验证. UserId:{user.Id}");
             }
 
             //4, Lockout 检查
             if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationLockedOut, $"用户已经被锁定。LockoutEndDate:{userLoginControl.LockoutEndDate}, UserGuid:{user.Guid}");
+                throw new AuthorizationException(ErrorCode.AuthorizationLockedOut, $"用户已经被锁定。LockoutEndDate:{userLoginControl.LockoutEndDate}, UserId:{user.Id}");
             }
 
             //5, 一段时间内,最大失败数检测
@@ -419,7 +419,7 @@ namespace HB.FullStack.Identity
                 {
                     if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
                     {
-                        throw new AuthorizationException(ErrorCode.AuthorizationOverMaxFailedCount, $"用户今日已经达到最大失败登陆数. UserGuid:{user.Guid}");
+                        throw new AuthorizationException(ErrorCode.AuthorizationOverMaxFailedCount, $"用户今日已经达到最大失败登陆数. UserId:{user.Id}");
                     }
                 }
             }
@@ -441,7 +441,7 @@ namespace HB.FullStack.Identity
 
         private static bool PassowrdCheck(User user, string password)
         {
-            string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
+            string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
             return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
@@ -454,7 +454,7 @@ namespace HB.FullStack.Identity
                     userLoginControl.LockoutEnabled = true;
                     userLoginControl.LockoutEndDate = TimeUtil.UtcNow + _options.SignInOptions.LockoutTimeSpan;
 
-                    _logger.LogWarning($"有用户重复登陆失败，账户已锁定.UserGuid:{userLoginControl.UserGuid}, LastUser:{lastUser}");
+                    _logger.LogWarning($"有用户重复登陆失败，账户已锁定.UserId:{userLoginControl.UserId}, LastUser:{lastUser}");
                 }
             }
 
@@ -472,7 +472,7 @@ namespace HB.FullStack.Identity
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
             try
             {
-                await _signInTokenRepo.DeleteByGuidAsync(signInToken.Guid, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInTokenRepo.DeleteByIdAsync(signInToken.Id, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -488,12 +488,13 @@ namespace HB.FullStack.Identity
         {
             IList<Claim> claims = new List<Claim>
             {
+                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
                 new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
-                //new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
-                new Claim(ClaimExtensionTypes.LoginName, user.LoginName??""),
-                //new Claim(ClaimExtensionTypes.MobilePhone, user.Mobile??""),
-                //new Claim(ClaimExtensionTypes.IsMobileConfirmed, user.MobileConfirmed.ToString(GlobalSettings.Culture))
+                new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
+
+                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString(CultureInfo.InvariantCulture)),
+                new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId)
             };
 
             foreach (UserClaim item in userClaims)
@@ -502,21 +503,13 @@ namespace HB.FullStack.Identity
                 {
                     claims.Add(new Claim(item.ClaimType, item.ClaimValue));
                 }
-
             }
 
             foreach (Role item in roles)
             {
                 claims.Add(new Claim(ClaimExtensionTypes.Role, item.Name));
             }
-
-
-            claims.Add(new Claim(ClaimExtensionTypes.SignInTokenGuid, signInToken.Guid));
-            claims.Add(new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId));
-
             return claims;
         }
-
-
     }
 }
