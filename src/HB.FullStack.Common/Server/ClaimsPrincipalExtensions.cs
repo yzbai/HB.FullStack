@@ -23,11 +23,6 @@ namespace System
             return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.UserId), CultureInfo.InvariantCulture);
         }
 
-        public static string? GetUserGuid(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.UserGuid);
-        }
-
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.SecurityStamp);

@@ -8,6 +8,9 @@ namespace HB.FullStack.Database.Def
     /// </summary>
     internal class EntityDef
     {
+        public bool IsIdAutoIncrement { get; set; }
+
+        public bool IsIdGuid { get; set; }
         /// <summary>
         /// 实体名
         /// </summary>
@@ -54,6 +57,8 @@ namespace HB.FullStack.Database.Def
         /// 属性枚举
         /// </summary>
         public List<EntityPropertyDef> PropertyDefs { get; } = new List<EntityPropertyDef>();
+
+        public EntityPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
 
         public EntityPropertyDef? GetPropertyDef(string propertyName)
         {

@@ -3,7 +3,7 @@
 //using System.ComponentModel.DataAnnotations;
 //using System.Text;
 
-//namespace HB.FullStack.Common.Validation.Attributes
+//namespace System.ComponentModel.DataAnnotations
 //{
 //    public sealed class ImageFileAttribute : ValidationAttribute
 //    {

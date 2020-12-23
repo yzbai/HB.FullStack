@@ -12,7 +12,7 @@ namespace HB.FullStack.DatabaseTests.Data
 {
 
     [CacheEntity]
-    public class PublisherEntity3 : DatabaseEntity
+    public class PublisherEntity3 : AutoIcrementIdEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -32,7 +32,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity2 : DatabaseEntity
+    public class PublisherEntity2 : AutoIcrementIdEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -78,7 +78,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity : DatabaseEntity
+    public class PublisherEntity : AutoIcrementIdEntity
     {
 
         [EntityProperty]

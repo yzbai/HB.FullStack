@@ -12,7 +12,6 @@
 
         public const string UserId = "HB.UserId";
 
-        public const string UserGuid = "HB.UserGuid";
 
         public const string DeviceId = "HB.DeviceId";
 

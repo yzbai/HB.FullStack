@@ -12,8 +12,10 @@ using System.Runtime.CompilerServices;
 
 namespace HB.FullStack.Common.Entities
 {
-    public class Entity : ValidatableObject
+    public abstract class Entity : ValidatableObject
     {
+
+
         public int Version { get; internal set; } = -1;
 
         public string LastUser { get; internal set; } = string.Empty;

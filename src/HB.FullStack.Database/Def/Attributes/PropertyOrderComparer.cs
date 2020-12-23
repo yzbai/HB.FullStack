@@ -46,7 +46,8 @@ namespace HB.FullStack.Database.Def
         {
             return info.Name switch
             {
-                nameof(DatabaseEntity.Id) => new EntityPropertyAttribute(0),
+                nameof(IdEntity.Id) => new EntityPropertyAttribute(0),
+                nameof(GuidEntity.Guid) => new EntityPropertyAttribute(0),
                 nameof(Entity.Version) => new EntityPropertyAttribute(1),
                 nameof(Entity.LastUser) => new EntityPropertyAttribute(2),
                 nameof(Entity.LastTime) => new EntityPropertyAttribute(3),

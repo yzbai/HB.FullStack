@@ -6,6 +6,8 @@ namespace HB.FullStack.Common.IdGen
 {
     public interface IDistributedIdGen
     {
+        public static IDistributedIdGen IdGen { get; set; } = null!;
+
         long GetId();
     }
 }

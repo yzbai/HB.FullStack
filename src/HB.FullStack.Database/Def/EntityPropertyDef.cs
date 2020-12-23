@@ -28,6 +28,8 @@ namespace HB.FullStack.Database.Def
 
         public bool IsAutoIncrementPrimaryKey { get; set; }
 
+        public bool IsPrimaryKey { get; set; }
+
         public bool IsForeignKey { get; set; }
 
         public bool IsUnique { get; set; }

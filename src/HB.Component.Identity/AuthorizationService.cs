@@ -489,7 +489,6 @@ namespace HB.FullStack.Identity
             IList<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
-                new Claim(ClaimExtensionTypes.UserGuid, user.Guid),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
                 new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
 

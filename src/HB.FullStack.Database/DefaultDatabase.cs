@@ -35,7 +35,7 @@ namespace HB.FullStack.Database
         private readonly ITransaction _transaction;
         private readonly ILogger _logger;
 
-        private readonly string _deletedReservedName;
+        private readonly string _deletedPropertyReservedName;
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
@@ -51,7 +51,7 @@ namespace HB.FullStack.Database
 
             EntityDefFactory.Initialize(databaseEngine);
 
-            _deletedReservedName = SqlHelper.GetReserved(nameof(Entity.Deleted), _databaseEngine.EngineType);
+            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(Entity.Deleted), _databaseEngine.EngineType);
 
             if (_databaseSettings.Version < 0)
             {
@@ -279,22 +279,22 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : DatabaseEntity, new()
+        public FromExpression<T> From<T>() where T : DatabaseEntity2, new()
         {
             return new FromExpression<T>(EngineType);
         }
 
-        public WhereExpression<T> Where<T>() where T : DatabaseEntity, new()
+        public WhereExpression<T> Where<T>() where T : DatabaseEntity2, new()
         {
             return new WhereExpression<T>(EngineType);
         }
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new()
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity2, new()
         {
             return new WhereExpression<T>(EngineType).Where(sqlFilter, filterParams);
         }
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseEntity, new()
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseEntity2, new()
         {
             return new WhereExpression<T>(EngineType).Where(predicate);
         }
@@ -305,7 +305,7 @@ namespace HB.FullStack.Database
 
         /// <returns></returns>
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -324,9 +324,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, TransactionContext? transContext = null)
-            where TSelect : DatabaseEntity, new()
-            where TFrom : DatabaseEntity, new()
-            where TWhere : DatabaseEntity, new()
+            where TSelect : DatabaseEntity2, new()
+            where TFrom : DatabaseEntity2, new()
+            where TWhere : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -337,7 +337,7 @@ namespace HB.FullStack.Database
             EntityDef fromDef = EntityDefFactory.GetDef<TFrom>()!;
             EntityDef whereDef = EntityDefFactory.GetDef<TWhere>()!;
 
-            whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedReservedName}=0");
+            whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
             try
             {
@@ -355,7 +355,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -364,7 +364,7 @@ namespace HB.FullStack.Database
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
-            whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedReservedName}=0");
+            whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
             try
             {
@@ -382,7 +382,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -395,7 +395,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -404,7 +404,7 @@ namespace HB.FullStack.Database
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
-            whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedReservedName}=0");
+            whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
             try
             {
@@ -424,43 +424,43 @@ namespace HB.FullStack.Database
         #region 单表查询, Where
 
         public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return RetrieveAsync<T>(null, null, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return PageAsync(null, whereCondition, pageNumber, perPageCount, transContext);
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return PageAsync<T>(null, null, pageNumber, perPageCount, transContext);
         }
 
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return CountAsync(null, condition, transContext);
         }
 
         public Task<long> CountAsync<T>(TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             return CountAsync<T>(null, null, transContext);
         }
@@ -470,14 +470,14 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             WhereExpression<T> where = Where<T>("Id={0}", id);
 
             return ScalarAsync(where, transContext);
         }
 
-        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DatabaseEntity2, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -485,7 +485,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -493,7 +493,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             WhereExpression<T> whereCondition = new WhereExpression<T>(EngineType);
 
@@ -501,7 +501,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseEntity2, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -513,8 +513,8 @@ namespace HB.FullStack.Database
         #region 双表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget : DatabaseEntity, new()
+            where TSource : DatabaseEntity2, new()
+            where TTarget : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -527,17 +527,17 @@ namespace HB.FullStack.Database
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{targetEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And<TTarget>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
 
@@ -545,7 +545,7 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
             }
@@ -564,8 +564,8 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<Tuple<TSource, TTarget?>>> PageAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget : DatabaseEntity, new()
+            where TSource : DatabaseEntity2, new()
+            where TTarget : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -578,8 +578,8 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget : DatabaseEntity, new()
+            where TSource : DatabaseEntity2, new()
+            where TTarget : DatabaseEntity2, new()
         {
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -602,9 +602,9 @@ namespace HB.FullStack.Database
         #region 三表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget1 : DatabaseEntity, new()
-            where TTarget2 : DatabaseEntity, new()
+            where TSource : DatabaseEntity2, new()
+            where TTarget1 : DatabaseEntity2, new()
+            where TTarget2 : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -618,17 +618,17 @@ namespace HB.FullStack.Database
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetEntityDef2.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{targetEntityDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And<TTarget2>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
 
@@ -636,7 +636,7 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedReservedName}=0");
+                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
             }
@@ -655,9 +655,9 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> PageAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget1 : DatabaseEntity, new()
-            where TTarget2 : DatabaseEntity, new()
+            where TSource : DatabaseEntity2, new()
+            where TTarget1 : DatabaseEntity2, new()
+            where TTarget2 : DatabaseEntity2, new()
         {
             if (whereCondition == null)
             {
@@ -670,9 +670,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget1 : DatabaseEntity, new()
-            where TTarget2 : DatabaseEntity, new()
+            where TSource : DatabaseEntity2, new()
+            where TTarget1 : DatabaseEntity2, new()
+            where TTarget2 : DatabaseEntity2, new()
         {
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -697,7 +697,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
         /// </summary>
-        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity2, new()
         {
             ThrowIf.NotValid(item);
 
@@ -718,7 +718,10 @@ namespace HB.FullStack.Database
 
                 object rt = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
 
-                item.Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                if (entityDef.IsIdAutoIncrement)
+                {
+                    ((AutoIcrementIdEntity)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                }
             }
             catch (Exception ex)
             {
@@ -742,7 +745,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>
-        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity2, new()
         {
             ThrowIf.NotValid(item);
 
@@ -800,7 +803,7 @@ namespace HB.FullStack.Database
         ///  版本控制，如果item中Version未赋值，会无法更改
         ///  反应Version变化
         /// </summary>
-        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity2, new()
         {
             ThrowIf.NotValid(item);
 
@@ -857,13 +860,13 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-        public async Task<IEnumerable<long>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity2, new()
         {
             ThrowIf.NotValid(items);
 
             if (!items.Any())
             {
-                return new List<long>();
+                return new List<object>();
             }
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -882,7 +885,7 @@ namespace HB.FullStack.Database
                     item.LastTime = TimeUtil.UtcNow;
                 });
 
-                IList<long> newIds = new List<long>();
+                IList<object> newIds = new List<object>();
 
                 var command = DbCommandBuilder.CreateBatchAddCommand(EngineType, entityDef, items);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
@@ -891,15 +894,33 @@ namespace HB.FullStack.Database
                     command,
                     true).ConfigureAwait(false);
 
-                while (reader.Read())
+                if (entityDef.IsIdAutoIncrement)
                 {
-                    newIds.Add(reader.GetInt64(0));
-                }
+                    while (reader.Read())
+                    {
+                        newIds.Add(reader.GetValue(0));
+                    }
 
-                for (int i = 0; i < items.Count(); ++i)
+                    int num = 0;
+
+                    foreach (var item in items)
+                    {
+                        ((AutoIcrementIdEntity)(object)item).Id = Convert.ToInt64(newIds[num++], CultureInfo.InvariantCulture);
+                    }
+                }
+                else if (entityDef.IsIdGuid)
                 {
-                    T item = items.ElementAt(i);
-                    item.Id = newIds[i];
+                    foreach (var item in items)
+                    {
+                        newIds.Add(((GuidEntity)(object)item).Guid);
+                    }
+                }
+                else
+                {
+                    foreach (var item in items)
+                    {
+                        newIds.Add(((IdEntity)(object)item).Id);
+                    }
                 }
 
                 return newIds;
@@ -926,7 +947,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity2, new()
         {
             ThrowIf.NotValid(items);
 
@@ -999,7 +1020,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
-        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity2, new()
         {
             ThrowIf.NotValid(items);
 

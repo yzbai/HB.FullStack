@@ -9,7 +9,7 @@ using OrmBenchmark.Core;
 namespace HB.FullStack.Benchmark.Database
 {
     [Database(TableName = "Posts")]
-    public class Post : DatabaseEntity, IPost
+    public class Post : AutoIcrementIdEntity, IPost
     {
         [EntityProperty(MaxLength = 2000)]
         public string Text { get; set; } = null!;

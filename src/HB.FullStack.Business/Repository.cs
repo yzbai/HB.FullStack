@@ -23,7 +23,7 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class Repository<TEntity> where TEntity : DatabaseEntity, new()
+    public abstract class Repository<TEntity> where TEntity : DatabaseEntity2, new()
     {
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly ILogger _logger;
@@ -212,14 +212,14 @@ namespace HB.FullStack.Repository
             await OnEntityDeletedAsync(entity).ConfigureAwait(false);
         }
 
-        protected async Task<IEnumerable<long>> BatchAddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        protected async Task<IEnumerable<object>> BatchAddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
             {
                 await OnEntityAddingAsync(entity).ConfigureAwait(false);
             }
 
-            IEnumerable<long> results;
+            IEnumerable<object> results;
 
             try
             {

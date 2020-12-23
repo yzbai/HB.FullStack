@@ -8,9 +8,9 @@ namespace HB.FullStack.Database.Def
     /// 标识字段为主键
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class AutoIncrementPrimaryKeyAttribute : Attribute
+    public sealed class AutoIncrementPrimaryKey2Attribute : PrimaryKeyAttribute
     {
-        public AutoIncrementPrimaryKeyAttribute()
+        public AutoIncrementPrimaryKey2Attribute()
         {
         }
     }

@@ -34,7 +34,7 @@ namespace HB.FullStack.Database.SQL
             args.RemoveLast();
             values.RemoveLast();
 
-            string returnIdStatement = returnId ? $"select {GetLastInsertIdStatement(engineType)};" : string.Empty;
+            string returnIdStatement = returnId && entityDef.IsIdAutoIncrement ? $"select {GetLastInsertIdStatement(engineType)};" : string.Empty;
 
             return $"insert into {entityDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
         }
@@ -45,7 +45,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (EntityPropertyDef propertyInfo in entityDef.PropertyDefs)
             {
-                if (propertyInfo.IsAutoIncrementPrimaryKey || propertyInfo.Name == "Guid")
+                if (propertyInfo.IsPrimaryKey)
                 {
                     continue;
                 }
@@ -55,13 +55,13 @@ namespace HB.FullStack.Database.SQL
 
             args.RemoveLast();
 
-            EntityPropertyDef idProperty = entityDef.GetPropertyDef(nameof(DatabaseEntity.Id))!;
+            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
             EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
             EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
             StringBuilder where = new StringBuilder();
 
-            where.Append($"{idProperty.DbReservedName}={idProperty.DbParameterizedName}_{number} AND ");
+            where.Append($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND ");
             where.Append($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND ");
             where.Append($"{deletedProperty.DbReservedName}=0");
 
@@ -264,7 +264,12 @@ namespace HB.FullStack.Database.SQL
 
                 string unique = propertyDef.IsUnique && !propertyDef.IsForeignKey && !propertyDef.IsAutoIncrementPrimaryKey ? " UNIQUE " : "";
 
-                string primaryStatement = propertyDef.Name == "Id" ? " PRIMARY KEY AUTOINCREMENT " : "";
+                string primaryStatement = propertyDef.IsPrimaryKey ? " PRIMARY KEY " : "";
+
+                if (propertyDef.IsAutoIncrementPrimaryKey)
+                {
+                    primaryStatement += " AUTOINCREMENT ";
+                }
 
                 propertyInfoSql.Append($" {propertyDef.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} ,");
             }
@@ -287,8 +292,15 @@ namespace HB.FullStack.Database.SQL
                 throw new DatabaseException($"Type : {entityDef.EntityFullName} has null or empty DbTableReservedName");
             }
 
+            EntityPropertyDef? primaryKeyPropertyDef = null;
+
             foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
+                if (propertyDef.IsPrimaryKey)
+                {
+                    primaryKeyPropertyDef = propertyDef;
+                }
+
                 string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, EngineType.MySQL);
 
                 int length = 0;
@@ -322,15 +334,20 @@ namespace HB.FullStack.Database.SQL
 
                 string lengthStatement = (length == 0 || dbTypeStatement == "MEDIUMTEXT") ? "" : "(" + length + ")";
                 string nullableStatement = propertyDef.IsNullable == true ? "" : " NOT NULL ";
-                string autoIncrementStatement = propertyDef.Name == "Id" ? "AUTO_INCREMENT" : "";
+                string autoIncrementStatement = propertyDef.IsAutoIncrementPrimaryKey ? "AUTO_INCREMENT" : "";
                 string uniqueStatement = !propertyDef.IsAutoIncrementPrimaryKey && !propertyDef.IsForeignKey && propertyDef.IsUnique ? " UNIQUE " : "";
 
                 propertySqlBuilder.Append($" {propertyDef.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {uniqueStatement},");
             }
 
+            if (primaryKeyPropertyDef == null)
+            {
+                throw new DatabaseException($"Entity:{entityDef.EntityFullName} no primary key");
+            }
+
             string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;
 
-            return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} PRIMARY KEY (`Id`)) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;";
+            return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;";
         }
 
         public static string GetTableCreateSql(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)

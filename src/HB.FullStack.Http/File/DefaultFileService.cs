@@ -21,7 +21,7 @@ namespace HB.FullStack.Server.File
             _securityService = securityService;
         }
 
-        public async Task SetAvatarAsync(string userGuid, IFormFile file)
+        public async Task SetAvatarAsync(long userId, IFormFile file)
         {
             byte[] data = await _securityService.ProcessFormFileAsync(
                     file,
@@ -29,7 +29,7 @@ namespace HB.FullStack.Server.File
                     _siteOptions.FileSettings.AvatarMaxSize).ConfigureAwait(false);
 
 
-            string path = Path.Combine(_siteOptions.FileSettings.AvatarPath, userGuid! + ".png");
+            string path = Path.Combine(_siteOptions.FileSettings.AvatarPath, userId + ".png");
 
             using FileStream fileStream = new FileStream(path, FileMode.Create);
 

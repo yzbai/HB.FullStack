@@ -8,12 +8,8 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// ½ÇÉ«
     /// </summary>
-    public class Role : DatabaseEntity
+    public class Role : IdEntity
     {
-        [Required]
-        [UniqueGuidEntityProperty]
-        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
-
         [EntityProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;
 

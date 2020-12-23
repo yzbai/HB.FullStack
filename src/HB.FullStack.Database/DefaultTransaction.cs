@@ -27,7 +27,7 @@ namespace HB.FullStack.Database
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity2
         {
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 

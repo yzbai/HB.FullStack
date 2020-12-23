@@ -3,7 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common.Validate;
 
-namespace HB.FullStack.Common.Validation.Attributes
+namespace System.ComponentModel.DataAnnotations
 {
     public sealed class DayAttribute : ValidationAttribute
     {

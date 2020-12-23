@@ -43,7 +43,7 @@ namespace HB.FullStack.Database.Def
 
             static bool entityTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(DatabaseEntity)) && !t.IsAbstract;
+                return t.IsSubclassOf(typeof(DatabaseEntity2)) && !t.IsAbstract;
             }
         }
 
@@ -133,7 +133,7 @@ namespace HB.FullStack.Database.Def
             return resusltEntitySchemaDict;
         }
 
-        public static EntityDef? GetDef<T>() where T : DatabaseEntity
+        public static EntityDef? GetDef<T>() where T : DatabaseEntity2
         {
             return GetDef(typeof(T));
         }
@@ -159,6 +159,8 @@ namespace HB.FullStack.Database.Def
 
             EntityDef entityDef = new EntityDef
             {
+                IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIcrementIdEntity)),
+                IsIdGuid = entityType.IsSubclassOf(typeof(GuidEntity)),
                 EntityType = entityType,
                 EntityFullName = entityType.FullName,
                 DatabaseName = dbSchema.DatabaseName,
@@ -182,7 +184,10 @@ namespace HB.FullStack.Database.Def
                     }
                     else if (info.Name == nameof(Entity.LastUser))
                     {
-                        entityPropertyAttribute = new EntityPropertyAttribute { MaxLength = Consts.LastUserMaxLength };
+                        entityPropertyAttribute = new EntityPropertyAttribute
+                        {
+                            MaxLength = Consts.LastUserMaxLength
+                        };
                     }
                     else
                     {
@@ -234,11 +239,13 @@ namespace HB.FullStack.Database.Def
             }
 
             //判断是否是主键
-            AutoIncrementPrimaryKeyAttribute? atts1 = propertyInfo.GetCustomAttribute<AutoIncrementPrimaryKeyAttribute>(false);
+            PrimaryKeyAttribute? primaryAttribute = propertyInfo.GetCustomAttribute<PrimaryKeyAttribute>(false);
 
-            if (atts1 != null)
+            if (primaryAttribute != null)
             {
-                propertyDef.IsAutoIncrementPrimaryKey = true;
+                entityDef.PrimaryKeyPropertyDef = propertyDef;
+                propertyDef.IsPrimaryKey = true;
+                propertyDef.IsAutoIncrementPrimaryKey = primaryAttribute is AutoIncrementPrimaryKey2Attribute;
                 propertyDef.IsNullable = false;
                 propertyDef.IsForeignKey = false;
                 propertyDef.IsUnique = true;
