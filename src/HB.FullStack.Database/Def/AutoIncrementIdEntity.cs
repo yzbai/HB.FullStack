@@ -3,7 +3,7 @@ using HB.FullStack.Common.Entities;
 
 namespace HB.FullStack.Database.Def
 {
-    public abstract class AutoIcrementIdEntity : IdDatabaseEntity
+    public abstract class AutoIncrementIdEntity : IdDatabaseEntity
     {
         [AutoIncrementPrimaryKey]
         [EntityProperty(0)]

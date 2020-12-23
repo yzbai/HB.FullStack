@@ -728,7 +728,7 @@ namespace HB.FullStack.Database
 
                 if (entityDef.IsIdAutoIncrement)
                 {
-                    ((AutoIcrementIdEntity)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                    ((AutoIncrementIdEntity)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
             }
             catch (Exception ex)
@@ -913,7 +913,7 @@ namespace HB.FullStack.Database
 
                     foreach (var item in items)
                     {
-                        ((AutoIcrementIdEntity)(object)item).Id = Convert.ToInt64(newIds[num++], CultureInfo.InvariantCulture);
+                        ((AutoIncrementIdEntity)(object)item).Id = Convert.ToInt64(newIds[num++], CultureInfo.InvariantCulture);
                     }
                 }
                 else if (entityDef.IsIdGuid)

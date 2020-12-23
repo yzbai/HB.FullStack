@@ -159,7 +159,7 @@ namespace HB.FullStack.Database.Def
 
             EntityDef entityDef = new EntityDef
             {
-                IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIcrementIdEntity)),
+                IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIncrementIdEntity)),
                 IsIdGuid = entityType.IsSubclassOf(typeof(GuidEntity)),
                 EntityType = entityType,
                 EntityFullName = entityType.FullName,
