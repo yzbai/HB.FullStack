@@ -3,11 +3,11 @@ using HB.FullStack.Common.Entities;
 
 namespace HB.FullStack.Database.Def
 {
-    public abstract class AutoIcrementIdEntity : DatabaseEntity2
+    public abstract class AutoIcrementIdEntity : IdDatabaseEntity
     {
         [AutoIncrementPrimaryKey2]
         [EntityProperty(0)]
         [CacheKey]
-        public long Id { get; set; } = -1;
+        public override long Id { get; set; } = -1;
     }
 }

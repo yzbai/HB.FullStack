@@ -6,7 +6,7 @@ using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class SignInToken : IdEntity
+    public class SignInToken : IdGenEntity
     {
         [Required]
         [ForeignKey(typeof(User))]

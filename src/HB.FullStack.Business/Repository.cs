@@ -23,7 +23,7 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class Repository<TEntity> where TEntity : DatabaseEntity2, new()
+    public abstract class Repository<TEntity> where TEntity : DatabaseEntity, new()
     {
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly ILogger _logger;

@@ -6,7 +6,7 @@ using HB.FullStack.Common.Entities;
 
 namespace HB.FullStack.Database.Def
 {
-    public abstract class DatabaseEntity2 : Entity
+    public abstract class DatabaseEntity : Entity
     {
     }
 }

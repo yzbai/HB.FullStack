@@ -8,7 +8,7 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// ½ÇÉ«
     /// </summary>
-    public class Role : IdEntity
+    public class Role : IdGenEntity
     {
         [EntityProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;

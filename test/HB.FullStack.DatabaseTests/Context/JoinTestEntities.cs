@@ -8,7 +8,7 @@ using HB.FullStack.Database.Def;
 namespace HB.FullStack.DatabaseTests
 {
 
-    public class A : AutoIcrementIdEntity
+    public class A : IdGenEntity
     {
 
 
@@ -17,7 +17,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B : AutoIcrementIdEntity
+    public class B : IdGenEntity
     {
 
         [EntityProperty]
@@ -25,7 +25,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB : AutoIcrementIdEntity
+    public class AB : IdGenEntity
     {
 
         [EntityProperty]
@@ -36,12 +36,49 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C : AutoIcrementIdEntity
+    public class C : IdGenEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
 
         [EntityProperty]
         public long AId { get; set; } = default!;
+    }
+
+    public class A_Client : GuidEntity
+    {
+
+
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+    }
+
+
+    public class B_Client : GuidEntity
+    {
+
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+    }
+
+
+    public class AB_Client : GuidEntity
+    {
+
+        [EntityProperty]
+        public string AGuid { get; set; } = default!;
+
+        [EntityProperty]
+        public string BGuid { get; set; } = default!;
+    }
+
+
+    public class C_Client : GuidEntity
+    {
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+
+        [EntityProperty]
+        public string AGuid { get; set; } = default!;
     }
 }

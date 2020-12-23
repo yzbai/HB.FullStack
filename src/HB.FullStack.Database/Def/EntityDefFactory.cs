@@ -43,7 +43,7 @@ namespace HB.FullStack.Database.Def
 
             static bool entityTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(DatabaseEntity2)) && !t.IsAbstract;
+                return t.IsSubclassOf(typeof(DatabaseEntity)) && !t.IsAbstract;
             }
         }
 
@@ -133,7 +133,7 @@ namespace HB.FullStack.Database.Def
             return resusltEntitySchemaDict;
         }
 
-        public static EntityDef? GetDef<T>() where T : DatabaseEntity2
+        public static EntityDef? GetDef<T>() where T : DatabaseEntity
         {
             return GetDef(typeof(T));
         }

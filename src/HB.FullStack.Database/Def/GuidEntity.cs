@@ -3,7 +3,7 @@ using HB.FullStack.Common.Entities;
 
 namespace HB.FullStack.Database.Def
 {
-    public abstract class GuidEntity : DatabaseEntity2
+    public abstract class GuidEntity : DatabaseEntity
     {
         [PrimaryKey]
         [UniqueGuidEntityProperty(0)]

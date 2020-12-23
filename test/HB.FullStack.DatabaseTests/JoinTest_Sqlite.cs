@@ -36,12 +36,12 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         private async Task AddSomeDataAsync()
         {
-            A a1 = new A { Name = "a1" };
-            A a2 = new A { Name = "a2" };
-            A a3 = new A { Name = "a3" };
+            A_Client a1 = new A_Client { Name = "a1" };
+            A_Client a2 = new A_Client { Name = "a2" };
+            A_Client a3 = new A_Client { Name = "a3" };
 
-            B b1 = new B { Name = "b1" };
-            B b2 = new B { Name = "b2" };
+            B_Client b1 = new B_Client { Name = "b1" };
+            B_Client b2 = new B_Client { Name = "b2" };
 
             await _sqlite.AddAsync(a2, "lastUsre", null);
             await _sqlite.AddAsync(a1, "lastUsre", null);
@@ -50,18 +50,17 @@ namespace HB.FullStack.DatabaseTests
             await _sqlite.AddAsync(b1, "lastUsre", null);
             await _sqlite.AddAsync(b2, "lastUsre", null);
 
-            AB a1b1 = new AB { AId = a1.Id, BId = b1.Id };
-            AB a1b2 = new AB { AId = a1.Id, BId = b2.Id };
+            AB_Client a1b1 = new AB_Client { AGuid = a1.Guid, BGuid = b1.Guid };
+            AB_Client a1b2 = new AB_Client { AGuid = a1.Guid, BGuid = b2.Guid };
+            AB_Client a2b1 = new AB_Client { AGuid = a2.Guid, BGuid = b1.Guid };
+            AB_Client a3b2 = new AB_Client { AGuid = a3.Guid, BGuid = b2.Guid };
 
-            AB a2b1 = new AB { AId = a2.Id, BId = b1.Id };
-            AB a3b2 = new AB { AId = a3.Id, BId = b2.Id };
-
-            C c1 = new C { AId = a1.Id };
-            C c2 = new C { AId = a2.Id };
-            C c3 = new C { AId = a3.Id };
-            C c4 = new C { AId = a1.Id };
-            C c5 = new C { AId = a2.Id };
-            C c6 = new C { AId = a3.Id };
+            C_Client c1 = new C_Client { AGuid = a1.Guid };
+            C_Client c2 = new C_Client { AGuid = a2.Guid };
+            C_Client c3 = new C_Client { AGuid = a3.Guid };
+            C_Client c4 = new C_Client { AGuid = a1.Guid };
+            C_Client c5 = new C_Client { AGuid = a2.Guid };
+            C_Client c6 = new C_Client { AGuid = a3.Guid };
 
             await _sqlite.AddAsync(a1b1, "lastUsre", null);
             await _sqlite.AddAsync(a1b2, "lastUsre", null);
@@ -82,14 +81,14 @@ namespace HB.FullStack.DatabaseTests
             IDatabase database = _sqlite;
 
             var from = database
-                .From<A>()
-                .LeftJoin<AB>((a, ab) => ab.AId == a.Id)
-                .LeftJoin<AB, B>((ab, b) => ab.BId == b.Id);
+                .From<A_Client>()
+                .LeftJoin<AB_Client>((a, ab) => ab.AGuid == a.Guid)
+                .LeftJoin<AB_Client, B_Client>((ab, b) => ab.BGuid == b.Guid);
 
 
             try
             {
-                IEnumerable<Tuple<A, AB?, B?>>? result = await database.RetrieveAsync<A, AB, B>(from, database.Where<A>(), null);
+                IEnumerable<Tuple<A_Client, AB_Client?, B_Client?>>? result = await database.RetrieveAsync<A_Client, AB_Client, B_Client>(from, database.Where<A_Client>(), null);
                 Assert.True(result.Count() > 0);
             }
             catch (Exception ex)
@@ -107,13 +106,13 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _sqlite;
             var from = database
-                .From<C>()
-                .LeftJoin<A>((c, a) => c.AId == a.Id);
+                .From<C_Client>()
+                .LeftJoin<A_Client>((c, a) => c.AGuid == a.Guid);
 
 
             try
             {
-                IEnumerable<Tuple<C, A?>>? result = await database.RetrieveAsync<C, A>(from, database.Where<C>(), null).ConfigureAwait(false);
+                IEnumerable<Tuple<C_Client, A_Client?>>? result = await database.RetrieveAsync<C_Client, A_Client>(from, database.Where<C_Client>(), null).ConfigureAwait(false);
                 Assert.True(result.Count() > 0);
             }
             catch (Exception ex)

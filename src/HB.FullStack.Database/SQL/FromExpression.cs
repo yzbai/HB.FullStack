@@ -21,7 +21,7 @@ namespace HB.FullStack.Database.SQL
         CROSS = 5
     }
 
-    public class FromExpression<T> where T : DatabaseEntity2, new()
+    public class FromExpression<T> where T : DatabaseEntity, new()
     {
         private readonly StringBuilder _statementBuilder = new StringBuilder();
 
@@ -47,7 +47,7 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
-        public FromExpression<T> InnerJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity2, new()
+        public FromExpression<T> InnerJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.INNER)
             {
@@ -60,8 +60,8 @@ namespace HB.FullStack.Database.SQL
         }
 
         public FromExpression<T> InnerJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
-            where TLeft : DatabaseEntity2, new()
-            where TRight : DatabaseEntity2, new()
+            where TLeft : DatabaseEntity, new()
+            where TRight : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.INNER)
             {
@@ -73,7 +73,7 @@ namespace HB.FullStack.Database.SQL
             return InternalJoin<TRight>("INNER JOIN", joinExpr);
         }
 
-        public FromExpression<T> LeftJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity2, new()
+        public FromExpression<T> LeftJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.LEFT)
             {
@@ -86,8 +86,8 @@ namespace HB.FullStack.Database.SQL
         }
 
         public FromExpression<T> LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
-            where TLeft : DatabaseEntity2, new()
-            where TRight : DatabaseEntity2, new()
+            where TLeft : DatabaseEntity, new()
+            where TRight : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.LEFT)
             {
@@ -99,7 +99,7 @@ namespace HB.FullStack.Database.SQL
             return InternalJoin<TRight>("LEFT JOIN", joinExpr);
         }
 
-        public FromExpression<T> RightJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity2, new()
+        public FromExpression<T> RightJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.RIGHT)
             {
@@ -112,8 +112,8 @@ namespace HB.FullStack.Database.SQL
         }
 
         public FromExpression<T> RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
-            where TLeft : DatabaseEntity2, new()
-            where TRight : DatabaseEntity2, new()
+            where TLeft : DatabaseEntity, new()
+            where TRight : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.RIGHT)
             {
@@ -125,7 +125,7 @@ namespace HB.FullStack.Database.SQL
             return InternalJoin<TRight>("RIGHT JOIN", joinExpr);
         }
 
-        public FromExpression<T> FullJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity2, new()
+        public FromExpression<T> FullJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.FULL)
             {
@@ -138,8 +138,8 @@ namespace HB.FullStack.Database.SQL
         }
 
         public FromExpression<T> FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
-            where TLeft : DatabaseEntity2, new()
-            where TRight : DatabaseEntity2, new()
+            where TLeft : DatabaseEntity, new()
+            where TRight : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.FULL)
             {
@@ -151,7 +151,7 @@ namespace HB.FullStack.Database.SQL
             return InternalJoin<TRight>("FULL JOIN", joinExpr);
         }
 
-        public FromExpression<T> CrossJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity2, new()
+        public FromExpression<T> CrossJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.CROSS)
             {
@@ -164,8 +164,8 @@ namespace HB.FullStack.Database.SQL
         }
 
         public FromExpression<T> CrossJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
-            where TLeft : DatabaseEntity2, new()
-            where TRight : DatabaseEntity2, new()
+            where TLeft : DatabaseEntity, new()
+            where TRight : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.CROSS)
             {
@@ -177,7 +177,7 @@ namespace HB.FullStack.Database.SQL
             return InternalJoin<TRight>("CROSS JOIN", joinExpr);
         }
 
-        private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr) where Target : DatabaseEntity2
+        private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr) where Target : DatabaseEntity
         {
             EntityDef targetDef = EntityDefFactory.GetDef<Target>()!;
 

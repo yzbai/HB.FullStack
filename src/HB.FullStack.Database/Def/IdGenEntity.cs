@@ -4,12 +4,13 @@ using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.Def
 {
-    public abstract class IdEntity : DatabaseEntity2
+
+    public abstract class IdGenEntity : IdDatabaseEntity
     {
         [PrimaryKey]
         [EntityProperty(0)]
         [CacheKey]
         [LongId]
-        public long Id { get; set; } = IDistributedIdGen.IdGen.GetId();
+        public override long Id { get; set; } = IDistributedIdGen.IdGen.GetId();
     }
 }
