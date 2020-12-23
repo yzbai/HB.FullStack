@@ -38,7 +38,7 @@ namespace System
             DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
             action(dataProtectionSettings);
 
-            string redisKey = $"{dataProtectionSettings.ApplicationDiscriminator}_{EnvironmentUtil.AspNetCoreEnvironment}_dpk";
+            string redisKey = $"{dataProtectionSettings.ApplicationName}_{EnvironmentUtil.AspNetCoreEnvironment}_dpk";
             X509Certificate2? certificate2 = CertificateUtil.GetBySubject(dataProtectionSettings.CertificateSubject);
 
             if (certificate2 == null)
@@ -68,7 +68,7 @@ namespace System
 
                     services
                         .AddDataProtection()
-                        .SetApplicationName(dataProtectionSettings.ApplicationDiscriminator)
+                        .SetApplicationName(dataProtectionSettings.ApplicationName)
                         .ProtectKeysWithCertificate(certificate2)
                         .PersistKeysToStackExchangeRedis(redisMultiplexer, redisKey);
                 });

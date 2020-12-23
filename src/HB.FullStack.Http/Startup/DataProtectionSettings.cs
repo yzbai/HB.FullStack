@@ -8,7 +8,7 @@ namespace HB.FullStack.Server
     public class DataProtectionSettings
     {
         [DisallowNull, NotNull]
-        public string? ApplicationDiscriminator { get; set; }
+        public string? ApplicationName { get; set; }
 
         [DisallowNull, NotNull]
         public string? CertificateSubject { get; set; }
