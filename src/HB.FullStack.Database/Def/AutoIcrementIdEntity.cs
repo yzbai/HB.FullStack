@@ -5,7 +5,7 @@ namespace HB.FullStack.Database.Def
 {
     public abstract class AutoIcrementIdEntity : IdDatabaseEntity
     {
-        [AutoIncrementPrimaryKey2]
+        [AutoIncrementPrimaryKey]
         [EntityProperty(0)]
         [CacheKey]
         public override long Id { get; set; } = -1;

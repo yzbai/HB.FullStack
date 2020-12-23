@@ -245,7 +245,7 @@ namespace HB.FullStack.Database.Def
             {
                 entityDef.PrimaryKeyPropertyDef = propertyDef;
                 propertyDef.IsPrimaryKey = true;
-                propertyDef.IsAutoIncrementPrimaryKey = primaryAttribute is AutoIncrementPrimaryKey2Attribute;
+                propertyDef.IsAutoIncrementPrimaryKey = primaryAttribute is AutoIncrementPrimaryKeyAttribute;
                 propertyDef.IsNullable = false;
                 propertyDef.IsForeignKey = false;
                 propertyDef.IsUnique = true;

@@ -478,7 +478,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<T?> ScalarAsync<T>(string guid, TransactionContext? transContext)
-            where T : GuidEntity, new()
+            where T : DatabaseEntity, new()
         {
             WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidEntity.Guid), EngineType)}={{0}}", guid);
 

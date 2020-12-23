@@ -139,7 +139,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity3_Client : GuidEntity
+    public class PublisherEntity3_Client : IdGuidEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -159,7 +159,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity2_Client : GuidEntity
+    public class PublisherEntity2_Client : IdGuidEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -205,7 +205,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity_Client : GuidEntity
+    public class PublisherEntity_Client : IdGuidEntity
     {
 
         [EntityProperty]

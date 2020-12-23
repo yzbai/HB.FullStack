@@ -32,7 +32,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class BookEntity_Client : GuidEntity
+    public class BookEntity_Client : IdGuidEntity
     {
 
         [EntityProperty]
@@ -43,7 +43,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class Book_Client : GuidEntity
+    public class Book_Client : IdGuidEntity
     {
         [CacheDimensionKey]
         public string Name { get; set; } = null!;

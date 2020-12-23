@@ -45,7 +45,7 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class A_Client : GuidEntity
+    public class A_Client : IdGuidEntity
     {
 
 
@@ -54,7 +54,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B_Client : GuidEntity
+    public class B_Client : IdGuidEntity
     {
 
         [EntityProperty]
@@ -62,7 +62,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB_Client : GuidEntity
+    public class AB_Client : IdGuidEntity
     {
 
         [EntityProperty]
@@ -73,7 +73,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C_Client : GuidEntity
+    public class C_Client : IdGuidEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
