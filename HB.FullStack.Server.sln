@@ -51,6 +51,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrmBenchmark.Dapper", "benc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrmBenchmark.OrmLite", "benchmark\OrmBenchmark.OrmLite\OrmBenchmark.OrmLite.csproj", "{805EAAF7-439E-4993-A132-A7F9B712D77A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.IdGen", "src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj", "{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,10 @@ Global
 		{805EAAF7-439E-4993-A132-A7F9B712D77A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{805EAAF7-439E-4993-A132-A7F9B712D77A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{805EAAF7-439E-4993-A132-A7F9B712D77A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

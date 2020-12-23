@@ -486,9 +486,7 @@ namespace HB.FullStack.Database.Mapper
             return emiter.CreateDelegate();
         }
 
-#pragma warning disable CA1801 // Review unused parameters
         public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegate(EntityDef entityDef, EngineType engineType)
-#pragma warning restore CA1801 // Review unused parameters
         {
             DynamicMethod dm = new DynamicMethod("ToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(object), typeof(int) }, true);
             ILGenerator il = dm.GetILGenerator();
