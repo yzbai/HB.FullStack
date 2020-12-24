@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Def\EntityDefFactory.cs~RF1231f09.TMP" />
+    <None Remove="Entities\EntityDefFactory.cs~RF1231f09.TMP" />
   </ItemGroup>
 
 
