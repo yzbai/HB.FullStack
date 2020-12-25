@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using HB.FullStack.Common.IdGen;
 using IdGen;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace HB.Infrastructure.IdGen
@@ -15,13 +16,13 @@ namespace HB.Infrastructure.IdGen
     /// </summary>
     public class IdGenDistributedId : IDistributedIdGen
     {
-        public static void Initialize(int machineId)
+        public static void Initialize(IdGenSettings settings)
         {
-            var epoch = new DateTime(2020, 12, 22, 0, 0, 0, DateTimeKind.Utc);
-            var structure = new IdStructure(41, 10, 12);
-            var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch));
+            //var epoch = new DateTime(2020, 12, 22, 0, 0, 0, DateTimeKind.Utc);
+            var structure = new IdStructure(settings.TimestampBits, settings.GeneratorIdBits, settings.SequenceBits);
+            var options = new IdGeneratorOptions(structure, new DefaultTimeSource(settings.Epoch));
 
-            IDistributedIdGen.IdGen = new IdGenDistributedId(machineId, options);
+            IDistributedIdGen.IdGen = new IdGenDistributedId(settings.MachineId, options);
         }
 
         private readonly IdGenerator _idGen;

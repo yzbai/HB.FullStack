@@ -3,14 +3,27 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using HB.Infrastructure.IdGen;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceRegisterIdGenExtensions
     {
-        public static IServiceCollection AddIdGen(this IServiceCollection services, string machineId)
+        public static IServiceCollection AddIdGen(this IServiceCollection services, IConfiguration configuration)
         {
-            IdGenDistributedId.Initialize(Convert.ToInt32(machineId));
+            IdGenSettings settings = new IdGenSettings();
+            configuration.Bind(settings);
+
+            IdGenDistributedId.Initialize(settings);
+            return services;
+        }
+
+        public static IServiceCollection AddIdGen(this IServiceCollection services, Action<IdGenSettings> action)
+        {
+            IdGenSettings settings = new IdGenSettings();
+            action(settings);
+
+            IdGenDistributedId.Initialize(settings);
             return services;
         }
     }

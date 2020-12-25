@@ -35,21 +35,21 @@ namespace HB.FullStack.Database.Def
         public override long Id { get; set; } = IDistributedIdGen.IdGen.GetId();
     }
 
-    public abstract class AutoIncrementIdGuidEntity : AutoIncrementIdEntity
-    {
-        [Required]
-        [UniqueGuidEntityProperty(1)]
-        [CacheKey]
-        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
-    }
+    //public abstract class AutoIncrementIdGuidEntity : AutoIncrementIdEntity
+    //{
+    //    [Required]
+    //    [UniqueGuidEntityProperty(1)]
+    //    [CacheKey]
+    //    public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
+    //}
 
-    public abstract class IdGenGuidEntity : IdGenEntity
-    {
-        [Required]
-        [UniqueGuidEntityProperty(1)]
-        [CacheKey]
-        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
-    }
+    //public abstract class IdGenGuidEntity : IdGenEntity
+    //{
+    //    [Required]
+    //    [UniqueGuidEntityProperty(1)]
+    //    [CacheKey]
+    //    public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
+    //}
 
     public abstract class GuidEntity : DatabaseEntity
     {
