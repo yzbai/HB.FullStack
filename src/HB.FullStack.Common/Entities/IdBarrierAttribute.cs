@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class CacheKeyAttribute : Attribute
+    public class IdBarrierAttribute : Attribute
     {
-
     }
 }

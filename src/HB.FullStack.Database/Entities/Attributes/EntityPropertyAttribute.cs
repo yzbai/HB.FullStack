@@ -25,6 +25,8 @@ namespace HB.FullStack.Database.Def
         /// </summary>
         public bool NotNull { get; set; }
 
+        public bool NeedIndex { get; set; }
+
         /// <summary>
         /// 字段值是否唯一
         /// </summary>

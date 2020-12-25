@@ -232,7 +232,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.UpdateAsync(entity, "lastUsre", tContext);
 
-                PublisherEntity_Client? stored = await database.ScalarAsync<PublisherEntity_Client>(entity.Guid, tContext);
+                PublisherEntity_Client? stored = await database.ScalarAsync<PublisherEntity_Client>(entity.Id, tContext);
 
                 await transaction.CommitAsync(tContext);
 
@@ -339,7 +339,7 @@ namespace HB.FullStack.DatabaseTests
 
             await database.AddAsync(item, "xx", null).ConfigureAwait(false);
 
-            var fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Guid, null);
+            var fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, null);
 
             Assert.Equal(item.LastTime, fetched!.LastTime);
 
@@ -347,11 +347,11 @@ namespace HB.FullStack.DatabaseTests
 
             await database.UpdateAsync(fetched, "xxx", null);
 
-            fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Guid, null);
+            fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, null);
 
             //await database.AddOrUpdateAsync(item, "ss", null);
 
-            fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Guid, null);
+            fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, null);
 
 
 
@@ -368,7 +368,7 @@ namespace HB.FullStack.DatabaseTests
                 await database.BatchAddAsync<PublisherEntity_Client>(items, "xx", trans).ConfigureAwait(false);
 
 
-                var results = await database.RetrieveAsync<PublisherEntity_Client>(item => SqlStatement.In(item.Guid, true, items.Select(item => (object)item.Guid).ToArray()), trans).ConfigureAwait(false);
+                var results = await database.RetrieveAsync<PublisherEntity_Client>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await database.BatchUpdateAsync<PublisherEntity_Client>(items, "xx", trans);
 
@@ -376,7 +376,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.BatchAddAsync<PublisherEntity_Client>(items2, "xx", trans);
 
-                results = await database.RetrieveAsync<PublisherEntity_Client>(item => SqlStatement.In(item.Guid, true, items2.Select(item => (object)item.Guid).ToArray()), trans);
+                results = await database.RetrieveAsync<PublisherEntity_Client>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans);
 
                 await database.BatchUpdateAsync<PublisherEntity_Client>(items2, "xx", trans);
 
@@ -435,7 +435,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.UpdateAsync(entity, "lastUsre", transactionContext);
 
-                PublisherEntity_Client? stored = await database.ScalarAsync<PublisherEntity_Client>(entity.Guid, transactionContext);
+                PublisherEntity_Client? stored = await database.ScalarAsync<PublisherEntity_Client>(entity.Id, transactionContext);
 
 
 
@@ -443,7 +443,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                var fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Guid, transactionContext);
+                var fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, transactionContext);
 
                 Assert.Equal(item.LastTime, fetched!.LastTime);
 
@@ -472,7 +472,7 @@ namespace HB.FullStack.DatabaseTests
 
             await database.AddAsync(publisher3, "sss", null);
 
-            var stored3 = await database.ScalarAsync<PublisherEntity3_Client>(publisher3.Guid, null);
+            var stored3 = await database.ScalarAsync<PublisherEntity3_Client>(publisher3.Id, null);
 
             Assert.Equal(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
 
@@ -489,7 +489,7 @@ namespace HB.FullStack.DatabaseTests
             }
 
 
-            PublisherEntity2_Client? publisher2 = await database.ScalarAsync<PublisherEntity2_Client>(publishers2[0].Guid, null).ConfigureAwait(false);
+            PublisherEntity2_Client? publisher2 = await database.ScalarAsync<PublisherEntity2_Client>(publishers2[0].Id, null).ConfigureAwait(false);
 
             Assert.Equal(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publishers2[0]));
 
@@ -506,7 +506,7 @@ namespace HB.FullStack.DatabaseTests
             }
 
 
-            PublisherEntity_Client? publisher1 = await database.ScalarAsync<PublisherEntity_Client>(publishers[0].Guid, null).ConfigureAwait(false);
+            PublisherEntity_Client? publisher1 = await database.ScalarAsync<PublisherEntity_Client>(publishers[0].Id, null).ConfigureAwait(false);
 
             Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
             #endregion

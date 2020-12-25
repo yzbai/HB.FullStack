@@ -37,7 +37,7 @@ namespace HB.FullStack.Database.Def
 
     public abstract class AutoIncrementIdGuidEntity : AutoIncrementIdEntity
     {
-
+        [Required]
         [UniqueGuidEntityProperty(1)]
         [CacheKey]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
@@ -45,7 +45,7 @@ namespace HB.FullStack.Database.Def
 
     public abstract class IdGenGuidEntity : IdGenEntity
     {
-
+        [Required]
         [UniqueGuidEntityProperty(1)]
         [CacheKey]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
@@ -53,6 +53,7 @@ namespace HB.FullStack.Database.Def
 
     public abstract class GuidEntity : DatabaseEntity
     {
+        [Required]
         [PrimaryKey]
         [UniqueGuidEntityProperty(0)]
         [CacheKey]

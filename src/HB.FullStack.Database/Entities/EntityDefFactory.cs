@@ -224,7 +224,7 @@ namespace HB.FullStack.Database.Def
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType);
 
 
-
+            propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;
             propertyDef.IsNullable = !propertyAttribute.NotNull;
             propertyDef.IsUnique = propertyAttribute.Unique;
             propertyDef.DbMaxLength = propertyAttribute.MaxLength > 0 ? (int?)propertyAttribute.MaxLength : null;

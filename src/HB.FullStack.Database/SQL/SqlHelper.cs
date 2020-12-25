@@ -255,6 +255,7 @@ namespace HB.FullStack.Database.SQL
         public static string SQLite_Table_Create_Statement(EntityDef entityDef, bool addDropStatement)
         {
             StringBuilder propertyInfoSql = new StringBuilder();
+            StringBuilder indexSqlBuilder = new StringBuilder();
 
             foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
             {
@@ -272,13 +273,19 @@ namespace HB.FullStack.Database.SQL
                 }
 
                 propertyInfoSql.Append($" {propertyDef.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} ,");
+
+                //索引
+                if (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded)
+                {
+                    indexSqlBuilder.Append($" create index {entityDef.TableName}_{propertyDef.Name}_index on {entityDef.DbTableReservedName} ({propertyDef.DbReservedName}); ");
+                }
             }
 
             propertyInfoSql.Remove(propertyInfoSql.Length - 1, 1);
 
             string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;
 
-            string tableCreateSql = $"{dropStatement} CREATE TABLE {entityDef.DbTableReservedName} ({propertyInfoSql});";
+            string tableCreateSql = $"{dropStatement} CREATE TABLE {entityDef.DbTableReservedName} ({propertyInfoSql});{indexSqlBuilder}";
 
             return tableCreateSql;
         }
@@ -286,6 +293,7 @@ namespace HB.FullStack.Database.SQL
         public static string MySQL_Table_Create_Statement(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength)
         {
             StringBuilder propertySqlBuilder = new StringBuilder();
+            StringBuilder indexSqlBuilder = new StringBuilder();
 
             if (entityDef.DbTableReservedName.IsNullOrEmpty())
             {
@@ -338,6 +346,12 @@ namespace HB.FullStack.Database.SQL
                 string uniqueStatement = !propertyDef.IsAutoIncrementPrimaryKey && !propertyDef.IsForeignKey && propertyDef.IsUnique ? " UNIQUE " : "";
 
                 propertySqlBuilder.Append($" {propertyDef.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {uniqueStatement},");
+
+                //判断索引
+                if (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded)
+                {
+                    indexSqlBuilder.Append($" INDEX {propertyDef.Name}_index ({propertyDef.DbReservedName}), ");
+                }
             }
 
             if (primaryKeyPropertyDef == null)
@@ -347,7 +361,7 @@ namespace HB.FullStack.Database.SQL
 
             string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;
 
-            return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;";
+            return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;";
         }
 
         public static string GetTableCreateSql(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)

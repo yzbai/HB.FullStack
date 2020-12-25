@@ -50,17 +50,17 @@ namespace HB.FullStack.DatabaseTests
             await _sqlite.AddAsync(b1, "lastUsre", null);
             await _sqlite.AddAsync(b2, "lastUsre", null);
 
-            AB_Client a1b1 = new AB_Client { AGuid = a1.Guid, BGuid = b1.Guid };
-            AB_Client a1b2 = new AB_Client { AGuid = a1.Guid, BGuid = b2.Guid };
-            AB_Client a2b1 = new AB_Client { AGuid = a2.Guid, BGuid = b1.Guid };
-            AB_Client a3b2 = new AB_Client { AGuid = a3.Guid, BGuid = b2.Guid };
+            AB_Client a1b1 = new AB_Client { AId = a1.Id, BId = b1.Id };
+            AB_Client a1b2 = new AB_Client { AId = a1.Id, BId = b2.Id };
+            AB_Client a2b1 = new AB_Client { AId = a2.Id, BId = b1.Id };
+            AB_Client a3b2 = new AB_Client { AId = a3.Id, BId = b2.Id };
 
-            C_Client c1 = new C_Client { AGuid = a1.Guid };
-            C_Client c2 = new C_Client { AGuid = a2.Guid };
-            C_Client c3 = new C_Client { AGuid = a3.Guid };
-            C_Client c4 = new C_Client { AGuid = a1.Guid };
-            C_Client c5 = new C_Client { AGuid = a2.Guid };
-            C_Client c6 = new C_Client { AGuid = a3.Guid };
+            C_Client c1 = new C_Client { AId = a1.Id };
+            C_Client c2 = new C_Client { AId = a2.Id };
+            C_Client c3 = new C_Client { AId = a3.Id };
+            C_Client c4 = new C_Client { AId = a1.Id };
+            C_Client c5 = new C_Client { AId = a2.Id };
+            C_Client c6 = new C_Client { AId = a3.Id };
 
             await _sqlite.AddAsync(a1b1, "lastUsre", null);
             await _sqlite.AddAsync(a1b2, "lastUsre", null);
@@ -82,8 +82,8 @@ namespace HB.FullStack.DatabaseTests
 
             var from = database
                 .From<A_Client>()
-                .LeftJoin<AB_Client>((a, ab) => ab.AGuid == a.Guid)
-                .LeftJoin<AB_Client, B_Client>((ab, b) => ab.BGuid == b.Guid);
+                .LeftJoin<AB_Client>((a, ab) => ab.AId == a.Id)
+                .LeftJoin<AB_Client, B_Client>((ab, b) => ab.BId == b.Id);
 
 
             try
@@ -107,7 +107,7 @@ namespace HB.FullStack.DatabaseTests
             IDatabase database = _sqlite;
             var from = database
                 .From<C_Client>()
-                .LeftJoin<A_Client>((c, a) => c.AGuid == a.Guid);
+                .LeftJoin<A_Client>((c, a) => c.AId == a.Id);
 
 
             try

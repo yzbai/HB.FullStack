@@ -14,7 +14,7 @@ namespace HB.FullStack.Database
     /// </summary>
     public static class DatabaseClientExtensions
     {
-        public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity2, new()
+        public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity, new()
         {
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
@@ -43,28 +43,28 @@ namespace HB.FullStack.Database
             return new TransactionContext(null!, TransactionStatus.InTransaction, null!);
         }
 
-        public static Task UpdateAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity2, new()
+        public static Task UpdateAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             TransactionContext context = transContext ?? GetFakeTransactionContext();
 
             return database.BatchUpdateAsync(items, "", context);
         }
 
-        public static Task DeleteAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity2, new()
+        public static Task DeleteAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             TransactionContext context = transContext ?? GetFakeTransactionContext();
 
             return database.BatchDeleteAsync(items, "", context);
         }
 
-        public static Task<IEnumerable<long>> AddAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity2, new()
+        public static Task<IEnumerable<object>> AddAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             TransactionContext context = transContext ?? GetFakeTransactionContext();
 
             return database.BatchAddAsync<T>(items, "", context);
         }
 
-        public static async Task SetAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext? transContext = null) where T : DatabaseEntity2, new()
+        public static async Task SetAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             TransactionContext context = transContext ?? GetFakeTransactionContext();
 

@@ -12,7 +12,7 @@ namespace HB.FullStack.DatabaseTests.Data
 {
 
     [CacheEntity]
-    public class PublisherEntity3 : IdGenGuidEntity
+    public class PublisherEntity3 : IdGenEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -32,7 +32,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity2 : IdGenGuidEntity
+    public class PublisherEntity2 : IdGenEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -78,7 +78,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity : IdGenGuidEntity
+    public class PublisherEntity : IdGenEntity
     {
 
         [EntityProperty]
@@ -139,7 +139,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity3_Client : AutoIncrementIdGuidEntity
+    public class PublisherEntity3_Client : IdGenEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -159,7 +159,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity2_Client : AutoIncrementIdGuidEntity
+    public class PublisherEntity2_Client : IdGenEntity
     {
         [EntityProperty]
         public int Integer { get; set; } = 999;
@@ -205,7 +205,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity_Client : AutoIncrementIdGuidEntity
+    public class PublisherEntity_Client : IdGenEntity
     {
 
         [EntityProperty]

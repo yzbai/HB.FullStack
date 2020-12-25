@@ -7,7 +7,7 @@ using System.Text;
 namespace HB.FullStack.DatabaseTests.Data
 {
     [CacheEntity]
-    public class BookEntity : IdGenGuidEntity
+    public class BookEntity : IdGenEntity
     {
 
         [EntityProperty]
@@ -18,24 +18,28 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class Book : IdGenGuidEntity
+    public class Book : IdGenEntity
     {
+        [EntityProperty]
         [CacheDimensionKey]
         public string Name { get; set; } = null!;
 
+        [EntityProperty]
         [CacheDimensionKey]
         public long BookID { get; set; }
 
+        [EntityProperty]
         public string? Publisher { get; set; }
 
+        [EntityProperty]
         public double Price { get; set; }
     }
 
     [CacheEntity]
-    public class BookEntity_Client : AutoIncrementIdGuidEntity
+    public class BookEntity_Client : IdGenEntity
     {
 
-        [EntityProperty]
+        [EntityProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
         [EntityProperty]
@@ -43,16 +47,20 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class Book_Client : AutoIncrementIdGuidEntity
+    public class Book_Client : IdGenEntity
     {
         [CacheDimensionKey]
+        [EntityProperty]
         public string Name { get; set; } = null!;
 
+        [EntityProperty]
         [CacheDimensionKey]
         public long BookID { get; set; }
 
+        [EntityProperty]
         public string? Publisher { get; set; }
 
+        [EntityProperty]
         public double Price { get; set; }
     }
 }

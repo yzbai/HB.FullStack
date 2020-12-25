@@ -32,6 +32,7 @@ namespace HB.FullStack
             IServiceCollection services = new ServiceCollection();
 
             services
+                .AddIdGen(Configuration["IdGen:MachineId"])
                 .AddOptions()
                 .AddLogging(builder =>
                 {

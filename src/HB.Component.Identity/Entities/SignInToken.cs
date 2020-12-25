@@ -14,7 +14,7 @@ namespace HB.FullStack.Identity.Entities
         public long UserId { get; set; }
 
         [Required]
-        [EntityProperty(NotNull = true)]
+        [EntityProperty(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
         [EntityProperty]
@@ -30,7 +30,7 @@ namespace HB.FullStack.Identity.Entities
         #region Device
 
         [Required]
-        [EntityProperty(NotNull = true)]
+        [EntityProperty(NotNull = true, NeedIndex = true)]
         public string DeviceId { get; set; } = default!;
 
         [EntityProperty(NotNull = true)]

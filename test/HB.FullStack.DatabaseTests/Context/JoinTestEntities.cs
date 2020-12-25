@@ -8,7 +8,7 @@ using HB.FullStack.Database.Def;
 namespace HB.FullStack.DatabaseTests
 {
 
-    public class A : IdGenGuidEntity
+    public class A : IdGenEntity
     {
 
 
@@ -17,7 +17,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B : IdGenGuidEntity
+    public class B : IdGenEntity
     {
 
         [EntityProperty]
@@ -25,7 +25,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB : IdGenGuidEntity
+    public class AB : IdGenEntity
     {
 
         [EntityProperty]
@@ -36,7 +36,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C : IdGenGuidEntity
+    public class C : IdGenEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
@@ -45,16 +45,7 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class A_Client : AutoIncrementIdGuidEntity
-    {
-
-
-        [EntityProperty]
-        public string Name { get; set; } = default!;
-    }
-
-
-    public class B_Client : AutoIncrementIdGuidEntity
+    public class A_Client : IdGenEntity
     {
 
         [EntityProperty]
@@ -62,23 +53,31 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB_Client : AutoIncrementIdGuidEntity
+    public class B_Client : IdGenEntity
     {
 
         [EntityProperty]
-        public string AGuid { get; set; } = default!;
-
-        [EntityProperty]
-        public string BGuid { get; set; } = default!;
+        public string Name { get; set; } = default!;
     }
 
 
-    public class C_Client : AutoIncrementIdGuidEntity
+    public class AB_Client : IdGenEntity
+    {
+
+        [EntityProperty]
+        public long AId { get; set; } = default!;
+
+        [EntityProperty]
+        public long BId { get; set; } = default!;
+    }
+
+
+    public class C_Client : IdGenEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
 
         [EntityProperty]
-        public string AGuid { get; set; } = default!;
+        public long AId { get; set; } = default!;
     }
 }
