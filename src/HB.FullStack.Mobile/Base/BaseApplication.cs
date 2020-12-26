@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using HB.FullStack.Client.Api;
 using HB.FullStack.Client.Services;
@@ -26,6 +27,8 @@ namespace HB.FullStack.Client.Base
 
             InitializeServices(services);
         }
+
+        public Task? InitializeTask { get; protected set; }
 
         public IConfiguration Configuration
         {

@@ -8,34 +8,40 @@ using HB.FullStack.Common.Resources;
 
 namespace System.Net.Http
 {
+    [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1052:Static holder types should be Static or NotInheritable", Justification = "<Pending>")]
+    public class EmptyResponse
+    {
+        public static EmptyResponse Value { get; }
+
+        static EmptyResponse()
+        {
+            Value = new EmptyResponse();
+        }
+
+        private EmptyResponse() { }
+    }
+
     public static class HttpClientApiExtensions
     {
-        public static async Task<T?> GetSingleAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
+        private static readonly Type _emptyResponse = typeof(EmptyResponse);
+
+        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : Resource where TResponse : class
         {
-            using HttpResponseMessage responseMessage = await httpClient.SendAsync(request).ConfigureAwait(false);
+            using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(request).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
-            return await responseMessage.DeSerializeJsonAsync<T>().ConfigureAwait(false);
+            if (typeof(TResponse) == _emptyResponse)
+            {
+                return (TResponse)(object)EmptyResponse.Value;
+            }
+            else
+            {
+                return await responseMessage.DeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
+            }
         }
 
-        public static async Task<IEnumerable<T>?> GetAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
-        {
-            using HttpResponseMessage responseMessage = await httpClient.SendAsync(request).ConfigureAwait(false);
-
-            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
-
-            return await responseMessage.DeSerializeJsonAsync<IEnumerable<T>>().ConfigureAwait(false);
-        }
-
-        public static async Task NonQueryAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
-        {
-            using HttpResponseMessage responseMessage = await httpClient.SendAsync(request).ConfigureAwait(false);
-
-            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
-        }
-
-        private static async Task<HttpResponseMessage> SendAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
+        private static async Task<HttpResponseMessage> SendCoreAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
         {
             try
             {
@@ -64,7 +70,7 @@ namespace System.Net.Http
             //Get的参数也放到body中去
             //if (request.GetHttpMethod() != HttpMethod.Get)
             //{
-            if (request is BufferedFileApiRequest<T> bufferedRequest)
+            if (request is FileUpdateRequest<T> bufferedRequest)
             {
                 MultipartFormDataContent content = new MultipartFormDataContent();
 

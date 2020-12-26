@@ -7,6 +7,7 @@ namespace HB.FullStack.Common.Resources
 {
     public abstract class Resource : ValidatableObject
     {
-
+        [IdBarrier]
+        public long Id { get; set; } = -1;
     }
 }

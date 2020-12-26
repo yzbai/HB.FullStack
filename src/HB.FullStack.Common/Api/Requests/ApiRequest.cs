@@ -8,6 +8,13 @@ using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Common.Api
 {
+    public enum ApiAuthType
+    {
+        None,
+        Jwt,
+        ApiKey
+    }
+
     public abstract class ApiRequest : ValidatableObject
     {
         #region Common Parameters
@@ -22,23 +29,25 @@ namespace HB.FullStack.Common.Api
 
         #endregion Common Parameters
 
-
         //All use fields & Get Methods instead of Properties, for avoid mvc binding & json searilize
-#pragma warning disable CA1051 // Do not declare visible instance fields
-        protected string _endpointName = null!;
-        protected string _apiVersion = null!;
-        protected string _resourceName = null!;
+        private readonly string _requestId = SecurityUtil.CreateUniqueToken();
+        private bool _needHttpMethodOveride = true;
+        private string _endpointName = null!;
+        private string _apiVersion = null!;
+        private string _resourceName = null!;
 
-        protected HttpMethod _httpMethod = null!;
-        protected string? _condition;
-        protected bool _needHttpMethodOveride = true;
-        protected readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
-#pragma warning restore CA1051 // Do not declare visible instance fields
+        private HttpMethod _httpMethod = null!;
+        private string? _condition;
+        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
+
+        private ApiAuthType _apiAuthType;
+        private string? _apiKeyName;
 
         protected ApiRequest() { }
 
-        protected ApiRequest(string endPointName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition)
+        protected ApiRequest(ApiAuthType apiAuthType, string endPointName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition)
         {
+            _apiAuthType = apiAuthType;
             _endpointName = endPointName;
             _apiVersion = apiVersion;
             _httpMethod = httpMethod;
@@ -46,9 +55,26 @@ namespace HB.FullStack.Common.Api
             _condition = condition;
         }
 
-        public string GetProductName()
+        public ApiAuthType GetApiAuthType() => _apiAuthType;
+
+        public void SetApiAuthType(ApiAuthType apiAuthType)
+        {
+            _apiAuthType = apiAuthType;
+        }
+
+        public string GetRequestId()
+        {
+            return _requestId;
+        }
+
+        public string GetEndpointName()
         {
             return _endpointName;
+        }
+
+        public void SetEndpointName(string endpointName)
+        {
+            _endpointName = endpointName;
         }
 
         public string GetApiVersion()
@@ -56,9 +82,19 @@ namespace HB.FullStack.Common.Api
             return _apiVersion;
         }
 
+        public void SetApiVersion(string apiVersion)
+        {
+            _apiVersion = apiVersion;
+        }
+
         public HttpMethod GetHttpMethod()
         {
             return _httpMethod;
+        }
+
+        public void SetHttpMethod(HttpMethod httpMethod)
+        {
+            _httpMethod = httpMethod;
         }
 
         public string GetResourceName()
@@ -66,9 +102,19 @@ namespace HB.FullStack.Common.Api
             return _resourceName;
         }
 
+        public void SetResourceName(string resourceName)
+        {
+            _resourceName = resourceName;
+        }
+
         public string? GetCondition()
         {
             return _condition;
+        }
+
+        public void SetCondition(string? conditon)
+        {
+            _condition = conditon;
         }
 
         public bool GetNeedHttpMethodOveride()
@@ -96,7 +142,6 @@ namespace HB.FullStack.Common.Api
             return null;
         }
 
-
         public void SetHeader(string name, string value)
         {
             _headers[name] = value;
@@ -106,11 +151,30 @@ namespace HB.FullStack.Common.Api
         {
             return _headers;
         }
+
+        public void SetJwt(string jwt)
+        {
+            SetHeader("Authorization", "Bearer " + jwt);
+        }
+
+        public void SetApiKey(string apiKey)
+        {
+            SetHeader("X-Api-Key", apiKey);
+        }
+
+        public void SetApiKeyName(string apiKeyName)
+        {
+            _apiKeyName = apiKeyName;
+        }
+
+        public string? GetApiKeyName()
+        {
+            return _apiKeyName;
+        }
     }
 
     public abstract class ApiRequest<T> : ApiRequest where T : Resource
     {
-
         /// <summary>
         /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供
         /// </summary>
@@ -120,15 +184,47 @@ namespace HB.FullStack.Common.Api
         {
             ResourceDef def = ResourceDefFactory.Get<T>();
 
-            _endpointName = def.EndpointName;
-            _apiVersion = def.ApiVersion;
-            _resourceName = def.Name;
-            _httpMethod = httpMethod;
-            _condition = condition;
+            SetEndpointName(def.EndpointName);
+            SetApiVersion(def.ApiVersion);
+            SetResourceName(def.Name);
+            SetHttpMethod(httpMethod);
+            SetCondition(condition);
+            SetApiAuthType(ApiAuthType.Jwt);
         }
 
-        public ApiRequest(string endPointName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition) : base(endPointName, apiVersion, httpMethod, resourceName, condition)
+        public ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition)
         {
+            ResourceDef def = ResourceDefFactory.Get<T>();
+
+            SetEndpointName(def.EndpointName);
+            SetApiVersion(def.ApiVersion);
+            SetResourceName(def.Name);
+            SetHttpMethod(httpMethod);
+            SetCondition(condition);
+            SetApiAuthType(ApiAuthType.ApiKey);
+            SetApiKeyName(apiKeyName);
+        }
+
+        public ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition)
+        {
+            ResourceDef def = ResourceDefFactory.Get<T>();
+
+            SetEndpointName(def.EndpointName);
+            SetApiVersion(def.ApiVersion);
+            SetResourceName(def.Name);
+            SetHttpMethod(httpMethod);
+            SetCondition(condition);
+            SetApiAuthType(apiAuthType);
+        }
+
+        public ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition, string endpointName, string apiVersion, string resourceName)
+        {
+            SetEndpointName(endpointName);
+            SetApiVersion(apiVersion);
+            SetResourceName(resourceName);
+            SetHttpMethod(httpMethod);
+            SetCondition(condition);
+            SetApiAuthType(apiAuthType);
         }
     }
 }

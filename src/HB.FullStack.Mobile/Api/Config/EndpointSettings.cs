@@ -28,5 +28,10 @@ namespace HB.FullStack.Client.Api
 
         public JwtEndpointSetting JwtEndpoint { get; set; } = new JwtEndpointSetting();
 
+
+        public string GetHttpClientName()
+        {
+            return Name + "_" + Version;
+        }
     }
 }

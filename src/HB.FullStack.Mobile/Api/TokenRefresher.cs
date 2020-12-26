@@ -100,7 +100,8 @@ namespace HB.FullStack.Client.Api
 
             public string RefreshToken { get; set; } = null!;
 
-            public RefreshAccessTokenRequest(string productName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken) : base(productName, apiVersion, httpMethod, resourceName, "ByRefresh")
+            public RefreshAccessTokenRequest(string endpointName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken)
+                : base(ApiAuthType.None, httpMethod, "ByRefresh", endpointName, apiVersion, resourceName)
             {
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;

@@ -37,12 +37,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services"></param>
         /// <param name="options"></param>
-        
+
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
             options.Endpoints.ForEach(endpoint =>
             {
-                services.AddHttpClient(ApiClient.GetHttpClientName(endpoint), httpClient =>
+                services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
                 {
                     httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");

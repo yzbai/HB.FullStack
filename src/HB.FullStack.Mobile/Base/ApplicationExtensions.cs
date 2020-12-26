@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using HB.FullStack.Client.Base;
 using Microsoft.Extensions.Logging;
 using Xamarin.Forms;
@@ -14,6 +15,15 @@ namespace Xamarin.Forms
 
     public static class ApplicationExtensions
     {
+        public static Task GetInitializeTaskAsync(this Application application)
+        {
+            if (application is BaseApplication baseApplication)
+            {
+                return baseApplication.InitializeTask ?? Task.CompletedTask;
+            }
+
+            return Task.CompletedTask;
+        }
 
         public static void Log(this Application application, LogLevel logLevel, Exception? ex, string? message)
         {

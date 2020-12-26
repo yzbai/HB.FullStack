@@ -25,8 +25,14 @@ namespace HB.FullStack.Client.Api
             }
         }
 
-        public bool TryGetApiKey(string name, out string key)
+        public bool TryGetApiKey(string? name, out string key)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                key = string.Empty;
+                return false;
+            }
+
             if (_apiKeysDict == null)
             {
                 _apiKeysDict = new Dictionary<string, string>();

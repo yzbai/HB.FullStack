@@ -36,6 +36,8 @@
 
         ApiUnkown = 153,
 
+        ApiRoleNoAuth = 154,
+
         #endregion API
 
         #region Database
