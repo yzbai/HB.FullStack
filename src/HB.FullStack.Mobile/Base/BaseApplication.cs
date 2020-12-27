@@ -28,7 +28,9 @@ namespace HB.FullStack.Client.Base
             InitializeServices(services);
         }
 
-        public Task? InitializeTask { get; protected set; }
+        public IList<Task> InitializeTasks { get; } = new List<Task>();
+
+        public Task InitializeTask { get => Task.WhenAll(InitializeTasks); }
 
         public IConfiguration Configuration
         {
@@ -96,10 +98,13 @@ namespace HB.FullStack.Client.Base
 
         }
 
-        protected abstract void PerformLogin();
+        protected abstract bool IsLogined();
+
+        public abstract void PerformLogin();
 
 
         private static IRemoteLoggingService? _remoteLoggingService;
+
         private static ILogger? _localLogger;
 
         public static void ExceptionHandler(Exception ex)

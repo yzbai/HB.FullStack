@@ -10,7 +10,7 @@ namespace HB.FullStack.Client.Effects
         //TODO: use WeakEventManager
         public event TouchActionEventHandler? TouchAction;
 
-        public TouchEffect() : base($"{ClientGlobal.EffectsGroupName}.{nameof(TouchEffect)}")
+        public TouchEffect() : base($"{Consts.EffectsGroupName}.{nameof(TouchEffect)}")
         {
         }
 

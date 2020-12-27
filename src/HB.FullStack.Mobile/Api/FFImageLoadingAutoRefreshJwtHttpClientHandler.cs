@@ -34,7 +34,7 @@ namespace HB.FullStack.Client.Api
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             AddDeviceInfo(request);
-            AddAuthInfo(request);
+            await AddAuthInfoAsync(request).ConfigureAwait(false);
 
             HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -77,16 +77,16 @@ namespace HB.FullStack.Client.Api
             });
         }
 
-        private static void AddAuthInfo(HttpRequestMessage request)
+        private static async Task AddAuthInfoAsync(HttpRequestMessage request)
         {
-            string? token = ClientGlobal.GetAccessToken();
+            string? token = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
 
             request.Headers.Add("Authorization", "Bearer " + token);
         }
 
         private static void AddDeviceInfo(HttpRequestMessage request)
         {
-            string deviceId = ClientGlobal.GetDeviceId();
+            string deviceId = DevicePreferences.GetDeviceId();
 
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
             request.RequestUri = request.RequestUri.AddQuery(ClientNames.DeviceId, deviceId);
@@ -94,8 +94,8 @@ namespace HB.FullStack.Client.Api
             DeviceWrapper deviceWrapper = new DeviceWrapper
             {
                 DeviceId = deviceId,
-                DeviceVersion = ClientGlobal.DeviceVersion,
-                DeviceInfos = ClientGlobal.DeviceInfos
+                DeviceVersion = DevicePreferences.DeviceVersion,
+                DeviceInfos = DevicePreferences.DeviceInfos
             };
 
 #pragma warning disable CA2000 // Dispose objects before losing scope

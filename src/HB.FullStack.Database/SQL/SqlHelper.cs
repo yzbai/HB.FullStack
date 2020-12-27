@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Text;
 
@@ -14,6 +15,71 @@ namespace HB.FullStack.Database.SQL
 {
     internal static class SqlHelper
     {
+        /// <summary>
+        /// 只用于客户端，IdGenEntity上
+        /// </summary>
+        /// <returns></returns>
+        public static string CreateAddOrUpdateSql(EntityDef entityDef, EngineType engineType, bool returnId, int number = 0)
+        {
+            StringBuilder addArgs = new StringBuilder();
+            StringBuilder selectArgs = new StringBuilder();
+            StringBuilder addValues = new StringBuilder();
+            StringBuilder updatePairs = new StringBuilder();
+
+            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            {
+                if (returnId)
+                {
+                    selectArgs.Append($"{propertyDef.DbReservedName},");
+                }
+
+                if (propertyDef.IsAutoIncrementPrimaryKey)
+                {
+                    continue;
+                }
+
+                addArgs.Append($"{propertyDef.DbReservedName},");
+                addValues.Append($"{propertyDef.DbParameterizedName}_{number},");
+
+                if (propertyDef.IsPrimaryKey)
+                {
+                    continue;
+                }
+
+                if (propertyDef.Name == nameof(Entity.Version) || propertyDef.Name == nameof(Entity.CreateTime))
+                {
+                    continue;
+                }
+
+                updatePairs.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
+            }
+
+            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+
+            updatePairs.Append($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1");
+
+            if (returnId)
+            {
+                selectArgs.RemoveLast();
+            }
+
+            addValues.RemoveLast();
+            addArgs.RemoveLast();
+            updatePairs.RemoveLast();
+
+            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
+
+            string sql = $"insert into {entityDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(engineType, primaryKeyProperty)} {updatePairs};";
+
+            if (returnId)
+            {
+                sql += $"select {selectArgs} from {entityDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {primaryKeyProperty.DbParameterizedName}_{number};";
+            }
+
+            return sql;
+        }
+
+
         public static string CreateAddEntitySql(EntityDef entityDef, EngineType engineType, bool returnId, int number = 0)
         {
             StringBuilder args = new StringBuilder();
@@ -371,6 +437,16 @@ namespace HB.FullStack.Database.SQL
                 EngineType.MySQL => MySQL_Table_Create_Statement(entityDef, addDropStatement, varcharDefaultLength),
                 EngineType.SQLite => SQLite_Table_Create_Statement(entityDef, addDropStatement),
                 _ => throw new DatabaseException(ErrorCode.DatabaseUnSupported)
+            };
+        }
+
+        public static string OnDuplicateKeyUpdateStatement(EngineType engineType, EntityPropertyDef primaryDef)
+        {
+            return engineType switch
+            {
+                EngineType.MySQL => "on duplicate key update",
+                EngineType.SQLite => $"on conflict({primaryDef.DbReservedName}) do update set",
+                _ => throw new NotImplementedException()
             };
         }
 

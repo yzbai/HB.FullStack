@@ -52,6 +52,7 @@ namespace HB.FullStack.Database.Def
                 nameof(Entity.LastUser) => new EntityPropertyAttribute(3),
                 nameof(Entity.LastTime) => new EntityPropertyAttribute(4),
                 nameof(Entity.Deleted) => new EntityPropertyAttribute(5),
+                nameof(Entity.CreateTime) => new EntityPropertyAttribute(6),
                 _ => null
             };
         }

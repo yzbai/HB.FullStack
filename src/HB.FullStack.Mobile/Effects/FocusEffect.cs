@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.Effects
 {
     public class FocusEffect : RoutingEffect
     {
-        public FocusEffect() : base($"{ClientGlobal.EffectsGroupName}.{nameof(FocusEffect)}")
+        public FocusEffect() : base($"{Consts.EffectsGroupName}.{nameof(FocusEffect)}")
         {
         }
     }

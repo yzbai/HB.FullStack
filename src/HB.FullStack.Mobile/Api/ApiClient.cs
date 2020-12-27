@@ -13,30 +13,6 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Client.Api
 {
-    public enum ApiRequestType
-    {
-        Add,
-        Update,
-        Delete,
-        Get,
-        GetSingle,
-    }
-
-    public class ApiEventArgs : EventArgs
-    {
-        public ApiRequestType RequestType { get; set; }
-
-        public string RequestId { get; set; }
-
-
-        public ApiEventArgs(ApiRequestType requestType, ApiRequest apiRequest)
-        {
-            RequestType = requestType;
-            RequestId = apiRequest.GetRequestId();
-        }
-
-    }
-
     internal class ApiClient : IApiClient
     {
         private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
@@ -66,12 +42,11 @@ namespace HB.FullStack.Client.Api
         public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? new List<T>();
 
-        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
+        public Task<T> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
             => SendAsync<T, T>(request, ApiRequestType.GetSingle);
 
         public async Task<IEnumerable<long>> AddAsync<T>(AddRequest<T> addRequest) where T : Resource
             => await SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add).ConfigureAwait(false) ?? new List<long>();
-
 
         public Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
@@ -79,7 +54,7 @@ namespace HB.FullStack.Client.Api
         public Task DeleteAsync<T>(DeleteRequest<T> request) where T : Resource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
-        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
+        private async Task<TResponse> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
         {
             if (!request.IsValid())
             {
@@ -89,7 +64,7 @@ namespace HB.FullStack.Client.Api
             EndpointSettings endpoint = GetEndpoint(request);
 
             AddDeviceInfo(request);
-            AddAuthInfo(request);
+            await AddAuthInfoAsync(request).ConfigureAwait(false);
 
             try
             {
@@ -145,13 +120,13 @@ namespace HB.FullStack.Client.Api
 
         private static void AddDeviceInfo(ApiRequest request)
         {
-            request.DeviceId = ClientGlobal.GetDeviceId();
-            request.DeviceInfos = ClientGlobal.DeviceInfos;
-            request.DeviceVersion = ClientGlobal.DeviceVersion;
+            request.DeviceId = DevicePreferences.GetDeviceId();
+            request.DeviceInfos = DevicePreferences.DeviceInfos;
+            request.DeviceVersion = DevicePreferences.DeviceVersion;
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        private void AddAuthInfo<T>(ApiRequest<T> request) where T : Resource
+        private async Task AddAuthInfoAsync<T>(ApiRequest<T> request) where T : Resource
         {
             switch (request.GetApiAuthType())
             {
@@ -159,7 +134,7 @@ namespace HB.FullStack.Client.Api
                     break;
                 case ApiAuthType.Jwt:
 
-                    if (!TrySetJwt(request))
+                    if (!await TrySetJwtAsync(request).ConfigureAwait(false))
                     {
                         throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
                     }
@@ -175,9 +150,9 @@ namespace HB.FullStack.Client.Api
             }
         }
 
-        private static bool TrySetJwt<T>(ApiRequest<T> request) where T : Resource
+        private static async Task<bool> TrySetJwtAsync<T>(ApiRequest<T> request) where T : Resource
         {
-            string? accessToken = ClientGlobal.GetAccessToken();
+            string? accessToken = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
 
             if (accessToken.IsNullOrEmpty())
             {

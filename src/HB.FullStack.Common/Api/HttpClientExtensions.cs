@@ -25,7 +25,7 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponse = typeof(EmptyResponse);
 
-        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : Resource where TResponse : class
+        public static async Task<TResponse> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : Resource where TResponse : class
         {
             using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(request).ConfigureAwait(false);
 
@@ -37,7 +37,14 @@ namespace System.Net.Http
             }
             else
             {
-                return await responseMessage.DeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
+                TResponse? response = await responseMessage.DeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
+
+                if (response == null)
+                {
+                    throw new ApiException(ErrorCode.ApiNullReturn, responseMessage.StatusCode);
+                }
+
+                return response;
             }
         }
 

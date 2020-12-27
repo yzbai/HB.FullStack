@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Reflection;
 using System.Threading.Tasks;
-using HB.FullStack.Client;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Common.Resources;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -14,7 +16,7 @@ namespace HB.FullStack.Client.Repos
     {
         private static bool _isDatabaseInitTaskNotWaitedYet = true;
 
-        private readonly TimeSpan _localDataExpiryTime;
+        private readonly TimeSpan? _localDataExpiryTime;
 
         protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
 
@@ -31,33 +33,46 @@ namespace HB.FullStack.Client.Repos
 
             var timeoutAttr = typeof(T).GetCustomAttribute<LocalDataTimeoutAttribute>();
 
-            _localDataExpiryTime = timeoutAttr?.ExpiryTime ?? TimeSpan.FromMinutes(5);
+            _localDataExpiryTime = timeoutAttr?.ExpiryTime;
         }
 
-        protected bool LocalDataTimeout(string resourceType, string resource)
+        protected bool LocalDataAvailable<TRes>(ApiRequest<TRes> apiRequest) where TRes : Resource
         {
-            return RequestLocker.NoWaitLock(resourceType, resource, _localDataExpiryTime);
+            if (_localDataExpiryTime.HasValue)
+            {
+                return RequestLocker.NoWaitLock(apiRequest.GetType().FullName, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture), _localDataExpiryTime.Value);
+            }
+
+            return false;
         }
 
-        protected static void TimeoutLocalData(string resourceType, string resource)
+        protected static void TimeoutLocalData<TRes>(ApiRequest<TRes> apiRequest) where TRes : Resource
         {
-            RequestLocker.UnLock(resourceType, resource);
+            RequestLocker.UnLock(apiRequest.GetType().FullName, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
         }
 
         protected static void InsureLogined()
         {
-            if (!ClientGlobal.IsLogined())
+            if (UserPreferences.IsLogined())
             {
                 throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
             }
         }
 
-        protected static void InsureInternet()
+        protected static bool InsureInternet(bool throwOnNoInternet = true)
         {
             if (Connectivity.NetworkAccess != NetworkAccess.Internet)
             {
-                throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadGateway);
+                if (throwOnNoInternet)
+                {
+                    throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadGateway);
+                }
+                return false;
             }
+
+            return true;
         }
+
+
     }
 }

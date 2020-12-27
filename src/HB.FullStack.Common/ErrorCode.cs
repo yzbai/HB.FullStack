@@ -38,6 +38,8 @@
 
         ApiRoleNoAuth = 154,
 
+        ApiNullReturn = 156,
+
         #endregion API
 
         #region Database
@@ -134,7 +136,7 @@
         AuthorizationUpdateSignInTokenError = 523,
         AuthorizationInvalideDeviceId = 524,
         AuthorizationRefreshTokenExpired = 525,
-        ApiNullReturn = 526,
+
 
         #endregion Authorization
 
@@ -167,7 +169,7 @@
 
 
         DistributedLockUnLockFailed = 934,
-
+        ApiNoInternet = 935,
     }
 
     public static class ErrorCodeExtensions

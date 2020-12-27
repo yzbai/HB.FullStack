@@ -24,6 +24,8 @@ namespace HB.FullStack.Common.Entities
         /// </summary>
         public DateTimeOffset LastTime { get; internal set; } = TimeUtil.UtcNow;
 
+        public DateTimeOffset CreateTime { get; internal set; } = TimeUtil.UtcNow;
+
         public bool Deleted { get; internal set; }
     }
 }

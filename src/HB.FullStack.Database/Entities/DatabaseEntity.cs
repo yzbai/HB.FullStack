@@ -32,7 +32,10 @@ namespace HB.FullStack.Database.Def
         [EntityProperty(0)]
         [CacheKey]
         [LongId]
-        public override long Id { get; set; } = IDistributedIdGen.IdGen.GetId();
+        public override long Id
+        {
+            get; set;
+        } = IDistributedIdGen.IdGen.GetId();
     }
 
     //public abstract class AutoIncrementIdGuidEntity : AutoIncrementIdEntity

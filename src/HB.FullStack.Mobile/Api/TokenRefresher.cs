@@ -18,7 +18,7 @@ namespace HB.FullStack.Client.Api
 
         public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings endpointSettings)
         {
-            string? accessToken = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+            string? accessToken = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
 
             if (accessToken.IsNullOrEmpty())
             {
@@ -44,7 +44,7 @@ namespace HB.FullStack.Client.Api
             //开始刷新
             try
             {
-                string? refreshToken = await ClientGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
+                string? refreshToken = await UserPreferences.GetRefreshTokenAsync().ConfigureAwait(false);
 
                 if (!refreshToken.IsNullOrEmpty())
                 {
@@ -63,7 +63,7 @@ namespace HB.FullStack.Client.Api
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        await ClientGlobal.OnAccessTokenRefreshSucceedAsync(resource.AccessToken).ConfigureAwait(false);
+                        await OnRefreshSucceedAsync(resource).ConfigureAwait(false);
 
                         return true;
                     }
@@ -73,7 +73,7 @@ namespace HB.FullStack.Client.Api
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                await ClientGlobal.OnAccessTokenRefreshFailedAsync().ConfigureAwait(false);
+                await OnRefreshFailedAsync().ConfigureAwait(false);
 
                 return false;
             }
@@ -83,10 +83,21 @@ namespace HB.FullStack.Client.Api
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                await ClientGlobal.OnAccessTokenRefreshFailedAsync().ConfigureAwait(false);
+                await OnRefreshFailedAsync().ConfigureAwait(false);
 
                 throw;
             }
+        }
+
+        private static async Task OnRefreshSucceedAsync(AccessTokenResource resource)
+        {
+            await UserPreferences.SetAccessTokenAsync(resource.AccessToken).ConfigureAwait(false);
+        }
+
+        private static async Task OnRefreshFailedAsync()
+        {
+            await UserPreferences.SetRefreshTokenAsync(null).ConfigureAwait(false);
+            await UserPreferences.SetAccessTokenAsync(null).ConfigureAwait(false);
         }
 
         private class AccessTokenResource : Resource

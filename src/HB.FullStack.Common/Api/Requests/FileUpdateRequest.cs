@@ -32,5 +32,10 @@ namespace HB.FullStack.Common.Api
         public string GetBytesPropertyName() => "File";
 
         public string GetFileName() => _fileName;
+
+        public override int GetHashCode()
+        {
+            return ((ApiRequest)this).GetHashCode();
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database
@@ -72,5 +73,42 @@ namespace HB.FullStack.Database
 
             await database.AddAsync<T>(newItems, context);
         }
+
+
+        public static async Task AddOrUpdateAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
+        {
+            ThrowIf.NotValid(item);
+
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+
+            if (!entityDef.DatabaseWriteable)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Entity:{SerializeUtil.ToJson(item)}");
+            }
+
+            try
+            {
+                item.LastTime = TimeUtil.UtcNow;
+
+                var command = DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
+
+                using var reader = await database.DatabaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
+
+                IList<T> entities = reader.ToEntities<T>(database.EngineType, entityDef);
+
+                T newItem = entities[0];
+
+                item.CreateTime = newItem.CreateTime;
+                item.Version = newItem.Version;
+                item.LastUser = newItem.LastUser;
+            }
+            catch (Exception ex) when (!(ex is DatabaseException))
+            {
+                string detail = $"Item:{SerializeUtil.ToJson(item)}";
+
+                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, detail, ex); ;
+            }
+        }
+
     }
 }

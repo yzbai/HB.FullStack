@@ -8,6 +8,8 @@ namespace HB.FullStack.Database.SQL
         UpdateEntity,
         DeleteEntity,
         SelectEntity,
-        Delete
+        Delete,
+        AddOrUpdateEntity
+
     }
 }

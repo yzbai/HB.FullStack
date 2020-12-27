@@ -107,37 +107,14 @@ namespace MyColorfulTime.IdBarriers
 
                 if (propertyValue is long id)
                 {
-                    if (id < 0)
+                    await ConvertLongIdAsync(obj, id, propertyInfo, requestType, direction, requestId).ConfigureAwait(false);
+                }
+                else if (propertyValue is IEnumerable<long> longIds)
+                {
+                    foreach (long iditem in longIds)
                     {
-                        continue;
+                        await ConvertLongIdAsync(obj, iditem, propertyInfo, requestType, direction, requestId).ConfigureAwait(false);
                     }
-
-                    if (propertyInfo.Name == nameof(Resource.Id) && requestType == ApiRequestType.Add && direction == ChangeDirection.ToServer)
-                    {
-                        _addRequestClientIdDict[requestId].Add(id);
-
-                        propertyInfo.SetValue(obj, -1);
-                    }
-
-                    long changedId = direction switch
-                    {
-                        ChangeDirection.ToServer => await _idBarrierRepo.GetServerIdAsync(id).ConfigureAwait(false),
-                        ChangeDirection.FromServer => await _idBarrierRepo.GetClientIdAsync(id).ConfigureAwait(false),
-                        _ => -1,
-                    };
-
-                    if (changedId < 0 &&
-                        propertyInfo.Name == nameof(Resource.Id) &&
-                        (requestType == ApiRequestType.Get || requestType == ApiRequestType.GetSingle) &&
-                        direction == ChangeDirection.FromServer)
-                    {
-                        changedId = IDistributedIdGen.IdGen.GetId();
-                        await _idBarrierRepo.AddIdBarrierAsync(clientId: changedId, serverId: id).ConfigureAwait(false);
-                    }
-
-                    propertyInfo.SetValue(obj, changedId);
-
-                    continue;
                 }
                 else if (propertyValue is IEnumerable enumerable)
                 {
@@ -151,6 +128,39 @@ namespace MyColorfulTime.IdBarriers
                     throw new ClientException($"Id Barrier碰到无法解析的类型");
                 }
             }
+        }
+
+        private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiRequestType requestType, ChangeDirection direction, string requestId)
+        {
+            if (id < 0)
+            {
+                return;
+            }
+
+            if (propertyInfo.Name == nameof(Resource.Id) && requestType == ApiRequestType.Add && direction == ChangeDirection.ToServer)
+            {
+                _addRequestClientIdDict[requestId].Add(id);
+
+                propertyInfo.SetValue(obj, -1);
+            }
+
+            long changedId = direction switch
+            {
+                ChangeDirection.ToServer => await _idBarrierRepo.GetServerIdAsync(id).ConfigureAwait(false),
+                ChangeDirection.FromServer => await _idBarrierRepo.GetClientIdAsync(id).ConfigureAwait(false),
+                _ => -1,
+            };
+
+            if (changedId < 0 &&
+                //propertyInfo.Name == nameof(Resource.Id) &&
+                (requestType == ApiRequestType.Get || requestType == ApiRequestType.GetSingle) &&
+                direction == ChangeDirection.FromServer)
+            {
+                changedId = IDistributedIdGen.IdGen.GetId();
+                await _idBarrierRepo.AddIdBarrierAsync(clientId: changedId, serverId: id).ConfigureAwait(false);
+            }
+
+            propertyInfo.SetValue(obj, changedId);
         }
     }
 }

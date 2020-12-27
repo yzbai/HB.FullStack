@@ -31,6 +31,7 @@ namespace HB.FullStack.Database
                     SqlType.DeleteEntity => SqlHelper.CreateDeleteEntitySql(entityDefs[0]),
                     SqlType.SelectEntity => SqlHelper.CreateSelectEntitySql(entityDefs),
                     SqlType.Delete => SqlHelper.CreateDeleteSql(entityDefs[0]),
+                    SqlType.AddOrUpdateEntity => SqlHelper.CreateAddOrUpdateSql(entityDefs[0], engineType, true),
                     _ => throw new NotImplementedException(),
                 };
 
@@ -131,6 +132,13 @@ namespace HB.FullStack.Database
         #endregion 查询
 
         #region 更改
+
+        public static EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
+        {
+            return new EngineCommand(
+                GetCachedSql(engineType, SqlType.AddOrUpdateEntity, entityDef),
+                entity.ToParameters(entityDef, engineType));
+        }
 
         public static EngineCommand CreateAddCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {

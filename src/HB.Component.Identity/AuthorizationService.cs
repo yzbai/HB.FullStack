@@ -138,7 +138,7 @@ namespace HB.FullStack.Identity
             }
         }
 
-        public async Task<SignInResult> SignInAsync(SignInContext context, string lastUser)
+        public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context);
 
@@ -173,7 +173,6 @@ namespace HB.FullStack.Identity
                 };
 
                 //不存在，则新建用户
-                bool newUserCreated = false;
 
                 if (user == null && context.SignInType == SignInType.BySms)
                 {
@@ -186,8 +185,6 @@ namespace HB.FullStack.Identity
                         emailConfirmed: false,
                         lastUser: lastUser,
                         transactionContext).ConfigureAwait(false);
-
-                    newUserCreated = true;
                 }
 
                 if (user == null)
@@ -230,11 +227,10 @@ namespace HB.FullStack.Identity
 
                 string jwt = await ConstructJwtAsync(user, signInToken, context.SignToWhere, transactionContext).ConfigureAwait(false);
 
-                SignInResult result = new SignInResult
+                UserAccessResult result = new UserAccessResult
                 (
                     accessToken: jwt,
                     refreshToken: signInToken.RefreshToken,
-                    newUserCreated: newUserCreated,
                     currentUser: user
                 );
 
@@ -251,7 +247,7 @@ namespace HB.FullStack.Identity
 
         //TODO: 做好详细的历史纪录，各个阶段都要打log。一有风吹草动，就立马删除SignInToken
         /// <returns>新的AccessToken</returns>
-        public async Task<string> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
+        public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context);
 
@@ -344,11 +340,11 @@ namespace HB.FullStack.Identity
 
                 // 发布新的AccessToken
 
-                string jwt = await ConstructJwtAsync(user, signInToken, claimsPrincipal.GetAudience(), transactionContext).ConfigureAwait(false);
+                string accessToken = await ConstructJwtAsync(user, signInToken, claimsPrincipal.GetAudience(), transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return jwt;
+                return new UserAccessResult(accessToken, context.RefreshToken, user);
             }
             catch
             {

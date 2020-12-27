@@ -178,7 +178,7 @@ namespace HB.FullStack.Database.Def
 
                 if (entityPropertyAttribute == null)
                 {
-                    if (info.Name == nameof(Entity.Version) || info.Name == nameof(Entity.Deleted) || info.Name == nameof(Entity.LastTime))
+                    if (info.Name == nameof(Entity.Version) || info.Name == nameof(Entity.Deleted) || info.Name == nameof(Entity.LastTime) || info.Name == nameof(Entity.CreateTime))
                     {
                         entityPropertyAttribute = new EntityPropertyAttribute();
                     }

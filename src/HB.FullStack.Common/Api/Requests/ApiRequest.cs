@@ -226,5 +226,7 @@ namespace HB.FullStack.Common.Api
             SetCondition(condition);
             SetApiAuthType(apiAuthType);
         }
+
+        public abstract override int GetHashCode();
     }
 }
