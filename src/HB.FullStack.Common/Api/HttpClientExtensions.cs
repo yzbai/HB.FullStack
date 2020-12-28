@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -75,39 +76,49 @@ namespace System.Net.Http
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, BuildUrl(request));
 
             //Get的参数也放到body中去
-            //if (request.GetHttpMethod() != HttpMethod.Get)
-            //{
-            if (request is FileUpdateRequest<T> bufferedRequest)
+
+            if (request is FileUpdateRequest<T> fileRequest)
             {
-                MultipartFormDataContent content = new MultipartFormDataContent();
-
-#pragma warning disable CA2000 // Dispose objects before losing scope // using HttpRequestMessage 会自动dispose他的content
-                ByteArrayContent byteArrayContent = new ByteArrayContent(bufferedRequest.GetBytes());
-#pragma warning restore CA2000 // Dispose objects before losing scope
-
-                content.Add(byteArrayContent, bufferedRequest.GetBytesPropertyName(), bufferedRequest.GetFileName());
-
-                //request.GetParameters().ForEach(kv =>
-                //{
-                //    content.Add(new StringContent(kv.Value), kv.Key);
-                //});
-
-#pragma warning disable CA2000 // Dispose objects before losing scope // HttpRequestMessage dispose时候，会dispose他的content
-                content.Add(new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json"));
-#pragma warning restore CA2000 // Dispose objects before losing scope
-
-                httpRequest.Content = content;
+                httpRequest.Content = BuildMultipartContent(fileRequest);
             }
             else
             {
                 //TODO: .net 5以后，使用JsonContent
                 httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
             }
-            //}
 
             request.GetHeaders().ForEach(kv => httpRequest.Headers.Add(kv.Key, kv.Value));
 
             return httpRequest;
+        }
+
+        [Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
+        private static MultipartFormDataContent BuildMultipartContent<T>(FileUpdateRequest<T> fileRequest) where T : Resource
+        {
+            MultipartFormDataContent content = new MultipartFormDataContent();
+
+            string byteArrayContentName = fileRequest.GetBytesPropertyName();
+            IEnumerable<byte[]> bytess = fileRequest.GetBytess();
+            IEnumerable<string> fileNames = fileRequest.GetFileNames();
+
+            int num = 0;
+
+            foreach (string fileName in fileNames)
+            {
+                byte[] bytes = bytess.ElementAt(num++);
+
+                ByteArrayContent byteArrayContent = new ByteArrayContent(bytes);
+                content.Add(byteArrayContent, byteArrayContentName, fileName);
+            }
+
+            //request.GetParameters().ForEach(kv =>
+            //{
+            //    content.Add(new StringContent(kv.Value), kv.Key);
+            //});
+
+            content.Add(new StringContent(SerializeUtil.ToJson(fileRequest), Encoding.UTF8, "application/json"));
+
+            return content;
         }
 
         private static string BuildUrl(ApiRequest request)
@@ -132,12 +143,12 @@ namespace System.Net.Http
             }
 
             //添加噪音
-            IDictionary<string, string?> parameters = new Dictionary<string, string?>();
-            parameters.Add(ClientNames.RandomStr, ApiRequest.GetRandomStr());
-            parameters.Add(ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture));
-
-            //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
-            parameters.Add(ClientNames.DeviceId, request.DeviceId);
+            IDictionary<string, string?> parameters = new Dictionary<string, string?>
+            {
+                { ClientNames.RandomStr, ApiRequest.GetRandomStr() },
+                { ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture) },
+                { ClientNames.DeviceId, request.DeviceId }//额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
+            };
 
             string query = parameters.ToHttpValueCollection().ToString();
             requestUrlBuilder.Append('?');

@@ -30,8 +30,6 @@ namespace HB.Infrastructure.Redis.Test
 
         public string? UserName { get; set; }
 
-        public DateTimeOffset CreateTime { get; set; }
-
         public bool Activated { get; set; }
 
         public UserType Type { get; set; }
@@ -67,7 +65,6 @@ namespace HB.Infrastructure.Redis.Test
         private readonly UserEntity _userEntity1 = new UserEntity()
         {
             UserName = "22222222222",
-            CreateTime = DateTimeOffset.UtcNow,
             Activated = true,
             Type = UserType.Admin
         };
@@ -75,7 +72,6 @@ namespace HB.Infrastructure.Redis.Test
         private readonly UserEntity _userEntity2 = new UserEntity()
         {
             UserName = "333333333",
-            CreateTime = DateTimeOffset.UtcNow,
             Activated = true,
             Type = UserType.Customer
         };

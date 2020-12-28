@@ -14,6 +14,16 @@ namespace System
 {
     public static class ThrowIf
     {
+
+        public static long NotLongId(long id, string paramName)
+        {
+            if (id > 0)
+            {
+                return id;
+            }
+
+            throw new ArgumentException($"不合格 long Id", paramName);
+        }
         /// <summary>
         /// Null
         /// </summary>

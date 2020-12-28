@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
@@ -73,71 +71,6 @@ namespace HB.FullStack.Identity
 
         public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
-        private void InitializeCredencials()
-        {
-            #region Initialize Jwt Signing Credentials
-
-            X509Certificate2? cert = CertificateUtil.GetBySubject(_options.SigningCertificateSubject);
-
-            if (cert == null)
-            {
-                throw new AuthorizationException(ErrorCode.JwtSigningCertNotFound, $"Subject:{_options.SigningCertificateSubject}");
-            }
-
-            _signingCredentials = CredentialHelper.GetSigningCredentials(cert, _options.SigningAlgorithm);
-            _jsonWebKeySetJson = CredentialHelper.CreateJsonWebKeySetJson(cert);
-            _issuerSigningKeys = CredentialHelper.GetIssuerSigningKeys(cert);
-
-            #endregion
-
-            #region Initialize Jwt Content Encrypt/Decrypt Credentials
-
-            X509Certificate2? encryptionCert = CertificateUtil.GetBySubject(_options.EncryptingCertificateSubject);
-
-            if (encryptionCert == null)
-            {
-                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
-            }
-
-            _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);
-            _decryptionSecurityKey = CredentialHelper.GetSecurityKey(encryptionCert);
-
-            #endregion
-        }
-
-        public async Task SignOutAsync(long signInTokenId, string lastUser)
-        {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
-            try
-            {
-                await _signInTokenRepo.DeleteByIdAsync(signInTokenId, lastUser, transactionContext).ConfigureAwait(false);
-
-                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                throw;
-            }
-        }
-
-        public async Task SignOutAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
-        {
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
-
-            try
-            {
-                await _signInTokenRepo.DeleteByLogOffTypeAsync(userId, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
-
-                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                throw;
-            }
-        }
-
         public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context);
@@ -176,15 +109,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null && context.SignInType == SignInType.BySms)
                 {
-                    user = await _userRepo.CreateAsync(
-                        mobile: context.Mobile!,
-                        email: null,
-                        loginName: context.LoginName,
-                        password: context.Password,
-                        mobileConfirmed: true,
-                        emailConfirmed: false,
-                        lastUser: lastUser,
-                        transactionContext).ConfigureAwait(false);
+                    user = await _identityService.CreateUserAsync(context.Mobile!, null, context.LoginName, context.Password, true, false, lastUser, transactionContext).ConfigureAwait(false);
                 }
 
                 if (user == null)
@@ -192,7 +117,7 @@ namespace HB.FullStack.Identity
                     throw new AuthorizationException(ErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
                 }
 
-                UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserIdAsync(user.Id).ConfigureAwait(false);
+                UserLoginControl userLoginControl = await _userLoginControlRepo.GetAsync(user.Id).ConfigureAwait(false) ?? new UserLoginControl { UserId = user.Id };
 
                 //密码检查
                 if (context.SignInType == SignInType.ByMobileAndPassword || context.SignInType == SignInType.ByLoginNameAndPassword)
@@ -209,22 +134,30 @@ namespace HB.FullStack.Identity
                 PreSignInCheck(user, userLoginControl, lastUser);
 
                 //注销其他客户端
-                await _signInTokenRepo.DeleteByLogOffTypeAsync(user.Id, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
+                await DeleteSignInTokensAsync(user.Id, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
 
                 //创建Token
-                SignInToken signInToken = await _signInTokenRepo.CreateAsync(
-                    user.Id,
-                    context.DeviceId,
-                    context.DeviceInfos,
-                    context.DeviceVersion,
-                    //context.DeviceAddress,
-                    context.DeviceIp,
-                    context.RememberMe ? _options.SignInOptions.RefreshTokenLongExpireTimeSpan : _options.SignInOptions.RefreshTokenShortExpireTimeSpan,
-                    lastUser,
-                    transactionContext).ConfigureAwait(false);
+
+                SignInToken signInToken = new SignInToken
+                (
+                    userId: user.Id,
+                    refreshToken: SecurityUtil.CreateUniqueToken(),
+                    expireAt: TimeUtil.UtcNow + (context.RememberMe ? _options.SignInOptions.RefreshTokenLongExpireTimeSpan : _options.SignInOptions.RefreshTokenShortExpireTimeSpan),
+                    deviceId: context.DeviceId,
+                    deviceVersion: context.DeviceVersion,
+                    deviceIp: context.DeviceIp,
+
+                    deviceName: context.DeviceInfos.Name,
+                    deviceModel: context.DeviceInfos.Model,
+                    deviceOSVersion: context.DeviceInfos.OSVersion,
+                    devicePlatform: context.DeviceInfos.Platform,
+                    deviceIdiom: context.DeviceInfos.Idiom,
+                    deviceType: context.DeviceInfos.Type
+                );
+
+                await _signInTokenRepo.AddAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
 
                 //构造 Jwt
-
                 string jwt = await ConstructJwtAsync(user, signInToken, context.SignToWhere, transactionContext).ConfigureAwait(false);
 
                 UserAccessResult result = new UserAccessResult
@@ -245,8 +178,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        //TODO: 做好详细的历史纪录，各个阶段都要打log。一有风吹草动，就立马删除SignInToken
-        /// <returns>新的AccessToken</returns>
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context);
@@ -296,7 +227,7 @@ namespace HB.FullStack.Identity
 
             //SignInToken 验证
             User? user;
-            SignInToken? signInToken;
+            SignInToken? signInToken = null;
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
@@ -317,8 +248,6 @@ namespace HB.FullStack.Identity
 
                 if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
-                    await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
-
                     throw new AuthorizationException(ErrorCode.AuthorizationRefreshTokenExpired, $"Refresh Token Expired.");
                 }
 
@@ -328,8 +257,6 @@ namespace HB.FullStack.Identity
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
-                    await BlackSignInTokenAsync(signInToken, lastUser).ConfigureAwait(false);
-
                     throw new AuthorizationException(ErrorCode.AuthorizationUserSecurityStampChanged, $"Refresh token error. User SecurityStamp Changed.");
                 }
 
@@ -349,6 +276,59 @@ namespace HB.FullStack.Identity
             catch
             {
                 await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+
+                if (signInToken != null)
+                {
+                    await _signInTokenRepo.DeleteAsync(signInToken, lastUser, null).ConfigureAwait(false);
+                }
+
+                throw;
+            }
+        }
+
+        public async Task SignOutAsync(long signInTokenId, string lastUser)
+        {
+            ThrowIf.NotLongId(signInTokenId, nameof(signInTokenId));
+
+            TransactionContext transContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
+
+            try
+            {
+                SignInToken? signInToken = await _signInTokenRepo.GetByIdAsync(signInTokenId, transContext).ConfigureAwait(false);
+
+                if (signInToken != null)
+                {
+                    await _signInTokenRepo.DeleteAsync(signInToken, lastUser, transContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    _logger.LogWarning($"尝试删除不存在的SignInToken. SignInTokenId:{signInTokenId}");
+                }
+
+                await transContext.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await transContext.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        public async Task SignOutAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
+        {
+            ThrowIf.NotLongId(userId, nameof(userId));
+
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
+
+            try
+            {
+                await DeleteSignInTokensAsync(userId, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
+
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
                 throw;
             }
         }
@@ -362,9 +342,24 @@ namespace HB.FullStack.Identity
                 return;
             }
 
-            UserLoginControl userLoginControl = await _userLoginControlRepo.GetOrCreateByUserIdAsync(user.Id).ConfigureAwait(false);
+            UserLoginControl userLoginControl = await _userLoginControlRepo.GetAsync(user.Id).ConfigureAwait(false) ?? new UserLoginControl { UserId = user.Id };
 
             OnSignInFailed(userLoginControl, lastUser);
+        }
+
+        private async Task DeleteSignInTokensAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
+        {
+            IEnumerable<SignInToken> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+
+            IEnumerable<SignInToken> toDeletes = logOffType switch
+            {
+                LogOffType.LogOffAllOthers => resultList,
+                LogOffType.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web),
+                LogOffType.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == idiom),
+                _ => new List<SignInToken>()
+            };
+
+            await _signInTokenRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
@@ -435,12 +430,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        private static bool PassowrdCheck(User user, string password)
-        {
-            string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
-            return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
-        }
-
         private void OnSignInFailed(UserLoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
@@ -462,22 +451,42 @@ namespace HB.FullStack.Identity
             _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
         }
 
-        private async Task BlackSignInTokenAsync(SignInToken signInToken, string lastUser)
+        private void InitializeCredencials()
         {
-            //TODO: 详细记录Black SiginInToken 的历史纪录
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
-            try
-            {
-                await _signInTokenRepo.DeleteByIdAsync(signInToken.Id, lastUser, transactionContext).ConfigureAwait(false);
+            #region Initialize Jwt Signing Credentials
 
-                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+            X509Certificate2? cert = CertificateUtil.GetBySubject(_options.SigningCertificateSubject);
 
-                throw;
+            if (cert == null)
+            {
+                throw new AuthorizationException(ErrorCode.JwtSigningCertNotFound, $"Subject:{_options.SigningCertificateSubject}");
             }
+
+            _signingCredentials = CredentialHelper.GetSigningCredentials(cert, _options.SigningAlgorithm);
+            _jsonWebKeySetJson = CredentialHelper.CreateJsonWebKeySetJson(cert);
+            _issuerSigningKeys = CredentialHelper.GetIssuerSigningKeys(cert);
+
+            #endregion
+
+            #region Initialize Jwt Content Encrypt/Decrypt Credentials
+
+            X509Certificate2? encryptionCert = CertificateUtil.GetBySubject(_options.EncryptingCertificateSubject);
+
+            if (encryptionCert == null)
+            {
+                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
+            }
+
+            _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);
+            _decryptionSecurityKey = CredentialHelper.GetSecurityKey(encryptionCert);
+
+            #endregion
+        }
+
+        private static bool PassowrdCheck(User user, string password)
+        {
+            string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
+            return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
         private static IEnumerable<Claim> ConstructClaims(User user, IEnumerable<Role> roles, IEnumerable<UserClaim> userClaims, SignInToken signInToken)

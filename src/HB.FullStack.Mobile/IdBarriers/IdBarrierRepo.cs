@@ -24,7 +24,7 @@ namespace HB.FullStack.Client.IdBarriers
             await _database.AddAsync(idBarrier, "", null).ConfigureAwait(false);
         }
 
-        public async Task AddIdBarrierAsync(List<long> clientIds, IEnumerable<long> servierIds)
+        public async Task AddIdBarrierAsync(List<long> clientIds, IEnumerable<long> servierIds, TransactionContext transactionContext)
         {
             List<IdBarrier> idBarriers = new List<IdBarrier>();
 
@@ -37,7 +37,7 @@ namespace HB.FullStack.Client.IdBarriers
                 idBarriers.Add(idBarrier);
             }
 
-            await _database.AddAsync(idBarriers).ConfigureAwait(false);
+            await _database.BatchAddAsync(idBarriers, "", transactionContext).ConfigureAwait(false);
         }
 
         public async Task<long> GetClientIdAsync(long serverId)

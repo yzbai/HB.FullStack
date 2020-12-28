@@ -117,6 +117,11 @@ namespace HB.FullStack.Client.Api
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;
             }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(AccessToken, RefreshToken);
+            }
         }
     }
 }

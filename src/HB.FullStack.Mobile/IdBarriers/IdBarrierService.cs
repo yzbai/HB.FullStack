@@ -10,6 +10,7 @@ using HB.FullStack.Client.IdBarriers;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Common.Resources;
+using HB.FullStack.Database;
 
 namespace MyColorfulTime.IdBarriers
 {
@@ -23,13 +24,14 @@ namespace MyColorfulTime.IdBarriers
         }
         private readonly IIdBarrierRepo _idBarrierRepo;
         private readonly IApiClient _apiClient;
-
+        private readonly ITransaction _transaction;
         private readonly Dictionary<string, List<long>> _addRequestClientIdDict = new Dictionary<string, List<long>>();
 
-        public IdBarrierService(IIdBarrierRepo idBarrierRepo, IApiClient apiClient)
+        public IdBarrierService(IIdBarrierRepo idBarrierRepo, IApiClient apiClient, ITransaction transaction)
         {
             _idBarrierRepo = idBarrierRepo;
             _apiClient = apiClient;
+            _transaction = transaction;
         }
 
         public void Initialize()
@@ -59,7 +61,7 @@ namespace MyColorfulTime.IdBarriers
                     {
                         List<long> clientIds = _addRequestClientIdDict[args.RequestId];
 
-                        await _idBarrierRepo.AddIdBarrierAsync(clientIds, servierIds).ConfigureAwait(false);
+                        await AddIdBarriersAsync(servierIds, clientIds).ConfigureAwait(false);
 
                         _addRequestClientIdDict.Remove(args.RequestId);
                     }
@@ -83,6 +85,22 @@ namespace MyColorfulTime.IdBarriers
                     break;
                 default:
                     break;
+            }
+        }
+
+        private async Task AddIdBarriersAsync(IEnumerable<long> servierIds, List<long> clientIds)
+        {
+            TransactionContext trans = await _transaction.BeginTransactionAsync<IdBarrier>().ConfigureAwait(false);
+            try
+            {
+                await _idBarrierRepo.AddIdBarrierAsync(clientIds, servierIds, trans).ConfigureAwait(false);
+
+                await trans.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await trans.RollbackAsync().ConfigureAwait(false);
+                throw;
             }
         }
 

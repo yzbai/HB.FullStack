@@ -133,13 +133,6 @@ namespace HB.FullStack.Database
 
         #region 更改
 
-        public static EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
-        {
-            return new EngineCommand(
-                GetCachedSql(engineType, SqlType.AddOrUpdateEntity, entityDef),
-                entity.ToParameters(entityDef, engineType));
-        }
-
         public static EngineCommand CreateAddCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
@@ -316,5 +309,57 @@ namespace HB.FullStack.Database
 
 
         #endregion Management
+
+        #region AddOrUpdate
+
+        /// <summary>
+        /// 只在客户端开放，因为不检查Version就update
+        /// </summary>
+        public static EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
+        {
+            return new EngineCommand(
+                GetCachedSql(engineType, SqlType.AddOrUpdateEntity, entityDef),
+                entity.ToParameters(entityDef, engineType));
+        }
+
+        /// <summary>
+        /// 只在客户端开放，因为不检查Version就update，并且无法更新entities
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="engineType"></param>
+        /// <param name="entityDef"></param>
+        /// <param name="entities"></param>
+        /// <returns></returns>
+        public static EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities) where T : DatabaseEntity, new()
+        {
+            ThrowIf.Empty(entities, nameof(entities));
+
+            StringBuilder innerBuilder = new StringBuilder();
+            //string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
+
+            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
+            int number = 0;
+
+            foreach (T entity in entities)
+            {
+                string addOrUpdateCommandText = SqlHelper.CreateAddOrUpdateSql(entityDef, engineType, false, number);
+
+                parameters.AddRange(entity.ToParameters(entityDef, engineType, number));
+
+                innerBuilder.Append(addOrUpdateCommandText);
+
+                number++;
+            }
+
+            StringBuilder commandTextBuilder = new StringBuilder();
+            //commandTextBuilder.Append($"{SqlHelper.TempTable_Drop(tempTableName, engineType)}");
+            //commandTextBuilder.Append($"{SqlHelper.TempTable_Create_Id(tempTableName, engineType)}");
+            commandTextBuilder.Append($"{innerBuilder}");
+            //commandTextBuilder.Append($"{SqlHelper.TempTable_Drop(tempTableName, engineType)}");
+
+            return new EngineCommand(commandTextBuilder.ToString(), parameters);
+        }
+
+        #endregion
     }
 }

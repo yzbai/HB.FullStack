@@ -12,7 +12,7 @@ namespace HB.FullStack.Client.Api
 
         event AsyncEventHandler<object, ApiEventArgs> Responsed;
 
-        Task<IEnumerable<long>> AddAsync<T>(AddRequest<T> request) where T : Resource;
+        Task AddAsync<T>(AddRequest<T> request) where T : Resource;
 
         Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource;
 

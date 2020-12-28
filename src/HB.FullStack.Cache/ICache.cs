@@ -145,7 +145,7 @@ namespace HB.FullStack.Cache
 
         #region Timestamp Cache
 
-        Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken));
+        Task<byte[]?> GetAsync(string key, CancellationToken token = default);
 
         /// <summary>
         /// utcTicks是指数据刚刚从数据库中取出来后的时间
@@ -167,7 +167,7 @@ namespace HB.FullStack.Cache
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default(CancellationToken));
+        Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default);
 
         #endregion
     }

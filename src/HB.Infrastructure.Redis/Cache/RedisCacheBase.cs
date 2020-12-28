@@ -54,17 +54,18 @@ namespace HB.Infrastructure.Redis.Cache
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
                 IServer server = RedisInstanceManager.GetServer(setting, _logger);
-                LoadedLuas loadedLuas = new LoadedLuas();
+                LoadedLuas loadedLuas = new LoadedLuas
+                {
+                    LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache._luaSetWithTimestamp),
+                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache._luaRemoveWithTimestamp),
+                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache._luaGetAndRefresh),
 
-                loadedLuas.LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache._luaSetWithTimestamp);
-                loadedLuas.LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache._luaRemoveWithTimestamp);
-                loadedLuas.LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache._luaGetAndRefresh);
-
-                loadedLuas.LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache._luaEntitiesGetAndRefresh);
-                loadedLuas.LoadedEntitiesGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache._luaEntitiesGetAndRefreshByDimension);
-                loadedLuas.LoadedEntitiesSetLua = server.ScriptLoad(RedisCache._luaEntitiesSet);
-                loadedLuas.LoadedEntitiesRemoveLua = server.ScriptLoad(RedisCache._luaEntitiesRemove);
-                loadedLuas.LoadedEntitiesRemoveByDimensionLua = server.ScriptLoad(RedisCache._luaEntitiesRemoveByDimension);
+                    LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache._luaEntitiesGetAndRefresh),
+                    LoadedEntitiesGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache._luaEntitiesGetAndRefreshByDimension),
+                    LoadedEntitiesSetLua = server.ScriptLoad(RedisCache._luaEntitiesSet),
+                    LoadedEntitiesRemoveLua = server.ScriptLoad(RedisCache._luaEntitiesRemove),
+                    LoadedEntitiesRemoveByDimensionLua = server.ScriptLoad(RedisCache._luaEntitiesRemoveByDimension)
+                };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;
             }

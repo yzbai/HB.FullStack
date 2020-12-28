@@ -878,7 +878,6 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.DbValueToTypeValue));
 
-#pragma warning disable CA1823 // Avoid unused private fields
         private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue));
 
         private static readonly MethodInfo _getStringConcatMethod = typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) });
@@ -888,6 +887,5 @@ namespace HB.FullStack.Database.Mapper
         private static readonly FieldInfo _dbNullValueFiled = typeof(DBNull).GetField("Value");
 
         private static readonly MethodInfo _getArraySetValueMethod = typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) });
-#pragma warning restore CA1823 // Avoid unused private fields
     }
 }

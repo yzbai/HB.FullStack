@@ -14,7 +14,7 @@ namespace HB.Infrastructure.IdGen.Tests
         [Fact]
         public async Task Test1Async()
         {
-            IdGenDistributedId.Initialize(0);
+            IdGenDistributedId.Initialize(new Microsoft.Extensions.DependencyInjection.IdGenSettings { MachineId = 0 });
             ConcurrentDictionary<long, int> dict = new ConcurrentDictionary<long, int>();
 
             List<Task> tasks = new List<Task>();

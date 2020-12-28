@@ -14,9 +14,7 @@ namespace HB.FullStack.Common.Api
 
         [IdBarrier]
         [Required]
-#pragma warning disable CA2227 // Collection properties should be read only
-        public IList<T> Resources { get; set; } = new List<T>();
-#pragma warning restore CA2227 // Collection properties should be read only
+        public List<T> Resources { get; set; } = new List<T>();
 
         public override int GetHashCode()
         {

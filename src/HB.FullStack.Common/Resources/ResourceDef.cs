@@ -15,9 +15,9 @@ namespace HB.FullStack.Common.Resources
 
     public static class ResourceDefFactory
     {
-        private static ConcurrentDictionary<Type, ResourceDef> _defDict = new ConcurrentDictionary<Type, ResourceDef>();
+        private static readonly ConcurrentDictionary<Type, ResourceDef> _defDict = new ConcurrentDictionary<Type, ResourceDef>();
 
-        private static object _defDictLocker = new object();
+        private static readonly object _defDictLocker = new object();
 
         public static ResourceDef Get<T>() where T : Resource
         {

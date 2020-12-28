@@ -45,8 +45,8 @@ namespace HB.FullStack.Client.Api
         public Task<T> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
             => SendAsync<T, T>(request, ApiRequestType.GetSingle);
 
-        public async Task<IEnumerable<long>> AddAsync<T>(AddRequest<T> addRequest) where T : Resource
-            => await SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add).ConfigureAwait(false) ?? new List<long>();
+        public Task AddAsync<T>(AddRequest<T> addRequest) where T : Resource
+            => SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
 
         public Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);

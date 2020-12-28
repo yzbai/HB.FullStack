@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.Caching.Distributed
 {
     public static class IDistributedCacheExtensions
     {
-        public static async Task SetIntAsync(this IDistributedCache cache, string key, int value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
+        public static async Task SetIntAsync(this IDistributedCache cache, string key, int value, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             try
             {
@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
         }
 
-        public static async Task<int?> GetIntAsync(this IDistributedCache cache, string key, CancellationToken token = default(CancellationToken))
+        public static async Task<int?> GetIntAsync(this IDistributedCache cache, string key, CancellationToken token = default)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
         }
 
-        public static async Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken)) where T : class
+        public static async Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.Caching.Distributed
             }
         }
 
-        public static async Task<T?> GetAsync<T>(this IDistributedCache cache, string key, CancellationToken token = default(CancellationToken)) where T : class
+        public static async Task<T?> GetAsync<T>(this IDistributedCache cache, string key, CancellationToken token = default) where T : class
         {
             try
             {

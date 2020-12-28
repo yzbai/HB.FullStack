@@ -20,5 +20,13 @@ namespace HB.FullStack.Identity.Entities
         [ForeignKey(typeof(Role))]
         [EntityProperty(NotNull = true)]
         public long RoleId { get; set; }
+
+        public RoleOfUser() { }
+
+        public RoleOfUser(long userId, long roleId)
+        {
+            UserId = userId;
+            RoleId = roleId;
+        }
     }
 }

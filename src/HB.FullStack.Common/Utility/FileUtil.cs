@@ -90,9 +90,7 @@ namespace System
 
                 return signatures.Any(signature => headerBytes.Take(signature.Length).SequenceEqual(signature));
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 GlobalSettings.Logger?.LogError(ex, $"IsFileSignatureMatched Error.extension: {extension}");
                 return false;
@@ -137,10 +135,10 @@ namespace System
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        
-        
-        
-        
+
+
+
+
         public static byte[] ComputeFileHash(string filePath)
         {
             int runCount = 1;

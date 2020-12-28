@@ -39,43 +39,14 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static TransactionContext GetFakeTransactionContext()
+        public static async Task SetByWhereAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext transContext) where T : DatabaseEntity, new()
         {
-            return new TransactionContext(null!, TransactionStatus.InTransaction, null!);
+            await database.DeleteAsync<T>(whereExpr, transContext).ConfigureAwait(false);
+
+            await database.BatchAddAsync<T>(newItems, "", transContext).ConfigureAwait(false);
         }
 
-        public static Task UpdateAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity, new()
-        {
-            TransactionContext context = transContext ?? GetFakeTransactionContext();
-
-            return database.BatchUpdateAsync(items, "", context);
-        }
-
-        public static Task DeleteAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity, new()
-        {
-            TransactionContext context = transContext ?? GetFakeTransactionContext();
-
-            return database.BatchDeleteAsync(items, "", context);
-        }
-
-        public static Task<IEnumerable<object>> AddAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext = null) where T : DatabaseEntity, new()
-        {
-            TransactionContext context = transContext ?? GetFakeTransactionContext();
-
-            return database.BatchAddAsync<T>(items, "", context);
-        }
-
-        public static async Task SetAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext? transContext = null) where T : DatabaseEntity, new()
-        {
-            TransactionContext context = transContext ?? GetFakeTransactionContext();
-
-            await database.DeleteAsync<T>(whereExpr, context).ConfigureAwait(false);
-
-            await database.AddAsync<T>(newItems, context);
-        }
-
-
-        public static async Task AddOrUpdateAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
+        public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item);
 
@@ -107,6 +78,43 @@ namespace HB.FullStack.Database
                 string detail = $"Item:{SerializeUtil.ToJson(item)}";
 
                 throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, detail, ex); ;
+            }
+        }
+
+        /// <summary>
+        /// warning: 不改变items！！！！
+        /// </summary>
+        public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext transContext) where T : DatabaseEntity, new()
+        {
+            ThrowIf.NotValid(items);
+
+            if (!items.Any())
+            {
+                return;
+            }
+
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+
+            if (!entityDef.DatabaseWriteable)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Items:{SerializeUtil.ToJson(items)}");
+            }
+
+            try
+            {
+                foreach (var item in items)
+                {
+                    item.LastTime = TimeUtil.UtcNow;
+                }
+
+                var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, entityDef, items);
+
+                await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, command).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is DatabaseException))
+            {
+                string detail = $"Items:{SerializeUtil.ToJson(items)}";
+                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, detail, ex);
             }
         }
 

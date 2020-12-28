@@ -76,7 +76,7 @@ end
 
 return data[3]";
 
-        public async Task<byte[]?> GetAsync(string key, CancellationToken token = default(CancellationToken))
+        public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
             if (key == null)
             {
@@ -182,7 +182,7 @@ return data[3]";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default(CancellationToken))
+        public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default)
         {
             if (key == null)
             {

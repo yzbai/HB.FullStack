@@ -53,7 +53,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrmBenchmark.OrmLite", "ben
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.IdGen", "src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj", "{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure.IdGen.Tests", "test\HB.Infrastructure.IdGen.Tests\HB.Infrastructure.IdGen.Tests.csproj", "{DE7E4D9D-63AC-4C02-B980-2B7EA87BF28E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.IdGen.Tests", "test\HB.Infrastructure.IdGen.Tests\HB.Infrastructure.IdGen.Tests.csproj", "{DE7E4D9D-63AC-4C02-B980-2B7EA87BF28E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{08E380BB-5C31-440F-A368-A9E94F01370C}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		common.props = common.props
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

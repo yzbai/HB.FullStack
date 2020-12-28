@@ -98,9 +98,9 @@ namespace HB.FullStack.Client.Base
 
         }
 
-        protected abstract bool IsLogined();
-
         public abstract void PerformLogin();
+
+        public abstract void DisplayOfflineWarning();
 
 
         private static IRemoteLoggingService? _remoteLoggingService;

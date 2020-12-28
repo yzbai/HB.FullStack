@@ -17,10 +17,10 @@ namespace HB.FullStack.Server.Filters
     public class CheckSmsCodeFilter : IAsyncActionFilter
     {
         private readonly ILogger _logger;
-        private readonly ISmsService _smsService;
+        private readonly ISmsServerService _smsService;
         private readonly IAuthorizationService _authorizationService;
 
-        public CheckSmsCodeFilter(ILogger<CheckSmsCodeFilter> logger, ISmsService smsService, IAuthorizationService authorizationService)
+        public CheckSmsCodeFilter(ILogger<CheckSmsCodeFilter> logger, ISmsServerService smsService, IAuthorizationService authorizationService)
         {
             _logger = logger;
             _smsService = smsService;
@@ -62,9 +62,7 @@ namespace HB.FullStack.Server.Filters
 
                 await next().ConfigureAwait(false);
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 OnError(context);
                 _logger.LogError(ex, "SmsCode 验证失败");

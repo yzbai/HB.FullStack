@@ -34,15 +34,5 @@ namespace HB.FullStack.Identity
                 return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
             })!;
         }
-
-        public Task AddToUserAsync(long userId, UserClaim userClaim, TransactionContext? transContext = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteFromUserAsync(long userId, UserClaim userClaim, TransactionContext? transContext = null)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

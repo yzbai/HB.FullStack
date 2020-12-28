@@ -118,13 +118,14 @@ return array";
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
                 IServer server = RedisInstanceManager.GetServer(setting, _logger);
-                LoadedLuas loadedLuas = new LoadedLuas();
-
-                loadedLuas.LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd);
-                loadedLuas.LoadedBatchUpdateLua = server.ScriptLoad(_luaBatchUpdate);
-                loadedLuas.LoadedBatchDeleteLua = server.ScriptLoad(_luaBatchDelete);
-                loadedLuas.LoadedBatchGetLua = server.ScriptLoad(_luaBatchGet);
-                loadedLuas.LoadedGetAllLua = server.ScriptLoad(_luaGetAll);
+                LoadedLuas loadedLuas = new LoadedLuas
+                {
+                    LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd),
+                    LoadedBatchUpdateLua = server.ScriptLoad(_luaBatchUpdate),
+                    LoadedBatchDeleteLua = server.ScriptLoad(_luaBatchDelete),
+                    LoadedBatchGetLua = server.ScriptLoad(_luaBatchGet),
+                    LoadedGetAllLua = server.ScriptLoad(_luaGetAll)
+                };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;
             }

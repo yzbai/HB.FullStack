@@ -45,7 +45,7 @@ namespace HB.FullStack
             IServiceCollection services = new ServiceCollection();
 
             services
-                .AddIdGen(Configuration["IdGen:MachineId"])
+                .AddIdGen(Configuration.GetSection("IdGen"))
                 .AddSingleton<TestCls>()
                 .AddOptions()
                 .AddLogging(builder =>

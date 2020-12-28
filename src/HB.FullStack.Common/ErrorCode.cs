@@ -170,6 +170,7 @@
 
         DistributedLockUnLockFailed = 934,
         ApiNoInternet = 935,
+        ApiUploadFailed = 936,
     }
 
     public static class ErrorCodeExtensions

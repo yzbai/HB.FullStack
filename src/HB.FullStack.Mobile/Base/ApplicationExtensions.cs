@@ -15,6 +15,13 @@ namespace Xamarin.Forms
 
     public static class ApplicationExtensions
     {
+        public static void DisplayOfflineWarning(this Application application)
+        {
+            if (application is BaseApplication baseApplication)
+            {
+                baseApplication.DisplayOfflineWarning();
+            }
+        }
         public static Task GetInitializeTaskAsync(this Application application)
         {
             if (application is BaseApplication baseApplication)

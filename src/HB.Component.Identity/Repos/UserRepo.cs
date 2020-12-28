@@ -23,13 +23,11 @@ namespace HB.FullStack.Identity
     /// </summary>
     internal class UserRepo : Repository<User>
     {
-        private readonly IdentityOptions _identityOptions;
         private readonly IDatabaseReader _databaseReader;
 
-        public UserRepo(IOptions<IdentityOptions> identityOptions, ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
-            _identityOptions = identityOptions.Value;
             _databaseReader = databaseReader;
 
             EntityUpdating += (sender, args) =>
@@ -102,55 +100,6 @@ namespace HB.FullStack.Identity
             return _databaseReader.CountAsync(where, transContext);
         }
 
-        #endregion
-
-        #region Write
-
-        public async Task<User> CreateAsync(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext transContext)
-        {
-            ThrowIf.NotMobile(mobile, nameof(mobile), true);
-            ThrowIf.NotEmail(email, nameof(email), true);
-            ThrowIf.NotLoginName(loginName, nameof(loginName), true);
-            ThrowIf.NotPassword(password, nameof(password), true);
-
-            #region 查重
-
-            if (mobile == null && email == null && loginName == null)
-            {
-                throw new FrameworkException(ErrorCode.IdentityMobileEmailLoginNameAllNull);
-            }
-
-            if (!mobileConfirmed && !emailConfirmed && password == null)
-            {
-                throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
-            }
-
-            long count = await CountUserAsync(loginName, mobile, email, transContext).ConfigureAwait(false);
-
-            if (count != 0)
-            {
-                throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(User)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
-            }
-
-            #endregion
-
-            User user = new User
-            {
-                SecurityStamp = SecurityUtil.CreateUniqueToken(),
-                LoginName = loginName,
-                Mobile = mobile,
-                Email = email,
-                //PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, user.Guid),
-                MobileConfirmed = mobileConfirmed,
-                EmailConfirmed = emailConfirmed
-            };
-
-            user.PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
-
-            await AddAsync(user, lastUser, transContext).ConfigureAwait(false);
-
-            return user;
-        }
         #endregion
     }
 }

@@ -25,7 +25,7 @@ namespace HB.FullStack.Database.Def
         /// 所属数据库
         /// 在IsTableModel为false时没有意义
         /// </summary>
-        public string? DatabaseName { get; set; }
+        public string DatabaseName { get; set; } = null!;
 
         /// <summary>
         /// 数据库是否可写

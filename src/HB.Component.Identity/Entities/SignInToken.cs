@@ -1,13 +1,34 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-
-using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities
 {
     public class SignInToken : IdGenEntity
     {
+        public SignInToken()
+        {
+
+        }
+
+        public SignInToken(long userId, string refreshToken, DateTimeOffset? expireAt, string deviceId, string deviceVersion, string deviceIp, string deviceName, string deviceModel, string deviceOSVersion, string devicePlatform, DeviceIdiom deviceIdiom, string deviceType)
+        {
+            UserId = userId;
+            RefreshToken = refreshToken;
+            ExpireAt = expireAt;
+
+            DeviceId = deviceId;
+            DeviceVersion = deviceVersion;
+            DeviceIp = deviceIp;
+
+            DeviceName = deviceName;
+            DeviceModel = deviceModel;
+            DeviceOSVersion = deviceOSVersion;
+            DevicePlatform = devicePlatform;
+            DeviceIdiom = deviceIdiom;
+            DeviceType = deviceType;
+        }
+
         [Required]
         [ForeignKey(typeof(User))]
         [EntityProperty(NotNull = true)]

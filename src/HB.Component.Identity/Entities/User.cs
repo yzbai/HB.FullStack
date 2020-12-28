@@ -62,5 +62,17 @@ namespace HB.FullStack.Identity.Entities
         [EntityProperty]
         public bool TwoFactorEnabled { get; set; }
 
+        public User() { }
+
+        public User(string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
+        {
+            SecurityStamp = SecurityUtil.CreateUniqueToken();
+            LoginName = loginName;
+            Mobile = mobile;
+            Email = email;
+            PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, SecurityStamp);
+            MobileConfirmed = mobileConfirmed;
+            EmailConfirmed = emailConfirmed;
+        }
     }
 }

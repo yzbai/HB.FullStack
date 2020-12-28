@@ -1,41 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http;
 using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Common.Api
 {
-    public class FileUpdateRequest<T> : ApiRequest<T> where T : Resource
+    public class FileUpdateRequest<T> : UpdateRequest<T> where T : Resource
     {
-        private readonly byte[]? _file;
+        private readonly IEnumerable<byte[]> _files;
+        private readonly IEnumerable<string> _fileNames;
 
-        private readonly string _fileName;
-
-        public FileUpdateRequest(byte[] file, string fileName) : base(HttpMethod.Put, null)
+        public FileUpdateRequest(IEnumerable<byte[]> files, IEnumerable<string> fileNames) : base()
         {
-            _file = file;
-            _fileName = fileName;
+            if (files.Count() != fileNames.Count())
+            {
+                throw new ApiException(ErrorCode.ApiModelValidationError, System.Net.HttpStatusCode.BadRequest);
+            }
+
+            _files = files;
+            _fileNames = fileNames;
         }
 
-        public FileUpdateRequest(string apiKeyName, byte[] file, string fileName) : base(apiKeyName, HttpMethod.Put, null)
+        public FileUpdateRequest(string apiKeyName, IEnumerable<byte[]> files, IEnumerable<string> fileNames) : base(apiKeyName)
         {
-            _file = file;
-            _fileName = fileName;
+            if (files.Count() != fileNames.Count())
+            {
+                throw new ApiException(ErrorCode.ApiModelValidationError, System.Net.HttpStatusCode.BadRequest);
+            }
+
+            _files = files;
+            _fileNames = fileNames;
         }
 
-        [IdBarrier]
-        [Required]
-        public T Resource { get; set; } = null!;
+        public IEnumerable<byte[]> GetBytess() => _files;
 
-        public byte[]? GetBytes() => _file;
+        public string GetBytesPropertyName() => "Files";
 
-        public string GetBytesPropertyName() => "File";
-
-        public string GetFileName() => _fileName;
-
-        public override int GetHashCode()
-        {
-            return ((ApiRequest)this).GetHashCode();
-        }
+        public IEnumerable<string> GetFileNames() => _fileNames;
     }
 }
