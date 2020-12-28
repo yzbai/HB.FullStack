@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.Api
         /// 刷新token的站点名
         /// </summary>
         [Required]
-        public string? ProductName { get; set; }
+        public string? EndpointName { get; set; }
 
         /// <summary>
         /// 刷新token的站点资源名
@@ -23,7 +23,7 @@ namespace HB.FullStack.Client.Api
         [Required]
         public string? Version { get; set; }
 
-        
+
 
         public int RefreshIntervalSeconds { get; set; } = 300;
 

@@ -16,8 +16,8 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
-        /// <exception cref="EncoderFallbackException">Ignore.</exception>
+        
+        
         public static byte[] GetUTF8Bytes(string item)
         {
             return Encoding.UTF8.GetBytes(item);
@@ -28,9 +28,9 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
-        /// <exception cref="DecoderFallbackException">Ignore.</exception>
+        
+        
+        
         public static string GetUTF8String(byte[] item)
         {
             return Encoding.UTF8.GetString(item);
@@ -41,8 +41,8 @@ namespace System
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Ignore.</exception>
+        
+        
         public static string ToHexString(byte[] bytes)
         {
             StringBuilder hex = new StringBuilder();

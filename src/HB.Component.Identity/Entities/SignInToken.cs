@@ -1,20 +1,41 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-
-using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities
 {
-    [DatabaseEntity]
-    public class SignInToken : Entity
+    public class SignInToken : IdGenEntity
     {
-        [Required]
-        [ForeignKey(typeof(User))]
-        [GuidEntityProperty(NotNull = true)]
-        public string UserGuid { get; set; } = default!;
+        public SignInToken()
+        {
+
+        }
+
+        public SignInToken(long userId, string refreshToken, DateTimeOffset? expireAt, string deviceId, string deviceVersion, string deviceIp, string deviceName, string deviceModel, string deviceOSVersion, string devicePlatform, DeviceIdiom deviceIdiom, string deviceType)
+        {
+            UserId = userId;
+            RefreshToken = refreshToken;
+            ExpireAt = expireAt;
+
+            DeviceId = deviceId;
+            DeviceVersion = deviceVersion;
+            DeviceIp = deviceIp;
+
+            DeviceName = deviceName;
+            DeviceModel = deviceModel;
+            DeviceOSVersion = deviceOSVersion;
+            DevicePlatform = devicePlatform;
+            DeviceIdiom = deviceIdiom;
+            DeviceType = deviceType;
+        }
 
         [Required]
+        [ForeignKey(typeof(User))]
         [EntityProperty(NotNull = true)]
+        public long UserId { get; set; }
+
+        [Required]
+        [EntityProperty(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
         [EntityProperty]
@@ -30,7 +51,7 @@ namespace HB.FullStack.Identity.Entities
         #region Device
 
         [Required]
-        [EntityProperty(NotNull = true)]
+        [EntityProperty(NotNull = true, NeedIndex = true)]
         public string DeviceId { get; set; } = default!;
 
         [EntityProperty(NotNull = true)]

@@ -31,12 +31,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\HB.FullStack.DatabaseTests\Context\BookEntity.cs" Link="Context\BookEntity.cs" />
+    <Compile Include="..\HB.FullStack.DatabaseTests\Context\JoinTestEntities.cs" Link="Context\JoinTestEntities.cs" />
+    <Compile Include="..\HB.FullStack.DatabaseTests\Context\Mocker.cs" Link="Context\Mocker.cs" />
+    <Compile Include="..\HB.FullStack.DatabaseTests\Context\PublisherEntity.cs" Link="Context\PublisherEntity.cs" />
     <Compile Include="..\ServiceFixture_MySql.cs" Link="ServiceFixture_MySql.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="..\appsettings.Development.json" Link="appsettings.Development.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\appsettings.json" Link="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -44,9 +48,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Context\" />
   </ItemGroup>
 
 </Project>

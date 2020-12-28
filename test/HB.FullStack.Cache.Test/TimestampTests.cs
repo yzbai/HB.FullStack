@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using HB.FullStack.DatabaseTests.Data;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,13 +25,16 @@ namespace HB.FullStack.Cache.Test
         private readonly int _databaseNumber;
         private readonly ITestOutputHelper _outputHelper;
         private readonly string _applicationName;
+        private readonly HB.FullStack.Database.IDatabase _mysql;
 
         public TimestampCacheTest(ServiceFixture_MySql serviceFixture, ITestOutputHelper outputHelper)
         {
             _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
             _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
-            _databaseNumber = Convert.ToInt32(ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]));
+            _databaseNumber = Convert.ToInt32(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
             _applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
+
+            _mysql = serviceFixture.ServiceProvider.GetRequiredService<HB.FullStack.Database.IDatabase>();
 
             _outputHelper = outputHelper;
         }
@@ -51,6 +54,8 @@ namespace HB.FullStack.Cache.Test
             IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
             List<Book> books = Mocker.MockMany();
+
+            await AddToDatabaeAsync(books).ConfigureAwait(false);
 
             string key = "BooksBy" + SecurityUtil.CreateUniqueToken();
 
@@ -78,20 +83,22 @@ namespace HB.FullStack.Cache.Test
 
             Book book = Mocker.MockOne();
 
+            await AddToDatabaeAsync(new Book[] { book }).ConfigureAwait(false);
+
             //typeof(Book).GetProperty("Guid").SetValue(book, "123");
             //book.Guid = "12345";
             //book.Name = "abc";
             //book.BookID = 222;
 
 
-            await _cache.SetAsync(book.Guid, book, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
+            await _cache.SetAsync(nameof(Book) + book.Id.ToString(), book, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
 
-            Assert.True(database.KeyExists(_applicationName + book.Guid));
+            Assert.True(database.KeyExists(_applicationName + nameof(Book) + book.Id.ToString()));
 
 
             await Task.Delay(10 * 1000);
 
-            Book? cached3 = await _cache.GetAsync<Book>(book.Guid).ConfigureAwait(false);
+            Book? cached3 = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString()).ConfigureAwait(false);
 
             Assert.True(cached3 != null);
 
@@ -100,7 +107,7 @@ namespace HB.FullStack.Cache.Test
 
             await Task.Delay(10 * 1000);
 
-            Book? cached4 = await _cache.GetAsync<Book>(book.Guid);
+            Book? cached4 = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
 
             Assert.False(cached4 != null);
 
@@ -121,6 +128,8 @@ namespace HB.FullStack.Cache.Test
 
             Book book = Mocker.MockOne();
 
+            await AddToDatabaeAsync(new Book[] { book }).ConfigureAwait(false);
+
             UtcNowTicks utcNowTicks = TimeUtil.UtcNowTicks;
             UtcNowTicks utcNowTicks2 = TimeUtil.UtcNowTicks;
             UtcNowTicks utcNowTicks3 = TimeUtil.UtcNowTicks;
@@ -129,21 +138,31 @@ namespace HB.FullStack.Cache.Test
             utcNowTicks3.Ticks += 10000;
 
             string oldName = book.Name;
-            await _cache.SetAsync(book.Guid, book, utcNowTicks, entryOptions).ConfigureAwait(false);
+            await _cache.SetAsync(nameof(Book) + book.Id.ToString(), book, utcNowTicks, entryOptions).ConfigureAwait(false);
 
             book.Name += "22222";
 
-            await _cache.SetAsync(book.Guid, book, utcNowTicks2, entryOptions).ConfigureAwait(false);
+            await _cache.SetAsync(nameof(Book) + book.Id.ToString(), book, utcNowTicks2, entryOptions).ConfigureAwait(false);
 
-            Book cached = await _cache.GetAsync<Book>(book.Guid);
+            Book cached = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
 
             Assert.True(cached.Name == oldName);
 
-            await _cache.SetAsync(book.Guid, book, utcNowTicks3, entryOptions).ConfigureAwait(false);
+            await _cache.SetAsync(nameof(Book) + book.Id.ToString(), book, utcNowTicks3, entryOptions).ConfigureAwait(false);
 
-            Book cached2 = await _cache.GetAsync<Book>(book.Guid);
+            Book cached2 = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
 
             Assert.True(cached2.Name == book.Name);
+        }
+
+        private async Task AddToDatabaeAsync(IEnumerable<Book> books)
+        {
+            await _mysql.BatchAddAsync(books, "", GetFakeTransactionContext()).ConfigureAwait(false);
+        }
+
+        private static Database.TransactionContext GetFakeTransactionContext()
+        {
+            return new Database.TransactionContext(null!, Database.TransactionStatus.InTransaction, null!);
         }
     }
 }

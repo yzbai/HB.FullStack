@@ -55,9 +55,7 @@ namespace HB.FullStack.Server.Filters
 
                 await next().ConfigureAwait(false);
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");

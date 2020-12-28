@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 
 using HB.FullStack.Common.Entities;
-
+using HB.FullStack.Database.Def;
 using OrmBenchmark.Core;
 
 namespace HB.FullStack.Benchmark.Database
 {
-    [DatabaseEntity(TableName = "Posts")]
-    public class Post : Entity, IPost
+    [Database(TableName = "Posts")]
+    public class Post : AutoIncrementIdEntity, IPost
     {
         [EntityProperty(MaxLength = 2000)]
         public string Text { get; set; } = null!;

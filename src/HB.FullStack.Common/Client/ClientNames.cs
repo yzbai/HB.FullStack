@@ -4,10 +4,8 @@ namespace System
 {
     public static class ClientNames
     {
-        public const string CurrentLoginName = nameof(CurrentLoginName);
         public const string AccessToken = nameof(AccessToken);
         public const string RefreshToken = nameof(RefreshToken);
-        public const string CurrentUserGuid = nameof(CurrentUserGuid);
 
         public const string DeviceId = nameof(DeviceId);
         public const string DeviceVersion = nameof(DeviceVersion);

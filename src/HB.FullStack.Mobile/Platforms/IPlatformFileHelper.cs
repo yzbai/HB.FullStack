@@ -9,16 +9,15 @@ namespace HB.FullStack.Client.Platforms
 {
     public interface IPlatformFileHelper
     {
-        Task SaveAvatarAsync(ImageSource imageSource, string usreGuid);
+        Task SaveAvatarAsync(ImageSource imageSource, long usreId);
 
         Task<Stream> GetStreamOfResourceAsync(string fileName);
 
         /// <summary>
         /// 如果不存在，返回null
         /// </summary>
-        /// <param name="userGuid"></param>
         /// <returns></returns>
-        string? GetAvatarFilePath(string userGuid);
-        Task<byte[]?> GetAvatarAsync(string userGuid);
+        string? GetAvatarFilePath(long userId);
+        Task<byte[]?> GetAvatarAsync(long userId);
     }
 }

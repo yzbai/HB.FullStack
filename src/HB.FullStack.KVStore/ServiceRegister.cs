@@ -13,7 +13,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             serviceCollection.AddOptions();
 
-            serviceCollection.AddSingleton<IKVStoreEntityDefFactory, DefaultKVStoreModelDefFactory>();
             serviceCollection.AddSingleton<IKVStore, DefaultKVStore>();
 
             return serviceCollection;

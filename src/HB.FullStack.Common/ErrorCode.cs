@@ -12,7 +12,7 @@
 
         #region API
 
-        ApiError = 19,
+
 
         //401
         ApiNoAuthority = 14,
@@ -34,8 +34,11 @@
         ApiUploadWrongType = 150,
         ApiSmsCodeInvalid = 152,
 
-        //502
-        ApiNoInternet = 145,
+        ApiUnkown = 153,
+
+        ApiRoleNoAuth = 154,
+
+        ApiNullReturn = 156,
 
         #endregion API
 
@@ -127,13 +130,13 @@
         AuthorizationNotFound = 517,
         AuthorizationTooFrequent = 518,
         AuthorizationInvalideAccessToken = 519,
-        AuthorizationInvalideUserGuid = 520,
+        AuthorizationInvalideUserId = 520,
         AuthorizationNoTokenInStore = 521,
         AuthorizationUserSecurityStampChanged = 522,
         AuthorizationUpdateSignInTokenError = 523,
         AuthorizationInvalideDeviceId = 524,
         AuthorizationRefreshTokenExpired = 525,
-        ApiNullReturn = 526,
+
 
         #endregion Authorization
 
@@ -153,7 +156,7 @@
 
         #region Cache
 
-        CacheEntityNotHaveGuidKeyAttribute = 828,
+        CacheEntityNotHaveKeyAttribute = 828,
         CacheLoadedLuaNotFound = 829,
         CacheNoSuchDimensionKey = 830,
         CacheNotEnabledForEntity = 831,
@@ -166,7 +169,8 @@
 
 
         DistributedLockUnLockFailed = 934,
-
+        ApiNoInternet = 935,
+        ApiUploadFailed = 936,
     }
 
     public static class ErrorCodeExtensions

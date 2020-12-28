@@ -6,8 +6,10 @@ using HB.FullStack.Identity.Entities;
 
 namespace HB.FullStack.Identity
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1040:Avoid empty interfaces", Justification = "<Pending>")]
     public interface IIdentityService
     {
+        Task AddRolesToUserAsync(long userId, long roleId, string lastUser);
+        Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext);
+        Task RemoveRoleFromUserAsync(long userId, long roleId, string lastUser);
     }
 }

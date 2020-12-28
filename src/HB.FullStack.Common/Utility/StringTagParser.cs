@@ -66,7 +66,7 @@ namespace System
         /// </summary>
         /// <param name="stringWithTag"></param>
         /// <returns></returns>
-        /// <exception cref="RegexMatchTimeoutException"></exception>
+        
         public string Parse(string stringWithTag)
         {
             MatchEvaluator replaceCallback = new MatchEvaluator(ReplaceTagHandler);

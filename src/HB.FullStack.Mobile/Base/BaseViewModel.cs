@@ -58,7 +58,7 @@ namespace HB.FullStack.Client.Base
             });
         }
 
-        public static Task<bool> DisplayAlertAsync(string message, string title, string acceptButton, string cancelButton)
+        public static Task<bool> DisplayChoiceAlertAsync(string message, string title, string acceptButton, string cancelButton)
         {
             return Application.Current.MainPage.DisplayAlert(title, message, acceptButton, cancelButton);
         }

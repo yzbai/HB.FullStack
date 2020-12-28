@@ -18,69 +18,33 @@ namespace HB.FullStack.Database.Engine
 
         DatabaseCommonSettings DatabaseSettings { get; }
 
-        DatabaseEngineType EngineType { get; }
+        EngineType EngineType { get; }
 
         string FirstDefaultDatabaseName { get; }
 
-        IEnumerable<string> GetDatabaseNames();
+        IEnumerable<string> DatabaseNames { get; }
 
         #endregion 管理功能
 
-        #region 创建功能
-
-        //IDataParameter CreateParameter(string name, object value, DbType dbType);
-
-        //IDataParameter CreateParameter(string name, object value);
-
-        //IDbCommand CreateTextCommand(string commandText, IDataParameter[]? parameters = null);
-
-        IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null);
-
-        #endregion 创建功能
-
-        #region SP执行功能
-
-        /// <summary>
-        /// 使用后必须Dispose，必须使用using
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="spName"></param>
-        /// <param name="dbParameters"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        Task<Tuple<IDbCommand, IDataReader>> ExecuteSPReaderAsync(IDbTransaction? trans, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster);
-
-        /// <exception cref="DatabaseException"></exception>
-        Task<object> ExecuteSPScalarAsync(IDbTransaction? trans, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster);
-
-        /// <exception cref="DatabaseException"></exception>
-        Task<int> ExecuteSPNonQueryAsync(IDbTransaction? trans, string dbName, string spName, IList<IDataParameter> parameters);
-
-        #endregion SP执行功能
 
         #region Command执行功能
 
-        /// <exception cref="DatabaseException"></exception>
-        Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, IDbCommand dbCommand);
+
+        Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand);
 
         /// <summary>
         /// 使用后必须Dispose，必须使用using
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
-        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, IDbCommand dbCommand, bool useMaster);
 
-        /// <exception cref="DatabaseException"></exception>
-        Task<object> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, IDbCommand dbCommand, bool useMaster);
+        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
+
+
+        Task<object> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
 
         #endregion Command执行功能
 
         #region 事务功能
 
-        /// <summary>
-        /// 创建 事务
-        /// </summary>
-        /// <param name="isolationLevel"></param>
-        /// <returns></returns>
         Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null);
 
         Task CommitAsync(IDbTransaction transaction);

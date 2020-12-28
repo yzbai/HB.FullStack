@@ -51,21 +51,21 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
         public async Task Test_1_Batch_Add_PublisherEntityAsync()
         {
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
 
-            IList<PublisherEntity> publishers = Mocker.GetPublishers();
+            IList<PublisherEntity_Client> publishers = Mocker.GetPublishers_Client();
 
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>().ConfigureAwait(false);
 
             try
             {
-                await database.BatchAddAsync<PublisherEntity>(publishers, "lastUsre", transactionContext);
+                await database.BatchAddAsync<PublisherEntity_Client>(publishers, "lastUsre", transactionContext);
 
                 await transaction.CommitAsync(transactionContext);
             }
@@ -82,7 +82,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="Exception">Ignore.</exception>
+
         [Fact]
 
 
@@ -90,15 +90,15 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
-            TransactionContext transContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            TransactionContext transContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
 
             try
             {
-                IEnumerable<PublisherEntity> lst = await database.RetrieveAllAsync<PublisherEntity>(transContext);
+                IEnumerable<PublisherEntity_Client> lst = await database.RetrieveAllAsync<PublisherEntity_Client>(transContext);
 
                 for (int i = 0; i < lst.Count(); i += 2)
                 {
-                    PublisherEntity entity = lst.ElementAt(i);
+                    PublisherEntity_Client entity = lst.ElementAt(i);
                     //entity.Guid = Guid.NewGuid().ToString();
                     entity.Type = PublisherType.Online;
                     entity.Name = "中sfasfaf文名字";
@@ -110,7 +110,7 @@ namespace HB.FullStack.DatabaseTests
                 };
                 }
 
-                await database.BatchUpdateAsync<PublisherEntity>(lst, "lastUsre", transContext);
+                await database.BatchUpdateAsync<PublisherEntity_Client>(lst, "lastUsre", transContext);
 
                 await transaction.CommitAsync(transContext);
 
@@ -128,8 +128,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -137,15 +137,15 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
 
             try
             {
-                IList<PublisherEntity> lst = (await database.PageAsync<PublisherEntity>(2, 100, transactionContext)).ToList();
+                IList<PublisherEntity_Client> lst = (await database.PageAsync<PublisherEntity_Client>(2, 100, transactionContext)).ToList();
 
                 if (lst.Count != 0)
                 {
-                    await database.BatchDeleteAsync<PublisherEntity>(lst, "lastUsre", transactionContext);
+                    await database.BatchDeleteAsync<PublisherEntity_Client>(lst, "lastUsre", transactionContext);
 
                 }
 
@@ -164,8 +164,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -173,15 +173,15 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
 
             try
             {
-                IList<PublisherEntity> lst = new List<PublisherEntity>();
+                IList<PublisherEntity_Client> lst = new List<PublisherEntity_Client>();
 
                 for (int i = 0; i < 10; ++i)
                 {
-                    PublisherEntity entity = Mocker.MockOnePublisherEntity();
+                    PublisherEntity_Client entity = Mocker.MockOnePublisherEntity_Client();
 
                     await database.AddAsync(entity, "lastUsre", tContext);
 
@@ -190,7 +190,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await transaction.CommitAsync(tContext);
 
-                Assert.True(lst.All(p => p.Id > 0));
+                Assert.True(lst.All(p => p.Version == 0));
             }
             catch (Exception ex)
             {
@@ -205,8 +205,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -214,25 +214,25 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
 
             try
             {
-                IList<PublisherEntity> testEntities = (await database.PageAsync<PublisherEntity>(1, 1, tContext)).ToList();
+                IList<PublisherEntity_Client> testEntities = (await database.PageAsync<PublisherEntity_Client>(1, 1, tContext)).ToList();
 
                 if (testEntities.Count == 0)
                 {
                     throw new Exception("No Entity to update");
                 }
 
-                PublisherEntity entity = testEntities[0];
+                PublisherEntity_Client entity = testEntities[0];
 
                 entity.Books.Add("New Book2");
                 //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Name = "Yuzhaobai" });
 
                 await database.UpdateAsync(entity, "lastUsre", tContext);
 
-                PublisherEntity? stored = await database.ScalarAsync<PublisherEntity>(entity.Id, tContext);
+                PublisherEntity_Client? stored = await database.ScalarAsync<PublisherEntity_Client>(entity.Id, tContext);
 
                 await transaction.CommitAsync(tContext);
 
@@ -253,8 +253,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -262,18 +262,18 @@ namespace HB.FullStack.DatabaseTests
         {
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
-            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
 
             try
             {
-                IList<PublisherEntity> testEntities = (await database.RetrieveAllAsync<PublisherEntity>(tContext)).ToList();
+                IList<PublisherEntity_Client> testEntities = (await database.RetrieveAllAsync<PublisherEntity_Client>(tContext)).ToList();
 
                 foreach (var entity in testEntities)
                 {
                     await database.DeleteAsync(entity, "lastUsre", tContext);
                 }
 
-                long count = await database.CountAsync<PublisherEntity>(tContext);
+                long count = await database.CountAsync<PublisherEntity_Client>(tContext);
 
                 await transaction.CommitAsync(tContext);
 
@@ -294,7 +294,7 @@ namespace HB.FullStack.DatabaseTests
         //{
         //    IDatabase database = GetDatabase(databaseType)!;
         //    ITransaction transaction = GetTransaction(databaseType)!;
-        //    TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+        //    TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
 
         //    try
         //    {
@@ -335,11 +335,11 @@ namespace HB.FullStack.DatabaseTests
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
 
-            PublisherEntity item = Mocker.MockOnePublisherEntity();
+            PublisherEntity_Client item = Mocker.MockOnePublisherEntity_Client();
 
             await database.AddAsync(item, "xx", null).ConfigureAwait(false);
 
-            var fetched = await database.ScalarAsync<PublisherEntity>(item.Id, null);
+            var fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, null);
 
             Assert.Equal(item.LastTime, fetched!.LastTime);
 
@@ -347,38 +347,38 @@ namespace HB.FullStack.DatabaseTests
 
             await database.UpdateAsync(fetched, "xxx", null);
 
-            fetched = await database.ScalarAsync<PublisherEntity>(item.Id, null);
+            fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, null);
 
             //await database.AddOrUpdateAsync(item, "ss", null);
 
-            fetched = await database.ScalarAsync<PublisherEntity>(item.Id, null);
+            fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, null);
 
 
 
             //Batch
 
-            var items = Mocker.GetPublishers();
+            var items = Mocker.GetPublishers_Client();
 
 
 
-            TransactionContext trans = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext trans = await transaction.BeginTransactionAsync<PublisherEntity_Client>().ConfigureAwait(false);
 
             try
             {
-                await database.BatchAddAsync<PublisherEntity>(items, "xx", trans).ConfigureAwait(false);
+                await database.BatchAddAsync<PublisherEntity_Client>(items, "xx", trans).ConfigureAwait(false);
 
 
-                var results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Guid, true, items.Select(item => item.Guid).ToArray()), trans).ConfigureAwait(false);
+                var results = await database.RetrieveAsync<PublisherEntity_Client>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await database.BatchUpdateAsync<PublisherEntity>(items, "xx", trans);
+                await database.BatchUpdateAsync<PublisherEntity_Client>(items, "xx", trans);
 
-                var items2 = Mocker.GetPublishers();
+                var items2 = Mocker.GetPublishers_Client();
 
-                await database.BatchAddAsync<PublisherEntity>(items2, "xx", trans);
+                await database.BatchAddAsync<PublisherEntity_Client>(items2, "xx", trans);
 
-                results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Guid, true, items2.Select(item => item.Guid).ToArray()), trans);
+                results = await database.RetrieveAsync<PublisherEntity_Client>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans);
 
-                await database.BatchUpdateAsync<PublisherEntity>(items2, "xx", trans);
+                await database.BatchUpdateAsync<PublisherEntity_Client>(items2, "xx", trans);
 
 
                 await transaction.CommitAsync(trans);
@@ -403,13 +403,13 @@ namespace HB.FullStack.DatabaseTests
             IDatabase database = _sqlite;
             ITransaction transaction = _sqlIteTransaction;
 
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>();
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>();
             //TransactionContext? transactionContext = null;
 
             try
             {
 
-                PublisherEntity item = Mocker.MockOnePublisherEntity();
+                PublisherEntity_Client item = Mocker.MockOnePublisherEntity_Client();
 
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
@@ -421,29 +421,29 @@ namespace HB.FullStack.DatabaseTests
                 await database.DeleteAsync(item, "xxx", transactionContext).ConfigureAwait(false);
 
 
-                IList<PublisherEntity> testEntities = (await database.PageAsync<PublisherEntity>(1, 1, transactionContext)).ToList();
+                IList<PublisherEntity_Client> testEntities = (await database.PageAsync<PublisherEntity_Client>(1, 1, transactionContext)).ToList();
 
                 if (testEntities.Count == 0)
                 {
                     throw new Exception("No Entity to update");
                 }
 
-                PublisherEntity entity = testEntities[0];
+                PublisherEntity_Client entity = testEntities[0];
 
                 entity.Books.Add("New Book2");
                 //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Name = "Yuzhaobai" });
 
                 await database.UpdateAsync(entity, "lastUsre", transactionContext);
 
-                PublisherEntity? stored = await database.ScalarAsync<PublisherEntity>(entity.Id, transactionContext);
+                PublisherEntity_Client? stored = await database.ScalarAsync<PublisherEntity_Client>(entity.Id, transactionContext);
 
 
 
-                item = Mocker.MockOnePublisherEntity();
+                item = Mocker.MockOnePublisherEntity_Client();
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                var fetched = await database.ScalarAsync<PublisherEntity>(item.Id, transactionContext);
+                var fetched = await database.ScalarAsync<PublisherEntity_Client>(item.Id, transactionContext);
 
                 Assert.Equal(item.LastTime, fetched!.LastTime);
 
@@ -468,11 +468,11 @@ namespace HB.FullStack.DatabaseTests
 
             #region
 
-            var publisher3 = new PublisherEntity3();
+            var publisher3 = new PublisherEntity3_Client();
 
             await database.AddAsync(publisher3, "sss", null);
 
-            var stored3 = await database.ScalarAsync<PublisherEntity3>(publisher3.Id, null);
+            var stored3 = await database.ScalarAsync<PublisherEntity3_Client>(publisher3.Id, null);
 
             Assert.Equal(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
 
@@ -480,16 +480,16 @@ namespace HB.FullStack.DatabaseTests
 
             #region 
 
-            var publishers2 = Mocker.GetPublishers2();
+            var publishers2 = Mocker.GetPublishers2_Client();
 
 
-            foreach (PublisherEntity2 publisher in publishers2)
+            foreach (PublisherEntity2_Client publisher in publishers2)
             {
                 await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
             }
 
 
-            PublisherEntity2? publisher2 = await database.ScalarAsync<PublisherEntity2>(publishers2[0].Id, null).ConfigureAwait(false);
+            PublisherEntity2_Client? publisher2 = await database.ScalarAsync<PublisherEntity2_Client>(publishers2[0].Id, null).ConfigureAwait(false);
 
             Assert.Equal(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publishers2[0]));
 
@@ -497,16 +497,16 @@ namespace HB.FullStack.DatabaseTests
 
             #region 
 
-            var publishers = Mocker.GetPublishers();
+            var publishers = Mocker.GetPublishers_Client();
 
 
-            foreach (PublisherEntity publisher in publishers)
+            foreach (PublisherEntity_Client publisher in publishers)
             {
                 await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
             }
 
 
-            PublisherEntity? publisher1 = await database.ScalarAsync<PublisherEntity>(publishers[0].Id, null).ConfigureAwait(false);
+            PublisherEntity_Client? publisher1 = await database.ScalarAsync<PublisherEntity_Client>(publishers[0].Id, null).ConfigureAwait(false);
 
             Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
             #endregion
@@ -523,13 +523,13 @@ namespace HB.FullStack.DatabaseTests
 
             IDatabase database = _sqlite;
 
-            var books = Mocker.GetBooks(500);
+            var books = Mocker.GetBooks_Client(500);
 
-            var trans = await _sqlIteTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
+            var trans = await _sqlIteTransaction.BeginTransactionAsync<BookEntity_Client>().ConfigureAwait(false);
 
-            IEnumerable<BookEntity> re = await database.RetrieveAsync<BookEntity>(b => b.Deleted, trans);
+            IEnumerable<BookEntity_Client> re = await database.RetrieveAsync<BookEntity_Client>(b => b.Deleted, trans);
 
-            await database.AddAsync<BookEntity>(Mocker.GetBooks(1)[0], "", trans);
+            await database.AddAsync<BookEntity_Client>(Mocker.GetBooks_Client(1)[0], "", trans);
 
             try
             {
@@ -561,19 +561,19 @@ namespace HB.FullStack.DatabaseTests
                 await mySqlConnection.OpenAsync();
 
 
-                SqliteCommand command0 = new SqliteCommand("select * from tb_book limit 1000", mySqlConnection);
+                SqliteCommand command0 = new SqliteCommand("select * from tb_bookentity_client limit 1000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
-                List<BookEntity> list1 = new List<BookEntity>();
-                List<BookEntity> list2 = new List<BookEntity>();
-                List<BookEntity> list3 = new List<BookEntity>();
+                List<BookEntity_Client> list1 = new List<BookEntity_Client>();
+                List<BookEntity_Client> list2 = new List<BookEntity_Client>();
+                List<BookEntity_Client> list3 = new List<BookEntity_Client>();
 
                 int len = reader0.FieldCount;
                 EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                EntityDef definition = EntityDefFactory.GetDef<BookEntity>();
+                EntityDef definition = EntityDefFactory.GetDef<BookEntity_Client>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -582,12 +582,12 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.SQLite);
+                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
 
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
-                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
+                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity_Client), reader0);
 
 
 
@@ -595,16 +595,13 @@ namespace HB.FullStack.DatabaseTests
                 Stopwatch stopwatch2 = new Stopwatch();
                 Stopwatch stopwatch3 = new Stopwatch();
 
-
-
-
                 while (reader0.Read())
                 {
                     stopwatch1.Start();
 
                     object obj1 = mapper1(reader0);
 
-                    list1.Add((BookEntity)obj1);
+                    list1.Add((BookEntity_Client)obj1);
                     stopwatch1.Stop();
 
 
@@ -612,19 +609,19 @@ namespace HB.FullStack.DatabaseTests
                     stopwatch2.Start();
                     object obj2 = mapper2(reader0);
 
-                    list2.Add((BookEntity)obj2);
+                    list2.Add((BookEntity_Client)obj2);
                     stopwatch2.Stop();
 
 
                     stopwatch3.Start();
 
-                    BookEntity item = new BookEntity();
+                    BookEntity_Client item = new BookEntity_Client();
 
                     for (int i = 0; i < len; ++i)
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.DatabaseEngineType.SQLite);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
 
                         if (value != null)
                         {
@@ -657,82 +654,6 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
-        //[Fact]
 
-        //
-        //public async Task Test_10_AddOrUpdate_VersionTestAsync()
-        //{
-        //    IDatabase database = GetDatabase(databaseType)!;
-
-        //    ITransaction transaction = GetTransaction(databaseType)!;
-
-        //    TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
-
-        //    try
-        //    {
-
-        //        PublisherEntity item = Mocker.MockOne();
-
-        //        Assert.True(item.Version == -1);
-
-        //        await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
-
-        //        Assert.True(item.Version == 0);
-
-        //        await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
-
-        //        Assert.True(item.Version == 1);
-
-        //        await database.UpdateAsync(item, "sfa", transactionContext).ConfigureAwait(false);
-
-        //        Assert.True(item.Version == 2);
-
-
-
-        //        IEnumerable<PublisherEntity> items = Mocker.GetPublishers();
-
-        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
-
-        //        await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
-
-        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
-
-        //        await database.BatchAddOrUpdateAsync(items, "xx", transactionContext);
-
-        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 1));
-
-        //        await database.BatchUpdateAsync(items, "ss", transactionContext).ConfigureAwait(false);
-
-        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 2));
-
-
-        //        //add
-        //        item = Mocker.MockOne();
-
-        //        Assert.True(item.Version == -1);
-
-        //        await database.AddAsync(item, "sfas", transactionContext).ConfigureAwait(false);
-
-        //        Assert.True(item.Version == 0);
-
-
-        //        //batch add
-        //        items = Mocker.GetPublishers();
-
-        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == -1));
-
-        //        await database.BatchAddAsync(items, "xx", transactionContext);
-
-        //        Assert.All<PublisherEntity>(items, item => Assert.True(item.Version == 0));
-
-        //        await transaction.CommitAsync(transactionContext);
-        //    }
-        //    catch
-        //    {
-        //        await transaction.RollbackAsync(transactionContext);
-        //        throw;
-        //    }
-
-        //}
     }
 }

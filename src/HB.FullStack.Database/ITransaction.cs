@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Database
 {
@@ -9,7 +10,7 @@ namespace HB.FullStack.Database
     {
         Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel? isolationLevel = null);
 
-        Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : Entity;
+        Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity;
 
         Task RollbackAsync(TransactionContext context);
 

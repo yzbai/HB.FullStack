@@ -27,9 +27,9 @@ namespace HB.FullStack.Database
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : Entity
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity
         {
-            EntityDef entityDef = EntityDefFactory.GetDef<T>();
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }
@@ -62,7 +62,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Close();
+                    conn.Dispose();
                 }
 
                 context.Status = TransactionStatus.Commited;
@@ -102,7 +102,7 @@ namespace HB.FullStack.Database
 
                 if (conn != null && conn.State != ConnectionState.Closed)
                 {
-                    conn.Close();
+                    conn.Dispose();
                 }
 
                 context.Status = TransactionStatus.Rollbacked;

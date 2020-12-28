@@ -13,7 +13,7 @@ namespace HB.FullStack.Client.Droid.Effects
         /// <summary>
         /// OnAttached
         /// </summary>
-        /// <exception cref="System.IO.IOException">Ignore.</exception>
+        
         protected override void OnAttached()
         {
             try
@@ -35,7 +35,7 @@ namespace HB.FullStack.Client.Droid.Effects
         /// OnElementPropertyChanged
         /// </summary>
         /// <param name="args"></param>
-        /// <exception cref="System.IO.IOException">Ignore.</exception>
+        
         protected override void OnElementPropertyChanged(System.ComponentModel.PropertyChangedEventArgs args)
         {
             base.OnElementPropertyChanged(args);

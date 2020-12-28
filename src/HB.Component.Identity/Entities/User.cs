@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common.Entities;
-
+using HB.FullStack.Database.Def;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
@@ -8,8 +9,7 @@ namespace HB.FullStack.Identity.Entities
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
     //[Serializable]
-    [DatabaseEntity]
-    public class User : Entity
+    public class User : IdGenEntity
     {
         [Required]
         [GuidEntityProperty(NotNull = true)]
@@ -61,5 +61,18 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [EntityProperty]
         public bool TwoFactorEnabled { get; set; }
+
+        public User() { }
+
+        public User(string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
+        {
+            SecurityStamp = SecurityUtil.CreateUniqueToken();
+            LoginName = loginName;
+            Mobile = mobile;
+            Email = email;
+            PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, SecurityStamp);
+            MobileConfirmed = mobileConfirmed;
+            EmailConfirmed = emailConfirmed;
+        }
     }
 }

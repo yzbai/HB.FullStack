@@ -388,11 +388,12 @@ return 1";
         {
             IServer server = RedisInstanceManager.GetServer(redisInstanceSetting, logger);
 
-            _loadedLuas = new LoadedLuas();
-
-            _loadedLuas.LoadedLockLua = server.ScriptLoad(_luaLock);
-            _loadedLuas.LoadedUnLockLua = server.ScriptLoad(_luaUnlock);
-            _loadedLuas.LoadedExtendLua = server.ScriptLoad(_luaExtend);
+            _loadedLuas = new LoadedLuas
+            {
+                LoadedLockLua = server.ScriptLoad(_luaLock),
+                LoadedUnLockLua = server.ScriptLoad(_luaUnlock),
+                LoadedExtendLua = server.ScriptLoad(_luaExtend)
+            };
         }
 
         internal static async Task<IDatabase> GetDatabaseAsync(RedisInstanceSetting redisInstanceSetting, ILogger logger)

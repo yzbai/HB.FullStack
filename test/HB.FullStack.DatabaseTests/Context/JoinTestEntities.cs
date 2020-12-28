@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 
 using HB.FullStack.Common.Entities;
+using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.DatabaseTests
 {
-    [DatabaseEntity]
-    public class A : Entity
+
+    public class A : IdGenEntity
     {
 
 
@@ -15,32 +16,68 @@ namespace HB.FullStack.DatabaseTests
         public string Name { get; set; } = default!;
     }
 
-    [DatabaseEntity]
-    public class B : Entity
+
+    public class B : IdGenEntity
     {
 
         [EntityProperty]
         public string Name { get; set; } = default!;
     }
 
-    [DatabaseEntity]
-    public class AB : Entity
+
+    public class AB : IdGenEntity
     {
 
         [EntityProperty]
-        public string AId { get; set; } = default!;
+        public long AId { get; set; } = default!;
 
         [EntityProperty]
-        public string BId { get; set; } = default!;
+        public long BId { get; set; } = default!;
     }
 
-    [DatabaseEntity]
-    public class C : Entity
+
+    public class C : IdGenEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
 
         [EntityProperty]
-        public string AId { get; set; } = default!;
+        public long AId { get; set; } = default!;
+    }
+
+    public class A_Client : IdGenEntity
+    {
+
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+    }
+
+
+    public class B_Client : IdGenEntity
+    {
+
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+    }
+
+
+    public class AB_Client : IdGenEntity
+    {
+
+        [EntityProperty]
+        public long AId { get; set; } = default!;
+
+        [EntityProperty]
+        public long BId { get; set; } = default!;
+    }
+
+
+    public class C_Client : IdGenEntity
+    {
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+
+        [EntityProperty]
+        public long AId { get; set; } = default!;
     }
 }

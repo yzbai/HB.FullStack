@@ -1,19 +1,22 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-
+using HB.FullStack.Common.Resources;
 using Microsoft.Extensions.Options;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.Client.Api
 {
-    public class ApiClient : IApiClient
+    internal class ApiClient : IApiClient
     {
+        private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
+
         private readonly ApiClientOptions _options;
 
         private readonly IHttpClientFactory _httpClientFactory;
@@ -24,154 +27,132 @@ namespace HB.FullStack.Client.Api
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task SendAsync(ApiRequest request)
+        public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting
         {
-            await SetDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
+            add => _asyncEventManager.Add(value);
+            remove => _asyncEventManager.Remove(value);
+        }
 
+        public event AsyncEventHandler<object, ApiEventArgs> Responsed
+        {
+            add => _asyncEventManager.Add(value);
+            remove => _asyncEventManager.Remove(value);
+        }
+
+        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource
+            => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? new List<T>();
+
+        public Task<T> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
+            => SendAsync<T, T>(request, ApiRequestType.GetSingle);
+
+        public Task AddAsync<T>(AddRequest<T> addRequest) where T : Resource
+            => SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
+
+        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource
+            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
+
+        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : Resource
+            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
+
+        private async Task<TResponse> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
+        {
             if (!request.IsValid())
             {
-                throw new ApiException(ErrorCode.ApiModelValidationError);
+                throw new ApiException(ErrorCode.ApiModelValidationError, HttpStatusCode.BadRequest);
             }
+
+            EndpointSettings endpoint = GetEndpoint(request);
+
+            AddDeviceInfo(request);
+            await AddAuthInfoAsync(request).ConfigureAwait(false);
 
             try
             {
-                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductName() && e.Version == request.GetApiVersion());
-
                 HttpClient httpClient = GetHttpClient(endpoint);
 
-                if (request is JwtApiRequest jwtApiRequest)
-                {
-                    bool jwtAdded = await TrySetJwtAsync(jwtApiRequest).ConfigureAwait(false);
+                await OnRequestingAsync(request, new ApiEventArgs(requestType, request)).ConfigureAwait(false);
 
-                    if (!jwtAdded)
-                    {
-                        throw new ApiException(ErrorCode.ApiNoAuthority);
-                    }
-                }
+                TResponse? rt = await httpClient.SendAsync<T, TResponse>(request).ConfigureAwait(false);
 
-                if (request is ApiKeyRequest apiKeyRequest)
-                {
-                    if (!TrySetApiKey(apiKeyRequest))
-                    {
-                        throw new ApiException(ErrorCode.ApiNoAuthority);
-                    }
-                }
+                await OnResponsedAsync(rt, new ApiEventArgs(requestType, request)).ConfigureAwait(false);
 
-                ApiResponse response = await request.GetResponseAsync(httpClient).ConfigureAwait(false);
-
-                if (request is JwtApiRequest)
-                {
-                    //只处理token过期这一种情况
-                    if (response.HttpCode == 401 && response.ErrCode == ErrorCode.ApiTokenExpired)
-                    {
-                        bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
-
-                        if (refreshSuccessed)
-                        {
-                            await SendAsync(request).ConfigureAwait(false);
-                        }
-                    }
-                }
-
-                if (!response.IsSuccessful)
-                {
-                    throw new ApiException(response.ErrCode, response.Message);
-                }
+                return rt;
             }
-            catch (ApiException)
+            catch (ApiException ex)
             {
+                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.HttpCode == HttpStatusCode.Unauthorized && ex.ErrorCode == ErrorCode.ApiTokenExpired)
+                {
+                    bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint).ConfigureAwait(false);
+
+                    if (refreshSuccessed)
+                    {
+                        return await SendAsync<T, TResponse>(request, requestType).ConfigureAwait(false);
+                    }
+                }
+
                 throw;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                throw new ApiException(ErrorCode.ApiError, $"ApiClient.SendAsync Failed.", ex);
+                throw new ApiException(ErrorCode.ApiUnkown, HttpStatusCode.BadRequest, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 
-        public async Task<T> SendAsync<T>(ApiRequest request) where T : class
+        private Task OnRequestingAsync(ApiRequest apiRequest, ApiEventArgs apiEventArgs)
         {
-            await SetDeviceInfoAlwaysAsync(request).ConfigureAwait(false);
+            return _asyncEventManager.RaiseEventAsync(nameof(Requesting), apiRequest, apiEventArgs);
+        }
 
-            if (!request.IsValid())
-            {
-                throw new ApiException(ErrorCode.ApiModelValidationError);
-            }
+        private Task OnResponsedAsync(object? responsedObj, ApiEventArgs apiEventArgs)
+        {
+            return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
+        }
 
-            try
-            {
-                EndpointSettings endpoint = _options.Endpoints.Single(e => e.ProductName == request.GetProductName() && e.Version == request.GetApiVersion());
-
-                HttpClient httpClient = GetHttpClient(endpoint);
-
-                if (request is JwtApiRequest jwtApiRequest)
-                {
-                    bool jwtAdded = await TrySetJwtAsync(jwtApiRequest).ConfigureAwait(false);
-
-                    if (!jwtAdded)
-                    {
-                        throw new ApiException(ErrorCode.ApiNoAuthority);
-                    }
-                }
-
-                if (request is ApiKeyRequest apiKeyRequest)
-                {
-                    if (!TrySetApiKey(apiKeyRequest))
-                    {
-                        throw new ApiException(ErrorCode.ApiNoAuthority);
-                    }
-                }
-
-                ApiResponse<T> response = await request.GetResponseAsync<T>(httpClient).ConfigureAwait(false);
-
-                if (request is JwtApiRequest)
-                {
-                    //只处理token过期这一种情况
-                    if (response.HttpCode == 401 && response.ErrCode == ErrorCode.ApiTokenExpired)
-                    {
-                        bool refreshSuccessed = await RefreshJwtAsync(endpoint).ConfigureAwait(false);
-
-                        if (refreshSuccessed)
-                        {
-                            return await SendAsync<T>(request).ConfigureAwait(false);
-                        }
-                    }
-                }
-
-                if (!response.IsSuccessful)
-                {
-                    throw new ApiException(response.ErrCode, response.Message);
-                }
-
-                //TODO: 小心检查随后
-                return response.Data!;
-            }
-            catch (ApiException)
-            {
-                throw;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                throw new ApiException(ErrorCode.ApiError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
-            }
+        private EndpointSettings GetEndpoint<T>(ApiRequest<T> request) where T : Resource
+        {
+            return _options.Endpoints.Single(e => e.Name == request.GetEndpointName() && e.Version == request.GetApiVersion());
         }
 
         private HttpClient GetHttpClient(EndpointSettings endpoint)
         {
-            return _httpClientFactory.CreateClient(GetHttpClientName(endpoint));
+            return _httpClientFactory.CreateClient(endpoint.GetHttpClientName());
         }
 
-        public static string GetHttpClientName(EndpointSettings endpoint)
+        private static void AddDeviceInfo(ApiRequest request)
         {
-            return endpoint.ProductName + "_" + endpoint.Version;
+            request.DeviceId = DevicePreferences.GetDeviceId();
+            request.DeviceInfos = DevicePreferences.DeviceInfos;
+            request.DeviceVersion = DevicePreferences.DeviceVersion;
+            //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        private static async Task<bool> TrySetJwtAsync(JwtApiRequest request)
+        private async Task AddAuthInfoAsync<T>(ApiRequest<T> request) where T : Resource
         {
-            string? accessToken = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
+            switch (request.GetApiAuthType())
+            {
+                case ApiAuthType.None:
+                    break;
+                case ApiAuthType.Jwt:
+
+                    if (!await TrySetJwtAsync(request).ConfigureAwait(false))
+                    {
+                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                    }
+                    break;
+                case ApiAuthType.ApiKey:
+                    if (!TrySetApiKey(request))
+                    {
+                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static async Task<bool> TrySetJwtAsync<T>(ApiRequest<T> request) where T : Resource
+        {
+            string? accessToken = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
 
             if (accessToken.IsNullOrEmpty())
             {
@@ -183,152 +164,15 @@ namespace HB.FullStack.Client.Api
             return true;
         }
 
-        private bool TrySetApiKey(ApiKeyRequest apiKeyRequest)
+        private bool TrySetApiKey<T>(ApiRequest<T> apiRequest) where T : Resource
         {
-            if (_options.TryGetApiKey(apiKeyRequest.GetApiKeyName(), out string key))
+            if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string key))
             {
-                apiKeyRequest.SetApiKey(key);
+                apiRequest.SetApiKey(key);
                 return true;
             }
 
             return false;
         }
-
-        private static async Task SetDeviceInfoAlwaysAsync(ApiRequest request)
-        {
-            request.DeviceId = await ClientGlobal.GetDeviceIdAsync().ConfigureAwait(false);
-            request.DeviceInfos = ClientGlobal.DeviceInfos;
-            request.DeviceVersion = ClientGlobal.DeviceVersion;
-            //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
-        }
-
-        #region Refresh
-
-        private const string _refreshTokenFrequencyCheckResourceType = "_Fqc_Refresh";
-
-        private static readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
-
-        private static readonly MemorySimpleLocker _locker = new MemorySimpleLocker();
-
-        private static readonly IDictionary<string, bool> _lastRefreshTokenResults = new Dictionary<string, bool>();
-
-        private class InnerUpdateTokenResponseData
-        {
-            public string AccessToken { get; set; } = null!;
-        }
-
-        public async Task<bool> RefreshJwtAsync(EndpointSettings endpointSettings)
-        {
-            try
-            {
-                //上锁
-                await _tokenRefreshSemaphore.WaitAsync().ConfigureAwait(false);
-
-                string? accessToken = await ClientGlobal.GetAccessTokenAsync().ConfigureAwait(false);
-
-                if (accessToken.IsNullOrEmpty())
-                {
-                    return false;
-                }
-
-                string accessTokenHashKey = SecurityUtil.GetHash(accessToken!);
-
-                //不久前刷新过
-                if (!_locker.NoWaitLock(_refreshTokenFrequencyCheckResourceType, accessTokenHashKey, TimeSpan.FromSeconds(endpointSettings.JwtEndpoint.RefreshIntervalSeconds)))
-                {
-                    if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
-                    {
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                //if (!_frequencyChecker.Check(
-                //    _refreshTokenFrequencyCheckResourceType,
-                //    accessTokenHashKey,
-                //    TimeSpan.FromSeconds(endpointSettings.JwtSettings.RefreshIntervalSeconds)))
-                //{
-                //    if (_lastRefreshTokenResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult) && lastRefreshResult)
-                //    {
-                //        return true;
-                //    }
-
-                //    return false;
-                //}
-
-                string? refreshToken = await ClientGlobal.GetRefreshTokenAsync().ConfigureAwait(false);
-
-                if (!refreshToken.IsNullOrEmpty())
-                {
-                    //开始刷新
-                    RefreshJwtApiRequest refreshRequest = new RefreshJwtApiRequest(
-                        endpointSettings.JwtEndpoint!.ProductName!,
-                        endpointSettings.JwtEndpoint!.Version!,
-                        HttpMethod.Put,
-                        endpointSettings.JwtEndpoint!.ResourceName!,
-                        accessToken!,
-                        refreshToken!
-                        );
-
-                    await SetDeviceInfoAlwaysAsync(refreshRequest).ConfigureAwait(false);
-
-                    EndpointSettings tokenRefreshEndpoint = _options.Endpoints.Single(
-                        e => e.ProductName == endpointSettings.JwtEndpoint.ProductName &&
-                        e.Version == endpointSettings.JwtEndpoint.Version);
-
-                    HttpClient httpClient = GetHttpClient(tokenRefreshEndpoint);
-
-                    ApiResponse<InnerUpdateTokenResponseData> refreshResponse = await refreshRequest.GetResponseAsync<InnerUpdateTokenResponseData>(httpClient).ConfigureAwait(false);
-
-                    //刷新成功
-                    if (refreshResponse.IsSuccessful)
-                    {
-                        _lastRefreshTokenResults[accessTokenHashKey] = true;
-
-                        string newAccessToken = refreshResponse.Data!.AccessToken;
-
-                        await ClientGlobal.OnJwtRefreshSucceedAsync(newAccessToken).ConfigureAwait(false);
-
-                        return true;
-                    }
-                }
-
-                //刷新失败
-                _lastRefreshTokenResults[accessTokenHashKey] = false;
-
-                await ClientGlobal.OnJwtRefreshFailedAsync().ConfigureAwait(false);
-
-                return false;
-            }
-            catch (ApiException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new ApiException(ErrorCode.ApiTokenRefresherError, "ApiClient.AutoRefreshTokenAsync Error.", ex);
-            }
-            finally
-            {
-                _tokenRefreshSemaphore.Release();
-            }
-        }
-
-        private class RefreshJwtApiRequest : ApiRequest
-        {
-            public string AccessToken { get; set; } = null!;
-
-            public string RefreshToken { get; set; } = null!;
-
-            public RefreshJwtApiRequest(string productName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken) : base(productName, apiVersion, httpMethod, resourceName, null)
-            {
-                AccessToken = accessToken;
-                RefreshToken = refreshToken;
-            }
-        }
-
-
-        #endregion
     }
 }

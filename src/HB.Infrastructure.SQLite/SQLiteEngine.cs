@@ -22,15 +22,17 @@ namespace HB.Infrastructure.SQLite
 
         public DatabaseCommonSettings DatabaseSettings => _options.CommonSettings;
 
-        public DatabaseEngineType EngineType => DatabaseEngineType.SQLite;
+        public EngineType EngineType => EngineType.SQLite;
 
         [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
 
+        public IEnumerable<string> DatabaseNames { get; private set; }
+
         public SQLiteEngine(IOptions<SQLiteOptions> options)
         {
-            //MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
-
             _options = options.Value;
+
+            DatabaseNames = _options.Connections.Select(s => s.DatabaseName);
 
             SetConnectionStrings();
         }
@@ -70,27 +72,23 @@ namespace HB.Infrastructure.SQLite
             return _connectionStringDict[dbName + "_0"];
         }
 
-        public IEnumerable<string> GetDatabaseNames()
-        {
-            return _options.Connections.Select(s => s.DatabaseName);
-        }
 
         #endregion 自身 & 构建
 
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
-        public IDbCommand CreateTextCommand(string commandText, IList<KeyValuePair<string, object>>? parameterPairs = null)
+        public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
         {
-            SqliteCommand command = new SqliteCommand(commandText)
+            SqliteCommand command = new SqliteCommand(engineCommand.CommandText)
             {
                 CommandType = CommandType.Text
             };
 
-            if (parameterPairs == null)
+            if (engineCommand.Parameters == null)
             {
                 return command;
             }
 
-            foreach (var pair in parameterPairs)
+            foreach (var pair in engineCommand.Parameters)
             {
                 command.Parameters.Add(new SqliteParameter(pair.Key, pair.Value));
             }
@@ -99,86 +97,51 @@ namespace HB.Infrastructure.SQLite
         }
 
 
-        #region SP
-
-        public Task<int> ExecuteSPNonQueryAsync(IDbTransaction? trans, string dbName, string spName, IList<IDataParameter> parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Tuple<IDbCommand, IDataReader>> ExecuteSPReaderAsync(IDbTransaction? trans, string dbName, string spName, IList<IDataParameter> dbParameters, bool useMaster)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<object> ExecuteSPScalarAsync(IDbTransaction? trans, string dbName, string spName, IList<IDataParameter> parameters, bool useMaster)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion SP
-
         #region Command 能力
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-
-        public Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
         {
+            using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
+
             if (Transaction == null)
             {
-                return SQLiteExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), dbCommand);
+                return await SQLiteExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), dbCommand).ConfigureAwait(false);
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandNonQueryAsync((SqliteTransaction)Transaction, dbCommand);
+                return await SQLiteExecuter.ExecuteCommandNonQueryAsync((SqliteTransaction)Transaction, dbCommand).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="dbCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-
-        public Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
+            //使用using的话，会同时关闭reader. 
+            //在Microsoft.Data.Sqlite实现中， dipose connection后，会自动dispose command
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            SqliteCommand dbCommand = CreateTextCommand(engineCommand);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+
             if (Transaction == null)
             {
-                return SQLiteExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), dbCommand);
+                return await SQLiteExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), dbCommand).ConfigureAwait(false);
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandReaderAsync((SqliteTransaction)Transaction, dbCommand);
+                return await SQLiteExecuter.ExecuteCommandReaderAsync((SqliteTransaction)Transaction, dbCommand).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="dbCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-
-        public Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, IDbCommand dbCommand, bool useMaster = false)
+        public async Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
+            using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
+
             if (Transaction == null)
             {
-                return SQLiteExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), dbCommand);
+                return await SQLiteExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), dbCommand).ConfigureAwait(false);
             }
             else
             {
-                return SQLiteExecuter.ExecuteCommandScalarAsync((SqliteTransaction)Transaction, dbCommand);
+                return await SQLiteExecuter.ExecuteCommandScalarAsync((SqliteTransaction)Transaction, dbCommand).ConfigureAwait(false);
             }
         }
 
@@ -207,7 +170,7 @@ namespace HB.Infrastructure.SQLite
             }
             finally
             {
-                await connection.CloseAsync().ConfigureAwait(false);
+                await connection.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -223,7 +186,7 @@ namespace HB.Infrastructure.SQLite
             }
             finally
             {
-                await connection.CloseAsync().ConfigureAwait(false);
+                await connection.DisposeAsync().ConfigureAwait(false);
             }
         }
 

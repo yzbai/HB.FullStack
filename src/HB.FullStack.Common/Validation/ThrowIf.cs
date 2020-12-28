@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -13,13 +14,23 @@ namespace System
 {
     public static class ThrowIf
     {
+
+        public static long NotLongId(long id, string paramName)
+        {
+            if (id > 0)
+            {
+                return id;
+            }
+
+            throw new ArgumentException($"不合格 long Id", paramName);
+        }
         /// <summary>
         /// Null
         /// </summary>
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
+
         [return: NotNull]
         public static T Null<T>([ValidatedNotNull] T? o, string paramName) where T : class
         {
@@ -34,7 +45,7 @@ namespace System
         /// </summary>
         /// <param name="o"></param>
         /// <returns></returns>
-        /// <exception cref="ValidateErrorException"></exception>
+
         [return: NotNull]
         public static T NotValid<T>(T o) where T : ValidatableObject
         {
@@ -75,7 +86,7 @@ namespace System
         /// <param name="dict"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static IDictionary<TKey, TValue> NullOrEmpty<TKey, TValue>([ValidatedNotNull] IDictionary<TKey, TValue>? dict, string paramName)
         {
@@ -93,11 +104,22 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static IEnumerable<T> NullOrEmpty<T>([ValidatedNotNull] IEnumerable<T>? lst, string paramName)
         {
             if (lst == null || !lst.Any())
+            {
+                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionNullOrEmptyErrorMessage, paramName);
+            }
+
+            return lst;
+        }
+
+        [return: NotNull]
+        public static ICollection NullOrEmpty<T>([ValidatedNotNull] ICollection? lst, string paramName)
+        {
+            if (lst == null || lst.Count == 0)
             {
                 throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionNullOrEmptyErrorMessage, paramName);
             }
@@ -111,7 +133,7 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         public static IEnumerable<T> Empty<T>(IEnumerable<T> lst, string paramName)
         {
             if (!lst.Any())
@@ -128,7 +150,7 @@ namespace System
         /// <param name="str"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         public static string Empty(string str, string paramName)
         {
             if (str.Length == 0)
@@ -145,7 +167,7 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static IEnumerable<T> AnyNull<T>([ValidatedNotNull] IEnumerable<T>? lst, string paramName)
         {
@@ -163,7 +185,7 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static string NullOrEmpty([ValidatedNotNull] string? o, string paramName)
         {
@@ -263,7 +285,7 @@ namespace System
         /// <param name="b"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: MaybeNull]
         public static string? NotEqual(string? a, string? b, string paramName)
         {
@@ -284,7 +306,7 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
+
         public static T ThrowIfNull<T>([ValidatedNotNull] this T? o, string paramName) where T : class
         {
             if (o == null)
@@ -318,7 +340,7 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static string ThrowIfNullOrEmpty([ValidatedNotNull] this string? o, string paramName)
         {
@@ -336,7 +358,7 @@ namespace System
         /// <param name="dict"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static IDictionary<TKey, TValue> ThrowIfNullOrEmpty<TKey, TValue>([ValidatedNotNull] this IDictionary<TKey, TValue>? dict, string paramName)
         {
@@ -354,7 +376,7 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: NotNull]
         public static IEnumerable<T> ThrowIfNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? lst, string paramName)
         {
@@ -373,7 +395,7 @@ namespace System
         /// <param name="b"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
+
         [return: MaybeNull]
         public static string? ThrowIfNotEqual(this string? a, string? b, string paramName)
         {

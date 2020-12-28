@@ -20,7 +20,7 @@ namespace HB.FullStack.Database.Mapper
         /// <summary>
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
-        public static Func<IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+        public static Func<IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader) }, true);
             ILGenerator il = dm.GetILGenerator();
@@ -31,7 +31,7 @@ namespace HB.FullStack.Database.Mapper
             return (Func<IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
-        private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType, ILGenerator il)
+        private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
         {
             try
             {
@@ -300,7 +300,7 @@ namespace HB.FullStack.Database.Mapper
             }
         }
 
-        public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegateWithSigil(EntityDef entityDef, DatabaseEngineType engineType)
+        public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegateWithSigil(EntityDef entityDef, EngineType engineType)
         {
             var emiter = Emit<Func<object, int, KeyValuePair<string, object>[]>>.NewDynamicMethod($"{entityDef.DatabaseName}_{entityDef.TableName}_{engineType}_ToParameters");
 
@@ -486,9 +486,7 @@ namespace HB.FullStack.Database.Mapper
             return emiter.CreateDelegate();
         }
 
-#pragma warning disable CA1801 // Review unused parameters
-        public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegate(EntityDef entityDef, DatabaseEngineType engineType)
-#pragma warning restore CA1801 // Review unused parameters
+        public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegate(EntityDef entityDef, EngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("ToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(object), typeof(int) }, true);
             ILGenerator il = dm.GetILGenerator();
@@ -880,7 +878,6 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.DbValueToTypeValue));
 
-#pragma warning disable CA1823 // Avoid unused private fields
         private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue));
 
         private static readonly MethodInfo _getStringConcatMethod = typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) });
@@ -890,6 +887,5 @@ namespace HB.FullStack.Database.Mapper
         private static readonly FieldInfo _dbNullValueFiled = typeof(DBNull).GetField("Value");
 
         private static readonly MethodInfo _getArraySetValueMethod = typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) });
-#pragma warning restore CA1823 // Avoid unused private fields
     }
 }

@@ -17,7 +17,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
     {
         private const string _prefix = "HBRL_";
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         internal IEnumerable<string> Resources { get; set; }
 

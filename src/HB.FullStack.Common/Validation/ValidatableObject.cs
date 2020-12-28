@@ -53,7 +53,6 @@ namespace HB.FullStack.Common
             return builder.ToString();
         }
 
-        [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public bool PerformValidate(string? propertyName = null)
         {
             try

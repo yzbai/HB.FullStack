@@ -28,7 +28,7 @@ namespace HB.FullStack.Cache.Test
         {
             _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
             _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
-            _databaseNumber = Convert.ToInt32(ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]));
+            _databaseNumber = Convert.ToInt32(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
             _applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
 
             _outputHelper = outputHelper;

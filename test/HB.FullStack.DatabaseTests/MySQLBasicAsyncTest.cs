@@ -51,8 +51,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -84,7 +84,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="Exception">Ignore.</exception>
+
         [Fact]
 
 
@@ -130,8 +130,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -166,8 +166,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -207,8 +207,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -255,8 +255,8 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
+
+
         [Fact]
 
 
@@ -369,7 +369,7 @@ namespace HB.FullStack.DatabaseTests
                 await database.BatchAddAsync<PublisherEntity>(items, "xx", trans).ConfigureAwait(false);
 
 
-                var results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Guid, true, items.Select(item => item.Guid).ToArray()), trans).ConfigureAwait(false);
+                var results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await database.BatchUpdateAsync<PublisherEntity>(items, "xx", trans);
 
@@ -377,7 +377,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.BatchAddAsync<PublisherEntity>(items2, "xx", trans);
 
-                results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Guid, true, items2.Select(item => item.Guid).ToArray()), trans);
+                results = await database.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans);
 
                 await database.BatchUpdateAsync<PublisherEntity>(items2, "xx", trans);
 
@@ -562,7 +562,7 @@ namespace HB.FullStack.DatabaseTests
                 await mySqlConnection.OpenAsync();
 
 
-                MySqlCommand command0 = new MySqlCommand("select * from tb_book limit 10000", mySqlConnection);
+                MySqlCommand command0 = new MySqlCommand("select * from tb_bookentity limit 10000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
@@ -574,7 +574,7 @@ namespace HB.FullStack.DatabaseTests
                 EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                EntityDef definition = EntityDefFactory.GetDef<BookEntity>();
+                EntityDef definition = EntityDefFactory.GetDef<BookEntity>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -583,7 +583,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.DatabaseEngineType.MySQL);
+                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
@@ -623,7 +623,7 @@ namespace HB.FullStack.DatabaseTests
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.DatabaseEngineType.MySQL);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.MySQL);
 
                         if (value != null)
                         {
@@ -657,15 +657,15 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [Theory]
-        [InlineData(DatabaseEngineType.MySQL)]
-        [InlineData(DatabaseEngineType.SQLite)]
-        public void EntityMapper_ToParameter_Test(DatabaseEngineType engineType)
+        [InlineData(EngineType.MySQL)]
+        [InlineData(EngineType.SQLite)]
+        public void EntityMapper_ToParameter_Test(EngineType engineType)
         {
             PublisherEntity publisherEntity = Mocker.MockOnePublisherEntity();
 
-            var emit_results = publisherEntity.ToParameters(EntityDefFactory.GetDef<PublisherEntity>(), engineType, 1);
+            var emit_results = publisherEntity.ToParameters(EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
 
-            var reflect_results = publisherEntity.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity>(), engineType, 1);
+            var reflect_results = publisherEntity.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
 
             AssertEqual(emit_results, reflect_results, engineType);
 
@@ -673,9 +673,9 @@ namespace HB.FullStack.DatabaseTests
 
             PublisherEntity2 publisherEntity2 = new PublisherEntity2();
 
-            var emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<PublisherEntity2>(), engineType, 1);
+            var emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
 
-            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity2>(), engineType, 1);
+            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
 
             AssertEqual(emit_results2, reflect_results2, engineType);
 
@@ -683,15 +683,15 @@ namespace HB.FullStack.DatabaseTests
 
             PublisherEntity3 publisherEntity3 = new PublisherEntity3();
 
-            var emit_results3 = publisherEntity3.ToParameters(EntityDefFactory.GetDef<PublisherEntity3>(), engineType, 1);
+            var emit_results3 = publisherEntity3.ToParameters(EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
 
-            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity3>(), engineType, 1);
+            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
 
             AssertEqual(emit_results3, reflect_results3, engineType);
 
         }
 
-        private void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, DatabaseEngineType engineType)
+        private void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
         {
             var dict = results.ToDictionary(kv => kv.Key);
 
@@ -708,9 +708,9 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [Theory]
-        [InlineData(DatabaseEngineType.MySQL)]
-        [InlineData(DatabaseEngineType.SQLite)]
-        public void EntityMapper_ToParameter_Performance_Test(DatabaseEngineType engineType)
+        [InlineData(EngineType.MySQL)]
+        [InlineData(EngineType.SQLite)]
+        public void EntityMapper_ToParameter_Performance_Test(EngineType engineType)
         {
             var entities = Mocker.GetPublishers(1000000);
 
@@ -721,7 +721,7 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Restart();
             foreach (var entity in entities)
             {
-                _ = entity.ToParameters(def, engineType);
+                _ = entity.ToParameters(def!, engineType);
             }
             stopwatch.Stop();
 
@@ -730,7 +730,7 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Restart();
             foreach (var entity in entities)
             {
-                _ = entity.ToParametersUsingReflection(def, engineType);
+                _ = entity.ToParametersUsingReflection(def!, engineType);
             }
             stopwatch.Stop();
 

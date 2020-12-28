@@ -361,7 +361,7 @@ namespace System
         /// </summary>
         /// <param name="mediaType"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
+        
         public static string? GetFileTypeByMediaType(string mediaType)
         {
             string mType = mediaType.ToLower(GlobalSettings.Culture);

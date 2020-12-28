@@ -32,8 +32,8 @@ namespace HB.FullStack.Identity
         ///// </summary>
         ///// <param name="options"></param>
         ///// <param name="logger"></param>
-        ///// <exception cref="FileNotFoundException">证书文件不存在</exception>
-        ///// <exception cref="ArgumentException">Json无法解析</exception>
+        //
+        //
         //public CredentialBiz(IOptions<AuthorizationServiceOptions> options)
         //{
         //    _options = options.Value;
@@ -170,7 +170,7 @@ namespace HB.FullStack.Identity
         /// GetIssuerSigningKeys
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.Identity.AuthorizationException"></exception>
+        
         //public IEnumerable<SecurityKey> IssuerSigningKeys
         //{
         //    get

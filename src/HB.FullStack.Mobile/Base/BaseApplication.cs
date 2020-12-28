@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using HB.FullStack.Client.Api;
 using HB.FullStack.Client.Services;
@@ -25,6 +27,10 @@ namespace HB.FullStack.Client.Base
 
             InitializeServices(services);
         }
+
+        public IList<Task> InitializeTasks { get; } = new List<Task>();
+
+        public Task InitializeTask { get => Task.WhenAll(InitializeTasks); }
 
         public IConfiguration Configuration
         {
@@ -92,34 +98,43 @@ namespace HB.FullStack.Client.Base
 
         }
 
+        public abstract void PerformLogin();
+
+        public abstract void DisplayOfflineWarning();
 
 
         private static IRemoteLoggingService? _remoteLoggingService;
+
         private static ILogger? _localLogger;
 
         public static void ExceptionHandler(Exception ex)
         {
             Log(LogLevel.Error, ex, null);
 
-            if (ex is FrameworkException fex)
+
+            if (ex is ApiException apiEx)
             {
-                switch (fex.ErrorCode)
+                switch (apiEx.ErrorCode)
                 {
-                    case ErrorCode.ApiNoInternet:
-                        Device.BeginInvokeOnMainThread(() =>
+                    case ErrorCode.ApiUnkown:
+
+                        if (apiEx.HttpCode.IsNoInternet())
                         {
-                            Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
-                        });
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
+                            });
+                        }
+
                         break;
                     case ErrorCode.ApiNoAuthority:
                     case ErrorCode.ApiTokenRefresherError:
                     case ErrorCode.ApiTokenExpired:
-                        DependencyService.Resolve<ILoginService>()?.PerformLogin();
+                        Application.Current.PerformLogin();
                         break;
                     default: break;
                 }
             }
-
         }
 
         public static void Log(LogLevel logLevel, Exception? ex, string? message = null)

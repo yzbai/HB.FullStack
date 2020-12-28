@@ -68,17 +68,17 @@ namespace HB.FullStack.Database.Converter
         static TypeConvert()
         {
             //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
-            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetConverter(), DatabaseEngineType.MySQL);
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetConverter(), EngineType.MySQL);
 
-            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetConverter(), DatabaseEngineType.SQLite);
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetConverter(), EngineType.SQLite);
         }
 
-        public static void RegisterGlobalTypeConverter(Type type, ITypeConverter typeConverter, DatabaseEngineType engineType)
+        public static void RegisterGlobalTypeConverter(Type type, ITypeConverter typeConverter, EngineType engineType)
         {
             Dictionary<Type, ConverterInfo> globalConverterInfos = engineType switch
             {
-                DatabaseEngineType.MySQL => _mysqlGlobalConverterInfos,
-                DatabaseEngineType.SQLite => _sqliteGlobalConverterInfos,
+                EngineType.MySQL => _mysqlGlobalConverterInfos,
+                EngineType.SQLite => _sqliteGlobalConverterInfos,
                 _ => throw new NotImplementedException(),
             };
 
@@ -95,7 +95,7 @@ namespace HB.FullStack.Database.Converter
         /// <summary>
         /// 将DataReader.GetValue(i)得到的数据库值，转换为Entity的Type值. 逻辑同EntityMapperCreator一致
         /// </summary>
-        public static object? DbValueToTypeValue(object dbValue, EntityPropertyDef propertyDef, DatabaseEngineType engineType) //Type targetType)
+        public static object? DbValueToTypeValue(object dbValue, EntityPropertyDef propertyDef, EngineType engineType) //Type targetType)
         {
             Type dbValueType = dbValue.GetType();
 
@@ -149,7 +149,7 @@ namespace HB.FullStack.Database.Converter
             return ctor.Invoke(new object?[] { typeValue });
         }
 
-        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -189,7 +189,7 @@ namespace HB.FullStack.Database.Converter
         /// <param name="quotedIfNeed"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        public static string TypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, DatabaseEngineType engineType)
+        public static string TypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -225,7 +225,7 @@ namespace HB.FullStack.Database.Converter
             return SqlHelper.GetQuoted(statement);
         }
 
-        public static DbType TypeToDbType(EntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        public static DbType TypeToDbType(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
             if (propertyDef.TypeConverter != null)
@@ -252,7 +252,7 @@ namespace HB.FullStack.Database.Converter
             throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
         }
 
-        public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, DatabaseEngineType engineType)
+        public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义
             if (propertyDef.TypeConverter != null)
@@ -279,22 +279,22 @@ namespace HB.FullStack.Database.Converter
             throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
         }
 
-        public static ITypeConverter? GetGlobalTypeConverter(Type trueType, DatabaseEngineType engineType)
+        public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)
         {
             return GetGlobalConverterInfo(trueType, engineType)?.TypeConverter;
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, int engineType)
         {
-            return GetGlobalConverterInfo(trueType, (DatabaseEngineType)engineType)?.TypeConverter;
+            return GetGlobalConverterInfo(trueType, (EngineType)engineType)?.TypeConverter;
         }
 
-        private static ConverterInfo? GetGlobalConverterInfo(Type trueType, DatabaseEngineType engineType)
+        private static ConverterInfo? GetGlobalConverterInfo(Type trueType, EngineType engineType)
         {
             Dictionary<Type, ConverterInfo> typeConvertSettings = engineType switch
             {
-                DatabaseEngineType.MySQL => _mysqlGlobalConverterInfos,
-                DatabaseEngineType.SQLite => _sqliteGlobalConverterInfos,
+                EngineType.MySQL => _mysqlGlobalConverterInfos,
+                EngineType.SQLite => _sqliteGlobalConverterInfos,
                 _ => throw new NotImplementedException(),
             };
 

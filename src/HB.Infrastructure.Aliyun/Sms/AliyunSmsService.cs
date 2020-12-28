@@ -14,7 +14,7 @@ using HB.FullStack.Cache;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    internal class AliyunSmsService : ISmsService
+    internal class AliyunSmsService : ISmsServerService
     {
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;

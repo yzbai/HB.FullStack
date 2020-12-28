@@ -22,8 +22,8 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly object _toEntityFuncDictLocker = new object();
 
-        public static IList<T> ToEntities<T>(this IDataReader reader, DatabaseEngineType engineType, EntityDef entityDef)
-            where T : Entity, new()
+        public static IList<T> ToEntities<T>(this IDataReader reader, EngineType engineType, EntityDef entityDef)
+            where T : DatabaseEntity, new()
         {
             Func<IDataReader, object?> mapFunc = GetCachedToEntityFunc(reader, entityDef, 0, reader.FieldCount, false, engineType);
 
@@ -39,9 +39,9 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget?>> ToEntities<TSource, TTarget>(this IDataReader reader, DatabaseEngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef)
-            where TSource : Entity, new()
-            where TTarget : Entity, new()
+        public static IList<Tuple<TSource, TTarget?>> ToEntities<TSource, TTarget>(this IDataReader reader, EngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef)
+            where TSource : DatabaseEntity, new()
+            where TTarget : DatabaseEntity, new()
         {
             var sourceFunc = GetCachedToEntityFunc(reader, sourceEntityDef, 0, sourceEntityDef.FieldCount, false, engineType);
             var targetFunc = GetCachedToEntityFunc(reader, targetEntityDef, sourceEntityDef.FieldCount, reader.FieldCount - sourceEntityDef.FieldCount, true, engineType);
@@ -59,10 +59,10 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToEntities<TSource, TTarget2, TTarget3>(this IDataReader reader, DatabaseEngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef1, EntityDef targetEntityDef2)
-            where TSource : Entity, new()
-            where TTarget2 : Entity, new()
-            where TTarget3 : Entity, new()
+        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToEntities<TSource, TTarget2, TTarget3>(this IDataReader reader, EngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef1, EntityDef targetEntityDef2)
+            where TSource : DatabaseEntity, new()
+            where TTarget2 : DatabaseEntity, new()
+            where TTarget3 : DatabaseEntity, new()
         {
             var sourceFunc = GetCachedToEntityFunc(reader, sourceEntityDef, 0, sourceEntityDef.FieldCount, false, engineType);
             var targetFunc1 = GetCachedToEntityFunc(reader, targetEntityDef1, sourceEntityDef.FieldCount, targetEntityDef1.FieldCount, true, engineType);
@@ -82,7 +82,7 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
-        private static Func<IDataReader, object?> GetCachedToEntityFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+        private static Func<IDataReader, object?> GetCachedToEntityFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             string key = GetKey(entityDef, startIndex, length, returnNullIfFirstNull, engineType);
 
@@ -99,7 +99,7 @@ namespace HB.FullStack.Database.Mapper
 
             return _toEntityFuncDict[key];
 
-            static string GetKey(EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, DatabaseEngineType engineType)
+            static string GetKey(EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
             {
                 return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
             }
@@ -113,7 +113,7 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly object _toParameterFuncDictLocker = new object();
 
-        public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
+        public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
 
@@ -127,14 +127,14 @@ namespace HB.FullStack.Database.Mapper
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, DatabaseEngineType engineType, int number = 0) where T : Entity, new()
+        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             Func<object, int, KeyValuePair<string, object>[]> func = GetCachedToParametersFunc(entityDef, engineType);
 
             return func(entity, number);
         }
 
-        private static Func<object, int, KeyValuePair<string, object>[]> GetCachedToParametersFunc(EntityDef entityDef, DatabaseEngineType engineType)
+        private static Func<object, int, KeyValuePair<string, object>[]> GetCachedToParametersFunc(EntityDef entityDef, EngineType engineType)
         {
             string key = GetKey(entityDef, engineType);
 
@@ -151,7 +151,7 @@ namespace HB.FullStack.Database.Mapper
 
             return _toParametersFuncDict[key];
 
-            static string GetKey(EntityDef entityDef, DatabaseEngineType engineType)
+            static string GetKey(EntityDef entityDef, EngineType engineType)
             {
                 return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_ToParameters";
             }

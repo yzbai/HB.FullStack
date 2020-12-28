@@ -29,7 +29,10 @@ namespace System
 
         public static void Add<T>(this IList<T> original, IEnumerable<T> items)
         {
-            items.ForEach(t => original.Add(t));
+            foreach (T t in items)
+            {
+                original.Add(t);
+            }
         }
 
         /// <summary>
@@ -37,8 +40,8 @@ namespace System
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
+
+
         public static IDictionary<TKey, TValue> CloningWithValues<TKey, TValue>(this IDictionary<TKey, TValue> original) where TValue : ICloneable
         {
             IDictionary<TKey, TValue> ret = new Dictionary<TKey, TValue>();
@@ -56,8 +59,8 @@ namespace System
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
+
+
         public static IDictionary<TKey, int> CloningWithValues<TKey>(this IDictionary<TKey, int> original)
         {
             IDictionary<TKey, int> ret = new Dictionary<TKey, int>();
@@ -75,8 +78,8 @@ namespace System
         /// <param name="original"></param>
         /// <param name="converter"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
+
+
         public static IDictionary<TKey, TNewValue> ConvertValue<TKey, TValue, TNewValue>(this IDictionary<TKey, TValue> original, Func<TValue, TNewValue> converter)
         {
             IDictionary<TKey, TNewValue> ret = new Dictionary<TKey, TNewValue>();
@@ -106,7 +109,7 @@ namespace System
         /// </summary>
         /// <param name="ts"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
+
         public static bool IsNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? ts)
         {
             return ts == null || !ts.Any();
@@ -117,7 +120,7 @@ namespace System
         /// </summary>
         /// <param name="ts"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
+
         public static bool IsNotNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? ts)
         {
             return ts != null && ts.Any();
@@ -128,7 +131,7 @@ namespace System
         /// </summary>
         /// <param name="dict"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
+
         public static NameValueCollection ToHttpValueCollection(this IEnumerable<KeyValuePair<string, string?>> dict)
         {
             NameValueCollection nameValueCollection = HttpUtility.ParseQueryString("");
@@ -144,7 +147,7 @@ namespace System
         /// <param name="ts"></param>
         /// <param name="seprator"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">Ignore.</exception>
+
         [return: NotNullIfNotNull("ts")]
         public static string? ToJoinedString(this IEnumerable? ts, string seprator)
         {

@@ -47,14 +47,6 @@ namespace System
             return jsonString.IsNullOrEmpty() ? default : JsonSerializer.Deserialize<T>(jsonString, _jsonSerializerOptions);
         }
 
-        /// <summary>
-        /// FromJsonAsync
-        /// </summary>
-        /// <param name="dataType"></param>
-        /// <param name="responseStream"></param>
-        /// <returns></returns>
-        /// <exception cref="JsonException"></exception>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
         public static async Task<object> FromJsonAsync(Type dataType, Stream responseStream)
         {
             return await JsonSerializer.DeserializeAsync(responseStream, dataType, _jsonSerializerOptions).ConfigureAwait(false);
@@ -65,14 +57,7 @@ namespace System
             return await JsonSerializer.DeserializeAsync<T>(responseStream, _jsonSerializerOptions).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// FromJson
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="jsonString"></param>
-        /// <returns></returns>
-        /// <exception cref="JsonException"></exception>
-        /// <exception cref="System.ArgumentNullException">Ignore.</exception>
+
         public static object? FromJson(Type type, string? jsonString)
         {
             if (jsonString.IsNullOrEmpty())
@@ -83,16 +68,6 @@ namespace System
             return JsonSerializer.Deserialize(jsonString, type, _jsonSerializerOptions);
         }
 
-        /// <summary>
-        /// FromJson
-        /// </summary>
-        /// <param name="jsonString"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        /// <exception cref="JsonException"></exception>
-        /// <exception cref="System.InvalidOperationException"></exception>
-        /// <exception cref="System.ObjectDisposedException"></exception>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
         public static string? FromJson(string jsonString, string name)
         {
             JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
@@ -118,9 +93,9 @@ namespace System
         /// </summary>
         /// <param name="thing"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        /// <exception cref="System.Runtime.Serialization.SerializationException"></exception>
-        /// <exception cref="System.Security.SecurityException"></exception>
+
+
+
         [Obsolete("Do not use BinaryFormatter, for reason https://blog.marcgravell.com/2020/03/why-do-i-rag-on-binaryformatter.html", true)]
         public static byte[] ToBytes(object thing)
         {
@@ -138,13 +113,13 @@ namespace System
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        /// <exception cref="System.ArgumentException"></exception>
-        /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        /// <exception cref="IOException"></exception>
-        /// <exception cref="System.ObjectDisposedException"></exception>
-        /// <exception cref="System.Runtime.Serialization.SerializationException"></exception>
-        /// <exception cref="System.Security.SecurityException"></exception>
+
+
+
+
+
+
+
         [Obsolete("Do not use BinaryFormatter, for reason https://blog.marcgravell.com/2020/03/why-do-i-rag-on-binaryformatter.html", true)]
         public static object? ToObject(byte[] bytes)
         {
@@ -332,7 +307,7 @@ namespace System
         /// <param name="type"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        /// <exception cref="System.InvalidOperationException">Ignore.</exception>
+
         public override int Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
         {
             try
@@ -366,7 +341,7 @@ namespace System
         /// <param name="writer"></param>
         /// <param name="value"></param>
         /// <param name="options"></param>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
+
         public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
         {
             try
@@ -419,7 +394,7 @@ namespace System
         /// <param name="writer"></param>
         /// <param name="value"></param>
         /// <param name="options"></param>
-        /// <exception cref="System.ArgumentException">Ignore.</exception>
+
         public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
         {
             try

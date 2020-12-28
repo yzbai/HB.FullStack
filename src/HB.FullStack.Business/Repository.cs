@@ -1,19 +1,14 @@
 ﻿using HB.FullStack.Cache;
 using HB.FullStack.Common;
-using HB.FullStack.Common.Entities;
 using HB.FullStack.Database;
-using HB.FullStack.DistributedLock;
+using HB.FullStack.Database.Def;
 using HB.FullStack.Lock.Memory;
-
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.Repository
@@ -23,12 +18,12 @@ namespace HB.FullStack.Repository
     /// Update时先操作数据库，再操作缓存。只在读取时，更新缓存
     /// 这里体现缓存的策略：
     /// 所有的关于TEntity的update\delete都要经过这里，保证缓存的Invalidation正确
-    /// Service里面不要出现_database.Update / _database.Delete,全部由Biz来调用
+    /// Service里面不要出现_database.Update / _database.Delete,全部由Repo来调用
     /// Cache Strategy : Cache Aside
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class Repository<TEntity> where TEntity : Entity, new()
+    public abstract class Repository<TEntity> where TEntity : DatabaseEntity, new()
     {
         protected readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
         protected readonly ILogger _logger;
@@ -45,7 +40,7 @@ namespace HB.FullStack.Repository
             //Dirty trick
             _database = (IDatabase)databaseReader;
 
-            _logger.LogInformation($"{this.GetType().Name} 初始化完成");
+            _logger.LogInformation($"{GetType().Name} 初始化完成");
         }
 
         #region Events
@@ -160,7 +155,7 @@ namespace HB.FullStack.Repository
 
         #region Database Write Wrapper
 
-        protected async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
+        public async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityUpdatingAsync(entity).ConfigureAwait(false);
 
@@ -175,12 +170,12 @@ namespace HB.FullStack.Repository
             }
 
             //Cache
-            RepositoryCacheStrategy.InvalidateCache(new TEntity[] { entity }, _cache);
+            EntityCacheStrategy.InvalidateCache(new TEntity[] { entity }, _cache);
 
             await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
         }
 
-        protected async Task AddAsync(TEntity entity, string lastUser, TransactionContext? transContext)
+        public async Task AddAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityAddingAsync(entity).ConfigureAwait(false);
 
@@ -197,7 +192,7 @@ namespace HB.FullStack.Repository
             await OnEntityAddedAsync(entity).ConfigureAwait(false);
         }
 
-        protected async Task DeleteAsync(TEntity entity, string lastUser, TransactionContext? transContext)
+        public async Task DeleteAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityDeletingAsync(entity).ConfigureAwait(false);
 
@@ -212,19 +207,19 @@ namespace HB.FullStack.Repository
             }
 
             //Cache
-            RepositoryCacheStrategy.InvalidateCache(new TEntity[] { entity }, _cache);
+            EntityCacheStrategy.InvalidateCache(new TEntity[] { entity }, _cache);
 
             await OnEntityDeletedAsync(entity).ConfigureAwait(false);
         }
 
-        protected async Task<IEnumerable<long>> BatchAddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        public async Task<IEnumerable<object>> AddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
             {
                 await OnEntityAddingAsync(entity).ConfigureAwait(false);
             }
 
-            IEnumerable<long> results;
+            IEnumerable<object> results;
 
             try
             {
@@ -248,7 +243,7 @@ namespace HB.FullStack.Repository
             return results;
         }
 
-        protected async Task BatchUpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        public async Task UpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
             {
@@ -270,7 +265,7 @@ namespace HB.FullStack.Repository
             }
 
             //Cache
-            RepositoryCacheStrategy.InvalidateCache(entities, _cache);
+            EntityCacheStrategy.InvalidateCache(entities, _cache);
 
             foreach (TEntity entity in entities)
             {
@@ -278,7 +273,7 @@ namespace HB.FullStack.Repository
             }
         }
 
-        protected async Task BatchDeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        public async Task DeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
             {
@@ -300,7 +295,7 @@ namespace HB.FullStack.Repository
             }
 
             //Cache
-            RepositoryCacheStrategy.InvalidateCache(entities, _cache);
+            EntityCacheStrategy.InvalidateCache(entities, _cache);
 
             foreach (TEntity entity in entities)
             {
@@ -312,11 +307,11 @@ namespace HB.FullStack.Repository
 
         #region Cache Strategy
 
-        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, string dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
+        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
-            var results = await RepositoryCacheStrategy.CacheAsideAsync<TEntity>(
+            var results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
                 dimensionKeyName,
-                new string[] { dimensionKeyValue },
+                new object[] { dimensionKeyValue },
                 async dbReader =>
                 {
                     TEntity? single = await dbRetrieve(dbReader).ConfigureAwait(false);
@@ -341,24 +336,24 @@ namespace HB.FullStack.Repository
             return results.ElementAt(0);
         }
 
-        protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable<string> dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
+        protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
         {
-            return RepositoryCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, _database, _cache, _memoryLockManager, _logger);
+            return EntityCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, _database, _cache, _memoryLockManager, _logger);
         }
 
         protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
-            return RepositoryCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, _cache, _memoryLockManager, _database, _logger);
+            return CachedItemCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, _cache, _memoryLockManager, _database, _logger);
         }
 
         protected Task<IEnumerable<TResult>> TryCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
         {
-            return RepositoryCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, _cache, _memoryLockManager, _database, _logger)!;
+            return CachedItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, _cache, _memoryLockManager, _database, _logger)!;
         }
 
         protected void InvalidateCache<TResult>(CachedItem<TResult> cachedItem) where TResult : class
         {
-            RepositoryCacheStrategy.InvalidateCache(cachedItem, _cache);
+            CachedItemCacheStrategy.InvalidateCache(cachedItem, _cache);
         }
 
         #endregion

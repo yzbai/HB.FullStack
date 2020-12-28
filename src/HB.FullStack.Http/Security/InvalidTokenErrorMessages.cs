@@ -27,9 +27,8 @@ namespace HB.FullStack.Server.Security
 
             IEnumerable<Exception> exceptions;
 
-            if (authFailure is AggregateException)
+            if (authFailure is AggregateException agEx)
             {
-                AggregateException agEx = (AggregateException)authFailure;
                 exceptions = agEx.InnerExceptions;
             }
             else

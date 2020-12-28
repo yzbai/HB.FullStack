@@ -71,29 +71,6 @@ end
 return 1
 ";
 
-        /// <summary>
-        /// keys:entityNameKey, entityVersionKey, tempListKey
-        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
-        /// </summary>
-        private const string _luaBatchAddOrUpdate = @"
-local count=tonumber(ARGV[1])
-for i = 1, count do
-    if (redis.call('HEXISTS',KEYS[1],ARGV[i+1])==1) then 
-        redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
-        local version= redis.call('HINCRBY',KEYS[2],ARGV[i+1],1) 
-        redis.call('RPUSH',KEYS[3],version) 
-    else 
-        redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
-        redis.call('HSET',KEYS[2],ARGV[i+1],0) 
-        redis.call('RPUSH',KEYS[3],0) 
-    end 
-end
-
-local result = redis.call('LRANGE',KEYS[3],0,-1)
-
-redis.call('DEL', KEYS[3])
-
-return result";
 
         /// <summary>
         /// keys:entityNameKey, entityVersionKey
@@ -141,14 +118,14 @@ return array";
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
                 IServer server = RedisInstanceManager.GetServer(setting, _logger);
-                LoadedLuas loadedLuas = new LoadedLuas();
-
-                loadedLuas.LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd);
-                loadedLuas.LoadedBatchUpdateLua = server.ScriptLoad(_luaBatchUpdate);
-                loadedLuas.LoadedBatchDeleteLua = server.ScriptLoad(_luaBatchDelete);
-                loadedLuas.LodedeBatchAddOrUpdateLua = server.ScriptLoad(_luaBatchAddOrUpdate);
-                loadedLuas.LoadedBatchGetLua = server.ScriptLoad(_luaBatchGet);
-                loadedLuas.LoadedGetAllLua = server.ScriptLoad(_luaGetAll);
+                LoadedLuas loadedLuas = new LoadedLuas
+                {
+                    LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd),
+                    LoadedBatchUpdateLua = server.ScriptLoad(_luaBatchUpdate),
+                    LoadedBatchDeleteLua = server.ScriptLoad(_luaBatchDelete),
+                    LoadedBatchGetLua = server.ScriptLoad(_luaBatchGet),
+                    LoadedGetAllLua = server.ScriptLoad(_luaGetAll)
+                };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;
             }
@@ -328,75 +305,6 @@ return array";
 
             redisKeys.Add(EntityNameKey(entityName));
             redisKeys.Add(EntityVersionNameKey(entityName));
-
-            redisValues.Add(entityKeys.Count());
-
-            foreach (string entityKey in entityKeys)
-            {
-                redisValues.Add(entityKey);
-            }
-
-            foreach (string? json in entityJsons)
-            {
-                redisValues.Add(json);
-            }
-        }
-
-        /// <summary>
-        /// 返回最新的Version
-        /// </summary>
-        [Obsolete("不做Version检查，所以淘汰")]
-        public async Task<IEnumerable<int>> EntityAddOrUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
-        {
-            byte[] loadedScript = GetLoadedLuas(storeName).LodedeBatchAddOrUpdateLua;
-
-            List<RedisKey> redisKeys = new List<RedisKey>();
-            List<RedisValue> redisValues = new List<RedisValue>();
-
-            PrepareEntityAddOrUpdateRedisInfo(entityName, entityKeys, entityJsons, redisKeys, redisValues);
-
-            try
-            {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-
-                RedisResult result = await db.ScriptEvaluateAsync(
-                    loadedScript,
-                    redisKeys.ToArray(),
-                    redisValues.ToArray()).ConfigureAwait(false);
-
-                return (int[])result;
-            }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
-            {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
-
-                InitLoadedLuas();
-
-                return await EntityAddOrUpdateAsync(storeName, entityName, entityKeys, entityJsons).ConfigureAwait(false);
-            }
-            catch (RedisConnectionException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisConnectionFailed, entityName, "", ex);
-            }
-            catch (RedisTimeoutException ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreRedisTimeout, entityName, "", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new KVStoreException(ErrorCode.KVStoreError, entityName, "", ex);
-            }
-        }
-
-        private void PrepareEntityAddOrUpdateRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, List<RedisKey> redisKeys, List<RedisValue> redisValues)
-        {
-            /// keys:entityNameKey, entityVersionKey, tempListKey
-            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
-
-            redisKeys.Add(EntityNameKey(entityName));
-            redisKeys.Add(EntityVersionNameKey(entityName));
-            redisKeys.Add("tmpL" + SecurityUtil.CreateUniqueToken());
-
 
             redisValues.Add(entityKeys.Count());
 

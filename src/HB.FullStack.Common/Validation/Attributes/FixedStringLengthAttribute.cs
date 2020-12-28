@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Common.Validation.Attributes
+namespace System.ComponentModel.DataAnnotations
 {
     public sealed class FixedStringLengthAttribute : ValidationAttribute
     {

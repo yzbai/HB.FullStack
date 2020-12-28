@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
+using System.Collections;
 
 namespace HB.FullStack.Identity
 {
@@ -21,13 +23,11 @@ namespace HB.FullStack.Identity
     /// </summary>
     internal class UserRepo : Repository<User>
     {
-        private readonly IdentityOptions _identityOptions;
         private readonly IDatabaseReader _databaseReader;
 
-        public UserRepo(IOptions<IdentityOptions> identityOptions, ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
-            _identityOptions = identityOptions.Value;
             _databaseReader = databaseReader;
 
             EntityUpdating += (sender, args) =>
@@ -39,25 +39,25 @@ namespace HB.FullStack.Identity
 
         #region Read 所有的查询都要经过这里
 
-        public async Task<User?> GetByGuidAsync(string userGuid, TransactionContext? transContext = null)
+        public async Task<User?> GetByIdAsync(long userId, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                dimensionKeyName: nameof(User.Guid),
-                dimensionKeyValue: userGuid,
+                dimensionKeyName: nameof(User.Id),
+                dimensionKeyValue: userId.ToString(CultureInfo.InvariantCulture),
                 dbRetrieve: db =>
                 {
-                    return db.ScalarAsync<User>(u => u.Guid == userGuid, transContext);
+                    return db.ScalarAsync<User>(userId, transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<User>> GetByGuidsAsync(IEnumerable<string> userGuids, TransactionContext? transContext = null)
+        public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                nameof(User.Guid),
-                userGuids,
+                nameof(User.Id),
+                userIds,
                 db =>
                 {
-                    return db.RetrieveAsync<User>(u => SqlStatement.In(u.Guid, true, userGuids.ToArray()), transContext);
+                    return db.RetrieveAsync<User>(u => SqlStatement.In(u.Id, true, userIds), transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -96,104 +96,10 @@ namespace HB.FullStack.Identity
 
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            WhereExpression<User> where = _databaseReader.Where<User>().Where(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            WhereExpression<User> where = _databaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
             return _databaseReader.CountAsync(where, transContext);
         }
 
-        #endregion
-
-        #region Write
-
-        //public async Task UpdateLoginNameAsync(string userGuid, string loginName, string lastUser, TransactionContext transContext)
-        //{
-        //    ThrowIf.NotLoginName(loginName, nameof(loginName), false);
-
-        //    #region Existense Check
-
-        //    long count = await CountUserByLoginNameAsync(loginName, transContext).ConfigureAwait(false);
-
-        //    if (count != 0)
-        //    {
-        //        throw new IdentityException(ErrorCode.IdentityAlreadyExists, $"userGuid:{userGuid}, loginName:{loginName}");
-        //    }
-
-        //    #endregion
-
-        //    User? user = await GetByGuidAsync(userGuid, transContext).ConfigureAwait(false);
-
-        //    if (user == null)
-        //    {
-        //        throw new IdentityException(ErrorCode.IdentityNotFound, $"userGuid:{userGuid}");
-        //    }
-
-        //    user.LoginName = loginName;
-
-        //    await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
-        //}
-
-        //public async Task UpdatePasswordByMobileAsync(string mobile, string newPassword, string lastUser, TransactionContext transContext)
-        //{
-        //    ThrowIf.NotMobile(mobile, nameof(mobile), false);
-        //    ThrowIf.NotPassword(mobile, nameof(newPassword), false);
-
-        //    User? user = await GetByMobileAsync(mobile, transContext).ConfigureAwait(false);
-
-        //    if (user == null)
-        //    {
-        //        throw new IdentityException(ErrorCode.IdentityNotFound, $"mobile:{mobile}");
-        //    }
-
-        //    user.PasswordHash = SecurityUtil.EncryptPwdWithSalt(newPassword, user.Guid);
-
-        //    await UpdateAsync(user, lastUser, transContext).ConfigureAwait(false);
-
-        //}
-
-        public async Task<User> CreateAsync(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext transContext)
-        {
-            ThrowIf.NotMobile(mobile, nameof(mobile), true);
-            ThrowIf.NotEmail(email, nameof(email), true);
-            ThrowIf.NotLoginName(loginName, nameof(loginName), true);
-            ThrowIf.NotPassword(password, nameof(password), true);
-
-            #region 查重
-
-            if (mobile == null && email == null && loginName == null)
-            {
-                throw new FrameworkException(ErrorCode.IdentityMobileEmailLoginNameAllNull);
-            }
-
-            if (!mobileConfirmed && !emailConfirmed && password == null)
-            {
-                throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
-            }
-
-            long count = await CountUserAsync(loginName, mobile, email, transContext).ConfigureAwait(false);
-
-            if (count != 0)
-            {
-                throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(User)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
-            }
-
-            #endregion
-
-            User user = new User
-            {
-                SecurityStamp = SecurityUtil.CreateUniqueToken(),
-                LoginName = loginName,
-                Mobile = mobile,
-                Email = email,
-                //PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, user.Guid),
-                MobileConfirmed = mobileConfirmed,
-                EmailConfirmed = emailConfirmed
-            };
-
-            user.PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, user.Guid);
-
-            await AddAsync(user, lastUser, transContext).ConfigureAwait(false);
-
-            return user;
-        }
         #endregion
     }
 }

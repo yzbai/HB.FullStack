@@ -5,6 +5,6 @@ namespace HB.FullStack.Server.File
 {
     public interface IFileService
     {
-        Task SetAvatarAsync(string userGuid, IFormFile file);
+        Task SetAvatarAsync(long userId, IFormFile file);
     }
 }

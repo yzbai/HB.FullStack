@@ -24,111 +24,30 @@ namespace HB.FullStack.Identity
 
         #region Read
 
-        public Task<IEnumerable<SignInToken>> GetByUserGuidAsync(string userGuid, TransactionContext? transactionContext)
+        public Task<IEnumerable<SignInToken>> GetByUserIdAsync(long userId, TransactionContext? transactionContext)
         {
-            return _databaseReader.RetrieveAsync<SignInToken>(s => s.UserGuid == userGuid, transactionContext);
+            return _databaseReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByGuidAsync(string signInTokenGuid, TransactionContext? transactionContext)
+        public Task<SignInToken?> GetByIdAsync(long signInTokenId, TransactionContext? transactionContext)
         {
-            return _databaseReader.ScalarAsync<SignInToken>(s => s.Guid == signInTokenGuid, transactionContext);
+            return _databaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByConditionAsync(string? signInTokenGuid, string? refreshToken, string deviceId, string? userGuid, TransactionContext? transContext = null)
+        public Task<SignInToken?> GetByConditionAsync(long signInTokenId, string? refreshToken, string deviceId, long userId, TransactionContext? transContext = null)
         {
-            if (signInTokenGuid.IsNullOrEmpty() || refreshToken.IsNullOrEmpty() || userGuid.IsNullOrEmpty())
+            if (refreshToken.IsNullOrEmpty())
             {
                 return Task.FromResult((SignInToken?)null);
             }
 
             return _databaseReader.ScalarAsync<SignInToken>(s =>
-                s.UserGuid == userGuid &&
-                s.Guid == signInTokenGuid &&
+                s.UserId == userId &&
+                s.Id == signInTokenId &&
                 s.RefreshToken == refreshToken &&
                 s.DeviceId == deviceId, transContext);
         }
 
         #endregion
-
-        public async Task<SignInToken> CreateAsync(
-            string userGuid,
-            string deviceId,
-            DeviceInfos deviceInfos,
-            string deviceVersion,
-            string ipAddress,
-            TimeSpan expireTimeSpan,
-            string lastUser,
-            TransactionContext? transactionContext)
-        {
-            SignInToken token = new SignInToken
-            {
-                UserGuid = userGuid,
-                RefreshToken = SecurityUtil.CreateUniqueToken(),
-                ExpireAt = TimeUtil.UtcNow + expireTimeSpan,
-                DeviceId = deviceId,
-                DeviceVersion = deviceVersion,
-                DeviceIp = ipAddress,
-
-                DeviceName = deviceInfos.Name,
-                DeviceModel = deviceInfos.Model,
-                DeviceOSVersion = deviceInfos.OSVersion,
-                DevicePlatform = deviceInfos.Platform,
-                DeviceIdiom = deviceInfos.Idiom,
-                DeviceType = deviceInfos.Type
-            };
-
-            await AddAsync(token, lastUser, transactionContext).ConfigureAwait(false);
-
-            return token;
-        }
-
-        public async Task DeleteByLogOffTypeAsync(string userGuid, DeviceIdiom currentIdiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
-        {
-            ThrowIf.Empty(userGuid, nameof(userGuid));
-
-            IEnumerable<SignInToken> resultList = await GetByUserGuidAsync(userGuid, transactionContext).ConfigureAwait(false);
-
-            IEnumerable<SignInToken> toDeletes = logOffType switch
-            {
-                LogOffType.LogOffAllOthers => resultList,
-                LogOffType.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web),
-                LogOffType.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == currentIdiom),
-                _ => new List<SignInToken>()
-            };
-
-            await BatchDeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
-        }
-
-        public async Task DeleteByUserGuidAsync(string userGuid, string lastUser, TransactionContext transContext)
-        {
-            ThrowIf.NullOrEmpty(userGuid, nameof(userGuid));
-            ThrowIf.Null(transContext, nameof(transContext));
-
-            IEnumerable<SignInToken> resultList = await GetByUserGuidAsync(userGuid, transContext).ConfigureAwait(false);
-
-            await BatchDeleteAsync(resultList, lastUser, transContext).ConfigureAwait(false);
-        }
-
-        public async Task DeleteByGuidAsync(string signInTokenGuid, string lastUser, TransactionContext transContext)
-        {
-            ThrowIf.NullOrEmpty(signInTokenGuid, nameof(signInTokenGuid));
-            ThrowIf.Null(transContext, nameof(transContext));
-
-            SignInToken? signInToken = await GetByGuidAsync(signInTokenGuid, transContext).ConfigureAwait(false);
-
-            if (signInToken != null)
-            {
-                await DeleteAsync(signInToken, lastUser, transContext).ConfigureAwait(false);
-            }
-            else
-            {
-                _logger.LogWarning($"尝试删除不存在的SignInToken. SignInTokenGuid:{signInTokenGuid}");
-            }
-        }
-
-        public new Task UpdateAsync(SignInToken signInToken, string lastUser, TransactionContext? transContext = null)
-        {
-            return base.UpdateAsync(signInToken, lastUser, transContext);
-        }
     }
 }

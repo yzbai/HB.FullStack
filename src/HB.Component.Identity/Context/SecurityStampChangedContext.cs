@@ -6,11 +6,11 @@ namespace HB.FullStack.Identity
 {
     public class SecurityStampChangedContext
     {
-        public string UserGuid { get; set; }
+        public long UserId { get; set; }
 
-        public SecurityStampChangedContext(string userGuid)
+        public SecurityStampChangedContext(long userId)
         {
-            UserGuid = userGuid;
+            UserId = userId;
         }
     }
 }
