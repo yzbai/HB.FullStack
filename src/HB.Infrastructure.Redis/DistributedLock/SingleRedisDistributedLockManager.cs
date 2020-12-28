@@ -101,7 +101,7 @@ return 1";
         /// <param name="waitTime">如果资源被占用，你愿意等多久，TimeSpan.Zero表明不愿意等。null表示使用默认等待时间</param>
         /// <param name="retryInterval">等待时不断尝试获取资源 的 等待间隔，应该大于TimeSpan.Zero, null 表示使用默认时间</param>
         /// <returns></returns>
-        public async Task<IDistributedLock> LockAsync(IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan? waitTime, TimeSpan? retryInterval, CancellationToken? cancellationToken = null)
+        public async Task<IDistributedLock> LockAsync(IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan? waitTime, TimeSpan? retryInterval, bool notUnlockWhenDispose = false, CancellationToken? cancellationToken = null)
         {
             if (expiryTime < _minimumExpiryTime)
             {
@@ -122,6 +122,7 @@ return 1";
                 expiryTime,
                 waitTime ?? TimeSpan.FromMilliseconds(_options.DefaultWaitMilliseconds),
                 retryInterval ?? TimeSpan.FromMilliseconds(_options.DefaultRetryIntervalMilliseconds),
+                notUnlockWhenDispose,
                 cancellationToken);
 
             await StartAsync(redisLock, _logger).ConfigureAwait(false);
@@ -272,6 +273,7 @@ return 1";
                 ExtendLockLifetime(redisLock, logger);
             }
         }
+
         private static void StopKeepAliveTimer(RedisLock redisLock, ILogger logger)
         {
             if (redisLock.KeepAliveTimer != null)
@@ -293,6 +295,12 @@ return 1";
         internal static async Task ReleaseResourceAsync(RedisLock redisLock, ILogger logger)
         {
             StopKeepAliveTimer(redisLock, logger);
+
+            if (redisLock.NotUnlockWhenDispose)
+            {
+                logger.LogDebug($"自动延期停止,但锁等他自己过期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+                return;
+            }
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();

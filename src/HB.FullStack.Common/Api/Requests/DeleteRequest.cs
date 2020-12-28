@@ -12,7 +12,7 @@ namespace HB.FullStack.Common.Api
 
         public DeleteRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Delete, null) { }
 
-        [Required]
+        [CollectionNotEmpty]
         [IdBarrier]
         public List<T> Resources { get; set; } = new List<T>();
 

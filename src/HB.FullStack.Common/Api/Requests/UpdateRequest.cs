@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.Api
         public UpdateRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Put, null) { }
 
         [IdBarrier]
-        [Required]
+        [CollectionNotEmpty]
         public List<T> Resources { get; set; } = new List<T>();
 
         public override int GetHashCode()

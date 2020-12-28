@@ -117,7 +117,7 @@ namespace HB.FullStack.Identity
                     throw new AuthorizationException(ErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
                 }
 
-                UserLoginControl userLoginControl = await _userLoginControlRepo.GetAsync(user.Id).ConfigureAwait(false) ?? new UserLoginControl { UserId = user.Id };
+                UserLoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
                 //密码检查
                 if (context.SignInType == SignInType.ByMobileAndPassword || context.SignInType == SignInType.ByLoginNameAndPassword)
@@ -178,14 +178,16 @@ namespace HB.FullStack.Identity
             }
         }
 
+
+
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context);
 
             //解决并发涌入
             using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
-                nameof(RefreshAccessTokenAsync) + context.DeviceId,
-                _options.RefreshIntervalTimeSpan).ConfigureAwait(false);
+               nameof(RefreshAccessTokenAsync) + context.DeviceId,
+               _options.RefreshIntervalTimeSpan, notUnlockWhenDispose: true).ConfigureAwait(false);
 
             if (!distributedLock.IsAcquired)
             {
@@ -342,7 +344,7 @@ namespace HB.FullStack.Identity
                 return;
             }
 
-            UserLoginControl userLoginControl = await _userLoginControlRepo.GetAsync(user.Id).ConfigureAwait(false) ?? new UserLoginControl { UserId = user.Id };
+            UserLoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
             OnSignInFailed(userLoginControl, lastUser);
         }
@@ -514,6 +516,19 @@ namespace HB.FullStack.Identity
                 claims.Add(new Claim(ClaimExtensionTypes.Role, item.Name));
             }
             return claims;
+        }
+
+        private async Task<UserLoginControl> GetOrCreateUserLoginControlAsync(string lastUser, long userId)
+        {
+            UserLoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
+
+            if (userLoginControl == null)
+            {
+                userLoginControl = new UserLoginControl { UserId = userId };
+                await _userLoginControlRepo.AddAsync(userLoginControl, lastUser).ConfigureAwait(false);
+            }
+
+            return userLoginControl;
         }
     }
 }

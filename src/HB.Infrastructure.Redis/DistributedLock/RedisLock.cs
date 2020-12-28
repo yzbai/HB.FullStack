@@ -33,13 +33,14 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         internal object StopKeepAliveTimerLockObj { get; private set; } = new object();
 
-        internal RedisLock(SingleRedisDistributedLockOptions options, ILogger logger, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, CancellationToken? cancellationToken)
+        internal RedisLock(SingleRedisDistributedLockOptions options, ILogger logger, IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan waitTime, TimeSpan retryTime, bool notUnlockWhenDispose, CancellationToken? cancellationToken)
         {
             Options = options;
             _logger = logger;
             ExpiryTime = expiryTime;
             WaitTime = waitTime;
             RetryTime = retryTime;
+            NotUnlockWhenDispose = notUnlockWhenDispose;
             CancellationToken = cancellationToken;
 
             List<string> keyResources = new List<string>();
@@ -66,6 +67,8 @@ namespace HB.Infrastructure.Redis.DistributedLock
         public bool IsAcquired => Status == DistributedLockStatus.Acquired;
 
         public int ExtendCount { get; set; }
+
+        public bool NotUnlockWhenDispose { get; set; }
 
 
         #region Disposable Pattern

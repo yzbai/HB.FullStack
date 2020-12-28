@@ -217,6 +217,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
                         "eBusC_" + entity.Guid,
                         TimeSpan.FromSeconds(_options.EventBusConsumerAckTimeoutSeconds),
+                        false,
                         cancellationToken).ConfigureAwait(false);
 
                     if (!distributedLock.IsAcquired)

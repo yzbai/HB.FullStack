@@ -214,7 +214,7 @@ namespace System
         {
             GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
 
-            using IDistributedLock distributedLock = await lockManager.LockAsync(
+            IDistributedLock distributedLock = await lockManager.LockAsync(
                 resources: database.DatabaseNames,
                 expiryTime: TimeSpan.FromMinutes(5),
                 waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);

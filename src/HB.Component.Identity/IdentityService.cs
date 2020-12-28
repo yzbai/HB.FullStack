@@ -38,7 +38,7 @@ namespace HB.FullStack.Identity
                 throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
             }
 
-            bool ownTrans = transactionContext != null;
+            bool ownTrans = transactionContext == null;
 
             TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
 

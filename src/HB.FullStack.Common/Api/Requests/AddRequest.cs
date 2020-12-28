@@ -12,7 +12,7 @@ namespace HB.FullStack.Common.Api
 
         public AddRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Post, null) { }
 
-        [Required]
+        [CollectionNotEmpty]
         [IdBarrier]
         public List<T> Resources { get; set; } = new List<T>();
 
