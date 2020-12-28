@@ -35,14 +35,14 @@
     <Compile Include="..\HB.FullStack.DatabaseTests\Context\JoinTestEntities.cs" Link="Context\JoinTestEntities.cs" />
     <Compile Include="..\HB.FullStack.DatabaseTests\Context\Mocker.cs" Link="Context\Mocker.cs" />
     <Compile Include="..\HB.FullStack.DatabaseTests\Context\PublisherEntity.cs" Link="Context\PublisherEntity.cs" />
-    <Compile Include=".\..\ServiceFixture_MySql.cs" Link="ServiceFixture_MySql.cs" />
+    <Compile Include="..\ServiceFixture_MySql.cs" Link="ServiceFixture_MySql.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include=".\..\appsettings.Development.json" Link="appsettings.Development.json">
+    <Content Include="..\appsettings.Development.json" Link="appsettings.Development.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include=".\..\appsettings.json" Link="appsettings.json">
+    <Content Include="..\appsettings.json" Link="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

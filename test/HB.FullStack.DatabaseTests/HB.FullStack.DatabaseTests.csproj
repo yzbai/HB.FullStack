@@ -12,15 +12,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include=".\..\ServiceFixture_Mysql.cs" Link="ServiceFixture_MySql.cs" />
-    <Compile Include=".\..\ServiceFixture_Sqlite.cs" Link="ServiceFixture_Sqlite.cs" />
+    <Compile Include="..\ServiceFixture_Mysql.cs" Link="ServiceFixture_MySql.cs" />
+    <Compile Include="..\ServiceFixture_Sqlite.cs" Link="ServiceFixture_Sqlite.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include=".\..\appsettings.Development.json" Link="appsettings.Development.json">
+    <Content Include="..\appsettings.Development.json" Link="appsettings.Development.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include=".\..\appsettings.json" Link="appsettings.json">
+    <Content Include="..\appsettings.json" Link="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
