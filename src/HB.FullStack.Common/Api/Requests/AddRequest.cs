@@ -12,9 +12,9 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public List<T> Resources { get; set; } = new List<T>();
 
-        protected AddRequest() : base(HttpMethod.Post, null) { }
+        public AddRequest() : base(HttpMethod.Post, null) { }
 
-        protected AddRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Post, null) { }
+        public AddRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Post, null) { }
 
         public AddRequest(IEnumerable<T> ress) : this()
         {

@@ -14,9 +14,9 @@ namespace HB.FullStack.Common.Api
 
         public DeleteRequest() : base(HttpMethod.Delete, null) { }
 
-        protected DeleteRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Delete, null) { }
+        public DeleteRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Delete, null) { }
 
-        protected DeleteRequest(IEnumerable<T> ress) : this()
+        public DeleteRequest(IEnumerable<T> ress) : this()
         {
             Resources.AddRange(ress);
         }

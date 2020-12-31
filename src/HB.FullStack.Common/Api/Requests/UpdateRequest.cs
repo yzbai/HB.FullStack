@@ -12,9 +12,9 @@ namespace HB.FullStack.Common.Api
         [CollectionNotEmpty]
         public List<T> Resources { get; set; } = new List<T>();
 
-        protected UpdateRequest() : base(HttpMethod.Put, null) { }
+        public UpdateRequest() : base(HttpMethod.Put, null) { }
 
-        protected UpdateRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Put, null) { }
+        public UpdateRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Put, null) { }
 
         public UpdateRequest(IEnumerable<T> ress) : this()
         {
