@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
-            options.Endpoints.ForEach(endpoint =>
+            foreach (var endpoint in options.Endpoints)
             {
                 services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
                 {
@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
 #endif
                 ;
-            });
+            }
 
 
 

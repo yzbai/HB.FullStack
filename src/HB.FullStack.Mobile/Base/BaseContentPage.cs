@@ -72,7 +72,15 @@ namespace HB.FullStack.Client.Base
             IsAppearing = true;
 
             //baseContentViews
-            GetAllCustomerControls().ForEach(v => v?.OnAppearing());
+            IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
+
+            if (customerControls != null)
+            {
+                foreach (var v in customerControls)
+                {
+                    v?.OnAppearing();
+                }
+            }
 
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
@@ -92,7 +100,15 @@ namespace HB.FullStack.Client.Base
             IsAppearing = false;
 
             //baseContentViews
-            GetAllCustomerControls().ForEach(v => v?.OnDisappearing());
+            IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
+
+            if (customerControls != null)
+            {
+                foreach (var v in customerControls)
+                {
+                    v?.OnDisappearing();
+                }
+            }
 
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)

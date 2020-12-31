@@ -110,7 +110,8 @@ namespace System
         /// <param name="ts"></param>
         /// <returns></returns>
 
-        public static bool IsNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? ts)
+
+        public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T>? ts)
         {
             return ts == null || !ts.Any();
         }
@@ -121,7 +122,7 @@ namespace System
         /// <param name="ts"></param>
         /// <returns></returns>
 
-        public static bool IsNotNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? ts)
+        public static bool IsNotNullOrEmpty<T>([NotNullWhen(true)] this IEnumerable<T>? ts)
         {
             return ts != null && ts.Any();
         }

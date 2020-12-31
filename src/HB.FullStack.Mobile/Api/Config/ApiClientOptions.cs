@@ -37,7 +37,10 @@ namespace HB.FullStack.Client.Api
             {
                 _apiKeysDict = new Dictionary<string, string>();
 
-                ApiKeys.ForEach(apiKey => _apiKeysDict.Add(apiKey.Name, apiKey.Key));
+                foreach (var apiKey in ApiKeys)
+                {
+                    _apiKeysDict.Add(apiKey.Name, apiKey.Key);
+                }
             }
 
             return _apiKeysDict.TryGetValue(name, out key);

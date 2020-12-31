@@ -92,7 +92,10 @@ namespace HB.FullStack.Client.Skia
                     // managed
                     if (_bitmaps.IsNotNullOrEmpty())
                     {
-                        _bitmaps.ForEach(bitmap => bitmap?.Dispose());
+                        foreach (var bitmap in _bitmaps)
+                        {
+                            bitmap?.Dispose();
+                        }
                     }
                 }
 

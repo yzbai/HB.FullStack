@@ -115,12 +115,25 @@ namespace HB.FullStack.Client.Skia
             ReStartAnimation();
         }
 
-        private void OnFiguresChanged(ObservableCollection<SKFigure>? oldValue, ObservableCollection<SKFigure>? newValue)
+        private void OnFiguresChanged(ObservableCollection<SKFigure>? oldValues, ObservableCollection<SKFigure>? newValues)
         {
             StopAnimation();
 
-            oldValue.ForEach(f => f.Dispose());
-            newValue.ForEach(f => f.Parent = this);
+            if (oldValues != null)
+            {
+                foreach (var f in oldValues)
+                {
+                    f.Dispose();
+                }
+            }
+
+            if (newValues != null)
+            {
+                foreach (var f in newValues)
+                {
+                    f.Dispose();
+                }
+            }
 
             if (IsAnimationMode)
             {
@@ -131,12 +144,12 @@ namespace HB.FullStack.Client.Skia
                 InvalidateSurface();
             }
 
-            if (oldValue is ObservableCollection<SKFigure> oldCollection)
+            if (oldValues is ObservableCollection<SKFigure> oldCollection)
             {
                 oldCollection.CollectionChanged -= OnFiguresCollectionChanged;
             }
 
-            if (newValue is ObservableCollection<SKFigure> newCollection)
+            if (newValues is ObservableCollection<SKFigure> newCollection)
             {
                 newCollection.CollectionChanged += OnFiguresCollectionChanged;
             }
@@ -146,7 +159,10 @@ namespace HB.FullStack.Client.Skia
         {
             if (sender is IEnumerable<SKFigure> figures)
             {
-                figures.ForEach(f => f.Parent = this);
+                foreach (var f in figures)
+                {
+                    f.Parent = this;
+                }
             }
 
             if (IsAnimationMode)
@@ -220,13 +236,13 @@ namespace HB.FullStack.Client.Skia
 
         private void OnPaintFigures(SKPaintSurfaceEventArgs e, SKCanvas canvas)
         {
-            Figures.ForEach(f =>
+            foreach (var f in Figures)
             {
                 using (new SKAutoCanvasRestore(canvas))
                 {
                     f.Paint(e);
                 }
-            });
+            }
         }
 
         private void OnPainted(object sender, SKPaintSurfaceEventArgs e)
