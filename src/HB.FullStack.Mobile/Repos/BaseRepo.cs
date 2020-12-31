@@ -21,7 +21,7 @@ namespace HB.FullStack.Client.Repos
     {
         protected static void InsureLogined()
         {
-            if (UserPreferences.IsLogined())
+            if (!UserPreferences.IsLogined())
             {
                 throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
             }

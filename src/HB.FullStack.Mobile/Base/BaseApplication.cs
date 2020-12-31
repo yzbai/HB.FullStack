@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
@@ -53,7 +54,7 @@ namespace HB.FullStack.Client.Base
                 {
                     if ("Debug".Equals(Environment, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        _minimumLogLevel = LogLevel.Trace;
+                        _minimumLogLevel = LogLevel.Information;
                     }
                     else
                     {
@@ -153,5 +154,7 @@ namespace HB.FullStack.Client.Base
 
             _localLogger?.Log(logLevel, ex, message);
         }
+
+
     }
 }

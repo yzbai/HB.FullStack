@@ -42,7 +42,7 @@ namespace HB.FullStack.Client.Base
 
         public virtual void OnAppearing(string pageName)
         {
-            NotifyValidationChanged();
+            NotifyValidationChanged(null);
         }
 
         public virtual void OnDisappearing(string pageName)

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Polly;
 using System;
 using System.Net.Http;
+using Xamarin.Essentials;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -48,11 +49,18 @@ namespace Microsoft.Extensions.DependencyInjection
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
                 })
-                .AddTransientHttpErrorPolicy(p =>
-                {
-                    //TODO: Move this to options
-                    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
-                })
+
+                //TODO: 调查这个
+                //.AddTransientHttpErrorPolicy(p =>
+                //{
+                //    if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+                //    {
+                //        throw new ApiException(ErrorCode.ApiNoInternet, System.Net.HttpStatusCode.BadGateway);
+                //    }
+
+                //    //TODO: Move this to options
+                //    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
+                //})
 #if DEBUG
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {

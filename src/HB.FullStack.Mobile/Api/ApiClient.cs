@@ -115,7 +115,11 @@ namespace HB.FullStack.Client.Api
 
         private HttpClient GetHttpClient(EndpointSettings endpoint)
         {
-            return _httpClientFactory.CreateClient(endpoint.GetHttpClientName());
+            HttpClient httpClient = _httpClientFactory.CreateClient(endpoint.GetHttpClientName());
+
+            httpClient.Timeout = TimeSpan.FromSeconds(10); //TODO: move to 
+
+            return httpClient;
         }
 
         private static void AddDeviceInfo(ApiRequest request)

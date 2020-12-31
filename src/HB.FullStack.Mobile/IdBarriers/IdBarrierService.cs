@@ -61,7 +61,7 @@ namespace MyColorfulTime.IdBarriers
                     {
                         List<long> clientIds = _addRequestClientIdDict[args.RequestId];
 
-                        await AddIdBarriersAsync(servierIds, clientIds).ConfigureAwait(false);
+                        await AddServerIdToClientIdAsync(servierIds, clientIds).ConfigureAwait(false);
 
                         _addRequestClientIdDict.Remove(args.RequestId);
                     }
@@ -88,34 +88,15 @@ namespace MyColorfulTime.IdBarriers
             }
         }
 
-        private async Task AddIdBarriersAsync(IEnumerable<long> servierIds, List<long> clientIds)
-        {
-            TransactionContext trans = await _transaction.BeginTransactionAsync<IdBarrier>().ConfigureAwait(false);
-            try
-            {
-                await _idBarrierRepo.AddIdBarrierAsync(clientIds, servierIds, trans).ConfigureAwait(false);
 
-                await trans.CommitAsync().ConfigureAwait(false);
-            }
-            catch
-            {
-                await trans.RollbackAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
 
         private async Task ChangeIdAsync(object? obj, string requestId, ChangeDirection direction, ApiRequestType requestType)
         {
             if (obj == null) { return; }
 
             //替换ID
-            foreach (PropertyInfo propertyInfo in obj.GetType().GetProperties(BindingFlags.Public))
+            foreach (PropertyInfo propertyInfo in obj.GetType().GetProperties().Where(p => Attribute.IsDefined(p, typeof(IdBarrierAttribute))))
             {
-                if (!Attribute.IsDefined(propertyInfo, typeof(IdBarrierAttribute)))
-                {
-                    continue;
-                }
-
                 object? propertyValue = propertyInfo.GetValue(obj);
 
                 if (propertyValue == null)
@@ -160,6 +141,8 @@ namespace MyColorfulTime.IdBarriers
                 _addRequestClientIdDict[requestId].Add(id);
 
                 propertyInfo.SetValue(obj, -1);
+
+                return;
             }
 
             long changedId = direction switch
@@ -175,10 +158,52 @@ namespace MyColorfulTime.IdBarriers
                 direction == ChangeDirection.FromServer)
             {
                 changedId = IDistributedIdGen.IdGen.GetId();
-                await _idBarrierRepo.AddIdBarrierAsync(clientId: changedId, serverId: id).ConfigureAwait(false);
+                await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);
             }
 
             propertyInfo.SetValue(obj, changedId);
+        }
+
+        private Task AddServerIdToClientIdAsync(long serverId, long clientId)
+        {
+            if (serverId <= 0)
+            {
+                return Task.CompletedTask;
+            }
+
+            return _idBarrierRepo.AddIdBarrierAsync(clientId: clientId, serverId: serverId);
+        }
+
+        private async Task AddServerIdToClientIdAsync(IEnumerable<long> serverIds, List<long> clientIds)
+        {
+            List<long> serverAdds = new List<long>();
+            List<long> clientAdds = new List<long>();
+
+            int num = 0;
+
+            foreach (long serverId in serverIds)
+            {
+                if (serverId <= 0)
+                {
+                    continue;
+                }
+
+                serverAdds.Add(serverId);
+                clientAdds.Add(clientIds[num++]);
+            }
+
+            TransactionContext trans = await _transaction.BeginTransactionAsync<IdBarrier>().ConfigureAwait(false);
+            try
+            {
+                await _idBarrierRepo.AddIdBarrierAsync(clientIds: clientAdds, servierIds: serverAdds, trans).ConfigureAwait(false);
+
+                await trans.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await trans.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
         }
     }
 }
