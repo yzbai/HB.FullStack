@@ -21,7 +21,10 @@ namespace HB.FullStack.Server.ApiKeyAuthentication
             {
                 _apiKeysDict = new Dictionary<string, string>();
 
-                ApiKeys.ForEach(apiKey => _apiKeysDict.Add(apiKey.Key, apiKey.Name));
+                foreach (var apiKey in ApiKeys)
+                {
+                    _apiKeysDict.Add(apiKey.Key, apiKey.Name);
+                }
             }
 
             return _apiKeysDict.TryGetValue(key, out name);

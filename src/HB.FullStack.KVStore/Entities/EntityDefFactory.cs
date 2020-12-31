@@ -46,7 +46,7 @@ namespace HB.FullStack.KVStore.Entities
             IDictionary<string, KVStoreEntitySchema> filedDict = _settings.KVStoreEntities.ToDictionary(t => t.EntityTypeFullName);
             IDictionary<string, KVStoreEntitySchema> resultDict = new Dictionary<string, KVStoreEntitySchema>();
 
-            allEntityTypes.ForEach(type =>
+            foreach (var type in allEntityTypes)
             {
                 KVStoreAttribute attribute = type.GetCustomAttribute<KVStoreAttribute>();
 
@@ -76,7 +76,7 @@ namespace HB.FullStack.KVStore.Entities
                 };
 
                 resultDict.Add(type.FullName, entitySchema);
-            });
+            }
 
             return resultDict;
         }

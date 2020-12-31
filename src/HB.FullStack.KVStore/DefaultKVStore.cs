@@ -130,11 +130,11 @@ namespace HB.FullStack.KVStore
             {
                 KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
-                items.ForEach(t =>
+                foreach (var t in items)
                 {
                     t.LastUser = lastUser;
                     t.LastTime = TimeUtil.UtcNow;
-                });
+                }
 
                 await _engine.EntityAddAsync(
                     entityDef.KVStoreName,
@@ -144,7 +144,10 @@ namespace HB.FullStack.KVStore
                     ).ConfigureAwait(false);
 
                 //version 变化
-                items.ForEach(t => t.Version = 0);
+                foreach (var t in items)
+                {
+                    t.Version = 0;
+                }
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
@@ -182,11 +185,11 @@ namespace HB.FullStack.KVStore
 
                 IEnumerable<int> originalVersions = items.Select(t => t.Version).ToArray();
 
-                items.ForEach(t =>
+                foreach (var t in items)
                 {
                     t.LastUser = lastUser;
                     t.LastTime = TimeUtil.UtcNow;
-                });
+                }
 
                 await _engine.EntityUpdateAsync(
                     entityDef.KVStoreName,
@@ -196,7 +199,10 @@ namespace HB.FullStack.KVStore
                     originalVersions).ConfigureAwait(false);
 
                 //反应Version变化
-                items.ForEach(t => t.Version++);
+                foreach (var t in items)
+                {
+                    t.Version++;
+                }
             }
 
             catch (Exception ex) when (!(ex is KVStoreException))
@@ -257,7 +263,7 @@ namespace HB.FullStack.KVStore
         {
             List<T?> rt = new List<T?>();
 
-            tuples.ForEach(t =>
+            foreach (var t in tuples)
             {
                 T? item = SerializeUtil.FromJson<T>(t.Item1);
                 if (item == null)
@@ -269,7 +275,7 @@ namespace HB.FullStack.KVStore
                     item.Version = t.Item2;
                     rt.Add(item);
                 }
-            });
+            }
 
             return rt;
         }

@@ -171,6 +171,11 @@ namespace HB.FullStack.Common.Api
         {
             return _apiKeyName;
         }
+
+        public string GetLastUser()
+        {
+            return DeviceInfos.Name;
+        }
     }
 
     public abstract class ApiRequest<T> : ApiRequest where T : Resource

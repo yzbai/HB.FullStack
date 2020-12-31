@@ -64,7 +64,7 @@ namespace HB.FullStack.Cache
 
             bool foundkeyAttribute = false;
 
-            entityType.GetProperties().ForEach(propertyInfo =>
+            foreach (var propertyInfo in entityType.GetProperties())
             {
                 if (!foundkeyAttribute)
                 {
@@ -75,7 +75,7 @@ namespace HB.FullStack.Cache
                         def.KeyProperty = propertyInfo;
                         foundkeyAttribute = true;
 
-                        return;
+                        continue;
                     }
                 }
 
@@ -85,7 +85,7 @@ namespace HB.FullStack.Cache
                 {
                     def.Dimensions.Add(propertyInfo);
                 }
-            });
+            }
 
             if (def.KeyProperty == null)
             {

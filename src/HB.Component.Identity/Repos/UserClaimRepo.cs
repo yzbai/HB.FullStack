@@ -14,6 +14,12 @@ namespace HB.FullStack.Identity
     {
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
+            EntityAdded += (entity, args) =>
+            {
+                InvalidateCache(CachedUserClaimsByUserId.Key(entity.UserId).Timestamp(args.UtcNowTicks));
+                return Task.CompletedTask;
+            };
+
             EntityUpdated += (entity, args) =>
             {
                 InvalidateCache(CachedUserClaimsByUserId.Key(entity.UserId).Timestamp(args.UtcNowTicks));

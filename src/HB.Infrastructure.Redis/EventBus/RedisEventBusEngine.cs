@@ -50,7 +50,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <param name="brokerName"></param>
         /// <param name="eventMessage"></param>
         /// <returns></returns>
-        
+
         public async Task PublishAsync(string brokerName, string eventName, string jsonData)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
@@ -68,7 +68,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// StartHandle
         /// </summary>
         /// <param name="eventType"></param>
-        
+
         public void StartHandle(string eventType)
         {
             if (!_consumeTaskManagers.ContainsKey(eventType))
@@ -83,7 +83,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 每一种事件，只有一次SubscribeHandler的机会。之后再订阅，就报错了。
         /// 开始处理
         /// </summary>
-        
+
         public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
@@ -104,7 +104,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <summary>
         /// 停止处理
         /// </summary>
-        
+
         public async Task UnSubscribeHandlerAsync(string eventType)
         {
             await _consumeTaskManagers[eventType].CancelAsync().ConfigureAwait(false);
@@ -150,10 +150,10 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             lock (_consumTaskCloseLocker)
             {
-                _consumeTaskManagers.ForEach(kv =>
+                foreach (var kv in _consumeTaskManagers)
                 {
                     kv.Value.Dispose();
-                });
+                };
             }
         }
 
@@ -163,7 +163,7 @@ namespace HB.Infrastructure.Redis.EventBus
         /// </summary>
         /// <param name="brokerName"></param>
         /// <returns></returns>
-        
+
         private RedisInstanceSetting GetRedisInstanceSetting(string brokerName)
         {
             if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting instanceSetting))

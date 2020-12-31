@@ -20,7 +20,7 @@ namespace HB.FullStack.Client.Api
 
         Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource;
 
-        Task<T> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource;
+        Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource;
 
 
     }

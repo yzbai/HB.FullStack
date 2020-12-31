@@ -484,10 +484,10 @@ return array";
 
         public void Close()
         {
-            _instanceSettingDict.ForEach(kv =>
+            foreach (var kv in _instanceSettingDict)
             {
                 RedisInstanceManager.Close(kv.Value);
-            });
+            }
         }
 
         private async Task<IDatabase> GetDatabaseAsync(string instanceName)
@@ -550,11 +550,11 @@ return array";
 
             List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
 
-            values.ForEach(kv =>
+            foreach (var kv in values)
             {
                 int version = (int)versions[kv.Key];
                 rt.Add(new Tuple<string?, int>(kv.Value.ToString(), version));
-            });
+            }
 
             return rt;
         }

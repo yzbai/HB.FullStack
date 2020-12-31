@@ -26,7 +26,7 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponse = typeof(EmptyResponse);
 
-        public static async Task<TResponse> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : Resource where TResponse : class
+        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : Resource where TResponse : class
         {
             using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(request).ConfigureAwait(false);
 
@@ -40,10 +40,10 @@ namespace System.Net.Http
             {
                 TResponse? response = await responseMessage.DeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
 
-                if (response == null)
-                {
-                    throw new ApiException(ErrorCode.ApiNullReturn, responseMessage.StatusCode);
-                }
+                //if (response == null)
+                //{
+                //    throw new ApiException(ErrorCode.ApiNullReturn, responseMessage.StatusCode);
+                //}
 
                 return response;
             }
@@ -87,7 +87,10 @@ namespace System.Net.Http
                 httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
             }
 
-            request.GetHeaders().ForEach(kv => httpRequest.Headers.Add(kv.Key, kv.Value));
+            foreach (var kv in request.GetHeaders())
+            {
+                httpRequest.Headers.Add(kv.Key, kv.Value);
+            }
 
             return httpRequest;
         }

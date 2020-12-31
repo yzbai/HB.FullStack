@@ -115,6 +115,11 @@ namespace HB.FullStack.Database.Mapper
 
         public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
+            if (entity.Version < 0)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseVersionNotSet, entityDef.EntityFullName, $"Version:{entity.Version}, 查看是否是使用了Select + New这个组合");
+            }
+
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
 
             foreach (var propertyDef in entityDef.PropertyDefs)
@@ -129,6 +134,11 @@ namespace HB.FullStack.Database.Mapper
 
         public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
+            if (entity.Version < 0)
+            {
+                throw new DatabaseException(ErrorCode.DatabaseVersionNotSet, entityDef.EntityFullName, $"Version:{entity.Version}, 查看是否是使用了Select + New这个组合");
+            }
+
             Func<object, int, KeyValuePair<string, object>[]> func = GetCachedToParametersFunc(entityDef, engineType);
 
             return func(entity, number);

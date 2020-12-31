@@ -32,7 +32,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static T Null<T>([ValidatedNotNull] T? o, string paramName) where T : class
+        public static T Null<T>([ValidatedNotNull][NotNull] T? o, string paramName) where T : class
         {
             if (o == null)
                 throw new ArgumentNullException(paramName);
@@ -68,13 +68,13 @@ namespace System
         {
             if (ts.Any())
             {
-                ts.ForEach(t =>
+                foreach (var t in ts)
                 {
                     if (!t.IsValid())
                     {
                         throw new ValidateErrorException(t);
                     }
-                });
+                }
             }
 
             return ts;
@@ -88,7 +88,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static IDictionary<TKey, TValue> NullOrEmpty<TKey, TValue>([ValidatedNotNull] IDictionary<TKey, TValue>? dict, string paramName)
+        public static IDictionary<TKey, TValue> NullOrEmpty<TKey, TValue>([ValidatedNotNull][NotNull] IDictionary<TKey, TValue>? dict, string paramName)
         {
             if (dict == null || !dict.Any())
             {
@@ -106,7 +106,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static IEnumerable<T> NullOrEmpty<T>([ValidatedNotNull] IEnumerable<T>? lst, string paramName)
+        public static IEnumerable<T> NullOrEmpty<T>([ValidatedNotNull][NotNull] IEnumerable<T>? lst, string paramName)
         {
             if (lst == null || !lst.Any())
             {
@@ -117,7 +117,7 @@ namespace System
         }
 
         [return: NotNull]
-        public static ICollection NullOrEmpty<T>([ValidatedNotNull] ICollection? lst, string paramName)
+        public static ICollection NullOrEmpty<T>([ValidatedNotNull][NotNull] ICollection? lst, string paramName)
         {
             if (lst == null || lst.Count == 0)
             {
@@ -169,7 +169,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static IEnumerable<T> AnyNull<T>([ValidatedNotNull] IEnumerable<T>? lst, string paramName)
+        public static IEnumerable<T> AnyNull<T>([ValidatedNotNull][NotNull] IEnumerable<T>? lst, string paramName)
         {
             if (lst == null || lst.Any(t => t == null))
             {
@@ -187,7 +187,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static string NullOrEmpty([ValidatedNotNull] string? o, string paramName)
+        public static string NullOrEmpty([ValidatedNotNull][NotNull] string? o, string paramName)
         {
             if (string.IsNullOrEmpty(o))
             {
@@ -197,7 +197,7 @@ namespace System
             return o;
         }
 
-        public static string? NotMobile([ValidatedNotNull] string? mobile, string paramName, bool canBeNull)
+        public static string? NotMobile(string? mobile, string paramName, bool canBeNull)
         {
             if (mobile == null)
             {
@@ -307,7 +307,7 @@ namespace System
         /// <param name="paramName"></param>
         /// <returns></returns>
 
-        public static T ThrowIfNull<T>([ValidatedNotNull] this T? o, string paramName) where T : class
+        public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class
         {
             if (o == null)
                 throw new ArgumentNullException(paramName);
@@ -321,7 +321,7 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull] this T? o, string paramName) where T : class, ISupportValidate
+        public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class, ISupportValidate
         {
             if (o == null)
                 throw new ArgumentNullException(paramName);
@@ -342,7 +342,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static string ThrowIfNullOrEmpty([ValidatedNotNull] this string? o, string paramName)
+        public static string ThrowIfNullOrEmpty([ValidatedNotNull][NotNull] this string? o, string paramName)
         {
             if (string.IsNullOrEmpty(o))
             {
@@ -360,7 +360,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static IDictionary<TKey, TValue> ThrowIfNullOrEmpty<TKey, TValue>([ValidatedNotNull] this IDictionary<TKey, TValue>? dict, string paramName)
+        public static IDictionary<TKey, TValue> ThrowIfNullOrEmpty<TKey, TValue>([ValidatedNotNull][NotNull] this IDictionary<TKey, TValue>? dict, string paramName)
         {
             if (dict == null || !dict.Any())
             {
@@ -378,7 +378,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNull]
-        public static IEnumerable<T> ThrowIfNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? lst, string paramName)
+        public static IEnumerable<T> ThrowIfNullOrEmpty<T>([ValidatedNotNull][NotNull] this IEnumerable<T>? lst, string paramName)
         {
             if (lst == null || !lst.Any())
             {

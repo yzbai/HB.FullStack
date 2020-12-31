@@ -16,7 +16,7 @@ namespace HB.FullStack.Common.Entities
     {
 
 
-        public int Version { get; internal set; } = -1;
+        public int Version { get; set; } = -1;
 
         public string LastUser { get; internal set; } = string.Empty;
 

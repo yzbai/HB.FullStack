@@ -35,10 +35,10 @@ namespace HB.Infrastructure.Redis.Cache
 
         public void Close()
         {
-            _instanceSettingDict.ForEach(kv =>
+            foreach (var kv in _instanceSettingDict)
             {
                 RedisInstanceManager.Close(kv.Value);
-            });
+            }
         }
 
         public void Dispose()

@@ -886,12 +886,12 @@ namespace HB.FullStack.Database
 
             try
             {
-                items.ForEach(item =>
+                foreach (var item in items)
                 {
                     item.Version = 0;
                     item.LastUser = lastUser;
                     item.LastTime = TimeUtil.UtcNow;
-                });
+                }
 
                 IList<object> newIds = new List<object>();
 
@@ -935,10 +935,10 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex)
             {
-                items.ForEach(item =>
+                foreach (var item in items)
                 {
                     item.Version = -1;
-                });
+                }
 
                 if (!(ex is DatabaseException))
                 {
@@ -973,12 +973,12 @@ namespace HB.FullStack.Database
 
             try
             {
-                items.ForEach(item =>
+                foreach (var item in items)
                 {
                     item.Version++;
                     item.LastUser = lastUser;
                     item.LastTime = TimeUtil.UtcNow;
-                });
+                }
 
                 var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, entityDef, items);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
@@ -1008,10 +1008,10 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex)
             {
-                items.ForEach(item =>
+                foreach (var item in items)
                 {
                     item.Version--;
-                });
+                }
 
                 if (!(ex is DatabaseException))
                 {
@@ -1046,13 +1046,13 @@ namespace HB.FullStack.Database
 
             try
             {
-                items.ForEach(item =>
+                foreach (var item in items)
                 {
                     item.Version++;
                     item.Deleted = true;
                     item.LastUser = lastUser;
                     item.LastTime = TimeUtil.UtcNow;
-                });
+                }
 
                 var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, entityDef, items);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
@@ -1082,11 +1082,11 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex)
             {
-                items.ForEach(item =>
+                foreach (var item in items)
                 {
                     item.Version--;
                     item.Deleted = false;
-                });
+                }
 
                 if (!(ex is DatabaseException))
                 {

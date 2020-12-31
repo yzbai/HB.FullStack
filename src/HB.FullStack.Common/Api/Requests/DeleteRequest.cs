@@ -8,17 +8,42 @@ namespace HB.FullStack.Common.Api
 {
     public class DeleteRequest<T> : ApiRequest<T> where T : Resource
     {
-        public DeleteRequest() : base(HttpMethod.Delete, null) { }
-
-        public DeleteRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Delete, null) { }
-
         [CollectionNotEmpty]
         [IdBarrier]
         public List<T> Resources { get; set; } = new List<T>();
 
+        public DeleteRequest() : base(HttpMethod.Delete, null) { }
+
+        protected DeleteRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Delete, null) { }
+
+        protected DeleteRequest(IEnumerable<T> ress) : this()
+        {
+            Resources.AddRange(ress);
+        }
+
+        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : this(apiKeyName)
+        {
+            Resources.AddRange(ress);
+        }
+
+        public DeleteRequest(T res) : this()
+        {
+            Resources.Add(res);
+        }
+
+        public DeleteRequest(string apiKeyName, T res) : this(apiKeyName)
+        {
+            Resources.Add(res);
+        }
+
+        public void AddResource(params T[] ress)
+        {
+            Resources.AddRange(ress);
+        }
+
         public override int GetHashCode()
         {
-            return ((ApiRequest)this).GetHashCode();
+            return HashCode.Combine(Resources);
         }
     }
 }

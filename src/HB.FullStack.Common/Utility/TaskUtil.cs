@@ -186,7 +186,10 @@ namespace System.Threading.Tasks
 
                 IEnumerable<T> finishedTs = await t.ConfigureAwait(continueOnCapturedContext);
 
-                finishedTs.ForEach(item => results.Add(convertor(item)));
+                foreach (var item in finishedTs)
+                {
+                    results.Add(convertor(item));
+                }
             }
 
             return results;

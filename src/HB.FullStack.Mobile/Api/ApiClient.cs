@@ -42,7 +42,7 @@ namespace HB.FullStack.Client.Api
         public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? new List<T>();
 
-        public Task<T> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
+        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
             => SendAsync<T, T>(request, ApiRequestType.GetSingle);
 
         public Task AddAsync<T>(AddRequest<T> addRequest) where T : Resource
@@ -54,11 +54,11 @@ namespace HB.FullStack.Client.Api
         public Task DeleteAsync<T>(DeleteRequest<T> request) where T : Resource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
-        private async Task<TResponse> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
+        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
         {
             if (!request.IsValid())
             {
-                throw new ApiException(ErrorCode.ApiModelValidationError, HttpStatusCode.BadRequest);
+                throw new ApiException(ErrorCode.ApiModelValidationError, HttpStatusCode.BadRequest, request.GetValidateErrorMessage());
             }
 
             EndpointSettings endpoint = GetEndpoint(request);

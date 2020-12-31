@@ -26,10 +26,10 @@ namespace HB.FullStack.Common.Api
 
         public ApiError(ErrorCode code, IDictionary<string, IEnumerable<string>> modelStates) : this(code: code, message: null)
         {
-            modelStates.ForEach(kv =>
+            foreach (var kv in modelStates)
             {
                 ModelStates.Add(kv.Key, new List<string>(kv.Value));
-            });
+            }
         }
     }
 }

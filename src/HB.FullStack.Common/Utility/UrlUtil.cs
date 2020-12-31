@@ -18,7 +18,10 @@ namespace HB.FullStack.Common.Utility
 
             NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-            parameters.ForEach(kv => { queries[kv.Key] = kv.Value; });
+            foreach (var kv in parameters)
+            {
+                queries[kv.Key] = kv.Value;
+            }
 
             uriBuilder.Query = queries.ToString();
 

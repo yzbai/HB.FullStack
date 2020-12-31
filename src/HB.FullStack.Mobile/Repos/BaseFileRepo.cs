@@ -24,9 +24,7 @@ namespace HB.FullStack.Client.Repos
 
             var fileNames = resources.Select(r => $"{r.Id}{fileSuffix}");
 
-            FileUpdateRequest<TRes> request = new FileUpdateRequest<TRes>(fileDatas, fileNames);
-
-            request.Resources.AddRange(resources);
+            FileUpdateRequest<TRes> request = new FileUpdateRequest<TRes>(fileDatas, fileNames, resources);
 
             return ApiClient.UpdateAsync(request);
         }

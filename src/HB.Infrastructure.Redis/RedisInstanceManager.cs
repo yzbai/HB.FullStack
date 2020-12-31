@@ -213,11 +213,11 @@ namespace HB.Infrastructure.Redis
 
         public static void CloseAll()
         {
-            _connectionDict.ForEach(kv =>
+            foreach (var kv in _connectionDict)
             {
                 kv.Value?.Dispose();
                 _connectionDict.TryRemove(kv.Key, out ConnectionMultiplexer _);
-            });
+            }
 
             _connectionDict = new ConcurrentDictionary<string, ConnectionMultiplexer>();
         }

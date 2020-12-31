@@ -402,9 +402,9 @@ end
             {
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesGetAndRefreshByDimensionLua;
 
-                foreach (string dk in dimensionKeyValues)
+                foreach (object dk in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dk));
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dk.ToString()));
                 }
             }
 

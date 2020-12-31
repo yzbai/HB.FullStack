@@ -49,7 +49,7 @@ namespace HB.FullStack.Server.Filters
 
                     if (!await _smsService.ValidateAsync(mobile!, smsCode!).ConfigureAwait(false))
                     {
-                        _authorizationService.OnSignInFailedBySmsAsync(mobile!, apiRequest.DeviceInfos.Name).Fire();
+                        _authorizationService.OnSignInFailedBySmsAsync(mobile!, apiRequest.GetLastUser()).Fire();
                         OnError(context);
                         return;
                     }

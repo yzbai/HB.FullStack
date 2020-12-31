@@ -49,7 +49,10 @@ namespace HB.FullStack.Database.Def
 
         private static void WarmUp(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
-            allEntityTypes.ForEach(t => _defDict[t] = CreateEntityDef(t, engineType, entitySchemaDict));
+            foreach (var t in allEntityTypes)
+            {
+                _defDict[t] = CreateEntityDef(t, engineType, entitySchemaDict);
+            }
         }
 
         private static IDictionary<string, EntitySetting> ConstructeSchemaDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allEntityTypes)
@@ -58,7 +61,7 @@ namespace HB.FullStack.Database.Def
 
             IDictionary<string, EntitySetting> resusltEntitySchemaDict = new Dictionary<string, EntitySetting>();
 
-            allEntityTypes.ForEach(type =>
+            foreach (var type in allEntityTypes)
             {
                 DatabaseAttribute attribute = type.GetCustomAttribute<DatabaseAttribute>();
 
@@ -128,7 +131,7 @@ namespace HB.FullStack.Database.Def
                 }
 
                 resusltEntitySchemaDict.Add(type.FullName, entitySchema);
-            });
+            }
 
             return resusltEntitySchemaDict;
         }

@@ -97,7 +97,7 @@ namespace HB.FullStack.Client.Repos
             RequestLocker.UnLock(apiRequest.GetType().FullName, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
         }
 
-        protected async Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext = null, bool forced = false)
+        protected async Task<TEntity?> GetSingleAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext = null, bool forced = false)
         {
             if (NeedLogined)
             {
@@ -131,7 +131,12 @@ namespace HB.FullStack.Client.Repos
 
             //获取全程，更新本地
 
-            TRes res = await ApiClient.GetSingleAsync(request).ConfigureAwait(false);
+            TRes? res = await ApiClient.GetSingleAsync(request).ConfigureAwait(false);
+
+            if (res == null)
+            {
+                return null;
+            }
 
             TEntity remote = ToEntity(res);
 
@@ -190,9 +195,7 @@ namespace HB.FullStack.Client.Repos
             if (InsureInternet(AllowOfflineWrite))
             {
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>();
-
-                addRequest.Resources.AddRange(entities.Select(k => ToResource(k)));
+                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)));
 
                 await ApiClient.AddAsync(addRequest).ConfigureAwait(false);
 
@@ -212,9 +215,7 @@ namespace HB.FullStack.Client.Repos
 
             if (InsureInternet(AllowOfflineWrite))
             {
-                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>();
-
-                updateRequest.Resources.Add(ToResource(entity));
+                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 
                 await ApiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
 

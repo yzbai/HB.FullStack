@@ -20,6 +20,12 @@ namespace HB.FullStack.Identity
         {
             _databaseReader = databaseReader;
 
+            EntityAdded += (roleOfUser, args) =>
+            {
+                InvalidateCache(CachedRolesByUserId.Key(roleOfUser.UserId).Timestamp(args.UtcNowTicks));
+                return Task.CompletedTask;
+            };
+
             EntityUpdated += (roleOfUser, args) =>
             {
                 InvalidateCache(CachedRolesByUserId.Key(roleOfUser.UserId).Timestamp(args.UtcNowTicks));

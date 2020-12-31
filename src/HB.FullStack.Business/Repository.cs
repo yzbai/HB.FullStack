@@ -102,53 +102,53 @@ namespace HB.FullStack.Repository
         protected virtual Task OnEntityUpdatingAsync(TEntity entity)
         {
             //Events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdating), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdating), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityUpdatedAsync(TEntity entity)
         {
             //Events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdated), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdated), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityUpdateFailedAsync(TEntity? entity)
         {
             //Events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdateFailed), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityUpdateFailed), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityAddingAsync(TEntity entity)
         {
             //events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityAdding), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityAdding), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityAddedAsync(TEntity entity)
         {
             //Events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityAdded), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityAdded), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityAddFailedAsync(TEntity entity)
         {
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityAddFailed), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityAddFailed), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityDeletingAsync(TEntity entity)
         {
             //Events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityDeleting), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityDeleting), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityDeletedAsync(TEntity entity)
         {
             //Events
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityDeleted), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityDeleted), entity, new DatabaseWriteEventArgs());
         }
 
         protected virtual Task OnEntityDeleteFailedAsync(TEntity entity)
         {
-            return _asyncEventManager.RaiseEventAsync(nameof(EntityAddFailed), entity, EventArgs.Empty);
+            return _asyncEventManager.RaiseEventAsync(nameof(EntityAddFailed), entity, new DatabaseWriteEventArgs());
         }
 
         #endregion

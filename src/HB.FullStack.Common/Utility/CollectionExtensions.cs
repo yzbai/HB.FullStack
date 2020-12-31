@@ -14,18 +14,18 @@ namespace System
 {
     public static class CollectionExtensions
     {
-        public static void ForEach<T>(this IEnumerable<T>? enumerable, Action<T> action)
-        {
-            if (enumerable == null)
-            {
-                return;
-            }
+        //public static void ForEach<T>(this IEnumerable<T>? enumerable, Action<T> action)
+        //{
+        //    if (enumerable == null)
+        //    {
+        //        return;
+        //    }
 
-            foreach (T t in enumerable)
-            {
-                action(t);
-            }
-        }
+        //    foreach (T t in enumerable)
+        //    {
+        //        action(t);
+        //    }
+        //}
 
         public static void Add<T>(this IList<T> original, IEnumerable<T> items)
         {
@@ -136,7 +136,10 @@ namespace System
         {
             NameValueCollection nameValueCollection = HttpUtility.ParseQueryString("");
 
-            dict.ForEach(kv => nameValueCollection.Add(kv.Key, kv.Value));
+            foreach (var kv in dict)
+            {
+                nameValueCollection.Add(kv.Key, kv.Value);
+            }
 
             return nameValueCollection;
         }

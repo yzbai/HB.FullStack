@@ -171,6 +171,7 @@
         DistributedLockUnLockFailed = 934,
         ApiNoInternet = 935,
         ApiUploadFailed = 936,
+        DatabaseVersionNotSet = 937,
     }
 
     public static class ErrorCodeExtensions
