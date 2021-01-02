@@ -24,7 +24,7 @@ namespace HB.FullStack.DistributedLock.Test
 
         private readonly IMemoryLockManager _lockManager;
 
-        private readonly ILogger _logger;
+        private readonly ILogger? _logger;
         public MemoryLockTests(ServiceFixture_MySql serviceFixture)
         {
             _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IMemoryLockManager>();
@@ -74,7 +74,7 @@ namespace HB.FullStack.DistributedLock.Test
                 tasks.Add(LockWorkAsync(resources, locksAcquired));
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 
             Assert.True(locksAcquired.Count == 6);
         }
@@ -92,7 +92,7 @@ namespace HB.FullStack.DistributedLock.Test
                 {
                     locksAcquired.Add(1);
                 }
-                await Task.Delay(4000);
+                await Task.Delay(4000).ConfigureAwait(false);
 
                 _logger.LogInformation("Leaving lock");
             }

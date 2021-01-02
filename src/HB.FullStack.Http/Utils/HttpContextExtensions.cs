@@ -93,7 +93,7 @@ namespace System
             {
                 try
                 {
-                    ip = httpContext.Connection.RemoteIpAddress.ToString();
+                    ip = httpContext.Connection.RemoteIpAddress?.ToString();
                 }
                 catch
                 {
@@ -119,9 +119,7 @@ namespace System
         {
             try
             {
-                StringValues values;
-
-                if (request.Headers?.TryGetValue(headerName, out values) ?? false)
+                if (request.Headers.TryGetValue(headerName, out StringValues values))
                 {
                     string rawValues = values.ToString();   // writes out as Csv when there are multiple.
 

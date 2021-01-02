@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     /// <summary>
     /// 将IEnumerable<string> 转换为用逗号“,”链接的字符串

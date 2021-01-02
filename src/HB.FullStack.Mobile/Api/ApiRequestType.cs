@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Client.Api
+﻿namespace HB.FullStack.Mobile.Api
 {
     public enum ApiRequestType
     {

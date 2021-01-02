@@ -48,9 +48,9 @@ namespace HB.FullStack.KVStore.Entities
 
             foreach (var type in allEntityTypes)
             {
-                KVStoreAttribute attribute = type.GetCustomAttribute<KVStoreAttribute>();
+                KVStoreAttribute? attribute = type.GetCustomAttribute<KVStoreAttribute>();
 
-                filedDict.TryGetValue(type.FullName, out KVStoreEntitySchema fileConfigured);
+                filedDict.TryGetValue(type.FullName!, out KVStoreEntitySchema? fileConfigured);
 
                 string? instanceName = null;
 
@@ -71,11 +71,11 @@ namespace HB.FullStack.KVStore.Entities
 
                 KVStoreEntitySchema entitySchema = new KVStoreEntitySchema
                 {
-                    EntityTypeFullName = type.FullName,
+                    EntityTypeFullName = type.FullName!,
                     InstanceName = instanceName!
                 };
 
-                resultDict.Add(type.FullName, entitySchema);
+                resultDict.Add(type.FullName!, entitySchema);
             }
 
             return resultDict;
@@ -104,9 +104,9 @@ namespace HB.FullStack.KVStore.Entities
 
         private static KVStoreEntityDef CreateEntityDef(Type type)
         {
-            if (!_typeSchemaDict.TryGetValue(type.FullName, out KVStoreEntitySchema storeEntitySchema))
+            if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreEntitySchema? storeEntitySchema))
             {
-                throw new KVStoreException(ErrorCode.KVStoreNoEntitySchemaFound, type.FullName);
+                throw new KVStoreException(ErrorCode.KVStoreNoEntitySchemaFound, type.FullName!);
             }
 
             KVStoreEntityDef entityDef = new KVStoreEntityDef(storeEntitySchema.InstanceName, type);
@@ -119,7 +119,7 @@ namespace HB.FullStack.KVStore.Entities
 
             foreach (PropertyInfo info in properties)
             {
-                KVStoreKeyAttribute keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>();
+                KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>();
 
                 if (keyAttr != null)
                 {

@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Api
     {
         [CollectionNotEmpty]
         [IdBarrier]
-        public List<T> Resources { get; set; } = new List<T>();
+        public IList<T> Resources { get; set; } = new List<T>();
 
         public DeleteRequest() : base(HttpMethod.Delete, null) { }
 

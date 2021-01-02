@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Shapes;
 
-namespace HB.FullStack.Client.Behaviors
+namespace HB.FullStack.Mobile.Behaviors
 {
     public class CircleClipBehavior : BaseBehavior<View>
     {
@@ -16,7 +16,7 @@ namespace HB.FullStack.Client.Behaviors
             bindable.SizeChanged += Bindable_SizeChanged;
         }
 
-        private void Bindable_SizeChanged(object sender, EventArgs e)
+        private void Bindable_SizeChanged(object? sender, EventArgs e)
         {
             if (sender is View view)
             {

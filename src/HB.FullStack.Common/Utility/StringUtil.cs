@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 using Microsoft;
@@ -16,8 +17,8 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        
-        
+
+
         public static byte[] GetUTF8Bytes(string item)
         {
             return Encoding.UTF8.GetBytes(item);
@@ -28,9 +29,9 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        
-        
-        
+
+
+
         public static string GetUTF8String(byte[] item)
         {
             return Encoding.UTF8.GetString(item);
@@ -41,8 +42,8 @@ namespace System
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        
-        
+
+
         public static string ToHexString(byte[] bytes)
         {
             StringBuilder hex = new StringBuilder();
@@ -210,12 +211,12 @@ namespace System
             return true;
         }
 
-        public static bool IsNullOrEmpty([ValidatedNotNull] this string? str)
+        public static bool IsNullOrEmpty([ValidatedNotNull][NotNullWhen(false)] this string? str)
         {
             return string.IsNullOrEmpty(str);
         }
 
-        public static bool IsNotNullOrEmpty([ValidatedNotNull] this string? str)
+        public static bool IsNotNullOrEmpty([ValidatedNotNull][NotNullWhen(true)] this string? str)
         {
             return !string.IsNullOrEmpty(str);
         }

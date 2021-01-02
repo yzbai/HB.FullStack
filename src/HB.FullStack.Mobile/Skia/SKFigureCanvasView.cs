@@ -1,5 +1,5 @@
-﻿using HB.FullStack.Client.Base;
-using HB.FullStack.Client.Effects;
+﻿using HB.FullStack.Mobile.Base;
+using HB.FullStack.Mobile.Effects;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -15,7 +15,7 @@ using AsyncAwaitBestPractices;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.FullStack.Client.Skia
+namespace HB.FullStack.Mobile.Skia
 {
     [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable",
         Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
@@ -155,7 +155,7 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void OnFiguresCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnFiguresCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (sender is IEnumerable<SKFigure> figures)
             {
@@ -211,7 +211,7 @@ namespace HB.FullStack.Client.Skia
             _stopwatch.Stop();
         }
 
-        private void FigureCanvasView_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
+        private void FigureCanvasView_PaintSurface(object? sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
@@ -224,7 +224,7 @@ namespace HB.FullStack.Client.Skia
             OnPainted(sender, e);
         }
 
-        private void OnPainting(object sender, SKPaintSurfaceEventArgs e)
+        private void OnPainting(object? sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
@@ -245,7 +245,7 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void OnPainted(object sender, SKPaintSurfaceEventArgs e)
+        private void OnPainted(object? sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
@@ -255,7 +255,7 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void TouchEffect_TouchAction(object sender, TouchActionEventArgs args)
+        private void TouchEffect_TouchAction(object? sender, TouchActionEventArgs args)
         {
             if (Figures == null)
             {

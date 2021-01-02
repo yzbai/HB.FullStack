@@ -2,7 +2,7 @@
 using System.Globalization;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     /// <summary>
     /// Int值的倍数，parameter表示几倍

@@ -61,15 +61,15 @@ namespace HB.FullStack.Database.Def
 
             IDictionary<string, EntitySetting> resusltEntitySchemaDict = new Dictionary<string, EntitySetting>();
 
-            foreach (var type in allEntityTypes)
+            foreach (Type type in allEntityTypes)
             {
-                DatabaseAttribute attribute = type.GetCustomAttribute<DatabaseAttribute>();
+                DatabaseAttribute? attribute = type.GetCustomAttribute<DatabaseAttribute>();
 
-                fileConfiguredDict.TryGetValue(type.FullName, out EntitySetting fileConfigured);
+                fileConfiguredDict.TryGetValue(type.FullName!, out EntitySetting? fileConfigured);
 
                 EntitySetting entitySchema = new EntitySetting
                 {
-                    EntityTypeFullName = type.FullName
+                    EntityTypeFullName = type.FullName!
                 };
 
                 if (attribute != null)
@@ -130,7 +130,7 @@ namespace HB.FullStack.Database.Def
                     entitySchema.TableName = "tb_" + type.Name.ToLower(GlobalSettings.Culture);
                 }
 
-                resusltEntitySchemaDict.Add(type.FullName, entitySchema);
+                resusltEntitySchemaDict.Add(type.FullName!, entitySchema);
             }
 
             return resusltEntitySchemaDict;
@@ -143,7 +143,7 @@ namespace HB.FullStack.Database.Def
 
         public static EntityDef? GetDef(Type entityType)
         {
-            if (_defDict.TryGetValue(entityType, out EntityDef entityDef))
+            if (_defDict.TryGetValue(entityType, out EntityDef? entityDef))
             {
                 return entityDef;
             }
@@ -155,7 +155,7 @@ namespace HB.FullStack.Database.Def
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
-            if (!entitySchemaDict!.TryGetValue(entityType.FullName, out EntitySetting dbSchema))
+            if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
                 throw new DatabaseException($"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
             }
@@ -165,7 +165,7 @@ namespace HB.FullStack.Database.Def
                 IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIncrementIdEntity)),
                 IsIdGuid = entityType.IsSubclassOf(typeof(GuidEntity)),
                 EntityType = entityType,
-                EntityFullName = entityType.FullName,
+                EntityFullName = entityType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
                 TableName = dbSchema.TableName
             };
@@ -177,7 +177,7 @@ namespace HB.FullStack.Database.Def
 
             foreach (PropertyInfo info in orderedProperties)
             {
-                EntityPropertyAttribute entityPropertyAttribute = info.GetCustomAttribute<EntityPropertyAttribute>(true);
+                EntityPropertyAttribute? entityPropertyAttribute = info.GetCustomAttribute<EntityPropertyAttribute>(true);
 
                 if (entityPropertyAttribute == null)
                 {
@@ -223,8 +223,12 @@ namespace HB.FullStack.Database.Def
                 Type = propertyInfo.PropertyType
             };
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
-            propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType);
-            propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType);
+
+            propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
+                ?? throw new DatabaseException(ErrorCode.DatabaseDefError, $"实体属性缺少Set方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
+
+            propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
+                ?? throw new DatabaseException(ErrorCode.DatabaseDefError, $"实体属性缺少Get方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
 
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;
@@ -238,7 +242,7 @@ namespace HB.FullStack.Database.Def
 
             if (propertyAttribute.Converter != null)
             {
-                propertyDef.TypeConverter = (ITypeConverter)Activator.CreateInstance(propertyAttribute.Converter);
+                propertyDef.TypeConverter = (ITypeConverter)Activator.CreateInstance(propertyAttribute.Converter)!;
             }
 
             //判断是否是主键
@@ -256,7 +260,7 @@ namespace HB.FullStack.Database.Def
             else
             {
                 //判断是否外键
-                ForeignKeyAttribute atts2 = propertyInfo.GetCustomAttribute<ForeignKeyAttribute>(false);
+                ForeignKeyAttribute? atts2 = propertyInfo.GetCustomAttribute<ForeignKeyAttribute>(false);
 
                 if (atts2 != null)
                 {

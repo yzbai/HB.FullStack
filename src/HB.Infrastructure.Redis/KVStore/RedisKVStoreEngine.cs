@@ -133,14 +133,14 @@ return array";
 
         private LoadedLuas GetLoadedLuas(string instanceName)
         {
-            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas loadedLuas))
+            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas? loadedLuas))
             {
                 return loadedLuas;
             }
 
             InitLoadedLuas();
 
-            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas loadedLuas2))
+            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas? loadedLuas2))
             {
                 return loadedLuas2;
             }
@@ -492,7 +492,7 @@ return array";
 
         private async Task<IDatabase> GetDatabaseAsync(string instanceName)
         {
-            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
+            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }

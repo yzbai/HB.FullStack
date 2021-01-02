@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -6,7 +7,6 @@ using HB.FullStack.Database.Engine;
 
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
-
 namespace HB.FullStack.Database
 {
     public interface IDatabase : IDatabaseWriter, IDatabaseReader

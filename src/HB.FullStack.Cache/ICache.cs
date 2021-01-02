@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace HB.FullStack.Cache
 {
 
@@ -43,7 +44,7 @@ namespace HB.FullStack.Cache
 
             if (exist)
             {
-                return (results.ElementAt(0), true);
+                return (results!.ElementAt(0), true);
             }
 
             return (null, false);
@@ -54,7 +55,7 @@ namespace HB.FullStack.Cache
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
             string dimensionKeyName = entityDef.KeyProperty.Name;
-            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity).ToString();
+            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity)!.ToString()!;
 
             return GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token);
         }
@@ -83,7 +84,7 @@ namespace HB.FullStack.Cache
 
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
             string dimensionKeyName = entityDef.KeyProperty.Name;
-            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e).ToString());
+            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e)!.ToString()!);
             IEnumerable<int> updatedVersions = entities.Select(e => e.Version);
 
             return RemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, updatedVersions, token);
@@ -105,7 +106,7 @@ namespace HB.FullStack.Cache
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
 
             string dimensionKeyName = entityDef.KeyProperty.Name;
-            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity).ToString();
+            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity)!.ToString()!;
 
             return RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, entity.Version, token);
         }

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public class ApiEventArgs : EventArgs
     {

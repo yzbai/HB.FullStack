@@ -34,7 +34,7 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new ArgumentNullException(nameof(CacheKey));
+                throw new FrameworkException(nameof(CacheKey));
             }
 
             return cache.GetAsync<TResult>(CacheKey, cancellationToken);
@@ -44,12 +44,12 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new ArgumentNullException(nameof(CacheKey));
+                throw new FrameworkException(nameof(CacheKey));
             }
 
             if (CacheValue == null)
             {
-                throw new ArgumentNullException(nameof(CacheValue));
+                throw new FrameworkException(nameof(CacheKey));
             }
 
             if (UtcTikcs.IsEmpty())
@@ -73,7 +73,7 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new ArgumentNullException(nameof(CacheKey));
+                throw new FrameworkException(nameof(CacheKey));
             }
 
             if (UtcTikcs.IsEmpty())

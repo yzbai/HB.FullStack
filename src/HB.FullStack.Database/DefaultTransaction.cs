@@ -53,7 +53,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbConnection conn = context.Transaction.Connection;
+                IDbConnection? conn = context.Transaction.Connection;
 
                 await _databaseEngine.CommitAsync(context.Transaction).ConfigureAwait(false);
                 //context.Transaction.Commit();
@@ -93,7 +93,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbConnection conn = context.Transaction.Connection;
+                IDbConnection? conn = context.Transaction.Connection;
 
                 await _databaseEngine.RollbackAsync(context.Transaction).ConfigureAwait(false);
                 //context.Transaction.Rollback();

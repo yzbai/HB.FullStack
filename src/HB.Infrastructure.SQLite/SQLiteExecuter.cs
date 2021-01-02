@@ -82,22 +82,20 @@ namespace HB.Infrastructure.SQLite
 
         #region Command Scalar
 
-        public static async Task<object> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
+        public static async Task<object?> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        public static async Task<object> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
+        public static async Task<object?> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandScalarAsync(sqliteTransaction.Connection, dbCommand).ConfigureAwait(false);
         }
 
-        private static async Task<object> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
+        private static async Task<object?> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
         {
-            object rtObj;
-
             try
             {
                 if (connection.State != ConnectionState.Open)
@@ -107,7 +105,7 @@ namespace HB.Infrastructure.SQLite
 
                 command.Connection = connection;
 
-                rtObj = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                return await command.ExecuteScalarAsync().ConfigureAwait(false);
             }
             catch (SqliteException sqliteException)
             {
@@ -117,8 +115,6 @@ namespace HB.Infrastructure.SQLite
             {
                 throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
             }
-
-            return rtObj;
         }
 
         #endregion Command Scalar

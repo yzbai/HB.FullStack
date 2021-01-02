@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace HB.FullStack.Database.SQL
@@ -10,12 +11,7 @@ namespace HB.FullStack.Database.SQL
     //http://blogs.msdn.com/b/mattwar/archive/2007/07/31/linq-building-an-iqueryable-provider-part-ii.aspx
     internal abstract class ExpressionVisitor
     {
-        /// <summary>
-        /// Visit
-        /// </summary>
-        /// <param name="exp"></param>
-        /// <returns></returns>
-        
+        [return: NotNullIfNotNull("exp")]
         protected virtual Expression? Visit(Expression? exp)
         {
             if (exp == null)
@@ -105,7 +101,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="binding"></param>
         /// <returns></returns>
-        
+
         protected virtual MemberBinding VisitBinding(MemberBinding binding)
         {
             return binding.BindingType switch
@@ -119,7 +115,7 @@ namespace HB.FullStack.Database.SQL
 
         protected virtual ElementInit VisitElementInitializer(ElementInit initializer)
         {
-            ReadOnlyCollection<Expression?> arguments = VisitExpressionList(initializer.Arguments);
+            ReadOnlyCollection<Expression> arguments = VisitExpressionList(initializer.Arguments);
             if (arguments != initializer.Arguments)
             {
                 return Expression.ElementInit(initializer.AddMethod, arguments);
@@ -197,7 +193,7 @@ namespace HB.FullStack.Database.SQL
         protected virtual Expression VisitMethodCall(MethodCallExpression m)
         {
             Expression? obj = Visit(m.Object);
-            IEnumerable<Expression?> args = VisitExpressionList(m.Arguments);
+            IEnumerable<Expression> args = VisitExpressionList(m.Arguments);
             if (obj != m.Object || args != m.Arguments)
             {
                 return Expression.Call(obj, m.Method, args);
@@ -205,9 +201,9 @@ namespace HB.FullStack.Database.SQL
             return m;
         }
 
-        protected virtual ReadOnlyCollection<Expression?> VisitExpressionList(ReadOnlyCollection<Expression?> original)
+        protected virtual ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
         {
-            List<Expression?>? list = null;
+            List<Expression>? list = null;
 
             for (int i = 0, n = original.Count; i < n; i++)
             {
@@ -219,7 +215,7 @@ namespace HB.FullStack.Database.SQL
                 }
                 else if (p != original[i])
                 {
-                    list = new List<Expression?>(n);
+                    list = new List<Expression>(n);
 
                     for (int j = 0; j < i; j++)
                     {
@@ -328,13 +324,13 @@ namespace HB.FullStack.Database.SQL
 
         protected virtual NewExpression VisitNew(NewExpression nex)
         {
-            IEnumerable<Expression?> args = VisitExpressionList(nex.Arguments);
+            IEnumerable<Expression> args = VisitExpressionList(nex.Arguments);
             if (args != nex.Arguments)
             {
                 if (nex.Members != null)
-                    return Expression.New(nex.Constructor, args, nex.Members);
+                    return Expression.New(nex.Constructor!, args, nex.Members);
                 else
-                    return Expression.New(nex.Constructor, args);
+                    return Expression.New(nex.Constructor!, args);
             }
             return nex;
         }
@@ -363,16 +359,16 @@ namespace HB.FullStack.Database.SQL
 
         protected virtual Expression VisitNewArray(NewArrayExpression na)
         {
-            IEnumerable<Expression?> exprs = VisitExpressionList(na.Expressions);
+            IEnumerable<Expression> exprs = VisitExpressionList(na.Expressions);
             if (exprs != na.Expressions)
             {
                 if (na.NodeType == ExpressionType.NewArrayInit)
                 {
-                    return Expression.NewArrayInit(na.Type.GetElementType(), exprs);
+                    return Expression.NewArrayInit(na.Type.GetElementType()!, exprs);
                 }
                 else
                 {
-                    return Expression.NewArrayBounds(na.Type.GetElementType(), exprs);
+                    return Expression.NewArrayBounds(na.Type.GetElementType()!, exprs);
                 }
             }
             return na;
@@ -380,7 +376,7 @@ namespace HB.FullStack.Database.SQL
 
         protected virtual Expression VisitInvocation(InvocationExpression iv)
         {
-            IEnumerable<Expression?> args = VisitExpressionList(iv.Arguments);
+            IEnumerable<Expression> args = VisitExpressionList(iv.Arguments);
             Expression? expr = Visit(iv.Expression);
             if (args != iv.Arguments || expr != iv.Expression)
             {

@@ -5,7 +5,7 @@ using System.Text;
 namespace HB.FullStack.Common.Resources
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class ApiAttribute : Attribute
+    public sealed class ApiAttribute : Attribute
     {
         public string EndPointName { get; }
 

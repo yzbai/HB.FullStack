@@ -1,11 +1,12 @@
-﻿using HB.FullStack.DatabaseTests.Data;
+﻿#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+using HB.FullStack.DatabaseTests.Data;
 
 using Microsoft.Data.Sqlite;
 
 using MySqlConnector;
 
 using System;
-
+using System.Security.Cryptography;
 using Xunit;
 
 namespace HB.FullStack.DatabaseTests
@@ -18,11 +19,12 @@ namespace HB.FullStack.DatabaseTests
         /// <summary>
         /// TestUseAffectedRow_When_True_Test
         /// </summary>
-        
+
         [Theory]
         [InlineData(true, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(false, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(null, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
         public void TestMySQL_UseAffectedRow_Test(bool? UseAffectedRows, string connectString)
         {
             if (UseAffectedRows.HasValue)
@@ -40,7 +42,6 @@ namespace HB.FullStack.DatabaseTests
             using MySqlCommand insertCommand = new MySqlCommand(insertCommandText, mySqlConnection);
 
             insertCommand.ExecuteScalar();
-
 
             string commandText = $"update `tb_publisher` set  `Name`='{new Random().NextDouble()}', `Version`=2 WHERE `Guid`='{guid}' ;";
 
@@ -74,6 +75,7 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
         public void TestSQLite_Changes_Test()
         {
             string connectString = $"Data Source=sqlite_test2.db";
@@ -112,3 +114,5 @@ namespace HB.FullStack.DatabaseTests
         }
     }
 }
+
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities

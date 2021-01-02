@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <base:BaseContentView
-    x:Class="HB.FullStack.Client.Controls.Chip"
+    x:Class="HB.FullStack.Mobile.Controls.Chip"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:base="clr-namespace:HB.FullStack.Client.Base"
-    xmlns:converters="clr-namespace:HB.FullStack.Client.Converters"
+    xmlns:base="clr-namespace:HB.FullStack.Mobile.Base"
+    xmlns:converters="clr-namespace:HB.FullStack.Mobile.Converters"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="ChipRoot"

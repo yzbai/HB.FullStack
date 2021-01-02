@@ -153,7 +153,7 @@ namespace System.Net.Http
                 { ClientNames.DeviceId, request.DeviceId }//额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
             };
 
-            string query = parameters.ToHttpValueCollection().ToString();
+            string? query = parameters.ToHttpValueCollection().ToString();
             requestUrlBuilder.Append('?');
             requestUrlBuilder.Append(query);
 

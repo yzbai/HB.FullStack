@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Api
     {
         [IdBarrier]
         [CollectionNotEmpty]
-        public List<T> Resources { get; set; } = new List<T>();
+        public IList<T> Resources { get; set; } = new List<T>();
 
         public UpdateRequest() : base(HttpMethod.Put, null) { }
 

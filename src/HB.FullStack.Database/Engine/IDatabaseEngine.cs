@@ -39,7 +39,7 @@ namespace HB.FullStack.Database.Engine
         Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
 
 
-        Task<object> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
+        Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
 
         #endregion Command执行功能
 

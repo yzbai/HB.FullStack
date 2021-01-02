@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;

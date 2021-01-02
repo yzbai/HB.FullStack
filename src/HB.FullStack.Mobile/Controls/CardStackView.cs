@@ -5,12 +5,12 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows.Input;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Markup;
 using static Xamarin.Forms.Markup.GridRowsColumns;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class CardStackView : BaseContentView
     {
@@ -82,7 +82,7 @@ namespace HB.FullStack.Client.Controls
             }
         }
 
-        private void OnItemsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnItemsSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             ReAddCards();
         }
@@ -97,7 +97,7 @@ namespace HB.FullStack.Client.Controls
             ReAddCards();
         }
 
-        private void OnSizeChanged(object sender, EventArgs e)
+        private void OnSizeChanged(object? sender, EventArgs e)
         {
             ReAddCards();
         }
@@ -127,7 +127,7 @@ namespace HB.FullStack.Client.Controls
             card.Children[0].Opacity = 1;
             card.Children[1].Opacity = 0;
 
-            _root.Children.Add(_cards);
+            _root.Children.AddRange(_cards);
 
             _lastCard = card;
         }
@@ -182,7 +182,7 @@ namespace HB.FullStack.Client.Controls
                     RowDefinitions = Rows.Define(Auto),
                     ColumnDefinitions = Columns.Define(Star, LabelWidth),
                     TranslationX = i * LabelWidth,
-                    BackgroundColor = CardBackgroundColors.ElementAt(ItemsSource.Count - i - 1),
+                    BackgroundColor = CardBackgroundColors!.ElementAt(ItemsSource.Count - i - 1),
                     Children =
                     {
                         //Card Content
@@ -202,7 +202,7 @@ namespace HB.FullStack.Client.Controls
             _lastCard.Children[0].Opacity = 1;
             _lastCard.Children[1].Opacity = 0;
 
-            _root.Children.Add(_cards);
+            _root.Children.AddRange(_cards);
         }
 
         private void GenerateRandomBackgroudColors()

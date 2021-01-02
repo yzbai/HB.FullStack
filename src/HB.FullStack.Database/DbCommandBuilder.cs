@@ -22,7 +22,7 @@ namespace HB.FullStack.Database
         {
             string cacheKey = GetCommandTextCacheKey(commandTextType, entityDefs);
 
-            if (!_commandTextCache.TryGetValue(cacheKey, out string commandText))
+            if (!_commandTextCache.TryGetValue(cacheKey, out string? commandText))
             {
                 commandText = commandTextType switch
                 {

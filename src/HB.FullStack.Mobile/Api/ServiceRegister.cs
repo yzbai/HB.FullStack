@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Client.Api;
+﻿using HB.FullStack.Mobile.Api;
 using Microsoft.Extensions.Configuration;
 using Polly;
 using System;
@@ -68,7 +68,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     {
                         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                         {
-                            if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
                                 return true;
                             return errors == System.Net.Security.SslPolicyErrors.None;
                         }

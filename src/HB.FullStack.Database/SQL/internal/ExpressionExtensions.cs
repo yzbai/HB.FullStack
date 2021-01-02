@@ -6,7 +6,7 @@ namespace System.Linq.Expressions
     {
         public static string ToStatement(this Expression expression, SQLExpressionVisitorContenxt context)
         {
-            return SQLExpressionVisitor.Visit(expression, context).ToString();
+            return SQLExpressionVisitor.Visit(expression, context).ToString()!;
         }
     }
 }

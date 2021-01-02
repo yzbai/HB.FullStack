@@ -43,11 +43,11 @@ namespace HB.FullStack.Server.Security
             //return Task.FromResult(random.Next(0, 10) % 2 == 0);
         }
 
-        public async Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedExtensions, long sizeLimit)
+        public async Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedFileSuffixes, long sizeLimit)
         {
             // Check the file length. This check doesn't catch files that only have 
             // a BOM as their content.
-            if (formFile == null || formFile.Length == 0 || permittedExtensions.IsNullOrEmpty())
+            if (formFile == null || formFile.Length == 0 || permittedFileSuffixes.IsNullOrEmpty())
             {
                 throw new ApiException(ErrorCode.ApiUploadEmptyFile, System.Net.HttpStatusCode.BadRequest);
             }
@@ -72,7 +72,7 @@ namespace HB.FullStack.Server.Security
                 }
 
                 if (!IsValidFileExtensionAndSignature(
-                    formFile.FileName, memoryStream, permittedExtensions))
+                    formFile.FileName, memoryStream, permittedFileSuffixes))
                 {
                     throw new ApiException(ErrorCode.ApiUploadWrongType, System.Net.HttpStatusCode.BadRequest);
                 }

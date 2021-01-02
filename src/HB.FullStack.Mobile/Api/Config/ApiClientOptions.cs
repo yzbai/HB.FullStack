@@ -2,9 +2,10 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public class ApiClientOptions : IOptions<ApiClientOptions>
     {
@@ -25,7 +26,7 @@ namespace HB.FullStack.Client.Api
             }
         }
 
-        public bool TryGetApiKey(string? name, out string key)
+        public bool TryGetApiKey(string? name, [NotNullWhen(true)] out string? key)
         {
             if (string.IsNullOrEmpty(name))
             {

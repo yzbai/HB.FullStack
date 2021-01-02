@@ -5,7 +5,7 @@ using Xamarin.Forms;
 
 #nullable disable
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public class BaseBehavior<T> : Behavior<T> where T : BindableObject
     {

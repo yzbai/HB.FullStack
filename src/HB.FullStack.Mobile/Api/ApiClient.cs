@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     internal class ApiClient : IApiClient
     {
@@ -170,7 +170,7 @@ namespace HB.FullStack.Client.Api
 
         private bool TrySetApiKey<T>(ApiRequest<T> apiRequest) where T : Resource
         {
-            if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string key))
+            if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string? key))
             {
                 apiRequest.SetApiKey(key);
                 return true;

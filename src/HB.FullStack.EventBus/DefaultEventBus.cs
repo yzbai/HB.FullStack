@@ -69,7 +69,7 @@ namespace HB.FullStack.EventBus
 
         private string GetBrokerName(string eventName)
         {
-            if (_eventSchemaDict.TryGetValue(eventName, out EventSchema eventSchema))
+            if (_eventSchemaDict.TryGetValue(eventName, out EventSchema? eventSchema))
             {
                 return eventSchema.BrokerName;
             }

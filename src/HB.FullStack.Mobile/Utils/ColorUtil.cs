@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Mobile
 {
     public class ColorItem
     {
@@ -162,7 +162,9 @@ namespace HB.FullStack.Client
 
         public static ColorItem RandomColor()
         {
+#pragma warning disable CA5394 // Do not use insecure randomness
             return _systemColorItems[new Random().Next(0, _systemColorItems.Count)];
+#pragma warning restore CA5394 // Do not use insecure randomness
         }
     }
 }

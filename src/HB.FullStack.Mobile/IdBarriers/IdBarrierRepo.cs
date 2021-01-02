@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Database;
 
-namespace HB.FullStack.Client.IdBarriers
+namespace HB.FullStack.Mobile.IdBarriers
 {
     //TODO: 考虑缓存
     internal class IdBarrierRepo : IIdBarrierRepo
@@ -24,7 +24,7 @@ namespace HB.FullStack.Client.IdBarriers
             await _database.AddAsync(idBarrier, "", null).ConfigureAwait(false);
         }
 
-        public async Task AddIdBarrierAsync(List<long> clientIds, IEnumerable<long> servierIds, TransactionContext transactionContext)
+        public async Task AddIdBarrierAsync(IList<long> clientIds, IEnumerable<long> servierIds, TransactionContext transactionContext)
         {
             List<IdBarrier> idBarriers = new List<IdBarrier>();
 

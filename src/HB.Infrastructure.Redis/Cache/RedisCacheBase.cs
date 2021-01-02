@@ -83,14 +83,14 @@ namespace HB.Infrastructure.Redis.Cache
                 instanceName = DefaultInstanceName;
             }
 
-            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas loadedLuas))
+            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas? loadedLuas))
             {
                 return loadedLuas;
             }
 
             InitLoadedLuas();
 
-            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas loadedLuas2))
+            if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas? loadedLuas2))
             {
                 return loadedLuas2;
             }
@@ -105,7 +105,7 @@ namespace HB.Infrastructure.Redis.Cache
                 instanceName = DefaultInstanceName;
             }
 
-            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
+            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
@@ -125,7 +125,7 @@ namespace HB.Infrastructure.Redis.Cache
                 instanceName = DefaultInstanceName;
             }
 
-            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
+            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
                 return RedisInstanceManager.GetDatabase(setting, _logger);
             }

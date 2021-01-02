@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Utils
+namespace HB.FullStack.Mobile.Utils
 {
     public static class PreferenceHelper
     {

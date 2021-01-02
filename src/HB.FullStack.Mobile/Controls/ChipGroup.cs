@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows.Input;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class ChipGroupItem
     {
@@ -163,7 +163,7 @@ namespace HB.FullStack.Client.Controls
             }
         }
 
-        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -188,9 +188,12 @@ namespace HB.FullStack.Client.Controls
 
             int index = e.OldStartingIndex;
 
-            foreach (ChipGroupItem _ in e.OldItems)
+            if (e.OldItems != null)
             {
-                _rootLayout.Children.RemoveAt(index++);
+                foreach (ChipGroupItem _ in e.OldItems)
+                {
+                    _rootLayout.Children.RemoveAt(index++);
+                }
             }
         }
 
@@ -221,9 +224,12 @@ namespace HB.FullStack.Client.Controls
 
             int index = e.NewStartingIndex;
 
-            foreach (ChipGroupItem newItem in e.NewItems)
+            if (e.NewItems != null)
             {
-                _rootLayout.Children.Insert(index++, CreateChip(newItem));
+                foreach (ChipGroupItem newItem in e.NewItems)
+                {
+                    _rootLayout.Children.Insert(index++, CreateChip(newItem));
+                }
             }
         }
 
@@ -258,7 +264,7 @@ namespace HB.FullStack.Client.Controls
             return chip;
         }
 
-        private static void Chip_OnSelect(object sender, EventArgs e)
+        private static void Chip_OnSelect(object? sender, EventArgs e)
         {
             if (sender is Chip chip)
             {

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 
 namespace HB.FullStack.Common
@@ -68,7 +69,14 @@ namespace HB.FullStack.Common
                 {
                     _validationContext.MemberName = propertyName;
 
-                    object propertyValue = this.GetType().GetProperty(propertyName).GetValue(this);
+                    PropertyInfo? propertyInfo = GetType().GetProperty(propertyName);
+
+                    if (propertyInfo == null)
+                    {
+                        throw new FrameworkException(ErrorCode.PropertyNotFound, $"PropertyName:{propertyName}");
+                    }
+
+                    object? propertyValue = propertyInfo.GetValue(this);
 
                     return Validator.TryValidateProperty(propertyValue, _validationContext, _validateResults);
                 }

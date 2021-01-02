@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseViewModel : ObservableObject
     {
@@ -28,11 +28,6 @@ namespace HB.FullStack.Client.Base
         }
 
         public IEnumerable<ValidationResult> ValidationResults { get { return GetValidateResults(); } }
-
-        public BaseViewModel()
-        {
-
-        }
 
         public void NotifyValidationChanged([CallerMemberName] string? proerptyName = null)
         {

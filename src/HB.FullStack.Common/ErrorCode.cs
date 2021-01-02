@@ -2,6 +2,7 @@
 {
     public enum ErrorCode
     {
+        None = 0,
         //200
         OK = 1,
 
@@ -172,6 +173,9 @@
         ApiNoInternet = 935,
         ApiUploadFailed = 936,
         DatabaseVersionNotSet = 937,
+        PropertyNotFound = 938,
+        DatabaseDefError = 939,
+        ResourceNotFound = 940,
     }
 
     public static class ErrorCodeExtensions

@@ -22,7 +22,7 @@ namespace HB.Infrastructure.Redis
 
         private static ConnectionMultiplexer GetConnectionMultiplexer(RedisInstanceSetting setting, ILogger logger)
         {
-            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached))
+            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? cached))
             {
                 return cached;
             }
@@ -32,7 +32,7 @@ namespace HB.Infrastructure.Redis
                 _connectionLock.Wait();
 
                 //Double check
-                if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached2))
+                if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? cached2))
                 {
                     return cached2;
                 }
@@ -93,7 +93,7 @@ namespace HB.Infrastructure.Redis
 
         private static async Task<ConnectionMultiplexer> GetConnectionMultiplexerAsync(RedisInstanceSetting setting, ILogger logger)
         {
-            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached))
+            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? cached))
             {
                 return cached;
             }
@@ -103,7 +103,7 @@ namespace HB.Infrastructure.Redis
                 await _connectionLock.WaitAsync().ConfigureAwait(false);
 
                 //Double check
-                if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer cached2))
+                if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? cached2))
                 {
                     return cached2;
                 }
@@ -204,7 +204,7 @@ namespace HB.Infrastructure.Redis
 
         public static void Close(RedisInstanceSetting setting)
         {
-            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer connection))
+            if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? connection))
             {
                 connection.Dispose();
                 _connectionDict.TryRemove(setting.InstanceName, out ConnectionMultiplexer _);

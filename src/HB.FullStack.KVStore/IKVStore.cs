@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-
 namespace HB.FullStack.KVStore
 {
     public interface IKVStore

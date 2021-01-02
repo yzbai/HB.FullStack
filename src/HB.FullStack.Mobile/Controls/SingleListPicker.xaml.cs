@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SingleListPicker : BaseContentView

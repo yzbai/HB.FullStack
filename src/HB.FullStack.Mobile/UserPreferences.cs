@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Client.Utils;
+﻿using HB.FullStack.Mobile.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Mobile
 {
     //public enum ClientState
     //{

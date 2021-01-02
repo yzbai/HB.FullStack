@@ -1,11 +1,11 @@
 ﻿using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public partial class Chip : BaseContentView
     {
@@ -220,7 +220,7 @@ namespace HB.FullStack.Client.Controls
         {
             InitializeComponent();
 
-            SizeChanged += (object sender, EventArgs e) =>
+            SizeChanged += (object? sender, EventArgs e) =>
             {
                 frame.CornerRadius = (float)(Height * 0.5);
             };

@@ -161,7 +161,9 @@ namespace System
                 catch (IOException ex)
                 {
                     //-2147024864意思是 另一个程序正在使用此文件,进程无法访问
+#pragma warning disable CA1508 // Avoid dead conditional code
                     if (runCount == 3 || ex.HResult != -2147024864)
+#pragma warning restore CA1508 // Avoid dead conditional code
                     {
                         throw;
                     }

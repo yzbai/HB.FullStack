@@ -29,18 +29,20 @@ namespace HB.Infrastructure.IdGen.Tests
             var ordered = dict.OrderBy(kv => kv.Key);
         }
 
-        private Task GenerateIdAsync(ConcurrentDictionary<long, int> dict)
+        private static Task GenerateIdAsync(ConcurrentDictionary<long, int> dict)
         {
             Task task = new Task(() =>
             {
-                int taskID = Task.CurrentId.Value;
+                int taskID = Task.CurrentId!.Value;
                 for (int i = 0; i < 10; ++i)
                 {
                     long id = IDistributedIdGen.IdGen.GetId();
                     Debug.WriteLine($"{id}    {taskID}");
                     if (!dict.TryAdd(id, taskID))
                     {
+#pragma warning disable CA2201 // Do not raise reserved exception types
                         throw new Exception("duplicated");
+#pragma warning restore CA2201 // Do not raise reserved exception types
                     }
                 }
             });

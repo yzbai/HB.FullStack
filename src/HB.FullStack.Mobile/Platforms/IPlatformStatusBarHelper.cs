@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Client.Platforms
+namespace HB.FullStack.Mobile.Platforms
 {
     public interface IPlatformStatusBarHelper
     {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Utils;
+using HB.FullStack.Mobile.Utils;
 using Microsoft.VisualStudio.Threading;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Mobile
 {
     public static class DevicePreferences
     {

@@ -42,12 +42,12 @@ namespace HB.FullStack.DatabaseTests
 
 
 
-            await _mysql.AddAsync(a2, "lastUsre", null);
-            await _mysql.AddAsync(a1, "lastUsre", null);
-            await _mysql.AddAsync(a3, "lastUsre", null);
+            await _mysql.AddAsync(a2, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(a1, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(a3, "lastUsre", null).ConfigureAwait(false);
 
-            await _mysql.AddAsync(b1, "lastUsre", null);
-            await _mysql.AddAsync(b2, "lastUsre", null);
+            await _mysql.AddAsync(b1, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(b2, "lastUsre", null).ConfigureAwait(false);
 
             AB a1b1 = new AB { AId = a1.Id, BId = b1.Id };
             AB a1b2 = new AB { AId = a1.Id, BId = b2.Id };
@@ -62,17 +62,17 @@ namespace HB.FullStack.DatabaseTests
             C c5 = new C { AId = a2.Id };
             C c6 = new C { AId = a3.Id };
 
-            await _mysql.AddAsync(a1b1, "lastUsre", null);
-            await _mysql.AddAsync(a1b2, "lastUsre", null);
-            await _mysql.AddAsync(a2b1, "lastUsre", null);
-            await _mysql.AddAsync(a3b2, "lastUsre", null);
+            await _mysql.AddAsync(a1b1, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(a1b2, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(a2b1, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(a3b2, "lastUsre", null).ConfigureAwait(false);
 
-            await _mysql.AddAsync(c1, "lastUsre", null);
-            await _mysql.AddAsync(c2, "lastUsre", null);
-            await _mysql.AddAsync(c3, "lastUsre", null);
-            await _mysql.AddAsync(c4, "lastUsre", null);
-            await _mysql.AddAsync(c5, "lastUsre", null);
-            await _mysql.AddAsync(c6, "lastUsre", null);
+            await _mysql.AddAsync(c1, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(c2, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(c3, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(c4, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(c5, "lastUsre", null).ConfigureAwait(false);
+            await _mysql.AddAsync(c6, "lastUsre", null).ConfigureAwait(false);
 
         }
 
@@ -90,14 +90,14 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IEnumerable<Tuple<A, AB?, B?>>? result = await database.RetrieveAsync<A, AB, B>(from, database.Where<A>(), null);
-                Assert.True(result.Count() > 0);
+                IEnumerable<Tuple<A, AB?, B?>>? result = await database.RetrieveAsync<A, AB, B>(from, database.Where<A>(), null).ConfigureAwait(false);
+                Assert.True(result.Any());
             }
             catch (Exception ex)
             {
                 _output.WriteLine(ex.Message);
 
-                throw ex;
+                throw;
             }
 
 
@@ -116,13 +116,13 @@ namespace HB.FullStack.DatabaseTests
             try
             {
                 IEnumerable<Tuple<C, A?>>? result = await database.RetrieveAsync<C, A>(from, database.Where<C>(), null).ConfigureAwait(false);
-                Assert.True(result.Count() > 0);
+                Assert.True(result.Any());
             }
             catch (Exception ex)
             {
                 _output.WriteLine(ex.Message);
 
-                throw ex;
+                throw;
             }
         }
     }

@@ -5,7 +5,7 @@ using System.Text;
 namespace System
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class IdBarrierAttribute : Attribute
+    public sealed class IdBarrierAttribute : Attribute
     {
     }
 }

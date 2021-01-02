@@ -1,9 +1,13 @@
 ﻿using System;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Effects
+namespace HB.FullStack.Mobile.Effects
 {
-    public delegate void TouchActionEventHandler(object sender, TouchActionEventArgs args);
+#pragma warning disable CA1003 // Use generic event handler instances
+#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
+    public delegate void TouchActionEventHandler(object? sender, TouchActionEventArgs args);
+#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
+#pragma warning restore CA1003 // Use generic event handler instances
 
     public class TouchEffect : RoutingEffect
     {

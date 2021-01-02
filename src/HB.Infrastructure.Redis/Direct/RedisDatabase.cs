@@ -36,7 +36,7 @@ namespace HB.Infrastructure.Redis.Direct
         /// <param name="key"></param>
         /// <param name="expireSeconds"></param>
         /// <returns></returns>
-        
+
         public async Task<bool> KeySetIfNotExistAsync(string redisInstanceName, string key, long expireSeconds)
         {
             try
@@ -111,7 +111,7 @@ namespace HB.Infrastructure.Redis.Direct
         /// <param name="fromQueueName"></param>
         /// <param name="toQueueName"></param>
         /// <returns></returns>
-        
+
         public async Task<T?> PopAndPushAsync<T>(string redisInstanceName, string fromQueueName, string toQueueName) where T : class
         {
             try
@@ -135,7 +135,7 @@ namespace HB.Infrastructure.Redis.Direct
         /// <param name="queueName"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        
+
         public async Task<long> PushAsync<T>(string redisInstanceName, string queueName, T data) where T : class
         {
             try
@@ -156,7 +156,7 @@ namespace HB.Infrastructure.Redis.Direct
         /// <param name="redisInstanceName"></param>
         /// <param name="queueName"></param>
         /// <returns></returns>
-        
+
         public async Task<ulong> QueueLengthAsync(string redisInstanceName, string queueName)
         {
             try
@@ -184,7 +184,7 @@ namespace HB.Infrastructure.Redis.Direct
         /// <param name="keys"></param>
         /// <param name="argvs"></param>
         /// <returns></returns>
-        
+
         public async Task<int> ScriptEvaluateAsync(string redisInstanceName, string script, string[] keys, string[] argvs)
         {
             try
@@ -208,10 +208,10 @@ namespace HB.Infrastructure.Redis.Direct
         /// </summary>
         /// <param name="instanceName"></param>
         /// <returns></returns>
-        
+
         private RedisInstanceSetting GetRedisInstanceSetting(string instanceName)
         {
-            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting setting))
+            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
                 return setting;
             }

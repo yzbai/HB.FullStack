@@ -166,7 +166,7 @@ namespace HB.Infrastructure.Redis.EventBus
 
         private RedisInstanceSetting GetRedisInstanceSetting(string brokerName)
         {
-            if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting instanceSetting))
+            if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting? instanceSetting))
             {
                 throw new EventBusException($"Not Found matched RedisInstanceSetting for Broker: {brokerName}.");
             }

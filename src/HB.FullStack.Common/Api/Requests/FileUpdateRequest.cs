@@ -56,10 +56,12 @@ namespace HB.FullStack.Common.Api
             _fileNames = fileNames;
         }
 
+#pragma warning disable CA1024 // Use properties where appropriate
         public IEnumerable<byte[]> GetBytess() => _files;
 
         public string GetBytesPropertyName() => "Files";
 
         public IEnumerable<string> GetFileNames() => _fileNames;
+#pragma warning restore CA1024 // Use properties where appropriate
     }
 }

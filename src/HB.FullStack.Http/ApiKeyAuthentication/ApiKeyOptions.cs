@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using System.Collections.Generic;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Server.ApiKeyAuthentication
 {
@@ -15,7 +16,7 @@ namespace HB.FullStack.Server.ApiKeyAuthentication
 
         public IList<ApiKey> ApiKeys { get; private set; } = new List<ApiKey>();
 
-        public bool TryGetApiKey(string key, out string? name)
+        public bool TryGetApiKey(string key, [NotNullWhen(true)] out string? name)
         {
             if (_apiKeysDict == null)
             {

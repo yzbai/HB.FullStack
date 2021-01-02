@@ -69,7 +69,7 @@ namespace HB.FullStack
             ServiceProvider.GetRequiredService<IDatabase>().InitializeAsync().Wait();
 
 
-            GlobalSettings.Logger.LogInformation($"当前Process,{Process.GetCurrentProcess().Id}");
+            GlobalSettings.Logger.LogInformation($"当前Process,{Environment.ProcessId}");
         }
     }
 }

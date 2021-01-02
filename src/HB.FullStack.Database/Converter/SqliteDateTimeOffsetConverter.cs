@@ -20,7 +20,7 @@ namespace HB.FullStack.Database.Converter
 
         public object DbValueToTypeValue(object dbValue, Type propertyType)
         {
-            return DateTimeOffset.Parse(dbValue.ToString(), CultureInfo.InvariantCulture);
+            return DateTimeOffset.Parse(dbValue.ToString()!, CultureInfo.InvariantCulture);
         }
     }
 }

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.DistributedLock.Test
 {
-    public class Mocker
+    public static class Mocker
     {
-        public static List<string> MockResourcesWithOne()
+        public static IList<string> MockResourcesWithOne()
         {
             return new List<string> { "aa" };
         }
-        public static List<string> MockResourcesWithThree()
+        public static IList<string> MockResourcesWithThree()
         {
             return new List<string> { "aa", "bb", "cc" };
         }

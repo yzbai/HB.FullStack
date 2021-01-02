@@ -2,7 +2,7 @@
 using System.Globalization;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     public class TupleMultipleBindingConverter : IMultiValueConverter
     {
@@ -20,7 +20,7 @@ namespace HB.FullStack.Client.Converters
                     5 => new Tuple<object?, object?, object?, object?, object?>(values[0], values[1], values[2], values[3], values[4]),
                     6 => new Tuple<object?, object?, object?, object?, object?, object?>(values[0], values[1], values[2], values[3], values[4], values[5]),
                     7 => new Tuple<object?, object?, object?, object?, object?, object?, object?>(values[0], values[1], values[2], values[3], values[4], values[5], values[6]),
-                    8 => new Tuple<object?, object?, object?, object?, object?, object?, object?, object?>(values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7]),
+                    8 => new Tuple<object?, object?, object?, object?, object?, object?, object?, object>(values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7]),
                     _ => null,
                 };
             }

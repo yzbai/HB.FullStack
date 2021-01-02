@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using HB.FullStack.Database.ClientExtension;
 using HB.FullStack.Database.ClientExtensions.Tests.Context;
 using HB.FullStack.Database.SQL;
 using Microsoft.Extensions.DependencyInjection;

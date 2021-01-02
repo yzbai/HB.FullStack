@@ -4,12 +4,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Windows.Input;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 
 #nullable disable
 
-namespace HB.FullStack.Client.Behaviors
+namespace HB.FullStack.Mobile.Behaviors
 {
     public class EventToCommandBehavior : BaseBehavior<View>
     {

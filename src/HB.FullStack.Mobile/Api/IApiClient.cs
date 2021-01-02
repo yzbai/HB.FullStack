@@ -4,13 +4,17 @@ using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Resources;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public interface IApiClient
     {
+#pragma warning disable CA1003 // Use generic event handler instances
+
         event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting;
 
         event AsyncEventHandler<object, ApiEventArgs> Responsed;
+
+#pragma warning restore CA1003 // Use generic event handler instances
 
         Task AddAsync<T>(AddRequest<T> request) where T : Resource;
 

@@ -29,7 +29,7 @@ namespace HB.FullStack.DistributedLock.Test
                 waitTime: (TimeSpan?)TimeSpan.FromSeconds(10),
                 retryInterval: (TimeSpan?)TimeSpan.FromSeconds(1)).ConfigureAwait(false);
 
-            await Task.Delay(5 * 1000);
+            await Task.Delay(5 * 1000).ConfigureAwait(false);
 
             lock1.Dispose();
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 
 namespace System
 {

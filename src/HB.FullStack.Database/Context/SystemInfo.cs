@@ -20,7 +20,7 @@ namespace HB.FullStack.Database
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.DatabaseName, out string value))
+                if (_sysDict.TryGetValue(SystemInfoNames.DatabaseName, out string? value))
                 {
                     return value;
                 }
@@ -37,7 +37,7 @@ namespace HB.FullStack.Database
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.Version, out string value))
+                if (_sysDict.TryGetValue(SystemInfoNames.Version, out string? value))
                 {
                     return value.ToInt32();
                 }

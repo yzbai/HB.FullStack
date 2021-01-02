@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Client.Platforms;
+﻿using HB.FullStack.Mobile.Platforms;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Services
+namespace HB.FullStack.Mobile.Services
 {
     public class PlatformLogger : ILogger
     {

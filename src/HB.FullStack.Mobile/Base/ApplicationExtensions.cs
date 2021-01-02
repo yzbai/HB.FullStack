@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Microsoft.Extensions.Logging;
 using Xamarin.Forms;
 

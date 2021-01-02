@@ -43,35 +43,35 @@ namespace System
                 .Where(t => condition(t));
         }
 
-        public static ConstructorInfo GetDefaultConstructor(this Type type)
+        public static ConstructorInfo? GetDefaultConstructor(this Type type)
         {
             return type.GetConstructor(Type.EmptyTypes);
         }
 
-        public static MethodInfo GetPropertySetterMethod(PropertyInfo propertyInfo, Type type)
+        public static MethodInfo? GetPropertySetterMethod(PropertyInfo propertyInfo, Type type)
         {
             if (propertyInfo.DeclaringType == type) return propertyInfo.GetSetMethod(true);
 
-            return propertyInfo.DeclaringType.GetProperty(
+            return propertyInfo.DeclaringType?.GetProperty(
                    propertyInfo.Name,
                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
                    Type.DefaultBinder,
                    propertyInfo.PropertyType,
                    propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray(),
-                   null).GetSetMethod(true);
+                   null)?.GetSetMethod(true);
         }
 
-        public static MethodInfo GetPropertyGetterMethod(PropertyInfo propertyInfo, Type type)
+        public static MethodInfo? GetPropertyGetterMethod(PropertyInfo propertyInfo, Type type)
         {
             if (propertyInfo.DeclaringType == type) return propertyInfo.GetGetMethod(true);
 
-            return propertyInfo.DeclaringType.GetProperty(
+            return propertyInfo.DeclaringType?.GetProperty(
                    propertyInfo.Name,
                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
                    Type.DefaultBinder,
                    propertyInfo.PropertyType,
                    propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray(),
-                   null).GetGetMethod(true);
+                   null)?.GetGetMethod(true);
         }
 
         public static Func<object, object> CreateGetValueDeleagte(Type declareType, string propertyName)
@@ -94,9 +94,9 @@ namespace System
             var param_instance = Expression.Parameter(typeof(object));
             var param_value = Expression.Parameter(typeof(object));
 
-            var body_instance = Expression.Convert(param_instance, property.DeclaringType);
+            var body_instance = Expression.Convert(param_instance, property.DeclaringType!);
             var body_value = Expression.Convert(param_value, property.PropertyType);
-            var body_call = Expression.Call(body_instance, property.GetSetMethod(), body_value);
+            var body_call = Expression.Call(body_instance, property.GetSetMethod()!, body_value);
 
             return Expression.Lambda<Action<object, object>>(body_call, param_instance, param_value).Compile();
         }
@@ -106,11 +106,11 @@ namespace System
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
 
-            MethodInfo getMethod = property.GetGetMethod(true);
+            MethodInfo getMethod = property.GetGetMethod(true)!;
 
             DynamicMethod dm = new DynamicMethod("PropertyGetter", typeof(object),
                 new Type[] { typeof(object) },
-                property.DeclaringType, true);
+                property.DeclaringType!, true);
 
             ILGenerator il = dm.GetILGenerator();
 
@@ -133,10 +133,10 @@ namespace System
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
 
-            MethodInfo setMethod = property.GetSetMethod(true);
+            MethodInfo setMethod = property.GetSetMethod(true)!;
 
             DynamicMethod dm = new DynamicMethod("PropertySetter", null,
-                new Type[] { typeof(object), typeof(object) }, property.DeclaringType, true);
+                new Type[] { typeof(object), typeof(object) }, property.DeclaringType!, true);
 
             ILGenerator il = dm.GetILGenerator();
 
@@ -147,7 +147,7 @@ namespace System
             il.Emit(OpCodes.Ldarg_1);
 
             EmitCastToReference(il, property.PropertyType);
-            if (!setMethod.IsStatic && !property.DeclaringType.IsValueType)
+            if (!setMethod.IsStatic && !property.DeclaringType!.IsValueType)
             {
                 il.EmitCall(OpCodes.Callvirt, setMethod, null);
             }

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Mobile
 {
     public static class Consts
     {
 
 
-        public const string EffectsGroupName = "HB.FullStack.Client.Effects";
+        public const string EffectsGroupName = "HB.FullStack.Mobile.Effects";
     }
 }

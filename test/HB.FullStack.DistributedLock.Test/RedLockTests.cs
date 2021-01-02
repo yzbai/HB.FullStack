@@ -23,7 +23,7 @@ namespace HB.FullStack.DistributedLock.Test
 
         private readonly IDistributedLockManager _lockManager;
 
-        private readonly ILogger _logger;
+        private readonly ILogger? _logger;
         public RedLockTests(ServiceFixture_MySql serviceFixture)
         {
             _lockManager = serviceFixture.ServiceProvider.GetRequiredService<IDistributedLockManager>();
@@ -73,7 +73,7 @@ namespace HB.FullStack.DistributedLock.Test
                 tasks.Add(LockWorkAsync(resources, locksAcquired));
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 
             Assert.True(locksAcquired.Count == 6);
         }
@@ -91,7 +91,7 @@ namespace HB.FullStack.DistributedLock.Test
                 {
                     locksAcquired.Add(1);
                 }
-                await Task.Delay(4000);
+                await Task.Delay(4000).ConfigureAwait(false);
 
                 _logger.LogInformation("Leaving lock");
             }
@@ -126,7 +126,7 @@ namespace HB.FullStack.DistributedLock.Test
 
             int extendCount;
 
-            using (IDistributedLock redisLock = await _lockManager.LockAsync(resources, TimeSpan.FromMilliseconds(100)))
+            using (IDistributedLock redisLock = await _lockManager.LockAsync(resources, TimeSpan.FromMilliseconds(100)).ConfigureAwait(false))
             {
                 Assert.True(redisLock.IsAcquired);
 
@@ -144,7 +144,7 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)))
+            using (var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)).ConfigureAwait(false))
             {
                 Assert.True(firstLock.IsAcquired);
 
@@ -155,7 +155,7 @@ namespace HB.FullStack.DistributedLock.Test
 
                 Thread.Sleep(1200); // wait until the key expires from redis
 
-                using (var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)))
+                using (var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)).ConfigureAwait(false))
                 {
                     Assert.True(secondLock.IsAcquired); // Eventually the outer lock should timeout
                 }
@@ -166,15 +166,14 @@ namespace HB.FullStack.DistributedLock.Test
         [Fact]
         public async Task TestCancelBlockingLockAsync()
         {
-            var cts = new CancellationTokenSource();
-
+            using var cts = new CancellationTokenSource();
             var resources = Mocker.MockResourcesWithThree();
 
             using (var firstLock = await _lockManager.LockAsync(
                 resources,
                 TimeSpan.FromSeconds(300),
                 TimeSpan.FromSeconds(2),
-                TimeSpan.FromSeconds(1)))
+                TimeSpan.FromSeconds(1)).ConfigureAwait(false))
             {
                 Assert.True(firstLock.IsAcquired);
 
@@ -189,7 +188,8 @@ namespace HB.FullStack.DistributedLock.Test
                         TimeSpan.FromSeconds(30),
                         TimeSpan.FromSeconds(100),
                         TimeSpan.FromSeconds(1),
-                        cts.Token);
+                        false,
+                        cts.Token).ConfigureAwait(false);
                     // should never get here
                     Assert.True(false);
                 }).ConfigureAwait(false);

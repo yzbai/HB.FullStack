@@ -23,7 +23,7 @@ namespace HB.FullStack.Common.Resources
         {
             Type type = typeof(T);
 
-            if (_defDict.TryGetValue(type, out ResourceDef def))
+            if (_defDict.TryGetValue(type, out ResourceDef? def))
             {
                 return def;
             }

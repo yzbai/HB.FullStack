@@ -43,12 +43,12 @@ namespace HB.FullStack.DatabaseTests
             B_Client b1 = new B_Client { Name = "b1" };
             B_Client b2 = new B_Client { Name = "b2" };
 
-            await _sqlite.AddAsync(a2, "lastUsre", null);
-            await _sqlite.AddAsync(a1, "lastUsre", null);
-            await _sqlite.AddAsync(a3, "lastUsre", null);
+            await _sqlite.AddAsync(a2, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(a1, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(a3, "lastUsre", null).ConfigureAwait(false);
 
-            await _sqlite.AddAsync(b1, "lastUsre", null);
-            await _sqlite.AddAsync(b2, "lastUsre", null);
+            await _sqlite.AddAsync(b1, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(b2, "lastUsre", null).ConfigureAwait(false);
 
             AB_Client a1b1 = new AB_Client { AId = a1.Id, BId = b1.Id };
             AB_Client a1b2 = new AB_Client { AId = a1.Id, BId = b2.Id };
@@ -62,17 +62,17 @@ namespace HB.FullStack.DatabaseTests
             C_Client c5 = new C_Client { AId = a2.Id };
             C_Client c6 = new C_Client { AId = a3.Id };
 
-            await _sqlite.AddAsync(a1b1, "lastUsre", null);
-            await _sqlite.AddAsync(a1b2, "lastUsre", null);
-            await _sqlite.AddAsync(a2b1, "lastUsre", null);
-            await _sqlite.AddAsync(a3b2, "lastUsre", null);
+            await _sqlite.AddAsync(a1b1, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(a1b2, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(a2b1, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(a3b2, "lastUsre", null).ConfigureAwait(false);
 
-            await _sqlite.AddAsync(c1, "lastUsre", null);
-            await _sqlite.AddAsync(c2, "lastUsre", null);
-            await _sqlite.AddAsync(c3, "lastUsre", null);
-            await _sqlite.AddAsync(c4, "lastUsre", null);
-            await _sqlite.AddAsync(c5, "lastUsre", null);
-            await _sqlite.AddAsync(c6, "lastUsre", null);
+            await _sqlite.AddAsync(c1, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(c2, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(c3, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(c4, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(c5, "lastUsre", null).ConfigureAwait(false);
+            await _sqlite.AddAsync(c6, "lastUsre", null).ConfigureAwait(false);
         }
 
         [Fact]
@@ -88,14 +88,14 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IEnumerable<Tuple<A_Client, AB_Client?, B_Client?>>? result = await database.RetrieveAsync<A_Client, AB_Client, B_Client>(from, database.Where<A_Client>(), null);
-                Assert.True(result.Count() > 0);
+                IEnumerable<Tuple<A_Client, AB_Client?, B_Client?>>? result = await database.RetrieveAsync<A_Client, AB_Client, B_Client>(from, database.Where<A_Client>(), null).ConfigureAwait(false);
+                Assert.True(result.Any());
             }
             catch (Exception ex)
             {
                 _output.WriteLine(ex.Message);
 
-                throw ex;
+                throw;
             }
 
 
@@ -113,13 +113,13 @@ namespace HB.FullStack.DatabaseTests
             try
             {
                 IEnumerable<Tuple<C_Client, A_Client?>>? result = await database.RetrieveAsync<C_Client, A_Client>(from, database.Where<C_Client>(), null).ConfigureAwait(false);
-                Assert.True(result.Count() > 0);
+                Assert.True(result.Any());
             }
             catch (Exception ex)
             {
                 _output.WriteLine(ex.Message);
 
-                throw ex;
+                throw;
             }
         }
     }

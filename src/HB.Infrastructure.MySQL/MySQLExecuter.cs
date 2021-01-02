@@ -86,13 +86,13 @@ namespace HB.Infrastructure.MySQL
 
         #region Command Scalar
 
-        public static async Task<object> ExecuteCommandScalarAsync(string connectString, MySqlCommand dbCommand)
+        public static async Task<object?> ExecuteCommandScalarAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        public static async Task<object> ExecuteCommandScalarAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
+        public static async Task<object?> ExecuteCommandScalarAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandScalarAsync(
@@ -100,10 +100,8 @@ namespace HB.Infrastructure.MySQL
                 dbCommand).ConfigureAwait(false);
         }
 
-        private static async Task<object> ExecuteCommandScalarAsync(MySqlConnection connection, MySqlCommand command)
+        private static async Task<object?> ExecuteCommandScalarAsync(MySqlConnection connection, MySqlCommand command)
         {
-            object rtObj;
-
             try
             {
                 if (connection.State != ConnectionState.Open)
@@ -113,7 +111,7 @@ namespace HB.Infrastructure.MySQL
 
                 command.Connection = connection;
 
-                rtObj = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                return await command.ExecuteScalarAsync().ConfigureAwait(false);
             }
             catch (MySqlException mysqlException)
             {
@@ -123,8 +121,6 @@ namespace HB.Infrastructure.MySQL
             {
                 throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
             }
-
-            return rtObj;
         }
 
         #endregion Command Scalar

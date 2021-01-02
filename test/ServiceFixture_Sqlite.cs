@@ -56,7 +56,7 @@ namespace HB.FullStack
             GlobalSettings.Logger = ServiceProvider.GetRequiredService<ILogger<ServiceFixture_Sqlite>>();
             ServiceProvider.GetRequiredService<IDatabase>().InitializeAsync().Wait();
 
-            GlobalSettings.Logger.LogInformation($"当前Process,{Process.GetCurrentProcess().Id}");
+            GlobalSettings.Logger.LogInformation($"当前Process,{Environment.ProcessId}");
         }
     }
 }

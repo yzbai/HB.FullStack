@@ -12,14 +12,14 @@ namespace HB.FullStack.Repository
     {
         protected IKVStore KVStore { get; }
 
-        public KVStoreRepository(IKVStore kVStore)
+        protected KVStoreRepository(IKVStore kVStore)
         {
             KVStore = kVStore;
         }
 
         public Task<TEntity?> GetAsync(object key)
         {
-            return KVStore.GetAsync<TEntity>(key.ToString());
+            return KVStore.GetAsync<TEntity>(key.ToString()!);
         }
 
         public Task AddAsync(TEntity entity, string lastUser)

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.EventBus.Abstractions
 {
+#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
     public interface IEventHandler //: IDisposable
+#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
     {
         //string EventType { get; }
 

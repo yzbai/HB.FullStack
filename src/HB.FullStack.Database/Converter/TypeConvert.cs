@@ -126,7 +126,7 @@ namespace HB.FullStack.Database.Converter
 
                 if (trueType.IsEnum)
                 {
-                    typeValue = Enum.Parse(trueType, dbValue.ToString(), true);
+                    typeValue = Enum.Parse(trueType, dbValue.ToString()!, true);
                 }
                 else if (trueType != dbValueType)
                 {
@@ -144,9 +144,9 @@ namespace HB.FullStack.Database.Converter
                 return typeValue;
             }
 
-            ConstructorInfo ctor = propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType });
+            ConstructorInfo? ctor = propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType });
 
-            return ctor.Invoke(new object?[] { typeValue });
+            return ctor!.Invoke(new object?[] { typeValue });
         }
 
         public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, EngineType engineType)
@@ -176,7 +176,7 @@ namespace HB.FullStack.Database.Converter
             //默认
             if (trueType.IsEnum)
             {
-                return typeValue.ToString();
+                return typeValue.ToString()!;
             }
 
             return typeValue;
@@ -214,7 +214,7 @@ namespace HB.FullStack.Database.Converter
                 DateTime _ => throw new DatabaseException(ErrorCode.UseDateTimeOffsetOnly),
                 DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", CultureInfo.InvariantCulture),
                 bool b => b ? "1" : "0",
-                _ => dbValue.ToString()
+                _ => dbValue.ToString()!
             };
 
             if (!quotedIfNeed || statement == "null" || !SqlHelper.IsValueNeedQuoted(dbValue!.GetType()))
@@ -298,7 +298,7 @@ namespace HB.FullStack.Database.Converter
                 _ => throw new NotImplementedException(),
             };
 
-            if (typeConvertSettings.TryGetValue(trueType, out ConverterInfo converterInfo))
+            if (typeConvertSettings.TryGetValue(trueType, out ConverterInfo? converterInfo))
             {
                 return converterInfo;
             }

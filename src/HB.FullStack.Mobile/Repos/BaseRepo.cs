@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Api;
+using HB.FullStack.Mobile.Api;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Resources;
@@ -15,7 +15,7 @@ using HB.FullStack.Database.Def;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Repos
+namespace HB.FullStack.Mobile.Repos
 {
     public abstract class BaseRepo
     {
@@ -55,7 +55,7 @@ namespace HB.FullStack.Client.Repos
 
         private readonly TimeSpan? _localDataExpiryTime;
 
-        public BaseRepo(IDatabase database, IApiClient apiClient)
+        protected BaseRepo(IDatabase database, IApiClient apiClient)
         {
             Database = database;
             ApiClient = apiClient;
@@ -86,7 +86,7 @@ namespace HB.FullStack.Client.Repos
         {
             if (_localDataExpiryTime.HasValue)
             {
-                return RequestLocker.NoWaitLock(apiRequest.GetType().FullName, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture), _localDataExpiryTime.Value);
+                return RequestLocker.NoWaitLock(apiRequest.GetType().FullName!, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture), _localDataExpiryTime.Value);
             }
 
             return false;
@@ -94,7 +94,7 @@ namespace HB.FullStack.Client.Repos
 
         protected static void TimeoutLocalData(ApiRequest<TRes> apiRequest)
         {
-            RequestLocker.UnLock(apiRequest.GetType().FullName, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
+            RequestLocker.UnLock(apiRequest.GetType().FullName!, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
         }
 
         protected async Task<TEntity?> GetSingleAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext = null, bool forced = false)

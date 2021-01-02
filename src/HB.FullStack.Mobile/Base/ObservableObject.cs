@@ -11,7 +11,7 @@ namespace System
     {
         private readonly WeakEventManager _propertyChangedEventManager = new WeakEventManager();
 
-        public event PropertyChangedEventHandler PropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged
         {
             add => _propertyChangedEventManager.AddEventHandler(value);
             remove => _propertyChangedEventManager.RemoveEventHandler(value);

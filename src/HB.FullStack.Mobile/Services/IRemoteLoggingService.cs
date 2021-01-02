@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Client.Services
+namespace HB.FullStack.Mobile.Services
 {
     public interface IRemoteLoggingService
     {

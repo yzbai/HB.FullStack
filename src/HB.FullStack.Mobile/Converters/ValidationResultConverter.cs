@@ -6,7 +6,7 @@ using System.Text;
 using Xamarin.Forms;
 using System.Linq;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     /// <summary>
     /// 获取viewmodel里的验证结果，parameter为key

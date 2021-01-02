@@ -240,7 +240,7 @@ namespace HB.FullStack.Database
         {
             var command = DbCommandBuilder.CreateIsTableExistCommand(EngineType, databaseName, tableName);
 
-            object result = await _databaseEngine.ExecuteCommandScalarAsync(transaction, databaseName, command, true).ConfigureAwait(false);
+            object? result = await _databaseEngine.ExecuteCommandScalarAsync(transaction, databaseName, command, true).ConfigureAwait(false);
 
             return Convert.ToBoolean(result, GlobalSettings.Culture);
         }
@@ -262,7 +262,7 @@ namespace HB.FullStack.Database
 
             while (reader.Read())
             {
-                systemInfo.Set(reader["Name"].ToString(), reader["Value"].ToString());
+                systemInfo.Set(reader["Name"].ToString()!, reader["Value"].ToString()!);
             }
 
             return systemInfo;
@@ -409,7 +409,7 @@ namespace HB.FullStack.Database
             try
             {
                 var command = DbCommandBuilder.CreateCountCommand(EngineType, fromCondition, whereCondition);
-                object countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                object? countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
                 return Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
             catch (Exception ex) when (!(ex is DatabaseException))
@@ -724,7 +724,7 @@ namespace HB.FullStack.Database
 
                 var command = DbCommandBuilder.CreateAddCommand(EngineType, entityDef, item);
 
-                object rt = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
+                object? rt = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
 
                 if (entityDef.IsIdAutoIncrement)
                 {

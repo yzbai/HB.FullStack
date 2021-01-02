@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Api
     {
         [CollectionNotEmpty]
         [IdBarrier]
-        public List<T> Resources { get; set; } = new List<T>();
+        public IList<T> Resources { get; set; } = new List<T>();
 
         public AddRequest() : base(HttpMethod.Post, null) { }
 
@@ -18,6 +18,7 @@ namespace HB.FullStack.Common.Api
 
         public AddRequest(IEnumerable<T> ress) : this()
         {
+
             Resources.AddRange(ress);
         }
 

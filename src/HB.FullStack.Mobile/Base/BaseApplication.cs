@@ -6,22 +6,22 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Api;
-using HB.FullStack.Client.Services;
+using HB.FullStack.Mobile.Api;
+using HB.FullStack.Mobile.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseApplication : Application
     {
         private LogLevel? _minimumLogLevel;
         private IConfiguration? _configuration;
 
-        public BaseApplication(IServiceCollection services)
+        protected BaseApplication(IServiceCollection services)
         {
             //Version
             VersionTracking.Track();
@@ -52,7 +52,7 @@ namespace HB.FullStack.Client.Base
             {
                 if (_minimumLogLevel == null)
                 {
-                    if ("Debug".Equals(Environment, StringComparison.InvariantCultureIgnoreCase))
+                    if ("Debug".Equals(Environment, StringComparison.OrdinalIgnoreCase))
                     {
                         _minimumLogLevel = LogLevel.Information;
                     }
@@ -94,10 +94,9 @@ namespace HB.FullStack.Client.Base
             Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
         }
 
-        protected virtual void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
-        {
-
-        }
+#pragma warning disable CA2109 // Review visible event handlers
+        protected abstract void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e);
+#pragma warning restore CA2109 // Review visible event handlers
 
         public abstract void PerformLogin();
 

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Platforms;
+using HB.FullStack.Mobile.Platforms;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseContentPage : ContentPage
     {
@@ -53,7 +53,7 @@ namespace HB.FullStack.Client.Base
 
         public bool DisableBackButton { get; set; }
 
-        public BaseContentPage()
+        protected BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
             PageName = GetType().Name;

@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Api;
+using HB.FullStack.Mobile.Api;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Resources;
 
-namespace HB.FullStack.Client.Repos
+namespace HB.FullStack.Mobile.Repos
 {
     public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : Resource
     {
         protected IApiClient ApiClient { get; }
 
-        public BaseFileRepo(IApiClient apiClient)
+        protected BaseFileRepo(IApiClient apiClient)
         {
             ApiClient = apiClient;
         }

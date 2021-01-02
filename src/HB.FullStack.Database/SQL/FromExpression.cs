@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
-
-using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Properties;
@@ -14,6 +12,7 @@ namespace HB.FullStack.Database.SQL
 {
     public enum SqlJoinType
     {
+        None = 0,
         INNER = 1,
         LEFT = 2,
         RIGHT = 3,

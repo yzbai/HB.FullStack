@@ -8,4 +8,15 @@ dotnet_diagnostic.CA1720.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA2227.severity = none
+dotnet_diagnostic.CA1019.severity = none
+dotnet_diagnostic.CA1813.severity = none
+
+# 影响上锁的double check
+dotnet_diagnostic.CA1508.severity = none
+
+dotnet_diagnostic.CA1014.severity = none
+
+dotnet_diagnostic.CA1824.severity = none
+
+dotnet_diagnostic.CA1024.severity = none
 

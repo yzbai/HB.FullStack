@@ -356,7 +356,7 @@ end
             {
                 foreach (object dimensionKeyValue in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetRealKey(entityDef.Name, dimensionKeyValue.ToString()));
+                    redisKeys.Add(GetRealKey(entityDef.Name, dimensionKeyValue.ToString()!));
                 }
 
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesRemoveLua;
@@ -395,7 +395,7 @@ end
 
                 foreach (object dk in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetRealKey(entityDef.Name, dk.ToString()));
+                    redisKeys.Add(GetRealKey(entityDef.Name, dk.ToString()!));
                 }
             }
             else
@@ -404,7 +404,7 @@ end
 
                 foreach (object dk in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dk.ToString()));
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dk.ToString()!));
                 }
             }
 
@@ -432,7 +432,7 @@ end
 
             foreach (TEntity entity in entities)
             {
-                string idRealKey = GetRealKey(entityDef.Name, entityDef.KeyProperty.GetValue(entity).ToString());
+                string idRealKey = GetRealKey(entityDef.Name, entityDef.KeyProperty.GetValue(entity)?.ToString()!);
 
                 redisKeys.Add(idRealKey);
 
@@ -440,7 +440,7 @@ end
 
                 foreach (PropertyInfo property in entityDef.Dimensions)
                 {
-                    string dimentionKey = GetEntityDimensionKey(entityDef.Name, property.Name, property.GetValue(entity).ToString());
+                    string dimentionKey = GetEntityDimensionKey(entityDef.Name, property.Name, property.GetValue(entity)?.ToString()!);
                     redisKeys.Add(dimentionKey);
                     joinedDimensinKeyBuilder.Append(dimentionKey);
                     joinedDimensinKeyBuilder.Append(' ');

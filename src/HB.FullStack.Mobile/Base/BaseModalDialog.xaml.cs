@@ -1,5 +1,5 @@
 ﻿using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Effects;
+using HB.FullStack.Mobile.Effects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class BaseModalDialog : BaseContentPage
@@ -48,7 +48,7 @@ namespace HB.FullStack.Client.Base
             }
         }
 
-        private void TouchEffect_TouchAction(object sender, TouchActionEventArgs args)
+        private void TouchEffect_TouchAction(object? sender, TouchActionEventArgs args)
         {
             if (_dialogFrame == null)
             {

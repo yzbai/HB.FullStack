@@ -131,7 +131,7 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        public async Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
 

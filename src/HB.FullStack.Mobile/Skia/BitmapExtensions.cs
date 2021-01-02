@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using SkiaSharp;
 
-namespace HB.FullStack.Client.Skia
+namespace HB.FullStack.Mobile.Skia
 {
     public static class BitmapExtensions
     {
@@ -13,7 +13,7 @@ namespace HB.FullStack.Client.Skia
         {
             Assembly assembly = type.GetTypeInfo().Assembly;
 
-            using Stream stream = assembly.GetManifestResourceStream(resourceID);
+            using Stream stream = assembly.GetManifestResourceStream(resourceID) ?? throw new ClientException(ErrorCode.ResourceNotFound, $"ResourceId:{resourceID}");
             return SKBitmap.Decode(stream);
         }
 

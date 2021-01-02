@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
 namespace HB.FullStack.EventBus.Abstractions
 {
     /// <summary>
@@ -22,16 +21,16 @@ namespace HB.FullStack.EventBus.Abstractions
         /// </summary>
         /// <param name="eventMessage"></param>
         /// <returns>是否发布成功，只有返回true才能确保消息不丢失</returns>
-        
+
         Task PublishAsync(string eventName, string jsonData);
 
-        
+
         void Subscribe(string eventName, IEventHandler handler);
 
-        
+
         Task UnSubscribeAsync(string eventName);
 
-        
+
         void StartHandle(string eventName);
 
         void Close();

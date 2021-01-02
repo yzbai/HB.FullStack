@@ -8,7 +8,7 @@ using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Resources;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public static class TokenRefresher
     {

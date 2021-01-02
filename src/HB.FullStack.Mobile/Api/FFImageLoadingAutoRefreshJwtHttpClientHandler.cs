@@ -9,7 +9,7 @@ using Xamarin.Forms;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Common.Utility;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public class FFImageLoadingAutoRefreshJwtHttpClientHandler : HttpClientHandler
     {
@@ -24,7 +24,7 @@ namespace HB.FullStack.Client.Api
 #if DEBUG
             ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
             {
-                if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
                     return true;
                 return errors == System.Net.Security.SslPolicyErrors.None;
             };
@@ -67,9 +67,9 @@ namespace HB.FullStack.Client.Api
             return responseMessage;
         }
 
-        private EndpointSettings? GetEndpointByUri(Uri requestUri)
+        private EndpointSettings? GetEndpointByUri(Uri? requestUri)
         {
-            string authority = requestUri.Authority;
+            string authority = requestUri!.Authority;
 
             return _options.Endpoints.FirstOrDefault(endpoint =>
             {
@@ -89,7 +89,7 @@ namespace HB.FullStack.Client.Api
             string deviceId = DevicePreferences.GetDeviceId();
 
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
-            request.RequestUri = request.RequestUri.AddQuery(ClientNames.DeviceId, deviceId);
+            request.RequestUri = request.RequestUri!.AddQuery(ClientNames.DeviceId, deviceId);
 
             DeviceWrapper deviceWrapper = new DeviceWrapper
             {
