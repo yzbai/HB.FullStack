@@ -1,10 +1,10 @@
 ﻿using Android.Util;
-using HB.FullStack.Client.Droid.Platforms;
-using HB.FullStack.Client.Platforms;
+using HB.FullStack.Mobile.Droid.Platforms;
+using HB.FullStack.Mobile.Platforms;
 using System;
 
 [assembly: Xamarin.Forms.Dependency(typeof(LoggerImpl))]
-namespace HB.FullStack.Client.Droid.Platforms
+namespace HB.FullStack.Mobile.Droid.Platforms
 {
     public class LoggerImpl : IPlatformLoggerImpl
     {

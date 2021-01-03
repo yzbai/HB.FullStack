@@ -91,7 +91,7 @@ namespace HB.FullStack.Mobile.Api
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
             request.RequestUri = request.RequestUri!.AddQuery(ClientNames.DeviceId, deviceId);
 
-            DeviceWrapper deviceWrapper = new DeviceWrapper
+            DeviceWrapper deviceWrapper = new()
             {
                 DeviceId = deviceId,
                 DeviceVersion = DevicePreferences.DeviceVersion,
@@ -114,10 +114,11 @@ namespace HB.FullStack.Mobile.Api
             {
                 try
                 {
-                    MultipartContent multipartContent = new MultipartContent();
-
-                    multipartContent.Add(request.Content);
-                    multipartContent.Add(deviceContent);
+                    MultipartContent multipartContent = new()
+                    {
+                        request.Content,
+                        deviceContent
+                    };
 
                     request.Content = multipartContent;
                 }

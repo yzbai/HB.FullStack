@@ -1,11 +1,11 @@
 ﻿using Android.Views;
-using HB.FullStack.Client.Droid.Platforms;
-using HB.FullStack.Client.Platforms;
+using HB.FullStack.Mobile.Droid.Platforms;
+using HB.FullStack.Mobile.Platforms;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(StatusBarHelper))]
-namespace HB.FullStack.Client.Droid.Platforms
+namespace HB.FullStack.Mobile.Droid.Platforms
 {
     public class StatusBarHelper : IPlatformStatusBarHelper
     {

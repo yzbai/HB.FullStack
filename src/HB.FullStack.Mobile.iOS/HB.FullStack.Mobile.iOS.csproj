@@ -40,8 +40,14 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="PlatformStatusBar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Mobile\HB.FullStack.Mobile.csproj">
+      <Project>{6756ff62-f061-4a3b-bc69-4f197686aa75}</Project>
+      <Name>HB.FullStack.Mobile</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

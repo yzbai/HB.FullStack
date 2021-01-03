@@ -3,8 +3,8 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-[assembly: ExportEffect(typeof(HB.FullStack.Client.Droid.Effects.FocusEffect), nameof(HB.FullStack.Client.Effects.FocusEffect))]
-namespace HB.FullStack.Client.Droid.Effects
+[assembly: ExportEffect(typeof(HB.FullStack.Mobile.Droid.Effects.FocusEffect), nameof(HB.FullStack.Mobile.Effects.FocusEffect))]
+namespace HB.FullStack.Mobile.Droid.Effects
 {
     public class FocusEffect : PlatformEffect
     {

@@ -10,10 +10,10 @@ using Xamarin.Forms.Platform.Android;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views;
-using HB.FullStack.Client.Controls;
+using HB.FullStack.Mobile.Controls;
 
-[assembly: ExportRenderer(typeof(HB.FullStack.Client.Controls.WheelPicker), typeof(HB.FullStack.Client.Droid.Renders.WheelPickerRenderer))]
-namespace HB.FullStack.Client.Droid.Renders
+[assembly: ExportRenderer(typeof(HB.FullStack.Mobile.Controls.WheelPicker), typeof(HB.FullStack.Mobile.Droid.Renders.WheelPickerRenderer))]
+namespace HB.FullStack.Mobile.Droid.Renders
 {
     public class WheelPickerRenderer : ViewRenderer<WheelPicker, LinearLayout>
     {

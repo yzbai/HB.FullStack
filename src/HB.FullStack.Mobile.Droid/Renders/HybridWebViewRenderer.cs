@@ -1,12 +1,12 @@
 ﻿using Android.Content;
 
-using HB.FullStack.Client.Controls;
+using HB.FullStack.Mobile.Controls;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-[assembly: ExportRenderer(typeof(HB.FullStack.Client.Controls.HybridWebView), typeof(HB.FullStack.Client.Droid.Renders.HybridWebViewRenderer))]
-namespace HB.FullStack.Client.Droid.Renders
+[assembly: ExportRenderer(typeof(HB.FullStack.Mobile.Controls.HybridWebView), typeof(HB.FullStack.Mobile.Droid.Renders.HybridWebViewRenderer))]
+namespace HB.FullStack.Mobile.Droid.Renders
 {
     public class HybridWebViewRenderer : WebViewRenderer
     {

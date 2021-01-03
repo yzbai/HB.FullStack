@@ -4,20 +4,20 @@ using System.Linq;
 
 using Android.Views;
 
-using HB.FullStack.Client.Effects;
+using HB.FullStack.Mobile.Effects;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-[assembly: ExportEffect(typeof(HB.FullStack.Client.Droid.Effects.TouchEffect), nameof(HB.FullStack.Client.Effects.TouchEffect))]
+[assembly: ExportEffect(typeof(HB.FullStack.Mobile.Droid.Effects.TouchEffect), nameof(HB.FullStack.Mobile.Effects.TouchEffect))]
 
-namespace HB.FullStack.Client.Droid.Effects
+namespace HB.FullStack.Mobile.Droid.Effects
 {
     public class TouchEffect : PlatformEffect
     {
         Android.Views.View _view;
         Element _formsElement;
-        HB.FullStack.Client.Effects.TouchEffect _libTouchEffect;
+        HB.FullStack.Mobile.Effects.TouchEffect _libTouchEffect;
         bool _capture;
         Func<double, double> _fromPixels;
         readonly int[] _twoIntArray = new int[2];
@@ -32,9 +32,9 @@ namespace HB.FullStack.Client.Droid.Effects
             _view = Control ?? Container;
 
             // Get access to the TouchEffect class in the .NET Standard library
-            HB.FullStack.Client.Effects.TouchEffect touchEffect =
-                (HB.FullStack.Client.Effects.TouchEffect)Element.Effects.
-                    FirstOrDefault(e => e is HB.FullStack.Client.Effects.TouchEffect);
+            HB.FullStack.Mobile.Effects.TouchEffect touchEffect =
+                (HB.FullStack.Mobile.Effects.TouchEffect)Element.Effects.
+                    FirstOrDefault(e => e is HB.FullStack.Mobile.Effects.TouchEffect);
 
             if (touchEffect != null && _view != null)
             {

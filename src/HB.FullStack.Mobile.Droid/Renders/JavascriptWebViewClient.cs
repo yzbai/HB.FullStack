@@ -1,9 +1,9 @@
 ﻿using System;
 using Android.Webkit;
-using HB.FullStack.Client.Controls;
+using HB.FullStack.Mobile.Controls;
 using Xamarin.Forms.Platform.Android;
 
-namespace HB.FullStack.Client.Droid.Renders
+namespace HB.FullStack.Mobile.Droid.Renders
 {
     public class JavascriptWebViewClient : FormsWebViewClient
     {
