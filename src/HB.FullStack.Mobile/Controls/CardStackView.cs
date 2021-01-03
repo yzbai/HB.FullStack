@@ -7,8 +7,6 @@ using System.Linq;
 using System.Windows.Input;
 using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
-using Xamarin.Forms.Markup;
-using static Xamarin.Forms.Markup.GridRowsColumns;
 
 namespace HB.FullStack.Mobile.Controls
 {
@@ -24,13 +22,13 @@ namespace HB.FullStack.Mobile.Controls
         #endregion
         public CardStackView()
         {
-            Content = new Grid
-            {
+            _root = new Grid {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                RowDefinitions = Rows.Define(Auto),
-                ColumnDefinitions = Columns.Define(Auto)
-            }.Assign(out _root);
+                VerticalOptions = LayoutOptions.FillAndExpand
+            };
+
+            _root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            _root.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             SizeChanged += OnSizeChanged;
 
@@ -164,6 +162,7 @@ namespace HB.FullStack.Mobile.Controls
             {
                 View cardView = (View)CardDataTemplate.CreateContent();
                 cardView.BindingContext = ItemsSource[i];
+                cardView.Opacity = 0;
 
                 View labelView;
 
@@ -177,22 +176,28 @@ namespace HB.FullStack.Mobile.Controls
                     labelView = new StackLayout();
                 }
 
+
                 Grid card = new Grid
                 {
-                    RowDefinitions = Rows.Define(Auto),
-                    ColumnDefinitions = Columns.Define(Star, LabelWidth),
-                    TranslationX = i * LabelWidth,
-                    BackgroundColor = CardBackgroundColors!.ElementAt(ItemsSource.Count - i - 1),
-                    Children =
-                    {
-                        //Card Content
-                        cardView.Row(0).Column(0,2).Invoke(view=>view.Opacity = 0),
-                        
-                        //Card Margin
-                        labelView.Row(0).Column(1),
-                    }
-                }.Width(OneCardWidth)
-                .Invoke(view => view.GestureRecognizers.Add(new TapGestureRecognizer { Command = _tapCommand, CommandParameter = view }));
+                    WidthRequest = OneCardWidth
+                };
+                card.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                card.ColumnDefinitions.Add(new ColumnDefinition{ Width = GridLength.Star });
+                card.ColumnDefinitions.Add(new ColumnDefinition { Width = LabelWidth });
+                card.TranslationX = i * LabelWidth;
+                card.BackgroundColor = CardBackgroundColors!.ElementAt(ItemsSource.Count - i - 1);
+                card.GestureRecognizers.Add(new TapGestureRecognizer { Command = _tapCommand, CommandParameter = card });
+
+                Grid.SetRow(cardView, 0);
+                Grid.SetColumn(cardView, 0);
+                Grid.SetColumnSpan(cardView, 2);
+
+                card.Children.Add(cardView);
+
+                Grid.SetRow(labelView, 0);
+                Grid.SetColumn(labelView, 1);
+
+                card.Children.Add(labelView);                
 
                 _cards.Add(card);
             }

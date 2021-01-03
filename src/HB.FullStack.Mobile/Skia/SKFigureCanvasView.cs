@@ -25,7 +25,7 @@ namespace HB.FullStack.Mobile.Skia
         public static readonly BindableProperty IsAnimationModeProperty = BindableProperty.Create(nameof(IsAnimationMode), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnIsAnimationModeChanged((bool)o, (bool)n); });
         public static readonly BindableProperty AnimationIntervalProperty = BindableProperty.Create(nameof(AnimationInterval), typeof(int), typeof(SKFigureCanvasView), 16, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnAnimationIntervalChanged(); });
 
-        private readonly WeakEventManager _eventManager = new WeakEventManager();
+        private readonly AsyncAwaitBestPractices.WeakEventManager _eventManager = new AsyncAwaitBestPractices.WeakEventManager();
         private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private Timer? _animationTimer;

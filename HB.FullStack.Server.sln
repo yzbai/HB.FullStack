@@ -64,7 +64,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Identity", "src\HB.FullStack.Identity\HB.FullStack.Identity.csproj", "{1045EDFA-1CFE-402D-AA16-A708F58BC50B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HB.FullStack.Test.Shared", "test\HB.FullStack.Test.Shared\HB.FullStack.Test.Shared.shproj", "{EBD09668-98FB-4A82-B458-40AD4A42235B}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		test\HB.FullStack.Test.Shared\HB.FullStack.Test.Shared.projitems*{4166d68a-c078-47a1-b781-7675e4f0eb80}*SharedItemsImports = 5
+		test\HB.FullStack.Test.Shared\HB.FullStack.Test.Shared.projitems*{883db74c-29ff-409e-8269-f8cb3dcf608e}*SharedItemsImports = 5
+		test\HB.FullStack.Test.Shared\HB.FullStack.Test.Shared.projitems*{c1637ed7-417a-4c4d-8187-d3db7f597ede}*SharedItemsImports = 5
+		test\HB.FullStack.Test.Shared\HB.FullStack.Test.Shared.projitems*{e7873166-4e21-43ef-aa32-89c160ed63f9}*SharedItemsImports = 5
+		test\HB.FullStack.Test.Shared\HB.FullStack.Test.Shared.projitems*{ebd09668-98fb-4a82-b458-40ad4a42235b}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -182,6 +191,7 @@ Global
 		{E1FB6A9F-054D-4C53-AC3E-AB516FBC117E} = {9C7C5B27-96CA-4297-A36A-9EF9DAAF0630}
 		{805EAAF7-439E-4993-A132-A7F9B712D77A} = {9C7C5B27-96CA-4297-A36A-9EF9DAAF0630}
 		{DE7E4D9D-63AC-4C02-B980-2B7EA87BF28E} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
+		{EBD09668-98FB-4A82-B458-40AD4A42235B} = {1C19E62F-9496-46FB-8E9A-8B45080EF0F2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}
