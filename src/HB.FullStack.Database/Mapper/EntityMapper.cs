@@ -10,8 +10,6 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
 
-using Sigil;
-
 namespace HB.FullStack.Database.Mapper
 {
     internal static class EntityMapper
