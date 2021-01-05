@@ -14,6 +14,7 @@ using HB.FullStack.Database;
 using HB.FullStack.Database.Def;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using HB.FullStack.Mobile.Base;
 
 namespace HB.FullStack.Mobile.Repos
 {
@@ -21,7 +22,7 @@ namespace HB.FullStack.Mobile.Repos
     {
         protected static void InsureLogined()
         {
-            if (!UserPreferences.IsLogined())
+            if (!UserPreferences.IsLogined)
             {
                 throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
             }
@@ -62,9 +63,10 @@ namespace HB.FullStack.Mobile.Repos
 
             if (_isDatabaseInitTaskNotWaitedYet)
             {
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-                Task.WaitAll(Application.Current.GetInitializeTaskAsync());
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+                if (Application.Current is BaseApplication baseApplication)
+                {
+                    baseApplication.InitializeTask.Wait();
+                }
 
                 _isDatabaseInitTaskNotWaitedYet = false;
             }
@@ -117,7 +119,7 @@ namespace HB.FullStack.Mobile.Repos
             if (!InsureInternet(AllowOfflineRead))
             {
                 //被迫使用离线数据
-                Application.Current.DisplayOfflineWarning();
+                AppStates.OfflineDataUsed();
 
                 TEntity? local = await Database.ScalarAsync(where, transactionContext).ConfigureAwait(false);
 
@@ -165,7 +167,7 @@ namespace HB.FullStack.Mobile.Repos
             if (!InsureInternet(AllowOfflineRead))
             {
                 //被迫使用离线数据
-                Application.Current.DisplayOfflineWarning();
+                AppStates.OfflineDataUsed();
 
                 IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
 

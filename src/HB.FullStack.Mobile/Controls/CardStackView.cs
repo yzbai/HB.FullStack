@@ -22,7 +22,7 @@ namespace HB.FullStack.Mobile.Controls
         #endregion
         public CardStackView()
         {
-            _root = new Grid {
+            Content = _root = new Grid {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 VerticalOptions = LayoutOptions.FillAndExpand
             };
@@ -35,17 +35,16 @@ namespace HB.FullStack.Mobile.Controls
             _tapCommand = new Command<Grid>(OnTapped);
         }
 
-
-
         #region Inputs
 
-        [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public IList? ItemsSource { get => (IList)GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
+        
         public DataTemplate? LabelDataTemplate { get; set; }
+        
         public DataTemplate? CardDataTemplate { get; set; }
+        
         public int LabelWidth { get; set; } = 60;
 
-        [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public IList<Color>? CardBackgroundColors { get; set; }
 
         #endregion
@@ -60,10 +59,7 @@ namespace HB.FullStack.Mobile.Controls
             base.OnDisappearing();
         }
 
-        public override IList<IBaseContentView?>? GetAllCustomerControls()
-        {
-            return null;
-        }
+        public override IList<IBaseContentView?>? GetAllCustomerControls() => null;
 
         private void OnItemsSourceChanged(IEnumerable? oldValue, IEnumerable? newValue)
         {

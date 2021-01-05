@@ -58,14 +58,14 @@ namespace HB.FullStack.Mobile.Base
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
             PageName = GetType().Name;
 
-            Application.Current.LogUsage(UsageType.PageCreate, PageName);
+            //Application.Current.LogUsage(UsageType.PageCreate, PageName);
         }
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
         protected override void OnAppearing()
         {
-            Application.Current.LogUsage(UsageType.PageAppearing, PageName);
+            //Application.Current.LogUsage(UsageType.PageAppearing, PageName);
 
             base.OnAppearing();
 
@@ -93,7 +93,7 @@ namespace HB.FullStack.Mobile.Base
 
         protected override void OnDisappearing()
         {
-            Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
+            //Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
 
             base.OnDisappearing();
 

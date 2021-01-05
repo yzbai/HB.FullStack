@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using HB.FullStack.Mobile.IdBarriers;
-using MyColorfulTime.IdBarriers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

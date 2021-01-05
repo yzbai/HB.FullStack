@@ -4,16 +4,15 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-using Xamarin.Forms;
 
-namespace HB.FullStack.Mobile.Services
+namespace HB.FullStack.Mobile.Logger
 {
-    public class PlatformLogger : ILogger
+    public class Logger : ILogger
     {
         private readonly IPlatformLoggerImpl? _impl;
         private readonly LogLevel _minLevel;
 
-        public PlatformLogger(IPlatformLoggerImpl? impl, LogLevel logLevel)
+        public Logger(IPlatformLoggerImpl? impl, LogLevel logLevel)
         {
             _impl = impl;
             _minLevel = logLevel;
@@ -62,49 +61,5 @@ namespace HB.FullStack.Mobile.Services
         {
             return null;
         }
-    }
-
-    public class PlatformLoggerProvider : ILoggerProvider
-    {
-        private readonly ILogger _logger;
-
-        public PlatformLoggerProvider(LogLevel logLevel)
-        {
-            IPlatformLoggerImpl? impl = DependencyService.Get<IPlatformLoggerImpl>();
-
-            _logger = new PlatformLogger(impl, logLevel);
-        }
-        public ILogger CreateLogger(string categoryName)
-        {
-            return _logger;
-        }
-
-        #region Dispose Pattern
-
-        private bool _disposed;   // boolean flag to stop us calling Dispose(twice)
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool cleanManaged)
-        {
-            if (!_disposed)
-            {
-                if (cleanManaged)
-                {
-                    // managed
-
-                }
-
-                //unmanaged
-
-                _disposed = true;
-            }
-        }
-
-        #endregion
     }
 }

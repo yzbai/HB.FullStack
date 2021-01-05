@@ -11,12 +11,12 @@ using HB.FullStack.Common.Utility;
 
 namespace HB.FullStack.Mobile.Api
 {
-    public class FFImageLoadingAutoRefreshJwtHttpClientHandler : HttpClientHandler
+    public class TokenAutoRefreshedHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
         private readonly ApiClientOptions _options;
 
-        public FFImageLoadingAutoRefreshJwtHttpClientHandler(IApiClient apiClient, IOptions<ApiClientOptions> options)
+        public TokenAutoRefreshedHttpClientHandler(IApiClient apiClient, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
             _options = options.Value;
@@ -34,7 +34,7 @@ namespace HB.FullStack.Mobile.Api
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             AddDeviceInfo(request);
-            await AddAuthInfoAsync(request).ConfigureAwait(false);
+            AddAuthInfo(request);
 
             HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -60,7 +60,7 @@ namespace HB.FullStack.Mobile.Api
             }
             catch (Exception ex)
             {
-                Application.Current.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
+                GlobalSettings.Logger.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
 
             }
 
@@ -77,16 +77,17 @@ namespace HB.FullStack.Mobile.Api
             });
         }
 
-        private static async Task AddAuthInfoAsync(HttpRequestMessage request)
+        private static void AddAuthInfo(HttpRequestMessage request)
         {
-            string? token = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
-
-            request.Headers.Add("Authorization", "Bearer " + token);
+            if (UserPreferences.AccessToken.IsNotNullOrEmpty())
+            {
+                request.Headers.Add("Authorization", "Bearer " + UserPreferences.AccessToken);
+            }
         }
 
         private static void AddDeviceInfo(HttpRequestMessage request)
         {
-            string deviceId = DevicePreferences.GetDeviceId();
+            string deviceId = DevicePreferences.DeviceId;
 
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
             request.RequestUri = request.RequestUri!.AddQuery(ClientNames.DeviceId, deviceId);
@@ -124,7 +125,7 @@ namespace HB.FullStack.Mobile.Api
                 }
                 catch (Exception ex)
                 {
-                    Application.Current.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
+                    GlobalSettings.Logger.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
                 }
             }
         }

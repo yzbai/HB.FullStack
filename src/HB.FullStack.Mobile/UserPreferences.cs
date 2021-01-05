@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Mobile.Utils;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 
@@ -23,158 +24,163 @@ namespace HB.FullStack.Mobile
     //TODO: 考虑SecurityStorage不支持时，改用普通的Storage
     public static class UserPreferences
     {
+        private const string UserId_Preference_Name = "wjUfoxCi";
+        private const string UserCreateTime_Preference_Name = "WMIliRIP";
+        private const string Mobile_Preference_Name = "H8YA3d5aj";
+        private const string Email_Preference_Name = "B2JG5UN5f";
+        private const string LoginName_Preference_Name = "UwsSmhY1";
+        private const string AccessToken_Preference_Name = "D3SQAAtrv";
+        private const string RefreshToken_Preference_Name = "ZTpMCJQl";
+
         private static long? _userId;
+        private static DateTimeOffset? _userCreateTime;
         private static string? _mobile;
         private static string? _loginName;
         private static string? _email;
-        private static DateTimeOffset? _userCreateTime;
         private static string? _accessToken;
         private static string? _refreshToken;
 
-        public static async Task<long> GetUserIdAsync()
+        static UserPreferences()
         {
-            if (!_userId.HasValue)
+            //Loading
+            string? storedValue = PreferenceHelper.PreferenceGetAsync(UserId_Preference_Name).Result;
+            _userId = storedValue == null ? null : Convert.ToInt64(storedValue, CultureInfo.InvariantCulture);
+
+            storedValue = PreferenceHelper.PreferenceGetAsync(UserCreateTime_Preference_Name).Result;
+            _userCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
+
+            _mobile = PreferenceHelper.PreferenceGetAsync(Mobile_Preference_Name).Result;
+            _loginName = PreferenceHelper.PreferenceGetAsync(LoginName_Preference_Name).Result;
+            _email = PreferenceHelper.PreferenceGetAsync(Email_Preference_Name).Result;
+            _accessToken = PreferenceHelper.PreferenceGetAsync(AccessToken_Preference_Name).Result;
+            _refreshToken = PreferenceHelper.PreferenceGetAsync(RefreshToken_Preference_Name).Result;
+        }
+
+        public static long? UserId
+        {
+            get
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_userId)).ConfigureAwait(false);
-
-                _userId = storedValue == null ? -1 : Convert.ToInt64(storedValue, CultureInfo.InvariantCulture);
+                return _userId;
             }
-
-            return _userId.Value;
-        }
-
-        public static async Task SetUserIdAsync(long userId)
-        {
-            _userId = userId;
-
-            await PreferenceHelper.PreferenceSetAsync(nameof(_userId), _userId.Value.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
-        }
-
-        public static async Task<DateTimeOffset> GetUserCreateTimeAsync()
-        {
-            if (!_userCreateTime.HasValue)
+            private set
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_userCreateTime)).ConfigureAwait(false);
+                _userId = value;
 
-                _userCreateTime = storedValue == null ? default : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
+                if (_userId.HasValue)
+                {
+                    PreferenceHelper.PreferenceSetAsync(UserId_Preference_Name, _userId.Value.ToString(CultureInfo.InvariantCulture)).Wait();
+                }
             }
-
-            return _userCreateTime.Value;
         }
 
-        public static async Task SetUserCreateTimeAsync(DateTimeOffset userCreateTime)
+        public static DateTimeOffset? UserCreateTime
         {
-            _userCreateTime = userCreateTime;
-
-            await PreferenceHelper.PreferenceSetAsync(nameof(_userCreateTime), _userCreateTime.Value.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
-        }
-
-        public static async Task<string?> GetMobileAsync()
-        {
-            if (string.IsNullOrEmpty(_mobile))
+            get
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_mobile)).ConfigureAwait(false);
-
-                _mobile = storedValue;
+                return _userCreateTime;
             }
-
-            return _mobile;
-        }
-
-        public static async Task SetMobileAsync(string? mobile)
-        {
-            _mobile = mobile;
-
-            await PreferenceHelper.PreferenceSetAsync(nameof(_mobile), mobile).ConfigureAwait(false);
-        }
-
-        public static async Task<string?> GetEmailAsync()
-        {
-            if (string.IsNullOrEmpty(_email))
+            private set
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_email)).ConfigureAwait(false);
+                _userCreateTime = value;
 
-                _email = storedValue;
+                if (_userCreateTime.HasValue)
+                {
+                    PreferenceHelper.PreferenceSetAsync(UserCreateTime_Preference_Name, _userCreateTime.Value.ToString(CultureInfo.InvariantCulture)).Wait();
+                }
             }
-
-            return _email;
         }
 
-        public static async Task SetEmailAsync(string? email)
+        public static string? Mobile
         {
-            _email = email;
-
-            await PreferenceHelper.PreferenceSetAsync(nameof(_email), _email).ConfigureAwait(false);
-        }
-
-        public static async Task<string?> GetLoginNameAsync()
-        {
-            if (string.IsNullOrEmpty(_loginName))
+            get
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_loginName)).ConfigureAwait(false);
-
-                _loginName = storedValue;
+                return _mobile;
             }
-
-            return _loginName;
-        }
-
-        public static async Task SetLoginNameAsync(string? loginName)
-        {
-            _loginName = loginName;
-
-            await PreferenceHelper.PreferenceSetAsync(nameof(_loginName), _loginName).ConfigureAwait(false);
-        }
-
-        public static async Task<string?> GetAccessTokenAsync()
-        {
-            if (string.IsNullOrEmpty(_accessToken))
+            private set
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_accessToken)).ConfigureAwait(false);
+                _mobile = value;
 
-                _accessToken = storedValue;
+                if (_mobile.IsNotNullOrEmpty())
+                {
+                    PreferenceHelper.PreferenceSetAsync(Mobile_Preference_Name, _mobile).Wait();
+                }
             }
-
-            return _accessToken;
         }
 
-        public static async Task SetAccessTokenAsync(string? accessToken)
+        public static string? Email
         {
-            _accessToken = accessToken;
-
-            await PreferenceHelper.PreferenceSetAsync(nameof(_accessToken), _accessToken).ConfigureAwait(false);
-        }
-
-        public static async Task<string?> GetRefreshTokenAsync()
-        {
-            if (string.IsNullOrEmpty(_refreshToken))
+            get => _email;
+            private set
             {
-                string? storedValue = await PreferenceHelper.PreferenceGetAsync(nameof(_refreshToken)).ConfigureAwait(false);
+                _email = value;
 
-                _refreshToken = storedValue;
+                if(_email.IsNotNullOrEmpty())
+                {
+                    PreferenceHelper.PreferenceSetAsync(Email_Preference_Name, _email).Wait();
+                }
             }
-
-            return _refreshToken;
         }
 
-        public static async Task SetRefreshTokenAsync(string? refreshToken)
+        public static string? LoginName
         {
-            _refreshToken = refreshToken;
+            get => _loginName;
+            private set
+            {
+                _loginName = value;
 
-            await PreferenceHelper.PreferenceSetAsync(nameof(_refreshToken), _refreshToken).ConfigureAwait(false);
+                if (_loginName.IsNotNullOrEmpty())
+                {
+                    PreferenceHelper.PreferenceSetAsync(LoginName_Preference_Name, _loginName).Wait();
+                }
+            }
         }
 
-        public static bool IsLogined()
+        public static string? AccessToken
         {
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-#pragma warning disable VSTHRD104 // Offer async methods
-            string? accessToken = GetAccessTokenAsync().Result;
-#pragma warning restore VSTHRD104 // Offer async methods
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+            get => _accessToken;
+            set
+            {
+                _accessToken = value;
 
-            return !string.IsNullOrEmpty(accessToken);
+                if(_accessToken.IsNotNullOrEmpty())
+                {
+                    PreferenceHelper.PreferenceSetAsync(AccessToken_Preference_Name, _accessToken).Wait();
+                }
+            }
         }
 
+        public static string? RefreshToken
+        {
+            get => _refreshToken;
+            private set
+            {
+                _refreshToken = value;
 
+                if (_refreshToken.IsNotNullOrEmpty())
+                {
+                    PreferenceHelper.PreferenceSetAsync(RefreshToken_Preference_Name, _refreshToken).Wait();
+                }
+            }
+        }
+
+        public static bool IsLogined => AccessToken.IsNotNullOrEmpty();
+        
+
+        public static void Login(long userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string? accessToken, string? refreshToken)
+        {
+            UserId = userId;
+            UserCreateTime = userCreateTime;
+            Mobile = mobile;
+            Email = email;
+            LoginName = loginName;
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+        }
+
+        public static void Logout()
+        {
+            AccessToken = null;
+            RefreshToken = null;
+        }
     }
 }

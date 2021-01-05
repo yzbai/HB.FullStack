@@ -10,39 +10,73 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Utils
 {
+    //TODO: 如果SecurityStorage不支持，改用普通的Preference
     public static class PreferenceHelper
     {
+        private static bool? _securityNotSupported;
+
+        public static bool SecurityStorageSupported
+        {
+            get 
+            {
+                if(!_securityNotSupported.HasValue)
+                {
+                    _securityNotSupported = Preferences.Get(nameof(SecurityStorageSupported), true);
+                }
+
+                return _securityNotSupported.Value;
+            
+            }
+            set 
+            {
+                _securityNotSupported = value;
+                Preferences.Set(nameof(SecurityStorageSupported), value);
+            }
+        }
+
         public static async Task<string?> PreferenceGetAsync(string key)
         {
             try
             {
-                string? value = await SecureStorage.GetAsync(key).ConfigureAwait(false);
-
-
-                return value;
+                if (SecurityStorageSupported)
+                {
+                    return await SecureStorage.GetAsync(key).ConfigureAwait(false);
+                }
+                else
+                {
+                    return Preferences.Get(key, null);
+                }
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
+            catch(FeatureNotSupportedException ex)
             {
-                Application.Current.Log(LogLevel.Critical, ex, $"SecureStorage Get 失败，很严重. key:{key}. Message:{ex.Message}");
-                return null;
+                GlobalSettings.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
+
+                SecurityStorageSupported = false;
+
+                return await PreferenceGetAsync(key).ConfigureAwait(false);
             }
         }
 
-        public static async Task PreferenceSetAsync(string key, string? value)
+        public static async Task PreferenceSetAsync(string key, string value)
         {
             try
             {
-                await SecureStorage.SetAsync(key, value ?? string.Empty).ConfigureAwait(false);
+                if (SecurityStorageSupported)
+                {
+                    await SecureStorage.SetAsync(key, value).ConfigureAwait(false);
+                }
+                else
+                {
+                    Preferences.Set(key, value);
+                }
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
+            catch (FeatureNotSupportedException ex)
             {
-                //TODO: Possible that device doesn't support secure storage on device.
-                Application.Current.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
-                return;
+                GlobalSettings.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
+
+                SecurityStorageSupported = false;
+
+                await PreferenceSetAsync(key, value).ConfigureAwait(false);
             }
         }
     }

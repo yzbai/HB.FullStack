@@ -1,4 +1,4 @@
-﻿namespace MyColorfulTime.IdBarriers
+﻿namespace HB.FullStack.Mobile.IdBarriers
 {
     public interface IIdBarrierService
     {

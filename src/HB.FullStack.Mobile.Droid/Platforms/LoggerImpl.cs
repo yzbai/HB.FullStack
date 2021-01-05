@@ -1,5 +1,6 @@
 ﻿using Android.Util;
 using HB.FullStack.Mobile.Droid.Platforms;
+using HB.FullStack.Mobile.Logger;
 using HB.FullStack.Mobile.Platforms;
 using System;
 
@@ -8,7 +9,7 @@ namespace HB.FullStack.Mobile.Droid.Platforms
 {
     public class LoggerImpl : IPlatformLoggerImpl
     {
-        private const string _tag = "MyColorfulTime";
+        private const string _tag = "HB.FullStack";
 
         public void Wtf(string message)
         {

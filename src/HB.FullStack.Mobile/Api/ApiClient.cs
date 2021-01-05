@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.Mobile.Api
@@ -64,7 +63,7 @@ namespace HB.FullStack.Mobile.Api
             EndpointSettings endpoint = GetEndpoint(request);
 
             AddDeviceInfo(request);
-            await AddAuthInfoAsync(request).ConfigureAwait(false);
+            AddAuthInfo(request);
 
             try
             {
@@ -124,13 +123,13 @@ namespace HB.FullStack.Mobile.Api
 
         private static void AddDeviceInfo(ApiRequest request)
         {
-            request.DeviceId = DevicePreferences.GetDeviceId();
+            request.DeviceId = DevicePreferences.DeviceId;
             request.DeviceInfos = DevicePreferences.DeviceInfos;
             request.DeviceVersion = DevicePreferences.DeviceVersion;
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        private async Task AddAuthInfoAsync<T>(ApiRequest<T> request) where T : Resource
+        private void AddAuthInfo<T>(ApiRequest<T> request) where T : Resource
         {
             switch (request.GetApiAuthType())
             {
@@ -138,7 +137,7 @@ namespace HB.FullStack.Mobile.Api
                     break;
                 case ApiAuthType.Jwt:
 
-                    if (!await TrySetJwtAsync(request).ConfigureAwait(false))
+                    if (!TrySetJwt(request))
                     {
                         throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
                     }
@@ -154,16 +153,14 @@ namespace HB.FullStack.Mobile.Api
             }
         }
 
-        private static async Task<bool> TrySetJwtAsync<T>(ApiRequest<T> request) where T : Resource
+        private static bool TrySetJwt<T>(ApiRequest<T> request) where T : Resource
         {
-            string? accessToken = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
-
-            if (accessToken.IsNullOrEmpty())
+            if (UserPreferences.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            request.SetJwt(accessToken!);
+            request.SetJwt(UserPreferences.AccessToken);
 
             return true;
         }

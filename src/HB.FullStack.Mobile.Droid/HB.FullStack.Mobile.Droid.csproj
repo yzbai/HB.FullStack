@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UriImageSourceExHandler.cs" />
     <Compile Include="Effects\FocusEffect.cs" />
     <Compile Include="Effects\TouchEffect.cs" />
     <Compile Include="Platforms\ImageExtensions.cs" />

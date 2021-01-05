@@ -1,37 +1,27 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
 using HB.FullStack.Mobile.Api;
-using HB.FullStack.Mobile.Services;
+using HB.FullStack.Mobile.Logger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 
 namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseApplication : Application
     {
+        private ServiceProvider? _serviceProvider;
         private LogLevel? _minimumLogLevel;
         private IConfiguration? _configuration;
+        private readonly IList<Task> _initializeTasks = new List<Task>();
 
-        protected BaseApplication(IServiceCollection services)
-        {
-            //Version
-            VersionTracking.Track();
-
-            InitializeServices(services);
-        }
-
-        public IList<Task> InitializeTasks { get; } = new List<Task>();
-
-        public Task InitializeTask { get => Task.WhenAll(InitializeTasks); }
+        public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
 
         public IConfiguration Configuration
         {
@@ -54,64 +44,87 @@ namespace HB.FullStack.Mobile.Base
                 {
                     if ("Debug".Equals(Environment, StringComparison.OrdinalIgnoreCase))
                     {
-                        _minimumLogLevel = LogLevel.Information;
+                        _minimumLogLevel = LogLevel.Debug;
                     }
                     else
                     {
-                        _minimumLogLevel = LogLevel.Information;
+                        _minimumLogLevel = LogLevel.Warning;
                     }
                 }
 
                 return _minimumLogLevel.Value;
             }
+            set
+            {
+                _minimumLogLevel = value;
+            }
+        }
+
+        public BaseApplication(IServiceCollection services)
+        {
+            //Version
+            VersionTracking.Track();
+
+            BaseRegisterServices(services);
+
+            BaseConfigureServices();
+
+            void BaseRegisterServices(IServiceCollection services)
+            {
+                services.AddOptions();
+
+                services.AddLogging(builder =>
+                {
+                    builder.SetMinimumLevel(MinimumLogLevel);
+                    builder.AddProvider(new LoggerProvider(MinimumLogLevel));
+                });
+
+                services.AddSingleton<TokenAutoRefreshedHttpClientHandler>();
+
+                RegisterServices(services);
+
+                //Build
+                _serviceProvider = services.BuildServiceProvider();
+                DependencyResolver.ResolveUsing(type => _serviceProvider.GetService(type));
+            }
+
+            void BaseConfigureServices()
+            {
+                //Log
+                GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
+                GlobalSettings.ExceptionHandler = ExceptionHandler;
+                //_remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
+
+                //UriImageSourceEx
+                UriImageSourceEx.HttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
+
+                //Connectivity
+                Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
+
+                ConfigureServices();
+            }
+        }
+
+        public void AddInitTask(Task task)
+        {
+            task.Fire();
+            _initializeTasks.Add(task);
         }
 
         public abstract string Environment { get; }
 
-        private void InitializeServices(IServiceCollection services)
-        {
-            RegisterServices(services);
+        protected abstract void RegisterServices(IServiceCollection services);
 
-            ConfigureServices();
-        }
+        protected abstract void ConfigureServices();
 
-        protected virtual void RegisterServices(IServiceCollection services)
-        {
-            services.AddOptions();
-
-            services.AddLogging(builder =>
-            {
-                builder.SetMinimumLevel(MinimumLogLevel);
-                builder.AddProvider(new PlatformLoggerProvider(LogLevel.Trace));
-            });
-
-            services.AddSingleton<FFImageLoadingAutoRefreshJwtHttpClientHandler>();
-        }
-
-        protected virtual void ConfigureServices()
-        {
-            //Connectivity
-            Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
-        }
-
-#pragma warning disable CA2109 // Review visible event handlers
         protected abstract void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e);
-#pragma warning restore CA2109 // Review visible event handlers
 
-        public abstract void PerformLogin();
+        //public abstract void PerformLogin();
 
         public abstract void DisplayOfflineWarning();
 
-
-        private static IRemoteLoggingService? _remoteLoggingService;
-
-        private static ILogger? _localLogger;
-
-        public static void ExceptionHandler(Exception ex)
+        public static void ExceptionHandler(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {
-            Log(LogLevel.Error, ex, null);
-
-
             if (ex is ApiException apiEx)
             {
                 switch (apiEx.ErrorCode)
@@ -130,30 +143,20 @@ namespace HB.FullStack.Mobile.Base
                     case ErrorCode.ApiNoAuthority:
                     case ErrorCode.ApiTokenRefresherError:
                     case ErrorCode.ApiTokenExpired:
-                        Application.Current.PerformLogin();
+                        //Application.Current.PerformLogin();
                         break;
                     default: break;
                 }
             }
+
+            Log(ex, message, logLevel);
         }
 
-        public static void Log(LogLevel logLevel, Exception? ex, string? message = null)
+        public static void Log(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {
-            if (_remoteLoggingService == null)
-            {
-                _remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
-            }
+            //_remoteLoggingService.LogAsync(logLevel, ex, message); //这里不加Fire()。避免循环
 
-            _remoteLoggingService?.LogAsync(logLevel, ex, message).SafeFireAndForget();
-
-            if (_localLogger == null)
-            {
-                _localLogger = DependencyService.Resolve<ILogger<BaseApplication>>();
-            }
-
-            _localLogger?.Log(logLevel, ex, message);
+            GlobalSettings.Logger.Log(logLevel, ex, message);
         }
-
-
     }
 }

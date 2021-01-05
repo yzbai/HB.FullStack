@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Android.App;
 using HB.FullStack.Mobile;
+using HB.FullStack.Mobile.Droid;
 using Xamarin.Forms;
 
 // General Information about an assembly is controlled through the following 
@@ -28,3 +29,4 @@ using Xamarin.Forms;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: ResolutionGroupName(Consts.EffectsGroupName)]
+

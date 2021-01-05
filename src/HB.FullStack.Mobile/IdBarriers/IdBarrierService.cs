@@ -12,7 +12,7 @@ using HB.FullStack.Common.IdGen;
 using HB.FullStack.Common.Resources;
 using HB.FullStack.Database;
 
-namespace MyColorfulTime.IdBarriers
+namespace HB.FullStack.Mobile.IdBarriers
 {
 
     internal class IdBarrierService : IIdBarrierService

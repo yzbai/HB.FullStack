@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Android.Graphics;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 
 namespace Xamarin.Forms
@@ -8,22 +10,27 @@ namespace Xamarin.Forms
     {
         public static IImageSourceHandler GetHandler(this ImageSource imageSource)
         {
-            if (imageSource is UriImageSource)
-            {
-                return new ImageLoaderSourceHandler();
-            }
-            else if (imageSource is FileImageSource)
-            {
-                return new FileImageSourceHandler();
-            }
-            else if (imageSource is StreamImageSource)
-            {
-                return new StreamImagesourceHandler();
-            }
-            else
-            {
+            if (imageSource == null || imageSource.IsEmpty)
                 return null;
-            }
+
+            return Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(imageSource);
+
+            //if (imageSource is UriImageSource)
+            //{
+            //    return new ImageLoaderSourceHandler();
+            //}
+            //else if (imageSource is FileImageSource)
+            //{
+            //    return new FileImageSourceHandler();
+            //}
+            //else if (imageSource is StreamImageSource)
+            //{
+            //    return new StreamImagesourceHandler();
+            //}
+            //else
+            //{
+                
+            //}
         }
 
         public static Task<Bitmap> GetBitMapAsync(this ImageSource source)
