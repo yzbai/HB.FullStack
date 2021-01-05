@@ -42,6 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IPublicResourceTokenManager, PublicResourceTokenManager>();
             services.AddScoped<CheckPublicResourceTokenFilter>();
             services.AddScoped<CheckSmsCodeFilter>();
+           
         }
     }
 }

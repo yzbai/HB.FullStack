@@ -1,4 +1,6 @@
 ﻿using HB.Infrastructure.Tencent;
+using HB.Infrastructure.Tencent.TCaptha;
+
 using Microsoft.Extensions.Configuration;
 using System;
 
@@ -50,6 +52,8 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             services.AddSingleton<ITCapthaClient, TCapthaClient>();
+
+            services.AddScoped<CheckTCapthcaFilter>();
         }
 
     }

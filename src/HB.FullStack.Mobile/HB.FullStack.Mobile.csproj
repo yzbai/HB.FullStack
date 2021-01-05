@@ -68,4 +68,16 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="TCaptcha\TCaptchaDialog.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="TCaptcha\TCaptchaDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

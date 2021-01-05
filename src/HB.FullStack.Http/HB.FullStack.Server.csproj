@@ -16,12 +16,6 @@
 
 
   <ItemGroup>
-    <Compile Remove="MixedSession\**" />
-    <EmbeddedResource Remove="MixedSession\**" />
-    <None Remove="MixedSession\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

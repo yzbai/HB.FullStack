@@ -109,12 +109,6 @@ namespace System
             return string.IsNullOrWhiteSpace(ip) ? "127.0.0.1" : ip;
         }
 
-        /// <summary>
-        /// GetHeaderValueAs
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="headerName"></param>
-        /// <returns></returns>
         public static T? GetHeaderValueAs<T>(this HttpRequest request, string headerName) where T : class
         {
             try

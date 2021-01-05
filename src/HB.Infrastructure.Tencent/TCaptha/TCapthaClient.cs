@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Tencent
         /// <exception cref="HttpRequestException"></exception>
         public async Task<bool> VerifyTicketAsync(string appid, string ticket, string randstr, string userIp)
         {
-            if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting apiKeySetting))
+            if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting? apiKeySetting))
             {
                 throw new TCapthaException($"lack ApiKeySettings for AppId:{appid}");
             }
@@ -51,7 +51,7 @@ namespace HB.Infrastructure.Tencent
                 {"Ticket",  ticket},
                 {"Randstr", randstr},
                 {"UserIP", userIp }
-            }.ToHttpValueCollection().ToString();
+            }.ToHttpValueCollection().ToString()!;
 
             string requestUrl = _options.Endpoint.RemoveSuffix("/") + "?" + query;
 

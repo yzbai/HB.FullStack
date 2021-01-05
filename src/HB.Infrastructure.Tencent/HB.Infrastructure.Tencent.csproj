@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+   <TargetFramework>net5.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -9,6 +9,10 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
     
@@ -19,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+    <ProjectReference Include="..\HB.FullStack.Http\HB.FullStack.Server.csproj" />
   </ItemGroup>
 
 </Project>
