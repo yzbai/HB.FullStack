@@ -119,7 +119,7 @@ namespace HB.FullStack.Mobile.Repos
             if (!InsureInternet(AllowOfflineRead))
             {
                 //被迫使用离线数据
-                AppStates.OfflineDataUsed();
+                NotifyOfflineDataUsed();
 
                 TEntity? local = await Database.ScalarAsync(where, transactionContext).ConfigureAwait(false);
 
@@ -147,6 +147,8 @@ namespace HB.FullStack.Mobile.Repos
             return remote;
         }
 
+        
+
         protected async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext transactionContext, bool forced = false)
         {
             if (NeedLogined)
@@ -167,7 +169,7 @@ namespace HB.FullStack.Mobile.Repos
             if (!InsureInternet(AllowOfflineRead))
             {
                 //被迫使用离线数据
-                AppStates.OfflineDataUsed();
+                NotifyOfflineDataUsed();
 
                 IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
 
@@ -227,6 +229,14 @@ namespace HB.FullStack.Mobile.Repos
             {
                 //脱网下操作
                 throw new NotImplementedException();
+            }
+        }
+
+        private static void NotifyOfflineDataUsed()
+        {
+            if (Application.Current is BaseApplication baseApplication)
+            {
+                baseApplication.OnOfflineDataUsed();
             }
         }
     }

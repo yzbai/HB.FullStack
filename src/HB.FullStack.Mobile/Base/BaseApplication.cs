@@ -121,8 +121,6 @@ namespace HB.FullStack.Mobile.Base
 
         //public abstract void PerformLogin();
 
-        public abstract void DisplayOfflineWarning();
-
         public static void ExceptionHandler(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {
             if (ex is ApiException apiEx)
@@ -151,6 +149,8 @@ namespace HB.FullStack.Mobile.Base
 
             Log(ex, message, logLevel);
         }
+
+        public abstract void OnOfflineDataUsed();
 
         public static void Log(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {

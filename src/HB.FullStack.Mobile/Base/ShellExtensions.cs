@@ -5,16 +5,16 @@ using Xamarin.Forms;
 
 namespace Xamarin.Forms
 {
-    public static class ShellExtensions
+    public static class ShellHelper
     {
-        public static bool IsCurrentPageA(this Shell shell, Type pageType)
+        public static bool IsCurrentPageA(Type pageType)
         {
-            return shell.CurrentPage().GetType() == pageType;
+            return Shell.Current.CurrentPage.GetType() == pageType;
         }
 
-        public static Page CurrentPage(this Shell shell)
+        public static string GetCurrentPageName()
         {
-            return ((IShellSectionController)shell.CurrentItem.CurrentItem).PresentedPage;
+            return Shell.Current.CurrentPage.GetType().Name;
         }
 
         public static string? GetPageName(this ShellNavigationState? state)

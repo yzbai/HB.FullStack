@@ -176,6 +176,7 @@
         PropertyNotFound = 938,
         DatabaseDefError = 939,
         ResourceNotFound = 940,
+        NotLogined = 941,
     }
 
     public static class ErrorCodeExtensions
