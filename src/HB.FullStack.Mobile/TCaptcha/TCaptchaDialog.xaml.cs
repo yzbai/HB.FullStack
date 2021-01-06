@@ -52,7 +52,7 @@ namespace HB.FullStack.Mobile.TCaptcha
             webView.EvaluateJavaScriptAsync($"showCaptcha(\"{AppId}\")").Fire();
 
             //TODO: 如果RegisterAction放在构造函数里，再次显示Dialog时，不会加载
-            webView.RegisterAction(CaptchaCallback);
+            webView.RegisterCSharpAction(CaptchaCallback);
         }
 
         private void CaptchaCallback(string json)

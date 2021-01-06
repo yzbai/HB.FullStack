@@ -1,9 +1,13 @@
 ﻿using AsyncAwaitBestPractices;
+
 using HB.FullStack.Mobile.Base;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Xamarin.Forms;
+
 using WeakEventManager = AsyncAwaitBestPractices.WeakEventManager;
 
 namespace HB.FullStack.Mobile.Controls
@@ -11,6 +15,7 @@ namespace HB.FullStack.Mobile.Controls
     public class HybridWebView : WebView, IBaseContentView
     {
         private readonly WeakEventManager _eventManager = new WeakEventManager();
+        private Action<string>? _cSharpAction;
 
         public static readonly BindableProperty UriProperty = BindableProperty.Create(
             propertyName: nameof(Uri),
@@ -18,40 +23,50 @@ namespace HB.FullStack.Mobile.Controls
             declaringType: typeof(HybridWebView),
             defaultValue: default(string));
 
-#pragma warning disable CA1056 // URI-like properties should not be strings
         public string Uri
-#pragma warning restore CA1056 // URI-like properties should not be strings
         {
             get { return (string)GetValue(UriProperty); }
             set { SetValue(UriProperty, value); }
         }
 
-        public event EventHandler Loaded { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
+        public event EventHandler Loaded
+        {
+            add => _eventManager.AddEventHandler(value); 
+            remove => _eventManager.RemoveEventHandler(value);
+        }
+
+        public HybridWebView()
+        {
+            Navigated += HybridWebView_Navigated;
+        }
+
+        private void HybridWebView_Navigated(object sender, WebNavigatedEventArgs e)
+        {
+            
+        }
 
         public void OnLoaded()
         {
             _eventManager.RaiseEvent(this, new EventArgs(), nameof(Loaded));
         }
 
-        Action<string>? _action;
-
-        public void RegisterAction(Action<string> callback)
+        public void RegisterCSharpAction(Action<string> action)
         {
-            _action = callback;
+            _cSharpAction = action;
         }
 
         public void Cleanup()
         {
-            _action = null;
+            _cSharpAction = null;
         }
 
         public void InvokeAction(string data)
         {
-            if (_action == null || data == null)
+            if (_cSharpAction == null || data == null)
             {
                 return;
             }
-            _action.Invoke(data);
+            _cSharpAction.Invoke(data);
         }
 
         public void OnAppearing()
@@ -63,6 +78,8 @@ namespace HB.FullStack.Mobile.Controls
         {
             IsAppearing = false;
         }
+
+        
 
         public IList<IBaseContentView?>? GetAllCustomerControls()
         {

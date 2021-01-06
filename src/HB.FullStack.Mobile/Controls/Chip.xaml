@@ -4,6 +4,7 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Mobile.Base"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
     xmlns:converters="clr-namespace:HB.FullStack.Mobile.Converters"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -20,7 +21,7 @@
         VerticalOptions="Center">
         <Frame.Resources>
             <ResourceDictionary>
-                <converters:HasValueConverter x:Key="HasValueConverter" />
+                <xct:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter"/>
             </ResourceDictionary>
         </Frame.Resources>
 
@@ -31,7 +32,7 @@
         <Frame.Content>
             <StackLayout HorizontalOptions="Center" Orientation="Horizontal" VerticalOptions="Center">
 
-                <Image d:IsVisible="False" IsVisible="{Binding Image, Converter={StaticResource HasValueConverter}}" Source="{Binding Image}" />
+                <Image d:IsVisible="False" IsVisible="{Binding ImageSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" Source="{Binding ImageSource}" />
 
                 <Label
                     d:Text="Chip"
@@ -39,13 +40,13 @@
                     FontSize="{Binding FontSize}"
                     HorizontalOptions="Center"
                     HorizontalTextAlignment="Center"
-                    IsVisible="{Binding Text, Converter={StaticResource HasValueConverter}}"
+                    IsVisible="{Binding Text, Converter={StaticResource IsNotNullOrEmptyConverter}}"
                     Text="{Binding Text}"
                     TextColor="{Binding TextColor}"
                     VerticalOptions="Center"
                     VerticalTextAlignment="Center" />
 
-                <Image d:IsVisible="False" IsVisible="{Binding CloseImage, Converter={StaticResource HasValueConverter}}" Source="{Binding CloseImage}">
+                <Image d:IsVisible="False" IsVisible="{Binding CloseImageSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" Source="{Binding CloseImageSource}">
                     <Image.GestureRecognizers>
                         <TapGestureRecognizer Tapped="CloseButton_Clicked" />
                     </Image.GestureRecognizers>

@@ -65,6 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
+    <PackageReference Include="Xamarin.CommunityToolkit">
+      <Version>1.0.0-pre6</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\strings.xml" />

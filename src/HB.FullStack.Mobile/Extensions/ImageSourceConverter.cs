@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
-namespace HB.FullStack.Mobile.Hack
+namespace HB.FullStack.Mobile.Extensions
 {
-    public class ImageSourceExConverter : IValueConverter
+    public class ImageSourceConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

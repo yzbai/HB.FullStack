@@ -16,7 +16,7 @@ namespace HB.FullStack.Mobile.Controls
 
         public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(Chip), Color.DarkGray);
 
-        public static readonly BindableProperty ImageProperty = BindableProperty.Create(nameof(Image), typeof(ImageSource), typeof(Chip));
+        public static readonly BindableProperty ImageProperty = BindableProperty.Create(nameof(ImageSource), typeof(ImageSource), typeof(Chip));
 
         public static readonly BindableProperty ClickedCommandProperty = BindableProperty.Create(nameof(ClickedCommand), typeof(ICommand), typeof(Chip));
 
@@ -26,7 +26,7 @@ namespace HB.FullStack.Mobile.Controls
 
         public static readonly BindableProperty CloseCommandParameterProperty = BindableProperty.Create(nameof(CloseCommandParameter), typeof(object), typeof(Chip));
 
-        public static readonly BindableProperty CloseImageProperty = BindableProperty.Create(nameof(CloseImage), typeof(ImageSource), typeof(Chip));
+        public static readonly BindableProperty CloseImageProperty = BindableProperty.Create(nameof(CloseImageSource), typeof(ImageSource), typeof(Chip));
 
         public static readonly BindableProperty IsToggleableProperty = BindableProperty.Create(nameof(IsToggleable), typeof(bool), typeof(Chip), propertyChanged: OnIsSelectedPropertyChanged);
 
@@ -101,7 +101,7 @@ namespace HB.FullStack.Mobile.Controls
             set => SetValue(TextColorProperty, value);
         }
 
-        public ImageSource Image
+        public ImageSource ImageSource
         {
             get => (ImageSource)GetValue(ImageProperty);
             set => SetValue(ImageProperty, value);
@@ -131,7 +131,7 @@ namespace HB.FullStack.Mobile.Controls
             set => SetValue(CloseCommandParameterProperty, value);
         }
 
-        public ImageSource CloseImage
+        public ImageSource CloseImageSource
         {
             get => (ImageSource)GetValue(CloseImageProperty);
             set => SetValue(CloseImageProperty, value);

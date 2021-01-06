@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Mobile
+namespace HB.FullStack.Mobile.Extensions
 {
 	/// <summary>
 	/// 从Xamarin.Forms中拷贝

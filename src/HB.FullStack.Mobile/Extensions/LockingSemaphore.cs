@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Mobile
+namespace HB.FullStack.Mobile.Extensions
 {
 	internal class LockingSemaphore
 	{

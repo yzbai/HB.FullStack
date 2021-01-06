@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HB.FullStack.Mobile;
+using HB.FullStack.Mobile.Extensions;
+
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using IOPath = System.IO.Path;
