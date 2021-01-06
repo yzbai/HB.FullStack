@@ -28,9 +28,9 @@ namespace HB.FullStack.Common
             return PerformValidate();
         }
 
-        public IList<ValidationResult> GetValidateResults(bool rePerformValidate = false)
+        public IList<ValidationResult> GetValidateResults(bool forced = false)
         {
-            if (_validateResults == null || rePerformValidate)
+            if (_validateResults == null || forced)
             {
                 PerformValidate();
             }

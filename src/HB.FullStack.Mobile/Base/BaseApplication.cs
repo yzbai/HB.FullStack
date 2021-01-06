@@ -92,7 +92,7 @@ namespace HB.FullStack.Mobile.Base
             {
                 //Log
                 GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
-                GlobalSettings.ExceptionHandler = ExceptionHandler;
+                GlobalSettings.MessageExceptionHandler = ExceptionHandler;
                 //_remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
 
                 //UriImageSourceEx
@@ -152,7 +152,7 @@ namespace HB.FullStack.Mobile.Base
 
         public abstract void OnOfflineDataUsed();
 
-        public static void Log(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
+        public static void Log(Exception? ex, string? message = null, LogLevel logLevel = LogLevel.Error)
         {
             //_remoteLoggingService.LogAsync(logLevel, ex, message); //这里不加Fire()。避免循环
 

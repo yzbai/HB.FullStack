@@ -17,13 +17,6 @@ namespace HB.FullStack.Mobile.Base
 
     public abstract class BaseContentView : ContentView, IBaseContentView
     {
-        protected override void OnParentSet()
-        {
-            base.OnParentSet();
-
-            Parent.
-        }
-
         public virtual void OnAppearing()
         {
             IsAppearing = true;

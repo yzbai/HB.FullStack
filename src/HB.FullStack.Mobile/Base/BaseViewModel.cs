@@ -37,7 +37,7 @@ namespace HB.FullStack.Mobile.Base
 
         public virtual void OnAppearing(string pageName)
         {
-            NotifyValidationChanged(null);
+            //NotifyValidationChanged(null);
         }
 
         public virtual void OnDisappearing(string pageName)
