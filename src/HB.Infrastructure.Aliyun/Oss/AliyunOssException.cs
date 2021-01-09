@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
-    public class AliyunOssException : FrameworkException
+    public class AliyunOssException : CommonException
     {
 
         public AliyunOssException(string? message) : base(message)

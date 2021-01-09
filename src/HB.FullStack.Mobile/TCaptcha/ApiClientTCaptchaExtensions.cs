@@ -22,7 +22,7 @@ namespace HB.FullStack.Mobile.Api
                     await onSuccessDelegate(resource).ConfigureAwait(false);
                 }
             }
-            catch (FrameworkException ex) when (ex.ErrorCode == ErrorCode.ApiPublicResourceTokenNeeded)
+            catch (ApiException ex) when (ex.ErrorCode == ErrorCode.ApiPublicResourceTokenNeeded)
             {
                 TCaptchaDialog dialog = new TCaptchaDialog(async (result) =>
                 {

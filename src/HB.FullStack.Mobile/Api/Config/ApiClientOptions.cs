@@ -13,9 +13,11 @@ namespace HB.FullStack.Mobile.Api
 
         public ApiClientOptions Value => this;
 
-        public IList<EndpointSettings> Endpoints { get; private set; } = new List<EndpointSettings>();
+        public IList<EndpointSettings> Endpoints { get; set; } = new List<EndpointSettings>();
 
-        public IList<ApiKey> ApiKeys { get; private set; } = new List<ApiKey>();
+        public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
+
+        public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(20);
 
         public void AddEndpoint(EndpointSettings endpointSettings)
         {

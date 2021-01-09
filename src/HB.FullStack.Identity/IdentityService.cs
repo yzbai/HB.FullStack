@@ -30,12 +30,12 @@ namespace HB.FullStack.Identity
 
             if (mobile == null && email == null && loginName == null)
             {
-                throw new FrameworkException(ErrorCode.IdentityMobileEmailLoginNameAllNull);
+                throw new CommonException(ErrorCode.IdentityMobileEmailLoginNameAllNull);
             }
 
             if (!mobileConfirmed && !emailConfirmed && password == null)
             {
-                throw new FrameworkException(ErrorCode.IdentityNothingConfirmed);
+                throw new CommonException(ErrorCode.IdentityNothingConfirmed);
             }
 
             bool ownTrans = transactionContext == null;
@@ -90,7 +90,7 @@ namespace HB.FullStack.Identity
 
                 if (count != 0)
                 {
-                    throw new FrameworkException(ErrorCode.DatabaseFoundTooMuch, $"已经有相同的角色. UserId:{userId}, RoleId:{roleId}");
+                    throw new CommonException(ErrorCode.DatabaseFoundTooMuch, $"已经有相同的角色. UserId:{userId}, RoleId:{roleId}");
                 }
 
                 RoleOfUser ru = new RoleOfUser(userId, roleId);
@@ -119,7 +119,7 @@ namespace HB.FullStack.Identity
 
                 if (stored == null)
                 {
-                    throw new FrameworkException(ErrorCode.DatabaseNotFound, $"没有找到这样的角色. UserId:{userId}, RoleId:{roleId}");
+                    throw new CommonException(ErrorCode.DatabaseNotFound, $"没有找到这样的角色. UserId:{userId}, RoleId:{roleId}");
                 }
 
                 await _roleOfUserRepo.DeleteAsync(stored, lastUser, trans).ConfigureAwait(false);

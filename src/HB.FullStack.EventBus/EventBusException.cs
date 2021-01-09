@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.FullStack.EventBus
 {
-    public class EventBusException : FrameworkException
+    public class EventBusException : CommonException
     {
         public EventBusException(string message) : base(message)
         {

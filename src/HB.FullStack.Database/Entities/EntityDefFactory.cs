@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-using HB.FullStack.Common.Entities;
+using HB.FullStack.Common;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
@@ -20,6 +20,11 @@ namespace HB.FullStack.Database.Def
 
         private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="databaseEngine"></param>
+        /// <exception cref="DatabaseException"></exception>
         public static void Initialize(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
@@ -47,6 +52,13 @@ namespace HB.FullStack.Database.Def
             }
         }
 
+        /// <summary>
+        /// WarmUp
+        /// </summary>
+        /// <param name="allEntityTypes"></param>
+        /// <param name="engineType"></param>
+        /// <param name="entitySchemaDict"></param>
+        /// <exception cref="DatabaseException"></exception>
         private static void WarmUp(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             foreach (var t in allEntityTypes)
@@ -151,13 +163,21 @@ namespace HB.FullStack.Database.Def
             return null;
         }
 
+        /// <summary>
+        /// CreateEntityDef
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="engineType"></param>
+        /// <param name="entitySchemaDict"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
             if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw new DatabaseException($"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
+                throw new DatabaseException(DatabaseErrorCode.NotADatabaseEntity, $"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
             }
 
             EntityDef entityDef = new EntityDef
@@ -214,6 +234,15 @@ namespace HB.FullStack.Database.Def
             return entityDef;
         }
 
+        /// <summary>
+        /// CreatePropertyDef
+        /// </summary>
+        /// <param name="entityDef"></param>
+        /// <param name="propertyInfo"></param>
+        /// <param name="propertyAttribute"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, EngineType engineType)
         {
             EntityPropertyDef propertyDef = new EntityPropertyDef
@@ -225,10 +254,10 @@ namespace HB.FullStack.Database.Def
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw new DatabaseException(ErrorCode.DatabaseDefError, $"实体属性缺少Set方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
+                ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体属性缺少Set方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
 
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw new DatabaseException(ErrorCode.DatabaseDefError, $"实体属性缺少Get方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
+                ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体属性缺少Get方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
 
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;

@@ -80,9 +80,9 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (JsonException ex)
             {
-                throw new AliyunSmsException(Resources.AliyunSmsResponseFormatErrorMessage, ex);
+                throw new AliyunSmsException(ErrorCode.AliyunSmsError, "阿里云短信服务，格式返回错误", ex);
             }
-            catch (ClientException ex)
+            catch (Aliyun.Acs.Core.Exceptions.ClientException ex)
             {
                 throw new AliyunSmsException(Resources.AliyunSmsServiceDownErrorMessage, ex);
             }

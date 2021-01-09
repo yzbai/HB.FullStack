@@ -476,7 +476,7 @@ namespace HB.FullStack.Identity
 
             if (encryptionCert == null)
             {
-                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
+                throw new CommonException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
             }
 
             _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);

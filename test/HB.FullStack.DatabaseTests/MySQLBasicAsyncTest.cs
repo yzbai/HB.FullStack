@@ -52,8 +52,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -85,7 +84,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -131,8 +130,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -167,8 +165,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -208,8 +205,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -225,7 +221,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (testEntities.Count == 0)
                 {
-                    throw new DatabaseException("No Entity to update");
+                    throw new  Exception("No Entity to update");
                 }
 
                 PublisherEntity entity = testEntities[0];
@@ -256,8 +252,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -330,6 +325,11 @@ namespace HB.FullStack.DatabaseTests
         //    }
         //}
 
+        /// <summary>
+        /// Test_8_LastTimeTestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
 
 
@@ -397,6 +397,12 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        /// <summary>
+        /// Test_9_UpdateLastTimeTestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -428,7 +434,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (testEntities.Count == 0)
                 {
-                    throw new DatabaseException("No Entity to update");
+                    throw new  Exception("No Entity to update");
                 }
 
                 PublisherEntity entity = testEntities[0];
@@ -464,6 +470,11 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        /// <summary>
+        /// Test_EntityMapperAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
         public async Task Test_EntityMapperAsync()
         {
@@ -517,6 +528,12 @@ namespace HB.FullStack.DatabaseTests
             #endregion
         }
 
+        /// <summary>
+        /// Test_EntityMapperPerformanceAsync
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Theory]
         [InlineData(1)]
         public async Task Test_EntityMapperPerformanceAsync(int index)
@@ -656,6 +673,11 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        /// <summary>
+        /// EntityMapper_ToParameter_Test
+        /// </summary>
+        /// <param name="engineType"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Theory]
         [InlineData(EngineType.MySQL)]
         [InlineData(EngineType.SQLite)]
@@ -691,6 +713,14 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        /// <summary>
+        /// AssertEqual
+        /// </summary>
+        /// <param name="emit_results"></param>
+        /// <param name="results"></param>
+        /// <param name="engineType"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
         {
             var dict = results.ToDictionary(kv => kv.Key);
@@ -707,6 +737,11 @@ namespace HB.FullStack.DatabaseTests
             }
         }
 
+        /// <summary>
+        /// EntityMapper_ToParameter_Performance_Test
+        /// </summary>
+        /// <param name="engineType"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Theory]
         [InlineData(EngineType.MySQL)]
         [InlineData(EngineType.SQLite)]

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.Infrastructure.Tencent
 {
-    public class TCapthaException : FrameworkException
+    public class TCapthaException : CommonException
     {
         public TCapthaException()
         {

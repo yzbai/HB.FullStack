@@ -16,6 +16,10 @@ namespace HB.FullStack
 
         public IServiceProvider ServiceProvider { get; private set; }
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         public ServiceFixture_Sqlite()
         {

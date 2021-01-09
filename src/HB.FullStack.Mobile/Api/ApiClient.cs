@@ -116,7 +116,7 @@ namespace HB.FullStack.Mobile.Api
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(endpoint.GetHttpClientName());
 
-            httpClient.Timeout = TimeSpan.FromSeconds(10); //TODO: move to 
+            httpClient.Timeout = _options.HttpClientTimeout;
 
             return httpClient;
         }

@@ -19,8 +19,6 @@ namespace System
             catch (Exception ex)
             {
                 GlobalSettings.MessageExceptionHandler.Invoke(ex, message, logLevel);
-
-                throw;
             }
         }
     }

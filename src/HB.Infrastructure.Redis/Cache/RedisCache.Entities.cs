@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
-using HB.FullStack.Common.Entities;
+using HB.FullStack.Common;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -233,6 +233,14 @@ end
             _logger.LogInformation($"RedisCache初始化完成");
         }
 
+        /// <summary>
+        /// GetEntitiesAsync
+        /// </summary>
+        /// <param name="dimensionKeyName"></param>
+        /// <param name="dimensionKeyValues"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -264,8 +272,21 @@ end
 
                 return await GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
             }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "分析这个");
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+            }
         }
 
+        /// <summary>
+        /// SetEntitiesAsync
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -318,8 +339,23 @@ end
 
                 return await SetEntitiesAsync<TEntity>(entities, token).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "分析这个");
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+            }
         }
 
+        /// <summary>
+        /// RemoveEntitiesAsync
+        /// </summary>
+        /// <param name="dimensionKeyName"></param>
+        /// <param name="dimensionKeyValues"></param>
+        /// <param name="updatedVersions"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -345,9 +381,25 @@ end
 
                 await RemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, updatedVersions, token).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "分析这个");
 
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+            }
         }
 
+        /// <summary>
+        /// AddRemoveEntitiesRedisInfo
+        /// </summary>
+        /// <param name="dimensionKeyName"></param>
+        /// <param name="dimensionKeyValues"></param>
+        /// <param name="updatedVersions"></param>
+        /// <param name="entityDef"></param>
+        /// <param name="redisKeys"></param>
+        /// <param name="redisValues"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         private byte[] AddRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             byte[] loadedScript;
@@ -385,6 +437,16 @@ end
         }
 
 
+        /// <summary>
+        /// AddGetEntitiesRedisInfo
+        /// </summary>
+        /// <param name="dimensionKeyName"></param>
+        /// <param name="dimensionKeyValues"></param>
+        /// <param name="entityDef"></param>
+        /// <param name="redisKeys"></param>
+        /// <param name="redisValues"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         private byte[] AddGetEntitiesRedisInfo(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
             byte[] loadedScript;

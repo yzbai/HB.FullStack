@@ -1,6 +1,6 @@
 ﻿using System;
 
-using HB.FullStack.Database.Properties;
+
 
 namespace HB.FullStack.Database.SQL
 {
@@ -17,7 +17,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (!enumType.IsEnum)
             {
-                throw new ArgumentException(Resources.TypeNotValidErrorMessage, nameof(enumType));
+                throw new ArgumentException("not a Enum", nameof(enumType));
             }
 
             EnumType = enumType;

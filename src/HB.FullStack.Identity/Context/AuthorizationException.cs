@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Identity
 {
-    public class AuthorizationException : FrameworkException
+    public class AuthorizationException : CommonException
     {
         public AuthorizationException(string? message) : base(message)
         {

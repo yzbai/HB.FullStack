@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 
-using HB.FullStack.Common.Entities;
+
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
@@ -20,6 +20,14 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly object _toEntityFuncDictLocker = new object();
 
+        /// <summary>
+        /// ToEntities
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="engineType"></param>
+        /// <param name="entityDef"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static IList<T> ToEntities<T>(this IDataReader reader, EngineType engineType, EntityDef entityDef)
             where T : DatabaseEntity, new()
         {
@@ -37,6 +45,15 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
+        /// <summary>
+        /// ToEntities
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="engineType"></param>
+        /// <param name="sourceEntityDef"></param>
+        /// <param name="targetEntityDef"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static IList<Tuple<TSource, TTarget?>> ToEntities<TSource, TTarget>(this IDataReader reader, EngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
@@ -57,6 +74,16 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
+        /// <summary>
+        /// ToEntities
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="engineType"></param>
+        /// <param name="sourceEntityDef"></param>
+        /// <param name="targetEntityDef1"></param>
+        /// <param name="targetEntityDef2"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToEntities<TSource, TTarget2, TTarget3>(this IDataReader reader, EngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef1, EntityDef targetEntityDef2)
             where TSource : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -80,6 +107,17 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
+        /// <summary>
+        /// GetCachedToEntityFunc
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="entityDef"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="length"></param>
+        /// <param name="returnNullIfFirstNull"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static Func<IDataReader, object?> GetCachedToEntityFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             string key = GetKey(entityDef, startIndex, length, returnNullIfFirstNull, engineType);
@@ -111,11 +149,20 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly object _toParameterFuncDictLocker = new object();
 
+        /// <summary>
+        /// ToParametersUsingReflection
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="entityDef"></param>
+        /// <param name="engineType"></param>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             if (entity.Version < 0)
             {
-                throw new DatabaseException(ErrorCode.DatabaseVersionNotSet, entityDef.EntityFullName, $"Version:{entity.Version}, 查看是否是使用了Select + New这个组合");
+                throw new DatabaseException(DatabaseErrorCode.DatabaseVersionNotSet,   $"Version:{entity.Version}, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
@@ -130,11 +177,20 @@ namespace HB.FullStack.Database.Mapper
             return parameters;
         }
 
+        /// <summary>
+        /// ToParameters
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="entityDef"></param>
+        /// <param name="engineType"></param>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             if (entity.Version < 0)
             {
-                throw new DatabaseException(ErrorCode.DatabaseVersionNotSet, entityDef.EntityFullName, $"Version:{entity.Version}, 查看是否是使用了Select + New这个组合");
+                throw new DatabaseException(DatabaseErrorCode.DatabaseVersionNotSet,   $"Version:{entity.Version}, 查看是否是使用了Select + New这个组合");
             }
 
             Func<object, int, KeyValuePair<string, object>[]> func = GetCachedToParametersFunc(entityDef, engineType);

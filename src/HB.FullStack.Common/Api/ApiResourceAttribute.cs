@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Common.Resources
+namespace HB.FullStack.Common.Api
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ApiAttribute : Attribute
+    public sealed class ApiResourceAttribute : Attribute
     {
         public string EndPointName { get; }
 
         public string Version { get; }
 
-        public ApiAttribute(string endPointName, string version)
+        public ApiResourceAttribute(string endPointName, string version)
         {
             EndPointName = endPointName;
             Version = version;

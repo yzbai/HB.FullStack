@@ -15,6 +15,16 @@ namespace ClassLibrary1
 
     public static partial class DataReaderTypeMapper
     {
+        /// <summary>
+        /// GetTypeDeserializerImpl
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="reader"></param>
+        /// <param name="startBound"></param>
+        /// <param name="length"></param>
+        /// <param name="returnNullIfFirstMissing"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception">Ignore.</exception>
         public static Func<IDataReader, object> GetTypeDeserializerImpl(Type type, IDataReader reader, int startBound = 0, int length = -1, bool returnNullIfFirstMissing = false)
         {
             if (length == -1)
@@ -44,6 +54,16 @@ namespace ClassLibrary1
             return (Func<IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
+        /// <summary>
+        /// GenerateDeserializerFromMap
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="reader"></param>
+        /// <param name="startBound"></param>
+        /// <param name="length"></param>
+        /// <param name="returnNullIfFirstMissing"></param>
+        /// <param name="il"></param>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         public static void GenerateDeserializerFromMap(Type type, IDataReader reader, int startBound, int length, bool returnNullIfFirstMissing, ILGenerator il)
         {
             var currentIndexDiagnosticLocal = il.DeclareLocal(typeof(int));
@@ -257,6 +277,15 @@ namespace ClassLibrary1
             il.Emit(OpCodes.Ret);
         }
 
+        /// <summary>
+        /// GenerateValueTupleDeserializer
+        /// </summary>
+        /// <param name="valueTupleType"></param>
+        /// <param name="reader"></param>
+        /// <param name="startBound"></param>
+        /// <param name="length"></param>
+        /// <param name="il"></param>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         public static void GenerateValueTupleDeserializer(Type valueTupleType, IDataReader reader, int startBound, int length, ILGenerator il)
         {
             var nullableUnderlyingType = Nullable.GetUnderlyingType(valueTupleType);
@@ -359,6 +388,14 @@ namespace ClassLibrary1
         public static bool IsValueTuple(Type type) => (type?.IsValueType == true
                                                && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal))
                                                || (type != null && IsValueTuple(Nullable.GetUnderlyingType(type)));
+        /// <summary>
+        /// ThrowDataException
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="index"></param>
+        /// <param name="reader"></param>
+        /// <param name="value"></param>
+        /// <exception cref="Exception">Ignore.</exception>
         public static void ThrowDataException(Exception ex, int index, IDataReader reader, object value)
         {
             Exception toThrow;

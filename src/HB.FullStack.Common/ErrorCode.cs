@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public enum ErrorCode
+    public enum ErrorCode2
     {
         None = 0,
         //200
@@ -177,13 +177,16 @@
         DatabaseDefError = 939,
         ResourceNotFound = 940,
         NotLogined = 941,
+        ApiNotAvailable = 942,
+        AliyunSmsError = 943,
+        CacheError = 944,
     }
 
     public static class ErrorCodeExtensions
     {
-        public static bool IsSuccessful(this ErrorCode errorCode)
+        public static bool IsSuccessful(this ErrorCode2 errorCode)
         {
-            return errorCode == ErrorCode.OK;
+            return errorCode == ErrorCode2.OK;
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
-using HB.FullStack.Common.Entities;
+
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
 

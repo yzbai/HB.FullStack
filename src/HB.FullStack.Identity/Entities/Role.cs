@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using HB.FullStack.Common.Entities;
+
 using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities

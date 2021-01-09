@@ -2,8 +2,6 @@
 
 using System;
 
-using HB.FullStack.Database.Properties;
-
 namespace HB.FullStack.Database
 {
     public class Migration
@@ -14,6 +12,14 @@ namespace HB.FullStack.Database
 
         public string TargetSchema { get; set; }
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="targetSchema"></param>
+        /// <param name="oldVersion"></param>
+        /// <param name="newVersion"></param>
+        /// <param name="sql"></param>
+        /// <exception cref="DatabaseException"></exception>
         public Migration(string targetSchema, int oldVersion, int newVersion, string sql)
         {
             //if (targetSchema.IsNullOrEmpty())
@@ -23,12 +29,12 @@ namespace HB.FullStack.Database
 
             if (oldVersion < 1)
             {
-                throw new ArgumentException(Resources.MigrateOldVersionErrorMessage);
+                throw new DatabaseException(DatabaseErrorCode.MigrateOldVersionErrorMessage);
             }
 
             if (newVersion != oldVersion + 1)
             {
-                throw new ArgumentException(Resources.MigrateVersionStepErrorMessage);
+                throw new DatabaseException(DatabaseErrorCode.MigrateVersionStepErrorMessage);
             }
 
             //if (sql.IsNullOrEmpty())

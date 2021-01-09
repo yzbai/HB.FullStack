@@ -6,7 +6,7 @@ using System.Text;
 
 namespace HB.FullStack.Identity
 {
-    public class IdentityException : FrameworkException
+    public class IdentityException : CommonException
     {
         public IdentityException(string? message) : base(message)
         {

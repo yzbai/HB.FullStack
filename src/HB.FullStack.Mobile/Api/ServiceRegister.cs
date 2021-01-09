@@ -51,16 +51,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
 
                 //TODO: 调查这个
-                .AddTransientHttpErrorPolicy(p =>
-                {
-                    if (Connectivity.NetworkAccess != NetworkAccess.Internet)
-                    {
-                        throw new ApiException(ErrorCode.ApiNoInternet, System.Net.HttpStatusCode.BadGateway);
-                    }
-
-                    //TODO: Move this to options
-                    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(2000));
-                })
+                //.AddTransientHttpErrorPolicy(p =>
+                //{
+                //    //TODO: Move this to options
+                //    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000));
+                //})
 #if DEBUG
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {

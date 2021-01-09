@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-using HB.FullStack.Common.Entities;
 using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.DatabaseTests

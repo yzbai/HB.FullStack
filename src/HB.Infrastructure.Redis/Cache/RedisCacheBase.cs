@@ -71,11 +71,13 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
+        /// <exception cref="CacheException"></exception>
         protected LoadedLuas GetDefaultLoadLuas()
         {
             return GetLoadedLuas(DefaultInstanceName);
         }
 
+        /// <exception cref="CacheException"></exception>
         protected LoadedLuas GetLoadedLuas(string? instanceName)
         {
             if (string.IsNullOrEmpty(instanceName))
@@ -95,44 +97,42 @@ namespace HB.Infrastructure.Redis.Cache
                 return loadedLuas2;
             }
 
-            throw new CacheException(ErrorCode.CacheLoadedLuaNotFound, $"Can not found LoadedLua Redis Instance: {instanceName}");
+            throw new CacheException(CacheErrorCode.CacheLoadedLuaNotFound, $"Instance: {instanceName}");
         }
 
+        /// <exception cref="CacheException"></exception>
         protected async Task<IDatabase> GetDatabaseAsync(string? instanceName)
         {
-            if (string.IsNullOrEmpty(instanceName))
-            {
-                instanceName = DefaultInstanceName;
-            }
+            instanceName ??= DefaultInstanceName;
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw new CacheException(ErrorCode.CacheLoadedLuaNotFound, $"Can not found Such Redis Instance: {instanceName}");
+            throw new CacheException(CacheErrorCode.CacheInstanceNotFound, $"Can not found Such Redis Instance: {instanceName}");
         }
 
+        /// <exception cref="CacheException"></exception>
         protected Task<IDatabase> GetDefaultDatabaseAsync()
         {
             return GetDatabaseAsync(DefaultInstanceName);
         }
 
+        /// <exception cref="CacheException"></exception>
         protected IDatabase GetDatabase(string? instanceName)
         {
-            if (string.IsNullOrEmpty(instanceName))
-            {
-                instanceName = DefaultInstanceName;
-            }
+            instanceName ??= DefaultInstanceName;
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
                 return RedisInstanceManager.GetDatabase(setting, _logger);
             }
 
-            throw new CacheException(ErrorCode.CacheLoadedLuaNotFound, $"Can not found Such Redis Instance: {instanceName}");
+            throw new CacheException(CacheErrorCode.CacheInstanceNotFound, $"Can not found Such Redis Instance: {instanceName}");
         }
 
+        /// <exception cref="CacheException"></exception>
         protected IDatabase GetDefaultDatabase()
         {
             return GetDatabase(DefaultInstanceName);
@@ -148,19 +148,25 @@ namespace HB.Infrastructure.Redis.Cache
             return GetRealKey(entityName, dimensionKeyName + dimensionKeyValue);
         }
 
+        /// <exception cref="CacheException"></exception>
         protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
         {
             if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                throw new CacheException(ErrorCode.CacheNoSuchDimensionKey, $"{entityDef.Name}, {dimensionKeyName}");
+                throw new CacheException(CacheErrorCode.NoSuchDimensionKey, $"{entityDef.Name}, {dimensionKeyName}");
             }
         }
 
+        /// <summary>
+        /// ThrowIfNotCacheEnabled
+        /// </summary>
+        /// <param name="entityDef"></param>
+        /// <exception cref="CacheException"></exception>
         protected static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
         {
             if (!entityDef.IsCacheable)
             {
-                throw new CacheException(ErrorCode.CacheNotEnabledForEntity, $"{entityDef.Name}");
+                throw new CacheException(CacheErrorCode.NotEnabledForEntity, $"{entityDef.Name}");
             }
         }
 

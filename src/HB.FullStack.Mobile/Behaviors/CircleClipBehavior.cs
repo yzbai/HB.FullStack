@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using HB.FullStack.Mobile.Base;
+
+using Xamarin.CommunityToolkit.Behaviors.Internals;
 using Xamarin.Forms;
 using Xamarin.Forms.Shapes;
 

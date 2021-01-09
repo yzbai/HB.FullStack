@@ -44,7 +44,7 @@ namespace System
             if (certificate2 == null)
             {
                 Log.Fatal($"Cert For DataProtection not found. CertSubject:{dataProtectionSettings.CertificateSubject}");
-                throw new FrameworkException(ErrorCode.DataProtectionCertNotFound, $"Subject:{dataProtectionSettings.CertificateSubject}");
+                throw new CommonException(ErrorCode.DataProtectionCertNotFound, $"Subject:{dataProtectionSettings.CertificateSubject}");
             }
 
             ConfigurationOptions redisConfigurationOptions = ConfigurationOptions.Parse(dataProtectionSettings.RedisConnectString);
@@ -93,7 +93,7 @@ namespace System
 
             if (encryptCert == null)
             {
-                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
+                throw new CommonException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
             }
 
             return

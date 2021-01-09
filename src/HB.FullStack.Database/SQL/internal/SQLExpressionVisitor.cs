@@ -16,6 +16,13 @@ namespace HB.FullStack.Database.SQL
 {
     internal static class SQLExpressionVisitor
     {
+        /// <summary>
+        /// Visit
+        /// </summary>
+        /// <param name="exp"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static object Visit(Expression? exp, SQLExpressionVisitorContenxt context)
         {
             if (exp == null) return string.Empty;
@@ -87,6 +94,13 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
+        /// <summary>
+        /// VisitLambda
+        /// </summary>
+        /// <param name="lambda"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitLambda(LambdaExpression lambda, SQLExpressionVisitorContenxt context)
         {
             if (lambda.Body.NodeType == ExpressionType.MemberAccess && context.Seperator == " ")
@@ -114,6 +128,13 @@ namespace HB.FullStack.Database.SQL
             return Visit(lambda.Body, context);
         }
 
+        /// <summary>
+        /// VisitBinary
+        /// </summary>
+        /// <param name="b"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitBinary(BinaryExpression b, SQLExpressionVisitorContenxt context)
         {
             object left;
@@ -207,6 +228,13 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
+        /// <summary>
+        /// VisitMemberAccess
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitMemberAccess(MemberExpression m, SQLExpressionVisitorContenxt context)
         {
             if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
@@ -232,7 +260,7 @@ namespace HB.FullStack.Database.SQL
 
                 EntityDef entityDef = EntityDefFactory.GetDef(entityType)!;
                 EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
-                    ?? throw new DatabaseException($"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
+                    ?? throw new DatabaseException( DatabaseErrorCode.DatabaseDefError, $"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
 
                 string prefix = "";
 
@@ -258,6 +286,13 @@ namespace HB.FullStack.Database.SQL
             return Expression.Lambda(exp).Compile().DynamicInvoke()!;
         }
 
+        /// <summary>
+        /// VisitNew
+        /// </summary>
+        /// <param name="nex"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitNew(NewExpression nex, SQLExpressionVisitorContenxt context)
         {
             // TODO : check !
@@ -310,6 +345,13 @@ namespace HB.FullStack.Database.SQL
             //}
         }
 
+        /// <summary>
+        /// VisitUnary
+        /// </summary>
+        /// <param name="u"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitUnary(UnaryExpression u, SQLExpressionVisitorContenxt context)
         {
             switch (u.NodeType)
@@ -334,6 +376,13 @@ namespace HB.FullStack.Database.SQL
             return Visit(u.Operand, context);
         }
 
+        /// <summary>
+        /// VisitMethodCall
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             if (m.Method.DeclaringType == typeof(SqlStatement))
@@ -348,6 +397,13 @@ namespace HB.FullStack.Database.SQL
             return Expression.Lambda(m).Compile().DynamicInvoke()!;
         }
 
+        /// <summary>
+        /// VisitExpressionList
+        /// </summary>
+        /// <param name="original"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static List<object> VisitExpressionList(ReadOnlyCollection<Expression> original, SQLExpressionVisitorContenxt context)
         {
             List<object> list = new List<object>();
@@ -366,6 +422,13 @@ namespace HB.FullStack.Database.SQL
             return list;
         }
 
+        /// <summary>
+        /// VisitNewArray
+        /// </summary>
+        /// <param name="na"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitNewArray(NewArrayExpression na, SQLExpressionVisitorContenxt context)
         {
             List<object> exprs = VisitExpressionList(na.Expressions, context);
@@ -378,12 +441,26 @@ namespace HB.FullStack.Database.SQL
             return r.ToString();
         }
 
+        /// <summary>
+        /// VisitNewArrayFromExpressionList
+        /// </summary>
+        /// <param name="na"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static List<object> VisitNewArrayFromExpressionList(NewArrayExpression na, SQLExpressionVisitorContenxt context)
         {
             List<object> exprs = VisitExpressionList(na.Expressions, context);
             return exprs;
         }
 
+        /// <summary>
+        /// VisitArrayMethodCall
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitArrayMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             string statement;
@@ -436,6 +513,13 @@ namespace HB.FullStack.Database.SQL
             return new PartialSqlString(statement);
         }
 
+        /// <summary>
+        /// VisitSqlMethodCall
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitSqlMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             List<object> args = VisitExpressionList(m.Arguments, context);
@@ -521,6 +605,13 @@ namespace HB.FullStack.Database.SQL
             return new PartialSqlString(statement);
         }
 
+        /// <summary>
+        /// VisitColumnAccessMethod
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static object VisitColumnAccessMethod(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             #region Mysql,其他数据库可能需要重写

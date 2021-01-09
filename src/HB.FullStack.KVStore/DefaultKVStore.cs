@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Entities;
+
 using HB.FullStack.KVStore.Engine;
 using HB.FullStack.KVStore.Entities;
 using HB.FullStack.KVStore.Properties;

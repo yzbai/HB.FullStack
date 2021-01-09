@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
-
+﻿
 using HB.FullStack.Common.Validate;
 
 using Xamarin.CommunityToolkit.Behaviors;

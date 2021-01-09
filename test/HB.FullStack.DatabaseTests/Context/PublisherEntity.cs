@@ -1,5 +1,4 @@
 ﻿using HB.FullStack.Common;
-using HB.FullStack.Common.Entities;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Def;

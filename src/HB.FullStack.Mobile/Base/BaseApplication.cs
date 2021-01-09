@@ -48,7 +48,7 @@ namespace HB.FullStack.Mobile.Base
                     }
                     else
                     {
-                        _minimumLogLevel = LogLevel.Warning;
+                        _minimumLogLevel = LogLevel.Information;
                     }
                 }
 
@@ -120,6 +120,8 @@ namespace HB.FullStack.Mobile.Base
         protected abstract void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e);
 
         //public abstract void PerformLogin();
+
+        public static void ExceptionHandler(Exception ex) => ExceptionHandler(ex, null);
 
         public static void ExceptionHandler(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {

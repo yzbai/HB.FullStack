@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using HB.FullStack.Cache;
+
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -76,13 +78,15 @@ end
 
 return data[3]";
 
+        /// <summary>
+        /// GetAsync
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
             token.ThrowIfCancellationRequested();
 
             IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
@@ -104,25 +108,26 @@ return data[3]";
 
                 return await GetAsync(key, token).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "分析这个");
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+            }
         }
 
+        /// <summary>
+        /// SetAsync
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="utcTicks"></param>
+        /// <param name="options"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
             token.ThrowIfCancellationRequested();
 
             IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
@@ -173,6 +178,12 @@ return data[3]";
 
                 return await SetAsync(key, value, utcTicks, options, token).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "分析这个");
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+            }
         }
 
         /// <summary>
@@ -182,6 +193,7 @@ return data[3]";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default)
         {
             if (key == null)
@@ -213,6 +225,12 @@ return data[3]";
                 InitLoadedLuas();
 
                 return await RemoveAsync(key, utcTicks, token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "分析这个");
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
             }
         }
     }

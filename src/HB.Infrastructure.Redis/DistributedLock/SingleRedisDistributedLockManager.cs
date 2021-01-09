@@ -342,7 +342,7 @@ return 1";
 
         private static void ThrowIfUnlockFailed(RedisLock redisLock)
         {
-            throw new FrameworkException(ErrorCode.DistributedLockUnLockFailed, $"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+            throw new CommonException(ErrorCode.DistributedLockUnLockFailed, $"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
         }
 
         private static void AddReleaseResourceRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues)

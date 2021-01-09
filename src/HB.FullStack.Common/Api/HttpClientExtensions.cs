@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System;
 
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
+
 
 namespace System.Net.Http
 {
@@ -26,7 +28,14 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponse = typeof(EmptyResponse);
 
-        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : Resource where TResponse : class
+        /// <summary>
+        /// SendAsync
+        /// </summary>
+        /// <param name="httpClient"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="System.ApiException"></exception>
+        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : ApiResource where TResponse : class
         {
             using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(request).ConfigureAwait(false);
 
@@ -49,7 +58,14 @@ namespace System.Net.Http
             }
         }
 
-        private static async Task<HttpResponseMessage> SendCoreAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : Resource
+        /// <summary>
+        /// SendCoreAsync
+        /// </summary>
+        /// <param name="httpClient"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        private static async Task<HttpResponseMessage> SendCoreAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : ApiResource
         {
             try
             {
@@ -57,13 +73,17 @@ namespace System.Net.Http
 
                 return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             }
+            catch (TaskCanceledException ex) when (ex.InnerException is SocketException)
+            {
+                throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}");
+            }
             catch (Exception ex)
             {
-                throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadRequest, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
+                throw new ApiException(ApiErrorCode.ApiUnkown, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
             }
         }
 
-        private static HttpRequestMessage ToHttpRequestMessage<T>(this ApiRequest<T> request) where T : Resource
+        private static HttpRequestMessage ToHttpRequestMessage<T>(this ApiRequest<T> request) where T : ApiResource
         {
             HttpMethod httpMethod = request.GetHttpMethod();
 
@@ -96,7 +116,7 @@ namespace System.Net.Http
         }
 
         [Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        private static MultipartFormDataContent BuildMultipartContent<T>(FileUpdateRequest<T> fileRequest) where T : Resource
+        private static MultipartFormDataContent BuildMultipartContent<T>(FileUpdateRequest<T> fileRequest) where T : ApiResource
         {
             MultipartFormDataContent content = new MultipartFormDataContent();
 
@@ -172,6 +192,12 @@ namespace System.Net.Http
             return requestUrlBuilder.ToString();
         }
 
+        /// <summary>
+        /// ThrowIfNotSuccessedAsync
+        /// </summary>
+        /// <param name="responseMessage"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
         public static async Task ThrowIfNotSuccessedAsync(HttpResponseMessage responseMessage)
         {
             if (responseMessage.IsSuccessStatusCode)
@@ -183,11 +209,15 @@ namespace System.Net.Http
 
             if (apiError == null)
             {
-                throw new ApiException(ErrorCode.ApiUnkown, responseMessage.StatusCode, responseMessage.ReasonPhrase);
+                throw new ApiException(ApiErrorCode.ApiErrorWrongFormat, $"StatusCode:{responseMessage.StatusCode},Reason:{ responseMessage.ReasonPhrase}");
             }
             else
             {
-                throw new ApiException(apiError.Code, responseMessage.StatusCode, apiError.Message, apiError.ModelStates);
+                throw new ApiException(apiError.ErrorCode, apiError.Message)
+                {
+                     HttpCode = responseMessage.StatusCode,
+                     ModelStates = apiError.ModelStates
+                };
             }
         }
     }

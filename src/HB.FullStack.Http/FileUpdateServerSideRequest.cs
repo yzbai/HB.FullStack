@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using HB.FullStack.Common.Resources;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,7 @@ namespace HB.FullStack.Common.Api
 {
 
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]
-    public class FileUpdateServerSideRequest<T> : UpdateRequest<T> where T : Resource
+    public class FileUpdateServerSideRequest<T> : UpdateRequest<T> where T : ApiResource
     {
         [Required]
         public IEnumerable<IFormFile> Files { get; set; } = null!;

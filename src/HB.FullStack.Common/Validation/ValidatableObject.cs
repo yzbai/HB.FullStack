@@ -71,21 +71,17 @@ namespace HB.FullStack.Common
 
                     PropertyInfo? propertyInfo = GetType().GetProperty(propertyName);
 
-                    if (propertyInfo == null)
+                    if (propertyInfo != null)
                     {
-                        throw new FrameworkException(ErrorCode.PropertyNotFound, $"PropertyName:{propertyName}");
+                        object? propertyValue = propertyInfo.GetValue(this);
+
+                        return Validator.TryValidateProperty(propertyValue, _validationContext, _validateResults);
                     }
-
-                    object? propertyValue = propertyInfo.GetValue(this);
-
-                    return Validator.TryValidateProperty(propertyValue, _validationContext, _validateResults);
                 }
-                else
-                {
-                    bool result = Validator.TryValidateObject(this, _validationContext, _validateResults, true);
 
-                    return result;
-                }
+                bool result = Validator.TryValidateObject(this, _validationContext, _validateResults, true);
+
+                return result;
             }
             catch (ArgumentNullException)
             {

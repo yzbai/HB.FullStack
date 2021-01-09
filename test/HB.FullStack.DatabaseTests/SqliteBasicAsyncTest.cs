@@ -30,6 +30,12 @@ namespace HB.FullStack.DatabaseTests
 
 
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="testOutputHelper"></param>
+        /// <param name="serviceFixture"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture_Sqlite serviceFixture)
         {
@@ -48,8 +54,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
         public async Task Test_1_Batch_Add_PublisherEntityAsync()
         {
@@ -79,7 +84,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -125,8 +130,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -161,8 +165,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -202,8 +205,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -219,7 +221,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (testEntities.Count == 0)
                 {
-                    throw new DatabaseException("No Entity to update");
+                    throw new Exception( "No Entity to update");
                 }
 
                 PublisherEntity_Client entity = testEntities[0];
@@ -250,8 +252,7 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <param name="databaseType"></param>
         /// <returns></returns>
-
-
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -324,6 +325,11 @@ namespace HB.FullStack.DatabaseTests
         //    }
         //}
 
+        /// <summary>
+        /// Test_8_LastTimeTestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
 
 
@@ -392,6 +398,12 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        /// <summary>
+        /// Test_9_UpdateLastTimeTestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
 
 
@@ -422,7 +434,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (testEntities.Count == 0)
                 {
-                    throw new DatabaseException("No Entity to update");
+                    throw new  Exception("No Entity to update");
                 }
 
                 PublisherEntity_Client entity = testEntities[0];
@@ -458,6 +470,11 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        /// <summary>
+        /// Test_EntityMapperAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
         public async Task Test_EntityMapperAsync()
         {
@@ -509,6 +526,12 @@ namespace HB.FullStack.DatabaseTests
             #endregion
         }
 
+        /// <summary>
+        /// Test_EntityMapperPerformanceAsync
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         [Theory]
         [InlineData(1)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method", Justification = "<Pending>")]

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
-using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest<T> where T : Resource
+    public class AddRequest<T> : ApiRequest<T> where T : ApiResource
     {
         [CollectionNotEmpty]
         [IdBarrier]

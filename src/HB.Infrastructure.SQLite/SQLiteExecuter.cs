@@ -16,6 +16,13 @@ namespace HB.Infrastructure.SQLite
     {
         #region Command Reader
 
+        /// <summary>
+        /// ExecuteCommandReaderAsync
+        /// </summary>
+        /// <param name="sqliteTransaction"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -23,7 +30,7 @@ namespace HB.Infrastructure.SQLite
         }
 
         /// <returns></returns>
-
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
@@ -31,6 +38,14 @@ namespace HB.Infrastructure.SQLite
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// ExecuteCommandReaderAsync
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="isOwnedConnection"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             SqliteDataReader? reader = null;
@@ -67,14 +82,7 @@ namespace HB.Infrastructure.SQLite
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                if (ex is SqliteException sqliteException)
-                {
-                    throw new DatabaseEngineException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
-                }
-                else
-                {
-                    throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
-                }
+                throw new DatabaseException(DatabaseErrorCode.DatabaseExecuterError, $"CommandText:{command.CommandText}", ex);
             }
         }
 
@@ -82,18 +90,39 @@ namespace HB.Infrastructure.SQLite
 
         #region Command Scalar
 
+        /// <summary>
+        /// ExecuteCommandScalarAsync
+        /// </summary>
+        /// <param name="connectString"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// ExecuteCommandScalarAsync
+        /// </summary>
+        /// <param name="sqliteTransaction"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<object?> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandScalarAsync(sqliteTransaction.Connection, dbCommand).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// ExecuteCommandScalarAsync
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static async Task<object?> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
         {
             try
@@ -107,13 +136,9 @@ namespace HB.Infrastructure.SQLite
 
                 return await command.ExecuteScalarAsync().ConfigureAwait(false);
             }
-            catch (SqliteException sqliteException)
-            {
-                throw new DatabaseEngineException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
-            }
             catch (Exception ex)
             {
-                throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseExecuterError, $"CommandText:{command.CommandText}", ex);
             }
         }
 
@@ -123,6 +148,13 @@ namespace HB.Infrastructure.SQLite
 
 
 
+        /// <summary>
+        /// ExecuteCommandNonQueryAsync
+        /// </summary>
+        /// <param name="connectString"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
@@ -131,6 +163,13 @@ namespace HB.Infrastructure.SQLite
         }
 
 
+        /// <summary>
+        /// ExecuteCommandNonQueryAsync
+        /// </summary>
+        /// <param name="sqliteTransaction"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -138,6 +177,13 @@ namespace HB.Infrastructure.SQLite
         }
 
 
+        /// <summary>
+        /// ExecuteCommandNonQueryAsync
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, SqliteCommand command)
         {
             try
@@ -151,13 +197,9 @@ namespace HB.Infrastructure.SQLite
 
                 return await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
-            catch (SqliteException sqliteException)
-            {
-                throw new DatabaseEngineException(ErrorCode.DatabaseExecuterError, null, $"CommandText:{command.CommandText}", sqliteException);
-            }
             catch (Exception ex)
             {
-                throw new DatabaseEngineException(ErrorCode.DatabaseError, null, $"CommandText:{command.CommandText}", ex);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseExecuterError, $"CommandText:{command.CommandText}", ex);
             }
         }
 

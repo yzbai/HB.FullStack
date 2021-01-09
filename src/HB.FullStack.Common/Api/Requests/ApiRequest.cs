@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
-using HB.FullStack.Common.Resources;
+
 
 namespace HB.FullStack.Common.Api
 {
@@ -179,7 +179,7 @@ namespace HB.FullStack.Common.Api
     }
 #pragma warning restore CA1024 // Use properties where appropriate
 
-    public abstract class ApiRequest<T> : ApiRequest where T : Resource
+    public abstract class ApiRequest<T> : ApiRequest where T : ApiResource
     {
         /// <summary>
         /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供
@@ -188,7 +188,7 @@ namespace HB.FullStack.Common.Api
         /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
         protected ApiRequest(HttpMethod httpMethod, string? condition)
         {
-            ResourceDef def = ResourceDefFactory.Get<T>();
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);
@@ -200,7 +200,7 @@ namespace HB.FullStack.Common.Api
 
         protected ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition)
         {
-            ResourceDef def = ResourceDefFactory.Get<T>();
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);
@@ -213,7 +213,7 @@ namespace HB.FullStack.Common.Api
 
         protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition)
         {
-            ResourceDef def = ResourceDefFactory.Get<T>();
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);

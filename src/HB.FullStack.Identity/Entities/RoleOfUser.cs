@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Common.Entities;
+﻿
 using HB.FullStack.Database.Def;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;

@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Common.Entities;
+﻿
 using HB.FullStack.Database.Def;
 using HB.FullStack.KVStore;
 using HB.FullStack.KVStore.Entities;

@@ -2,10 +2,10 @@
 using System.Data;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Entities;
+
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Properties;
+
 
 namespace HB.FullStack.Database
 {
@@ -34,6 +34,12 @@ namespace HB.FullStack.Database
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }
 
+        /// <summary>
+        /// CommitAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task CommitAsync(TransactionContext context)
         {
             //if (context == null || context.Transaction == null)
@@ -48,7 +54,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw new DatabaseException(ErrorCode.DatabaseTransactionError, Resources.TransactionAlreadyFinishedMessage);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseTransactionAlreadyFinishedMessage);
             }
 
             try
@@ -74,6 +80,12 @@ namespace HB.FullStack.Database
             }
         }
 
+        /// <summary>
+        /// RollbackAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         public async Task RollbackAsync(TransactionContext context)
         {
             //if (context == null || context.Transaction == null)
@@ -88,7 +100,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw new DatabaseException(ErrorCode.DatabaseTransactionError, Resources.TransactionAlreadyFinishedMessage);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseTransactionAlreadyFinishedMessage);
             }
 
             try

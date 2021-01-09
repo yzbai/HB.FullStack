@@ -79,7 +79,7 @@ namespace HB.FullStack.Database.Converter
             {
                 EngineType.MySQL => _mysqlGlobalConverterInfos,
                 EngineType.SQLite => _sqliteGlobalConverterInfos,
-                _ => throw new NotImplementedException(),
+                _ => throw new NotSupportedException(),
             };
 
             ConverterInfo converterInfo = new ConverterInfo
@@ -189,6 +189,7 @@ namespace HB.FullStack.Database.Converter
         /// <param name="quotedIfNeed"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static string TypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)
@@ -211,7 +212,7 @@ namespace HB.FullStack.Database.Converter
                 //null => "null",
                 //Enum e => e.ToString(),
                 DBNull _ => "null",
-                DateTime _ => throw new DatabaseException(ErrorCode.UseDateTimeOffsetOnly),
+                DateTime _ => throw new DatabaseException(DatabaseErrorCode.UseDateTimeOffsetOnly),
                 DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", CultureInfo.InvariantCulture),
                 bool b => b ? "1" : "0",
                 _ => dbValue.ToString()!
@@ -225,6 +226,13 @@ namespace HB.FullStack.Database.Converter
             return SqlHelper.GetQuoted(statement);
         }
 
+        /// <summary>
+        /// TypeToDbType
+        /// </summary>
+        /// <param name="propertyDef"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static DbType TypeToDbType(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
@@ -249,9 +257,16 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
+            throw new DatabaseException(DatabaseErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
         }
 
+        /// <summary>
+        /// TypeToDbTypeStatement
+        /// </summary>
+        /// <param name="propertyDef"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义
@@ -276,7 +291,7 @@ namespace HB.FullStack.Database.Converter
                 return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
             }
 
-            throw new DatabaseException(ErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
+            throw new DatabaseException(DatabaseErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)

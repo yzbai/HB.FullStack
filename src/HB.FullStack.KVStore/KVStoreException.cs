@@ -6,7 +6,7 @@ using System.Text;
 
 namespace HB.FullStack.KVStore
 {
-    public class KVStoreException : FrameworkException
+    public class KVStoreException : CommonException
     {
         public KVStoreException(ErrorCode errorCode, string entityName, string? message = null, Exception? innerException = null)
             : base(errorCode, $"EntityName:{entityName}, Message:{message}", innerException)

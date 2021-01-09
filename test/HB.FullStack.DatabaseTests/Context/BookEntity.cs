@@ -1,5 +1,4 @@
-﻿using HB.FullStack.Common.Entities;
-using HB.FullStack.Database.Def;
+﻿using HB.FullStack.Database.Def;
 using System;
 using System.Collections.Generic;
 using System.Text;

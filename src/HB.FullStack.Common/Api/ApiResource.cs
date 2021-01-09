@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace HB.FullStack.Common.Resources
+namespace HB.FullStack.Common.Api
 {
-    public abstract class Resource : ValidatableObject
+    public abstract class ApiResource : ValidatableObject
     {
         [IdBarrier]
         public long Id { get; set; } = -1;

@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("HB.FullStack.KVStore")]
 [assembly: InternalsVisibleTo("HB.FullStack.Repository")]
 
-namespace HB.FullStack.Common.Entities
+namespace HB.FullStack.Common
 {
     public abstract class Entity : ValidatableObject
     {

@@ -92,7 +92,7 @@ namespace HB.FullStack.Database.SQL
                     return VisitListInit((ListInitExpression)exp);
 
                 default:
-                    throw new DatabaseException($"Unhandled expression type: {exp.NodeType}");
+                    throw new NotSupportedException();
             }
         }
 
@@ -109,7 +109,7 @@ namespace HB.FullStack.Database.SQL
                 MemberBindingType.Assignment => VisitMemberAssignment((MemberAssignment)binding),
                 MemberBindingType.MemberBinding => VisitMemberMemberBinding((MemberMemberBinding)binding),
                 MemberBindingType.ListBinding => VisitMemberListBinding((MemberListBinding)binding),
-                _ => throw new DatabaseException($"Unhandled binding type {binding.BindingType}")
+                _ => throw new NotSupportedException()
             };
         }
 

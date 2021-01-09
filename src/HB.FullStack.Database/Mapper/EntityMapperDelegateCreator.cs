@@ -19,6 +19,7 @@ namespace HB.FullStack.Database.Mapper
         /// <summary>
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
+        /// <exception cref="DatabaseException"></exception>
         public static Func<IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader) }, true);
@@ -30,6 +31,17 @@ namespace HB.FullStack.Database.Mapper
             return (Func<IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
+        /// <summary>
+        /// EmitEntityMapper
+        /// </summary>
+        /// <param name="def"></param>
+        /// <param name="reader"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="length"></param>
+        /// <param name="returnNullIfFirstNull"></param>
+        /// <param name="engineType"></param>
+        /// <param name="il"></param>
+        /// <exception cref="DatabaseException"></exception>
         private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
         {
             try
@@ -38,7 +50,7 @@ namespace HB.FullStack.Database.Mapper
 
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
-                    propertyDefs.Add(def.GetPropertyDef(reader.GetName(i)) ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {reader.GetName(i)}."));
+                    propertyDefs.Add(def.GetPropertyDef(reader.GetName(i)) ?? throw new DatabaseException(DatabaseErrorCode.LackPropertyDef, $"EntityPropertyDef : {reader.GetName(i)}."));
                 }
 
                 LocalBuilder returnValueLocal = il.DeclareLocal(def.EntityType);
@@ -48,7 +60,7 @@ namespace HB.FullStack.Database.Mapper
 
                 System.Reflection.Emit.Label allFinished = il.DefineLabel();
 
-                ConstructorInfo ctor = def.EntityType.GetDefaultConstructor() ?? throw new DatabaseException(ErrorCode.DatabaseDefError, $"实体没有默认构造函数。Entity:{def.EntityFullName}");
+                ConstructorInfo ctor = def.EntityType.GetDefaultConstructor() ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体没有默认构造函数。Entity:{def.EntityFullName}");
 
                 il.Emit(OpCodes.Ldtoken, def.EntityType);
                 il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
@@ -292,10 +304,10 @@ namespace HB.FullStack.Database.Mapper
                 il.Emit(OpCodes.Ret);
                 //emitter.Return();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //string info = ex.GetDebugInfo();
-                throw;
+                throw new DatabaseException(DatabaseErrorCode.EmitEntityMapperError, "", ex);
             }
         }
 

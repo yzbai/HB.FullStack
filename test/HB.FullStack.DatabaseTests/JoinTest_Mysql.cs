@@ -1,5 +1,4 @@
-﻿using HB.FullStack.Common.Entities;
-using HB.FullStack.Database;
+﻿using HB.FullStack.Database;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,6 +30,11 @@ namespace HB.FullStack.DatabaseTests
         }
 
 
+        /// <summary>
+        /// AddSomeDataAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         private async Task AddSomeDataAsync()
         {
             A a1 = new A { Name = "a1" };
@@ -77,6 +81,11 @@ namespace HB.FullStack.DatabaseTests
         }
 
 
+        /// <summary>
+        /// Test_1_ThreeTable_JoinTestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
         public async Task Test_1_ThreeTable_JoinTestAsync()
         {
@@ -104,6 +113,11 @@ namespace HB.FullStack.DatabaseTests
         }
 
 
+        /// <summary>
+        /// Test_2_TwoTable_JoinTestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception">Ignore.</exception>
         [Fact]
         public async Task Test_2_TwoTable_JoinTestAsync()
         {

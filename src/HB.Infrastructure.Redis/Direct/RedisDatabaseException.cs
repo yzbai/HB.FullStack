@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HB.Infrastructure.Redis.Direct
 {
-    public class RedisDatabaseException : FrameworkException
+    public class RedisDatabaseException : CommonException
     {
         public RedisDatabaseException()
         {

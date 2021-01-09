@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.Common.Entities;
+
+using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.Def

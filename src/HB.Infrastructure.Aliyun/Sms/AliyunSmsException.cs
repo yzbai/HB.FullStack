@@ -4,22 +4,11 @@ using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsException : FrameworkException
+    public class AliyunSmsException : CommonException
     {
 
-        public AliyunSmsException()
-        {
-        }
-
-        public AliyunSmsException(string? message) : base(message)
-        {
-        }
-
+       
         public AliyunSmsException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
-
-        public AliyunSmsException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
 

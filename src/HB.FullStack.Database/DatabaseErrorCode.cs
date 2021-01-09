@@ -1,0 +1,29 @@
+﻿namespace HB.FullStack.Database
+{
+    public enum DatabaseErrorCode
+    {
+        DatabaseTransactionConnectionIsNull,
+        DatabaseExecuterError,
+        DatabaseError,
+        DatabaseNameNotFoundInSystemInfoTable,
+        VersionNotFoundInSystemInfoTable,
+        MigrateOldVersionErrorMessage,
+        MigrateVersionStepErrorMessage,
+        UseDateTimeOffsetOnly,
+        DatabaseUnSupported,
+        NotADatabaseEntity,
+        DatabaseDefError,
+        DatabaseVersionNotSet,
+        LackPropertyDef,
+        EmitEntityMapperError,
+        SqlJoinTypeMixedErrorMessage,
+        VersionShouldBePositiveMessage,
+        DatabaseTableCreateError,
+        DatabaseMigrateError,
+        DatabaseFoundTooMuch,
+        DatabaseNotWriteable,
+        DatabaseNotFound,
+        DatabaseTransactionError,
+        DatabaseTransactionAlreadyFinishedMessage,
+    }
+}
