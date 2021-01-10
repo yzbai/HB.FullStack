@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace HB.FullStack.Identity
+using HB.FullStack.Identity;
+
+namespace System
 {
     public class IdentityException : Exception
     {

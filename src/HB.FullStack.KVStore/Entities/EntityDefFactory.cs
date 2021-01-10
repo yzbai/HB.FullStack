@@ -84,7 +84,7 @@ namespace HB.FullStack.KVStore.Entities
         /// GetDef
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
         public static KVStoreEntityDef GetDef<T>()
         {
             return GetDef(typeof(T));
@@ -95,7 +95,7 @@ namespace HB.FullStack.KVStore.Entities
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
         public static KVStoreEntityDef GetDef(Type type)
         {
             if (!_defDict.ContainsKey(type))
@@ -117,7 +117,7 @@ namespace HB.FullStack.KVStore.Entities
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
         private static KVStoreEntityDef CreateEntityDef(Type type)
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreEntitySchema? storeEntitySchema))

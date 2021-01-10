@@ -4,6 +4,8 @@
     {
         OutOfRange,
         IdBarrierError,
-        ResourceNotFound
+        ResourceNotFound,
+        BizError,
+        NotLogined
     }
 }

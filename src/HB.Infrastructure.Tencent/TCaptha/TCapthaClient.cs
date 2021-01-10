@@ -35,14 +35,12 @@ namespace HB.Infrastructure.Tencent
         /// <param name="randstr"></param>
         /// <param name="userIp"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Infrastructure.Tencent.TCapthaException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="HttpRequestException"></exception>
+        /// <exception cref="TencentException"></exception>
         public async Task<bool> VerifyTicketAsync(string appid, string ticket, string randstr, string userIp)
         {
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting? apiKeySetting))
             {
-                throw new TCapthaException($"lack ApiKeySettings for AppId:{appid}");
+                throw new TencentException( TencentErrorCode.CapthaError,$"lack ApiKeySettings for AppId:{appid}");
             }
 
             string query = new Dictionary<string, string?> {
@@ -82,31 +80,13 @@ namespace HB.Infrastructure.Tencent
 
                 return false;
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogCritical(ex, $"TCaptha Response Parse Error. Content:{content}");
 
                 return false;
             }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
-                return false;
-            }
-            catch (OverflowException ex)
-            {
-                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
-                return false;
-            }
-            catch (FormatException ex)
-            {
-                _logger.LogError(ex, $"TCaptha Response Parse Error. Content:{content}");
-                return false;
-            }
-
         }
-
-
     }
 }
 

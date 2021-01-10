@@ -357,6 +357,8 @@ namespace HB.FullStack.Repository
 
         #region Cache Strategy
 
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
             var results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
@@ -386,21 +388,34 @@ namespace HB.FullStack.Repository
             return results.ElementAt(0);
         }
 
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
         {
             return EntityCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
 
+        /// <summary>
+        /// TryCacheAsideAsync
+        /// </summary>
+        /// <param name="cachedItem"></param>
+        /// <param name="dbRetrieve"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
             return CachedItemCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         protected Task<IEnumerable<TResult>> TryCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
         {
             return CachedItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
+        /// <exception cref="CacheException"></exception>
         protected void InvalidateCache<TResult>(CachedItem<TResult> cachedItem) where TResult : class
         {
             CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);

@@ -54,7 +54,7 @@ namespace HB.FullStack.Identity
         /// <param name="userClaimRepo"></param>
         /// <param name="userLoginControlRepo"></param>
         /// <param name="identityService"></param>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         public AuthorizationService(
             IOptions<AuthorizationServiceOptions> options,
             ILogger<AuthorizationService> logger,
@@ -91,9 +91,10 @@ namespace HB.FullStack.Identity
         /// <param name="context"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
+        /// <exception cref="CacheException"></exception>
         public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -209,8 +210,9 @@ namespace HB.FullStack.Identity
         /// <param name="context"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -388,7 +390,9 @@ namespace HB.FullStack.Identity
         /// <param name="mobile"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
         public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
         {
             User? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
@@ -437,6 +441,7 @@ namespace HB.FullStack.Identity
         /// <param name="transactionContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
             IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
@@ -460,8 +465,8 @@ namespace HB.FullStack.Identity
         /// <param name="user"></param>
         /// <param name="userLoginControl"></param>
         /// <param name="lastUser"></param>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="IdentityException"></exception>
+        /// <exception cref="KVStoreException"></exception>
         private void PreSignInCheck(User user, UserLoginControl userLoginControl, string lastUser)
         {
             ThrowIf.Null(user, nameof(user));
@@ -518,7 +523,7 @@ namespace HB.FullStack.Identity
         /// </summary>
         /// <param name="userLoginControl"></param>
         /// <param name="lastUser"></param>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
         private void OnSignInFailed(UserLoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
@@ -543,7 +548,7 @@ namespace HB.FullStack.Identity
         /// <summary>
         /// InitializeCredencials
         /// </summary>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         private void InitializeCredencials()
         {
             #region Initialize Jwt Signing Credentials
@@ -615,7 +620,7 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
         private async Task<UserLoginControl> GetOrCreateUserLoginControlAsync(string lastUser, long userId)
         {
             UserLoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);

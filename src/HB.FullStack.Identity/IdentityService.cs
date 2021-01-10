@@ -33,7 +33,7 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <param name="transactionContext"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
         public async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
@@ -98,7 +98,7 @@ namespace HB.FullStack.Identity
         /// <param name="roleId"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
         public async Task AddRolesToUserAsync(long userId, long roleId, string lastUser)
         {
@@ -136,7 +136,7 @@ namespace HB.FullStack.Identity
         /// <param name="roleId"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
         public async Task RemoveRoleFromUserAsync(long userId, long roleId, string lastUser)
         {

@@ -91,7 +91,7 @@ namespace HB.FullStack.Server.Security
             }
             catch (Exception ex)
             {
-                throw new ApiException(ApiErrorCode.ApiUnkown, $"文件名称{formFile.FileName}", ex);
+                throw new ApiException(ApiErrorCode.ServerError, $"文件名称{formFile.FileName}", ex);
             }
         }
 

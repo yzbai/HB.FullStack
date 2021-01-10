@@ -39,6 +39,14 @@ namespace HB.FullStack.Identity
 
         #region Read 所有的查询都要经过这里
 
+        /// <summary>
+        /// GetByIdAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<User?> GetByIdAsync(long userId, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -50,6 +58,14 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// GetByIdsAsync
+        /// </summary>
+        /// <param name="userIds"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -61,6 +77,14 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// GetByMobileAsync
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -72,6 +96,14 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// GetByLoginNameAsync
+        /// </summary>
+        /// <param name="loginName"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -83,6 +115,14 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// GetByEmailAsync
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(

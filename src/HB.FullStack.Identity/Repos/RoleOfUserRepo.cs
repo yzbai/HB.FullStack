@@ -16,6 +16,14 @@ namespace HB.FullStack.Identity
     public class RoleOfUserRepo : DatabaseRepository<RoleOfUser>
     {
         private readonly IDatabaseReader _databaseReader;
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="databaseReader"></param>
+        /// <param name="cache"></param>
+        /// <param name="memoryLockManager"></param>
+        /// <exception cref="CacheException"></exception>
         public RoleOfUserRepo(ILogger<RoleOfUserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             _databaseReader = databaseReader;
@@ -53,6 +61,7 @@ namespace HB.FullStack.Identity
         /// <param name="transContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
         public Task<IEnumerable<Role>> GetRolesByUserIdAsync(long userId, TransactionContext? transContext = null)
         {
             return TryCacheAsideAsync(CachedRolesByUserId.Key(userId), dbReader =>
@@ -64,6 +73,14 @@ namespace HB.FullStack.Identity
             })!;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public Task<long> CountByUserIdAndRoleIdAsync(long userId, long roleId, TransactionContext? transContext = null)
         {
             return _databaseReader.CountAsync<RoleOfUser>(ru => ru.UserId == userId && ru.RoleId == roleId, transContext);

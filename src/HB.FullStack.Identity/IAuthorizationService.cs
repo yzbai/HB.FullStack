@@ -8,13 +8,15 @@ namespace HB.FullStack.Identity
     {
         string JsonWebKeySetJson { get; }
 
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
         Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
 
-        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
+        /// <exception cref="CacheException"></exception>
         Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser);
 
         /// <exception cref="DatabaseException"></exception>
@@ -23,7 +25,9 @@ namespace HB.FullStack.Identity
         /// <exception cref="DatabaseException"></exception>
         Task SignOutAsync(long signInTokenId, string lastUser);
 
-        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
+        /// <exception cref="KVStoreException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
         Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
     }
 }

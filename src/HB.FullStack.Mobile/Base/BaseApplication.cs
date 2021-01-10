@@ -131,24 +131,53 @@ namespace HB.FullStack.Mobile.Base
             {
                 switch (apiEx.ErrorCode)
                 {
-                    case ApiErrorCode.ApiUnkown:
-
-                        if (apiEx.HttpCode.IsNoInternet())
-                        {
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
-                            });
-                        }
-
+                    case ApiErrorCode.NoAuthority:
+                        break;
+                    case ApiErrorCode.AccessTokenExpired:
+                        break;
+                    case ApiErrorCode.ModelValidationError:
                         break;
                     case ApiErrorCode.ApiNotAvailable:
-                    case ApiErrorCode.NoAuthority:
-                    case ApiErrorCode.AccessTokenExpired:
-                        //Application.Current.PerformLogin();
                         break;
-                    default: break;
+                    case ApiErrorCode.ApiErrorWrongFormat:
+                        break;
+                    case ApiErrorCode.NotApiResourceEntity:
+                        break;
+                    case ApiErrorCode.ApiSmsCodeInvalid:
+                        break;
+                    case ApiErrorCode.ApiPublicResourceTokenNeeded:
+                        break;
+                    case ApiErrorCode.ApiPublicResourceTokenError:
+                        break;
+                    case ApiErrorCode.ApiUploadEmptyFile:
+                        break;
+                    case ApiErrorCode.ApiUploadOverSize:
+                        break;
+                    case ApiErrorCode.ApiUploadWrongType:
+                        break;
+                    case ApiErrorCode.ApiHttpsRequired:
+                        break;
+                    case ApiErrorCode.FromExceptionController:
+                        break;
+                    case ApiErrorCode.ApiCapthaError:
+                        break;
+                    case ApiErrorCode.ApiUploadFailed:
+                        break;
+                    case ApiErrorCode.ServerError:
+                        break;
+                    case ApiErrorCode.ClientError:
+                        break;
+                    default:
+                        break;
                 }
+            }
+            else if(ex is MobileException mobileException)
+            {
+
+            }
+            else if (ex is DatabaseException dbException)
+            {
+
             }
 
             Log(ex, message, logLevel);

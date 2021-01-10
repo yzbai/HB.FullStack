@@ -33,12 +33,12 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (firstArgumentValue is not ApiRequest apiRequest)
                 {
-                    OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                     return;
                 }
                 if (apiRequest.PublicResourceToken.IsNullOrEmpty())
                 {
-                    OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                     return;
                 }
 
@@ -46,7 +46,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (result == null || !result.IsSuccessed)
                 {
-                    OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                     return;
                 }
 
@@ -54,7 +54,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (!verifyResult)
                 {
-                    OnError(context, ErrorCode.ApiPublicResourceTokenError);
+                    OnError(context, ApiErrorCode.ApiPublicResourceTokenError);
                     return;
                 }
 
@@ -62,12 +62,12 @@ namespace HB.Infrastructure.Tencent.TCaptha
             }
             catch (Exception ex)
             {
-                OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                 _logger.LogError(ex, "TCaptcha 验证执行失败");
             }
         }
 
-        private static void OnError(ActionExecutingContext? context, ErrorCode error)
+        private static void OnError(ActionExecutingContext? context, ApiErrorCode error)
         {
             if (context != null)
             {

@@ -79,7 +79,7 @@ namespace System.Net.Http
             }
             catch (Exception ex)
             {
-                throw new ApiException(ApiErrorCode.ApiUnkown, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
+                throw new ApiException(ApiErrorCode.ClientError, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
             }
         }
 

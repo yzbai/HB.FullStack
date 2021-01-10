@@ -2,7 +2,6 @@
 using Aliyun.Acs.Core.Auth.Sts;
 using Aliyun.Acs.Core.Exceptions;
 using Aliyun.Acs.Core.Http;
-using HB.Infrastructure.Aliyun.Properties;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -50,7 +49,8 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// <param name="userGuid"></param>
         /// <param name="isRead"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         public AliyunStsToken GetUserDirectoryToken(string bucket, string userGuid, bool isRead)
         {
             return GetDirectoryToken(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(userGuid), isRead);
@@ -65,17 +65,17 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// <param name="roleSessionName"></param>
         /// <param name="isRead"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         public AliyunStsToken GetDirectoryToken(string bucket, string directory, string roleSessionName, bool isRead)
         {
             if (!_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
             {
-                throw new AliyunOssException($"No Such Bucket : {bucket}");
+                throw new AliyunException( AliyunErrorCode.OssError, $"No Such Bucket : {bucket}");
             }
 
             if (!_acsClients.TryGetValue(bucket, out IAcsClient acsClient))
             {
-                throw new AliyunOssException($"Can not find AcsClient related to {bucket}");
+                throw new AliyunException(AliyunErrorCode.OssError, $"Can not find AcsClient related to {bucket}");
             }
 
             string path = bucket + "/" + directory;
@@ -109,7 +109,7 @@ namespace HB.Infrastructure.Aliyun.Oss
             }
             catch (Exception ex)
             {
-                throw new AliyunOssException(Resources.AliyunOssAssumeRoleRequestFailedMessage, ex);
+                throw new AliyunException( AliyunErrorCode.OssError, $"AliyunOssAssumeRoleRequestFailed", ex);
             }
         }
 
@@ -118,7 +118,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// </summary>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         public string GetOssEndpoint(string bucket)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
@@ -126,7 +126,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.Endpoint;
             }
 
-            throw new AliyunOssException($"No Such Bucket : {bucket}");
+            throw new AliyunException( AliyunErrorCode.OssError,$"No Such Bucket : {bucket}");
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// </summary>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         public string GetRegionId(string bucket)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
@@ -142,7 +142,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.RegionId;
             }
 
-            throw new AliyunOssException($"No Such Bucket : {bucket}");
+            throw new AliyunException( AliyunErrorCode.OssError,$"No Such Bucket : {bucket}");
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// <param name="bucket"></param>
         /// <param name="userGuid"></param>
         /// <returns></returns>
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         private string GetUserDirectory(string bucket, string userGuid)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
@@ -160,7 +160,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.BucketUserDirectory + seprator + userGuid;
             }
 
-            throw new AliyunOssException($"No Such Bucket : {bucket}");
+            throw new AliyunException( AliyunErrorCode.OssError,$"No Such Bucket : {bucket}");
         }
 
         private static string GetRoleSessionName(string userGuid)

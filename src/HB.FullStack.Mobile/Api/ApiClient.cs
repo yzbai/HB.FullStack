@@ -104,7 +104,7 @@ namespace HB.FullStack.Mobile.Api
             }
             catch (Exception ex)
             {
-                throw new ApiException(ApiErrorCode.ApiUnkown, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
+                throw new ApiException(ApiErrorCode.ClientError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 

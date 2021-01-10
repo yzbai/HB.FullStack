@@ -52,6 +52,7 @@ namespace HB.FullStack.Mobile.IdBarriers
         /// <param name="args"></param>
         /// <returns></returns>
         /// <exception cref="MobileException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         private async Task ApiClient_RequestingAsync(ApiRequest request, ApiEventArgs args)
         {
             if (args.RequestType == ApiRequestType.Add)

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.EventBus
+using HB.FullStack.EventBus;
+
+namespace System
 {
     public class EventBusException : Exception
     {

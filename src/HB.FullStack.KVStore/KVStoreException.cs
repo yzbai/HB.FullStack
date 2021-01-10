@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace HB.FullStack.KVStore
+using HB.FullStack.KVStore;
+
+namespace System
 {
     public class KVStoreException : Exception
     {

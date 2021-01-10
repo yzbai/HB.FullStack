@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.Api
 {
     public enum ApiErrorCode
     {
-        ApiUnkown,
+        //ApiUnkown,
 
         NoAuthority,
         AccessTokenExpired,
@@ -26,5 +26,10 @@ namespace HB.FullStack.Common.Api
         ApiHttpsRequired,
         FromExceptionController,
         ApiCapthaError,
+        ApiUploadFailed,
+
+        ServerError,
+        ClientError,
+        NullReturn,
     }
 }
