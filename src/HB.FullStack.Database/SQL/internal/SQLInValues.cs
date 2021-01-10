@@ -29,6 +29,12 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
+        /// <summary>
+        /// ToSqlInString
+        /// </summary>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="System.DatabaseException"></exception>
         public string ToSqlInString(EngineType engineType)
         {
             if (Count == 0)
@@ -37,6 +43,13 @@ namespace HB.FullStack.Database.SQL
             return SqlJoin(_values, engineType);
         }
 
+        /// <summary>
+        /// SqlJoin
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="System.DatabaseException"></exception>
         public static string SqlJoin(IEnumerable values, EngineType engineType)
         {
             StringBuilder sb = new StringBuilder();

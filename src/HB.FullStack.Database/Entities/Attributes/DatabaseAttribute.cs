@@ -5,7 +5,7 @@ using System;
 namespace HB.FullStack.Database.Def
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class DatabaseAttribute : Attribute
+    public sealed class DatabaseAttribute : Attribute
     {
         public string? DatabaseName { get; set; }
 

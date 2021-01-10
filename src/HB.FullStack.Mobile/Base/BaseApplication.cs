@@ -2,35 +2,28 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Api;
-using HB.FullStack.Client.Services;
+
+using HB.FullStack.Common.Api;
+using HB.FullStack.Mobile.Api;
+using HB.FullStack.Mobile.Logger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseApplication : Application
     {
+        private ServiceProvider? _serviceProvider;
         private LogLevel? _minimumLogLevel;
         private IConfiguration? _configuration;
+        private readonly IList<Task> _initializeTasks = new List<Task>();
 
-        public BaseApplication(IServiceCollection services)
-        {
-            //Version
-            VersionTracking.Track();
-
-            InitializeServices(services);
-        }
-
-        public IList<Task> InitializeTasks { get; } = new List<Task>();
-
-        public Task InitializeTask { get => Task.WhenAll(InitializeTasks); }
+        public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
 
         public IConfiguration Configuration
         {
@@ -51,9 +44,9 @@ namespace HB.FullStack.Client.Base
             {
                 if (_minimumLogLevel == null)
                 {
-                    if ("Debug".Equals(Environment, StringComparison.InvariantCultureIgnoreCase))
+                    if ("Debug".Equals(Environment, StringComparison.OrdinalIgnoreCase))
                     {
-                        _minimumLogLevel = LogLevel.Trace;
+                        _minimumLogLevel = LogLevel.Debug;
                     }
                     else
                     {
@@ -63,95 +56,140 @@ namespace HB.FullStack.Client.Base
 
                 return _minimumLogLevel.Value;
             }
+            set
+            {
+                _minimumLogLevel = value;
+            }
+        }
+
+        public BaseApplication(IServiceCollection services)
+        {
+            //Version
+            VersionTracking.Track();
+
+            BaseRegisterServices(services);
+
+            BaseConfigureServices();
+
+            void BaseRegisterServices(IServiceCollection services)
+            {
+                services.AddOptions();
+
+                services.AddLogging(builder =>
+                {
+                    builder.SetMinimumLevel(MinimumLogLevel);
+                    builder.AddProvider(new LoggerProvider(MinimumLogLevel));
+                });
+
+                services.AddSingleton<TokenAutoRefreshedHttpClientHandler>();
+
+                RegisterServices(services);
+
+                //Build
+                _serviceProvider = services.BuildServiceProvider();
+                DependencyResolver.ResolveUsing(type => _serviceProvider.GetService(type));
+            }
+
+            void BaseConfigureServices()
+            {
+                //Log
+                GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
+                GlobalSettings.MessageExceptionHandler = ExceptionHandler;
+                //_remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
+
+                //UriImageSourceEx
+                UriImageSourceEx.HttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
+
+                //Connectivity
+                Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
+
+                ConfigureServices();
+            }
+        }
+
+        public void AddInitTask(Task task)
+        {
+            task.Fire();
+            _initializeTasks.Add(task);
         }
 
         public abstract string Environment { get; }
 
-        private void InitializeServices(IServiceCollection services)
+        protected abstract void RegisterServices(IServiceCollection services);
+
+        protected abstract void ConfigureServices();
+
+        protected abstract void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e);
+
+        //public abstract void PerformLogin();
+
+        public static void ExceptionHandler(Exception ex) => ExceptionHandler(ex, null);
+
+        public static void ExceptionHandler(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {
-            RegisterServices(services);
-
-            ConfigureServices();
-        }
-
-        protected virtual void RegisterServices(IServiceCollection services)
-        {
-            services.AddOptions();
-
-            services.AddLogging(builder =>
-            {
-                builder.SetMinimumLevel(MinimumLogLevel);
-                builder.AddProvider(new PlatformLoggerProvider(LogLevel.Trace));
-            });
-
-            services.AddSingleton<FFImageLoadingAutoRefreshJwtHttpClientHandler>();
-        }
-
-        protected virtual void ConfigureServices()
-        {
-            //Connectivity
-            Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
-        }
-
-        protected virtual void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
-        {
-
-        }
-
-        public abstract void PerformLogin();
-
-        public abstract void DisplayOfflineWarning();
-
-
-        private static IRemoteLoggingService? _remoteLoggingService;
-
-        private static ILogger? _localLogger;
-
-        public static void ExceptionHandler(Exception ex)
-        {
-            Log(LogLevel.Error, ex, null);
-
-
             if (ex is ApiException apiEx)
             {
                 switch (apiEx.ErrorCode)
                 {
-                    case ErrorCode.ApiUnkown:
-
-                        if (apiEx.HttpCode.IsNoInternet())
-                        {
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                Application.Current.MainPage.DisplayAlert("网络异常", "看起来不能上网了，请联网吧!", "知道了").Fire();
-                            });
-                        }
-
+                    case ApiErrorCode.NoAuthority:
                         break;
-                    case ErrorCode.ApiNoAuthority:
-                    case ErrorCode.ApiTokenRefresherError:
-                    case ErrorCode.ApiTokenExpired:
-                        Application.Current.PerformLogin();
+                    case ApiErrorCode.AccessTokenExpired:
                         break;
-                    default: break;
+                    case ApiErrorCode.ModelValidationError:
+                        break;
+                    case ApiErrorCode.ApiNotAvailable:
+                        break;
+                    case ApiErrorCode.ApiErrorWrongFormat:
+                        break;
+                    case ApiErrorCode.NotApiResourceEntity:
+                        break;
+                    case ApiErrorCode.ApiSmsCodeInvalid:
+                        break;
+                    case ApiErrorCode.ApiPublicResourceTokenNeeded:
+                        break;
+                    case ApiErrorCode.ApiPublicResourceTokenError:
+                        break;
+                    case ApiErrorCode.ApiUploadEmptyFile:
+                        break;
+                    case ApiErrorCode.ApiUploadOverSize:
+                        break;
+                    case ApiErrorCode.ApiUploadWrongType:
+                        break;
+                    case ApiErrorCode.ApiHttpsRequired:
+                        break;
+                    case ApiErrorCode.FromExceptionController:
+                        break;
+                    case ApiErrorCode.ApiCapthaError:
+                        break;
+                    case ApiErrorCode.ApiUploadFailed:
+                        break;
+                    case ApiErrorCode.ServerError:
+                        break;
+                    case ApiErrorCode.ClientError:
+                        break;
+                    default:
+                        break;
                 }
             }
+            else if(ex is MobileException mobileException)
+            {
+
+            }
+            else if (ex is DatabaseException dbException)
+            {
+
+            }
+
+            Log(ex, message, logLevel);
         }
 
-        public static void Log(LogLevel logLevel, Exception? ex, string? message = null)
+        public abstract void OnOfflineDataUsed();
+
+        public static void Log(Exception? ex, string? message = null, LogLevel logLevel = LogLevel.Error)
         {
-            if (_remoteLoggingService == null)
-            {
-                _remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
-            }
+            //_remoteLoggingService.LogAsync(logLevel, ex, message); //这里不加Fire()。避免循环
 
-            _remoteLoggingService?.LogAsync(logLevel, ex, message).SafeFireAndForget();
-
-            if (_localLogger == null)
-            {
-                _localLogger = DependencyService.Resolve<ILogger<BaseApplication>>();
-            }
-
-            _localLogger?.Log(logLevel, ex, message);
+            GlobalSettings.Logger.Log(logLevel, ex, message);
         }
     }
 }

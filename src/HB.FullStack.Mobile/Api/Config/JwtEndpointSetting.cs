@@ -1,7 +1,7 @@
 ﻿using HB.FullStack.Common;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public class JwtEndpointSetting : ValidatableObject
     {

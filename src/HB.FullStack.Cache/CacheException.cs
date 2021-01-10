@@ -1,31 +1,29 @@
 ﻿using System;
+using System.Runtime.Serialization;
+
+using HB.FullStack.Cache;
 
 namespace System
 {
-    public class CacheException : FrameworkException
+    public class CacheException : Exception
     {
-        public CacheException(string? message) : base(message)
+        public CacheErrorCode ErrorCode { get; set; }
+
+        public CacheException(CacheErrorCode errorCode) : base()
         {
+            ErrorCode = errorCode;
         }
 
-        public CacheException(string? message, Exception? innerException) : base(message, innerException)
+        public CacheException(CacheErrorCode errorCode, string message) : base(message)
         {
+            ErrorCode = errorCode;
         }
 
-        public CacheException()
+        public CacheException(CacheErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
         {
+            ErrorCode = errorCode;
         }
 
-        public CacheException(ErrorCode errorCode, string? message) : base(errorCode, message)
-        {
-        }
-
-        public CacheException(ErrorCode errorCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
-        {
-        }
-
-        public CacheException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
+        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
     }
 }

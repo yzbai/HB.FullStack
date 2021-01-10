@@ -118,6 +118,14 @@ namespace HB.Infrastructure.MySQL
 
         #region Command 能力
 
+        /// <summary>
+        /// ExecuteCommandNonQueryAsync
+        /// </summary>
+        /// <param name="Transaction"></param>
+        /// <param name="dbName"></param>
+        /// <param name="engineCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -132,6 +140,15 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
+        /// <summary>
+        /// ExecuteCommandReaderAsync
+        /// </summary>
+        /// <param name="Transaction"></param>
+        /// <param name="dbName"></param>
+        /// <param name="engineCommand"></param>
+        /// <param name="useMaster"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -146,7 +163,16 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-        public async Task<object> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
+        /// <summary>
+        /// ExecuteCommandScalarAsync
+        /// </summary>
+        /// <param name="Transaction"></param>
+        /// <param name="dbName"></param>
+        /// <param name="engineCommand"></param>
+        /// <param name="useMaster"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 

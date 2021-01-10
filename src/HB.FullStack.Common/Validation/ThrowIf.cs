@@ -15,6 +15,13 @@ namespace System
     public static class ThrowIf
     {
 
+        /// <summary>
+        /// NotLongId
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="paramName"></param>
+        /// <returns></returns>
+        
         public static long NotLongId(long id, string paramName)
         {
             if (id > 0)
@@ -22,7 +29,7 @@ namespace System
                 return id;
             }
 
-            throw new ArgumentException($"不合格 long Id", paramName);
+            throw new ArgumentException($"不合格 long Id. Parameter:{paramName}");
         }
         /// <summary>
         /// Null
@@ -30,12 +37,12 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static T Null<T>([ValidatedNotNull] T? o, string paramName) where T : class
+        public static T Null<T>([ValidatedNotNull][NotNull] T? o, string paramName) where T : class
         {
             if (o == null)
-                throw new ArgumentNullException(paramName);
+                throw new ArgumentNullException($"Parameter:{paramName}");
 
             return o;
         }
@@ -45,13 +52,13 @@ namespace System
         /// </summary>
         /// <param name="o"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static T NotValid<T>(T o) where T : ValidatableObject
+        public static T NotValid<T>(T o, string paramName) where T : ValidatableObject
         {
             if (!o.IsValid())
             {
-                throw new ValidateErrorException(o);
+                throw new ArgumentException($"不合法的实例. Parameter:{paramName}");
             }
 
             return o;
@@ -63,18 +70,19 @@ namespace System
         /// <param name="ts"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
+        
         [return: NotNull]
-        public static IEnumerable<T> NotValid<T>([ValidatedNotNull] IEnumerable<T> ts) where T : ValidatableObject
+        public static IEnumerable<T> NotValid<T>([ValidatedNotNull] IEnumerable<T> ts, string paramName) where T : ValidatableObject
         {
             if (ts.Any())
             {
-                ts.ForEach(t =>
+                foreach (var t in ts)
                 {
                     if (!t.IsValid())
                     {
-                        throw new ValidateErrorException(t);
+                        throw new ArgumentException($"不合法的实例集合. Parameter:{paramName}");
                     }
-                });
+                }
             }
 
             return ts;
@@ -83,19 +91,24 @@ namespace System
         /// <summary>
         /// NullOrEmpty
         /// </summary>
-        /// <param name="dict"></param>
+        /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static IDictionary<TKey, TValue> NullOrEmpty<TKey, TValue>([ValidatedNotNull] IDictionary<TKey, TValue>? dict, string paramName)
+        public static IEnumerable<T> NullOrEmpty<T>([ValidatedNotNull][NotNull] IEnumerable<T>? lst, string paramName)
         {
-            if (dict == null || !dict.Any())
+            if (lst == null || !lst.Any())
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.DictionaryNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
-            return dict;
+            if(!lst.Any())
+            {
+                throw new ArgumentException($"Parameter:{ paramName}");
+            }
+
+            return lst;
         }
 
         /// <summary>
@@ -104,24 +117,18 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static IEnumerable<T> NullOrEmpty<T>([ValidatedNotNull] IEnumerable<T>? lst, string paramName)
+        public static ICollection NullOrEmpty<T>([ValidatedNotNull][NotNull] ICollection? lst, string paramName)
         {
-            if (lst == null || !lst.Any())
+            if (lst == null)
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
-            return lst;
-        }
-
-        [return: NotNull]
-        public static ICollection NullOrEmpty<T>([ValidatedNotNull] ICollection? lst, string paramName)
-        {
-            if (lst == null || lst.Count == 0)
+            if(lst.Count == 0)
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentException($"Parameter:{ paramName}");
             }
 
             return lst;
@@ -133,12 +140,12 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         public static IEnumerable<T> Empty<T>(IEnumerable<T> lst, string paramName)
         {
             if (!lst.Any())
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
             return lst;
@@ -150,12 +157,12 @@ namespace System
         /// <param name="str"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         public static string Empty(string str, string paramName)
         {
             if (str.Length == 0)
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.StringCanNotBeEmpty, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return str;
@@ -167,13 +174,13 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static IEnumerable<T> AnyNull<T>([ValidatedNotNull] IEnumerable<T>? lst, string paramName)
+        public static IEnumerable<T> AnyNull<T>([ValidatedNotNull][NotNull] IEnumerable<T>? lst, string paramName)
         {
             if (lst == null || lst.Any(t => t == null))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionAnyNullErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
             return lst;
@@ -185,19 +192,27 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static string NullOrEmpty([ValidatedNotNull] string? o, string paramName)
+        public static string NullOrEmpty([ValidatedNotNull][NotNull] string? o, string paramName)
         {
             if (string.IsNullOrEmpty(o))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.ParameterNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
             return o;
         }
 
-        public static string? NotMobile([ValidatedNotNull] string? mobile, string paramName, bool canBeNull)
+        /// <summary>
+        /// NotMobile
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <param name="paramName"></param>
+        /// <param name="canBeNull"></param>
+        /// <returns></returns>
+        
+        public static string? NotMobile(string? mobile, string paramName, bool canBeNull)
         {
             if (mobile == null)
             {
@@ -213,12 +228,20 @@ namespace System
 
             if (!ValidationMethods.IsMobilePhone(mobile))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.NotMobileErrorMessage, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return mobile;
         }
 
+        /// <summary>
+        /// NotPassword
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="paramName"></param>
+        /// <param name="canBeNull"></param>
+        /// <returns></returns>
+        
         public static string? NotPassword(string? password, string paramName, bool canBeNull)
         {
             if (canBeNull && password == null)
@@ -228,12 +251,20 @@ namespace System
 
             if (!ValidationMethods.IsPassword(password))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.NotPasswordErrorMessage, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return password;
         }
 
+        /// <summary>
+        /// NotLoginName
+        /// </summary>
+        /// <param name="loginName"></param>
+        /// <param name="paramName"></param>
+        /// <param name="canBeNull"></param>
+        /// <returns></returns>
+        
         public static string? NotLoginName(string? loginName, string paramName, bool canBeNull)
         {
             if (loginName == null)
@@ -250,12 +281,20 @@ namespace System
 
             if (!ValidationMethods.IsLoginName(loginName))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.NotLoginNameErrorMessage, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return loginName;
         }
 
+        /// <summary>
+        /// NotEmail
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="paramName"></param>
+        /// <param name="canBeNull"></param>
+        /// <returns></returns>
+        
         public static string? NotEmail(string? email, string paramName, bool canBeNull)
         {
             if (email == null)
@@ -266,13 +305,13 @@ namespace System
                 }
                 else
                 {
-                    throw new ArgumentNullException(HB.FullStack.Common.Properties.Resources.NotEmailErrorMessage, paramName);
+                    throw new ArgumentNullException( $"Parameter:{ paramName}");
                 }
             }
 
             if (!ValidationMethods.IsEmail(email))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.NotEmailErrorMessage, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return email;
@@ -285,13 +324,13 @@ namespace System
         /// <param name="b"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: MaybeNull]
         public static string? NotEqual(string? a, string? b, string paramName)
         {
             if (a == null && b != null || a != null && !a.Equals(b, GlobalSettings.Comparison))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.StringNotEqualErrorMessage, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return a;
@@ -306,11 +345,11 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
-        public static T ThrowIfNull<T>([ValidatedNotNull] this T? o, string paramName) where T : class
+        
+        public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class
         {
             if (o == null)
-                throw new ArgumentNullException(paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
 
             return o;
         }
@@ -321,14 +360,15 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull] this T? o, string paramName) where T : class, ISupportValidate
+        
+        public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class, ISupportValidate
         {
             if (o == null)
-                throw new ArgumentNullException(paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
 
             if (!o.IsValid())
             {
-                throw new ValidateErrorException(o);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return o;
@@ -340,13 +380,13 @@ namespace System
         /// <param name="o"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static string ThrowIfNullOrEmpty([ValidatedNotNull] this string? o, string paramName)
+        public static string ThrowIfNullOrEmpty([ValidatedNotNull][NotNull] this string? o, string paramName)
         {
             if (string.IsNullOrEmpty(o))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.ParameterNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
             return o;
@@ -358,13 +398,13 @@ namespace System
         /// <param name="dict"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static IDictionary<TKey, TValue> ThrowIfNullOrEmpty<TKey, TValue>([ValidatedNotNull] this IDictionary<TKey, TValue>? dict, string paramName)
+        public static IDictionary<TKey, TValue> ThrowIfNullOrEmpty<TKey, TValue>([ValidatedNotNull][NotNull] this IDictionary<TKey, TValue>? dict, string paramName)
         {
             if (dict == null || !dict.Any())
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.DictionaryNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
             return dict;
@@ -376,13 +416,13 @@ namespace System
         /// <param name="lst"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: NotNull]
-        public static IEnumerable<T> ThrowIfNullOrEmpty<T>([ValidatedNotNull] this IEnumerable<T>? lst, string paramName)
+        public static IEnumerable<T> ThrowIfNullOrEmpty<T>([ValidatedNotNull][NotNull] this IEnumerable<T>? lst, string paramName)
         {
             if (lst == null || !lst.Any())
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.CollectionNullOrEmptyErrorMessage, paramName);
+                throw new ArgumentNullException( $"Parameter:{ paramName}");
             }
 
             return lst;
@@ -395,13 +435,13 @@ namespace System
         /// <param name="b"></param>
         /// <param name="paramName"></param>
         /// <returns></returns>
-
+        
         [return: MaybeNull]
         public static string? ThrowIfNotEqual(this string? a, string? b, string paramName)
         {
             if (a == null && b != null || a != null && !a.Equals(b, GlobalSettings.Comparison))
             {
-                throw new ArgumentException(HB.FullStack.Common.Properties.Resources.StringNotEqualErrorMessage, paramName);
+                throw new ArgumentException( $"Parameter:{ paramName}");
             }
 
             return a;

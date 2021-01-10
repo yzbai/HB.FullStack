@@ -18,9 +18,9 @@ namespace HB.FullStack.Lock.Memory
 
             ResourceKeys = resources.Select(r => _prefix + resourceType + r).ToList();
 
-            ResourceValues = new List<string>(ResourceKeys.Count());
+            ResourceValues = new List<string>(ResourceKeys.Count);
 
-            for (int i = 0; i < ResourceKeys.Count(); ++i)
+            for (int i = 0; i < ResourceKeys.Count; ++i)
             {
                 ResourceValues.Add(SecurityUtil.CreateUniqueToken());
             }
@@ -44,14 +44,47 @@ namespace HB.FullStack.Lock.Memory
 
         public int ExtendCount { get; set; }
 
-        public void Dispose()
-        {
-            LockManager.Unlock(this);
-        }
+        //public void Dispose()
+        //{
+        //    LockManager.Unlock(this);
+        //}
 
         public void StopKeepAliveTimer()
         {
-            LockManager.StopKeepAliveTimer(this);
+            MemoryLockManager.StopKeepAliveTimer(this);
+        }
+
+        private bool _disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+
+                    LockManager.Unlock(this);
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                _disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~MemoryLock()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

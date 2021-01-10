@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
-    <RootNamespace>OrmBenchmark.Core</RootNamespace>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+ 
+    <RootNamespace>OrmBenchmark.OrmLite</RootNamespace>
   </PropertyGroup>
 
   <!-- common NuGet package refs that affect all projects -->
@@ -11,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="MySql.Data" Version="8.0.22" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
 
 

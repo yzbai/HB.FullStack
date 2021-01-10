@@ -20,11 +20,21 @@ namespace HB.FullStack.Database
             Status = status;
         }
 
+        /// <summary>
+        /// CommitAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="System.DatabaseException"></exception>
         public Task CommitAsync()
         {
             return _transactionManager.CommitAsync(this);
         }
 
+        /// <summary>
+        /// RollbackAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="System.DatabaseException">Ignore.</exception>
         public Task RollbackAsync()
         {
             return _transactionManager.RollbackAsync(this);

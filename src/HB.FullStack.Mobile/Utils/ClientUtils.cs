@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Mobile
 {
     public static class ClientUtils
     {
@@ -79,12 +79,12 @@ namespace HB.FullStack.Client
             ThrowIf.Empty(appsettingsName, nameof(appsettingsName));
             //ThrowIf.Null(executingAssembly, nameof(executingAssembly));
 
-            string fileName = $"{executingAssembly.FullName.Split(",")[0]}.{appsettingsName}";
+            string fileName = $"{executingAssembly.FullName!.Split(",")[0]}.{appsettingsName}";
             //string fileName = appsettingsName;
 
             string fullPath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
-            using (Stream resFileStream = executingAssembly.GetManifestResourceStream(fileName))
+            using (Stream? resFileStream = executingAssembly.GetManifestResourceStream(fileName))
             {
                 if (resFileStream != null)
                 {

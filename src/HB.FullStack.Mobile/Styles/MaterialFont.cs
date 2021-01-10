@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Client.Styles
+namespace HB.FullStack.Mobile.Styles
 {
     public static class MaterialFont
     {

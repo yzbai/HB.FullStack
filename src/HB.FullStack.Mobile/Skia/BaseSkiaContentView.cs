@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 
-namespace HB.FullStack.Client.Skia
+namespace HB.FullStack.Mobile.Skia
 {
     public abstract class BaseSkiaContentView : BaseContentView
     {

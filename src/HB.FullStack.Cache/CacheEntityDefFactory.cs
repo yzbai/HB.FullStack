@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-using HB.FullStack.Common.Entities;
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Cache
 {
@@ -12,6 +12,11 @@ namespace HB.FullStack.Cache
 
         private static readonly object _lockObj = new object();
 
+        /// <summary>
+        /// Get
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public static CacheEntityDef Get<TEntity>() where TEntity : Entity, new()
         {
             Type entityType = typeof(TEntity);
@@ -31,6 +36,12 @@ namespace HB.FullStack.Cache
 
         }
 
+        /// <summary>
+        /// CreateEntityDef
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         private static CacheEntityDef CreateEntityDef(Type entityType)
         {
             CacheEntityDef def = new CacheEntityDef
@@ -42,14 +53,10 @@ namespace HB.FullStack.Cache
 
             if (cacheEntityAttribute == null)
             {
-                def.IsCacheable = false;
-
-                return def;
+                throw new CacheException(CacheErrorCode.NotACacheEntity, $"Type:{entityType.FullName}");
             }
 
             def.IsCacheable = true;
-
-            //def.IsBatchEnabled = cacheEntityAttribute.IsBatchEnabled;
 
             def.CacheInstanceName = cacheEntityAttribute.CacheInstanceName;
 
@@ -59,12 +66,12 @@ namespace HB.FullStack.Cache
 
             if (def.SlidingTime > def.AbsoluteTimeRelativeToNow)
             {
-                throw new CacheException(ErrorCode.CacheSlidingTimeBiggerThanMaxAlive, $"{def.Name}");
+                throw new CacheException(CacheErrorCode.CacheSlidingTimeBiggerThanMaxAlive, $"{def.Name}");
             }
 
             bool foundkeyAttribute = false;
 
-            entityType.GetProperties().ForEach(propertyInfo =>
+            foreach (var propertyInfo in entityType.GetProperties())
             {
                 if (!foundkeyAttribute)
                 {
@@ -75,7 +82,7 @@ namespace HB.FullStack.Cache
                         def.KeyProperty = propertyInfo;
                         foundkeyAttribute = true;
 
-                        return;
+                        continue;
                     }
                 }
 
@@ -85,11 +92,11 @@ namespace HB.FullStack.Cache
                 {
                     def.Dimensions.Add(propertyInfo);
                 }
-            });
+            }
 
             if (def.KeyProperty == null)
             {
-                throw new CacheException(ErrorCode.CacheEntityNotHaveKeyAttribute, $"entity:{entityType.FullName}");
+                throw new CacheException(CacheErrorCode.CacheEntityNotHaveKeyAttribute, $"entity:{entityType.FullName}");
             }
 
             return def;

@@ -6,9 +6,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
+
+using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseViewModel : ObservableObject
     {
@@ -27,22 +29,8 @@ namespace HB.FullStack.Client.Base
             set { SetProperty(ref _title, value); }
         }
 
-        public IEnumerable<ValidationResult> ValidationResults { get { return GetValidateResults(); } }
-
-        public BaseViewModel()
-        {
-
-        }
-
-        public void NotifyValidationChanged([CallerMemberName] string? proerptyName = null)
-        {
-            PerformValidate(proerptyName);
-            OnPropertyChanged(nameof(ValidationResults));
-        }
-
         public virtual void OnAppearing(string pageName)
         {
-            NotifyValidationChanged();
         }
 
         public virtual void OnDisappearing(string pageName)

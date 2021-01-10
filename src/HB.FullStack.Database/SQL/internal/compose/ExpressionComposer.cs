@@ -39,13 +39,13 @@ namespace HB.FullStack.Database.SQL
         public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> first,
                                                        Expression<Func<T, bool>> second)
         {
-            return first.Compose(second, Expression.AndAlso);
+            return first.Compose(second, Expression.AndAlso!);
         }
 
         public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> first,
                                                       Expression<Func<T, bool>> second)
         {
-            return first.Compose(second, Expression.OrElse);
+            return first.Compose(second, Expression.OrElse!);
         }
 
         public static Expression<Func<T, bool>> Not<T>(this Expression<Func<T, bool>> expression)
@@ -71,24 +71,24 @@ namespace HB.FullStack.Database.SQL
 
         public static Expression<Func<T1, T2, bool>> And<T1, T2>(this Expression<Func<T1, T2, bool>> first, Expression<Func<T1, T2, bool>> second)
         {
-            return first.Compose(second, Expression.AndAlso);
+            return first.Compose(second, Expression.AndAlso!);
         }
 
         public static Expression<Func<T1, T2, bool>> Or<T1, T2>(this Expression<Func<T1, T2, bool>> first,
                                                       Expression<Func<T1, T2, bool>> second)
         {
-            return first.Compose(second, Expression.OrElse);
+            return first.Compose(second, Expression.OrElse!);
         }
 
         public static Expression<Func<T1, T2, T3, bool>> And<T1, T2, T3>(this Expression<Func<T1, T2, T3, bool>> first, Expression<Func<T1, T2, T3, bool>> second)
         {
-            return first.Compose(second, Expression.AndAlso);
+            return first.Compose(second, Expression.AndAlso!);
         }
 
         public static Expression<Func<T1, T2, T3, bool>> Or<T1, T2, T3>(this Expression<Func<T1, T2, T3, bool>> first,
                                                       Expression<Func<T1, T2, T3, bool>> second)
         {
-            return first.Compose(second, Expression.OrElse);
+            return first.Compose(second, Expression.OrElse!);
         }
     }
 }

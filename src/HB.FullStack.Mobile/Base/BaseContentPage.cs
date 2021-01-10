@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Platforms;
+using HB.FullStack.Mobile.Platforms;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Base
+namespace HB.FullStack.Mobile.Base
 {
     public abstract class BaseContentPage : ContentPage
     {
@@ -53,26 +53,34 @@ namespace HB.FullStack.Client.Base
 
         public bool DisableBackButton { get; set; }
 
-        public BaseContentPage()
+        protected BaseContentPage()
         {
             ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
             PageName = GetType().Name;
 
-            Application.Current.LogUsage(UsageType.PageCreate, PageName);
+            //Application.Current.LogUsage(UsageType.PageCreate, PageName);
         }
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
         protected override void OnAppearing()
         {
-            Application.Current.LogUsage(UsageType.PageAppearing, PageName);
+            //Application.Current.LogUsage(UsageType.PageAppearing, PageName);
 
             base.OnAppearing();
 
             IsAppearing = true;
 
             //baseContentViews
-            GetAllCustomerControls().ForEach(v => v?.OnAppearing());
+            IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
+
+            if (customerControls != null)
+            {
+                foreach (var v in customerControls)
+                {
+                    v?.OnAppearing();
+                }
+            }
 
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
@@ -85,14 +93,22 @@ namespace HB.FullStack.Client.Base
 
         protected override void OnDisappearing()
         {
-            Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
+            //Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
 
             base.OnDisappearing();
 
             IsAppearing = false;
 
             //baseContentViews
-            GetAllCustomerControls().ForEach(v => v?.OnDisappearing());
+            IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
+
+            if (customerControls != null)
+            {
+                foreach (var v in customerControls)
+                {
+                    v?.OnDisappearing();
+                }
+            }
 
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)

@@ -8,7 +8,7 @@ namespace HB.FullStack.Cache
     {
         public PropertyInfo KeyProperty { get; internal set; } = null!;
 
-        public List<PropertyInfo> Dimensions { get; private set; } = new List<PropertyInfo>();
+        public IList<PropertyInfo> Dimensions { get; private set; } = new List<PropertyInfo>();
 
         public bool IsCacheable { get; internal set; }
 

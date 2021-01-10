@@ -93,7 +93,7 @@ namespace HB.FullStack.Lock.Memory
             return memoryLock;
         }
 
-        internal void StopKeepAliveTimer(MemoryLock memoryLock)
+        internal static void StopKeepAliveTimer(MemoryLock memoryLock)
         {
             if (memoryLock.KeepAliveTimer != null)
             {

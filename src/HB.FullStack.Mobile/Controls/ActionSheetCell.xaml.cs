@@ -1,6 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Base;
-using HB.FullStack.Client.Styles;
+using HB.FullStack.Mobile.Base;
+using HB.FullStack.Mobile.Styles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class ActionSheetCellOptionItem
     {

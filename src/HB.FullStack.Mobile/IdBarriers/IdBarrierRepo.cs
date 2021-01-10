@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Database;
 
-namespace HB.FullStack.Client.IdBarriers
+namespace HB.FullStack.Mobile.IdBarriers
 {
     //TODO: 考虑缓存
     internal class IdBarrierRepo : IIdBarrierRepo
@@ -17,6 +17,13 @@ namespace HB.FullStack.Client.IdBarriers
             _database = database;
         }
 
+        /// <summary>
+        /// AddIdBarrierAsync
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="serverId"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task AddIdBarrierAsync(long clientId, long serverId)
         {
             IdBarrier idBarrier = new IdBarrier { ClientId = clientId, ServerId = serverId };
@@ -24,7 +31,15 @@ namespace HB.FullStack.Client.IdBarriers
             await _database.AddAsync(idBarrier, "", null).ConfigureAwait(false);
         }
 
-        public async Task AddIdBarrierAsync(List<long> clientIds, IEnumerable<long> servierIds, TransactionContext transactionContext)
+        /// <summary>
+        /// AddIdBarrierAsync
+        /// </summary>
+        /// <param name="clientIds"></param>
+        /// <param name="servierIds"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        public async Task AddIdBarrierAsync(IList<long> clientIds, IEnumerable<long> servierIds, TransactionContext transactionContext)
         {
             List<IdBarrier> idBarriers = new List<IdBarrier>();
 
@@ -40,6 +55,7 @@ namespace HB.FullStack.Client.IdBarriers
             await _database.BatchAddAsync(idBarriers, "", transactionContext).ConfigureAwait(false);
         }
 
+        /// <exception cref="DatabaseException"></exception>
         public async Task<long> GetClientIdAsync(long serverId)
         {
             IdBarrier? barrier = await _database.ScalarAsync<IdBarrier>(item => item.ServerId == serverId, null).ConfigureAwait(false);
@@ -52,6 +68,7 @@ namespace HB.FullStack.Client.IdBarriers
             return barrier.ClientId;
         }
 
+        /// <exception cref="DatabaseException"></exception>
         public async Task<long> GetServerIdAsync(long clientId)
         {
             IdBarrier? barrier = await _database.ScalarAsync<IdBarrier>(item => item.ClientId == clientId, null).ConfigureAwait(false);

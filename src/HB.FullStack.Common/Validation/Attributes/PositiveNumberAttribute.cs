@@ -17,7 +17,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value == null) { return CanBeNull; }
 

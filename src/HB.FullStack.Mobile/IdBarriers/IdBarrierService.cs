@@ -5,14 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Api;
-using HB.FullStack.Client.IdBarriers;
+using HB.FullStack.Mobile.Api;
+using HB.FullStack.Mobile.IdBarriers;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.IdGen;
-using HB.FullStack.Common.Resources;
 using HB.FullStack.Database;
 
-namespace MyColorfulTime.IdBarriers
+namespace HB.FullStack.Mobile.IdBarriers
 {
 
     internal class IdBarrierService : IIdBarrierService
@@ -34,6 +33,11 @@ namespace MyColorfulTime.IdBarriers
             _transaction = transaction;
         }
 
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="MobileException"></exception>
         public void Initialize()
         {
             _apiClient.Requesting += ApiClient_RequestingAsync;
@@ -41,6 +45,14 @@ namespace MyColorfulTime.IdBarriers
         }
 
         //考虑手工硬编码
+        /// <summary>
+        /// ApiClient_RequestingAsync
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        /// <exception cref="MobileException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         private async Task ApiClient_RequestingAsync(ApiRequest request, ApiEventArgs args)
         {
             if (args.RequestType == ApiRequestType.Add)
@@ -51,6 +63,14 @@ namespace MyColorfulTime.IdBarriers
             await ChangeIdAsync(request, args.RequestId, ChangeDirection.ToServer, args.RequestType).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// ApiClient_ResponsedAsync
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="MobileException"></exception>
         private async Task ApiClient_ResponsedAsync(object? sender, ApiEventArgs args)
         {
             switch (args.RequestType)
@@ -61,7 +81,7 @@ namespace MyColorfulTime.IdBarriers
                     {
                         List<long> clientIds = _addRequestClientIdDict[args.RequestId];
 
-                        await AddIdBarriersAsync(servierIds, clientIds).ConfigureAwait(false);
+                        await AddServerIdToClientIdAsync(servierIds, clientIds).ConfigureAwait(false);
 
                         _addRequestClientIdDict.Remove(args.RequestId);
                     }
@@ -88,34 +108,25 @@ namespace MyColorfulTime.IdBarriers
             }
         }
 
-        private async Task AddIdBarriersAsync(IEnumerable<long> servierIds, List<long> clientIds)
-        {
-            TransactionContext trans = await _transaction.BeginTransactionAsync<IdBarrier>().ConfigureAwait(false);
-            try
-            {
-                await _idBarrierRepo.AddIdBarrierAsync(clientIds, servierIds, trans).ConfigureAwait(false);
 
-                await trans.CommitAsync().ConfigureAwait(false);
-            }
-            catch
-            {
-                await trans.RollbackAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
 
+        /// <summary>
+        /// ChangeIdAsync
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="requestId"></param>
+        /// <param name="direction"></param>
+        /// <param name="requestType"></param>
+        /// <returns></returns>
+        /// <exception cref="MobileException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         private async Task ChangeIdAsync(object? obj, string requestId, ChangeDirection direction, ApiRequestType requestType)
         {
             if (obj == null) { return; }
 
             //替换ID
-            foreach (PropertyInfo propertyInfo in obj.GetType().GetProperties(BindingFlags.Public))
+            foreach (PropertyInfo propertyInfo in obj.GetType().GetProperties().Where(p => Attribute.IsDefined(p, typeof(IdBarrierAttribute))))
             {
-                if (!Attribute.IsDefined(propertyInfo, typeof(IdBarrierAttribute)))
-                {
-                    continue;
-                }
-
                 object? propertyValue = propertyInfo.GetValue(obj);
 
                 if (propertyValue == null)
@@ -143,11 +154,22 @@ namespace MyColorfulTime.IdBarriers
                 }
                 else
                 {
-                    throw new ClientException($"Id Barrier碰到无法解析的类型");
+                    throw new MobileException(MobileErrorCode.IdBarrierError, $"Id Barrier碰到无法解析的类型");
                 }
             }
         }
 
+        /// <summary>
+        /// ConvertLongIdAsync
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="id"></param>
+        /// <param name="propertyInfo"></param>
+        /// <param name="requestType"></param>
+        /// <param name="direction"></param>
+        /// <param name="requestId"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiRequestType requestType, ChangeDirection direction, string requestId)
         {
             if (id < 0)
@@ -155,11 +177,13 @@ namespace MyColorfulTime.IdBarriers
                 return;
             }
 
-            if (propertyInfo.Name == nameof(Resource.Id) && requestType == ApiRequestType.Add && direction == ChangeDirection.ToServer)
+            if (propertyInfo.Name == nameof(ApiResource.Id) && requestType == ApiRequestType.Add && direction == ChangeDirection.ToServer)
             {
                 _addRequestClientIdDict[requestId].Add(id);
 
                 propertyInfo.SetValue(obj, -1);
+
+                return;
             }
 
             long changedId = direction switch
@@ -175,10 +199,66 @@ namespace MyColorfulTime.IdBarriers
                 direction == ChangeDirection.FromServer)
             {
                 changedId = IDistributedIdGen.IdGen.GetId();
-                await _idBarrierRepo.AddIdBarrierAsync(clientId: changedId, serverId: id).ConfigureAwait(false);
+                await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);
             }
 
             propertyInfo.SetValue(obj, changedId);
+        }
+
+        /// <summary>
+        /// AddServerIdToClientIdAsync
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        private Task AddServerIdToClientIdAsync(long serverId, long clientId)
+        {
+            if (serverId <= 0)
+            {
+                return Task.CompletedTask;
+            }
+
+            return _idBarrierRepo.AddIdBarrierAsync(clientId: clientId, serverId: serverId);
+        }
+
+        /// <summary>
+        /// AddServerIdToClientIdAsync
+        /// </summary>
+        /// <param name="serverIds"></param>
+        /// <param name="clientIds"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        private async Task AddServerIdToClientIdAsync(IEnumerable<long> serverIds, List<long> clientIds)
+        {
+            List<long> serverAdds = new List<long>();
+            List<long> clientAdds = new List<long>();
+
+            int num = 0;
+
+            foreach (long serverId in serverIds)
+            {
+                if (serverId <= 0)
+                {
+                    continue;
+                }
+
+                serverAdds.Add(serverId);
+                clientAdds.Add(clientIds[num++]);
+            }
+
+            TransactionContext trans = await _transaction.BeginTransactionAsync<IdBarrier>().ConfigureAwait(false);
+            try
+            {
+                await _idBarrierRepo.AddIdBarrierAsync(clientIds: clientAdds, servierIds: serverAdds, trans).ConfigureAwait(false);
+
+                await trans.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await trans.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
         }
     }
 }

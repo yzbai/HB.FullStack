@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Database.Def;
 
-namespace HB.FullStack.Client.IdBarriers
+namespace HB.FullStack.Mobile.IdBarriers
 {
     public class IdBarrier : AutoIncrementIdEntity
     {

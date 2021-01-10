@@ -43,7 +43,7 @@ namespace HB.FullStack.Common
                 Clear(now);
 
                 //不存在 or 存在但过期
-                if (!_resourceExpiryInfoDict.TryGetValue(key, out ResourceExpiryInfo storedInfo) || now - storedInfo.Timestamp >= storedInfo.ExpiryMilliseconds)
+                if (!_resourceExpiryInfoDict.TryGetValue(key, out ResourceExpiryInfo? storedInfo) || now - storedInfo.Timestamp >= storedInfo.ExpiryMilliseconds)
                 {
                     _resourceExpiryInfoDict[key] = new ResourceExpiryInfo(now, (long)expiryTime.TotalMilliseconds);
 

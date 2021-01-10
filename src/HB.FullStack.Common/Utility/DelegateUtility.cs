@@ -12,7 +12,7 @@ namespace HB.FullStack.Common
         }
 
 
-        public static Delegate Cast(Delegate source, Type type)
+        public static Delegate? Cast(Delegate source, Type type)
         {
             ThrowIf.Null(source, nameof(source));
 

@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -55,6 +56,16 @@ namespace HB.FullStack.Common.Validate
             }
 
             return Regex.IsMatch(text, RegExpressions.Year);
+        }
+
+        public static bool IsSmsCode([NotNullWhen(true)]string? text, int smsCodeLength)
+        {
+            if(string.IsNullOrEmpty(text) || text.Length != smsCodeLength)
+            {
+                return false;
+            }
+
+            return Regex.IsMatch(text, RegExpressions.Number);
         }
 
         public static bool IsMonth([NotNullWhen(true)] string? text)

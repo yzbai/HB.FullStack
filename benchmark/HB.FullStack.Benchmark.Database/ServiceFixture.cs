@@ -1,20 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using HB.FullStack.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Lock.Distributed;
-using HB.FullStack.Lock.Memory;
-using HB.Infrastructure.Redis;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using StackExchange.Redis;
 
 namespace HB.FullStack
 {
@@ -47,13 +37,7 @@ namespace HB.FullStack
                     builder.AddConsole();
                     builder.AddDebug();
                 })
-                .AddMemoryCache()
-                .AddMySQL(Configuration.GetSection("MySQL"))
-                .AddRedisCache(Configuration.GetSection("RedisCache"))
-                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
-                .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
-                .AddMemoryLock()
-                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"));
+                .AddMySQL(Configuration.GetSection("MySQL"));
 
             ServiceProvider = services.BuildServiceProvider();
 
@@ -68,7 +52,6 @@ namespace HB.FullStack
                     builder.AddConsole();
                     builder.AddDebug();
                 })
-                .AddMemoryCache()
                 .AddSQLite(options =>
                 {
                     options.CommonSettings.Version = 1;
@@ -79,12 +62,7 @@ namespace HB.FullStack
                         ConnectionString = "Data Source=sqlite_test2.db",
                         IsMaster = true
                     });
-                })
-                .AddRedisCache(Configuration.GetSection("RedisCache"))
-                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
-                .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
-                .AddMemoryLock()
-                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock")); ;
+                });
 
             ServiceProvider2 = services2.BuildServiceProvider();
         }

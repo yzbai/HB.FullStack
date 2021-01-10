@@ -122,6 +122,11 @@ namespace OrmBenchmark.ConsoleUI.NetCore
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// PrepareDatabaseAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         private static async System.Threading.Tasks.Task PrepareDatabaseAsync()
         {
             ServiceFixture serviceFixture = new ServiceFixture();

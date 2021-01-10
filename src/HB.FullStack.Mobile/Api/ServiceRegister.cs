@@ -1,8 +1,9 @@
-﻿using HB.FullStack.Client.Api;
+﻿using HB.FullStack.Mobile.Api;
 using Microsoft.Extensions.Configuration;
 using Polly;
 using System;
 using System.Net.Http;
+using Xamarin.Essentials;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -40,7 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
-            options.Endpoints.ForEach(endpoint =>
+            foreach (var endpoint in options.Endpoints)
             {
                 services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
                 {
@@ -48,11 +49,13 @@ namespace Microsoft.Extensions.DependencyInjection
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
                 })
-                .AddTransientHttpErrorPolicy(p =>
-                {
-                    //TODO: Move this to options
-                    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
-                })
+
+                //TODO: 调查这个
+                //.AddTransientHttpErrorPolicy(p =>
+                //{
+                //    //TODO: Move this to options
+                //    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000));
+                //})
 #if DEBUG
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {
@@ -60,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     {
                         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                         {
-                            if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
                                 return true;
                             return errors == System.Net.Security.SslPolicyErrors.None;
                         }
@@ -69,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
 #endif
                 ;
-            });
+            }
 
 
 

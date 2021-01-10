@@ -25,7 +25,7 @@ namespace HB.FullStack.Server
 
             _logger.LogError(exceptionHandlerFeature.Error, "Error From ExceptionController");
 
-            ApiError apiErrorResponse = new ApiError(ErrorCode.ApiUnkown, exceptionHandlerFeature.Error.Message);
+            ApiError apiErrorResponse = new ApiError(ApiErrorCode.FromExceptionController, exceptionHandlerFeature.Error.Message);
 
             return new BadRequestObjectResult(apiErrorResponse)
             {

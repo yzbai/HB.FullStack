@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Text;
 using System.Threading;
@@ -11,18 +12,23 @@ namespace HB.FullStack.Cache
 {
     public static class ICacheExtensions
     {
-        public static async Task SetIntAsync(this ICache cache, string key, int value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
+        /// <summary>
+        /// SetIntAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="utcTicks"></param>
+        /// <param name="options"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
+        public static Task SetIntAsync(this ICache cache, string key, int value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            try
-            {
-                await cache.SetStringAsync(key, Convert.ToString(value, CultureInfo.InvariantCulture), utcTicks, options, token).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new FrameworkException($"Cache SetIntAsync Error. Key:{key}, Value:{value}", ex);
-            }
+            return cache.SetStringAsync(key, value.ToString(CultureInfo.InvariantCulture), utcTicks, options, token);
         }
 
+        /// <exception cref="CacheException"></exception>
         public static async Task<int?> GetIntAsync(this ICache cache, string key, CancellationToken token = default)
         {
             try
@@ -34,14 +40,29 @@ namespace HB.FullStack.Cache
                     return null;
                 }
 
-                return value!.ToInt32();
+                return Convert.ToInt32(value, CultureInfo.InvariantCulture);
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
-                throw new FrameworkException($"Cache GetIntAsync Error. Key:{key}", ex);
+                throw new CacheException(CacheErrorCode.ConvertError, $"Key:{key}", ex);
+            }
+            catch(OverflowException ex)
+            {
+                throw new CacheException(CacheErrorCode.ConvertError, $"Key:{key}", ex);
             }
         }
 
+        /// <summary>
+        /// SetStringAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="utcTicks"></param>
+        /// <param name="options"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public static async Task SetStringAsync(this ICache cache, string key, string value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             try
@@ -50,12 +71,20 @@ namespace HB.FullStack.Cache
 
                 await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not CacheException)
             {
-                throw new FrameworkException($"Cache SetAsync Error. Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
+                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
             }
         }
 
+        /// <summary>
+        /// GetStringAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public static async Task<string?> GetStringAsync(this ICache cache, string key, CancellationToken token = default)
         {
             try
@@ -64,12 +93,23 @@ namespace HB.FullStack.Cache
 
                 return await SerializeUtil.UnPackAsync<string>(bytes).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not CacheException)
             {
-                throw new FrameworkException($"Cache GetAsync Error. Key:{key}", ex);
+                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}", ex);
             }
         }
 
+        /// <summary>
+        /// SetAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="utcTicks"></param>
+        /// <param name="options"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public static async Task SetAsync<T>(this ICache cache, string key, T value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
         {
             try
@@ -78,12 +118,20 @@ namespace HB.FullStack.Cache
 
                 await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not CacheException)
             {
-                throw new FrameworkException($"Cache SetAsync Error. Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
+                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
             }
         }
 
+        /// <summary>
+        /// GetAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public static async Task<T?> GetAsync<T>(this ICache cache, string key, CancellationToken token = default) where T : class
         {
             try
@@ -92,12 +140,10 @@ namespace HB.FullStack.Cache
 
                 return await SerializeUtil.UnPackAsync<T>(bytes).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not CacheException)
             {
-                throw new FrameworkException($"Cache GetAsync Error. Key:{key}", ex);
+                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}", ex);
             }
         }
-
-
     }
 }

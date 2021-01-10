@@ -36,8 +36,8 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        
-        
+
+
         public static string GetHash(string item)
         {
             using SHA256 sha256Obj = SHA256.Create();
@@ -51,10 +51,10 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        
-        
-        
-        
+
+
+
+
         public static async Task<string> GetHashAsync<T>([DisallowNull] T item) where T : class
         {
             using SHA256 sha256Obj = SHA256.Create();
@@ -69,8 +69,8 @@ namespace System
         /// <param name="pwd"></param>
         /// <param name="salt"></param>
         /// <returns></returns>
-        
-        
+
+
         public static string EncryptPwdWithSalt(string pwd, string salt)
         {
             return GetHash(pwd + salt);
@@ -87,6 +87,7 @@ namespace System
         private static readonly string[] _charArray = _charCollection.Split(',');
         private static readonly string[] _numbericCharArray = _charCollection.Substring(0, 20).Split(',');
 
+
         public static string CreateRandomString(int length)
         {
             return CreateRandomString(length, _charArray);
@@ -97,6 +98,8 @@ namespace System
             return CreateRandomString(length, _numbericCharArray);
         }
 
+
+
         private static string CreateRandomString(int length, string[] charArray)
         {
             Random random = new Random(Guid.NewGuid().GetHashCode());
@@ -105,7 +108,7 @@ namespace System
 
             for (int i = 0; i < length; i++)
             {
-                randomString += charArray[random.Next(0, arrayLength)];
+                randomString += charArray[RandomNumberGenerator.GetInt32(0, arrayLength)];
             }
 
             return randomString;

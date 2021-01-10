@@ -1,24 +1,29 @@
 ﻿#nullable enable
 
+using HB.FullStack.Database;
+
 namespace System
 {
-    public class DatabaseException : FrameworkException
+    public class DatabaseException : Exception
     {
-        public DatabaseException(ErrorCode errorCode, string? whoEntityName = null, string? detail = null, Exception? innerException = null)
-            : base(errorCode, $"EntityName:{whoEntityName}, Detail:{detail}", innerException)
+
+        public DatabaseErrorCode ErrorCode { get; set; }
+        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
+
+
+        public DatabaseException(DatabaseErrorCode errorCode) : base()
         {
+            ErrorCode = errorCode;
         }
 
-        public DatabaseException()
+        public DatabaseException(DatabaseErrorCode errorCode, string message) : base(message)
         {
+            ErrorCode = errorCode;
         }
 
-        public DatabaseException(string? message) : base(message)
+        public DatabaseException(DatabaseErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
         {
-        }
-
-        public DatabaseException(string? message, Exception? innerException) : base(message, innerException)
-        {
+            ErrorCode = errorCode;
         }
     }
 }

@@ -2,34 +2,38 @@
 
 using System;
 using System.Collections.Generic;
-using HB.FullStack.Common.Resources;
+
 
 namespace HB.FullStack.Common.Api
 {
-    public class ApiError : Resource
+    public class ApiError : ApiResource
     {
-        public ErrorCode Code { get; set; }
+        public ApiErrorCode ErrorCode { get; set; }
 
         public string? Message { get; set; }
 
-        public IDictionary<string, IEnumerable<string>> ModelStates { get; private set; } = new Dictionary<string, IEnumerable<string>>();
+        public IDictionary<string, IEnumerable<string>>? ModelStates { get; set; } = new Dictionary<string, IEnumerable<string>>();
 
         public ApiError()
         {
         }
 
-        public ApiError(ErrorCode code, string? message = null)
+        public ApiError(ApiErrorCode code, string? message = null)
         {
-            Code = code;
+            ErrorCode = code;
             Message = message ?? code.ToString();
         }
 
-        public ApiError(ErrorCode code, IDictionary<string, IEnumerable<string>> modelStates) : this(code: code, message: null)
+        public ApiError(ApiErrorCode code, IDictionary<string, IEnumerable<string>> modelStates) : this(code: code, message: null)
         {
-            modelStates.ForEach(kv =>
-            {
-                ModelStates.Add(kv.Key, new List<string>(kv.Value));
-            });
+            ModelStates = modelStates;
+        }
+
+        public ApiError(ApiException ex)
+        {
+            ErrorCode = ex.ErrorCode;
+            Message = ex.Message;
+            ModelStates = ex.ModelStates;
         }
     }
 }

@@ -5,7 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.Common.Entities;
+
+using HB.FullStack.Common;
 using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Database.Def

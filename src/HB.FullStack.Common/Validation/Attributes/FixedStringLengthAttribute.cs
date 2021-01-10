@@ -6,11 +6,10 @@ namespace System.ComponentModel.DataAnnotations
     {
         public bool CanBeNull { get; set; } = true;
 
-        private readonly int _length;
 
         public FixedStringLengthAttribute(int length)
         {
-            _length = length;
+            Length = length;
 
             if (string.IsNullOrEmpty(ErrorMessage))
             {
@@ -18,14 +17,16 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value == null)
             {
                 return CanBeNull;
             }
 
-            return value is string text && text.Length == _length;
+            return value is string text && text.Length == Length;
         }
+
+        public int Length { get; }
     }
 }

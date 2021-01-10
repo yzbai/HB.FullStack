@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using HB.FullStack.Client.IdBarriers;
-using MyColorfulTime.IdBarriers;
+using HB.FullStack.Mobile.IdBarriers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

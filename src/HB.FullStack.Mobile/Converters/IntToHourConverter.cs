@@ -2,7 +2,7 @@
 using System.Globalization;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     /// <summary>
     /// 将Int值表示为两位的字符串

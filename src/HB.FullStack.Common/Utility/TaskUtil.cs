@@ -50,7 +50,7 @@ namespace System.Threading.Tasks
 
                     IEnumerable<T1> t1s = await task1.ConfigureAwait(false); //await task1.ConfigureAwait(false);
 
-                    results.Add(convertor1(t1s));
+                    results.AddRange(convertor1(t1s));
                 }
 
                 if (finished == task2)
@@ -61,7 +61,7 @@ namespace System.Threading.Tasks
 
                     IEnumerable<T2> t2s = await task2.ConfigureAwait(false);
 
-                    results.Add(convertor2(t2s));
+                    results.AddRange(convertor2(t2s));
                 }
             }
 
@@ -105,7 +105,7 @@ namespace System.Threading.Tasks
 
                     IEnumerable<T1> t1s = await task1.ConfigureAwait(continueOnCapturedContext);
 
-                    results.Add(convertor1(t1s));
+                    results.AddRange(convertor1(t1s));
                 }
 
                 if (finished == task2)
@@ -116,7 +116,7 @@ namespace System.Threading.Tasks
 
                     IEnumerable<T2> t2s = await task2.ConfigureAwait(continueOnCapturedContext);
 
-                    results.Add(convertor2(t2s));
+                    results.AddRange(convertor2(t2s));
                 }
 
                 if (finished == task3)
@@ -127,7 +127,7 @@ namespace System.Threading.Tasks
 
                     IEnumerable<T3> t3s = await task3.ConfigureAwait(continueOnCapturedContext);
 
-                    results.Add(convertor3(t3s));
+                    results.AddRange(convertor3(t3s));
                 }
             }
 
@@ -186,7 +186,10 @@ namespace System.Threading.Tasks
 
                 IEnumerable<T> finishedTs = await t.ConfigureAwait(continueOnCapturedContext);
 
-                finishedTs.ForEach(item => results.Add(convertor(item)));
+                foreach (var item in finishedTs)
+                {
+                    results.Add(convertor(item));
+                }
             }
 
             return results;

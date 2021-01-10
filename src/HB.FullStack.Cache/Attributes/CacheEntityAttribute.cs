@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Common.Entities
+namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class CacheEntityAttribute : Attribute

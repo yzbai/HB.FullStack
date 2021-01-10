@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Common.Api;
+using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
 using HB.FullStack.Server;
@@ -33,6 +34,13 @@ namespace System
 {
     public static class StartupExtensions
     {
+        /// <summary>
+        /// AddDataProtectionWithCertInRedis
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        /// <exception cref="ServerException"></exception>
         public static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
             DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
@@ -44,7 +52,7 @@ namespace System
             if (certificate2 == null)
             {
                 Log.Fatal($"Cert For DataProtection not found. CertSubject:{dataProtectionSettings.CertificateSubject}");
-                throw new FrameworkException(ErrorCode.DataProtectionCertNotFound, $"Subject:{dataProtectionSettings.CertificateSubject}");
+                throw new ServerException(ServerErrorCode.DataProtectionCertNotFound, $"Subject:{dataProtectionSettings.CertificateSubject}");
             }
 
             ConfigurationOptions redisConfigurationOptions = ConfigurationOptions.Parse(dataProtectionSettings.RedisConnectString);
@@ -83,6 +91,7 @@ namespace System
         /// <param name="audience">我是谁，即jwt是颁发给谁的</param>
         /// <param name="authority">当局。我该去向谁核实，即是谁颁发了这个jwt</param>
         /// <returns></returns>
+        /// <exception cref="ServerException"></exception>
         public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             JwtClientSettings jwtSettings = new JwtClientSettings();
@@ -93,7 +102,7 @@ namespace System
 
             if (encryptCert == null)
             {
-                throw new FrameworkException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
+                throw new ServerException(ServerErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
             }
 
             return
@@ -103,7 +112,7 @@ namespace System
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer(jwtOptions =>
+                .AddJwtBearer((Action<JwtBearerOptions>)(jwtOptions =>
                 {
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
@@ -130,11 +139,11 @@ namespace System
                             //{
                             c.Response.ContentType = "application/problem+json";
 
-                            ErrorCode error = c.AuthenticateFailure switch
+                            ApiErrorCode error = c.AuthenticateFailure switch
                             {
-                                null => ErrorCode.ApiNoAuthority,
-                                SecurityTokenExpiredException s => ErrorCode.ApiTokenExpired,
-                                _ => ErrorCode.ApiNoAuthority
+                                null => ApiErrorCode.NoAuthority,
+                                SecurityTokenExpiredException s => ApiErrorCode.AccessTokenExpired,
+                                _ => ApiErrorCode.NoAuthority
                             };
 
                             ApiError errorResponse = new ApiError(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
@@ -173,7 +182,7 @@ namespace System
                             return Task.CompletedTask;
                         }
                     };
-                });
+                }));
         }
 
         public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
@@ -192,11 +201,11 @@ namespace System
                 {
                     SerializeUtil.Configure(options.JsonSerializerOptions);
                 })
-                .ConfigureApiBehaviorOptions(apiBehaviorOptions =>
+                .ConfigureApiBehaviorOptions((Action<ApiBehaviorOptions>)(apiBehaviorOptions =>
                 {
                     apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
                     {
-                        ApiError apiErrorResponse = new ApiError(ErrorCode.ApiModelValidationError, actionContext.ModelState.GetErrors());
+                        ApiError apiErrorResponse = new ApiError((ApiErrorCode)ApiErrorCode.ModelValidationError, actionContext.ModelState.GetErrors());
 
                         return new BadRequestObjectResult(apiErrorResponse)
                         {
@@ -204,17 +213,24 @@ namespace System
                         };
                     };
 
-                })
+                }))
                 .PartManager.ApplicationParts.Add(new AssemblyPart(httpFrameworkAssembly));
 
             return services;
         }
 
+        /// <summary>
+        /// InitializeDatabaseAsync
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="lockManager"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager)
         {
             GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
 
-            using IDistributedLock distributedLock = await lockManager.LockAsync(
+            IDistributedLock distributedLock = await lockManager.LockAsync(
                 resources: database.DatabaseNames,
                 expiryTime: TimeSpan.FromMinutes(5),
                 waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
@@ -236,9 +252,14 @@ namespace System
             }
         }
 
+        /// <summary>
+        /// ThrowIfDatabaseInitLockNotGet
+        /// </summary>
+        /// <param name="databaseNames"></param>
+        /// <exception cref="DatabaseException"></exception>
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
         {
-            throw new DatabaseException(ErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
+            throw new DatabaseException(DatabaseErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
         }
     }
 }

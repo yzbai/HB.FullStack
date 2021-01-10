@@ -6,11 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
+
+using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class ImageOptionItem : ObservableObject
     {
@@ -96,6 +98,10 @@ namespace HB.FullStack.Client.Controls
             SelectedIndex = -1;
         }
 
+        /// <summary>
+        /// OnSelectedIndexChanged
+        /// </summary>
+        /// <exception cref="MobileException"></exception>
         private void OnSelectedIndexChanged()
         {
             if (ItemsSource == null)
@@ -109,7 +115,7 @@ namespace HB.FullStack.Client.Controls
             }
             else if (SelectedIndex > ItemsSource!.Count - 1)
             {
-                throw new ClientException(ErrorCode.OutOfRange, $"ImageOptions SelectedIndex :{SelectedIndex} Out of Range.");
+                throw new MobileException(MobileErrorCode.OutOfRange, $"ImageOptions SelectedIndex :{SelectedIndex} Out of Range.");
             }
 
             SelectedItem = ItemsSource[SelectedIndex];

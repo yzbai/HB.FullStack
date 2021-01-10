@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace HB.FullStack.Server
 {
@@ -7,9 +8,10 @@ namespace HB.FullStack.Server
     /// </summary>
     public interface IPublicResourceTokenManager
     {
-        
+        /// <exception cref="CacheException"></exception>
         Task<string> GetNewTokenAsync(int expiredSeconds = 60);
 
+        /// <exception cref="CacheException"></exception>
         Task<bool> CheckTokenAsync(string? token);
     }
 }

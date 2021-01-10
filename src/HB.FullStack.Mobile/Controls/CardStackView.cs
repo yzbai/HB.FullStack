@@ -5,12 +5,10 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows.Input;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
-using Xamarin.Forms.Markup;
-using static Xamarin.Forms.Markup.GridRowsColumns;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class CardStackView : BaseContentView
     {
@@ -24,30 +22,29 @@ namespace HB.FullStack.Client.Controls
         #endregion
         public CardStackView()
         {
-            Content = new Grid
-            {
+            Content = _root = new Grid {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                RowDefinitions = Rows.Define(Auto),
-                ColumnDefinitions = Columns.Define(Auto)
-            }.Assign(out _root);
+                VerticalOptions = LayoutOptions.FillAndExpand
+            };
+
+            _root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            _root.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             SizeChanged += OnSizeChanged;
 
             _tapCommand = new Command<Grid>(OnTapped);
         }
 
-
-
         #region Inputs
 
-        [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public IList? ItemsSource { get => (IList)GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
+        
         public DataTemplate? LabelDataTemplate { get; set; }
+        
         public DataTemplate? CardDataTemplate { get; set; }
+        
         public int LabelWidth { get; set; } = 60;
 
-        [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public IList<Color>? CardBackgroundColors { get; set; }
 
         #endregion
@@ -62,10 +59,7 @@ namespace HB.FullStack.Client.Controls
             base.OnDisappearing();
         }
 
-        public override IList<IBaseContentView?>? GetAllCustomerControls()
-        {
-            return null;
-        }
+        public override IList<IBaseContentView?>? GetAllCustomerControls() => null;
 
         private void OnItemsSourceChanged(IEnumerable? oldValue, IEnumerable? newValue)
         {
@@ -82,7 +76,7 @@ namespace HB.FullStack.Client.Controls
             }
         }
 
-        private void OnItemsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnItemsSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             ReAddCards();
         }
@@ -97,7 +91,7 @@ namespace HB.FullStack.Client.Controls
             ReAddCards();
         }
 
-        private void OnSizeChanged(object sender, EventArgs e)
+        private void OnSizeChanged(object? sender, EventArgs e)
         {
             ReAddCards();
         }
@@ -127,7 +121,7 @@ namespace HB.FullStack.Client.Controls
             card.Children[0].Opacity = 1;
             card.Children[1].Opacity = 0;
 
-            _root.Children.Add(_cards);
+            _root.Children.AddRange(_cards);
 
             _lastCard = card;
         }
@@ -164,6 +158,7 @@ namespace HB.FullStack.Client.Controls
             {
                 View cardView = (View)CardDataTemplate.CreateContent();
                 cardView.BindingContext = ItemsSource[i];
+                cardView.Opacity = 0;
 
                 View labelView;
 
@@ -177,22 +172,28 @@ namespace HB.FullStack.Client.Controls
                     labelView = new StackLayout();
                 }
 
+
                 Grid card = new Grid
                 {
-                    RowDefinitions = Rows.Define(Auto),
-                    ColumnDefinitions = Columns.Define(Star, LabelWidth),
-                    TranslationX = i * LabelWidth,
-                    BackgroundColor = CardBackgroundColors.ElementAt(ItemsSource.Count - i - 1),
-                    Children =
-                    {
-                        //Card Content
-                        cardView.Row(0).Column(0,2).Invoke(view=>view.Opacity = 0),
-                        
-                        //Card Margin
-                        labelView.Row(0).Column(1),
-                    }
-                }.Width(OneCardWidth)
-                .Invoke(view => view.GestureRecognizers.Add(new TapGestureRecognizer { Command = _tapCommand, CommandParameter = view }));
+                    WidthRequest = OneCardWidth
+                };
+                card.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                card.ColumnDefinitions.Add(new ColumnDefinition{ Width = GridLength.Star });
+                card.ColumnDefinitions.Add(new ColumnDefinition { Width = LabelWidth });
+                card.TranslationX = i * LabelWidth;
+                card.BackgroundColor = CardBackgroundColors!.ElementAt(ItemsSource.Count - i - 1);
+                card.GestureRecognizers.Add(new TapGestureRecognizer { Command = _tapCommand, CommandParameter = card });
+
+                Grid.SetRow(cardView, 0);
+                Grid.SetColumn(cardView, 0);
+                Grid.SetColumnSpan(cardView, 2);
+
+                card.Children.Add(cardView);
+
+                Grid.SetRow(labelView, 0);
+                Grid.SetColumn(labelView, 1);
+
+                card.Children.Add(labelView);                
 
                 _cards.Add(card);
             }
@@ -202,7 +203,7 @@ namespace HB.FullStack.Client.Controls
             _lastCard.Children[0].Opacity = 1;
             _lastCard.Children[1].Opacity = 0;
 
-            _root.Children.Add(_cards);
+            _root.Children.AddRange(_cards);
         }
 
         private void GenerateRandomBackgroudColors()

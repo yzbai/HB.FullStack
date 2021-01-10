@@ -42,7 +42,7 @@ namespace OrmBenchmark.Dapper
             return null;
         }
 
-        public async Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync()
+        public   Task<IEnumerable<IPost>> GetAllItemsAsObjectAsync()
         {
             return null;
         }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Platforms;
+using HB.FullStack.Mobile.Platforms;
 using SkiaSharp;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Skia
+namespace HB.FullStack.Mobile.Skia
 {
     public class SKGif : IDisposable
     {
@@ -92,7 +92,10 @@ namespace HB.FullStack.Client.Skia
                     // managed
                     if (_bitmaps.IsNotNullOrEmpty())
                     {
-                        _bitmaps.ForEach(bitmap => bitmap?.Dispose());
+                        foreach (var bitmap in _bitmaps)
+                        {
+                            bitmap?.Dispose();
+                        }
                     }
                 }
 

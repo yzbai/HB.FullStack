@@ -44,12 +44,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HB.FullStack.Mobile\HB.FullStack.Client.csproj">
-      <Project>{1085d7fa-7a6f-41ae-9cb0-f769b5ddad25}</Project>
-      <Name>HB.FullStack.Client</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Xamarin.Essentials">
       <Version>1.6.0-pre4</Version>
     </PackageReference>

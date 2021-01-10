@@ -1,11 +1,10 @@
-﻿using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Base;
+﻿using HB.FullStack.Mobile.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public partial class Chip : BaseContentView
     {
@@ -17,7 +16,7 @@ namespace HB.FullStack.Client.Controls
 
         public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(Chip), Color.DarkGray);
 
-        public static readonly BindableProperty ImageProperty = BindableProperty.Create(nameof(Image), typeof(ImageSource), typeof(Chip));
+        public static readonly BindableProperty ImageProperty = BindableProperty.Create(nameof(ImageSource), typeof(ImageSource), typeof(Chip));
 
         public static readonly BindableProperty ClickedCommandProperty = BindableProperty.Create(nameof(ClickedCommand), typeof(ICommand), typeof(Chip));
 
@@ -27,7 +26,7 @@ namespace HB.FullStack.Client.Controls
 
         public static readonly BindableProperty CloseCommandParameterProperty = BindableProperty.Create(nameof(CloseCommandParameter), typeof(object), typeof(Chip));
 
-        public static readonly BindableProperty CloseImageProperty = BindableProperty.Create(nameof(CloseImage), typeof(ImageSource), typeof(Chip));
+        public static readonly BindableProperty CloseImageProperty = BindableProperty.Create(nameof(CloseImageSource), typeof(ImageSource), typeof(Chip));
 
         public static readonly BindableProperty IsToggleableProperty = BindableProperty.Create(nameof(IsToggleable), typeof(bool), typeof(Chip), propertyChanged: OnIsSelectedPropertyChanged);
 
@@ -50,7 +49,6 @@ namespace HB.FullStack.Client.Controls
         public static readonly BindableProperty UnselectedHasShadowProperty = BindableProperty.Create(nameof(UnselectedHasShadow), typeof(bool), typeof(Chip), true);
 
         public static readonly BindableProperty SelectedHasShadowProperty = BindableProperty.Create(nameof(SelectedHasShadow), typeof(bool), typeof(Chip), true);
-
 
         private readonly WeakEventManager _eventManager = new WeakEventManager();
 
@@ -103,7 +101,7 @@ namespace HB.FullStack.Client.Controls
             set => SetValue(TextColorProperty, value);
         }
 
-        public ImageSource Image
+        public ImageSource ImageSource
         {
             get => (ImageSource)GetValue(ImageProperty);
             set => SetValue(ImageProperty, value);
@@ -133,7 +131,7 @@ namespace HB.FullStack.Client.Controls
             set => SetValue(CloseCommandParameterProperty, value);
         }
 
-        public ImageSource CloseImage
+        public ImageSource CloseImageSource
         {
             get => (ImageSource)GetValue(CloseImageProperty);
             set => SetValue(CloseImageProperty, value);
@@ -220,7 +218,7 @@ namespace HB.FullStack.Client.Controls
         {
             InitializeComponent();
 
-            SizeChanged += (object sender, EventArgs e) =>
+            SizeChanged += (object? sender, EventArgs e) =>
             {
                 frame.CornerRadius = (float)(Height * 0.5);
             };
@@ -244,7 +242,7 @@ namespace HB.FullStack.Client.Controls
 
         private void Clicked(object sender, EventArgs args)
         {
-            _eventManager.RaiseEvent(sender, args, nameof(OnClicked));
+            _eventManager.HandleEvent(sender, args, nameof(OnClicked));
             //OnClicked?.Invoke(sender, args);
 
             if (ClickedCommand != null && ClickedCommand.CanExecute(ClickedCommandParameter))
@@ -276,7 +274,7 @@ namespace HB.FullStack.Client.Controls
 
                 if (IsSelected)
                 {
-                    _eventManager.RaiseEvent(this, new EventArgs(), nameof(OnSelect));
+                    _eventManager.HandleEvent(this, new EventArgs(), nameof(OnSelect));
                     //OnSelect?.Invoke(this, new EventArgs());
 
                     if (SelectCommand != null && SelectCommand.CanExecute(SelectCommandParameter))
@@ -284,7 +282,7 @@ namespace HB.FullStack.Client.Controls
                 }
                 else
                 {
-                    _eventManager.RaiseEvent(this, new EventArgs(), nameof(OnUnselect));
+                    _eventManager.HandleEvent(this, new EventArgs(), nameof(OnUnselect));
                     //OnUnselect?.Invoke(this, new EventArgs());
 
                     if (UnselectCommand != null && SelectCommand.CanExecute(UnselectCommandParameter))
@@ -295,7 +293,7 @@ namespace HB.FullStack.Client.Controls
 
         private void CloseButton_Clicked(object sender, EventArgs args)
         {
-            _eventManager.RaiseEvent(sender, args, nameof(OnClose));
+            _eventManager.HandleEvent(sender, args, nameof(OnClose));
             //OnClose?.Invoke(sender, args);
 
             if (CloseCommand != null && CloseCommand.CanExecute(CloseCommandParameter))
