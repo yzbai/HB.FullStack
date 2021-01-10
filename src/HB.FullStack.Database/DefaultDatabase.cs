@@ -268,6 +268,14 @@ namespace HB.FullStack.Database
 
         #region SystemInfo
 
+        /// <summary>
+        /// IsTableExistsAsync
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="tableName"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private async Task<bool> IsTableExistsAsync(string databaseName, string tableName, IDbTransaction transaction)
         {
             var command = DbCommandBuilder.CreateIsTableExistCommand(EngineType, databaseName, tableName);
@@ -277,6 +285,13 @@ namespace HB.FullStack.Database
             return Convert.ToBoolean(result, GlobalSettings.Culture);
         }
 
+        /// <summary>
+        /// GetSystemInfoAsync
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<SystemInfo> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
         {
             bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SystemInfoTableName, transaction).ConfigureAwait(false);
@@ -300,6 +315,14 @@ namespace HB.FullStack.Database
             return systemInfo;
         }
 
+        /// <summary>
+        /// UpdateSystemVersionAsync
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="version"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task UpdateSystemVersionAsync(string databaseName, int version, IDbTransaction transaction)
         {
             var command = DbCommandBuilder.CreateSystemVersionUpdateCommand(EngineType, databaseName, version);

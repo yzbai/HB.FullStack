@@ -23,6 +23,12 @@ namespace HB.FullStack.Server.Filters
             _publicResourceTokenManager = publicResourceTokenManager;
         }
 
+        /// <summary>
+        /// OnActionExecutionAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             try
@@ -36,33 +42,39 @@ namespace HB.FullStack.Server.Filters
                     {
                         if (apiRequest.PublicResourceToken.IsNullOrEmpty())
                         {
-                            OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                            OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                             return;
                         }
 
                         if (!await _publicResourceTokenManager.CheckTokenAsync(apiRequest.PublicResourceToken).ConfigureAwait(false))
                         {
-                            OnError(context, ErrorCode.ApiPublicResourceTokenError);
+                            OnError(context, ApiErrorCode.ApiPublicResourceTokenError);
                             return;
                         }
+
                     }
                 }
                 else
                 {
-                    OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                     return;
                 }
 
                 await next().ConfigureAwait(false);
             }
+            catch (CacheException ex)
+            {
+                OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                _logger.LogError(ex, "PublicResourceToken 验证失败");
+            }
             catch (Exception ex)
             {
-                OnError(context, ErrorCode.ApiPublicResourceTokenNeeded);
+                OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");
             }
         }
 
-        private static void OnError(ActionExecutingContext? context, ErrorCode error)
+        private static void OnError(ActionExecutingContext? context, ApiErrorCode error)
         {
             if (context != null)
             {

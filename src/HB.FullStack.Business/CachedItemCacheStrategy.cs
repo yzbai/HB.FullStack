@@ -63,6 +63,12 @@ namespace HB.FullStack.Repository
             }
         }
 
+        /// <summary>
+        /// InvalidateCache
+        /// </summary>
+        /// <param name="cacheItem"></param>
+        /// <param name="cache"></param>
+        /// <exception cref="CacheException">Ignore.</exception>
         public static void InvalidateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
         {
             cacheItem.RemoveFromAsync(cache).Fire();

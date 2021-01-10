@@ -46,6 +46,13 @@ namespace HB.FullStack.Identity
             return _databaseReader.ScalarAsync<RoleOfUser>(ru => ru.UserId == userId && ru.RoleId == roleId, transactionContext);
         }
 
+        /// <summary>
+        /// GetRolesByUserIdAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public Task<IEnumerable<Role>> GetRolesByUserIdAsync(long userId, TransactionContext? transContext = null)
         {
             return TryCacheAsideAsync(CachedRolesByUserId.Key(userId), dbReader =>

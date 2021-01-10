@@ -75,7 +75,6 @@ namespace HB.Infrastructure.SQLite
 
         #endregion 自身 & 构建
 
-        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
         {
             SqliteCommand command = new SqliteCommand(engineCommand.CommandText)
@@ -99,6 +98,14 @@ namespace HB.Infrastructure.SQLite
 
         #region Command 能力
 
+        /// <summary>
+        /// ExecuteCommandNonQueryAsync
+        /// </summary>
+        /// <param name="Transaction"></param>
+        /// <param name="dbName"></param>
+        /// <param name="engineCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
@@ -113,6 +120,15 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
+        /// <summary>
+        /// ExecuteCommandReaderAsync
+        /// </summary>
+        /// <param name="Transaction"></param>
+        /// <param name="dbName"></param>
+        /// <param name="engineCommand"></param>
+        /// <param name="useMaster"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             //使用using的话，会同时关闭reader. 
@@ -131,6 +147,15 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
+        /// <summary>
+        /// ExecuteCommandScalarAsync
+        /// </summary>
+        /// <param name="Transaction"></param>
+        /// <param name="dbName"></param>
+        /// <param name="engineCommand"></param>
+        /// <param name="useMaster"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);

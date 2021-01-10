@@ -34,6 +34,13 @@ namespace HB.Infrastructure.MySQL
                 dbCommand).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// ExecuteCommandReaderAsync
+        /// </summary>
+        /// <param name="connectString"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
@@ -94,6 +101,13 @@ namespace HB.Infrastructure.MySQL
 
         #region Command Scalar
 
+        /// <summary>
+        /// ExecuteCommandScalarAsync
+        /// </summary>
+        /// <param name="connectString"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);
@@ -145,6 +159,13 @@ namespace HB.Infrastructure.MySQL
 
         #region Comand NonQuery
 
+        /// <summary>
+        /// ExecuteCommandNonQueryAsync
+        /// </summary>
+        /// <param name="connectString"></param>
+        /// <param name="dbCommand"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);

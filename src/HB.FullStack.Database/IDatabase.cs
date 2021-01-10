@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Database.Engine;
 
-[assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
+[assembly: InternalsVisibleTo("HB.FullStack.Tests")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
 namespace HB.FullStack.Database
 {

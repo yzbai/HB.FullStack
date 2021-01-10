@@ -21,6 +21,20 @@ namespace HB.FullStack.Identity
 
         #region User
 
+        /// <summary>
+        /// CreateUserAsync
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <param name="email"></param>
+        /// <param name="loginName"></param>
+        /// <param name="password"></param>
+        /// <param name="mobileConfirmed"></param>
+        /// <param name="emailConfirmed"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
@@ -30,12 +44,12 @@ namespace HB.FullStack.Identity
 
             if (mobile == null && email == null && loginName == null)
             {
-                throw new CommonException(ErrorCode.IdentityMobileEmailLoginNameAllNull);
+                throw new IdentityException(IdentityErrorCode.IdentityMobileEmailLoginNameAllNull);
             }
 
             if (!mobileConfirmed && !emailConfirmed && password == null)
             {
-                throw new CommonException(ErrorCode.IdentityNothingConfirmed);
+                throw new IdentityException(IdentityErrorCode.IdentityNothingConfirmed);
             }
 
             bool ownTrans = transactionContext == null;
@@ -48,7 +62,7 @@ namespace HB.FullStack.Identity
 
                 if (count != 0)
                 {
-                    throw new IdentityException(ErrorCode.IdentityAlreadyTaken, $"userType:{typeof(User)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
+                    throw new IdentityException(IdentityErrorCode.IdentityAlreadyTaken, $"userType:{typeof(User)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
                 }
 
                 User user = new User(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
@@ -77,6 +91,15 @@ namespace HB.FullStack.Identity
 
         #region Role
 
+        /// <summary>
+        /// AddRolesToUserAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task AddRolesToUserAsync(long userId, long roleId, string lastUser)
         {
             ThrowIf.NotLongId(userId, nameof(userId));
@@ -90,7 +113,7 @@ namespace HB.FullStack.Identity
 
                 if (count != 0)
                 {
-                    throw new CommonException(ErrorCode.DatabaseFoundTooMuch, $"已经有相同的角色. UserId:{userId}, RoleId:{roleId}");
+                    throw new IdentityException(IdentityErrorCode.FoundTooMuch, $"已经有相同的角色. UserId:{userId}, RoleId:{roleId}");
                 }
 
                 RoleOfUser ru = new RoleOfUser(userId, roleId);
@@ -106,6 +129,15 @@ namespace HB.FullStack.Identity
             }
         }
 
+        /// <summary>
+        /// RemoveRoleFromUserAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task RemoveRoleFromUserAsync(long userId, long roleId, string lastUser)
         {
             ThrowIf.NotLongId(userId, nameof(userId));
@@ -119,7 +151,7 @@ namespace HB.FullStack.Identity
 
                 if (stored == null)
                 {
-                    throw new CommonException(ErrorCode.DatabaseNotFound, $"没有找到这样的角色. UserId:{userId}, RoleId:{roleId}");
+                    throw new IdentityException(IdentityErrorCode.NotFound, $"没有找到这样的角色. UserId:{userId}, RoleId:{roleId}");
                 }
 
                 await _roleOfUserRepo.DeleteAsync(stored, lastUser, trans).ConfigureAwait(false);

@@ -21,6 +21,13 @@ namespace HB.FullStack.Server.File
             _securityService = securityService;
         }
 
+        /// <summary>
+        /// SetAvatarAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
         public async Task SetAvatarAsync(long userId, IFormFile file)
         {
             byte[] data = await _securityService.ProcessFormFileAsync(

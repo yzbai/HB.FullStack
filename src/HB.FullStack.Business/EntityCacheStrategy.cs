@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
-
+using HB.FullStack.Common;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
 
@@ -82,6 +82,12 @@ namespace HB.FullStack.Repository
 
         }
 
+        /// <summary>
+        /// UpdateCache
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="cache"></param>
+        /// <exception cref="CacheException">Ignore.</exception>
         private static void UpdateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             #region 普通缓存，加锁的做法
@@ -115,6 +121,12 @@ namespace HB.FullStack.Repository
 
         }
 
+        /// <summary>
+        /// InvalidateCache
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="cache"></param>
+        /// <exception cref="CacheException">Ignore.</exception>
         public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             if (ICache.IsEntityEnabled<TEntity>())

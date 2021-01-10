@@ -11,6 +11,8 @@ namespace HB.FullStack.Server.Security
     public interface ISecurityService
     {
         Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest);
+
+        /// <exception cref="ApiException"></exception>
         Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedFileSuffixes, long sizeLimit);
     }
 }

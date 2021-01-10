@@ -8,10 +8,22 @@ namespace HB.FullStack.Common.Api
 {
     public enum ApiErrorCode
     {
-        ModelValidationError,
         ApiUnkown,
+
+        NoAuthority,
+        AccessTokenExpired,
+
+        ModelValidationError,
         ApiNotAvailable,
         ApiErrorWrongFormat,
-        NotApiResourceEntity
+        NotApiResourceEntity,
+        ApiSmsCodeInvalid,
+        ApiPublicResourceTokenNeeded,
+        ApiPublicResourceTokenError,
+        ApiUploadEmptyFile,
+        ApiUploadOverSize,
+        ApiUploadWrongType,
+        ApiHttpsRequired,
+        FromExceptionController,
     }
 }

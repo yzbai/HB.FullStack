@@ -41,6 +41,20 @@ namespace HB.FullStack.Identity
         private EncryptingCredentials _encryptingCredentials = null!;
         private SecurityKey _decryptionSecurityKey = null!;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
+        /// <param name="transaction"></param>
+        /// <param name="lockManager"></param>
+        /// <param name="userRepo"></param>
+        /// <param name="signInTokenRepo"></param>
+        /// <param name="roleOfUserRepo"></param>
+        /// <param name="userClaimRepo"></param>
+        /// <param name="userLoginControlRepo"></param>
+        /// <param name="identityService"></param>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
         public AuthorizationService(
             IOptions<AuthorizationServiceOptions> options,
             ILogger<AuthorizationService> logger,
@@ -71,9 +85,18 @@ namespace HB.FullStack.Identity
 
         public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
+        /// <summary>
+        /// SignInAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
-            ThrowIf.NotValid(context);
+            ThrowIf.NotValid(context, nameof(context));
 
             switch (context.SignInType)
             {
@@ -114,7 +137,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null)
                 {
-                    throw new AuthorizationException(ErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
+                    throw new IdentityException(IdentityErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
                 }
 
                 UserLoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
@@ -126,7 +149,7 @@ namespace HB.FullStack.Identity
                     {
                         OnSignInFailed(userLoginControl, lastUser);
 
-                        throw new AuthorizationException(ErrorCode.AuthorizationPasswordWrong, $"SignInContext:{SerializeUtil.ToJson(context)}");
+                        throw new IdentityException(IdentityErrorCode.AuthorizationPasswordWrong, $"SignInContext:{SerializeUtil.ToJson(context)}");
                     }
                 }
 
@@ -180,9 +203,17 @@ namespace HB.FullStack.Identity
 
 
 
+        /// <summary>
+        /// RefreshAccessTokenAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
-            ThrowIf.NotValid(context);
+            ThrowIf.NotValid(context, nameof(context));
 
             //解决并发涌入
             using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
@@ -191,7 +222,7 @@ namespace HB.FullStack.Identity
 
             if (!distributedLock.IsAcquired)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationTooFrequent, $"Context:{SerializeUtil.ToJson(context)}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationTooFrequent, $"Context:{SerializeUtil.ToJson(context)}");
             }
 
             //AccessToken, Claims 验证
@@ -204,7 +235,7 @@ namespace HB.FullStack.Identity
             }
             catch (Exception ex)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationInvalideAccessToken, $"Context: {SerializeUtil.ToJson(context)}", ex);
+                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideAccessToken, $"Context: {SerializeUtil.ToJson(context)}", ex);
             }
 
             //TODO: 这里缺DeviceId验证. 放在了StartupUtil.cs中
@@ -212,19 +243,19 @@ namespace HB.FullStack.Identity
             if (claimsPrincipal == null)
             {
                 //TODO: Black concern SigninToken by RefreshToken
-                throw new AuthorizationException(ErrorCode.AuthorizationInvalideAccessToken, $"Context: {SerializeUtil.ToJson(context)}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideAccessToken, $"Context: {SerializeUtil.ToJson(context)}");
             }
 
             if (claimsPrincipal.GetDeviceId() != context.DeviceId)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationInvalideDeviceId, $"Context: {SerializeUtil.ToJson(context)}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideDeviceId, $"Context: {SerializeUtil.ToJson(context)}");
             }
 
             long userId = claimsPrincipal.GetUserId();
 
             if (userId <= 0)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationInvalideUserId, $"Context: {SerializeUtil.ToJson(context)}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideUserId, $"Context: {SerializeUtil.ToJson(context)}");
             }
 
             //SignInToken 验证
@@ -243,14 +274,14 @@ namespace HB.FullStack.Identity
 
                 if (signInToken == null || signInToken.Blacked)
                 {
-                    throw new AuthorizationException(ErrorCode.AuthorizationNoTokenInStore, $"Refresh token error. signInToken not saved in db. ");
+                    throw new IdentityException(IdentityErrorCode.AuthorizationNoTokenInStore, $"Refresh token error. signInToken not saved in db. ");
                 }
 
                 //验证SignInToken过期问题
 
                 if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
-                    throw new AuthorizationException(ErrorCode.AuthorizationRefreshTokenExpired, $"Refresh Token Expired.");
+                    throw new IdentityException(IdentityErrorCode.AuthorizationRefreshTokenExpired, $"Refresh Token Expired.");
                 }
 
                 // User 信息变动验证
@@ -259,7 +290,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
-                    throw new AuthorizationException(ErrorCode.AuthorizationUserSecurityStampChanged, $"Refresh token error. User SecurityStamp Changed.");
+                    throw new IdentityException(IdentityErrorCode.AuthorizationUserSecurityStampChanged, $"Refresh token error. User SecurityStamp Changed.");
                 }
 
                 // 更新SignInToken
@@ -288,6 +319,13 @@ namespace HB.FullStack.Identity
             }
         }
 
+        /// <summary>
+        /// SignOutAsync
+        /// </summary>
+        /// <param name="signInTokenId"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task SignOutAsync(long signInTokenId, string lastUser)
         {
             ThrowIf.NotLongId(signInTokenId, nameof(signInTokenId));
@@ -316,6 +354,15 @@ namespace HB.FullStack.Identity
             }
         }
 
+        /// <summary>
+        /// SignOutAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="idiom"></param>
+        /// <param name="logOffType"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task SignOutAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
             ThrowIf.NotLongId(userId, nameof(userId));
@@ -335,6 +382,13 @@ namespace HB.FullStack.Identity
             }
         }
 
+        /// <summary>
+        /// OnSignInFailedBySmsAsync
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
         {
             User? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
@@ -349,6 +403,16 @@ namespace HB.FullStack.Identity
             OnSignInFailed(userLoginControl, lastUser);
         }
 
+        /// <summary>
+        /// DeleteSignInTokensAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="idiom"></param>
+        /// <param name="logOffType"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private async Task DeleteSignInTokensAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
         {
             IEnumerable<SignInToken> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
@@ -364,6 +428,15 @@ namespace HB.FullStack.Identity
             await _signInTokenRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// ConstructJwtAsync
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="signInToken"></param>
+        /// <param name="signToWhere"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
             IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
@@ -381,6 +454,14 @@ namespace HB.FullStack.Identity
             return jwt;
         }
 
+        /// <summary>
+        /// PreSignInCheck
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="userLoginControl"></param>
+        /// <param name="lastUser"></param>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         private void PreSignInCheck(User user, UserLoginControl userLoginControl, string lastUser)
         {
             ThrowIf.Null(user, nameof(user));
@@ -390,19 +471,19 @@ namespace HB.FullStack.Identity
             //2, 手机验证
             if (signInOptions.RequireMobileConfirmed && !user.MobileConfirmed)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationMobileNotConfirmed, $"用户手机需要通过验证. UserId:{user.Id}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationMobileNotConfirmed, $"用户手机需要通过验证. UserId:{user.Id}");
             }
 
             //3, 邮件验证
             if (signInOptions.RequireEmailConfirmed && !user.EmailConfirmed)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationEmailNotConfirmed, $"用户邮箱需要通过验证. UserId:{user.Id}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationEmailNotConfirmed, $"用户邮箱需要通过验证. UserId:{user.Id}");
             }
 
             //4, Lockout 检查
             if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
             {
-                throw new AuthorizationException(ErrorCode.AuthorizationLockedOut, $"用户已经被锁定。LockoutEndDate:{userLoginControl.LockoutEndDate}, UserId:{user.Id}");
+                throw new IdentityException(IdentityErrorCode.AuthorizationLockedOut, $"用户已经被锁定。LockoutEndDate:{userLoginControl.LockoutEndDate}, UserId:{user.Id}");
             }
 
             //5, 一段时间内,最大失败数检测
@@ -412,7 +493,7 @@ namespace HB.FullStack.Identity
                 {
                     if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
                     {
-                        throw new AuthorizationException(ErrorCode.AuthorizationOverMaxFailedCount, $"用户今日已经达到最大失败登陆数. UserId:{user.Id}");
+                        throw new IdentityException(IdentityErrorCode.AuthorizationOverMaxFailedCount, $"用户今日已经达到最大失败登陆数. UserId:{user.Id}");
                     }
                 }
             }
@@ -432,6 +513,12 @@ namespace HB.FullStack.Identity
             }
         }
 
+        /// <summary>
+        /// OnSignInFailed
+        /// </summary>
+        /// <param name="userLoginControl"></param>
+        /// <param name="lastUser"></param>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         private void OnSignInFailed(UserLoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
@@ -453,6 +540,10 @@ namespace HB.FullStack.Identity
             _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
         }
 
+        /// <summary>
+        /// InitializeCredencials
+        /// </summary>
+        /// <exception cref="HB.FullStack.Identity.IdentityException"></exception>
         private void InitializeCredencials()
         {
             #region Initialize Jwt Signing Credentials
@@ -461,7 +552,7 @@ namespace HB.FullStack.Identity
 
             if (cert == null)
             {
-                throw new AuthorizationException(ErrorCode.JwtSigningCertNotFound, $"Subject:{_options.SigningCertificateSubject}");
+                throw new IdentityException(IdentityErrorCode.JwtSigningCertNotFound, $"Subject:{_options.SigningCertificateSubject}");
             }
 
             _signingCredentials = CredentialHelper.GetSigningCredentials(cert, _options.SigningAlgorithm);
@@ -476,7 +567,7 @@ namespace HB.FullStack.Identity
 
             if (encryptionCert == null)
             {
-                throw new CommonException(ErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
+                throw new IdentityException(IdentityErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
             }
 
             _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);
@@ -518,6 +609,13 @@ namespace HB.FullStack.Identity
             return claims;
         }
 
+        /// <summary>
+        /// GetOrCreateUserLoginControlAsync
+        /// </summary>
+        /// <param name="lastUser"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         private async Task<UserLoginControl> GetOrCreateUserLoginControlAsync(string lastUser, long userId)
         {
             UserLoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);

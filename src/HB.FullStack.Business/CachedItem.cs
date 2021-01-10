@@ -34,7 +34,7 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new FrameworkException(nameof(CacheKey));
+                throw new ArgumentNullException(nameof(CacheKey));
             }
 
             return cache.GetAsync<TResult>(CacheKey, cancellationToken);
@@ -44,12 +44,12 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new FrameworkException(nameof(CacheKey));
+                throw new ArgumentNullException(nameof(CacheKey));
             }
 
             if (CacheValue == null)
             {
-                throw new FrameworkException(nameof(CacheKey));
+                throw new ArgumentNullException(nameof(CacheValue));
             }
 
             if (UtcTikcs.IsEmpty())
@@ -69,11 +69,17 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
+        /// <summary>
+        /// RemoveFromAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<bool> RemoveFromAsync(ICache cache)
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new FrameworkException(nameof(CacheKey));
+                throw new ArgumentNullException(nameof(CacheKey));
             }
 
             if (UtcTikcs.IsEmpty())

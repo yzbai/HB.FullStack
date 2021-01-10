@@ -1,6 +1,5 @@
 ﻿
 using HB.FullStack.KVStore.Engine;
-using HB.FullStack.KVStore.Properties;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -81,11 +80,22 @@ namespace HB.FullStack.KVStore.Entities
             return resultDict;
         }
 
+        /// <summary>
+        /// GetDef
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         public static KVStoreEntityDef GetDef<T>()
         {
             return GetDef(typeof(T));
         }
 
+        /// <summary>
+        /// GetDef
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         public static KVStoreEntityDef GetDef(Type type)
         {
             if (!_defDict.ContainsKey(type))
@@ -102,11 +112,17 @@ namespace HB.FullStack.KVStore.Entities
             return _defDict[type];
         }
 
+        /// <summary>
+        /// CreateEntityDef
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="HB.FullStack.KVStore.KVStoreException"></exception>
         private static KVStoreEntityDef CreateEntityDef(Type type)
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreEntitySchema? storeEntitySchema))
             {
-                throw new KVStoreException(ErrorCode.KVStoreNoEntitySchemaFound, type.FullName!);
+                throw new KVStoreException(KVStoreErrorCode.KVStoreNoEntitySchemaFound, $"Type:{type.FullName}");
             }
 
             KVStoreEntityDef entityDef = new KVStoreEntityDef(storeEntitySchema.InstanceName, type);
@@ -137,7 +153,7 @@ namespace HB.FullStack.KVStore.Entities
             {
                 if (backupKeyPropertyInfo == null)
                 {
-                    throw new KVStoreException(Resources.LackKVStoreKeyAttributeErrorMessage);
+                    throw new KVStoreException(KVStoreErrorCode.LackKVStoreKeyAttributeErrorMessage);
                 }
 
                 entityDef.KeyPropertyInfos.Add(0, backupKeyPropertyInfo);

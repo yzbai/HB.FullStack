@@ -34,12 +34,16 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.AddIdentity(o => { });
         }
 
+        /// <summary>
+        /// AddAuthorizationServer
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        /// <exception cref="IdentityException"></exception>
         public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, Action<AuthorizationServiceOptions> action)
         {
-            if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
-            {
-                throw new FrameworkException("AuthroizationService需要IdentityService");
-            }
+            ThrowIfNoIdentityService(services);
 
             services.AddOptions();
 
@@ -50,12 +54,18 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        
+
+        /// <summary>
+        /// AddAuthorizationServer
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        /// <exception cref="IdentityException"></exception>
         public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, IConfiguration configuration)
         {
-            if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
-            {
-                throw new FrameworkException("AuthroizationService需要IdentityService");
-            }
+            ThrowIfNoIdentityService(services);
 
             services.AddOptions();
 
@@ -64,6 +74,19 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
             return services;
+        }
+
+        /// <summary>
+        /// ThrowIfNoIdentityService
+        /// </summary>
+        /// <param name="services"></param>
+        /// <exception cref="IdentityException"></exception>
+        private static void ThrowIfNoIdentityService(IServiceCollection services)
+        {
+            if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
+            {
+                throw new IdentityException(IdentityErrorCode.ServiceRegisterError, "AuthroizationService需要IdentityService");
+            }
         }
     }
 

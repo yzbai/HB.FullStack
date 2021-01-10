@@ -5,7 +5,7 @@ namespace System
 {
     public enum CommonErrorCode
     {
-         
+        
     }
 }
 

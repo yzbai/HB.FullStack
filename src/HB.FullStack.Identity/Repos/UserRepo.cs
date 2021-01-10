@@ -94,6 +94,15 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// CountUserAsync
+        /// </summary>
+        /// <param name="loginName"></param>
+        /// <param name="mobile"></param>
+        /// <param name="email"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
             WhereExpression<User> where = _databaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);

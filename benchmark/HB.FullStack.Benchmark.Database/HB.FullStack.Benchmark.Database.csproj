@@ -14,7 +14,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis\HB.Infrastructure.Redis.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
     <ProjectReference Include="..\OrmBenchmark.Core\OrmBenchmark.Core.csproj" />
   </ItemGroup>

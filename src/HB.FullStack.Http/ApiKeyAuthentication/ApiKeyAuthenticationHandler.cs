@@ -60,7 +60,7 @@ namespace HB.FullStack.Server.ApiKeyAuthentication
             Response.StatusCode = 401;
             Response.ContentType = "application/problem+json";
 
-            ApiError errorResponse = new ApiError(ErrorCode.ApiKeyUnAuthenticated);
+            ApiError errorResponse = new ApiError(ApiErrorCode.NoAuthority);
 
             return Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
         }
@@ -70,7 +70,7 @@ namespace HB.FullStack.Server.ApiKeyAuthentication
             Response.StatusCode = 403;
             Response.ContentType = "application/problem+json";
 
-            ApiError errorResponse = new ApiError(ErrorCode.ApiKeyUnAuthenticated);
+            ApiError errorResponse = new ApiError(ApiErrorCode.NoAuthority);
 
             return Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
         }

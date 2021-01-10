@@ -43,18 +43,26 @@ namespace HB.FullStack.Server.Security
             //return Task.FromResult(random.Next(0, 10) % 2 == 0);
         }
 
+        /// <summary>
+        /// ProcessFormFileAsync
+        /// </summary>
+        /// <param name="formFile"></param>
+        /// <param name="permittedFileSuffixes"></param>
+        /// <param name="sizeLimit"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
         public async Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedFileSuffixes, long sizeLimit)
         {
             // Check the file length. This check doesn't catch files that only have 
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedFileSuffixes.IsNullOrEmpty())
             {
-                throw new ApiException(ErrorCode.ApiUploadEmptyFile, System.Net.HttpStatusCode.BadRequest);
+                throw new ApiException(ApiErrorCode.ApiUploadEmptyFile);
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw new ApiException(ErrorCode.ApiUploadOverSize, System.Net.HttpStatusCode.BadRequest);
+                throw new ApiException(ApiErrorCode.ApiUploadOverSize);
             }
 
             try
@@ -68,13 +76,13 @@ namespace HB.FullStack.Server.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw new ApiException(ErrorCode.ApiUploadEmptyFile, System.Net.HttpStatusCode.BadRequest);
+                    throw new ApiException(ApiErrorCode.ApiUploadEmptyFile);
                 }
 
                 if (!IsValidFileExtensionAndSignature(
                     formFile.FileName, memoryStream, permittedFileSuffixes))
                 {
-                    throw new ApiException(ErrorCode.ApiUploadWrongType, System.Net.HttpStatusCode.BadRequest);
+                    throw new ApiException(ApiErrorCode.ApiUploadWrongType);
                 }
                 else
                 {
@@ -83,7 +91,7 @@ namespace HB.FullStack.Server.Security
             }
             catch (Exception ex)
             {
-                throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadRequest, $"文件名称{formFile.FileName}", ex);
+                throw new ApiException(ApiErrorCode.ApiUnkown, $"文件名称{formFile.FileName}", ex);
             }
         }
 

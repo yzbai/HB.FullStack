@@ -22,11 +22,25 @@ namespace HB.FullStack.Repository
             return KVStore.GetAsync<TEntity>(key.ToString()!);
         }
 
+        /// <summary>
+        /// AddAsync
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="KVStoreException"></exception>
         public Task AddAsync(TEntity entity, string lastUser)
         {
             return KVStore.AddAsync(entity, lastUser);
         }
 
+        /// <summary>
+        /// UpdateAsync
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="KVStoreException"></exception>
         public Task UpdateAsync(TEntity entity, string lastUser)
         {
             return KVStore.UpdateAsync(entity, lastUser);

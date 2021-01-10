@@ -6,25 +6,25 @@ using System.Text;
 
 namespace HB.FullStack.KVStore
 {
-    public class KVStoreException : CommonException
+    public class KVStoreException : Exception
     {
-        public KVStoreException(ErrorCode errorCode, string entityName, string? message = null, Exception? innerException = null)
-            : base(errorCode, $"EntityName:{entityName}, Message:{message}", innerException)
+        public KVStoreErrorCode ErrorCode { get; set; }
+        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
+
+
+        public KVStoreException(KVStoreErrorCode errorCode) : base()
         {
-
-
+            ErrorCode = errorCode;
         }
 
-        public KVStoreException()
+        public KVStoreException(KVStoreErrorCode errorCode, string message) : base(message)
         {
+            ErrorCode = errorCode;
         }
 
-        public KVStoreException(string? message) : base(message)
+        public KVStoreException(KVStoreErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
         {
-        }
-
-        public KVStoreException(string? message, Exception? innerException) : base(message, innerException)
-        {
+            ErrorCode = errorCode;
         }
     }
 }

@@ -25,5 +25,6 @@
         DatabaseNotFound,
         DatabaseTransactionError,
         DatabaseTransactionAlreadyFinishedMessage,
+        DatabaseInitLockError,
     }
 }

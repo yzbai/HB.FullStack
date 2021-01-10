@@ -157,6 +157,14 @@ namespace HB.FullStack.Repository
 
         #region Database Write Wrapper
 
+        /// <summary>
+        /// UpdateAsync
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityUpdatingAsync(entity).ConfigureAwait(false);
@@ -177,6 +185,14 @@ namespace HB.FullStack.Repository
             await OnEntityUpdatedAsync(entity).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// AddAsync
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task AddAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityAddingAsync(entity).ConfigureAwait(false);
@@ -194,6 +210,14 @@ namespace HB.FullStack.Repository
             await OnEntityAddedAsync(entity).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// DeleteAsync
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task DeleteAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityDeletingAsync(entity).ConfigureAwait(false);
@@ -214,6 +238,14 @@ namespace HB.FullStack.Repository
             await OnEntityDeletedAsync(entity).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// AddAsync
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task<IEnumerable<object>> AddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
@@ -245,6 +277,14 @@ namespace HB.FullStack.Repository
             return results;
         }
 
+        /// <summary>
+        /// UpdateAsync
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task UpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
@@ -275,6 +315,14 @@ namespace HB.FullStack.Repository
             }
         }
 
+        /// <summary>
+        /// DeleteAsync
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public async Task DeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
         {
             foreach (TEntity entity in entities)
