@@ -11,7 +11,6 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
 
-using Sigil;
 
 namespace HB.FullStack.Database.Mapper
 {
@@ -20,6 +19,7 @@ namespace HB.FullStack.Database.Mapper
         /// <summary>
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
+        /// <exception cref="DatabaseException"></exception>
         public static Func<IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader) }, true);
@@ -31,6 +31,17 @@ namespace HB.FullStack.Database.Mapper
             return (Func<IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
+        /// <summary>
+        /// EmitEntityMapper
+        /// </summary>
+        /// <param name="def"></param>
+        /// <param name="reader"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="length"></param>
+        /// <param name="returnNullIfFirstNull"></param>
+        /// <param name="engineType"></param>
+        /// <param name="il"></param>
+        /// <exception cref="DatabaseException"></exception>
         private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
         {
             try
@@ -39,7 +50,7 @@ namespace HB.FullStack.Database.Mapper
 
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
-                    propertyDefs.Add(def.GetPropertyDef(reader.GetName(i)) ?? throw new DatabaseException($"Lack DatabaseEntityPropertyDef of {reader.GetName(i)}."));
+                    propertyDefs.Add(def.GetPropertyDef(reader.GetName(i)) ?? throw new DatabaseException(DatabaseErrorCode.LackPropertyDef, $"EntityPropertyDef : {reader.GetName(i)}."));
                 }
 
                 LocalBuilder returnValueLocal = il.DeclareLocal(def.EntityType);
@@ -49,7 +60,7 @@ namespace HB.FullStack.Database.Mapper
 
                 System.Reflection.Emit.Label allFinished = il.DefineLabel();
 
-                ConstructorInfo ctor = def.EntityType.GetDefaultConstructor();
+                ConstructorInfo ctor = def.EntityType.GetDefaultConstructor() ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体没有默认构造函数。Entity:{def.EntityFullName}");
 
                 il.Emit(OpCodes.Ldtoken, def.EntityType);
                 il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
@@ -235,7 +246,7 @@ namespace HB.FullStack.Database.Mapper
 
                         if (propertyDef.NullableUnderlyingType != null)
                         {
-                            il.Emit(OpCodes.Newobj, propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
+                            il.Emit(OpCodes.Newobj, propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType })!);
                             //emitter.NewObject(propertyDef.Type.GetConstructor(new Type[] { propertyDef.NullableUnderlyingType }));
                         }
                     }
@@ -293,198 +304,198 @@ namespace HB.FullStack.Database.Mapper
                 il.Emit(OpCodes.Ret);
                 //emitter.Return();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //string info = ex.GetDebugInfo();
-                throw;
+                throw new DatabaseException(DatabaseErrorCode.EmitEntityMapperError, "", ex);
             }
         }
 
-        public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegateWithSigil(EntityDef entityDef, EngineType engineType)
-        {
-            var emiter = Emit<Func<object, int, KeyValuePair<string, object>[]>>.NewDynamicMethod($"{entityDef.DatabaseName}_{entityDef.TableName}_{engineType}_ToParameters");
+        //public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegateWithSigil(EntityDef entityDef, EngineType engineType)
+        //{
+        //    var emiter = Emit<Func<object, int, KeyValuePair<string, object>[]>>.NewDynamicMethod($"{entityDef.DatabaseName}_{entityDef.TableName}_{engineType}_ToParameters");
 
-            Local array = emiter.DeclareLocal<KeyValuePair<string, object>[]>();
-            Local tmpObj = emiter.DeclareLocal<object>();
-            Local entityTypeLocal = emiter.DeclareLocal(typeof(Type));
-            Local tmpTrueTypeLocal = emiter.DeclareLocal(typeof(Type));
-            Local entityLocal = emiter.DeclareLocal(entityDef.EntityType);
+        //    Local array = emiter.DeclareLocal<KeyValuePair<string, object>[]>();
+        //    Local tmpObj = emiter.DeclareLocal<object>();
+        //    Local entityTypeLocal = emiter.DeclareLocal(typeof(Type));
+        //    Local tmpTrueTypeLocal = emiter.DeclareLocal(typeof(Type));
+        //    Local entityLocal = emiter.DeclareLocal(entityDef.EntityType);
 
-            emiter.LoadArgument(0);
-            emiter.UnboxAny(entityDef.EntityType);
-            emiter.StoreLocal(entityLocal);
+        //    emiter.LoadArgument(0);
+        //    emiter.UnboxAny(entityDef.EntityType);
+        //    emiter.StoreLocal(entityLocal);
 
-            emiter.LoadConstant(entityDef.EntityType);
-            emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
-            emiter.StoreLocal(entityTypeLocal);
-
-
-            emiter.LoadConstant(entityDef.FieldCount);
-            emiter.NewArray<KeyValuePair<string, object>>();
-
-            emiter.StoreLocal(array);
-
-            int index = 0;
-            foreach (var propertyDef in entityDef.PropertyDefs)
-            {
-                Sigil.Label nullLabel = emiter.DefineLabel();
-                Sigil.Label finishLabel = emiter.DefineLabel();
-
-                emiter.LoadLocal(array);
-                //[array]
-
-                emiter.LoadConstant($"{propertyDef.DbParameterizedName!}_");
-                emiter.LoadArgument(1);
-                emiter.Box<int>();
-                //emiter.CastClass<string>();
-                emiter.Call(typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) }));
-                //[array][key]
+        //    emiter.LoadConstant(entityDef.EntityType);
+        //    emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
+        //    emiter.StoreLocal(entityTypeLocal);
 
 
-                //emiter.LoadArgument(0);
-                ////[array][key][entity_obj]
-                //emiter.UnboxAny(entityDef.EntityType);
-                emiter.LoadLocal(entityLocal);
-                //[array][key][entity]
+        //    emiter.LoadConstant(entityDef.FieldCount);
+        //    emiter.NewArray<KeyValuePair<string, object>>();
 
-                if (propertyDef.Type.IsValueType)
-                {
-                    emiter.Call(propertyDef.GetMethod);
-                    emiter.Box(propertyDef.Type);
-                }
-                else
-                {
-                    emiter.CallVirtual(propertyDef.GetMethod);
-                }
+        //    emiter.StoreLocal(array);
 
+        //    int index = 0;
+        //    foreach (var propertyDef in entityDef.PropertyDefs)
+        //    {
+        //        Sigil.Label nullLabel = emiter.DefineLabel();
+        //        Sigil.Label finishLabel = emiter.DefineLabel();
 
-                #region TypeValue To DbValue
+        //        emiter.LoadLocal(array);
+        //        //[array]
 
-                //[array][key][property_value_obj]
-                //判断是否是null
-                emiter.Duplicate();
-                //[array][key[property_value_obj][property_value_obj]
-                emiter.BranchIfFalse(nullLabel);
-                //[array][key][property_value_obj]
+        //        emiter.LoadConstant($"{propertyDef.DbParameterizedName!}_");
+        //        emiter.LoadArgument(1);
+        //        emiter.Box<int>();
+        //        //emiter.CastClass<string>();
+        //        emiter.Call(typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) }));
+        //        //[array][key]
 
 
-                if (propertyDef.TypeConverter != null)
-                {
-                    emiter.StoreLocal(tmpObj);
-                    //[array][key]
+        //        //emiter.LoadArgument(0);
+        //        ////[array][key][entity_obj]
+        //        //emiter.UnboxAny(entityDef.EntityType);
+        //        emiter.LoadLocal(entityLocal);
+        //        //[array][key][entity]
+
+        //        if (propertyDef.Type.IsValueType)
+        //        {
+        //            emiter.Call(propertyDef.GetMethod);
+        //            emiter.Box(propertyDef.Type);
+        //        }
+        //        else
+        //        {
+        //            emiter.CallVirtual(propertyDef.GetMethod);
+        //        }
 
 
-                    emiter.LoadLocal(entityTypeLocal);
+        //        #region TypeValue To DbValue
 
-                    emiter.LoadConstant(propertyDef.Name);
-                    emiter.Call(EntityMapperDelegateCreator._getPropertyTypeConverterMethod);
-                    //[array][key][typeconverter]
-
-                    emiter.LoadLocal(tmpObj);
-                    //[array][key][typeconveter][property_value_obj]
-                    emiter.LoadConstant(propertyDef.Type);
-                    emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
-                    //[array][key][typeconveter][property_value_obj][property_type]
-                    emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
-                    //[array][key][db_value]
-                }
-                else
-                {
-                    Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
-
-                    //查看全局TypeConvert
-
-                    ITypeConverter? globalConverter = TypeConvert.GetGlobalTypeConverter(trueType, engineType);
-
-                    if (globalConverter != null)
-                    {
-                        emiter.StoreLocal(tmpObj);
-                        //[array][key]
-
-                        emiter.LoadConstant(trueType);
-                        emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
-                        emiter.StoreLocal(tmpTrueTypeLocal);
-                        emiter.LoadLocal(tmpTrueTypeLocal);
-
-                        emiter.LoadConstant((int)engineType);
-                        emiter.Call(EntityMapperDelegateCreator._getGlobalTypeConverterMethod);
-                        //[array][key][typeconverter]
-
-                        emiter.LoadLocal(tmpObj);
-                        //[array][key][typeconverter][property_value_obj]
-                        emiter.LoadLocal(tmpTrueTypeLocal);
-                        //[array][key][typeconverter][property_value_obj][true_type]
-                        emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
-                        //[array][key][db_value]
-                    }
-                    else
-                    {
-                        //默认
-                        if (trueType.IsEnum)
-                        {
-                            emiter.CallVirtual(typeof(object).GetMethod(nameof(object.ToString)));
-                        }
-                    }
-                }
+        //        //[array][key][property_value_obj]
+        //        //判断是否是null
+        //        emiter.Duplicate();
+        //        //[array][key[property_value_obj][property_value_obj]
+        //        emiter.BranchIfFalse(nullLabel);
+        //        //[array][key][property_value_obj]
 
 
-                emiter.Branch(finishLabel);
+        //        if (propertyDef.TypeConverter != null)
+        //        {
+        //            emiter.StoreLocal(tmpObj);
+        //            //[array][key]
 
-                #endregion
+
+        //            emiter.LoadLocal(entityTypeLocal);
+
+        //            emiter.LoadConstant(propertyDef.Name);
+        //            emiter.Call(EntityMapperDelegateCreator._getPropertyTypeConverterMethod);
+        //            //[array][key][typeconverter]
+
+        //            emiter.LoadLocal(tmpObj);
+        //            //[array][key][typeconveter][property_value_obj]
+        //            emiter.LoadConstant(propertyDef.Type);
+        //            emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
+        //            //[array][key][typeconveter][property_value_obj][property_type]
+        //            emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
+        //            //[array][key][db_value]
+        //        }
+        //        else
+        //        {
+        //            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+
+        //            //查看全局TypeConvert
+
+        //            ITypeConverter? globalConverter = TypeConvert.GetGlobalTypeConverter(trueType, engineType);
+
+        //            if (globalConverter != null)
+        //            {
+        //                emiter.StoreLocal(tmpObj);
+        //                //[array][key]
+
+        //                emiter.LoadConstant(trueType);
+        //                emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
+        //                emiter.StoreLocal(tmpTrueTypeLocal);
+        //                emiter.LoadLocal(tmpTrueTypeLocal);
+
+        //                emiter.LoadConstant((int)engineType);
+        //                emiter.Call(EntityMapperDelegateCreator._getGlobalTypeConverterMethod);
+        //                //[array][key][typeconverter]
+
+        //                emiter.LoadLocal(tmpObj);
+        //                //[array][key][typeconverter][property_value_obj]
+        //                emiter.LoadLocal(tmpTrueTypeLocal);
+        //                //[array][key][typeconverter][property_value_obj][true_type]
+        //                emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
+        //                //[array][key][db_value]
+        //            }
+        //            else
+        //            {
+        //                //默认
+        //                if (trueType.IsEnum)
+        //                {
+        //                    emiter.CallVirtual(typeof(object).GetMethod(nameof(object.ToString)));
+        //                }
+        //            }
+        //        }
 
 
+        //        emiter.Branch(finishLabel);
 
-                #region If Null 
-                emiter.MarkLabel(nullLabel);
-                //[array][key][property_value_obj]
-                emiter.Pop();
-                //[array][key]
-                emiter.LoadField(typeof(DBNull).GetField("Value"));
-                //[array][key][DBNull]
-
-                emiter.Branch(finishLabel);
-                #endregion
+        //        #endregion
 
 
 
-                emiter.MarkLabel(finishLabel);
+        //        #region If Null 
+        //        emiter.MarkLabel(nullLabel);
+        //        //[array][key][property_value_obj]
+        //        emiter.Pop();
+        //        //[array][key]
+        //        emiter.LoadField(typeof(DBNull).GetField("Value"));
+        //        //[array][key][DBNull]
+
+        //        emiter.Branch(finishLabel);
+        //        #endregion
 
 
 
-                var kvCtor = typeof(KeyValuePair<string, object>).GetConstructor(new Type[] { typeof(string), typeof(object) });
-
-
-                emiter.NewObject(kvCtor);
-                //[array][kv]
+        //        emiter.MarkLabel(finishLabel);
 
 
 
+        //        var kvCtor = typeof(KeyValuePair<string, object>).GetConstructor(new Type[] { typeof(string), typeof(object) });
 
-                emiter.Box<KeyValuePair<string, object>>();
-                //[array][kv_obj]
 
-                emiter.LoadConstant(index);
-                //[array][kv_obj][index]
-
-                emiter.Call(typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) }));
+        //        emiter.NewObject(kvCtor);
+        //        //[array][kv]
 
 
 
 
+        //        emiter.Box<KeyValuePair<string, object>>();
+        //        //[array][kv_obj]
 
-                index++;
-            }
+        //        emiter.LoadConstant(index);
+        //        //[array][kv_obj][index]
+
+        //        emiter.Call(typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) }));
 
 
 
 
 
-            emiter.LoadLocal(array);
+        //        index++;
+        //    }
 
-            emiter.Return();
 
-            return emiter.CreateDelegate();
-        }
+
+
+
+        //    emiter.LoadLocal(array);
+
+        //    emiter.Return();
+
+        //    return emiter.CreateDelegate();
+        //}
 
         public static Func<object, int, KeyValuePair<string, object>[]> CreateToParametersDelegate(EntityDef entityDef, EngineType engineType)
         {
@@ -681,7 +692,7 @@ namespace HB.FullStack.Database.Mapper
 
 
 
-                var kvCtor = typeof(KeyValuePair<string, object>).GetConstructor(new Type[] { typeof(string), typeof(object) });
+                var kvCtor = typeof(KeyValuePair<string, object>).GetConstructor(new Type[] { typeof(string), typeof(object) })!;
 
                 il.Emit(OpCodes.Newobj, kvCtor);
                 //emiter.NewObject(kvCtor);
@@ -814,9 +825,9 @@ namespace HB.FullStack.Database.Mapper
                 else
                 {
                     il.Emit(OpCodes.Ldtoken, to); // stack is now [target][target][value][member-type-token]
-                    il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)), null); // stack is now [target][target][value][member-type]
+                    il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!, null); // stack is now [target][target][value][member-type]
                     il.EmitCall(OpCodes.Call, _invariantCultureMethod, null); // stack is now [target][target][value][member-type][culture]
-                    il.EmitCall(OpCodes.Call, typeof(Convert).GetMethod(nameof(Convert.ChangeType), new Type[] { typeof(object), typeof(Type), typeof(IFormatProvider) }), null); // stack is now [target][target][boxed-member-type-value]
+                    il.EmitCall(OpCodes.Call, typeof(Convert).GetMethod(nameof(Convert.ChangeType), new Type[] { typeof(object), typeof(Type), typeof(IFormatProvider) })!, null); // stack is now [target][target][boxed-member-type-value]
                     il.Emit(OpCodes.Unbox_Any, to); // stack is now [target][target][typed-value]
                 }
             }
@@ -849,43 +860,30 @@ namespace HB.FullStack.Database.Mapper
             }
         }
 
-        private static MethodInfo GetPropertySetterMethod(PropertyInfo propertyInfo, Type type)
-        {
-            if (propertyInfo.DeclaringType == type) return propertyInfo.GetSetMethod(true);
+        private static readonly MethodInfo _dataReaderGetItemMethod = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)!
+            .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))!
+            .Select(p => p.GetGetMethod()).First()!;
 
-            return propertyInfo.DeclaringType.GetProperty(
-                   propertyInfo.Name,
-                   BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                   Type.DefaultBinder,
-                   propertyInfo.PropertyType,
-                   propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray(),
-                   null).GetSetMethod(true);
-        }
+        private static readonly MethodInfo _enumParseMethod = typeof(Enum).GetMethod(nameof(Enum.Parse), new Type[] { typeof(Type), typeof(string), typeof(bool) })!;
 
-        private static readonly MethodInfo _dataReaderGetItemMethod = typeof(IDataRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .Where(p => p.GetIndexParameters().Length > 0 && p.GetIndexParameters()[0].ParameterType == typeof(int))
-            .Select(p => p.GetGetMethod()).First();
+        private static readonly MethodInfo _invariantCultureMethod = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static)!.GetGetMethod()!;
 
-        private static readonly MethodInfo _enumParseMethod = typeof(Enum).GetMethod(nameof(Enum.Parse), new Type[] { typeof(Type), typeof(string), typeof(bool) });
+        private static readonly MethodInfo _getPropertyTypeConverterMethod = typeof(EntityDefFactory).GetMethod(nameof(EntityDefFactory.GetPropertyTypeConverter))!;
 
-        private static readonly MethodInfo _invariantCultureMethod = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static).GetGetMethod();
+        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(TypeConvert).GetMethod(nameof(TypeConvert.GetGlobalTypeConverter), new Type[] { typeof(Type), typeof(int) })!;
 
-        private static readonly MethodInfo _getPropertyTypeConverterMethod = typeof(EntityDefFactory).GetMethod(nameof(EntityDefFactory.GetPropertyTypeConverter));
+        private static readonly MethodInfo _getTypeFromHandleMethod = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!;
 
-        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(TypeConvert).GetMethod(nameof(TypeConvert.GetGlobalTypeConverter), new Type[] { typeof(Type), typeof(int) });
+        private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.DbValueToTypeValue))!;
 
-        private static readonly MethodInfo _getTypeFromHandleMethod = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
+        private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue))!;
 
-        private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.DbValueToTypeValue));
+        private static readonly MethodInfo _getStringConcatMethod = typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) })!;
 
-        private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue));
+        private static readonly MethodInfo _getObjectToStringMethod = typeof(object).GetMethod(nameof(object.ToString))!;
 
-        private static readonly MethodInfo _getStringConcatMethod = typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) });
+        private static readonly FieldInfo _dbNullValueFiled = typeof(DBNull).GetField("Value")!;
 
-        private static readonly MethodInfo _getObjectToStringMethod = typeof(object).GetMethod(nameof(object.ToString));
-
-        private static readonly FieldInfo _dbNullValueFiled = typeof(DBNull).GetField("Value");
-
-        private static readonly MethodInfo _getArraySetValueMethod = typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) });
+        private static readonly MethodInfo _getArraySetValueMethod = typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) })!;
     }
 }

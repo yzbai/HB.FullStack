@@ -27,89 +27,21 @@ namespace System
         //    }
         //}
 
-        public static void Add<T>(this IList<T> original, IEnumerable<T> items)
+        public static void AddRange<T>(this IList<T> ts, IEnumerable<T> items)
         {
-            foreach (T t in items)
+            if (ts == null) throw new ArgumentNullException(nameof(ts));
+
+            if (ts is List<T> lst)
             {
-                original.Add(t);
-            }
-        }
-
-        /// <summary>
-        /// CloningWithValues
-        /// </summary>
-        /// <param name="original"></param>
-        /// <returns></returns>
-
-
-        public static IDictionary<TKey, TValue> CloningWithValues<TKey, TValue>(this IDictionary<TKey, TValue> original) where TValue : ICloneable
-        {
-            IDictionary<TKey, TValue> ret = new Dictionary<TKey, TValue>();
-
-            foreach (KeyValuePair<TKey, TValue> entry in original)
-            {
-                ICloneable cloneable = entry.Value;
-                ret.Add(entry.Key!, (TValue)cloneable.Clone());
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// CloningWithValues
-        /// </summary>
-        /// <param name="original"></param>
-        /// <returns></returns>
-
-
-        public static IDictionary<TKey, int> CloningWithValues<TKey>(this IDictionary<TKey, int> original)
-        {
-            IDictionary<TKey, int> ret = new Dictionary<TKey, int>();
-
-            foreach (KeyValuePair<TKey, int> entry in original)
-            {
-                ret.Add(entry.Key!, entry.Value);
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// ConvertValue
-        /// </summary>
-        /// <param name="original"></param>
-        /// <param name="converter"></param>
-        /// <returns></returns>
-
-
-        public static IDictionary<TKey, TNewValue> ConvertValue<TKey, TValue, TNewValue>(this IDictionary<TKey, TValue> original, Func<TValue, TNewValue> converter)
-        {
-            IDictionary<TKey, TNewValue> ret = new Dictionary<TKey, TNewValue>();
-
-            foreach (KeyValuePair<TKey, TValue> pair in original)
-            {
-                ret.Add(pair.Key, converter(pair.Value));
+                lst.AddRange(items);
+                return;
             }
 
-            return ret;
-        }
-
-        public static IList<T> CloneWithValues<T>(this IList<T> lst) where T : ICloneable
-        {
-            List<T> retList = new List<T>();
-
-            foreach (T item in lst)
+            foreach (var t in items)
             {
-                retList.Add((T)item.Clone());
+                ts.Add(t);
             }
-
-            return retList;
         }
-
-        /// <summary>
-        /// IsNullOrEmpty
-        /// </summary>
-        /// <param name="ts"></param>
-        /// <returns></returns>
-
 
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T>? ts)
         {

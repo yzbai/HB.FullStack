@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Entities
+namespace System
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class CacheDimensionKeyAttribute : Attribute

@@ -20,6 +20,11 @@ namespace HB.FullStack.Benchmark.Database
 
         public string Name => "HB.FullStack.Database";
 
+        /// <summary>
+        /// Init
+        /// </summary>
+        /// <param name="connectionStrong"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
         public void Init(string connectionStrong)
         {
             ServiceFixture serviceFixture = new ServiceFixture();

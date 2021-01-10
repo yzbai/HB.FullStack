@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class SelectableImage : Image
     {
@@ -37,7 +37,7 @@ namespace HB.FullStack.Client.Controls
             GestureRecognizers.Add(tapGestureRecognizer);
         }
 
-        private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
+        private void OnTapGestureRecognizerTapped(object? sender, EventArgs e)
         {
             IsSelected = !IsSelected;
         }

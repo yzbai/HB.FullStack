@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Client.Api;
+﻿using HB.FullStack.Mobile.Api;
 using Microsoft.Extensions.Configuration;
 using Polly;
 using System;
@@ -53,13 +53,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 //TODO: 调查这个
                 //.AddTransientHttpErrorPolicy(p =>
                 //{
-                //    if (Connectivity.NetworkAccess != NetworkAccess.Internet)
-                //    {
-                //        throw new ApiException(ErrorCode.ApiNoInternet, System.Net.HttpStatusCode.BadGateway);
-                //    }
-
                 //    //TODO: Move this to options
-                //    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(600));
+                //    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000));
                 //})
 #if DEBUG
                 .ConfigurePrimaryHttpMessageHandler(() =>
@@ -68,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     {
                         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                         {
-                            if (cert.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
                                 return true;
                             return errors == System.Net.Security.SslPolicyErrors.None;
                         }

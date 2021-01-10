@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Builder
              {
                  if (!context.Request.IsHttps)
                  {
-                     ApiError errorResponse = new ApiError(ErrorCode.ApiHttpsRequired);
+                     ApiError errorResponse = new ApiError(ApiErrorCode.ApiHttpsRequired);
 
                      context.Response.StatusCode = 400;
                      context.Response.ContentType = "application/json";

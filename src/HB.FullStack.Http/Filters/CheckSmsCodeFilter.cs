@@ -27,6 +27,12 @@ namespace HB.FullStack.Server.Filters
             _authorizationService = authorizationService;
         }
 
+        /// <summary>
+        /// OnActionExecutionAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             try
@@ -73,7 +79,7 @@ namespace HB.FullStack.Server.Filters
         {
             if (context != null)
             {
-                context.Result = new BadRequestObjectResult(new ApiError(ErrorCode.ApiSmsCodeInvalid));
+                context.Result = new BadRequestObjectResult(new ApiError(ApiErrorCode.ApiSmsCodeInvalid));
             }
         }
     }

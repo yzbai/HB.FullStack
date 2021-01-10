@@ -87,10 +87,6 @@
       <Project>{7dfdb4b1-81b1-4519-b923-fe5d1f3f7c7a}</Project>
       <Name>HB.FullStack.Database</Name>
     </ProjectReference>
-    <ProjectReference Include="..\HB.FullStack.Mobile\HB.FullStack.Client.csproj">
-      <Project>{831376f6-196a-423c-a172-801593f2379c}</Project>
-      <Name>HB.FullStack.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj">
       <Project>{061d01d3-6117-4fd9-a57d-9c46cf79ace4}</Project>
       <Name>HB.Infrastructure.SQLite</Name>

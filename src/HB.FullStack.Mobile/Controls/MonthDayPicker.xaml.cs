@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using HB.FullStack.Client.Base;
+using System.Globalization;
+
+using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MonthDayPicker : BaseContentView
@@ -70,16 +72,16 @@ namespace HB.FullStack.Client.Controls
             Root.Children[SelectedDay - 1].BackgroundColor = SelectedColor;
         }
 
-        private void FrameTapGesture_Tapped(object sender, EventArgs e)
+        private void FrameTapGesture_Tapped(object? sender, EventArgs e)
         {
             Root.Children[SelectedDay - 1].BackgroundColor = Color.White;
 
-            Frame frame = (Frame)sender;
+            if (sender is Frame frame)
+            {
+                frame.BackgroundColor = SelectedColor;
 
-            frame.BackgroundColor = SelectedColor;
-
-            SelectedDay = ((Label)frame.Content).Text.ToInt32();
-
+                SelectedDay = Convert.ToInt32(((Label)frame.Content).Text, CultureInfo.InvariantCulture);
+            }
         }
 
         public override void OnAppearing()

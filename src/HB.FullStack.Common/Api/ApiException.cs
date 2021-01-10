@@ -1,40 +1,33 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 
+using HB.FullStack.Common.Api;
+
 namespace System
 {
-    [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]
-    public class ApiException : FrameworkException
+    public class ApiException : Exception
     {
-        public HttpStatusCode HttpCode { get; }
+        public HttpStatusCode HttpCode { get; set; }
 
-        //public ApiException(string? message) : base(message)
-        //{
-        //}
+        public ApiErrorCode ErrorCode { get; }
 
-        //public ApiException(string? message, Exception? innerException) : base(message, innerException)
-        //{
-        //}
-
-        //public ApiException()
-        //{
-        //}
-
-        public ApiException(ErrorCode errorCode, HttpStatusCode httpCode, string? message = null) : base(errorCode, message)
+        public ApiException(ApiErrorCode errorCode)
         {
-            HttpCode = httpCode;
+            ErrorCode = errorCode;
         }
 
-        public ApiException(ErrorCode errorCode, HttpStatusCode httpCode, string? message, Exception? innerException) : base(errorCode, message, innerException)
+        public ApiException(ApiErrorCode errorCode, string? message) : base(message)
         {
-            HttpCode = httpCode;
+            ErrorCode = errorCode;
         }
 
-        public ApiException(ErrorCode errorCode, HttpStatusCode httpCode, string? message, IDictionary<string, IEnumerable<string>>? modelStates = null) : this(errorCode, httpCode, message)
+        public ApiException(ApiErrorCode errorCode, string? message, Exception? innerException) : base(message, innerException)
         {
-            ModelStates = modelStates;
+            ErrorCode = errorCode;
         }
 
         public IDictionary<string, IEnumerable<string>>? ModelStates { get; set; }
+
+        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
     }
 }

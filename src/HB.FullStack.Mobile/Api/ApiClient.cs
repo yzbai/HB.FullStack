@@ -1,6 +1,5 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 using Microsoft.Extensions.Options;
 
 using System;
@@ -8,10 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     internal class ApiClient : IApiClient
     {
@@ -39,32 +37,44 @@ namespace HB.FullStack.Client.Api
             remove => _asyncEventManager.Remove(value);
         }
 
-        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? new List<T>();
 
-        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : ApiResource
             => SendAsync<T, T>(request, ApiRequestType.GetSingle);
 
-        public Task AddAsync<T>(AddRequest<T> addRequest) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource
             => SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
 
-        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
 
-        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
-        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
+        /// <summary>
+        /// SendAsync
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="requestType"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ApiResource where TResponse : class
         {
             if (!request.IsValid())
             {
-                throw new ApiException(ErrorCode.ApiModelValidationError, HttpStatusCode.BadRequest, request.GetValidateErrorMessage());
+                throw new ApiException(ApiErrorCode.ModelValidationError, request.GetValidateErrorMessage());
             }
 
             EndpointSettings endpoint = GetEndpoint(request);
 
             AddDeviceInfo(request);
-            await AddAuthInfoAsync(request).ConfigureAwait(false);
+            AddAuthInfo(request);
 
             try
             {
@@ -80,7 +90,7 @@ namespace HB.FullStack.Client.Api
             }
             catch (ApiException ex)
             {
-                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.HttpCode == HttpStatusCode.Unauthorized && ex.ErrorCode == ErrorCode.ApiTokenExpired)
+                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.HttpCode == HttpStatusCode.Unauthorized && ex.ErrorCode == ApiErrorCode.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint).ConfigureAwait(false);
 
@@ -94,7 +104,7 @@ namespace HB.FullStack.Client.Api
             }
             catch (Exception ex)
             {
-                throw new ApiException(ErrorCode.ApiUnkown, HttpStatusCode.BadRequest, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
+                throw new ApiException(ApiErrorCode.ClientError, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 
@@ -108,7 +118,7 @@ namespace HB.FullStack.Client.Api
             return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
         }
 
-        private EndpointSettings GetEndpoint<T>(ApiRequest<T> request) where T : Resource
+        private EndpointSettings GetEndpoint<T>(ApiRequest<T> request) where T : ApiResource
         {
             return _options.Endpoints.Single(e => e.Name == request.GetEndpointName() && e.Version == request.GetApiVersion());
         }
@@ -117,20 +127,25 @@ namespace HB.FullStack.Client.Api
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(endpoint.GetHttpClientName());
 
-            httpClient.Timeout = TimeSpan.FromSeconds(10); //TODO: move to 
+            httpClient.Timeout = _options.HttpClientTimeout;
 
             return httpClient;
         }
 
         private static void AddDeviceInfo(ApiRequest request)
         {
-            request.DeviceId = DevicePreferences.GetDeviceId();
+            request.DeviceId = DevicePreferences.DeviceId;
             request.DeviceInfos = DevicePreferences.DeviceInfos;
             request.DeviceVersion = DevicePreferences.DeviceVersion;
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        private async Task AddAuthInfoAsync<T>(ApiRequest<T> request) where T : Resource
+        /// <summary>
+        /// AddAuthInfo
+        /// </summary>
+        /// <param name="request"></param>
+        /// <exception cref="ApiException"></exception>
+        private void AddAuthInfo<T>(ApiRequest<T> request) where T : ApiResource
         {
             switch (request.GetApiAuthType())
             {
@@ -138,15 +153,15 @@ namespace HB.FullStack.Client.Api
                     break;
                 case ApiAuthType.Jwt:
 
-                    if (!await TrySetJwtAsync(request).ConfigureAwait(false))
+                    if (!TrySetJwt(request))
                     {
-                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                        throw new ApiException(ApiErrorCode.NoAuthority);
                     }
                     break;
                 case ApiAuthType.ApiKey:
                     if (!TrySetApiKey(request))
                     {
-                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                        throw new ApiException(ApiErrorCode.NoAuthority);
                     }
                     break;
                 default:
@@ -154,23 +169,21 @@ namespace HB.FullStack.Client.Api
             }
         }
 
-        private static async Task<bool> TrySetJwtAsync<T>(ApiRequest<T> request) where T : Resource
+        private static bool TrySetJwt<T>(ApiRequest<T> request) where T : ApiResource
         {
-            string? accessToken = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
-
-            if (accessToken.IsNullOrEmpty())
+            if (UserPreferences.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            request.SetJwt(accessToken!);
+            request.SetJwt(UserPreferences.AccessToken);
 
             return true;
         }
 
-        private bool TrySetApiKey<T>(ApiRequest<T> apiRequest) where T : Resource
+        private bool TrySetApiKey<T>(ApiRequest<T> apiRequest) where T : ApiResource
         {
-            if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string key))
+            if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string? key))
             {
                 apiRequest.SetApiKey(key);
                 return true;

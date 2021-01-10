@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
-using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest<T> where T : Resource
+    public class AddRequest<T> : ApiRequest<T> where T : ApiResource
     {
         [CollectionNotEmpty]
         [IdBarrier]
-        public List<T> Resources { get; set; } = new List<T>();
+        public IList<T> Resources { get; set; } = new List<T>();
 
         public AddRequest() : base(HttpMethod.Post, null) { }
 
@@ -18,6 +17,7 @@ namespace HB.FullStack.Common.Api
 
         public AddRequest(IEnumerable<T> ress) : this()
         {
+
             Resources.AddRange(ress);
         }
 

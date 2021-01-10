@@ -12,6 +12,17 @@ namespace HB.FullStack.Repository
 {
     public static class CachedItemCacheStrategy
     {
+        /// <summary>
+        /// CacheAsideAsync
+        /// </summary>
+        /// <param name="cacheItem"></param>
+        /// <param name="dbRetrieve"></param>
+        /// <param name="cache"></param>
+        /// <param name="memoryLockManager"></param>
+        /// <param name="database"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
@@ -63,11 +74,23 @@ namespace HB.FullStack.Repository
             }
         }
 
+        /// <summary>
+        /// InvalidateCache
+        /// </summary>
+        /// <param name="cacheItem"></param>
+        /// <param name="cache"></param>
+        /// <exception cref="CacheException">Ignore.</exception>
         public static void InvalidateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
         {
             cacheItem.RemoveFromAsync(cache).Fire();
         }
 
+        /// <summary>
+        /// UpdateCache
+        /// </summary>
+        /// <param name="cacheItem"></param>
+        /// <param name="cache"></param>
+        /// <exception cref="CacheException"></exception>
         private static void UpdateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
         {
             cacheItem.SetToAsync(cache).Fire();

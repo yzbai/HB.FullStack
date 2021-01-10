@@ -3,8 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-
-using HB.FullStack.Database.Properties;
+using System.Globalization;
 
 namespace HB.FullStack.Database
 {
@@ -15,17 +14,21 @@ namespace HB.FullStack.Database
     {
         private readonly IDictionary<string, string> _sysDict = new Dictionary<string, string>();
 
+        /// <summary>
+        /// DatabaseName
+        /// </summary>
+        /// <exception cref="DatabaseException">Get.</exception>
         [NotNull, DisallowNull]
         public string DatabaseName
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.DatabaseName, out string value))
+                if (_sysDict.TryGetValue(SystemInfoNames.DatabaseName, out string? value))
                 {
                     return value;
                 }
 
-                throw new KeyNotFoundException(Resources.DatabaseNameNotFoundInSystemInfoTable);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseNameNotFoundInSystemInfoTable);
             }
             private set
             {
@@ -33,16 +36,20 @@ namespace HB.FullStack.Database
             }
         }
 
+        /// <summary>
+        /// Version
+        /// </summary>
+        /// <exception cref="DatabaseException">Get.</exception>
         public int Version
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.Version, out string value))
+                if (_sysDict.TryGetValue(SystemInfoNames.Version, out string? value))
                 {
-                    return value.ToInt32();
+                    return Convert.ToInt32(value, CultureInfo.InvariantCulture);
                 }
 
-                throw new KeyNotFoundException(Resources.VersionNotFoundInSystemInfoTable);
+                throw new DatabaseException(DatabaseErrorCode.VersionNotFoundInSystemInfoTable);
             }
             set
             {

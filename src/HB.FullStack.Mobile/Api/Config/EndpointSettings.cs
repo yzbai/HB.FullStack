@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public class EndpointSettings : ValidatableObject
     {

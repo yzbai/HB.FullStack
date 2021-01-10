@@ -14,7 +14,7 @@ namespace System.ComponentModel.DataAnnotations
                 ErrorMessage = "Not a Valid Mobile";
         }
 
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value == null)
             {

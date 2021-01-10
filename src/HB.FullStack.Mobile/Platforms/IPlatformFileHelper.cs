@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Platforms
+namespace HB.FullStack.Mobile.Platforms
 {
     public interface IPlatformFileHelper
     {

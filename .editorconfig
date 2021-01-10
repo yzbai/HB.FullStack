@@ -1,11 +1,38 @@
 ﻿[*.cs]
 
-# CA1062: Validate arguments of public methods
-dotnet_diagnostic.CA1062.severity = none
-dotnet_diagnostic.CA1030.severity = none
+# 影响上锁的double check
+dotnet_diagnostic.CA1508.severity = none
+
+dotnet_diagnostic.CA1014.severity = none
+
+dotnet_diagnostic.CA1824.severity = none
+
+dotnet_diagnostic.CA1024.severity = none
+
+
+
+# Avoid uninstantiated internal classe
 dotnet_diagnostic.CA1812.severity = none
+
+#  Identifiers should not contain type names - Visual ...
 dotnet_diagnostic.CA1720.severity = none
 dotnet_diagnostic.CA1707.severity = none
-dotnet_diagnostic.CA1031.severity = none
+dotnet_diagnostic.CA1019.severity = none
+dotnet_diagnostic.CA1813.severity = none
+
+# 临时关闭 Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# Validate arguments of public methods 因为开启了Nullable，确保所有调用被调用项目全是NRT
+dotnet_diagnostic.CA1062.severity = none
+
+#在适用处使用事件
+dotnet_diagnostic.CA1030.severity = none
+
+
+# 这条规则目前有bug，只在IList上触发，而对于IEnumerable没反应，且应为BindableProperty的特殊写法，故此先禁用 2020.5.29
 dotnet_diagnostic.CA2227.severity = none
 
+
+#CA1031：不要捕捉一般异常类型
+dotnet_diagnostic.CA1031.severity = none

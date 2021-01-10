@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    public class CollectionNotEmptyAttribute : ValidationAttribute
+    public sealed class CollectionNotEmptyAttribute : ValidationAttribute
     {
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value == null)
             {

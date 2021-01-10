@@ -2,9 +2,10 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public class ApiClientOptions : IOptions<ApiClientOptions>
     {
@@ -12,9 +13,11 @@ namespace HB.FullStack.Client.Api
 
         public ApiClientOptions Value => this;
 
-        public IList<EndpointSettings> Endpoints { get; private set; } = new List<EndpointSettings>();
+        public IList<EndpointSettings> Endpoints { get; set; } = new List<EndpointSettings>();
 
-        public IList<ApiKey> ApiKeys { get; private set; } = new List<ApiKey>();
+        public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
+
+        public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(20);
 
         public void AddEndpoint(EndpointSettings endpointSettings)
         {
@@ -25,7 +28,7 @@ namespace HB.FullStack.Client.Api
             }
         }
 
-        public bool TryGetApiKey(string? name, out string key)
+        public bool TryGetApiKey(string? name, [NotNullWhen(true)] out string? key)
         {
             if (string.IsNullOrEmpty(name))
             {

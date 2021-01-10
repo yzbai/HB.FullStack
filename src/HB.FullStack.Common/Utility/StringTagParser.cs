@@ -66,7 +66,7 @@ namespace System
         /// </summary>
         /// <param name="stringWithTag"></param>
         /// <returns></returns>
-        
+
         public string Parse(string stringWithTag)
         {
             MatchEvaluator replaceCallback = new MatchEvaluator(ReplaceTagHandler);
@@ -75,7 +75,7 @@ namespace System
 
         private string ReplaceTagHandler(Match token)
         {
-            return _tagCache.Contains(token.Value) ? _tagCache[token.Value].ToString() : string.Empty;
+            return _tagCache.Contains(token.Value) ? _tagCache[token.Value]!.ToString()! : string.Empty;
         }
     }
 }

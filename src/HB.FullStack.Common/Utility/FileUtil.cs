@@ -135,10 +135,8 @@ namespace System
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-
-
-
-
+        /// <exception cref="FileLoadException"></exception>
+        /// <exception cref="IOException"></exception>
         public static byte[] ComputeFileHash(string filePath)
         {
             int runCount = 1;

@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database.Engine;
 
-[assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
+[assembly: InternalsVisibleTo("HB.FullStack.Tests")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
-
 namespace HB.FullStack.Database
 {
     public interface IDatabase : IDatabaseWriter, IDatabaseReader
@@ -16,6 +16,7 @@ namespace HB.FullStack.Database
         /// </summary>
         /// <param name="migrations"></param>
         /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         Task InitializeAsync(IEnumerable<Migration>? migrations = null);
 
         EngineType EngineType { get; }

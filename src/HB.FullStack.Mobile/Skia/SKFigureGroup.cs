@@ -4,13 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Client.Skia
+namespace HB.FullStack.Mobile.Skia
 {
     public class SKFigureGroup<T> : SKFigure where T : SKFigure
     {
         public bool AutoBringToFront { get; set; } = true;
 
-        protected List<T> Figures { get; } = new List<T>();
+        protected IList<T> Figures { get; } = new List<T>();
 
         private readonly Dictionary<long, T> _hittedFigures = new Dictionary<long, T>();
 
@@ -86,7 +86,7 @@ namespace HB.FullStack.Client.Skia
 
         #region 事件派发
 
-        private void SKFigureGroup_Pressed(object sender, SKTouchInfo info)
+        private void SKFigureGroup_Pressed(object? sender, SKTouchInfoEventArgs info)
         {
             //Bring to Front
 
@@ -95,7 +95,7 @@ namespace HB.FullStack.Client.Skia
                 return;
             }
 
-            if (_hittedFigures.TryGetValue(info.TouchEventId, out T figure))
+            if (_hittedFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
                 if (Figures.Remove(figure))
                 {
@@ -104,9 +104,9 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void SKFigureGroup_Dragged(object sender, SKTouchInfo info)
+        private void SKFigureGroup_Dragged(object? sender, SKTouchInfoEventArgs info)
         {
-            if (_hittedFigures.TryGetValue(info.TouchEventId, out T figure))
+            if (_hittedFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
                 figure.OnDragged(info);
 
@@ -117,9 +117,9 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void SKFigureGroup_LongTapped(object sender, SKTouchInfo info)
+        private void SKFigureGroup_LongTapped(object? sender, SKTouchInfoEventArgs info)
         {
-            if (_hittedFigures.TryGetValue(info.TouchEventId, out T figure))
+            if (_hittedFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
                 figure.OnLongTapped(info);
 
@@ -130,9 +130,9 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void SKFigureGroup_Tapped(object sender, SKTouchInfo info)
+        private void SKFigureGroup_Tapped(object? sender, SKTouchInfoEventArgs info)
         {
-            if (_hittedFigures.TryGetValue(info.TouchEventId, out T figure))
+            if (_hittedFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
                 figure.OnTapped(info);
 
@@ -143,9 +143,9 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void SKFigureGroup_Cancelled(object sender, SKTouchInfo info)
+        private void SKFigureGroup_Cancelled(object? sender, SKTouchInfoEventArgs info)
         {
-            if (_hittedFigures.TryGetValue(info.TouchEventId, out T figure))
+            if (_hittedFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
                 figure.OnCancelled(info);
 
@@ -156,7 +156,7 @@ namespace HB.FullStack.Client.Skia
             }
         }
 
-        private void SKFigureGroup_HitFailed(object sender, EventArgs e)
+        private void SKFigureGroup_HitFailed(object? sender, EventArgs e)
         {
             _hittedFigures.Clear();
 
@@ -172,13 +172,13 @@ namespace HB.FullStack.Client.Skia
 
         private bool _disposed;
 
-        protected override void Dispose(bool disposeManaged)
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposeManaged);
+            base.Dispose(disposing);
 
             if (!_disposed)
             {
-                if (disposeManaged)
+                if (disposing)
                 {
                     // managed
                     Clear();

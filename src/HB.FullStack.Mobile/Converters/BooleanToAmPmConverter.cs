@@ -2,7 +2,7 @@
 using System.Globalization;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     /// <summary>
     /// 将Boolean值转换为“上午” 和 “下午”

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Platforms;
+using HB.FullStack.Mobile.Platforms;
 using SkiaSharp;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Skia
+namespace HB.FullStack.Mobile.Skia
 {
     public class SKGif : IDisposable
     {

@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class WheelPicker : View
     {

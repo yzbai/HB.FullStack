@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using HB.FullStack.Database.ClientExtension;
 using HB.FullStack.Database.ClientExtensions.Tests.Context;
 using HB.FullStack.Database.SQL;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +17,11 @@ namespace HB.FullStack.Database.ClientExtensions.Tests
             _database = serviceFixture.ServiceProvider.GetRequiredService<IDatabase>();
             _transaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
         }
+        /// <summary>
+        /// Delete_TestAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         [Fact]
         public async Task Delete_TestAsync()
         {

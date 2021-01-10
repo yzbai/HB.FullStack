@@ -6,9 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 
-namespace HB.FullStack.Client.Api
+namespace HB.FullStack.Mobile.Api
 {
     public static class TokenRefresher
     {
@@ -16,16 +15,21 @@ namespace HB.FullStack.Client.Api
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
+        /// <summary>
+        /// RefreshAccessTokenAsync
+        /// </summary>
+        /// <param name="apiClient"></param>
+        /// <param name="endpointSettings"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
         public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings endpointSettings)
         {
-            string? accessToken = await UserPreferences.GetAccessTokenAsync().ConfigureAwait(false);
-
-            if (accessToken.IsNullOrEmpty())
+            if (UserPreferences.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            string accessTokenHashKey = SecurityUtil.GetHash(accessToken!);
+            string accessTokenHashKey = SecurityUtil.GetHash(UserPreferences.AccessToken);
 
             //这个AccessToken不久前刷新过
             if (!_locker.NoWaitLock(
@@ -44,17 +48,15 @@ namespace HB.FullStack.Client.Api
             //开始刷新
             try
             {
-                string? refreshToken = await UserPreferences.GetRefreshTokenAsync().ConfigureAwait(false);
-
-                if (!refreshToken.IsNullOrEmpty())
+                if (UserPreferences.RefreshToken.IsNotNullOrEmpty())
                 {
                     RefreshAccessTokenRequest refreshRequest = new RefreshAccessTokenRequest(
                         endpointSettings.JwtEndpoint!.EndpointName!,
                         endpointSettings.JwtEndpoint!.Version!,
                         HttpMethod.Get,
                         endpointSettings.JwtEndpoint!.ResourceName!,
-                        accessToken!,
-                        refreshToken!);
+                        UserPreferences.AccessToken,
+                        UserPreferences.RefreshToken);
 
                     AccessTokenResource? resource = await apiClient.GetSingleAsync(refreshRequest).ConfigureAwait(false);
 
@@ -63,7 +65,7 @@ namespace HB.FullStack.Client.Api
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        await OnRefreshSucceedAsync(resource).ConfigureAwait(false);
+                        OnRefreshSucceed(resource);
 
                         return true;
                     }
@@ -73,7 +75,7 @@ namespace HB.FullStack.Client.Api
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                await OnRefreshFailedAsync().ConfigureAwait(false);
+                OnRefreshFailed();
 
                 return false;
             }
@@ -83,24 +85,23 @@ namespace HB.FullStack.Client.Api
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                await OnRefreshFailedAsync().ConfigureAwait(false);
+                OnRefreshFailed();
 
                 throw;
             }
         }
 
-        private static async Task OnRefreshSucceedAsync(AccessTokenResource resource)
+        private static void OnRefreshSucceed(AccessTokenResource resource)
         {
-            await UserPreferences.SetAccessTokenAsync(resource.AccessToken).ConfigureAwait(false);
+            UserPreferences.AccessToken = resource.AccessToken;
         }
 
-        private static async Task OnRefreshFailedAsync()
+        private static void OnRefreshFailed()
         {
-            await UserPreferences.SetRefreshTokenAsync(null).ConfigureAwait(false);
-            await UserPreferences.SetAccessTokenAsync(null).ConfigureAwait(false);
+            UserPreferences.Logout();
         }
 
-        private class AccessTokenResource : Resource
+        private class AccessTokenResource : ApiResource
         {
             public string AccessToken { get; set; } = null!;
         }

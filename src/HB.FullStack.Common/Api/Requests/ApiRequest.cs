@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
-using HB.FullStack.Common.Resources;
+
 
 namespace HB.FullStack.Common.Api
 {
@@ -15,6 +15,7 @@ namespace HB.FullStack.Common.Api
         ApiKey
     }
 
+#pragma warning disable CA1024 // Use properties where appropriate //All use fields & Get Methods instead of Properties, for avoid mvc binding & json searilize
     public abstract class ApiRequest : ValidatableObject
     {
         #region Common Parameters
@@ -29,7 +30,6 @@ namespace HB.FullStack.Common.Api
 
         #endregion Common Parameters
 
-        //All use fields & Get Methods instead of Properties, for avoid mvc binding & json searilize
         private readonly string _requestId = SecurityUtil.CreateUniqueToken();
         private bool _needHttpMethodOveride = true;
         private string _endpointName = null!;
@@ -134,7 +134,7 @@ namespace HB.FullStack.Common.Api
 
         public string? GetHeader(string name)
         {
-            if (_headers.TryGetValue(name, out string value))
+            if (_headers.TryGetValue(name, out string? value))
             {
                 return value;
             }
@@ -177,17 +177,18 @@ namespace HB.FullStack.Common.Api
             return DeviceInfos.Name;
         }
     }
+#pragma warning restore CA1024 // Use properties where appropriate
 
-    public abstract class ApiRequest<T> : ApiRequest where T : Resource
+    public abstract class ApiRequest<T> : ApiRequest where T : ApiResource
     {
         /// <summary>
         /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供
         /// </summary>
         /// <param name="httpMethod"></param>
         /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
-        public ApiRequest(HttpMethod httpMethod, string? condition)
+        protected ApiRequest(HttpMethod httpMethod, string? condition)
         {
-            ResourceDef def = ResourceDefFactory.Get<T>();
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);
@@ -197,9 +198,9 @@ namespace HB.FullStack.Common.Api
             SetApiAuthType(ApiAuthType.Jwt);
         }
 
-        public ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition)
+        protected ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition)
         {
-            ResourceDef def = ResourceDefFactory.Get<T>();
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);
@@ -210,9 +211,9 @@ namespace HB.FullStack.Common.Api
             SetApiKeyName(apiKeyName);
         }
 
-        public ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition)
         {
-            ResourceDef def = ResourceDefFactory.Get<T>();
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);
@@ -222,7 +223,7 @@ namespace HB.FullStack.Common.Api
             SetApiAuthType(apiAuthType);
         }
 
-        public ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition, string endpointName, string apiVersion, string resourceName)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition, string endpointName, string apiVersion, string resourceName)
         {
             SetEndpointName(endpointName);
             SetApiVersion(apiVersion);

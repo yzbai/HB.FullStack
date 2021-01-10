@@ -93,7 +93,7 @@ namespace System
             {
                 try
                 {
-                    ip = httpContext.Connection.RemoteIpAddress.ToString();
+                    ip = httpContext.Connection.RemoteIpAddress?.ToString();
                 }
                 catch
                 {
@@ -109,19 +109,11 @@ namespace System
             return string.IsNullOrWhiteSpace(ip) ? "127.0.0.1" : ip;
         }
 
-        /// <summary>
-        /// GetHeaderValueAs
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="headerName"></param>
-        /// <returns></returns>
         public static T? GetHeaderValueAs<T>(this HttpRequest request, string headerName) where T : class
         {
             try
             {
-                StringValues values;
-
-                if (request.Headers?.TryGetValue(headerName, out values) ?? false)
+                if (request.Headers.TryGetValue(headerName, out StringValues values))
                 {
                     string rawValues = values.ToString();   // writes out as Csv when there are multiple.
 

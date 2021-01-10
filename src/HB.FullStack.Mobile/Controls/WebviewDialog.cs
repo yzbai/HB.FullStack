@@ -1,5 +1,5 @@
 ﻿using AsyncAwaitBestPractices;
-using HB.FullStack.Client.Base;
+using HB.FullStack.Mobile.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Text;
 
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Controls
+namespace HB.FullStack.Mobile.Controls
 {
     public class WebviewDialog : BaseModalDialog
     {

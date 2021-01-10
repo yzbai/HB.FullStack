@@ -10,7 +10,6 @@ using HB.FullStack.Server.Filters;
 using HB.FullStack.Server.Security;
 
 using Microsoft.Extensions.Configuration;
-
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FullStackServerServiceRegister
@@ -43,6 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IPublicResourceTokenManager, PublicResourceTokenManager>();
             services.AddScoped<CheckPublicResourceTokenFilter>();
             services.AddScoped<CheckSmsCodeFilter>();
+           
         }
     }
 }

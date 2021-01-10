@@ -4,16 +4,16 @@ namespace HB.Infrastructure.Aliyun.Oss
 {
     public interface IAliyunOssService
     {
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         AliyunStsToken GetUserDirectoryToken(string bucket, string userGuid, bool isRead);
 
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         AliyunStsToken GetDirectoryToken(string bucket, string directory, string roleSessionName, bool isRead);
 
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         string GetOssEndpoint(string bucket);
 
-        /// <exception cref="HB.Infrastructure.Aliyun.Oss.AliyunOssException"></exception>
+        /// <exception cref="Aliyun.AliyunException"></exception>
         string GetRegionId(string bucket);
 
         string UserBucketName { get; }

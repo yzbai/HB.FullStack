@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 
 namespace HB.FullStack.Common
@@ -27,9 +28,9 @@ namespace HB.FullStack.Common
             return PerformValidate();
         }
 
-        public IList<ValidationResult> GetValidateResults(bool rePerformValidate = false)
+        public IList<ValidationResult> GetValidateResults(bool forced = false)
         {
-            if (_validateResults == null || rePerformValidate)
+            if (_validateResults == null || forced)
             {
                 PerformValidate();
             }
@@ -68,16 +69,19 @@ namespace HB.FullStack.Common
                 {
                     _validationContext.MemberName = propertyName;
 
-                    object propertyValue = this.GetType().GetProperty(propertyName).GetValue(this);
+                    PropertyInfo? propertyInfo = GetType().GetProperty(propertyName);
 
-                    return Validator.TryValidateProperty(propertyValue, _validationContext, _validateResults);
-                }
-                else
-                {
-                    bool result = Validator.TryValidateObject(this, _validationContext, _validateResults, true);
+                    if (propertyInfo != null)
+                    {
+                        object? propertyValue = propertyInfo.GetValue(this);
 
-                    return result;
+                        return Validator.TryValidateProperty(propertyValue, _validationContext, _validateResults);
+                    }
                 }
+
+                bool result = Validator.TryValidateObject(this, _validationContext, _validateResults, true);
+
+                return result;
             }
             catch (ArgumentNullException)
             {

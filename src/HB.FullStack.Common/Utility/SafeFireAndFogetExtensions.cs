@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.Extensions.Logging;
 
 namespace System
 {
@@ -10,7 +10,7 @@ namespace System
     {
         [Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         [Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD003:Avoid awaiting foreign Tasks", Justification = "<Pending>")]
-        public static async void Fire(this Task task, string? message = null, bool continueOnCapturedContext = false)
+        public static async void Fire(this Task task, string? message = null, LogLevel logLevel = LogLevel.Error, bool continueOnCapturedContext = false)
         {
             try
             {
@@ -18,8 +18,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.ExceptionHandler(ex, message);
-                throw;
+                GlobalSettings.MessageExceptionHandler.Invoke(ex, message, logLevel);
             }
         }
     }

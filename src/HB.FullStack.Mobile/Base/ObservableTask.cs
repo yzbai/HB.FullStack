@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
+using Xamarin.CommunityToolkit.ObjectModel;
+
 namespace System
 {
     /// <summary>
@@ -17,8 +19,6 @@ namespace System
 
         public Task TaskCompletion { get; private set; }
 
-        [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        [SuppressMessage("Usage", "VSTHRD104:Offer async methods", Justification = "<Pending>")]
         public TResult Result => (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : InitialResult;
 
         public TaskStatus Status { get { return Task.Status; } }

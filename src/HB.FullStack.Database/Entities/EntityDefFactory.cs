@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-using HB.FullStack.Common.Entities;
+using HB.FullStack.Common;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
@@ -20,6 +20,11 @@ namespace HB.FullStack.Database.Def
 
         private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
+        /// <summary>
+        /// Initialize
+        /// </summary>
+        /// <param name="databaseEngine"></param>
+        /// <exception cref="DatabaseException"></exception>
         public static void Initialize(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
@@ -47,6 +52,13 @@ namespace HB.FullStack.Database.Def
             }
         }
 
+        /// <summary>
+        /// WarmUp
+        /// </summary>
+        /// <param name="allEntityTypes"></param>
+        /// <param name="engineType"></param>
+        /// <param name="entitySchemaDict"></param>
+        /// <exception cref="DatabaseException"></exception>
         private static void WarmUp(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             foreach (var t in allEntityTypes)
@@ -61,15 +73,15 @@ namespace HB.FullStack.Database.Def
 
             IDictionary<string, EntitySetting> resusltEntitySchemaDict = new Dictionary<string, EntitySetting>();
 
-            foreach (var type in allEntityTypes)
+            foreach (Type type in allEntityTypes)
             {
-                DatabaseAttribute attribute = type.GetCustomAttribute<DatabaseAttribute>();
+                DatabaseAttribute? attribute = type.GetCustomAttribute<DatabaseAttribute>();
 
-                fileConfiguredDict.TryGetValue(type.FullName, out EntitySetting fileConfigured);
+                fileConfiguredDict.TryGetValue(type.FullName!, out EntitySetting? fileConfigured);
 
                 EntitySetting entitySchema = new EntitySetting
                 {
-                    EntityTypeFullName = type.FullName
+                    EntityTypeFullName = type.FullName!
                 };
 
                 if (attribute != null)
@@ -130,7 +142,7 @@ namespace HB.FullStack.Database.Def
                     entitySchema.TableName = "tb_" + type.Name.ToLower(GlobalSettings.Culture);
                 }
 
-                resusltEntitySchemaDict.Add(type.FullName, entitySchema);
+                resusltEntitySchemaDict.Add(type.FullName!, entitySchema);
             }
 
             return resusltEntitySchemaDict;
@@ -143,7 +155,7 @@ namespace HB.FullStack.Database.Def
 
         public static EntityDef? GetDef(Type entityType)
         {
-            if (_defDict.TryGetValue(entityType, out EntityDef entityDef))
+            if (_defDict.TryGetValue(entityType, out EntityDef? entityDef))
             {
                 return entityDef;
             }
@@ -151,13 +163,21 @@ namespace HB.FullStack.Database.Def
             return null;
         }
 
+        /// <summary>
+        /// CreateEntityDef
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="engineType"></param>
+        /// <param name="entitySchemaDict"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
-            if (!entitySchemaDict!.TryGetValue(entityType.FullName, out EntitySetting dbSchema))
+            if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw new DatabaseException($"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
+                throw new DatabaseException(DatabaseErrorCode.NotADatabaseEntity, $"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
             }
 
             EntityDef entityDef = new EntityDef
@@ -165,7 +185,7 @@ namespace HB.FullStack.Database.Def
                 IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIncrementIdEntity)),
                 IsIdGuid = entityType.IsSubclassOf(typeof(GuidEntity)),
                 EntityType = entityType,
-                EntityFullName = entityType.FullName,
+                EntityFullName = entityType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
                 TableName = dbSchema.TableName
             };
@@ -177,7 +197,7 @@ namespace HB.FullStack.Database.Def
 
             foreach (PropertyInfo info in orderedProperties)
             {
-                EntityPropertyAttribute entityPropertyAttribute = info.GetCustomAttribute<EntityPropertyAttribute>(true);
+                EntityPropertyAttribute? entityPropertyAttribute = info.GetCustomAttribute<EntityPropertyAttribute>(true);
 
                 if (entityPropertyAttribute == null)
                 {
@@ -214,6 +234,15 @@ namespace HB.FullStack.Database.Def
             return entityDef;
         }
 
+        /// <summary>
+        /// CreatePropertyDef
+        /// </summary>
+        /// <param name="entityDef"></param>
+        /// <param name="propertyInfo"></param>
+        /// <param name="propertyAttribute"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, EngineType engineType)
         {
             EntityPropertyDef propertyDef = new EntityPropertyDef
@@ -223,8 +252,12 @@ namespace HB.FullStack.Database.Def
                 Type = propertyInfo.PropertyType
             };
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
-            propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType);
-            propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType);
+
+            propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
+                ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体属性缺少Set方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
+
+            propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
+                ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体属性缺少Get方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
 
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;
@@ -238,7 +271,7 @@ namespace HB.FullStack.Database.Def
 
             if (propertyAttribute.Converter != null)
             {
-                propertyDef.TypeConverter = (ITypeConverter)Activator.CreateInstance(propertyAttribute.Converter);
+                propertyDef.TypeConverter = (ITypeConverter)Activator.CreateInstance(propertyAttribute.Converter)!;
             }
 
             //判断是否是主键
@@ -256,7 +289,7 @@ namespace HB.FullStack.Database.Def
             else
             {
                 //判断是否外键
-                ForeignKeyAttribute atts2 = propertyInfo.GetCustomAttribute<ForeignKeyAttribute>(false);
+                ForeignKeyAttribute? atts2 = propertyInfo.GetCustomAttribute<ForeignKeyAttribute>(false);
 
                 if (atts2 != null)
                 {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Client.Converters
+namespace HB.FullStack.Mobile.Converters
 {
     public class IntToOppositeBoolConverter : IValueConverter
     {

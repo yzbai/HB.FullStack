@@ -30,6 +30,7 @@ namespace HB.FullStack.Repository
 
         public UtcNowTicks UtcTikcs { get; private set; } = UtcNowTicks.Empty;
 
+        /// <exception cref="CacheException"></exception>
         public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(CacheKey))
@@ -40,6 +41,13 @@ namespace HB.FullStack.Repository
             return cache.GetAsync<TResult>(CacheKey, cancellationToken);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public Task SetToAsync(ICache cache, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(CacheKey))
@@ -69,6 +77,12 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
+        /// <summary>
+        /// RemoveFromAsync
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <returns></returns>
+        /// <exception cref="CacheException"></exception>
         public async Task<bool> RemoveFromAsync(ICache cache)
         {
             if (string.IsNullOrEmpty(CacheKey))
