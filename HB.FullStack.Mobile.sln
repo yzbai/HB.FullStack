@@ -34,13 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Mobile.iOS", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Mobile.Droid", "src\HB.FullStack.Mobile.Droid\HB.FullStack.Mobile.Droid.csproj", "{934ED8CE-284C-4642-9BBB-12A0BEAA3D6E}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HB.FullStack.Test.Client.Shared", "test\HB.FullStack.Test.Client.Shared\HB.FullStack.Test.Client.Shared.shproj", "{B40D3652-2785-496A-8562-CF33998F5BF3}"
-EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		test\HB.FullStack.Test.Client.Shared\HB.FullStack.Test.Client.Shared.projitems*{4f51e8a0-37e6-4a7d-a796-9e15d0ab980a}*SharedItemsImports = 5
-		test\HB.FullStack.Test.Client.Shared\HB.FullStack.Test.Client.Shared.projitems*{b40d3652-2785-496a-8562-cf33998f5bf3}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -93,7 +87,6 @@ Global
 		{170B4983-8CEA-47D4-86CE-4CFCEFBC0A59} = {404F46AE-52E6-43CA-B1B3-FCB7981FED83}
 		{4F51E8A0-37E6-4A7D-A796-9E15D0AB980A} = {9AA4CA25-7234-4843-931A-98236A97A791}
 		{BB0EB8FD-8841-4CF7-8971-D2DA37ACD5EE} = {404F46AE-52E6-43CA-B1B3-FCB7981FED83}
-		{B40D3652-2785-496A-8562-CF33998F5BF3} = {9AA4CA25-7234-4843-931A-98236A97A791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BEBB122E-F70C-48CE-9D8B-8A5AE87DF77F}

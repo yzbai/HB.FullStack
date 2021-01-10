@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 using HB.FullStack.Mobile.TCaptcha;
 
 using Xamarin.Forms;
@@ -11,7 +10,15 @@ namespace HB.FullStack.Mobile.Api
 {
     public static class ApiClientTCaptchaExtensions
     {
-        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest<T> request, Func<T?, Task>? onSuccessDelegate) where T : Resource
+        /// <summary>
+        /// GetSingleWithTCaptchaCheckedAsync
+        /// </summary>
+        /// <param name="apiClient"></param>
+        /// <param name="request"></param>
+        /// <param name="onSuccessDelegate"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest<T> request, Func<T?, Task>? onSuccessDelegate) where T : ApiResource
         {
             try
             {
@@ -22,13 +29,14 @@ namespace HB.FullStack.Mobile.Api
                     await onSuccessDelegate(resource).ConfigureAwait(false);
                 }
             }
-            catch (ApiException ex) when (ex.ErrorCode == ErrorCode.ApiPublicResourceTokenNeeded)
+            catch (ApiException ex) when (ex.ErrorCode == ApiErrorCode.ApiPublicResourceTokenNeeded)
             {
                 TCaptchaDialog dialog = new TCaptchaDialog(async (result) =>
                 {
                     if (result.IsNullOrEmpty())
                     {
-                        throw new ApiException(ErrorCode.ApiCapthaError, System.Net.HttpStatusCode.BadRequest);
+                        GlobalSettings.ExceptionHandler.Invoke(new ApiException(ApiErrorCode.ApiCapthaError));
+                        return;
                     }
 
                     request.PublicResourceToken = result;

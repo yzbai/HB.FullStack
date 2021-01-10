@@ -98,6 +98,10 @@ namespace HB.FullStack.Mobile.Controls
             SelectedIndex = -1;
         }
 
+        /// <summary>
+        /// OnSelectedIndexChanged
+        /// </summary>
+        /// <exception cref="MobileException"></exception>
         private void OnSelectedIndexChanged()
         {
             if (ItemsSource == null)
@@ -111,7 +115,7 @@ namespace HB.FullStack.Mobile.Controls
             }
             else if (SelectedIndex > ItemsSource!.Count - 1)
             {
-                throw new ClientException(ErrorCode.OutOfRange, $"ImageOptions SelectedIndex :{SelectedIndex} Out of Range.");
+                throw new MobileException(MobileErrorCode.OutOfRange, $"ImageOptions SelectedIndex :{SelectedIndex} Out of Range.");
             }
 
             SelectedItem = ItemsSource[SelectedIndex];

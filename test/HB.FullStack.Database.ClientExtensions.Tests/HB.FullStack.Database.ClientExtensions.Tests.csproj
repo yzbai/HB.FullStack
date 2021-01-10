@@ -8,6 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="appsettings.Development.json" />
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
@@ -31,7 +45,5 @@
     <ProjectReference Include="..\..\src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
   </ItemGroup>
-
-  <Import Project="..\HB.FullStack.Test.Client.Shared\HB.FullStack.Test.Client.Shared.projitems" Label="Shared" />
 
 </Project>

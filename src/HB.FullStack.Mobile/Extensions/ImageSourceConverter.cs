@@ -7,6 +7,15 @@ namespace HB.FullStack.Mobile.Extensions
 {
     public class ImageSourceConverter : IValueConverter
     {
+        /// <summary>
+        /// Convert
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="targetType"></param>
+        /// <param name="parameter"></param>
+        /// <param name="culture"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is string strValue)

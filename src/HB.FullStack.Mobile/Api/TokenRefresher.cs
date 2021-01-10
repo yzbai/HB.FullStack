@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Mobile.Api
 {
@@ -16,6 +15,13 @@ namespace HB.FullStack.Mobile.Api
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
+        /// <summary>
+        /// RefreshAccessTokenAsync
+        /// </summary>
+        /// <param name="apiClient"></param>
+        /// <param name="endpointSettings"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
         public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings endpointSettings)
         {
             if (UserPreferences.AccessToken.IsNullOrEmpty())
@@ -95,7 +101,7 @@ namespace HB.FullStack.Mobile.Api
             UserPreferences.Logout();
         }
 
-        private class AccessTokenResource : Resource
+        private class AccessTokenResource : ApiResource
         {
             public string AccessToken { get; set; } = null!;
         }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+
 using HB.FullStack.Mobile.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -78,9 +80,8 @@ namespace HB.FullStack.Mobile.Controls
             {
                 frame.BackgroundColor = SelectedColor;
 
-                SelectedDay = ((Label)frame.Content).Text.ToInt32();
+                SelectedDay = Convert.ToInt32(((Label)frame.Content).Text, CultureInfo.InvariantCulture);
             }
-
         }
 
         public override void OnAppearing()

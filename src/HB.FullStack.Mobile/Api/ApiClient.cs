@@ -1,6 +1,5 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 using Microsoft.Extensions.Options;
 
 using System;
@@ -38,26 +37,38 @@ namespace HB.FullStack.Mobile.Api
             remove => _asyncEventManager.Remove(value);
         }
 
-        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? new List<T>();
 
-        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : ApiResource
             => SendAsync<T, T>(request, ApiRequestType.GetSingle);
 
-        public Task AddAsync<T>(AddRequest<T> addRequest) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource
             => SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
 
-        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
 
-        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : Resource
+        /// <exception cref="ApiException"></exception>
+        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
-        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : Resource where TResponse : class
+        /// <summary>
+        /// SendAsync
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="requestType"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ApiResource where TResponse : class
         {
             if (!request.IsValid())
             {
-                throw new ApiException(ErrorCode.ApiModelValidationError, HttpStatusCode.BadRequest, request.GetValidateErrorMessage());
+                throw new ApiException(ApiErrorCode.ModelValidationError, request.GetValidateErrorMessage());
             }
 
             EndpointSettings endpoint = GetEndpoint(request);
@@ -79,7 +90,7 @@ namespace HB.FullStack.Mobile.Api
             }
             catch (ApiException ex)
             {
-                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.HttpCode == HttpStatusCode.Unauthorized && ex.ErrorCode == ErrorCode.ApiTokenExpired)
+                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.HttpCode == HttpStatusCode.Unauthorized && ex.ErrorCode == ApiErrorCode.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint).ConfigureAwait(false);
 
@@ -93,7 +104,7 @@ namespace HB.FullStack.Mobile.Api
             }
             catch (Exception ex)
             {
-                throw new ApiException(ErrorCode.ApiUnkown, HttpStatusCode.BadRequest, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
+                throw new ApiException(ApiErrorCode.ApiUnkown, $"ApiClient.SendAsync Failed.Type : {typeof(T)}", ex);
             }
         }
 
@@ -107,7 +118,7 @@ namespace HB.FullStack.Mobile.Api
             return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
         }
 
-        private EndpointSettings GetEndpoint<T>(ApiRequest<T> request) where T : Resource
+        private EndpointSettings GetEndpoint<T>(ApiRequest<T> request) where T : ApiResource
         {
             return _options.Endpoints.Single(e => e.Name == request.GetEndpointName() && e.Version == request.GetApiVersion());
         }
@@ -129,7 +140,12 @@ namespace HB.FullStack.Mobile.Api
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        private void AddAuthInfo<T>(ApiRequest<T> request) where T : Resource
+        /// <summary>
+        /// AddAuthInfo
+        /// </summary>
+        /// <param name="request"></param>
+        /// <exception cref="ApiException"></exception>
+        private void AddAuthInfo<T>(ApiRequest<T> request) where T : ApiResource
         {
             switch (request.GetApiAuthType())
             {
@@ -139,13 +155,13 @@ namespace HB.FullStack.Mobile.Api
 
                     if (!TrySetJwt(request))
                     {
-                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                        throw new ApiException(ApiErrorCode.NoAuthority);
                     }
                     break;
                 case ApiAuthType.ApiKey:
                     if (!TrySetApiKey(request))
                     {
-                        throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                        throw new ApiException(ApiErrorCode.NoAuthority);
                     }
                     break;
                 default:
@@ -153,7 +169,7 @@ namespace HB.FullStack.Mobile.Api
             }
         }
 
-        private static bool TrySetJwt<T>(ApiRequest<T> request) where T : Resource
+        private static bool TrySetJwt<T>(ApiRequest<T> request) where T : ApiResource
         {
             if (UserPreferences.AccessToken.IsNullOrEmpty())
             {
@@ -165,7 +181,7 @@ namespace HB.FullStack.Mobile.Api
             return true;
         }
 
-        private bool TrySetApiKey<T>(ApiRequest<T> apiRequest) where T : Resource
+        private bool TrySetApiKey<T>(ApiRequest<T> apiRequest) where T : ApiResource
         {
             if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string? key))
             {

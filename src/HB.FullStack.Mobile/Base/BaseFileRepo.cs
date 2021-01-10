@@ -3,11 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using HB.FullStack.Mobile.Api;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Mobile.Repos
 {
-    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : Resource
+    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource
     {
         protected IApiClient ApiClient { get; }
 
@@ -16,6 +15,14 @@ namespace HB.FullStack.Mobile.Repos
             ApiClient = apiClient;
         }
 
+        /// <summary>
+        /// UploadAsync
+        /// </summary>
+        /// <param name="fileSuffix"></param>
+        /// <param name="fileDatas"></param>
+        /// <param name="resources"></param>
+        /// <returns></returns>
+        /// <exception cref="System.ApiException"></exception>
         public Task UploadAsync(string fileSuffix, IEnumerable<byte[]> fileDatas, IEnumerable<TRes> resources)
         {
             InsureInternet();

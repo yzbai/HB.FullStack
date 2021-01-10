@@ -79,6 +79,13 @@ namespace Xamarin.Forms
 			set { SetValue(UriProperty, value); }
 		}
 
+		/// <summary>
+		/// GetStreamAsync
+		/// </summary>
+		/// <param name="userToken"></param>
+		/// <returns></returns>
+		/// <exception cref="OperationCanceledException"></exception>
+		/// <exception cref="Exception"></exception>
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public async Task<Stream> GetStreamAsync(CancellationToken userToken = default(CancellationToken))
 		{
@@ -131,6 +138,13 @@ namespace Xamarin.Forms
 			return (await Store.GetLastWriteTimeAsync(path).ConfigureAwait(false)).UtcDateTime;
 		}
 
+		/// <summary>
+		/// GetStreamAsync
+		/// </summary>
+		/// <param name="uri"></param>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		/// <exception cref="OperationCanceledException"></exception>
 		async Task<Stream> GetStreamAsync(Uri uri, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -221,6 +235,13 @@ namespace Xamarin.Forms
 			}
 		}
 
+		/// <summary>
+		/// GetStreamFromCacheAsync
+		/// </summary>
+		/// <param name="uri"></param>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		/// <exception cref="OperationCanceledException"></exception>
 		async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
 		{
 			string key = GetCacheKey(uri);

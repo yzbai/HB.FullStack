@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 
 namespace HB.FullStack.Mobile.Api
 {
@@ -16,15 +15,20 @@ namespace HB.FullStack.Mobile.Api
 
 #pragma warning restore CA1003 // Use generic event handler instances
 
-        Task AddAsync<T>(AddRequest<T> request) where T : Resource;
+        /// <exception cref="ApiException"></exception>
+        Task AddAsync<T>(AddRequest<T> request) where T : ApiResource;
 
-        Task UpdateAsync<T>(UpdateRequest<T> request) where T : Resource;
+        /// <exception cref="ApiException"></exception>
+        Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource;
 
-        Task DeleteAsync<T>(DeleteRequest<T> request) where T : Resource;
+        /// <exception cref="ApiException"></exception>
+        Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource;
 
-        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : Resource;
+        /// <exception cref="ApiException"></exception>
+        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource;
 
-        Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : Resource;
+        /// <exception cref="ApiException"></exception>
+        Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : ApiResource;
 
 
     }

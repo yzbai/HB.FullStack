@@ -25,5 +25,6 @@ namespace HB.FullStack.Common.Api
         ApiUploadWrongType,
         ApiHttpsRequired,
         FromExceptionController,
+        ApiCapthaError,
     }
 }

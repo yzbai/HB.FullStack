@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common.Api;
 using HB.FullStack.Mobile.Api;
 using HB.FullStack.Mobile.Logger;
 using Microsoft.Extensions.Configuration;
@@ -129,7 +131,7 @@ namespace HB.FullStack.Mobile.Base
             {
                 switch (apiEx.ErrorCode)
                 {
-                    case ErrorCode.ApiUnkown:
+                    case ApiErrorCode.ApiUnkown:
 
                         if (apiEx.HttpCode.IsNoInternet())
                         {
@@ -140,9 +142,9 @@ namespace HB.FullStack.Mobile.Base
                         }
 
                         break;
-                    case ErrorCode.ApiNoAuthority:
-                    case ErrorCode.ApiTokenRefresherError:
-                    case ErrorCode.ApiTokenExpired:
+                    case ApiErrorCode.ApiNotAvailable:
+                    case ApiErrorCode.NoAuthority:
+                    case ApiErrorCode.AccessTokenExpired:
                         //Application.Current.PerformLogin();
                         break;
                     default: break;

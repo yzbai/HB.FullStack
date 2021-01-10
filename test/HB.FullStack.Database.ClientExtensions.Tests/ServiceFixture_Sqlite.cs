@@ -6,8 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-
-
 namespace HB.FullStack
 {
     public class ServiceFixture_Sqlite
@@ -16,7 +14,10 @@ namespace HB.FullStack
 
         public IServiceProvider ServiceProvider { get; private set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <exception cref="DatabaseException"></exception>
         public ServiceFixture_Sqlite()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");

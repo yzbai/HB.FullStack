@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using HB.FullStack.Mobile.Api;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Resources;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Def;
 using Xamarin.Essentials;
@@ -20,21 +19,31 @@ namespace HB.FullStack.Mobile.Repos
 {
     public abstract class BaseRepo
     {
+        /// <summary>
+        /// InsureLogined
+        /// </summary>
+        /// <exception cref="ApiException"></exception>
         protected static void InsureLogined()
         {
             if (!UserPreferences.IsLogined)
             {
-                throw new ApiException(ErrorCode.ApiNoAuthority, System.Net.HttpStatusCode.Unauthorized);
+                throw new ApiException(ApiErrorCode.NoAuthority);
             }
         }
 
+        /// <summary>
+        /// InsureInternet
+        /// </summary>
+        /// <param name="allowOffline"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
         protected static bool InsureInternet(bool allowOffline = false)
         {
             if (Connectivity.NetworkAccess != NetworkAccess.Internet)
             {
                 if (!allowOffline)
                 {
-                    throw new ApiException(ErrorCode.ApiUnkown, System.Net.HttpStatusCode.BadGateway);
+                    throw new ApiException(ApiErrorCode.ApiNotAvailable);
                 }
 
                 return false;
@@ -44,7 +53,7 @@ namespace HB.FullStack.Mobile.Repos
         }
     }
 
-    public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : Resource
+    public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource
     {
         private static bool _isDatabaseInitTaskNotWaitedYet = true;
 
@@ -99,6 +108,16 @@ namespace HB.FullStack.Mobile.Repos
             RequestLocker.UnLock(apiRequest.GetType().FullName!, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
         }
 
+        /// <summary>
+        /// GetSingleAsync
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="request"></param>
+        /// <param name="transactionContext"></param>
+        /// <param name="forced"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         protected async Task<TEntity?> GetSingleAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext = null, bool forced = false)
         {
             if (NeedLogined)
@@ -128,7 +147,7 @@ namespace HB.FullStack.Mobile.Repos
                     return local;
                 }
 
-                throw new ApiException(ErrorCode.ApiNoInternet, System.Net.HttpStatusCode.BadGateway);
+                throw new ApiException(ApiErrorCode.ApiNotAvailable);
             }
 
             //获取全程，更新本地
@@ -149,6 +168,16 @@ namespace HB.FullStack.Mobile.Repos
 
         
 
+        /// <summary>
+        /// GetAsync
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="request"></param>
+        /// <param name="transactionContext"></param>
+        /// <param name="forced"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         protected async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext transactionContext, bool forced = false)
         {
             if (NeedLogined)
@@ -178,7 +207,7 @@ namespace HB.FullStack.Mobile.Repos
                     return locals;
                 }
 
-                throw new ApiException(ErrorCode.ApiNoInternet, System.Net.HttpStatusCode.BadGateway);
+                throw new ApiException(ApiErrorCode.ApiNotAvailable);
             }
 
             //获取远程，更新本地
@@ -192,9 +221,17 @@ namespace HB.FullStack.Mobile.Repos
             return remotes;
         }
 
+        /// <summary>
+        /// AddAsync
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext transactionContext)
         {
-            ThrowIf.NotValid(entities);
+            ThrowIf.NotValid(entities, nameof(entities));
 
             if (InsureInternet(AllowOfflineWrite))
             {
@@ -209,13 +246,21 @@ namespace HB.FullStack.Mobile.Repos
             else
             {
                 //脱网下操作
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 
+        /// <summary>
+        /// UpdateAsync
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException"></exception>
+        /// <exception cref="DatabaseException"></exception>
         public async Task UpdateAsync(TEntity entity, TransactionContext? transactionContext = null)
         {
-            ThrowIf.NotValid(entity);
+            ThrowIf.NotValid(entity, nameof(entity));
 
             if (InsureInternet(AllowOfflineWrite))
             {
@@ -228,7 +273,7 @@ namespace HB.FullStack.Mobile.Repos
             else
             {
                 //脱网下操作
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 

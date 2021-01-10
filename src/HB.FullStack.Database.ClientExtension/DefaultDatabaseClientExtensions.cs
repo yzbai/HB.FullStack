@@ -14,13 +14,21 @@ namespace HB.FullStack.Database
     /// </summary>
     public static class DatabaseClientExtensions
     {
+        /// <summary>
+        /// DeleteAsync
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="whereExpr"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity, new()
         {
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}");
             }
 
             try
@@ -34,7 +42,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
-                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, "", ex); ;
+                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}", ex);
             }
         }
 
@@ -45,15 +53,23 @@ namespace HB.FullStack.Database
             await database.BatchAddAsync<T>(newItems, "", transContext).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// AddOrUpdateByIdAsync
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="item"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
-            ThrowIf.NotValid(item);
+            ThrowIf.NotValid(item,nameof(item));
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Entity:{SerializeUtil.ToJson(item)}");
+                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Entity:{SerializeUtil.ToJson(item)}");
             }
 
             try
@@ -76,16 +92,17 @@ namespace HB.FullStack.Database
             {
                 string detail = $"Item:{SerializeUtil.ToJson(item)}";
 
-                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, detail, ex); ;
+                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex); 
             }
         }
 
         /// <summary>
         /// warning: 不改变items！！！！
         /// </summary>
+        /// <exception cref="DatabaseException"></exception>
         public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext transContext) where T : DatabaseEntity, new()
         {
-            ThrowIf.NotValid(items);
+            ThrowIf.NotValid(items, nameof(items));
 
             if (!items.Any())
             {
@@ -96,7 +113,7 @@ namespace HB.FullStack.Database
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw new DatabaseException(ErrorCode.DatabaseNotWriteable, entityDef.EntityFullName, $"Items:{SerializeUtil.ToJson(items)}");
+                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Items:{SerializeUtil.ToJson(items)}");
             }
 
             try
@@ -113,7 +130,7 @@ namespace HB.FullStack.Database
             catch (Exception ex) when (!(ex is DatabaseException))
             {
                 string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw new DatabaseException(ErrorCode.DatabaseError, entityDef.EntityFullName, detail, ex);
+                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
             }
         }
 

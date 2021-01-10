@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Xamarin.Forms;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Common.Utility;
+using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Mobile.Api
 {
@@ -31,6 +32,13 @@ namespace HB.FullStack.Mobile.Api
 #endif
         }
 
+        /// <summary>
+        /// SendAsync
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ApiException">Ignore.</exception>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             AddDeviceInfo(request);
@@ -44,7 +52,7 @@ namespace HB.FullStack.Mobile.Api
             }
             catch (ApiException ex)
             {
-                if (ex.HttpCode == System.Net.HttpStatusCode.Unauthorized && ex.ErrorCode == ErrorCode.ApiTokenExpired)
+                if (ex.HttpCode == System.Net.HttpStatusCode.Unauthorized && ex.ErrorCode == ApiErrorCode.AccessTokenExpired)
                 {
                     EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
 
@@ -56,12 +64,7 @@ namespace HB.FullStack.Mobile.Api
                     }
                 }
 
-                throw;
-            }
-            catch (Exception ex)
-            {
                 GlobalSettings.Logger.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
-
             }
 
             return responseMessage;

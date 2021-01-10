@@ -15,6 +15,12 @@ namespace HB.FullStack.Mobile.Extensions
     {
         public string? Source { get; set; }
 
+        /// <summary>
+        /// ProvideValue
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         public ImageSource ProvideValue(IServiceProvider serviceProvider)
         {
             if (Source.IsNotNullOrEmpty())

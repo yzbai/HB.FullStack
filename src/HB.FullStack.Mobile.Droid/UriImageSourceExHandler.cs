@@ -18,6 +18,15 @@ namespace HB.FullStack.Mobile.Droid
 {
 	public class UriImageSourceExHandler
 	{
+		/// <summary>
+		/// LoadImageAsync
+		/// </summary>
+		/// <param name="imagesource"></param>
+		/// <param name="context"></param>
+		/// <param name="cancelationToken"></param>
+		/// <returns></returns>
+		/// <exception cref="OperationCanceledException"></exception>
+		/// <exception cref="Exception"></exception>
 		public async Task<Bitmap> LoadImageAsync(ImageSource imagesource, Context context, CancellationToken cancelationToken = default(CancellationToken))
 		{
 			var imageLoader = imagesource as UriImageSourceEx;

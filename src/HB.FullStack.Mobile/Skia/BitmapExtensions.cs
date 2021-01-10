@@ -9,11 +9,18 @@ namespace HB.FullStack.Mobile.Skia
 {
     public static class BitmapExtensions
     {
+        /// <summary>
+        /// LoadBitmapResource
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="resourceID"></param>
+        /// <returns></returns>
+        /// <exception cref="MobileException"></exception>
         public static SKBitmap LoadBitmapResource(Type type, string resourceID)
         {
             Assembly assembly = type.GetTypeInfo().Assembly;
 
-            using Stream stream = assembly.GetManifestResourceStream(resourceID) ?? throw new ClientException(ErrorCode.ResourceNotFound, $"ResourceId:{resourceID}");
+            using Stream stream = assembly.GetManifestResourceStream(resourceID) ?? throw new MobileException(MobileErrorCode.ResourceNotFound, $"ResourceId:{resourceID}");
             return SKBitmap.Decode(stream);
         }
 
