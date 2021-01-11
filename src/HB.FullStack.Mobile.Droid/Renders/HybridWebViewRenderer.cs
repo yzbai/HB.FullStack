@@ -39,9 +39,9 @@ namespace HB.FullStack.Mobile.Droid.Renders
                 Control.Settings.AllowUniversalAccessFromFileURLs = true;
                 Control.Settings.JavaScriptEnabled = true;
 
-                //Control.AddJavascriptInterface(new JSBridge(this), "jsBridge");
+                Control.AddJavascriptInterface(new JSBridge(this), "jsBridge");
 
-                //Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {_javascriptFunction}"));
+                Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {_javascriptFunction}"));
                 //Control.LoadUrl($"file:///android_asset/Content/{((HybridWebView)Element).Uri}");
 
                 if (Element is HybridWebView hybridWebView)

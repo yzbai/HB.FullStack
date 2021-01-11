@@ -53,7 +53,9 @@ namespace HB.FullStack.Cache
 
             if (cacheEntityAttribute == null)
             {
-                throw new CacheException(CacheErrorCode.NotACacheEntity, $"Type:{entityType.FullName}");
+                def.IsCacheable = false;
+
+                return def;
             }
 
             def.IsCacheable = true;
