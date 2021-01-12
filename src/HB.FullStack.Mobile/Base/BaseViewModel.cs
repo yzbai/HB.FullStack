@@ -50,5 +50,15 @@ namespace HB.FullStack.Mobile.Base
         {
             return Application.Current.MainPage.DisplayAlert(title, message, acceptButton, cancelButton);
         }
+
+        protected static void PopToRoot()
+        {
+            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopToRootAsync());
+        }
+
+        protected static void PushModal(BaseModalDialog dialog, bool animate = true)
+        {
+            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PushModalAsync(dialog, animate).Fire());
+        }
     }
 }

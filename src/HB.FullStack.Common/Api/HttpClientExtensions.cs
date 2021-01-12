@@ -26,7 +26,7 @@ namespace System.Net.Http
 
     public static class HttpClientApiExtensions
     {
-        private static readonly Type _emptyResponse = typeof(EmptyResponse);
+        private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
         /// <summary>
         /// SendAsync
@@ -41,18 +41,13 @@ namespace System.Net.Http
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
-            if (typeof(TResponse) == _emptyResponse)
+            if (typeof(TResponse) == _emptyResponseType)
             {
                 return (TResponse)(object)EmptyResponse.Value;
             }
             else
             {
                 TResponse? response = await responseMessage.DeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
-
-                //if (response == null)
-                //{
-                //    throw new ApiException(ErrorCode.ApiNullReturn, responseMessage.StatusCode);
-                //}
 
                 return response;
             }
@@ -75,7 +70,11 @@ namespace System.Net.Http
             }
             catch (TaskCanceledException ex) when (ex.InnerException is SocketException)
             {
-                throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}");
+                throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}", ex);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}", ex);
             }
             catch (Exception ex)
             {
