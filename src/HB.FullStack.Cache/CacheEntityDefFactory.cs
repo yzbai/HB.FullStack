@@ -44,7 +44,7 @@ namespace HB.FullStack.Cache
         /// <exception cref="CacheException"></exception>
         private static CacheEntityDef CreateEntityDef(Type entityType)
         {
-            CacheEntityDef def = new CacheEntityDef
+            CacheEntityDef def = new()
             {
                 Name = entityType.Name
             };
