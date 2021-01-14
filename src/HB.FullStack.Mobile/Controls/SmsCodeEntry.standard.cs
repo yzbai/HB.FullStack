@@ -1,17 +1,20 @@
 ﻿using AsyncAwaitBestPractices;
+
 using HB.FullStack.Mobile.Base;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
+
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace HB.FullStack.Mobile.Controls
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SmsCodeEntry : BaseContentView
+    public class SmsCodeEntry : BaseContentView
     {
         public static readonly BindableProperty CodeCountProperty = BindableProperty.Create(nameof(CodeCount), typeof(int), typeof(SmsCodeEntry), 6, BindingMode.OneWay, propertyChanged: (bindable, oldValue, newValue) =>
         {
@@ -21,12 +24,12 @@ namespace HB.FullStack.Mobile.Controls
             }
         });
         public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(SmsCodeEntry), "", BindingMode.TwoWay, propertyChanged: (bindable, oldValue, newValue) =>
-           {
-               if (bindable is SmsCodeEntry smsCodeEntry && newValue is string text)
-               {
-                   smsCodeEntry.ResetLabelText(text);
-               }
-           });
+        {
+            if (bindable is SmsCodeEntry smsCodeEntry && newValue is string text)
+            {
+                smsCodeEntry.ResetLabelText(text);
+            }
+        });
         public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(nameof(FontSize), typeof(double), typeof(SmsCodeEntry), 32.0);
         public static readonly BindableProperty LabelWidthRequestProperty = BindableProperty.Create(nameof(LabelWidthRequest), typeof(double), typeof(SmsCodeEntry), 18.0);
         public static readonly BindableProperty BorderUnSelectedColorProperty = BindableProperty.Create(nameof(BorderUnSelectedColor), typeof(Color), typeof(SmsCodeEntry), Color.DarkGreen, propertyChanged: (b, o, n) =>
@@ -52,10 +55,30 @@ namespace HB.FullStack.Mobile.Controls
         public Color BorderUnSelectedColor { get => (Color)GetValue(BorderUnSelectedColorProperty); set => SetValue(BorderUnSelectedColorProperty, value); }
 
         private readonly List<Frame> _frames = new List<Frame>();
+        private FlexLayout _pinLayout;
+        private Entry _inputEntry;
 
         public SmsCodeEntry()
         {
-            InitializeComponent();
+            Content = new StackLayout
+            {
+                Children = {
+                new AbsoluteLayout { Children = {
+                    new FlexLayout{ JustifyContent= FlexJustify.SpaceEvenly }
+                        .Assign(out _pinLayout)
+                        .Invoke(layout=>{
+                            AbsoluteLayout.SetLayoutBounds(layout,new Rectangle(0,0,1,1));
+                            AbsoluteLayout.SetLayoutFlags(layout, AbsoluteLayoutFlags.SizeProportional); }),
+
+                    new Entry{ IsVisible = true, Opacity = 0, Keyboard= Keyboard.Numeric }
+                        .Assign(out _inputEntry)
+                        .Bind(Entry.MaxLengthProperty, nameof(CodeCount))
+                        .Bind(Entry.TextProperty, nameof(Text))
+                        .Invoke(layout=>{
+                            AbsoluteLayout.SetLayoutBounds(layout,new Rectangle(0,0,1,1));
+                            AbsoluteLayout.SetLayoutFlags(layout, AbsoluteLayoutFlags.SizeProportional); })
+                    }}}
+            }.Invoke(layout => { layout.BindingContext = this; });
 
             ResetLabels(CodeCount);
         }
@@ -77,12 +100,12 @@ namespace HB.FullStack.Mobile.Controls
 
         public new void Focus()
         {
-            InputEntry.Focus();
+            _inputEntry.Focus();
         }
 
         private void ResetLabels(int count)
         {
-            PinLayout.Children.Clear();
+            _pinLayout.Children.Clear();
             _frames.Clear();
 
             for (int i = 0; i < count; ++i)
@@ -92,7 +115,7 @@ namespace HB.FullStack.Mobile.Controls
 
                 _frames.Add(frame);
                 frame.Content = label;
-                PinLayout.Children.Add(frame);
+                _pinLayout.Children.Add(frame);
             }
         }
         private void ResetLabelText(string text)
@@ -127,7 +150,7 @@ namespace HB.FullStack.Mobile.Controls
             }
 
             //InputEntry Cursor Position
-            InputEntry.CursorPosition = text.IsNullOrEmpty() ? 0 : text.Length;
+            _inputEntry.CursorPosition = text.IsNullOrEmpty() ? 0 : text.Length;
         }
     }
 

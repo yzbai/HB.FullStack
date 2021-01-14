@@ -6,8 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+
+using static Xamarin.CommunityToolkit.Markup.GridRowsColumns;
 
 namespace HB.FullStack.Mobile.Controls
 {
@@ -22,10 +26,9 @@ namespace HB.FullStack.Mobile.Controls
         public object? Tag { get; set; }
     }
 
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ActionSheetCell : StackLayout
+    public class ActionSheetCell : StackLayout
     {
-        public string ChevronRight { get; } = MaterialFont.ChevronRight;
+        //public string ChevronRight { get; } = MaterialFont.ChevronRight;
 
         #region Input
 
@@ -138,7 +141,26 @@ namespace HB.FullStack.Mobile.Controls
 
         public ActionSheetCell()
         {
-            InitializeComponent();
+            var grid = new Grid { 
+                RowDefinitions = Rows.Define(Star),
+                ColumnDefinitions = Columns.Define(Auto, Star, Auto),
+                Children = { 
+                    new Label{ }
+                        .Row(0).Column(0).Start().TextCenterVertical().FontSize(Device.GetNamedSize(NamedSize.Medium, typeof(Label)))
+                        .Bind(Label.TextProperty, nameof(Title)),
+
+                    new Label{ TextColor = Color.Gray }
+                        .Row(0).Column(1).End().TextCenterVertical().FontSize(Device.GetNamedSize(NamedSize.Small, typeof(Label)))
+                        .Bind(Label.TextProperty, nameof(SelectedDisplayText)),
+
+                    new Label{ Text = MaterialFont.ChevronRight }
+                        .Row(0).Column(2).EndExpand().TextCenterVertical().Font("MaterialIcon", Device.GetNamedSize(NamedSize.Medium, typeof(Label)))
+                }
+            }.Bind(Grid.MarginProperty, nameof(Margin))
+            .Invoke(v=>v.GestureRecognizers.Add(new TapGestureRecognizer { }.Invoke(v=>v.Tapped+=TapGestureRecognizer_Tapped)))
+            .Invoke(v=>v.BindingContext = this);
+            
+            Children.Add(grid);
         }
 
         private void TapGestureRecognizer_Tapped(object sender, EventArgs e)

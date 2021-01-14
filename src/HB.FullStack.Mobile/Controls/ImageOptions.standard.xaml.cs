@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using HB.FullStack.Mobile.Base;
 
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
+using Xamarin.Forms.Shapes;
 using Xamarin.Forms.Xaml;
 
 namespace HB.FullStack.Mobile.Controls
@@ -40,15 +42,13 @@ namespace HB.FullStack.Mobile.Controls
     /// <summary>
     /// 单选图形列表
     /// </summary>
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ImageOptions : BaseContentView
+    public class ImageOptions : BaseContentView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList<ImageOptionItem>), typeof(ImageOptions), propertyChanged: (b, o, n) => ((ImageOptions)b).OnItemsSourceChanged());
         public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(ImageOptions), -1, BindingMode.TwoWay, propertyChanged: (b, o, n) => ((ImageOptions)b).OnSelectedIndexChanged());
         public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(ImageOptionItem), typeof(ImageOptions), null, BindingMode.TwoWay, propertyChanged: (b, o, n) => ((ImageOptions)b).OnSelectedItemChanged());
         public static readonly BindableProperty SelectedChangedCommandProperty = BindableProperty.Create(nameof(SelectedChangedCommand), typeof(ICommand), typeof(ImageOptions), null);
 
-        [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>")]
         public IList<ImageOptionItem>? ItemsSource { get => (IList<ImageOptionItem>)GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
 
         public int SelectedIndex { get => (int)GetValue(SelectedIndexProperty); set => SetValue(SelectedIndexProperty, value); }
@@ -77,7 +77,42 @@ namespace HB.FullStack.Mobile.Controls
 
         public ImageOptions()
         {
-            InitializeComponent();
+            Content = new CollectionView {
+                SelectionMode = SelectionMode.None,
+                
+                ItemsLayout = new GridItemsLayout(ItemsLayoutOrientation.Vertical) { }
+                .Bind(GridItemsLayout.SpanProperty, nameof(Column))
+                .Bind(GridItemsLayout.VerticalItemSpacingProperty, nameof(VerticalItemSpacing)),
+
+                ItemTemplate = new DataTemplate(()=>new StackLayout {
+                    Orientation = StackOrientation.Vertical,
+                    Children = { 
+                        new SelectableImage{ 
+                            Aspect = Aspect.AspectFill, 
+                            Clip = new EllipseGeometry{ }
+                            .Bind(EllipseGeometry.CenterProperty, nameof(ImageCenter), source:this)
+                            .Bind(EllipseGeometry.RadiusXProperty, "ImageCenter.X", source:this)
+                            .Bind(EllipseGeometry.RadiusYProperty, "ImageCenter.Y", source:this)
+                        }
+                        .Center()
+                        .Bind(SelectableImage.SourceProperty, nameof(ImageOptionItem.UnSelectedImage))
+                        .Bind(SelectableImage.SelectedImageSourceProperty, nameof(ImageOptionItem.SelectedImage))
+                        .Bind(SelectableImage.IsSelectedProperty, nameof(ImageOptionItem.IsSelected))
+                        .Bind(SelectableImage.SelectedCommandProperty, nameof(SingleSelectedCommand), source:this)
+                        .Bind(SelectableImage.SelectedCommandParameterProperty, ".")
+                        .Bind(SelectableImage.UnSelectedCommandProperty, nameof(SingleUnSelectedCommand), source:this)
+                        .Bind(SelectableImage.UnSelectedCommandParameterProperty, ".")
+                        .Bind(SelectableImage.HeightRequestProperty, nameof(ImageHeightRequest), source:this)
+                        .Bind(SelectableImage.WidthProperty, nameof(ImageWidthRequest), source:this),
+
+                        new Label{ }
+                        .Center()
+                        .Bind(Label.TextProperty, nameof(ImageOptionItem.Title))
+                    }
+                }.Center())
+            }.Center()
+            .Bind(CollectionView.ItemsSourceProperty, nameof(ItemsSource))
+            .Invoke(v => v.BindingContext = this);
 
             SingleSelectedCommand = new Command<ImageOptionItem>(SingleSelected);
             SingleUnSelectedCommand = new Command<ImageOptionItem>(SingleUnSelected);

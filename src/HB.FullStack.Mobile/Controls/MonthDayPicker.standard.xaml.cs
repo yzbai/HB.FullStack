@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Globalization;
 
 using HB.FullStack.Mobile.Base;
+
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
+using static Xamarin.CommunityToolkit.Markup.GridRowsColumns;
+
 namespace HB.FullStack.Mobile.Controls
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MonthDayPicker : BaseContentView
+    public class MonthDayPicker : BaseContentView
     {
         public Color SelectedColor { get; set; } = Color.Blue;
 
@@ -20,9 +23,15 @@ namespace HB.FullStack.Mobile.Controls
             set { _selectedDay = value; OnPropertyChanged(); }
         }
 
+        private Grid _root;
+
         public MonthDayPicker()
         {
-            InitializeComponent();
+            Content = new Grid
+            {
+                RowDefinitions = Rows.Define(Auto, Auto, Auto, Auto, Auto),
+                ColumnDefinitions = Columns.Define(Star, Star, Star, Star, Star, Star, Star)
+            }.Assign(out _root);
 
             int day = 1;
 
@@ -63,18 +72,18 @@ namespace HB.FullStack.Mobile.Controls
 
                     frame.Content = label;
 
-                    Root.Children.Add(frame, col, row);
+                    _root.Children.Add(frame, col, row);
 
                     day++;
                 }
             }
 
-            Root.Children[SelectedDay - 1].BackgroundColor = SelectedColor;
+            _root.Children[SelectedDay - 1].BackgroundColor = SelectedColor;
         }
 
         private void FrameTapGesture_Tapped(object? sender, EventArgs e)
         {
-            Root.Children[SelectedDay - 1].BackgroundColor = Color.White;
+            _root.Children[SelectedDay - 1].BackgroundColor = Color.White;
 
             if (sender is Frame frame)
             {

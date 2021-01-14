@@ -6,20 +6,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace HB.FullStack.Mobile.Base
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class BaseModalDialog : BaseContentPage
+    [ContentProperty("Content")]
+    public class BaseModalDialog : BaseContentPage
     {
         private Frame? _dialogFrame;
         public bool IsBackgroudClickedToDismiss { get; set; }
 
+        private ControlTemplate _controlTemplate;
+
         public BaseModalDialog()
         {
-            InitializeComponent();
+            _controlTemplate = new ControlTemplate(() => new StackLayout { 
+                Children = { 
+                    new Frame{ 
+                        CornerRadius = 10,
+                        HasShadow = true,
+                        BackgroundColor = Color.White,
+                        Content = new StackLayout{ 
+                            Children = { 
+                                new ContentPresenter()
+                            }
+                        }
+                    }.Width(280).CenterExpand()
+                }
+            });
 
             BackgroundColor = Color.FromHex("#80000000");
             //ControlTemplate = (ControlTemplate)Resources["DialogControlTemplate"];
@@ -28,7 +44,7 @@ namespace HB.FullStack.Mobile.Base
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            ControlTemplate = (ControlTemplate)Resources["DialogControlTemplate"];
+            ControlTemplate = _controlTemplate;
         }
 
         protected override void OnApplyTemplate()

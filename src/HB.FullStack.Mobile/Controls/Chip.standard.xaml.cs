@@ -1,12 +1,16 @@
 ﻿using HB.FullStack.Mobile.Base;
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
+
+using Xamarin.CommunityToolkit.Converters;
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Controls
 {
-    public partial class Chip : BaseContentView
+    public class Chip : BaseContentView
     {
         public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(Chip), null, BindingMode.OneWay);
 
@@ -214,13 +218,57 @@ namespace HB.FullStack.Mobile.Controls
                 ((Chip)bindable).RefreshVisualState();
         }
 
+        private Frame _frame;
         public Chip()
         {
-            InitializeComponent();
+            Content = new Frame
+            {
+                CornerRadius = 15,
+                HasShadow = false,
+                Content = new StackLayout
+                {
+                    Orientation = StackOrientation.Horizontal,
+                    Children = {
+                        new Image{ }
+                            .Bind(Image.IsVisibleProperty, nameof(ImageSource), convert: (object? obj)=>obj!=null),
+
+                        new Label{ }
+                            .Center()
+                            .TextCenter()
+                            .Bind(Label.TextProperty, nameof(Text))
+                            .Bind(Label.TextColorProperty, nameof(TextColor))
+                            .Bind(Label.IsVisibleProperty, nameof(Text), convert:(object? obj)=>obj!=null)
+                            .Bind(Label.FontFamilyProperty, nameof(FontFamily))
+                            .Bind(Label.FontSizeProperty, nameof(FontSize)),
+
+                        new Image{ }
+                            .Bind(Image.SourceProperty, nameof(CloseImageSource))
+                            .Bind(Image.IsVisibleProperty, nameof(CloseImageSource), convert : (object? obj)=>obj!=null)
+                            .Invoke(v=>v.GestureRecognizers.Add(new TapGestureRecognizer{ }.Invoke(v=>v.Tapped += CloseButton_Clicked)))
+                    }
+                }.Center()
+            }.Center().Margin(0, 0).Padding(8, 5)
+            .Invoke(v => v.GestureRecognizers.Add(new TapGestureRecognizer { }.Invoke(v => v.Tapped += Clicked)))
+            .Invoke(v => v.BindingContext = this)
+            .Assign(out _frame);
+
+            VisualState selectedState = new VisualState { Name = "Selected" };
+            selectedState.Setters.AddBinding(Frame.BackgroundColorProperty, new Binding(nameof(SelectedBackgroundColor), source: this));
+            selectedState.Setters.AddBinding(Frame.HasShadowProperty, new Binding(nameof(SelectedHasShadow), source: this));
+
+            VisualState unSelectedState = new VisualState { Name = "UnSelected" };
+            unSelectedState.Setters.AddBinding(Frame.BackgroundColorProperty, new Binding(nameof(UnselectedBackgroundColor), source: this));
+            unSelectedState.Setters.AddBinding(Frame.HasShadowProperty, new Binding(nameof(UnselectedHasShadow), source: this));
+
+            VisualStateGroup commonStateGroup = new VisualStateGroup { Name = "CommonStates" };
+            commonStateGroup.States.Add(selectedState);
+            commonStateGroup.States.Add(unSelectedState);
+
+            VisualStateManager.SetVisualStateGroups(_frame, new VisualStateGroupList { commonStateGroup });
 
             SizeChanged += (object? sender, EventArgs e) =>
             {
-                frame.CornerRadius = (float)(Height * 0.5);
+                _frame.CornerRadius = (float)(Height * 0.5);
             };
         }
 
@@ -237,7 +285,7 @@ namespace HB.FullStack.Mobile.Controls
         private void RefreshVisualState()
         {
             string stateName = IsToggleable ? (IsSelected ? "Selected" : "Unselected") : "Normal";
-            VisualStateManager.GoToState(frame, stateName);
+            VisualStateManager.GoToState(_frame, stateName);
         }
 
         private void Clicked(object sender, EventArgs args)

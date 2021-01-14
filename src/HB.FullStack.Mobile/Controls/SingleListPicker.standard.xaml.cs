@@ -7,11 +7,11 @@ using HB.FullStack.Mobile.Base;
 using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Xamarin.CommunityToolkit.Markup;
 
 namespace HB.FullStack.Mobile.Controls
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SingleListPicker : BaseContentView
+    public class SingleListPicker : BaseContentView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
             nameof(ItemsSource),
@@ -20,9 +20,7 @@ namespace HB.FullStack.Mobile.Controls
             null,
             BindingMode.OneWay);
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<SingleListPickerItem> ItemsSource
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (IList<SingleListPickerItem>)GetValue(ItemsSourceProperty); }
             set { SetValue(ItemsSourceProperty, value); }
@@ -43,7 +41,28 @@ namespace HB.FullStack.Mobile.Controls
 
         public SingleListPicker()
         {
-            InitializeComponent();
+            Content = new StackLayout { Children = { 
+                    new ListView{ 
+                        SelectionMode = ListViewSelectionMode.None,
+                        ItemTemplate = new DataTemplate(()=>
+                            new ViewCell{ View = new StackLayout{ 
+                                Orientation = StackOrientation.Horizontal,
+                                Children={ 
+                                    new Label{ }.StartExpand().TextCenterVertical().Bind(Label.TextProperty, nameof(SingleListPickerItem.Text)),
+
+                                    new RadioButton{ }.EndExpand()
+                                    .Bind(RadioButton.IsCheckedProperty, nameof(SingleListPickerItem.IsChecked))
+                                    .Bind(RadioButton.GroupNameProperty, nameof(GroupName), source: this)
+                                    .Invoke(view=>view.CheckedChanged += RadioButton_CheckedChanged)
+                                }
+                            }
+                        })
+                    }
+                    .Bind(ListView.ItemsSourceProperty, nameof(ItemsSource))
+                    .Invoke(lst=>lst.ItemTapped += RadioList_ItemTapped)
+                }
+            }.Invoke(layout=>layout.BindingContext = this);
+
         }
 
         private void RadioList_ItemTapped(object sender, ItemTappedEventArgs e)

@@ -4,14 +4,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using HB.FullStack.Mobile.Base;
 
+using Xamarin.CommunityToolkit.Markup;
 using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace HB.FullStack.Mobile.Controls
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MultipleListPicker : BaseContentView
+    public class MultipleListPicker : BaseContentView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
             nameof(ItemsSource),
@@ -20,9 +20,7 @@ namespace HB.FullStack.Mobile.Controls
             null,
             BindingMode.OneWay);
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<MultipleListPickerItem> ItemsSource
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (IList<MultipleListPickerItem>)GetValue(ItemsSourceProperty); }
             set { SetValue(ItemsSourceProperty, value); }
@@ -30,9 +28,7 @@ namespace HB.FullStack.Mobile.Controls
 
         private IList<int> _selectedIndexes = new List<int>();
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<int> SelectedIndexes
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return _selectedIndexes; }
             set { _selectedIndexes = value; OnPropertyChanged(); }
@@ -40,7 +36,21 @@ namespace HB.FullStack.Mobile.Controls
 
         public MultipleListPicker()
         {
-            InitializeComponent();
+            Content = new StackLayout { Children = { 
+                    new ListView{
+                        HorizontalScrollBarVisibility = ScrollBarVisibility.Never,
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Never,
+                        SelectionMode = ListViewSelectionMode.None,
+                        ItemTemplate = new DataTemplate(()=>new ViewCell{View = new StackLayout{ 
+                            Orientation = StackOrientation.Horizontal,
+                            Children={ 
+                                new Label{ }.StartExpand().TextCenterVertical().Bind(Label.TextProperty, nameof(MultipleListPickerItem.Text)),
+                                new CheckBox{ }.EndExpand().Bind(CheckBox.IsCheckedProperty, nameof(MultipleListPickerItem.IsChecked)).Invoke(v=>v.CheckedChanged+=CheckBox_CheckedChanged)
+                            }
+                        } })
+                    }.Bind(ListView.ItemsSourceProperty, nameof(ItemsSource))
+                    .Invoke(v=>v.ItemTapped+=ListView_ItemTapped)
+                } }.Top().Invoke(v => v.BindingContext = this);
         }
 
         private void ListView_ItemTapped(object sender, ItemTappedEventArgs e)
