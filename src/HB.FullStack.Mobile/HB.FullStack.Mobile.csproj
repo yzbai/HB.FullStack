@@ -1,84 +1,109 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
+  <Import Project="..\..\common.props" />
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;Xamarin.iOS10;MonoAndroid11.0</TargetFrameworks>
     <LangVersion>Latest</LangVersion>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+
+    <Product>$(AssemblyName) ($(TargetFramework))</Product>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)'=='Debug' AND $(TargetFramework.StartsWith('MonoAndroid'))">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' AND $(TargetFramework.StartsWith('MonoAndroid'))">
+    <DebugType>portable</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)'=='Debug' AND $(TargetFramework.StartsWith('Xamarin.iOS'))">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' AND $(TargetFramework.StartsWith('Xamarin.iOS'))">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="**/*.shared.cs" />
+    <Compile Include="**/*.shared.*.cs" />
+   
+    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.2" />
+    <PackageReference Include="Xamarin.CommunityToolkit" Version="1.0.1" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.6.1-preview1" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
+
+    <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard2.1')) ">
+
+    <Compile Include="**/*.standard.cs" />
+    <Compile Include="**/*.standard.*.cs" />
+
+
     <None Remove="Styles\materialdesignicons-webfont.ttf" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Styles\materialdesignicons-webfont.ttf" />
-  </ItemGroup>
 
-  <ItemGroup>
-    
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
     <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
-    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.2" />
-    <PackageReference Include="Xamarin.CommunityToolkit" Version="1.0.0-pre6" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1-preview1" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
-  </ItemGroup>
+    <PackageReference Include="Xamarin.CommunityToolkit.Markup" Version="1.0.1" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+    
     <ProjectReference Include="..\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Base\BaseModalDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\ActionSheetCell.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\Chip.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\CommandCell.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\ImageOptions.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\MonthDayPicker.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\MultipleListPicker.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\MultiplePickerDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\SingleListPicker.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Controls\SmsCodeEntry.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+    <Compile Include="**\*.android.cs" />
+    <Compile Include="**\*.android.*.cs" />
+    <!--Resources-->
+    <AndroidResource Include="Resources\**\*.axml" />
+    <AndroidResource Include="Resources\**\*.xml" />
+    <AndroidResource Include="Resources\**\*.png" />
+
+
+    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
+
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Mono.Android" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="TCaptcha\TCaptchaDialog.xaml.cs">
-      <DependentUpon>%(Filename)</DependentUpon>
-    </Compile>
-  </ItemGroup>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+    <Compile Include="**\*.ios.cs" />
+    <Compile Include="**\*.ios.*.cs" />
 
-  <ItemGroup>
-    <EmbeddedResource Update="TCaptcha\TCaptchaDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
+    <Reference Include="Xamarin.iOS" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+
   </ItemGroup>
 
 </Project>

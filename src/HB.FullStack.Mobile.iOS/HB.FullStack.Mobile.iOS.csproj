@@ -40,9 +40,9 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UriImageSourceExHandler.cs" />
-    <Compile Include="PlatformStatusBar.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UriImageSourceExHandler.ios.cs" />
+    <Compile Include="PlatformStatusBar.ios.cs" />
+    <Compile Include="Properties\AssemblyInfo.ios.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HB.FullStack.Mobile\HB.FullStack.Mobile.csproj">
