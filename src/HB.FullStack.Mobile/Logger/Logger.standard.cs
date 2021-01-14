@@ -9,10 +9,10 @@ namespace HB.FullStack.Mobile.Logger
 {
     public class Logger : ILogger
     {
-        private readonly IPlatformLoggerImpl? _impl;
+        private readonly ILoggerImpl? _impl;
         private readonly LogLevel _minLevel;
 
-        public Logger(IPlatformLoggerImpl? impl, LogLevel logLevel)
+        public Logger(ILoggerImpl? impl, LogLevel logLevel)
         {
             _impl = impl;
             _minLevel = logLevel;

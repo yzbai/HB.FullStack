@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace HB.FullStack.Mobile.Platforms
 {
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
-    public interface IPlatformLoggerImpl
+    public interface ILoggerImpl
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
     {
         void Wtf(string message);

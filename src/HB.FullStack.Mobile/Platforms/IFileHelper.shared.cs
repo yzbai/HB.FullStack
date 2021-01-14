@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Platforms
 {
-    public interface IPlatformFileHelper
+    public interface IFileHelper
     {
         Task SaveAvatarAsync(ImageSource imageSource, long usreId);
 

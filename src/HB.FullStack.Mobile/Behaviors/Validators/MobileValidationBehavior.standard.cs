@@ -2,7 +2,7 @@
 using HB.FullStack.Common.Validate;
 
 using Xamarin.CommunityToolkit.Behaviors;
-using Xamarin.CommunityToolkit.Behaviors.Internals2;
+using Xamarin.CommunityToolkit.Behaviors.Internals;
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Behaviors

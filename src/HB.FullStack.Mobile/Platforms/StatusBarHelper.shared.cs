@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HB.FullStack.Mobile.Platforms
 {
-    public interface IPlatformStatusBarHelper
+    public interface IStatusBarHelper
     {
         bool IsShowing { get; }
 

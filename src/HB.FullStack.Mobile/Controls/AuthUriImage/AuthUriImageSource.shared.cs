@@ -3,16 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.FullStack.Mobile;
+
 using HB.FullStack.Mobile.Extensions;
 
-using Xamarin.Forms;
 using Xamarin.Forms.Internals;
+
 using IOPath = System.IO.Path;
 
 namespace Xamarin.Forms
@@ -20,12 +18,12 @@ namespace Xamarin.Forms
 	/// <summary>
 	/// 从Xamarin.Forms复制. 
 	/// </summary>
-	public sealed class UriImageSourceEx : ImageSource
+	public sealed class AuthUriImageSource : ImageSource
 	{
 		internal const string CacheName = "ImageLoaderCache";
 
-		public static readonly BindableProperty UriProperty = BindableProperty.Create("Uri", typeof(Uri), typeof(UriImageSourceEx), default(Uri),
-			propertyChanged: (bindable, oldvalue, newvalue) => ((UriImageSourceEx)bindable).OnUriChanged(), validateValue: (bindable, value) => value == null || ((Uri)value).IsAbsoluteUri);
+		public static readonly BindableProperty UriProperty = BindableProperty.Create("Uri", typeof(Uri), typeof(AuthUriImageSource), default(Uri),
+			propertyChanged: (bindable, oldvalue, newvalue) => ((AuthUriImageSource)bindable).OnUriChanged(), validateValue: (bindable, value) => value == null || ((Uri)value).IsAbsoluteUri);
 
 		static readonly Xamarin.Forms.Internals.IIsolatedStorageFile Store = Device.PlatformServices.GetUserStoreForApplication();
 
@@ -36,7 +34,7 @@ namespace Xamarin.Forms
 
 		bool _cachingEnabled = true;
 
-		static UriImageSourceEx()
+		static AuthUriImageSource()
 		{
 			if (!Store.GetDirectoryExistsAsync(CacheName).Result)
 				Store.CreateDirectoryAsync(CacheName).Wait();

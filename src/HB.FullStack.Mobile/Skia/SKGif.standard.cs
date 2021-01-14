@@ -28,7 +28,7 @@ namespace HB.FullStack.Mobile.Skia
         {
             return Task.Run(async () =>
             {
-                IPlatformFileHelper fileService = DependencyService.Resolve<IPlatformFileHelper>();
+                IFileHelper fileService = DependencyService.Resolve<IFileHelper>();
 
                 using Stream stream = await fileService.GetStreamOfResourceAsync(fileName).ConfigureAwait(false);
                 using SKManagedStream sKManagedStream = new SKManagedStream(stream);

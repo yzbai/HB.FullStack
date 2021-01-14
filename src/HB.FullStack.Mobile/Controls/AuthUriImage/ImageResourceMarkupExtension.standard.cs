@@ -30,7 +30,7 @@ namespace HB.FullStack.Mobile.Extensions
                     return ImageSource.FromFile(Source);
                 }
 
-                return new UriImageSourceEx { Uri = result };
+                return new AuthUriImageSource { Uri = result };
             }
 
             throw new InvalidOperationException($"Cannot convert \"{Source}\" into {typeof(ImageSource)}");

@@ -98,7 +98,7 @@ namespace HB.FullStack.Mobile.Base
                 //_remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
 
                 //UriImageSourceEx
-                UriImageSourceEx.HttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
+                AuthUriImageSource.HttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
 
                 //Connectivity
                 Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };

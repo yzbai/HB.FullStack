@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Base
 {
-    public interface IBaseContentView
-    {
-        bool IsAppearing { get; }
-
-        void OnAppearing();
-        void OnDisappearing();
-
-        IList<IBaseContentView?>? GetAllCustomerControls();
-    }
 
     public abstract class BaseContentView : ContentView, IBaseContentView
     {

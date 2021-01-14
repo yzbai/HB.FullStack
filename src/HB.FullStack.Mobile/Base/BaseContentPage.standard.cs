@@ -36,17 +36,17 @@ namespace HB.FullStack.Mobile.Base
         {
             get
             {
-                return DependencyService.Resolve<IPlatformStatusBarHelper>().IsShowing;
+                return DependencyService.Resolve<IStatusBarHelper>().IsShowing;
             }
             set
             {
                 if (value)
                 {
-                    DependencyService.Resolve<IPlatformStatusBarHelper>().Show();
+                    DependencyService.Resolve<IStatusBarHelper>().Show();
                 }
                 else
                 {
-                    DependencyService.Resolve<IPlatformStatusBarHelper>().Hide();
+                    DependencyService.Resolve<IStatusBarHelper>().Hide();
                 }
             }
         }

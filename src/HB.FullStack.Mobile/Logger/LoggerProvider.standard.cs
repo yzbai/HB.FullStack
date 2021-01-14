@@ -11,7 +11,7 @@ namespace HB.FullStack.Mobile.Logger
 
         public LoggerProvider(LogLevel logLevel)
         {
-            IPlatformLoggerImpl? impl = DependencyService.Get<IPlatformLoggerImpl>();
+            ILoggerImpl? impl = DependencyService.Get<ILoggerImpl>();
 
             _logger = new Logger(impl, logLevel);
         }
