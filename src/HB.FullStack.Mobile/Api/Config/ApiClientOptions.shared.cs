@@ -46,7 +46,7 @@ namespace HB.FullStack.Mobile.Api
                 }
             }
 
-            return _apiKeysDict.TryGetValue(name, out key);
+            return _apiKeysDict.TryGetValue(name!, out key);
         }
     }
 
