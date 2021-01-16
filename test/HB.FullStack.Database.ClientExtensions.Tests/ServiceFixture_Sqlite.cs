@@ -24,6 +24,7 @@ namespace HB.FullStack
 
             IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
                .AddEnvironmentVariables()
+               .AddUserSecrets<ServiceFixture_Sqlite>()
                .SetBasePath(Environment.CurrentDirectory)
                .AddJsonFile("appsettings.json", optional: false)
                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true);
@@ -57,7 +58,7 @@ namespace HB.FullStack
             GlobalSettings.Logger = ServiceProvider.GetRequiredService<ILogger<ServiceFixture_Sqlite>>();
             ServiceProvider.GetRequiredService<IDatabase>().InitializeAsync().Wait();
 
-            GlobalSettings.Logger.LogInformation($"当前Process,{Environment.ProcessId}");
+            //GlobalSettings.Logger.LogInformation($"当前Process,{Environment.ProcessId}");
         }
     }
 }

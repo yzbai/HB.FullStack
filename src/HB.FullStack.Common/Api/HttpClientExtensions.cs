@@ -68,10 +68,26 @@ namespace System.Net.Http
 
                 return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             }
+            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+            {
+                // Handle timeout.
+                throw new ApiException(ApiErrorCode.Timeout, $"Request:{SerializeUtil.ToJson(request)}", ex);
+            }
             catch (TaskCanceledException ex) when (ex.InnerException is SocketException)
             {
                 throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}", ex);
             }
+            catch (TaskCanceledException ex)
+            {
+                // Handle cancellation.
+                throw new ApiException(ApiErrorCode.RequestCanceled, $"Request:{SerializeUtil.ToJson(request)}", ex);
+            }
+            //TODO: when using .net 5
+            //catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            //{
+            //    // Handle 404
+            //    Console.WriteLine("Not found: " + ex.Message);
+            //}
             catch (OperationCanceledException ex)
             {
                 throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}", ex);

@@ -49,8 +49,8 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// <param name="userGuid"></param>
         /// <param name="isRead"></param>
         /// <returns></returns>
-        /// <exception cref="Aliyun.AliyunException"></exception>
-        /// <exception cref="Aliyun.AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
         public AliyunStsToken GetUserDirectoryToken(string bucket, string userGuid, bool isRead)
         {
             return GetDirectoryToken(bucket, GetUserDirectory(bucket, userGuid), GetRoleSessionName(userGuid), isRead);
@@ -65,7 +65,8 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// <param name="roleSessionName"></param>
         /// <param name="isRead"></param>
         /// <returns></returns>
-        /// <exception cref="Aliyun.AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
         public AliyunStsToken GetDirectoryToken(string bucket, string directory, string roleSessionName, bool isRead)
         {
             if (!_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
@@ -118,7 +119,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// </summary>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        /// <exception cref="Aliyun.AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
         public string GetOssEndpoint(string bucket)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
@@ -134,7 +135,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// </summary>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        /// <exception cref="Aliyun.AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
         public string GetRegionId(string bucket)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
@@ -151,7 +152,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// <param name="bucket"></param>
         /// <param name="userGuid"></param>
         /// <returns></returns>
-        /// <exception cref="Aliyun.AliyunException"></exception>
+        /// <exception cref="AliyunException"></exception>
         private string GetUserDirectory(string bucket, string userGuid)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))

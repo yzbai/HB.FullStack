@@ -31,5 +31,7 @@ namespace HB.FullStack.Common.Api
         ServerError,
         ClientError,
         NullReturn,
+        Timeout,
+        RequestCanceled,
     }
 }
