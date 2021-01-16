@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,3 +52,4 @@ namespace HB.FullStack.Mobile.Droid
 		}
 	}
 }
+#nullable restore

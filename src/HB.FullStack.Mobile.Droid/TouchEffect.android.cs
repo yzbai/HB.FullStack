@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -215,3 +216,4 @@ namespace HB.FullStack.Mobile.Droid.Effects
         }
     }
 }
+#nullable restore

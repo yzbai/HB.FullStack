@@ -1,4 +1,5 @@
-﻿using Android.Content;
+﻿#nullable enable
+using Android.Content;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
@@ -293,3 +294,4 @@ namespace HB.FullStack.Mobile.Droid.Renders
         }
     }
 }
+#nullable restore

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Threading.Tasks;
 using Android.Graphics;
 using Xamarin.Forms.Internals;
@@ -72,3 +73,4 @@ namespace Xamarin.Forms
         }
     }
 }
+#nullable restore
