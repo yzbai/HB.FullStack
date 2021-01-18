@@ -1,11 +1,13 @@
-﻿using System;
+﻿using HB.FullStack.Mobile.Controls;
+
+using System;
 using System.Globalization;
 
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Extensions
 {
-    public class ImageSourceConverter : IValueConverter
+    public class AuthImageSourceConverter : IValueConverter
     {
         /// <summary>
         /// Convert
@@ -33,17 +35,8 @@ namespace HB.FullStack.Mobile.Extensions
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is FileImageSource fileImageSource)
-            {
-                return fileImageSource.File;
-            }
 
-            if (value is UriImageSource uriImageSource)
-            {
-                return uriImageSource.Uri.ToString();
-            }
-
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
     }
 }

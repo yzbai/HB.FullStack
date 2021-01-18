@@ -30,6 +30,8 @@ namespace HB.FullStack.Mobile.Api
                 return errors == System.Net.Security.SslPolicyErrors.None;
             };
 #endif
+
+            GlobalSettings.Logger.LogInformation("TokenAutoRefreshedHttpClientHandler Inited.");
         }
 
         /// <summary>
@@ -41,6 +43,14 @@ namespace HB.FullStack.Mobile.Api
         /// <exception cref="ApiException">Ignore.</exception>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
+
+            if (endpointSettings == null)
+            {
+                GlobalSettings.Logger.LogDebug("Not found endpoint");
+                return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+
             AddDeviceInfo(request);
             AddAuthInfo(request);
 
@@ -54,14 +64,9 @@ namespace HB.FullStack.Mobile.Api
             {
                 if (ex.HttpCode == System.Net.HttpStatusCode.Unauthorized && ex.ErrorCode == ApiErrorCode.AccessTokenExpired)
                 {
-                    EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
+                    await TokenRefresher.RefreshAccessTokenAsync(_apiClient, endpointSettings).ConfigureAwait(false);
 
-                    if (endpointSettings != null)
-                    {
-                        await TokenRefresher.RefreshAccessTokenAsync(_apiClient, endpointSettings).ConfigureAwait(false);
-
-                        return responseMessage;
-                    }
+                    return responseMessage;
                 }
 
                 GlobalSettings.Logger.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");

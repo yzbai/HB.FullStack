@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
 using HB.FullStack.Mobile.Api;
+using HB.FullStack.Mobile.Controls;
 using HB.FullStack.Mobile.Logger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

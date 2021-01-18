@@ -8,16 +8,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
 using Android.Graphics;
+
+using HB.FullStack.Mobile.Controls;
 using HB.FullStack.Mobile.Droid;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 
-[assembly: ExportImageSourceHandler(typeof(AuthUriImageSource), typeof(AuthUriImageSourceHandler))]
+[assembly: ExportImageSourceHandler(typeof(AuthUriImageSource), typeof(AuthImageSourceHandler))]
 
 namespace HB.FullStack.Mobile.Droid
 {
-	public class AuthUriImageSourceHandler
+	public class AuthImageSourceHandler : IImageSourceHandler
 	{
 		/// <summary>
 		/// LoadImageAsync
