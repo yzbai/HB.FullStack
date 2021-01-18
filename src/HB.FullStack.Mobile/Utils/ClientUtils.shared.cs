@@ -74,7 +74,7 @@ namespace HB.FullStack.Mobile
             return SecurityUtil.CreateUniqueToken();
         }
 
-        public static IConfiguration BuildConfiguration(string appsettingsFile, [ValidatedNotNull] Assembly executingAssembly)
+        public static IConfiguration GetConfiguration(string appsettingsFile, [ValidatedNotNull] Assembly executingAssembly)
         {
             ThrowIf.Empty(appsettingsFile, nameof(appsettingsFile));
 
