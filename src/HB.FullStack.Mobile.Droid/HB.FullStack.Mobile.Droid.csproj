@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthUriImageSourceHandler.android.cs" />
+    <Compile Include="AuthImageSourceHandler.android.cs" />
     <Compile Include="FocusEffect.android.cs" />
     <Compile Include="HybridWebViewRenderer.android.cs" />
     <Compile Include="ImageExtensions.android.cs" />
@@ -70,7 +70,7 @@
     <PackageReference Include="Xamarin.CommunityToolkit" Version="1.0.1" />
     <PackageReference Include="Xamarin.Essentials" Version="1.6.1-preview1" />
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
-    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.5" />
+    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\strings.xml" />

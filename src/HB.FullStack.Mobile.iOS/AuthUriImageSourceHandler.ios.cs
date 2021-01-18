@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreAnimation;
 using Foundation;
+
+using HB.FullStack.Mobile.Controls;
 using HB.FullStack.Mobile.iOS;
 using ImageIO;
 using UIKit;

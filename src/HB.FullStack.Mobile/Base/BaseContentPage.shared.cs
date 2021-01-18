@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+
 using HB.FullStack.Mobile.Platforms;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Base
@@ -55,7 +57,11 @@ namespace HB.FullStack.Mobile.Base
 
         protected BaseContentPage()
         {
-            ControlTemplate = (ControlTemplate)Application.Current.Resources["BaseContentPageControlTemplate"];
+            if (Application.Current.Resources.TryGetValue("BaseContentPageControlTemplate", out object controlTemplate))
+            {
+                ControlTemplate = (ControlTemplate)controlTemplate;
+            }
+
             PageName = GetType().Name;
 
             //Application.Current.LogUsage(UsageType.PageCreate, PageName);
