@@ -277,6 +277,36 @@ namespace HB.FullStack.Database.SQL
 			};
 		}
 
+		public static string Transaction_Begin(EngineType engineType)
+        {
+			return engineType switch
+            {
+                EngineType.MySQL => "Begin;",
+                EngineType.SQLite => "Begin;",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+		public static string Transaction_Commit(EngineType engineType)
+        {
+			return engineType switch
+			{
+				EngineType.MySQL => "Commit;",
+				EngineType.SQLite => "Commit;",
+				_ => throw new NotImplementedException(),
+			};
+		}
+
+		public static string Transaction_Rollback(EngineType engineType)
+        {
+			return engineType switch
+			{
+				EngineType.MySQL => "Rollback;",
+				EngineType.SQLite => "Rollback;",
+				_ => throw new NotImplementedException(),
+			};
+		}
+
 		public static string FoundChanges_Statement(EngineType databaseEngineType)
 		{
 			return databaseEngineType switch

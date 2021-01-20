@@ -1105,7 +1105,7 @@ namespace HB.FullStack.Database
         /// BatchAddAsync，反应Version变化
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -1124,9 +1124,10 @@ namespace HB.FullStack.Database
 
                 IList<object> newIds = new List<object>();
 
-                var command = DbCommandBuilder.CreateBatchAddCommand(EngineType, entityDef, items);
+                var command = DbCommandBuilder.CreateBatchAddCommand(EngineType, entityDef, items, transContext == null);
+
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext.Transaction,
+                    transContext?.Transaction,
                     entityDef.DatabaseName!,
                     command,
                     true).ConfigureAwait(false);
@@ -1162,14 +1163,21 @@ namespace HB.FullStack.Database
 
                 return newIds;
             }
-            catch (DatabaseException)
+            catch (DatabaseException ex)
             {
-                RestoreItems(items);
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                {
+                    RestoreItems(items);
+                }
+
                 throw;
             }
             catch (Exception ex)
             {
-                RestoreItems(items);
+                if (transContext != null)
+                {
+                    RestoreItems(items);
+                }
 
                 string detail = $"Items:{SerializeUtil.ToJson(items)}";
                 throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
@@ -1198,7 +1206,7 @@ namespace HB.FullStack.Database
         /// 批量更改，反应Version变化
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -1215,9 +1223,9 @@ namespace HB.FullStack.Database
             {
                 PrepareItems(items, lastUser);
 
-                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, entityDef, items);
+                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, entityDef, items, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext.Transaction,
+                    transContext?.Transaction,
                     entityDef.DatabaseName!,
                     command,
                     true).ConfigureAwait(false);
@@ -1241,14 +1249,21 @@ namespace HB.FullStack.Database
                     throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName}, BatchUpdate wrong number return. Some data item not found. Items:{SerializeUtil.ToJson(items)}");
                 }
             }
-            catch (DatabaseException)
+            catch (DatabaseException ex)
             {
-                RestoreItems(items);
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                {
+                    RestoreItems(items);
+                }
+
                 throw;
             }
             catch (Exception ex)
             {
-                RestoreItems(items);
+                if (transContext != null)
+                {
+                    RestoreItems(items);
+                }
 
                 string detail = $"Items:{SerializeUtil.ToJson(items)}";
                 throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
@@ -1277,7 +1292,7 @@ namespace HB.FullStack.Database
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext transContext) where T : DatabaseEntity, new()
+        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -1294,9 +1309,9 @@ namespace HB.FullStack.Database
             {
                 PrepareItems(items, lastUser);
 
-                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, entityDef, items);
+                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, entityDef, items, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext.Transaction,
+                    transContext?.Transaction,
                     entityDef.DatabaseName!,
                     command,
                     true).ConfigureAwait(false);
@@ -1320,14 +1335,21 @@ namespace HB.FullStack.Database
                     throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName}, BatchDelete wrong number return. Some data item not found. Items:{SerializeUtil.ToJson(items)}");
                 }
             }
-            catch (DatabaseException)
+            catch (DatabaseException ex)
             {
-                RestoreItems(items);
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                {
+                    RestoreItems(items);
+                }
+
                 throw;
             }
             catch (Exception ex)
             {
-                RestoreItems(items);
+                if (transContext != null)
+                {
+                    RestoreItems(items);
+                }
 
                 string detail = $"Items:{SerializeUtil.ToJson(items)}";
                 throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{ entityDef.EntityFullName}, {detail}", ex);
