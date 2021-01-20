@@ -32,7 +32,7 @@ namespace HB.FullStack.Mobile.Base
             {
                 if (_configuration == null)
                 {
-                    _configuration = ClientUtils.BuildConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
+                    _configuration = ClientUtils.GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
                 }
 
                 return _configuration;

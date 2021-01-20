@@ -246,7 +246,7 @@ namespace HB.FullStack.Repository
         /// <param name="transContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<IEnumerable<object>> AddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        public async Task<IEnumerable<object>> AddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
             {
@@ -285,7 +285,7 @@ namespace HB.FullStack.Repository
         /// <param name="transContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public async Task UpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        public async Task UpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
             {
@@ -323,7 +323,7 @@ namespace HB.FullStack.Repository
         /// <param name="transContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public async Task DeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext transContext)
+        public async Task DeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
             {

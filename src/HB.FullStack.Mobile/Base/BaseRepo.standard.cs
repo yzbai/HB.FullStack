@@ -14,16 +14,15 @@ using HB.FullStack.Database.Def;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using HB.FullStack.Mobile.Base;
+using Microsoft;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Mobile.Repos
 {
     public abstract class BaseRepo
     {
-        /// <summary>
-        /// InsureLogined
-        /// </summary>
         /// <exception cref="ApiException"></exception>
-        protected static void InsureLogined()
+        protected static void EnsureLogined()
         {
             if (!UserPreferences.IsLogined)
             {
@@ -31,13 +30,8 @@ namespace HB.FullStack.Mobile.Repos
             }
         }
 
-        /// <summary>
-        /// InsureInternet
-        /// </summary>
-        /// <param name="allowOffline"></param>
-        /// <returns></returns>
         /// <exception cref="ApiException"></exception>
-        protected static bool InsureInternet(bool allowOffline = false)
+        protected static bool EnsureInternet(bool allowOffline = false)
         {
             if (Connectivity.NetworkAccess != NetworkAccess.Internet)
             {
@@ -50,6 +44,15 @@ namespace HB.FullStack.Mobile.Repos
             }
 
             return true;
+        }
+
+        /// <exception cref="ApiException"></exception>
+        protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string entityName)
+        {
+            if (obj == null)
+            {
+                throw new ApiException(HB.FullStack.Common.Api.ApiErrorCode.NullReturn, $"Parameter: {entityName}");
+            }
         }
     }
 
@@ -108,81 +111,13 @@ namespace HB.FullStack.Mobile.Repos
             RequestLocker.UnLock(apiRequest.GetType().FullName!, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
         }
 
-        /// <summary>
-        /// GetSingleAsync
-        /// </summary>
-        /// <param name="where"></param>
-        /// <param name="request"></param>
-        /// <param name="transactionContext"></param>
-        /// <param name="forced"></param>
-        /// <returns></returns>
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        protected async Task<TEntity?> GetSingleAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext = null, bool forced = false)
+        protected async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext, bool forced = false)
         {
             if (NeedLogined)
             {
-                InsureLogined();
-            }
-
-            if (!forced && LocalDataAvailable(request))
-            {
-                TEntity? local = await Database.ScalarAsync(where, transactionContext).ConfigureAwait(false);
-
-                if (local != null)
-                {
-                    return local;
-                }
-            }
-
-            if (!InsureInternet(AllowOfflineRead))
-            {
-                //被迫使用离线数据
-                NotifyOfflineDataUsed();
-
-                TEntity? local = await Database.ScalarAsync(where, transactionContext).ConfigureAwait(false);
-
-                if (local != null)
-                {
-                    return local;
-                }
-
-                throw new ApiException(ApiErrorCode.ApiNotAvailable);
-            }
-
-            //获取全程，更新本地
-
-            TRes? res = await ApiClient.GetSingleAsync(request).ConfigureAwait(false);
-
-            if (res == null)
-            {
-                return null;
-            }
-
-            TEntity remote = ToEntity(res);
-
-            await Database.AddOrUpdateByIdAsync(remote).ConfigureAwait(false); //考虑Fire（）
-
-            return remote;
-        }
-
-        
-
-        /// <summary>
-        /// GetAsync
-        /// </summary>
-        /// <param name="where"></param>
-        /// <param name="request"></param>
-        /// <param name="transactionContext"></param>
-        /// <param name="forced"></param>
-        /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        protected async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext transactionContext, bool forced = false)
-        {
-            if (NeedLogined)
-            {
-                InsureLogined();
+                EnsureLogined();
             }
 
             if (!forced && LocalDataAvailable(request))
@@ -195,7 +130,7 @@ namespace HB.FullStack.Mobile.Repos
                 }
             }
 
-            if (!InsureInternet(AllowOfflineRead))
+            if (!EnsureInternet(AllowOfflineRead))
             {
                 //被迫使用离线数据
                 NotifyOfflineDataUsed();
@@ -221,19 +156,20 @@ namespace HB.FullStack.Mobile.Repos
             return remotes;
         }
 
-        /// <summary>
-        /// AddAsync
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
+        protected async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext, bool forced = false)
+        {
+            IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, forced).ConfigureAwait(false);
+
+            return entities.FirstOrDefault();
+        }
+
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext transactionContext)
+        public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext? transactionContext)
         {
             ThrowIf.NotValid(entities, nameof(entities));
 
-            if (InsureInternet(AllowOfflineWrite))
+            if (EnsureInternet(AllowOfflineWrite))
             {
                 //Remote
                 AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)));
@@ -250,19 +186,13 @@ namespace HB.FullStack.Mobile.Repos
             }
         }
 
-        /// <summary>
-        /// UpdateAsync
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
         public async Task UpdateAsync(TEntity entity, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotValid(entity, nameof(entity));
 
-            if (InsureInternet(AllowOfflineWrite))
+            if (EnsureInternet(AllowOfflineWrite))
             {
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 

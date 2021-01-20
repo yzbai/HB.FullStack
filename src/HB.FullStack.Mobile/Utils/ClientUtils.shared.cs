@@ -74,28 +74,17 @@ namespace HB.FullStack.Mobile
             return SecurityUtil.CreateUniqueToken();
         }
 
-        public static IConfiguration BuildConfiguration(string appsettingsName, [ValidatedNotNull] Assembly executingAssembly)
+        public static IConfiguration GetConfiguration(string appsettingsFile, [ValidatedNotNull] Assembly executingAssembly)
         {
-            ThrowIf.Empty(appsettingsName, nameof(appsettingsName));
-            //ThrowIf.Null(executingAssembly, nameof(executingAssembly));
+            ThrowIf.Empty(appsettingsFile, nameof(appsettingsFile));
 
-            string fileName = $"{executingAssembly.FullName!.Split(",")[0]}.{appsettingsName}";
-            //string fileName = appsettingsName;
+            string fileName = $"{executingAssembly.FullName!.Split(",")[0]}.{appsettingsFile}";
 
-            string fullPath = Path.Combine(FileSystem.CacheDirectory, fileName);
-
-            using (Stream? resFileStream = executingAssembly.GetManifestResourceStream(fileName))
-            {
-                if (resFileStream != null)
-                {
-                    using FileStream fileStream = File.Create(fullPath);
-                    resFileStream.CopyTo(fileStream);
-                }
-            }
+            using Stream resFileStream = executingAssembly.GetManifestResourceStream(fileName);
 
             IConfigurationBuilder builder = new ConfigurationBuilder();
 
-            builder.AddJsonFile(fullPath, false);
+            builder.AddJsonStream(resFileStream);
 
             return builder.Build();
         }
