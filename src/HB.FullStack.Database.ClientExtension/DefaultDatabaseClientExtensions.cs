@@ -100,7 +100,7 @@ namespace HB.FullStack.Database
         /// warning: 不改变items！！！！
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext transContext) where T : DatabaseEntity, new()
+        public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -123,7 +123,7 @@ namespace HB.FullStack.Database
                     item.LastTime = TimeUtil.UtcNow;
                 }
 
-                var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, entityDef, items);
+                var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, entityDef, items, transContext == null);
 
                 await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, command).ConfigureAwait(false);
             }

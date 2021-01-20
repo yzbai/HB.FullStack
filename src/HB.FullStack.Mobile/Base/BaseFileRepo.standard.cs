@@ -15,17 +15,10 @@ namespace HB.FullStack.Mobile.Repos
             ApiClient = apiClient;
         }
 
-        /// <summary>
-        /// UploadAsync
-        /// </summary>
-        /// <param name="fileSuffix"></param>
-        /// <param name="fileDatas"></param>
-        /// <param name="resources"></param>
-        /// <returns></returns>
         /// <exception cref="System.ApiException"></exception>
         public Task UploadAsync(string fileSuffix, IEnumerable<byte[]> fileDatas, IEnumerable<TRes> resources)
         {
-            InsureInternet();
+            EnsureInternet();
 
             string suffix = fileSuffix.StartsWith('.') ? fileSuffix : "." + fileSuffix;
 

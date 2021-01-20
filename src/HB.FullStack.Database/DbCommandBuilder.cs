@@ -478,7 +478,7 @@ namespace HB.FullStack.Database
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public static EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities) where T : DatabaseEntity, new()
+        public static EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
 
@@ -500,10 +500,21 @@ namespace HB.FullStack.Database
             }
 
             StringBuilder commandTextBuilder = new StringBuilder();
+
+            if(needTrans)
+            {
+                commandTextBuilder.Append(SqlHelper.Transaction_Begin(engineType));
+            }
+
             //commandTextBuilder.Append($"{SqlHelper.TempTable_Drop(tempTableName, engineType)}");
             //commandTextBuilder.Append($"{SqlHelper.TempTable_Create_Id(tempTableName, engineType)}");
-            commandTextBuilder.Append($"{innerBuilder}");
+            commandTextBuilder.Append(innerBuilder);
             //commandTextBuilder.Append($"{SqlHelper.TempTable_Drop(tempTableName, engineType)}");
+
+            if(needTrans)
+            {
+                commandTextBuilder.Append(SqlHelper.Transaction_Commit(engineType));
+            }
 
             return new EngineCommand(commandTextBuilder.ToString(), parameters);
         }

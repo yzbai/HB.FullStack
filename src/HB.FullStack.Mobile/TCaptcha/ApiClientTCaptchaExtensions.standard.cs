@@ -22,7 +22,7 @@ namespace HB.FullStack.Mobile.Api
         {
             try
             {
-                T? resource = await apiClient.GetSingleAsync(request).ConfigureAwait(false);
+                T? resource = await apiClient.GetFirstOrDefaultAsync(request).ConfigureAwait(false);
 
                 if (onSuccessDelegate != null)
                 {
@@ -41,7 +41,7 @@ namespace HB.FullStack.Mobile.Api
 
                     request.PublicResourceToken = result;
 
-                    T? resource = await apiClient.GetSingleAsync(request).ConfigureAwait(false);
+                    T? resource = await apiClient.GetFirstOrDefaultAsync(request).ConfigureAwait(false);
 
                     if (onSuccessDelegate != null)
                     {

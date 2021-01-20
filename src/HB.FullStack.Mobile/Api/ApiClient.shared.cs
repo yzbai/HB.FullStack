@@ -39,11 +39,7 @@ namespace HB.FullStack.Mobile.Api
 
         /// <exception cref="ApiException"></exception>
         public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource
-            => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? new List<T>();
-
-        /// <exception cref="ApiException"></exception>
-        public Task<T?> GetSingleAsync<T>(ApiRequest<T> request) where T : ApiResource
-            => SendAsync<T, T>(request, ApiRequestType.GetSingle);
+            => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? Array.Empty<T>();
 
         /// <exception cref="ApiException"></exception>
         public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource

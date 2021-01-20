@@ -58,7 +58,7 @@ namespace HB.FullStack.Mobile.Api
                         UserPreferences.AccessToken,
                         UserPreferences.RefreshToken);
 
-                    AccessTokenResource? resource = await apiClient.GetSingleAsync(refreshRequest).ConfigureAwait(false);
+                    AccessTokenResource? resource = await apiClient.GetFirstOrDefaultAsync(refreshRequest).ConfigureAwait(false);
 
                     if (resource != null)
                     {
