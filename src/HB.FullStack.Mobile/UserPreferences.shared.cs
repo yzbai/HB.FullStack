@@ -14,24 +14,9 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile
 {
-    //public enum ClientState
-    //{
-    //    NotLogined,
-    //    NewVersionAndLogined,
-    //    OldVersionAndLogined
-    //}
-
     //TODO: 考虑SecurityStorage不支持时，改用普通的Storage
     public static class UserPreferences
     {
-        private const string UserId_Preference_Name = "wjUfoxCi";
-        private const string UserCreateTime_Preference_Name = "WMIliRIP";
-        private const string Mobile_Preference_Name = "H8YA3d5aj";
-        private const string Email_Preference_Name = "B2JG5UN5f";
-        private const string LoginName_Preference_Name = "UwsSmhY1";
-        private const string AccessToken_Preference_Name = "D3SQAAtrv";
-        private const string RefreshToken_Preference_Name = "ZTpMCJQl";
-
         private static long? _userId;
         private static DateTimeOffset? _userCreateTime;
         private static string? _mobile;
@@ -40,26 +25,16 @@ namespace HB.FullStack.Mobile
         private static string? _accessToken;
         private static string? _refreshToken;
 
-        static UserPreferences()
-        {
-            //Loading
-            string? storedValue = PreferenceHelper.PreferenceGetAsync(UserId_Preference_Name).Result;
-            _userId = storedValue == null ? null : Convert.ToInt64(storedValue, CultureInfo.InvariantCulture);
-
-            storedValue = PreferenceHelper.PreferenceGetAsync(UserCreateTime_Preference_Name).Result;
-            _userCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
-
-            _mobile = PreferenceHelper.PreferenceGetAsync(Mobile_Preference_Name).Result;
-            _loginName = PreferenceHelper.PreferenceGetAsync(LoginName_Preference_Name).Result;
-            _email = PreferenceHelper.PreferenceGetAsync(Email_Preference_Name).Result;
-            _accessToken = PreferenceHelper.PreferenceGetAsync(AccessToken_Preference_Name).Result;
-            _refreshToken = PreferenceHelper.PreferenceGetAsync(RefreshToken_Preference_Name).Result;
-        }
-
         public static long? UserId
         {
             get
             {
+                if (!_userId.HasValue)
+                {
+                    string? storedValue = PreferenceHelper.PreferenceGetAsync(Consts.UserId_Preference_Name).Result;
+                    _userId = storedValue == null ? null : Convert.ToInt64(storedValue, CultureInfo.InvariantCulture);
+                }
+
                 return _userId;
             }
             private set
@@ -68,7 +43,7 @@ namespace HB.FullStack.Mobile
 
                 if (_userId.HasValue)
                 {
-                    PreferenceHelper.PreferenceSetAsync(UserId_Preference_Name, _userId.Value.ToString(CultureInfo.InvariantCulture)).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.UserId_Preference_Name, _userId.Value.ToString(CultureInfo.InvariantCulture)).Wait();
                 }
             }
         }
@@ -77,6 +52,12 @@ namespace HB.FullStack.Mobile
         {
             get
             {
+                if (!_userCreateTime.HasValue)
+                {
+                    string? storedValue = PreferenceHelper.PreferenceGetAsync(Consts.UserCreateTime_Preference_Name).Result;
+                    _userCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
+                }
+
                 return _userCreateTime;
             }
             private set
@@ -85,7 +66,7 @@ namespace HB.FullStack.Mobile
 
                 if (_userCreateTime.HasValue)
                 {
-                    PreferenceHelper.PreferenceSetAsync(UserCreateTime_Preference_Name, _userCreateTime.Value.ToString(CultureInfo.InvariantCulture)).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.UserCreateTime_Preference_Name, _userCreateTime.Value.ToString(CultureInfo.InvariantCulture)).Wait();
                 }
             }
         }
@@ -94,6 +75,10 @@ namespace HB.FullStack.Mobile
         {
             get
             {
+                if (_mobile.IsNullOrEmpty())
+                {
+                    _mobile = PreferenceHelper.PreferenceGetAsync(Consts.Mobile_Preference_Name).Result;
+                }
                 return _mobile;
             }
             private set
@@ -102,69 +87,100 @@ namespace HB.FullStack.Mobile
 
                 if (_mobile.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.PreferenceSetAsync(Mobile_Preference_Name, _mobile).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.Mobile_Preference_Name, _mobile).Wait();
                 }
             }
         }
 
         public static string? Email
         {
-            get => _email;
+            get
+            {
+                if (_email.IsNullOrEmpty())
+                {
+                    _email = PreferenceHelper.PreferenceGetAsync(Consts.Email_Preference_Name).Result;
+                }
+
+                return _email;
+            }
             private set
             {
                 _email = value;
 
-                if(_email.IsNotNullOrEmpty())
+                if (_email.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.PreferenceSetAsync(Email_Preference_Name, _email).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.Email_Preference_Name, _email).Wait();
                 }
             }
         }
 
         public static string? LoginName
         {
-            get => _loginName;
+            get
+            {
+                if (_loginName.IsNullOrEmpty())
+                {
+                    _loginName = PreferenceHelper.PreferenceGetAsync(Consts.LoginName_Preference_Name).Result;
+                }
+
+                return _loginName;
+            }
             private set
             {
                 _loginName = value;
 
                 if (_loginName.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.PreferenceSetAsync(LoginName_Preference_Name, _loginName).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.LoginName_Preference_Name, _loginName).Wait();
                 }
             }
         }
 
         public static string? AccessToken
         {
-            get => _accessToken;
+            get 
+            {
+                if(_accessToken.IsNullOrEmpty())
+                {
+                    _accessToken = PreferenceHelper.PreferenceGetAsync(Consts.AccessToken_Preference_Name).Result;
+                }
+
+                return _accessToken;
+            }
             set
             {
                 _accessToken = value;
 
-                if(_accessToken.IsNotNullOrEmpty())
+                if (_accessToken.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.PreferenceSetAsync(AccessToken_Preference_Name, _accessToken).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.AccessToken_Preference_Name, _accessToken).Wait();
                 }
             }
         }
 
         public static string? RefreshToken
         {
-            get => _refreshToken;
+            get
+            {
+                if (_refreshToken.IsNullOrEmpty())
+                {
+                    _refreshToken = PreferenceHelper.PreferenceGetAsync(Consts.RefreshToken_Preference_Name).Result;
+                }
+
+                return _refreshToken;
+            }
             private set
             {
                 _refreshToken = value;
 
                 if (_refreshToken.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.PreferenceSetAsync(RefreshToken_Preference_Name, _refreshToken).Wait();
+                    PreferenceHelper.PreferenceSetAsync(Consts.RefreshToken_Preference_Name, _refreshToken).Wait();
                 }
             }
         }
 
         public static bool IsLogined => AccessToken.IsNotNullOrEmpty();
-        
 
         public static void Login(long userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string? accessToken, string? refreshToken)
         {

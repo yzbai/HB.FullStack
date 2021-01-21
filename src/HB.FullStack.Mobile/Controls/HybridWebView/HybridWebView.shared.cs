@@ -23,6 +23,7 @@ namespace HB.FullStack.Mobile.Controls
             declaringType: typeof(HybridWebView),
             defaultValue: default(string));
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "<Pending>")]
         public string Uri
         {
             get { return (string)GetValue(UriProperty); }

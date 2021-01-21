@@ -24,7 +24,7 @@ namespace HB.FullStack.Mobile.Controls
     {
         internal const string CacheName = "ImageLoaderCache";
 
-        public static readonly BindableProperty UriProperty = BindableProperty.Create("Uri", typeof(Uri), typeof(AuthUriImageSource), default(Uri),
+        public static readonly BindableProperty UriProperty = BindableProperty.Create(nameof(Uri), typeof(Uri), typeof(AuthUriImageSource), default(Uri),
             propertyChanged: (bindable, oldvalue, newvalue) => ((AuthUriImageSource)bindable).OnUriChanged(), validateValue: (bindable, value) => value == null || ((Uri)value).IsAbsoluteUri);
 
         static readonly Xamarin.Forms.Internals.IIsolatedStorageFile Store = Device.PlatformServices.GetUserStoreForApplication();
@@ -95,7 +95,9 @@ namespace HB.FullStack.Mobile.Controls
 
             try
             {
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
                 stream = await GetStreamAsync(Uri, CancellationTokenSource.Token);
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
                 OnLoadingCompleted(false);
             }
             catch (OperationCanceledException)
@@ -122,7 +124,9 @@ namespace HB.FullStack.Mobile.Controls
             return Device.PlatformServices.GetHash(uri.AbsoluteUri);
         }
 
+#pragma warning disable CA1801 // Review unused parameters
         async Task<bool> GetHasLocallyCachedCopyAsync(string key, bool checkValidity = true)
+#pragma warning restore CA1801 // Review unused parameters
         {
             DateTime now = DateTime.UtcNow;
             DateTime? lastWriteTime = await GetLastWriteTimeUtcAsync(key).ConfigureAwait(false);
@@ -186,13 +190,19 @@ namespace HB.FullStack.Mobile.Controls
                     catch (IOException)
                     {
                         // iOS seems to not like 2 readers opening the file at the exact same time, back off for random amount of time
+#pragma warning disable CA5394 // Do not use insecure randomness
                         backoff = new Random().Next(1, 5);
+#pragma warning restore CA5394 // Do not use insecure randomness
                         retry--;
                     }
 
                     if (backoff > 0)
                     {
+#pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods that take one
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
                         await Task.Delay(backoff);
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+#pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods that take one
                     }
                 }
                 return null;
@@ -256,8 +266,12 @@ namespace HB.FullStack.Mobile.Controls
 
             try
             {
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
                 await sem.WaitAsync(cancellationToken);
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
                 Stream stream = await GetStreamAsyncUnchecked(key, uri, cancellationToken);
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
                 if (stream == null || stream.Length == 0 || !stream.CanRead)
                 {
                     sem.Release();
@@ -281,7 +295,7 @@ namespace HB.FullStack.Mobile.Controls
             OnSourceChanged();
         }
 
-        public async Task<Stream> GetStreamCoreAsync(Uri uri, CancellationToken cancellationToken)
+        public static async Task<Stream> GetStreamCoreAsync(Uri uri, CancellationToken cancellationToken)
         {
             if (HttpClientHandler == null)
             {

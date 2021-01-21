@@ -14,7 +14,7 @@ namespace HB.FullStack.Mobile.Controls
 		public LockingSemaphore(int initialCount)
 		{
 			if (initialCount < 0)
-				throw new ArgumentOutOfRangeException("initialCount");
+				throw new ArgumentOutOfRangeException(nameof(initialCount));
 			_currentCount = initialCount;
 		}
 

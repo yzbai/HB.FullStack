@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Mobile.Logger
+namespace HB.FullStack.Mobile.Logging
 {
     public class Logger : ILogger
     {

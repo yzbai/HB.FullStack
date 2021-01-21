@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Xamarin.Forms;
 
-namespace HB.FullStack.Mobile.Logger
+namespace HB.FullStack.Mobile.Logging
 {
     public class LoggerProvider : ILoggerProvider
     {

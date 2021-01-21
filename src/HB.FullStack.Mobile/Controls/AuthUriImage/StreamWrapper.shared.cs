@@ -21,7 +21,7 @@ namespace HB.FullStack.Mobile.Controls
 		public StreamWrapper(Stream wrapped, IDisposable? additionalDisposable)
 		{
 			if (wrapped == null)
-				throw new ArgumentNullException("wrapped");
+				throw new ArgumentNullException(nameof(wrapped));
 
 			_wrapped = wrapped;
 			_additionalDisposable = additionalDisposable;
@@ -91,8 +91,10 @@ namespace HB.FullStack.Mobile.Controls
 		}
 
 
-		public static async Task<Stream?> GetStreamAsync(Uri uri, CancellationToken cancellationToken, HttpClient client)
-		{
+#pragma warning disable CA1068 // CancellationToken parameters must come last
+        public static async Task<Stream?> GetStreamAsync(Uri uri, CancellationToken cancellationToken, HttpClient client)
+#pragma warning restore CA1068 // CancellationToken parameters must come last
+        {
 			HttpResponseMessage response = await client.GetAsync(uri, cancellationToken).ConfigureAwait(false);
 			if (!response.IsSuccessStatusCode)
 			{

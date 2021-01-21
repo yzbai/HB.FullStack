@@ -31,7 +31,7 @@ namespace HB.FullStack.Mobile.Api
 
         async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource
         {
-            IEnumerable<T> ts = await GetAsync(request);
+            IEnumerable<T> ts = await GetAsync(request).ConfigureAwait(false);
 
             return ts.FirstOrDefault();
         }

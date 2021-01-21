@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Mobile.Api;
 using HB.FullStack.Mobile.Controls;
-using HB.FullStack.Mobile.Logger;
+using HB.FullStack.Mobile.Logging;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -63,16 +64,19 @@ namespace HB.FullStack.Mobile.Base
             }
         }
 
-        public BaseApplication(IServiceCollection services)
+        protected BaseApplication()
         {
             //Version
-            VersionTracking.Track();
+            VersionTracking.Track();         
+        }
 
-            BaseRegisterServices(services);
+        protected void InitializeServices(IServiceCollection services)
+        {
+            RegisterBaseServices(services);
 
-            BaseConfigureServices();
+            ConfigureBaseServices();
 
-            void BaseRegisterServices(IServiceCollection services)
+            void RegisterBaseServices(IServiceCollection services)
             {
                 services.AddOptions();
 
@@ -91,7 +95,7 @@ namespace HB.FullStack.Mobile.Base
                 DependencyResolver.ResolveUsing(type => _serviceProvider.GetService(type));
             }
 
-            void BaseConfigureServices()
+            void ConfigureBaseServices()
             {
                 //Log
                 GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
@@ -102,7 +106,7 @@ namespace HB.FullStack.Mobile.Base
                 AuthUriImageSource.HttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
 
                 //Connectivity
-                Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
+                //Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };
 
                 ConfigureServices();
             }
@@ -119,10 +123,6 @@ namespace HB.FullStack.Mobile.Base
         protected abstract void RegisterServices(IServiceCollection services);
 
         protected abstract void ConfigureServices();
-
-        protected abstract void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e);
-
-        //public abstract void PerformLogin();
 
         public static void ExceptionHandler(Exception ex) => ExceptionHandler(ex, null);
 
