@@ -10,8 +10,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Repository
 {
-    public abstract class CachedItem<TResult>
-        where TResult : class
+    public abstract class CachedItem<TResult> where TResult : class
     {
         private CachedItem() { ResourceType = this.GetType().Name; }
         protected CachedItem(params string[] keys) : this()
@@ -31,43 +30,25 @@ namespace HB.FullStack.Repository
         public UtcNowTicks UtcTikcs { get; private set; } = UtcNowTicks.Empty;
 
         /// <exception cref="CacheException"></exception>
+        /// <exception cref="RepositoryException"></exception>
         public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(CacheKey))
-            {
-                throw new ArgumentNullException(nameof(CacheKey));
-            }
+            ThrowOnNullOrEmptyCacheKey();
 
             return cache.GetAsync<TResult>(CacheKey, cancellationToken);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <exception cref="RepositoryException"></exception>
         /// <exception cref="CacheException"></exception>
         public Task SetToAsync(ICache cache, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(CacheKey))
-            {
-                throw new ArgumentNullException(nameof(CacheKey));
-            }
-
-            if (CacheValue == null)
-            {
-                throw new ArgumentNullException(nameof(CacheValue));
-            }
-
-            if (UtcTikcs.IsEmpty())
-            {
-                throw new ArgumentException(nameof(UtcTikcs));
-            }
+            ThrowOnNullOrEmptyCacheKey();
+            ThrowOnNullCacheValue();
+            ThrowOnEmptyUtcTicks();
 
             return cache.SetAsync<TResult>(
                 CacheKey,
-                CacheValue,
+                CacheValue!,
                 UtcTikcs,
                 new DistributedCacheEntryOptions
                 {
@@ -77,23 +58,12 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        /// <summary>
-        /// RemoveFromAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <returns></returns>
         /// <exception cref="CacheException"></exception>
+        /// <exception cref="RepositoryException"></exception>
         public async Task<bool> RemoveFromAsync(ICache cache)
         {
-            if (string.IsNullOrEmpty(CacheKey))
-            {
-                throw new ArgumentNullException(nameof(CacheKey));
-            }
-
-            if (UtcTikcs.IsEmpty())
-            {
-                throw new ArgumentException(nameof(UtcTikcs));
-            }
+            ThrowOnNullOrEmptyCacheKey();
+            ThrowOnEmptyUtcTicks();
 
             return await cache.RemoveAsync(CacheKey, UtcTikcs).ConfigureAwait(false);
         }
@@ -109,6 +79,30 @@ namespace HB.FullStack.Repository
             UtcTikcs = utcTicks;
 
             return this;
+        }
+
+        private void ThrowOnEmptyUtcTicks()
+        {
+            if (UtcTikcs.IsEmpty())
+            {
+                throw new RepositoryException(RepositoryErrorCode.UtcTicksNotSet, $"ResourceType:{ResourceType}, CacheKey:{CacheKey}, CacheValue:{CacheValue}");
+            }
+        }
+
+        private void ThrowOnNullCacheValue()
+        {
+            if (CacheValue == null)
+            {
+                throw new RepositoryException(RepositoryErrorCode.CacheValueNotSet, $"ResourceType:{ResourceType}, CacheKey:{CacheKey}");
+            }
+        }
+
+        private void ThrowOnNullOrEmptyCacheKey()
+        {
+            if (string.IsNullOrEmpty(CacheKey))
+            {
+                throw new RepositoryException(RepositoryErrorCode.CacheKeyNotSet, $"ResourceType:{ResourceType}");
+            }
         }
     }
 }

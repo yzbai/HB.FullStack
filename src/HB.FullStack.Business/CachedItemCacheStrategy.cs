@@ -23,6 +23,7 @@ namespace HB.FullStack.Repository
         /// <param name="logger"></param>
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
+        /// <exception cref="RepositoryException"></exception>
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)

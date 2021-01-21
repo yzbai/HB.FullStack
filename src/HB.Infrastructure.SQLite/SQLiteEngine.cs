@@ -77,10 +77,12 @@ namespace HB.Infrastructure.SQLite
 
         public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
             SqliteCommand command = new SqliteCommand(engineCommand.CommandText)
             {
                 CommandType = CommandType.Text
             };
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
             if (engineCommand.Parameters == null)
             {
