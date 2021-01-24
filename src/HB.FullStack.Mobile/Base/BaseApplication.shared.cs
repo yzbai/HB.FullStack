@@ -27,6 +27,13 @@ namespace HB.FullStack.Mobile.Base
 
         public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
 
+#if DEBUG
+        public static string Environment => "Debug";
+#endif
+#if RELEASE
+        public static string Environment => "Release";
+#endif
+
         public IConfiguration Configuration
         {
             get
@@ -117,8 +124,6 @@ namespace HB.FullStack.Mobile.Base
             task.Fire();
             _initializeTasks.Add(task);
         }
-
-        public abstract string Environment { get; }
 
         protected abstract void RegisterServices(IServiceCollection services);
 
