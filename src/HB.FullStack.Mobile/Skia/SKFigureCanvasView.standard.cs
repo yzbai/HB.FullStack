@@ -11,9 +11,9 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using Xamarin.Forms;
 using System.Linq;
-using AsyncAwaitBestPractices;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
+using HB.FullStack.Mobile.Effects.Touch;
 
 namespace HB.FullStack.Mobile.Skia
 {
@@ -25,21 +25,10 @@ namespace HB.FullStack.Mobile.Skia
         public static readonly BindableProperty IsAnimationModeProperty = BindableProperty.Create(nameof(IsAnimationMode), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnIsAnimationModeChanged((bool)o, (bool)n); });
         public static readonly BindableProperty AnimationIntervalProperty = BindableProperty.Create(nameof(AnimationInterval), typeof(int), typeof(SKFigureCanvasView), 16, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnAnimationIntervalChanged(); });
 
-        private readonly AsyncAwaitBestPractices.WeakEventManager _eventManager = new AsyncAwaitBestPractices.WeakEventManager();
+        private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private Timer? _animationTimer;
-
-        public SKFigureCanvasView() : base()
-        {
-            TouchEffect touchEffect = new TouchEffect { Capture = true };
-
-            touchEffect.TouchAction += TouchEffect_TouchAction;
-
-            Effects.Add(touchEffect);
-
-            PaintSurface += FigureCanvasView_PaintSurface;
-        }
 
         public ObservableCollection<SKFigure> Figures { get => (ObservableCollection<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
 
@@ -67,6 +56,17 @@ namespace HB.FullStack.Mobile.Skia
         {
             add => _eventManager.AddEventHandler(value);
             remove => _eventManager.AddEventHandler(value);
+        }
+
+        public SKFigureCanvasView() : base()
+        {
+            TouchEffect touchEffect = new TouchEffect { Capture = true };
+
+            touchEffect.TouchAction += TouchEffect_TouchAction;
+
+            Effects.Add(touchEffect);
+
+            PaintSurface += FigureCanvasView_PaintSurface;            
         }
 
         public void OnAppearing()
@@ -230,7 +230,7 @@ namespace HB.FullStack.Mobile.Skia
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                _eventManager.RaiseEvent(sender, e, nameof(Painting));
+                _eventManager.HandleEvent(sender, e, nameof(Painting));
             }
         }
 
@@ -251,12 +251,14 @@ namespace HB.FullStack.Mobile.Skia
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                _eventManager.RaiseEvent(sender, e, nameof(Painted));
+                _eventManager.HandleEvent(sender, e, nameof(Painted));
             }
         }
 
         private void TouchEffect_TouchAction(object? sender, TouchActionEventArgs args)
         {
+            GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
+
             if (Figures == null)
             {
                 return;

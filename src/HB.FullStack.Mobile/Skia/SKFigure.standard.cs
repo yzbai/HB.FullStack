@@ -1,4 +1,6 @@
 ﻿using HB.FullStack.Mobile.Effects;
+using HB.FullStack.Mobile.Effects.Touch;
+
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -20,11 +22,80 @@ namespace HB.FullStack.Mobile.Skia
 
     public abstract class SKFigure : IDisposable
     {
-        public const float LongTapTolerantDistanceInDp = 0.1f;
-        public const int LongTapMinDurationInMilliseconds = 400;
-
         private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
         private readonly Dictionary<long, TaskWrapper> _touchLongTask = new Dictionary<long, TaskWrapper>();
+        private SKFigureCanvasView? _canvasView;
+
+        /// <summary>
+        /// 占用Canvas的宽度比例
+        /// </summary>
+        public float WidthRatio { get; }
+        /// <summary>
+        /// 占用Canvas的高度比例
+        /// </summary>
+        public float HeightRatio { get; }
+        /// <summary>
+        /// 在Canvas中的位置
+        /// </summary>
+        public SKAlignment VerticalAlignment { get; }
+        /// <summary>
+        /// 在Canvas中的位置
+        /// </summary>
+        public SKAlignment HorizontalAlignment { get; } 
+
+        /// <summary>
+        /// Maybe SKFigureGroup or SKFigureCanvasView
+        /// </summary>
+        public object? Parent { get; set; }
+
+        public SKFigureCanvasView? CanvasView
+        {
+            get
+            {
+                if (_canvasView == null)
+                {
+                    object? obj = Parent;
+
+                    while (obj != null)
+                    {
+                        if (obj is SKFigureCanvasView canvasView)
+                        {
+                            _canvasView = canvasView;
+                            break;
+                        }
+                        else if (obj is SKFigure figure)
+                        {
+                            obj = figure.Parent;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                return _canvasView;
+            }
+        }
+
+        public bool EnableDrag { get; set; } = true;
+
+        public bool EnableTouch { get; set; } = true;
+
+        /// <summary>
+        /// 轮廓
+        /// </summary>
+        public virtual SKPath? Path { get; set; }
+
+        /// <summary>
+        /// 用于测试是否点击到的轮廓，一般比Path大一点
+        /// </summary>
+        public virtual SKPath? HitTestPath { get; set; }
+
+        /// <summary>
+        /// 变换矩阵
+        /// </summary>
+        public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
         protected SKFigure() : this(1f, 1f, SKAlignment.Center, SKAlignment.Center) { }
 
@@ -39,67 +110,13 @@ namespace HB.FullStack.Mobile.Skia
             HorizontalAlignment = horizontalAlignment;
         }
 
-        public float WidthRatio { get; }
-        public float HeightRatio { get; }
-
-        public SKAlignment VerticalAlignment { get; }
-        public SKAlignment HorizontalAlignment { get; }
-
-        /// <summary>
-        /// Maybe SKFigureGroup or SKFigureCanvasView
-        /// </summary>
-        public object? Parent { get; set; }
-
-        public SKFigureCanvasView? CanvasView
-        {
-            get
-            {
-                object? obj = Parent;
-
-                while (obj != null)
-                {
-                    if (obj is SKFigureCanvasView canvasView)
-                    {
-                        return canvasView;
-                    }
-                    else if (obj is SKFigure figure)
-                    {
-                        obj = figure.Parent;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                return null;
-            }
-        }
-
-        public bool EnableDrag { get; set; } = true;
-
-        public bool EnableTouch { get; set; } = true;
-
-        /// <summary>
-        /// Figure的方形轮廓
-        /// </summary>
-        public virtual SKRect Bounds { get; set; }
-
-        /// <summary>
-        /// 用于测试是否点击到的方形轮廓，一般比Bounds大一点
-        /// </summary>
-        public virtual SKRect HitTestBounds { get; set; }
-
-        [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>")]
-        public SKMatrix AppliedMatrix = SKMatrix.CreateIdentity();
-
         public abstract void Paint(SKPaintSurfaceEventArgs e);
 
         #region 事件
 
         public virtual bool HitTest(SKPoint skPoint, long touchId)
         {
-            if (HitTestBounds == SKRect.Empty && Bounds == SKRect.Empty)
+            if (Path.IsNullOrEmpty() && HitTestPath.IsNullOrEmpty())
             {
                 return false;
             }
@@ -109,17 +126,17 @@ namespace HB.FullStack.Mobile.Skia
                 return false;
             }
 
-            if (AppliedMatrix.TryInvert(out SKMatrix inversedMatrix))
+            if (Matrix.TryInvert(out SKMatrix inversedMatrix))
             {
                 SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(skPoint);
 
-                if (HitTestBounds != default)
+                if (HitTestPath.IsNotNullOrEmpty())
                 {
-                    return HitTestBounds.Contains(mappedToOriginPoint);
+                    return HitTestPath.Contains(mappedToOriginPoint.X, mappedToOriginPoint.Y);
                 }
                 else
                 {
-                    return Bounds.Contains(mappedToOriginPoint);
+                    return Path!.Contains(mappedToOriginPoint.X, mappedToOriginPoint.Y);
                 }
             }
 
@@ -142,7 +159,7 @@ namespace HB.FullStack.Mobile.Skia
         {
             return Task.Run(async () =>
             {
-                await Task.Delay(LongTapMinDurationInMilliseconds).ConfigureAwait(false);
+                await Task.Delay(Consts.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -326,8 +343,6 @@ namespace HB.FullStack.Mobile.Skia
         {
             CanvasView?.InvalidateSurface();
         }
-
-
 
         #endregion
 

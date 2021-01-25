@@ -18,5 +18,8 @@ namespace HB.FullStack.Mobile
 
 
         public const string EffectsGroupName = "HB.FullStack.Mobile.Effects";
+
+        public const float LongTapTolerantDistanceInDp = 0.1f;
+        public const int LongTapMinDurationInMilliseconds = 400;
     }
 }

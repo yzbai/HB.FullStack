@@ -5,12 +5,14 @@ using System.Linq;
 
 using Android.Views;
 
-using HB.FullStack.Mobile.Effects;
+using HB.FullStack.Mobile.Effects.Touch;
+
+using Microsoft.Extensions.Logging;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-[assembly: ExportEffect(typeof(HB.FullStack.Mobile.Droid.Effects.TouchEffect), nameof(HB.FullStack.Mobile.Effects.TouchEffect))]
+[assembly: ExportEffect(typeof(HB.FullStack.Mobile.Droid.Effects.TouchEffect), nameof(HB.FullStack.Mobile.Effects.Touch.TouchEffect))]
 
 namespace HB.FullStack.Mobile.Droid.Effects
 {
@@ -18,7 +20,7 @@ namespace HB.FullStack.Mobile.Droid.Effects
     {
         Android.Views.View? _view;
         Element? _formsElement;
-        HB.FullStack.Mobile.Effects.TouchEffect? _libTouchEffect;
+        HB.FullStack.Mobile.Effects.Touch.TouchEffect? _libTouchEffect;
         bool _capture;
         Func<double, double>? _fromPixels;
         readonly int[] _twoIntArray = new int[2];
@@ -33,9 +35,9 @@ namespace HB.FullStack.Mobile.Droid.Effects
             _view = Control ?? Container;
 
             // Get access to the TouchEffect class in the .NET Standard library
-            HB.FullStack.Mobile.Effects.TouchEffect touchEffect =
-                (HB.FullStack.Mobile.Effects.TouchEffect)Element.Effects.
-                    FirstOrDefault(e => e is HB.FullStack.Mobile.Effects.TouchEffect);
+            HB.FullStack.Mobile.Effects.Touch.TouchEffect touchEffect =
+                (HB.FullStack.Mobile.Effects.Touch.TouchEffect)Element.Effects.
+                    FirstOrDefault(e => e is HB.FullStack.Mobile.Effects.Touch.TouchEffect);
 
             if (touchEffect != null && _view != null)
             {
@@ -85,7 +87,7 @@ namespace HB.FullStack.Mobile.Droid.Effects
                                                   _twoIntArray[1] + motionEvent.GetY(pointerIndex));
 
 
-            //Log.Debug("HB.MyColorfulTime", $"Android : {args.Event.ActionMasked}, Id : {id}, at : {screenPointerCoords}");
+            GlobalSettings.Logger.LogDebug($"Android Touch Events: {motionEvent.ActionMasked}, Id : {id}, at : {screenPointerCoords}");
 
 
             // Use ActionMasked here rather than Action to reduce the number of possibilities
@@ -96,6 +98,7 @@ namespace HB.FullStack.Mobile.Droid.Effects
                     FireEvent(this, id, TouchActionType.Pressed, screenPointerCoords, true);
 
                     _idToEffectDictionary.Add(id, this);
+                    //_idToEffectDictionary[id] =this;
 
                     _capture = _libTouchEffect!.Capture;
                     break;

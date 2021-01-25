@@ -1,5 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.FullStack.Mobile.Effects;
+using HB.FullStack.Mobile.Effects.Touch;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

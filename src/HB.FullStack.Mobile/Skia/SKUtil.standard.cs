@@ -1,5 +1,9 @@
-﻿using SkiaSharp;
+﻿using Microsoft;
+
+using SkiaSharp;
 using System;
+using System.Diagnostics.CodeAnalysis;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Skia
@@ -251,9 +255,29 @@ namespace HB.FullStack.Mobile.Skia
             return Math.Sqrt(Math.Pow(b.Y - a.Y, 2) + Math.Pow(b.X - a.X, 2));
         }
 
+        /// <summary>
+        /// 将以左上角为坐标系的点，转换为以中心为坐标系上的点。同一个点。
+        /// </summary>
+        /// <param name="skPoint"></param>
+        /// <param name="canvasSize"></param>
+        /// <returns></returns>
         public static SKPoint TranslatePointToCenter(SKPoint skPoint, SKSize canvasSize)
         {
             return new SKPoint(skPoint.X - canvasSize.Width / 2, skPoint.Y - canvasSize.Height / 2);
         }
     }
+
+    public static class SKExtensions
+    {
+        public static bool IsNullOrEmpty([ValidatedNotNull][NotNullWhen(false)] this SKPath? path)
+        {
+            return path == null || path.IsEmpty;
+        }
+
+        public static bool IsNotNullOrEmpty([ValidatedNotNull][NotNullWhen(true)]this SKPath? path)
+        {
+            return path != null && !path.IsEmpty;
+        }
+    }
+
 }
