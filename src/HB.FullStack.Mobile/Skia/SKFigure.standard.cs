@@ -13,7 +13,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    public abstract class SKFigure : IDisposable
+    public class SKFigure : IDisposable
     {
         class LongTouchTaskInfo
         {
@@ -80,7 +80,10 @@ namespace HB.FullStack.Mobile.Skia
         /// </summary>
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        public abstract void Paint(SKPaintSurfaceEventArgs e);
+        public virtual void Paint(SKPaintSurfaceEventArgs e)
+        {
+
+        }
 
         public virtual bool HitTest(SKPoint skPoint, long touchId)
         {

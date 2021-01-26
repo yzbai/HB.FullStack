@@ -18,10 +18,13 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private readonly SKRatioPoint _pivotPoint;
         private readonly float _handLengthRatio;
 
-        public int HourResult { get; set; }
+        public SKRatioPoint PivotPoint { get; set; }
 
+        public int HourResult { get; set; }
         public bool IsAM { get; set; } = true;
         public bool CanAntiClockwise { get; set; }
+
+        public DragableHourHandFigure() : this(SKRatioPoint.Empty, 0.5f, 0) { }
 
         public DragableHourHandFigure(SKRatioPoint pivotPoint, float handLengthRatio, int initHour)
         {

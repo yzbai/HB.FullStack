@@ -8,15 +8,19 @@ namespace HB.FullStack.Mobile.Skia
 {
     public struct SKRatioPoint : IEquatable<SKRatioPoint>
     {
+        public static SKRatioPoint Empty => new SKRatioPoint(0, 0);
+
+        public float XRatio { get; set; }
+
+        public float YRatio { get; set; }
+
+        public bool IsEmpty => XRatio == 0 && YRatio == 0;
+
         public SKRatioPoint(float xRatio, float yRatio)
         {
             XRatio = xRatio;
             YRatio = yRatio;
         }
-
-        public float XRatio { get; set; }
-
-        public float YRatio { get; set; }
 
         public override bool Equals(object obj)
         {
