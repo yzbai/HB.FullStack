@@ -23,10 +23,6 @@ namespace HB.FullStack.Mobile.Skia
         /// <summary>
         /// 返回转动的弧度
         /// </summary>
-        /// <param name="prevPoint"></param>
-        /// <param name="newPoint"></param>
-        /// <param name="pivotPoint"></param>
-        /// <returns></returns>
         public static double CaculateRotatedRadian(SKPoint prevPoint, SKPoint newPoint, SKPoint pivotPoint)
         {
             SKPoint oldVector = prevPoint - pivotPoint;

@@ -46,8 +46,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
             IsAntialias = true,
             StrokeWidth = 10
         };
+        private readonly TimeBlockDrawInfo drawInfo;
+        private readonly SKRatioPoint pivotPoint;
+        private readonly float radiusRatio;
 
-        public TimeBlockFigure(TimeBlockDrawInfo drawInfo, float ratio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment) : base(ratio, ratio, horizontalAlignment, verticalAlignment)
+        public TimeBlockFigure(SKRatioPoint pivotPoint, float radiusRatio, TimeBlockDrawInfo drawInfo)
         {
             State = TimeBlockFigureState.Normal;
 
@@ -61,6 +64,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
             Dragged += TimeBlockFigure_Dragged;
             Cancelled += TimeBlockFigure_Cancelled;
             HitFailed += TimeBlockFigure_HitFailed;
+            this.drawInfo = drawInfo;
+            this.pivotPoint = pivotPoint;
+            this.radiusRatio = radiusRatio;
         }
 
         public TimeBlockFigureState State { get; set; }
@@ -100,8 +106,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
             SKPath? path1 = null;
             SKPath? path2 = null;
 
-            float innerRadius = GetFigureWidth(info.Size) / 4f;
-            float outterRadius = GetFigureWidth(info.Size) / 3f;
+            float innerRadius = Math.Min(info.Height, info.Width) / 4f;
+            float outterRadius = Math.Min(info.Height, info.Width) / 3f;
 
             switch (spanType)
             {

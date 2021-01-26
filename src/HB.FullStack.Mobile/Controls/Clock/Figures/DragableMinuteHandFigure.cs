@@ -22,7 +22,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         public int MinuteResult { get; set; }
         public bool CanAntiClockwise { get; set; }
 
-        public DragableMinuteHandFigure(int initMinute, DragableHourHandFigure houHand, float ratio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment) : base(ratio, ratio, horizontalAlignment, verticalAlignment)
+        public DragableMinuteHandFigure(SKRatioPoint pivotPoint, float handLengthRatio, int initMinute, DragableHourHandFigure houHand)
         {
             EnableTouch = true;
             EnableDrag = true;
@@ -32,6 +32,10 @@ namespace HB.FullStack.Mobile.Controls.Clock
             Dragged += MinuteHandFigure_Dragged;
 
             SetMinute(initMinute);
+            this.initMinute = initMinute;
+            this.houHand = houHand;
+            this.pivotPoint = pivotPoint;
+            this.handLengthRatio = handLengthRatio;
         }
 
         public void SetMinute(int initMinute)
@@ -54,6 +58,10 @@ namespace HB.FullStack.Mobile.Controls.Clock
             Color = Color.Blue.ToSKColor(),
             IsAntialias = true
         };
+        private readonly int initMinute;
+        private readonly DragableHourHandFigure houHand;
+        private readonly SKRatioPoint pivotPoint;
+        private readonly float handLengthRatio;
 
         public override void Paint(SKPaintSurfaceEventArgs e)
         {
@@ -67,7 +75,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             canvas.Translate(info.Width / 2, info.Height / 2);
 
-            _handLength = GetFigureWidth(info.Size) / 3f;
+            _handLength = Math.Min(info.Height, info.Width) * handLengthRatio;
 
             canvas.Concat(ref Matrix);
 

@@ -140,7 +140,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             {
                 foreach (var drawInfo in TimeBlockDrawInfos)
                 {
-                    toAdds.Add(new TimeBlockFigure(drawInfo, Description.TimeBlockRatio, SKAlignment.Center, SKAlignment.Center));
+                    toAdds.Add(new TimeBlockFigure(new SKRatioPoint(0.5f, 0.5f), Description.TimeBlockRatio, drawInfo));
                 }
             }
 
@@ -148,12 +148,12 @@ namespace HB.FullStack.Mobile.Controls.Clock
             {
                 foreach (var drawInfo in InProgressTimeBlockDrawInfos)
                 {
-                    toAdds.Add(new TimeBlockFigure(drawInfo, Description.TimeBlockRatio, SKAlignment.Center, SKAlignment.Center));
+                    toAdds.Add(new TimeBlockFigure(new SKRatioPoint(0.5f, 0.5f), Description.TimeBlockRatio, drawInfo));
                 }
             }
 
-            _hourHandFigure = new DragableHourHandFigure(0, Description.DialHandRatio, SKAlignment.Center, SKAlignment.Center);
-            _minuteHandFigure = new DragableMinuteHandFigure(0, _hourHandFigure, Description.DialHandRatio, SKAlignment.Center, SKAlignment.Center);
+            _hourHandFigure = new DragableHourHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, 0);
+            _minuteHandFigure = new DragableMinuteHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, 0, _hourHandFigure);
 
             _hourHandFigure.SetHour(InitialHour);
             _minuteHandFigure.SetMinute(InitialMinute);
@@ -179,16 +179,15 @@ namespace HB.FullStack.Mobile.Controls.Clock
             if (Description.DialBackgroundGifResourceName.IsNotNullOrEmpty())
             {
                 GifCircleDialBackgroundFigure dialBackgroundFigure = new GifCircleDialBackgroundFigure(
+                    new SKRatioPoint(0.5f, 0.5f),
                     Description.DialBackgroundRatio,
                     Description.DialBackgroundRatio,
-                    SKAlignment.Center,
-                    SKAlignment.Center,
                     Description.DialBackgroundGifResourceName!);
 
                 backgroundToAdds.Add(dialBackgroundFigure);
             }
 
-            TicksFigure ticksFigure = new TicksFigure(Description.TicksRatio, SKAlignment.Center, SKAlignment.Center);
+            TicksFigure ticksFigure = new TicksFigure(new SKRatioPoint(0.5f, 0.5f), Description.TicksRatio);
 
             backgroundToAdds.Add(ticksFigure);
 

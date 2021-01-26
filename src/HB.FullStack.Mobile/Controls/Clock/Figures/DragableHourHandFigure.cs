@@ -15,14 +15,19 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private int _previousHour;
         private float _handLength;
         private SKSize _previousCanvasSize;
+        private readonly SKRatioPoint _pivotPoint;
+        private readonly float _handLengthRatio;
 
         public int HourResult { get; set; }
 
         public bool IsAM { get; set; } = true;
         public bool CanAntiClockwise { get; set; }
 
-        public DragableHourHandFigure(int initHour, float ratio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment) : base(ratio, ratio, horizontalAlignment, verticalAlignment)
+        public DragableHourHandFigure(SKRatioPoint pivotPoint, float handLengthRatio, int initHour)
         {
+            _pivotPoint = pivotPoint;
+            _handLengthRatio = handLengthRatio;
+
             EnableDrag = true;
             EnableTouch = true;
 
@@ -50,10 +55,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
             CaculateTimeResult();
 
             canvas.Translate(info.Width / 2f, info.Height / 2f);
-
-            _handLength = GetFigureWidth(info.Size) / 4f;
-
+            
             canvas.Concat(ref Matrix);
+
+            _handLength = Math.Min(info.Height, info.Width) * _handLengthRatio;
+
 
             canvas.DrawLine(0, 0, 0, -_handLength, _hourPaint);
         }
@@ -118,11 +124,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
             HourResult = _previousHour = hour;
 
             Matrix = SKUtil.HourToMatrix(_previousHour);
-
-            //if (invalidateSurface)
-            //{
-            //    InvalidateSurface();
-            //}
         }
 
         private void HourHandFigure_Dragged(object sender, SKTouchInfoEventArgs info)

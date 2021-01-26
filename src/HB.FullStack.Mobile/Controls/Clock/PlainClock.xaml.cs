@@ -100,7 +100,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             foreach (var drawInfo in TimeBlockDrawInfos)
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                TimeBlockFigure timeBlockFigure = new TimeBlockFigure(drawInfo, Description.TimeBlockRatio, SKAlignment.Center, SKAlignment.Center);
+                TimeBlockFigure timeBlockFigure = new TimeBlockFigure(new SKRatioPoint(0.5f,0.5f), Description.TimeBlockRatio, drawInfo);
 #pragma warning restore CA2000 // Dispose objects before losing scope
                 _currentTimeBlockFigureGroup.AddFigure(timeBlockFigure);
             }
@@ -108,7 +108,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             toAdds.Add(_currentTimeBlockFigureGroup);
 
             //Dial Hand
-            DialHandFigure dialHandFigure = new DialHandFigure(Description.DialHandRatio, SKAlignment.Center, SKAlignment.Center);
+            DialHandFigure dialHandFigure = new DialHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, Description.DialHandRatio, Description.DialHandRatio);
             toAdds.Add(dialHandFigure);
 
             //End
@@ -128,16 +128,15 @@ namespace HB.FullStack.Mobile.Controls.Clock
             if (!string.IsNullOrEmpty(Description.DialBackgroundGifResourceName))
             {
                 GifCircleDialBackgroundFigure dialBackgroundFigure = new GifCircleDialBackgroundFigure(
+                    new SKRatioPoint(0.5f, 0.5f),
                     Description.DialBackgroundRatio,
                     Description.DialBackgroundRatio,
-                    SKAlignment.Center,
-                    SKAlignment.Center,
                     Description.DialBackgroundGifResourceName!);
 
                 backgroundToAdds.Add(dialBackgroundFigure);
             }
 
-            TicksFigure ticksFigure = new TicksFigure(Description.TicksRatio, SKAlignment.Center, SKAlignment.Center);
+            TicksFigure ticksFigure = new TicksFigure(new SKRatioPoint(0.5f, 0.5f), Description.TicksRatio);
 
             backgroundToAdds.Add(ticksFigure);
 

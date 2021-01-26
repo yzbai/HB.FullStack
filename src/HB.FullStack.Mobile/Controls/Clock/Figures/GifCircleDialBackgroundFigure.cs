@@ -15,17 +15,23 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private readonly SKGif _backgroundGif;
 
         private readonly SKPaint _paint = new SKPaint();
-
+        private readonly SKRatioPoint pivotPoint;
+        private readonly float widthRatio;
+        private readonly float heightRatio;
+        private readonly string gifResourceName;
         private SKMatrix _shaderTransformMatrix = SKMatrix.Empty;
 
         private SKSizeI _previousSize = SKSizeI.Empty;
 
         private float _previousRadius;
 
-        public GifCircleDialBackgroundFigure(float widthRatio, float heightRatio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment, string gifResourceName)
-            : base(widthRatio: widthRatio, heightRatio: heightRatio, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment)
+        public GifCircleDialBackgroundFigure(SKRatioPoint pivotPoint, float widthRatio, float heightRatio, string gifResourceName)
         {
             _backgroundGif = new SKGif(gifResourceName);
+            this.pivotPoint = pivotPoint;
+            this.widthRatio = widthRatio;
+            this.heightRatio = heightRatio;
+            this.gifResourceName = gifResourceName;
         }
 
         public override void Paint(SKPaintSurfaceEventArgs e)
@@ -39,7 +45,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             SKSurface surface = e.Surface;
             SKCanvas canvas = surface.Canvas;
 
-            SKSize figureSize = GetFigureSize(info.Size);
+            SKSize figureSize = new SKSize(info.Width * widthRatio, info.Height * heightRatio);
             SKBitmap bitmap = _backgroundGif.GetBitmap(CanvasView!.ElapsedMilliseconds);
 
             if (_previousSize != info.Size)
@@ -55,8 +61,49 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _paint.Shader = SKShader.CreateBitmap(bitmap, SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, _shaderTransformMatrix);
 
             //默认居中
-            //SKPoint center = new SKPoint(info.Width / 2f, info.Height / 2f);
-            canvas.DrawCircle(GetFigureCenter(info.Size), _previousRadius, _paint);
+            SKPoint center = new SKPoint(info.Width * pivotPoint.XRatio, info.Height * pivotPoint.YRatio);
+            canvas.DrawCircle(center, _previousRadius, _paint);
+        }
+
+        /// <summary>
+        /// 获取sourceSize大小的bitmap填充Figure的变换矩阵
+        /// </summary>
+        /// <param name="canvasSize"></param>
+        /// <param name="sourceSize"></param>
+        /// <param name="stretch"></param>
+        /// <returns></returns>
+        public SKMatrix GetFilledMatrix(SKSize canvasSize, SKSize sourceSize, SKStretch stretch = SKStretch.AspectFill)
+        {
+            SKMatrix transToCenterMatrix = GetTransToFigureCenterMatrix(canvasSize, sourceSize);
+
+            float figureWidth = canvasSize.Width * widthRatio;
+            float figureHeight = canvasSize.Height * heightRatio;
+            float widthScale = figureWidth / sourceSize.Width;
+            float heightScale = figureHeight / sourceSize.Height;
+            float maxScale = Math.Max(heightScale, widthScale);
+            float minScale = Math.Min(heightScale, widthScale);
+
+            SKPoint sourceCenter = new SKPoint(sourceSize.Width / 2f, sourceSize.Height / 2f);
+
+            SKMatrix scaleMatrix = stretch switch
+            {
+                SKStretch.AspectFill => SKMatrix.CreateScale(maxScale, maxScale, sourceCenter.X, sourceCenter.Y),
+                SKStretch.AspectFit => SKMatrix.CreateScale(minScale, minScale, sourceCenter.X, sourceCenter.Y),
+                SKStretch.Fill => SKMatrix.CreateScale(widthScale, heightScale, sourceCenter.X, sourceCenter.Y),
+                _ => SKMatrix.Identity
+            };
+
+            return SKMatrix.Concat(transToCenterMatrix, scaleMatrix);
+
+        }
+
+        public SKMatrix GetTransToFigureCenterMatrix(SKSize canvasSize, SKSize sourceSize)
+        {
+            SKPoint figureCenter = new SKPoint(canvasSize.Width * pivotPoint.XRatio, canvasSize.Height * pivotPoint.YRatio);
+
+            SKPoint sourceCenter = new SKPoint(sourceSize.Width / 2f, sourceSize.Height / 2f);
+
+            return SKMatrix.CreateTranslation(figureCenter.X - sourceCenter.X, figureCenter.Y - sourceCenter.Y);
         }
 
         #region Dispose Pattern

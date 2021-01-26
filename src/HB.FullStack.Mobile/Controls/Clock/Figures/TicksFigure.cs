@@ -14,7 +14,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private readonly SKPaint? _minuteMarkPaint;
         private readonly SKPaint? _hourNumPaint;
         private readonly SKPaint? _minuteNumPaint;
-
+        private readonly SKRatioPoint pivotPoint;
+        private readonly float handLengthRatio;
         private SKSizeI _previousCanvasSize = SKSizeI.Empty;
 
         private float _radius;
@@ -22,13 +23,15 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private float _singleHourNumWidth;
         private float _singleMinuteNumWidth;
 
-        public TicksFigure(float ratio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment) : base(ratio, ratio, horizontalAlignment, verticalAlignment)
+        public TicksFigure(SKRatioPoint pivotPoint, float handLengthRatio)
         {
             _hourMarkPaint = new SKPaint { Color = ColorUtil.RandomColor().Color.ToSKColor(), Style = SKPaintStyle.Fill };
             _minuteMarkPaint = new SKPaint { Color = ColorUtil.RandomColor().Color.ToSKColor(), Style = SKPaintStyle.Fill };
 
             _hourNumPaint = new SKPaint { Color = ColorUtil.RandomColor().Color.ToSKColor(), Style = SKPaintStyle.Fill };
             _minuteNumPaint = new SKPaint { Color = ColorUtil.RandomColor().Color.ToSKColor(), Style = SKPaintStyle.Fill };
+            this.pivotPoint = pivotPoint;
+            this.handLengthRatio = handLengthRatio;
         }
 
         public override void Paint(SKPaintSurfaceEventArgs e)
@@ -39,7 +42,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             if (_previousCanvasSize != info.Size)
             {
-                _radius = Math.Min(info.Height * HeightRatio, info.Width * WidthRatio) / 2f;
+                _radius = Math.Min(info.Height * handLengthRatio, info.Width * handLengthRatio) / 2f;
 
                 _singleHourNumWidth = _radius / 11;
                 _singleMinuteNumWidth = _radius / 15;

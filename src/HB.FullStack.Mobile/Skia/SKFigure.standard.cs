@@ -13,35 +13,18 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    internal class TaskWrapper
-    {
-        public Task Task { get; set; } = null!;
-
-        public CancellationTokenSource CancellationTokenSource { get; set; } = null!;
-    }
-
     public abstract class SKFigure : IDisposable
     {
-        private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
-        private readonly Dictionary<long, TaskWrapper> _touchLongTask = new Dictionary<long, TaskWrapper>();
-        private SKFigureCanvasView? _canvasView;
+        class LongTouchTaskInfo
+        {
+            public Task Task { get; set; } = null!;
 
-        /// <summary>
-        /// 占用Canvas的宽度比例
-        /// </summary>
-        public float WidthRatio { get; }
-        /// <summary>
-        /// 占用Canvas的高度比例
-        /// </summary>
-        public float HeightRatio { get; }
-        /// <summary>
-        /// 在Canvas中的位置
-        /// </summary>
-        public SKAlignment VerticalAlignment { get; }
-        /// <summary>
-        /// 在Canvas中的位置
-        /// </summary>
-        public SKAlignment HorizontalAlignment { get; } 
+            public CancellationTokenSource CancellationTokenSource { get; set; } = null!;
+        }
+
+        private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
+        private readonly Dictionary<long, LongTouchTaskInfo> _touchLongTask = new Dictionary<long, LongTouchTaskInfo>();
+        private SKFigureCanvasView? _canvasView;
 
         /// <summary>
         /// Maybe SKFigureGroup or SKFigureCanvasView
@@ -97,22 +80,7 @@ namespace HB.FullStack.Mobile.Skia
         /// </summary>
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        protected SKFigure() : this(1f, 1f, SKAlignment.Center, SKAlignment.Center) { }
-
-        protected SKFigure(float widthRatio, float heightRatio) : this(widthRatio, heightRatio, SKAlignment.Center, SKAlignment.Center) { }
-
-        protected SKFigure(float widthRatio, float heightRatio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment)
-        {
-            WidthRatio = widthRatio;
-            HeightRatio = heightRatio;
-
-            VerticalAlignment = verticalAlignment;
-            HorizontalAlignment = horizontalAlignment;
-        }
-
         public abstract void Paint(SKPaintSurfaceEventArgs e);
-
-        #region 事件
 
         public virtual bool HitTest(SKPoint skPoint, long touchId)
         {
@@ -142,6 +110,8 @@ namespace HB.FullStack.Mobile.Skia
 
             return false;
         }
+
+        #region 事件
 
         public event EventHandler<SKTouchInfoEventArgs>? Pressed;
 
@@ -209,7 +179,7 @@ namespace HB.FullStack.Mobile.Skia
 
                             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                            _touchLongTask[args.Id] = new TaskWrapper
+                            _touchLongTask[args.Id] = new LongTouchTaskInfo
                             {
                                 CancellationTokenSource = cancellationTokenSource,
                                 Task = LongPressedTaskAsync(touchInfo, cancellationTokenSource.Token)
@@ -236,7 +206,7 @@ namespace HB.FullStack.Mobile.Skia
                             }
                             else
                             {
-                                if (_touchLongTask.TryGetValue(args.Id, out TaskWrapper? taskWrapper))
+                                if (_touchLongTask.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
                                 {
                                     taskWrapper.CancellationTokenSource.Cancel();
                                     _touchLongTask.Remove(args.Id);
@@ -259,7 +229,7 @@ namespace HB.FullStack.Mobile.Skia
 
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (_touchLongTask.TryGetValue(args.Id, out TaskWrapper? taskWrapper))
+                            if (_touchLongTask.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
                             {
                                 taskWrapper.CancellationTokenSource.Cancel();
                                 _touchLongTask.Remove(args.Id);
@@ -291,7 +261,7 @@ namespace HB.FullStack.Mobile.Skia
                     {
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (_touchLongTask.TryGetValue(args.Id, out TaskWrapper? taskWrapper))
+                            if (_touchLongTask.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
                             {
                                 taskWrapper.CancellationTokenSource.Cancel();
                                 _touchLongTask.Remove(args.Id);
@@ -342,89 +312,6 @@ namespace HB.FullStack.Mobile.Skia
         public void InvalidateSurface()
         {
             CanvasView?.InvalidateSurface();
-        }
-
-        #endregion
-
-        #region Matrix
-
-        public SKSize GetFigureSize(SKSize canvasSize)
-        {
-            return new SKSize(canvasSize.Width * WidthRatio, canvasSize.Height * HeightRatio);
-        }
-
-        public float GetFigureWidth(SKSize canvasSize)
-        {
-            return canvasSize.Width * WidthRatio;
-        }
-
-        public float GetFigureHeight(SKSize canvasSize)
-        {
-            return canvasSize.Height * HeightRatio;
-        }
-
-        public SKMatrix GetTransToFigureCenterMatrix(SKSize canvasSize, SKSize sourceSize)
-        {
-            SKPoint figureCenter = GetFigureCenter(canvasSize);
-
-            SKPoint sourceCenter = new SKPoint(sourceSize.Width / 2f, sourceSize.Height / 2f);
-
-            return SKMatrix.CreateTranslation(figureCenter.X - sourceCenter.X, figureCenter.Y - sourceCenter.Y);
-        }
-
-        public SKPoint GetFigureCenter(SKSize canvasSize)
-        {
-            float x, y;
-
-            x = HorizontalAlignment switch
-            {
-                SKAlignment.Center => canvasSize.Width / 2f,
-                SKAlignment.Start => canvasSize.Width * WidthRatio / 2f,
-                SKAlignment.End => canvasSize.Width - canvasSize.Width * WidthRatio / 2f,
-                _ => 0
-            };
-
-            y = VerticalAlignment switch
-            {
-                SKAlignment.Center => canvasSize.Height / 2f,
-                SKAlignment.Start => canvasSize.Height * HeightRatio / 2f,
-                SKAlignment.End => canvasSize.Height - canvasSize.Height * HeightRatio / 2f,
-                _ => 0
-            };
-
-            return new SKPoint(x, y);
-        }
-
-        /// <summary>
-        /// 获取sourceSize大小的bitmap填充Figure的变换矩阵
-        /// </summary>
-        /// <param name="canvasSize"></param>
-        /// <param name="sourceSize"></param>
-        /// <param name="stretch"></param>
-        /// <returns></returns>
-        public SKMatrix GetFilledMatrix(SKSize canvasSize, SKSize sourceSize, SKStretch stretch = SKStretch.AspectFill)
-        {
-            SKMatrix transToCenterMatrix = GetTransToFigureCenterMatrix(canvasSize, sourceSize);
-
-            float figureWidth = canvasSize.Width * WidthRatio;
-            float figureHeight = canvasSize.Height * HeightRatio;
-            float widthScale = figureWidth / sourceSize.Width;
-            float heightScale = figureHeight / sourceSize.Height;
-            float maxScale = Math.Max(heightScale, widthScale);
-            float minScale = Math.Min(heightScale, widthScale);
-
-            SKPoint sourceCenter = new SKPoint(sourceSize.Width / 2f, sourceSize.Height / 2f);
-
-            SKMatrix scaleMatrix = stretch switch
-            {
-                SKStretch.AspectFill => SKMatrix.CreateScale(maxScale, maxScale, sourceCenter.X, sourceCenter.Y),
-                SKStretch.AspectFit => SKMatrix.CreateScale(minScale, minScale, sourceCenter.X, sourceCenter.Y),
-                SKStretch.Fill => SKMatrix.CreateScale(widthScale, heightScale, sourceCenter.X, sourceCenter.Y),
-                _ => SKMatrix.Identity
-            };
-
-            return SKMatrix.Concat(transToCenterMatrix, scaleMatrix);
-
         }
 
         #endregion

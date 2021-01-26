@@ -12,6 +12,55 @@ namespace HB.FullStack.Mobile.Controls.Clock
     /// </summary>
     public class DialHandFigure : SKFigure
     {
+        private readonly SKRatioPoint _pivotPoint;
+        private readonly float _hourHandLengthRatio;
+        private readonly float _minuteHandLengthRatio;
+        private readonly float _secondHandLengthRatio;
+
+        public int HourResult { get; private set; }
+
+        public int MinuteResult { get; private set; }
+
+        public int SecondResult { get; private set; }
+
+        public bool IsAM { get; private set; }
+
+        public DialHandFigure(SKRatioPoint pivotPoint, float hourHandLengthRatio, float minuteHandLengthRatio, float secondHandLengthRatio)
+        {
+            _pivotPoint = pivotPoint;
+            _hourHandLengthRatio = hourHandLengthRatio;
+            _minuteHandLengthRatio = minuteHandLengthRatio;
+            _secondHandLengthRatio = secondHandLengthRatio;
+            
+            EnableDrag = false;
+            EnableTouch = false;
+        }
+
+        public override void Paint(SKPaintSurfaceEventArgs e)
+        {
+            SKImageInfo info = e.Info;
+            SKSurface surface = e.Surface;
+            SKCanvas canvas = surface.Canvas;
+
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+
+            HourResult = now.Hour;
+            MinuteResult = now.Minute;
+            SecondResult = now.Second;
+            IsAM = now.Hour < 12;
+
+            canvas.Translate(info.Width * _pivotPoint.XRatio, info.Height * _pivotPoint.YRatio);
+
+            //Minute
+            DrawMinuteHand(e);
+
+            //Hour
+            DrawHourHand(e);
+
+            //Second
+            DrawSecondHand(e);
+        }
+
         private readonly SKPaint _secondPaint = new SKPaint
         {
             Style = SKPaintStyle.Stroke,
@@ -35,51 +84,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             Color = SKColors.Brown,
             IsAntialias = true
         };
-
-        public DialHandFigure(float ratio, SKAlignment horizontalAlignment, SKAlignment verticalAlignment) : base(ratio, ratio, horizontalAlignment, verticalAlignment)
-        {
-            EnableDrag = false;
-            EnableTouch = false;
-        }
-
-        public int HourResult { get; set; }
-
-        public int MinuteResult { get; set; }
-
-        public int SecondResult { get; set; }
-
-        public bool IsAM { get; set; } = true;
-
-        public override void Paint(SKPaintSurfaceEventArgs e)
-        {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
-
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-
-            HourResult = now.Hour;
-            MinuteResult = now.Minute;
-            SecondResult = now.Second;
-            IsAM = now.Hour < 12;
-
-            canvas.Translate(info.Width / 2f, info.Height / 2f);
-
-            //Minute
-            DrawMinuteHand(e);
-
-            //Hour
-            DrawHourHand(e);
-
-            //Second
-            DrawSecondHand(e);
-        }
-
-        public override bool HitTest(SKPoint skPoint, long touchId)
-        {
-            return false;
-        }
-
+        
         private void DrawSecondHand(SKPaintSurfaceEventArgs e)
         {
             SKImageInfo info = e.Info;
@@ -88,7 +93,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                float secondHandLength = GetFigureWidth(info.Size) * 0.4f;
+                float secondHandLength = Math.Min(info.Width, info.Height) * _secondHandLengthRatio;
 
                 double radian = SKUtil.SecondToRadian(SecondResult);
 
@@ -106,7 +111,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                float minuteHandLength = GetFigureWidth(info.Size) * 0.35f;
+                //float minuteHandLength = GetFigureWidth(info.Size) * 0.35f;
+                float minuteHandLength = Math.Min(info.Width, info.Height)* _minuteHandLengthRatio;
 
                 double radian = SKUtil.MinuteToRadian(MinuteResult);
 
@@ -124,7 +130,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             using (new SKAutoCanvasRestore(canvas))
             {
-                float hourHandLength = GetFigureWidth(info.Size) * 0.25f;
+                //float hourHandLength = GetFigureWidth(info.Size) * 0.25f;
+                float hourHandLength = Math.Min(info.Width, info.Height) * _hourHandLengthRatio;
 
                 double radian = SKUtil.HourToRadian(HourResult, MinuteResult);
 
