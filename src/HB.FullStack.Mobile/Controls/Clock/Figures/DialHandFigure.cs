@@ -36,12 +36,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
             EnableTouch = false;
         }
 
-        public override void OnPaint(SKPaintSurfaceEventArgs e)
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
-
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
             HourResult = now.Hour;
@@ -52,13 +48,13 @@ namespace HB.FullStack.Mobile.Controls.Clock
             canvas.Translate(info.Width * _pivotPoint.XRatio, info.Height * _pivotPoint.YRatio);
 
             //Minute
-            DrawMinuteHand(e);
+            DrawMinuteHand(info, canvas);
 
             //Hour
-            DrawHourHand(e);
+            DrawHourHand(info, canvas);
 
             //Second
-            DrawSecondHand(e);
+            DrawSecondHand(info, canvas);
         }
 
         private readonly SKPaint _secondPaint = new SKPaint
@@ -85,11 +81,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
             IsAntialias = true
         };
         
-        private void DrawSecondHand(SKPaintSurfaceEventArgs e)
+        private void DrawSecondHand(SKImageInfo info, SKCanvas canvas)
         {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
+           
 
             using (new SKAutoCanvasRestore(canvas))
             {
@@ -103,11 +97,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
             }
         }
 
-        private void DrawMinuteHand(SKPaintSurfaceEventArgs e)
+        private void DrawMinuteHand(SKImageInfo info, SKCanvas canvas)
         {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
+       
 
             using (new SKAutoCanvasRestore(canvas))
             {
@@ -122,11 +114,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
             }
         }
 
-        private void DrawHourHand(SKPaintSurfaceEventArgs e)
+        private void DrawHourHand(SKImageInfo info, SKCanvas canvas)
         {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
+            
 
             using (new SKAutoCanvasRestore(canvas))
             {
@@ -163,6 +153,16 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
                 _disposed = true;
             }
+        }
+
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnCaculateOutput()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion Dispose Pattern

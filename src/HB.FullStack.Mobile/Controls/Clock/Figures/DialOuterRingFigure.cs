@@ -25,11 +25,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _paint = new SKPaint { Style = SKPaintStyle.Fill, Color = ColorUtil.RandomColor().Color.ToSKColor() };
         }
 
-        public override void OnPaint(SKPaintSurfaceEventArgs e)
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
+ 
 
             canvas.Save();
 
@@ -60,6 +58,16 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
                 _disposed = true;
             }
+        }
+
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        protected override void OnCaculateOutput()
+        {
+            throw new System.NotImplementedException();
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources

@@ -50,8 +50,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         #region Privates
 
-        private DragableHourHandFigure? _hourHandFigure;
-        private DragableMinuteHandFigure? _minuteHandFigure;
+        private HourHandFigure? _hourHandFigure;
+        private MinuteHandFigure? _minuteHandFigure;
 
         //因为Databinding, 只能public
         public ObservableCollection<SKFigure> BackgroundFigures { get; private set; } = new ObservableCollection<SKFigure>();
@@ -152,8 +152,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 }
             }
 
-            _hourHandFigure = new DragableHourHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, InitialHour);
-            _minuteHandFigure = new DragableMinuteHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, InitialMinute, _hourHandFigure);
+            _hourHandFigure = new HourHandFigure(Description.DialHandRatio, InitialHour) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
+            _minuteHandFigure = new MinuteHandFigure(Description.DialHandRatio, InitialMinute, _hourHandFigure) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f)};
 
             //_hourHandFigure.SetHour(InitialHour);
             //_minuteHandFigure.SetMinute(InitialMinute);

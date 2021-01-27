@@ -91,11 +91,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
         /// </summary>
         public Time24Hour CurrentEndTime { get; set; }
 
-        public override void OnPaint(SKPaintSurfaceEventArgs e)
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
+ 
 
             _previousCanvasSize = info.Size;
 
@@ -348,6 +346,16 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
                 _disposed = true;
             }
+        }
+
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnCaculateOutput()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion Dispose Pattern

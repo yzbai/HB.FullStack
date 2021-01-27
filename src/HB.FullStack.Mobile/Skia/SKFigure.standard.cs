@@ -19,12 +19,9 @@ namespace HB.FullStack.Mobile.Skia
     public abstract class SKFigure : IDisposable
     {
         private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
-        
+
         private SKFigureCanvasView? _canvasView;
 
-        /// <summary>
-        /// Maybe SKFigureGroup or SKFigureCanvasView
-        /// </summary>
         public object? Parent { get; set; }
 
         public SKFigureCanvasView? CanvasView
@@ -60,39 +57,56 @@ namespace HB.FullStack.Mobile.Skia
         public bool EnableDrag { get; set; } = true;
 
         public bool EnableTouch { get; set; } = true;
+        
+        public SKRatioPoint PivotRatioPoint { get; set; }
 
-        /// <summary>
-        /// 轮廓
-        /// </summary>
+        public SKMatrix Matrix = SKMatrix.CreateIdentity();
+        
         public virtual SKPath? Path { get; set; }
 
-        /// <summary>
-        /// 用于测试是否点击到的轮廓，一般比Path大一点
-        /// </summary>
         public virtual SKPath? HitTestPath { get; set; }
 
-        /// <summary>
-        /// 变换矩阵
-        /// </summary>
-        public SKMatrix Matrix = SKMatrix.CreateIdentity();
+        protected SKSize CanvasSize { get; private set; }
 
-        public abstract void OnPaint(SKPaintSurfaceEventArgs e);
+        public virtual void OnPaint(SKPaintSurfaceEventArgs e)
+        {
+            SKImageInfo info = e.Info;
+            SKSurface surface = e.Surface;
+            SKCanvas canvas = surface.Canvas;
+
+            CanvasSize = info.Size;
+
+            //Translate to Pivot
+            canvas.Translate(info.Width * PivotRatioPoint.XRatio, info.Height * PivotRatioPoint.YRatio);
+
+            //变型
+            canvas.Concat(ref Matrix);
+
+            OnDraw(info, canvas);
+
+            OnUpdateHitTestPath(info);
+
+            OnCaculateOutput();
+        }
+
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas);
+        
+        protected abstract void OnUpdateHitTestPath(SKImageInfo info);
+        
+        protected abstract void OnCaculateOutput();
 
         public virtual bool OnHitTest(SKPoint skPoint, long touchId)
         {
-            if (Path.IsNullOrEmpty() && HitTestPath.IsNullOrEmpty())
+            if (!EnableTouch || (Path.IsNullOrEmpty() && HitTestPath.IsNullOrEmpty()))
             {
                 return false;
             }
 
-            if (EnableTouch == false)
-            {
-                return false;
-            }
+            SKPoint pivotedPoint = GetPivotedPoint(skPoint);
 
             if (Matrix.TryInvert(out SKMatrix inversedMatrix))
             {
-                SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(skPoint);
+                SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(pivotedPoint);
 
                 if (HitTestPath.IsNotNullOrEmpty())
                 {
@@ -105,6 +119,11 @@ namespace HB.FullStack.Mobile.Skia
             }
 
             return false;
+        }
+
+        public SKPoint GetPivotedPoint(SKPoint point)
+        {
+            return new SKPoint(point.X - CanvasSize.Width * PivotRatioPoint.XRatio, point.Y - CanvasSize.Height * PivotRatioPoint.YRatio);
         }
 
         public virtual void ProcessTouchAction(TouchActionEventArgs args)
@@ -245,7 +264,7 @@ namespace HB.FullStack.Mobile.Skia
         }
 
         #region 事件
-        
+
         class LongTouchTaskInfo
         {
             public Task Task { get; set; } = null!;

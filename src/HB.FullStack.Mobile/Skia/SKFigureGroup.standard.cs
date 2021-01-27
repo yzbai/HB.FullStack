@@ -36,6 +36,10 @@ namespace HB.FullStack.Mobile.Skia
                 }
             }
         }
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
+        {
+
+        }
 
         public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
@@ -189,6 +193,18 @@ namespace HB.FullStack.Mobile.Skia
                 _disposed = true;
             }
         }
+
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnCaculateOutput()
+        {
+            throw new NotImplementedException();
+        }
+
+
 
         #endregion
     }

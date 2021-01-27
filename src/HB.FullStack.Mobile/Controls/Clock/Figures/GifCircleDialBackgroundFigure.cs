@@ -34,16 +34,14 @@ namespace HB.FullStack.Mobile.Controls.Clock
             this.gifResourceName = gifResourceName;
         }
 
-        public override void OnPaint(SKPaintSurfaceEventArgs e)
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
             if (_backgroundGif == null || !_backgroundGif.IsReady)
             {
                 return;
             }
 
-            SKImageInfo info = e.Info;
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
+ 
 
             SKSize figureSize = new SKSize(info.Width * widthRatio, info.Height * heightRatio);
             SKBitmap bitmap = _backgroundGif.GetBitmap(CanvasView!.ElapsedMilliseconds);
@@ -129,6 +127,16 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
                 _disposed = true;
             }
+        }
+
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnCaculateOutput()
+        {
+            throw new NotImplementedException();
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
