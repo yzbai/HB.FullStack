@@ -152,11 +152,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 }
             }
 
-            _hourHandFigure = new DragableHourHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, 0);
-            _minuteHandFigure = new DragableMinuteHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, 0, _hourHandFigure);
+            _hourHandFigure = new DragableHourHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, InitialHour);
+            _minuteHandFigure = new DragableMinuteHandFigure(new SKRatioPoint(0.5f, 0.5f), Description.DialHandRatio, InitialMinute, _hourHandFigure);
 
-            _hourHandFigure.SetHour(InitialHour);
-            _minuteHandFigure.SetMinute(InitialMinute);
+            //_hourHandFigure.SetHour(InitialHour);
+            //_minuteHandFigure.SetMinute(InitialMinute);
 
             _hourHandFigure.CanAntiClockwise = CanHourHandAntiClockwise;
             _minuteHandFigure.CanAntiClockwise = CanMinuteHandAntiClockwise;

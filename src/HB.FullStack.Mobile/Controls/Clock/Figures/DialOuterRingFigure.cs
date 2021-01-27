@@ -25,7 +25,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _paint = new SKPaint { Style = SKPaintStyle.Fill, Color = ColorUtil.RandomColor().Color.ToSKColor() };
         }
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
             SKImageInfo info = e.Info;
             SKSurface surface = e.Surface;

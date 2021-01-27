@@ -34,7 +34,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             this.handLengthRatio = handLengthRatio;
         }
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
             SKImageInfo info = e.Info;
             SKSurface surface = e.Surface;

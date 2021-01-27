@@ -2,28 +2,24 @@
 using HB.FullStack.Mobile.Effects.Touch;
 
 using Microsoft.Extensions.Logging;
+
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    public class SKFigure : IDisposable
+    public abstract class SKFigure : IDisposable
     {
-        class LongTouchTaskInfo
-        {
-            public Task Task { get; set; } = null!;
-
-            public CancellationTokenSource CancellationTokenSource { get; set; } = null!;
-        }
-
         private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
-        private readonly Dictionary<long, LongTouchTaskInfo> _touchLongTask = new Dictionary<long, LongTouchTaskInfo>();
+        
         private SKFigureCanvasView? _canvasView;
 
         /// <summary>
@@ -80,12 +76,9 @@ namespace HB.FullStack.Mobile.Skia
         /// </summary>
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        public virtual void Paint(SKPaintSurfaceEventArgs e)
-        {
+        public abstract void OnPaint(SKPaintSurfaceEventArgs e);
 
-        }
-
-        public virtual bool HitTest(SKPoint skPoint, long touchId)
+        public virtual bool OnHitTest(SKPoint skPoint, long touchId)
         {
             if (Path.IsNullOrEmpty() && HitTestPath.IsNullOrEmpty())
             {
@@ -112,37 +105,6 @@ namespace HB.FullStack.Mobile.Skia
             }
 
             return false;
-        }
-
-        #region 事件
-
-        public event EventHandler<SKTouchInfoEventArgs>? Pressed;
-
-        public event EventHandler<SKTouchInfoEventArgs>? LongTapped;
-
-        public event EventHandler<SKTouchInfoEventArgs>? Tapped;
-
-        public event EventHandler<SKTouchInfoEventArgs>? Dragged;
-
-        public event EventHandler<SKTouchInfoEventArgs>? Cancelled;
-
-        public event EventHandler? HitFailed;
-
-        private Task LongPressedTaskAsync(SKTouchInfoEventArgs info, CancellationToken cancellationToken)
-        {
-            return Task.Run(async () =>
-            {
-                await Task.Delay(Consts.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                info.LongPressHappend = true;
-
-                OnLongTapped(info);
-            }, cancellationToken);
         }
 
         public virtual void ProcessTouchAction(TouchActionEventArgs args)
@@ -182,7 +144,7 @@ namespace HB.FullStack.Mobile.Skia
 
                             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                            _touchLongTask[args.Id] = new LongTouchTaskInfo
+                            _longTouchInfos[args.Id] = new LongTouchTaskInfo
                             {
                                 CancellationTokenSource = cancellationTokenSource,
                                 Task = LongPressedTaskAsync(touchInfo, cancellationTokenSource.Token)
@@ -209,10 +171,10 @@ namespace HB.FullStack.Mobile.Skia
                             }
                             else
                             {
-                                if (_touchLongTask.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
+                                if (_longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
                                 {
                                     taskWrapper.CancellationTokenSource.Cancel();
-                                    _touchLongTask.Remove(args.Id);
+                                    _longTouchInfos.Remove(args.Id);
                                 }
 
                                 OnDragged(touchInfo);
@@ -232,10 +194,10 @@ namespace HB.FullStack.Mobile.Skia
 
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (_touchLongTask.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
+                            if (_longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
                             {
                                 taskWrapper.CancellationTokenSource.Cancel();
-                                _touchLongTask.Remove(args.Id);
+                                _longTouchInfos.Remove(args.Id);
                             }
 
                             touchInfo.CurrentPoint = curLocation;
@@ -264,10 +226,10 @@ namespace HB.FullStack.Mobile.Skia
                     {
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (_touchLongTask.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
+                            if (_longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
                             {
                                 taskWrapper.CancellationTokenSource.Cancel();
-                                _touchLongTask.Remove(args.Id);
+                                _longTouchInfos.Remove(args.Id);
                             }
 
                             touchInfo.IsOver = true;
@@ -282,39 +244,100 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
+        #region 事件
+        
+        class LongTouchTaskInfo
+        {
+            public Task Task { get; set; } = null!;
+
+            public CancellationTokenSource CancellationTokenSource { get; set; } = null!;
+        }
+
+        private readonly Dictionary<long, LongTouchTaskInfo> _longTouchInfos = new Dictionary<long, LongTouchTaskInfo>();
+
+        private readonly WeakEventManager _weakEventManager = new WeakEventManager();
+
+        public event EventHandler<SKTouchInfoEventArgs> Pressed
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(Pressed));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(Pressed));
+        }
+
+        public event EventHandler<SKTouchInfoEventArgs> LongTapped
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(LongTapped));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(LongTapped));
+        }
+
+        public event EventHandler<SKTouchInfoEventArgs> Tapped
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(Tapped));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(Tapped));
+        }
+
+        public event EventHandler<SKTouchInfoEventArgs> Dragged
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(Dragged));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(Dragged));
+        }
+
+        public event EventHandler<SKTouchInfoEventArgs> Cancelled
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(Cancelled));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(Cancelled));
+        }
+
+        public event EventHandler? HitFailed
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(HitFailed));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(HitFailed));
+        }
+
+        private Task LongPressedTaskAsync(SKTouchInfoEventArgs info, CancellationToken cancellationToken)
+        {
+            return Task.Run(async () =>
+            {
+                await Task.Delay(Consts.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                info.LongPressHappend = true;
+
+                OnLongTapped(info);
+            }, cancellationToken);
+        }
+
         public void OnPressed(SKTouchInfoEventArgs touchInfo)
         {
-            Pressed?.Invoke(this, touchInfo);
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(Pressed));
         }
 
         public void OnDragged(SKTouchInfoEventArgs touchInfo)
         {
-            Dragged?.Invoke(this, touchInfo);
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(Dragged));
         }
 
         public void OnTapped(SKTouchInfoEventArgs touchInfo)
         {
-            Tapped?.Invoke(this, touchInfo);
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
         }
 
         public void OnLongTapped(SKTouchInfoEventArgs touchInfo)
         {
-            LongTapped?.Invoke(this, touchInfo);
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
         }
 
         public void OnCancelled(SKTouchInfoEventArgs touchInfo)
         {
-            Cancelled?.Invoke(this, touchInfo);
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
         }
 
         public void OnHitFailed()
         {
-            HitFailed?.Invoke(this, new EventArgs());
-        }
-
-        public void InvalidateSurface()
-        {
-            CanvasView?.InvalidateSurface();
+            _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
         }
 
         #endregion

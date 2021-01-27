@@ -21,7 +21,7 @@ namespace HB.FullStack.Mobile.Skia
         Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
     public class SKFigureCanvasView : SKCanvasView, IBaseContentView
     {
-        public static readonly BindableProperty FiguresProperty = BindableProperty.Create(nameof(Figures), typeof(ObservableCollection<SKFigure>), typeof(SKFigureCanvasView), new ObservableCollection<SKFigure>(), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((ObservableCollection<SKFigure>?)o, (ObservableCollection<SKFigure>?)n); });
+        public static readonly BindableProperty FiguresProperty = BindableProperty.Create(nameof(Figures), typeof(IList<SKFigure>), typeof(SKFigureCanvasView), new ObservableCollection<SKFigure>(), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((IList<SKFigure>?)o, (IList<SKFigure>?)n); });
         public static readonly BindableProperty IsAnimationModeProperty = BindableProperty.Create(nameof(IsAnimationMode), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnIsAnimationModeChanged((bool)o, (bool)n); });
         public static readonly BindableProperty AnimationIntervalProperty = BindableProperty.Create(nameof(AnimationInterval), typeof(int), typeof(SKFigureCanvasView), 16, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnAnimationIntervalChanged(); });
 
@@ -30,7 +30,7 @@ namespace HB.FullStack.Mobile.Skia
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private Timer? _animationTimer;
 
-        public ObservableCollection<SKFigure> Figures { get => (ObservableCollection<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
+        public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
 
         public bool IsAnimationMode { get => (bool)GetValue(IsAnimationModeProperty); set => SetValue(IsAnimationModeProperty, value); }
 
@@ -115,7 +115,7 @@ namespace HB.FullStack.Mobile.Skia
             ReStartAnimation();
         }
 
-        private void OnFiguresChanged(ObservableCollection<SKFigure>? oldValues, ObservableCollection<SKFigure>? newValues)
+        private void OnFiguresChanged(IList<SKFigure>? oldValues, IList<SKFigure>? newValues)
         {
             StopAnimation();
 
@@ -240,7 +240,7 @@ namespace HB.FullStack.Mobile.Skia
             {
                 using (new SKAutoCanvasRestore(canvas))
                 {
-                    f.Paint(e);
+                    f.OnPaint(e);
                 }
             }
         }
@@ -257,7 +257,7 @@ namespace HB.FullStack.Mobile.Skia
 
         private void TouchEffect_TouchAction(object? sender, TouchActionEventArgs args)
         {
-            GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
+            //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
             if (Figures == null)
             {
@@ -290,9 +290,9 @@ namespace HB.FullStack.Mobile.Skia
 
                     for (int i = Figures.Count - 1; i >= 0; --i)
                     {
-                        SKFigure figure = Figures[i];
+                        SKFigure figure = Figures.ElementAt(i);
 
-                        if (!founded && figure.HitTest(skPoint, args.Id))
+                        if (!founded && figure.OnHitTest(skPoint, args.Id))
                         {
                             founded = true;
 

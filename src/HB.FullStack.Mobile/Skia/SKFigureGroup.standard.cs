@@ -24,7 +24,7 @@ namespace HB.FullStack.Mobile.Skia
             HitFailed += SKFigureGroup_HitFailed;
         }
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
@@ -32,18 +32,18 @@ namespace HB.FullStack.Mobile.Skia
             {
                 using (new SKAutoCanvasRestore(canvas))
                 {
-                    figure.Paint(e);
+                    figure.OnPaint(e);
                 }
             }
         }
 
-        public override bool HitTest(SKPoint skPoint, long touchId)
+        public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
             for (int i = Figures.Count - 1; i >= 0; i--)
             {
                 T figure = Figures[i];
 
-                if (figure.HitTest(skPoint, touchId))
+                if (figure.OnHitTest(skPoint, touchId))
                 {
                     _hittedFigures[touchId] = figure;
 

@@ -34,7 +34,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             this.gifResourceName = gifResourceName;
         }
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
             if (_backgroundGif == null || !_backgroundGif.IsReady)
             {

@@ -91,7 +91,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         /// </summary>
         public Time24Hour CurrentEndTime { get; set; }
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
             SKImageInfo info = e.Info;
             SKSurface surface = e.Surface;
@@ -208,7 +208,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             path2?.Dispose();
         }
 
-        public override bool HitTest(SKPoint skPoint, long touchId)
+        public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
             if (_previousRegion == null)
             {

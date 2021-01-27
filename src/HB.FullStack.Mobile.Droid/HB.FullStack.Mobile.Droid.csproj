@@ -66,10 +66,10 @@
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.2" />
-    <PackageReference Include="Xamarin.CommunityToolkit" Version="1.0.1" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1-preview1" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
+    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.3-preview.18" />
+    <PackageReference Include="Xamarin.CommunityToolkit" Version="1.0.2" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.1931" />
     <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
   </ItemGroup>
   <ItemGroup>

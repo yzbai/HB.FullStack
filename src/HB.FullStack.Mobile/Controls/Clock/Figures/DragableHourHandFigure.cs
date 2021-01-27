@@ -15,28 +15,44 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private int _previousHour;
         private float _handLength;
         private SKSize _previousCanvasSize;
-        private readonly SKRatioPoint _pivotPoint;
         private readonly float _handLengthRatio;
+        private readonly int _initHour24;
 
         public SKRatioPoint PivotPoint { get; set; }
 
-        public int HourResult { get; set; }
-        public bool IsAM { get; set; } = true;
+        public int HourResult { get; private set; }
+        public bool IsAM { get; private set; } = true;
         public bool CanAntiClockwise { get; set; }
 
         public DragableHourHandFigure() : this(SKRatioPoint.Empty, 0.5f, 0) { }
 
-        public DragableHourHandFigure(SKRatioPoint pivotPoint, float handLengthRatio, int initHour)
+        public DragableHourHandFigure(SKRatioPoint pivotPoint, float handLengthRatio, int initHour24)
         {
-            _pivotPoint = pivotPoint;
+            PivotPoint = pivotPoint;
             _handLengthRatio = handLengthRatio;
-
+            _initHour24 = initHour24;
+            
             EnableDrag = true;
             EnableTouch = true;
 
-            Dragged += HourHandFigure_Dragged;
+            Dragged += OnDragged;
 
-            SetHour(initHour);
+            InitMatrix();
+        }
+
+        private void InitMatrix()
+        {
+            int hour = _initHour24;
+
+            if (hour >= 12)
+            {
+                IsAM = false;
+                hour -= 12;
+            }
+
+            HourResult = _previousHour = hour;
+
+            Matrix = SKUtil.HourToMatrix(_previousHour);
         }
 
         private readonly SKPaint _hourPaint = new SKPaint
@@ -47,8 +63,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
             IsAntialias = true
         };
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
+            base.OnPaint(e);
+
             SKImageInfo info = e.Info;
             SKSurface surface = e.Surface;
             SKCanvas canvas = surface.Canvas;
@@ -58,16 +77,16 @@ namespace HB.FullStack.Mobile.Controls.Clock
             CaculateTimeResult();
 
             canvas.Translate(info.Width / 2f, info.Height / 2f);
-            
             canvas.Concat(ref Matrix);
+            
 
-            _handLength = Math.Min(info.Height, info.Width) * _handLengthRatio;
+            _handLength = Math.Min(info.Height, info.Width)/2f * _handLengthRatio;
 
 
             canvas.DrawLine(0, 0, 0, -_handLength, _hourPaint);
         }
 
-        public override bool HitTest(SKPoint skPoint, long touchId)
+        public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
             SKPoint transedPoint = SKUtil.TranslatePointToCenter(skPoint, _previousCanvasSize);
 
@@ -116,20 +135,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             #endregion AM/PM
         }
 
-        public void SetHour(int hour)
-        {
-            if (hour >= 12)
-            {
-                IsAM = false;
-                hour -= 12;
-            }
-
-            HourResult = _previousHour = hour;
-
-            Matrix = SKUtil.HourToMatrix(_previousHour);
-        }
-
-        private void HourHandFigure_Dragged(object sender, SKTouchInfoEventArgs info)
+        private void OnDragged(object sender, SKTouchInfoEventArgs info)
         {
             SKPoint previousPoint = SKUtil.TranslatePointToCenter(info.PreviousPoint, _previousCanvasSize);
             SKPoint currentPoint = SKUtil.TranslatePointToCenter(info.CurrentPoint, _previousCanvasSize);

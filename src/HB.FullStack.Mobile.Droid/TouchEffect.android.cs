@@ -87,7 +87,7 @@ namespace HB.FullStack.Mobile.Droid.Effects
                                                   _twoIntArray[1] + motionEvent.GetY(pointerIndex));
 
 
-            GlobalSettings.Logger.LogDebug($"Android Touch Events: {motionEvent.ActionMasked}, Id : {id}, at : {screenPointerCoords}");
+            //GlobalSettings.Logger.LogDebug($"Android Touch Events: {motionEvent.ActionMasked}, Id : {id}, at : {screenPointerCoords}");
 
 
             // Use ActionMasked here rather than Action to reduce the number of possibilities

@@ -63,7 +63,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private readonly SKRatioPoint pivotPoint;
         private readonly float handLengthRatio;
 
-        public override void Paint(SKPaintSurfaceEventArgs e)
+        public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
             SKImageInfo info = e.Info;
             SKSurface surface = e.Surface;
@@ -133,7 +133,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             return roundMinute;
         }
 
-        public override bool HitTest(SKPoint skPoint, long touchId)
+        public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
             SKPoint transedPoint = SKUtil.TranslatePointToCenter(skPoint, _previousCanvasSize);
 
