@@ -41,8 +41,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 return;
             }
 
- 
-
             SKSize figureSize = new SKSize(info.Width * widthRatio, info.Height * heightRatio);
             SKBitmap bitmap = _backgroundGif.GetBitmap(CanvasView!.ElapsedMilliseconds);
 
@@ -135,6 +133,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
         }
 
         protected override void OnCaculateOutput()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void CaculateMatrixByTime(long elapsedMilliseconds)
         {
             throw new NotImplementedException();
         }

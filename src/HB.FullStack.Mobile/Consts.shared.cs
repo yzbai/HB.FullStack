@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Mobile
 {
+    /// <summary>
+    /// 警告：不要修改
+    /// </summary>
     public static class Consts
     {
         public const string UserId_Preference_Name = "wjUfoxCi";
@@ -19,7 +22,7 @@ namespace HB.FullStack.Mobile
 
         public const string EffectsGroupName = "HB.FullStack.Mobile.Effects";
 
-        public const float LongTapTolerantDistanceInDp = 0.1f;
+        public const float TapTolerantDistanceInDp = 1f;
         public const int LongTapMinDurationInMilliseconds = 400;
     }
 }

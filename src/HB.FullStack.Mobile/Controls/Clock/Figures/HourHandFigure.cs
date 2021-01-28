@@ -90,6 +90,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
             }
         }
 
+        #region CaculateMatrixByTouch
+
         private void OnDragged(object sender, SKTouchInfoEventArgs info)
         {
             SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);
@@ -165,6 +167,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             Matrix = SKUtil.HourToMatrix(hour, adjustMinute);
         }
+
+        #endregion
 
         #region Dispose Pattern
 

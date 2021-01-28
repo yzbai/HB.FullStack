@@ -17,65 +17,58 @@ using HB.FullStack.Mobile.Effects.Touch;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable",
-        Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
+    enum InvalidateSurfaceType
+    {
+        ByTouch,
+        ByTimeTick
+    }
+
+    [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
     public class SKFigureCanvasView : SKCanvasView, IBaseContentView
     {
         public static readonly BindableProperty FiguresProperty = BindableProperty.Create(nameof(Figures), typeof(IList<SKFigure>), typeof(SKFigureCanvasView), new ObservableCollection<SKFigure>(), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((IList<SKFigure>?)o, (IList<SKFigure>?)n); });
-        public static readonly BindableProperty IsAnimationModeProperty = BindableProperty.Create(nameof(IsAnimationMode), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnIsAnimationModeChanged((bool)o, (bool)n); });
-        public static readonly BindableProperty AnimationIntervalProperty = BindableProperty.Create(nameof(AnimationInterval), typeof(int), typeof(SKFigureCanvasView), 16, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnAnimationIntervalChanged(); });
+        public static readonly BindableProperty EnableTimeTickProperty = BindableProperty.Create(nameof(EnableTimeTick), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnEnableTimeTickChanged((bool)o, (bool)n); });
+        public static readonly BindableProperty TimeTickIntervalsProperty = BindableProperty.Create(nameof(TimeTickIntervals), typeof(TimeSpan), typeof(SKFigureCanvasView), TimeSpan.FromMilliseconds(16), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnTimeTickIntervalChanged(); });
 
         private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
-        private Timer? _animationTimer;
+        private Timer? _timer;
 
         public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
 
-        public bool IsAnimationMode { get => (bool)GetValue(IsAnimationModeProperty); set => SetValue(IsAnimationModeProperty, value); }
+        public bool EnableTimeTick { get => (bool)GetValue(EnableTimeTickProperty); set => SetValue(EnableTimeTickProperty, value); }
 
-        public int AnimationInterval { get => (int)GetValue(AnimationIntervalProperty); set => SetValue(AnimationIntervalProperty, value); }
+        public TimeSpan TimeTickIntervals { get => (TimeSpan)GetValue(TimeTickIntervalsProperty); set => SetValue(TimeTickIntervalsProperty, value); }
 
         public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
 
-        public bool IsAnimating { get; private set; }
+        //public bool IsResponsingTimeTick { get; private set; }
 
         public bool IsAppearing { get; private set; }
 
         public bool AutoBringToFront { get; set; }
 
-        public bool EnableFailedToHitEvent { get; set; } = true;
-
-        public event EventHandler<SKPaintSurfaceEventArgs> Painting
-        {
-            add => _eventManager.AddEventHandler(value);
-            remove => _eventManager.RemoveEventHandler(value);
-        }
-
-        public event EventHandler<SKPaintSurfaceEventArgs> Painted
-        {
-            add => _eventManager.AddEventHandler(value);
-            remove => _eventManager.AddEventHandler(value);
-        }
+        public bool EnableFailedToHitEvent { get; set; }
 
         public SKFigureCanvasView() : base()
         {
             TouchEffect touchEffect = new TouchEffect { Capture = true };
 
-            touchEffect.TouchAction += TouchEffect_TouchAction;
+            touchEffect.TouchAction += OnTouch;
 
             Effects.Add(touchEffect);
 
-            PaintSurface += FigureCanvasView_PaintSurface;            
+            PaintSurface += OnPaintSurface;
         }
 
         public void OnAppearing()
         {
             IsAppearing = true;
 
-            if (IsAnimationMode)
+            if (EnableTimeTick)
             {
-                ReStartAnimation();
+                ResumeResponseTimeTick();
             }
         }
 
@@ -83,41 +76,18 @@ namespace HB.FullStack.Mobile.Skia
         {
             IsAppearing = false;
 
-            StopAnimation();
+            StopResponseTimeTick();
 
             _touchDictionary.Clear();
         }
 
-        public IList<IBaseContentView?>? GetAllCustomerControls()
-        {
-            return null;
-        }
+        public IList<IBaseContentView?>? GetAllCustomerControls() => null;
 
-        private void OnIsAnimationModeChanged(bool oldValue, bool newValue)
-        {
-            if (oldValue == newValue)
-            {
-                return;
-            }
-
-            if (newValue && IsAppearing)
-            {
-                ReStartAnimation();
-            }
-            else
-            {
-                StopAnimation();
-            }
-        }
-
-        private void OnAnimationIntervalChanged()
-        {
-            ReStartAnimation();
-        }
+        #region OnFigures
 
         private void OnFiguresChanged(IList<SKFigure>? oldValues, IList<SKFigure>? newValues)
         {
-            StopAnimation();
+            StopResponseTimeTick();
 
             if (oldValues != null)
             {
@@ -135,9 +105,9 @@ namespace HB.FullStack.Mobile.Skia
                 }
             }
 
-            if (IsAnimationMode)
+            if (EnableTimeTick)
             {
-                ReStartAnimation();
+                ResumeResponseTimeTick();
             }
             else
             {
@@ -165,9 +135,9 @@ namespace HB.FullStack.Mobile.Skia
                 }
             }
 
-            if (IsAnimationMode)
+            if (EnableTimeTick)
             {
-                ReStartAnimation();
+                ResumeResponseTimeTick();
             }
             else
             {
@@ -175,87 +145,70 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
-        private void ReStartAnimation()
+        #endregion
+
+        #region OnTimeTick
+
+        private void OnEnableTimeTickChanged(bool oldValue, bool newValue)
         {
-            if (!IsAnimationMode)
+            if (oldValue == newValue)
+            {
+                return;
+            }
+
+            if (newValue && IsAppearing)
+            {
+                ResumeResponseTimeTick();
+            }
+            else
+            {
+                StopResponseTimeTick();
+            }
+        }
+
+        private void OnTimeTickIntervalChanged()
+        {
+            ResumeResponseTimeTick();
+        }
+
+        private void ResumeResponseTimeTick()
+        {
+            if (!EnableTimeTick)
             {
                 return;
             }
 
             _stopwatch.Restart();
-            IsAnimating = true;
+            //IsResponsingTimeTick = true;
 
-            if (_animationTimer == null)
+            if (_timer == null)
             {
-                _animationTimer = new Timer(
-                    new TimerCallback(state =>
-                    {
-                        Device.BeginInvokeOnMainThread(() => InvalidateSurface());
-                    }),
+                _timer = new Timer(
+                    new TimerCallback(state => Device.BeginInvokeOnMainThread(() => InvalidateSurface())),
                     null,
-                    0,
-                    AnimationInterval);
+                    TimeSpan.Zero,
+                    TimeTickIntervals);
             }
             else
             {
-                _animationTimer.Change(0, AnimationInterval);
+                _timer.Change(TimeSpan.Zero, TimeTickIntervals);
             }
         }
 
-        private void StopAnimation()
+        private void StopResponseTimeTick()
         {
-            _animationTimer?.Dispose();
-            _animationTimer = null;
+            _timer?.Dispose();
+            _timer = null;
 
-            IsAnimating = false;
+            //IsResponsingTimeTick = false;
             _stopwatch.Stop();
         }
 
-        private void FigureCanvasView_PaintSurface(object? sender, SKPaintSurfaceEventArgs e)
-        {
-            SKCanvas canvas = e.Surface.Canvas;
+        #endregion
 
-            canvas.Clear();
+        #region OnTouch
 
-            OnPainting(sender, e);
-
-            OnPaintFigures(e, canvas);
-
-            OnPainted(sender, e);
-        }
-
-        private void OnPainting(object? sender, SKPaintSurfaceEventArgs e)
-        {
-            SKCanvas canvas = e.Surface.Canvas;
-
-            using (new SKAutoCanvasRestore(canvas))
-            {
-                _eventManager.HandleEvent(sender, e, nameof(Painting));
-            }
-        }
-
-        private void OnPaintFigures(SKPaintSurfaceEventArgs e, SKCanvas canvas)
-        {
-            foreach (var f in Figures)
-            {
-                using (new SKAutoCanvasRestore(canvas))
-                {
-                    f.OnPaint(e);
-                }
-            }
-        }
-
-        private void OnPainted(object? sender, SKPaintSurfaceEventArgs e)
-        {
-            SKCanvas canvas = e.Surface.Canvas;
-
-            using (new SKAutoCanvasRestore(canvas))
-            {
-                _eventManager.HandleEvent(sender, e, nameof(Painted));
-            }
-        }
-
-        private void TouchEffect_TouchAction(object? sender, TouchActionEventArgs args)
+        private void OnTouch(object? sender, TouchActionEventArgs args)
         {
             //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
@@ -323,7 +276,7 @@ namespace HB.FullStack.Mobile.Skia
                         }
                     }
 
-                    if (!IsAnimationMode)
+                    //if (!EnableTimeTick)
                     {
                         InvalidateSurface();
                     }
@@ -335,7 +288,7 @@ namespace HB.FullStack.Mobile.Skia
                     {
                         relatedFigure.ProcessTouchAction(args);
 
-                        if (!IsAnimationMode)
+                        //if (!EnableTimeTick)
                         {
                             InvalidateSurface();
                         }
@@ -350,7 +303,7 @@ namespace HB.FullStack.Mobile.Skia
 
                         _touchDictionary.Remove(eventId);
 
-                        if (!IsAnimationMode)
+                        //if (!EnableTimeTick)
                         {
                             InvalidateSurface();
                         }
@@ -359,5 +312,67 @@ namespace HB.FullStack.Mobile.Skia
                     break;
             }
         }
+
+        #endregion
+
+        #region Paint
+
+        public event EventHandler<SKPaintSurfaceEventArgs> Painting
+        {
+            add => _eventManager.AddEventHandler(value);
+            remove => _eventManager.RemoveEventHandler(value);
+        }
+
+        public event EventHandler<SKPaintSurfaceEventArgs> Painted
+        {
+            add => _eventManager.AddEventHandler(value);
+            remove => _eventManager.AddEventHandler(value);
+        }
+
+        private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
+        {
+            SKCanvas canvas = e.Surface.Canvas;
+
+            canvas.Clear();
+
+            OnPainting(sender, e);
+
+            OnPaintFigures(e, canvas);
+
+            OnPainted(sender, e);
+        }
+
+        private void OnPainting(object? sender, SKPaintSurfaceEventArgs e)
+        {
+            SKCanvas canvas = e.Surface.Canvas;
+
+            using (new SKAutoCanvasRestore(canvas))
+            {
+                _eventManager.HandleEvent(sender, e, nameof(Painting));
+            }
+        }
+
+        private void OnPaintFigures(SKPaintSurfaceEventArgs e, SKCanvas canvas)
+        {
+            foreach (var f in Figures)
+            {
+                using (new SKAutoCanvasRestore(canvas))
+                {
+                    f.OnPaint(e);
+                }
+            }
+        }
+
+        private void OnPainted(object? sender, SKPaintSurfaceEventArgs e)
+        {
+            SKCanvas canvas = e.Surface.Canvas;
+
+            using (new SKAutoCanvasRestore(canvas))
+            {
+                _eventManager.HandleEvent(sender, e, nameof(Painted));
+            }
+        }
+
+        #endregion
     }
 }

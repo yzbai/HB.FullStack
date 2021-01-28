@@ -97,7 +97,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             return new List<IBaseContentView?> { BackgroundCanvasView, ForegroundCanvasView };
         }
 
-        protected override void RemoveFigures()
+        protected override void DisposeFigures()
         {
             if (_hourHandFigure != null)
             {

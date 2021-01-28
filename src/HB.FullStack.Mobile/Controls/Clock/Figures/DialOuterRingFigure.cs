@@ -70,6 +70,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
             throw new System.NotImplementedException();
         }
 
+        protected override void CaculateMatrixByTime(long elapsedMilliseconds)
+        {
+            throw new System.NotImplementedException();
+        }
+
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
         // ~DialOuterRingFigure ()
         // {

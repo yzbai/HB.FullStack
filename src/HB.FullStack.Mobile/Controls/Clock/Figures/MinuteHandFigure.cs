@@ -17,6 +17,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private readonly WeakReference<HourHandFigure> _houHand;
 
         public int MinuteResult { get; set; }
+
         public bool CanAntiClockwise { get; set; }
 
         public MinuteHandFigure(float handLengthRatio, int initMinute, HourHandFigure houHand)

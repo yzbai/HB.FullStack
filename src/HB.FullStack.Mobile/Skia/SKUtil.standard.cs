@@ -225,7 +225,10 @@ namespace HB.FullStack.Mobile.Skia
 
         #endregion
 
-        public static double Density { get; set; } = Xamarin.Essentials.DeviceDisplay.MainDisplayInfo.Density;
+        public static double Density { get; } = Xamarin.Essentials.DeviceDisplay.MainDisplayInfo.Density;
+
+        public static double TapTolerantDistance { get; } = ToPx(Consts.TapTolerantDistanceInDp);
+
         public static double ToPx(double dp)
         {
             return dp * Density;
@@ -246,18 +249,20 @@ namespace HB.FullStack.Mobile.Skia
             return new Point(ToDp(sKPoint.X), ToDp(sKPoint.Y));
         }
 
-        public static double DistanceInDp(Point a, Point b)
+        public static double Distance(Point a, Point b)
         {
             return Math.Sqrt(Math.Pow(b.Y - a.Y, 2) + Math.Pow(b.X - a.X, 2));
+        }
+
+        public static double Distance(SKPoint a, SKPoint b)
+        {
+            return Math.Sqrt(Math.Pow(b.Y-a.Y, 2) + Math.Pow(b.X-a.X,2));
         }
 
         /// <summary>
         /// 将以左上角为坐标系的点，转换为以中心为坐标系上的点。同一个点。
         /// </summary>
-        /// <param name="skPoint"></param>
-        /// <param name="canvasSize"></param>
-        /// <returns></returns>
-        public static SKPoint TranslatePointToCenter(SKPoint skPoint, SKSize canvasSize)
+        public static SKPoint PivotPointToCenter(SKPoint skPoint, SKSize canvasSize)
         {
             return new SKPoint(skPoint.X - canvasSize.Width / 2, skPoint.Y - canvasSize.Height / 2);
         }

@@ -18,10 +18,10 @@ namespace HB.FullStack.Mobile.Skia
         {
             base.OnDisappearing();
 
-            RemoveFigures();
+            DisposeFigures();
         }
 
-        protected abstract void RemoveFigures();
+        protected abstract void DisposeFigures();
 
         protected abstract void ReAddFigures();
     }

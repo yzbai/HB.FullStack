@@ -165,6 +165,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
             throw new NotImplementedException();
         }
 
+        protected override void CaculateMatrixByTime(long elapsedMilliseconds)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion Dispose Pattern
     }
 }

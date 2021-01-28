@@ -6,6 +6,7 @@ using System.Text;
 
 namespace HB.FullStack.Mobile.Skia
 {
+    EnableMultipleSelected
     public class SKFigureGroup<T> : SKFigure where T : SKFigure
     {
         public bool AutoBringToFront { get; set; } = true;
