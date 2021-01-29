@@ -50,8 +50,6 @@ namespace HB.FullStack.Mobile.Skia
 
         public bool AutoBringToFront { get; set; } = true;
 
-        public bool EnableFailedToHitEvent { get; set; } = true;
-
         public SKFigureCanvasView() : base()
         {
             _touchEffect = new TouchEffect { Capture = true };
@@ -262,20 +260,11 @@ namespace HB.FullStack.Mobile.Skia
                                     Figures.Add(figure);
                                 }
                             }
-
-                            if (!EnableFailedToHitEvent)
-                            {
-                                //就不用给剩下的Figure发去点击失败消息了
-                                break;
-                            }
                         }
                         else
                         {
-                            if (EnableFailedToHitEvent)
-                            {
-                                TouchActionEventArgs unTouchArgs = new TouchActionEventArgs(args.Id, TouchActionType.HitFailed, args.Location, args.IsInContact);
-                                figure.ProcessTouchAction(unTouchArgs);
-                            }
+                            TouchActionEventArgs unTouchArgs = new TouchActionEventArgs(args.Id, TouchActionType.HitFailed, args.Location, args.IsInContact);
+                            figure.ProcessTouchAction(unTouchArgs);
                         }
                     }
 

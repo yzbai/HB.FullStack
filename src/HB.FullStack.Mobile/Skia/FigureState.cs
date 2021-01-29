@@ -4,17 +4,10 @@ using System.Text;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    public interface IStatedFigure
-    {
-        void SetState(FigureState state);
-    }
-
     public enum FigureState
     {
         None,
-        Tapped,
-        LongTapped,
-        Dragged,
-        UnSelected,
+        Selected,
+        LongSelected,
     }
 }

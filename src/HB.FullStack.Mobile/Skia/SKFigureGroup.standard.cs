@@ -1,4 +1,6 @@
-﻿using SkiaSharp;
+﻿using HB.FullStack.Mobile.Effects.Touch;
+
+using SkiaSharp;
 using SkiaSharp.Views.Forms;
 
 using System;
@@ -19,7 +21,7 @@ namespace HB.FullStack.Mobile.Skia
 
         public bool EnableMultipleSelected { get; set; }
 
-        public bool EnableUnSelectedByHitFailed { get; set; }
+        public bool EnableUnSelectedByHitFailed { get; set; } = true;
 
         //TODO: make this obserable, and to notify repaint
         protected IList<T> Figures { get; } = new List<T>();
@@ -48,19 +50,26 @@ namespace HB.FullStack.Mobile.Skia
         }
         public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
+            bool founded = false;
+
             for (int i = Figures.Count - 1; i >= 0; i--)
             {
                 T figure = Figures[i];
 
-                if (figure.OnHitTest(skPoint, touchId))
+                if (!founded && figure.OnHitTest(skPoint, touchId))
                 {
-                    _hittingFigures[touchId] = figure;
+                    founded = true;
 
-                    return true;
+                    _hittingFigures[touchId] = figure;
+                }
+                else
+                {
+                    TouchActionEventArgs unTouchArgs = new TouchActionEventArgs(touchId, TouchActionType.HitFailed, SKUtil.ToPoint(skPoint), true);
+                    figure.ProcessTouchAction(unTouchArgs);
                 }
             }
 
-            return false;
+            return founded;
         }
 
         public void AddFigure(T figure)
@@ -113,81 +122,40 @@ namespace HB.FullStack.Mobile.Skia
         {
             SelectedFigures.Remove(figure);
 
-            if (figure is IStatedFigure statedFigure)
-            {
-                statedFigure.SetState(FigureState.UnSelected);
-            }
-        }
-
-        public void Select(T figure, string eventName)
-        {
-            if (eventName == nameof(OnCancelled))
-            {
-                return;
-            }
-
-            if (!EnableMultipleSelected)
-            {
-                foreach (SKFigure f in SelectedFigures)
-                {
-                    if (f == figure)
-                    {
-                        continue;
-                    }
-
-                    if (f is IStatedFigure statedFigure1)
-                    {
-                        statedFigure1.SetState(FigureState.UnSelected);
-                    }
-                }
-
-                SelectedFigures.Clear();
-            }
-
-            SelectedFigures.Add(figure);
-
-            if (figure is IStatedFigure statedFigure2)
-            {
-                FigureState figureState = eventName switch
-                {
-                    nameof(OnTapped) => FigureState.Tapped,
-                    nameof(OnLongTapped) => FigureState.LongTapped,
-                    nameof(OnDragged) => FigureState.Dragged,
-                    _ => FigureState.None
-                };
-
-                statedFigure2.SetState(figureState);
-            }
+            figure.SetState(FigureState.None);
         }
 
         public void UnSelectAll()
         {
             foreach (SKFigure f in SelectedFigures)
             {
-                if (f is IStatedFigure statedFigure)
-                {
-                    statedFigure.SetState(FigureState.UnSelected);
-                }
+                f.SetState(FigureState.None);
             }
 
             SelectedFigures.Clear();
         }
 
-        #region 事件派发
-
-        private void OnTouchIsOver(SKTouchInfoEventArgs info, T figure, string eventName)
+        private void Select(T figure)
         {
-            if (info.IsOver)
+            if (!EnableMultipleSelected)
             {
-                _hittingFigures.Remove(info.TouchEventId);
+                foreach (SKFigure sf in SelectedFigures)
+                {
+                    if (sf == figure)
+                    {
+                        continue;
+                    }
+
+                    sf.SetState(FigureState.None);
+                }
+
+                SelectedFigures.Clear();
             }
 
-            //Selected
-            if (info.IsOver || info.LongPressHappend)
-            {
-                Select(figure, eventName);
-            }
+            SelectedFigures.Add(figure);
         }
+
+        #region 事件派发
 
         private void OnPressed(object? sender, SKTouchInfoEventArgs info)
         {
@@ -195,6 +163,8 @@ namespace HB.FullStack.Mobile.Skia
             {
                 return;
             }
+
+            figure.OnPressed(info);
 
             //Bring To Frong
             if (AutoBringToFront && Figures.Remove(figure))
@@ -212,7 +182,12 @@ namespace HB.FullStack.Mobile.Skia
 
             figure.OnDragged(info);
 
-            OnTouchIsOver(info, figure, nameof(OnDragged));
+            Select(figure);
+
+            if (info.IsOver)
+            {
+                _hittingFigures.Remove(info.TouchEventId);
+            }
         }
 
         private void OnLongTapped(object? sender, SKTouchInfoEventArgs info)
@@ -224,7 +199,12 @@ namespace HB.FullStack.Mobile.Skia
 
             figure.OnLongTapped(info);
 
-            OnTouchIsOver(info, figure, nameof(OnLongTapped));
+            Select(figure);
+
+            if (info.IsOver)
+            {
+                _hittingFigures.Remove(info.TouchEventId);
+            }
         }
 
         private void OnTapped(object? sender, SKTouchInfoEventArgs info)
@@ -236,7 +216,12 @@ namespace HB.FullStack.Mobile.Skia
 
             figure.OnTapped(info);
 
-            OnTouchIsOver(info, figure, nameof(OnTapped));
+            Select(figure);
+
+            if (info.IsOver)
+            {
+                _hittingFigures.Remove(info.TouchEventId);
+            }
         }
 
         private void OnCancelled(object? sender, SKTouchInfoEventArgs info)
@@ -248,7 +233,10 @@ namespace HB.FullStack.Mobile.Skia
 
             figure.OnCancelled(info);
 
-            OnTouchIsOver(info, figure, nameof(OnCancelled));
+            if (info.IsOver)
+            {
+                _hittingFigures.Remove(info.TouchEventId);
+            }
         }
 
         private void OnHitFailed(object? sender, EventArgs e)

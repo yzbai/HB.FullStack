@@ -10,7 +10,7 @@ using SkiaSharp.Views.Forms;
 
 namespace HB.FullStack.Mobile.Controls.Clock
 {
-    public class TimeBlockFigure : SKFigure, IStatedFigure
+    public class TimeBlockFigure : SKFigure
     {
         private SKRegion? _previousRegion;
         private SKPath? _previousPath;
@@ -46,8 +46,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         public TimeBlockFigure(float innerRadiusRatio, float outterRadiusRatio, TimeBlockDrawInfo drawInfo)
         {
-            State = FigureState.None;
-
             PreviousStartTime = CurrentStartTime = drawInfo.StartTime;
             PreviousEndTime = CurrentEndTime = drawInfo.EndTime;
 
@@ -63,7 +61,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _outterRadiusRatio = outterRadiusRatio;
         }
 
-        public FigureState State { get; set; }
+
 
         /// <summary>
         /// 最近的已经确定的开始时间
@@ -172,7 +170,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 canvas.DrawPath(path2, _sectorPaint);
             }
 
-            if (State == FigureState.Tapped)
+            if (State == FigureState.Selected)
             {
                 if (path1 != null)
                 {
@@ -185,7 +183,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 }
             }
 
-            if (State == FigureState.LongTapped)
+            if (State == FigureState.LongSelected)
             {
                 if (path1 != null)
                 {
@@ -212,18 +210,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         }
 
-        public void SetState(FigureState state)
-        {
-            //GlobalSettings.Logger.LogDebug(state.ToString());
-
-            if (State == FigureState.LongTapped && state == FigureState.Dragged)
-            {
-                return;
-            }
-
-            State = state;
-        }
-
         //public override bool OnHitTest(SKPoint skPoint, long touchId)
         //{
         //    if (_previousRegion == null)
@@ -239,7 +225,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private void TimeBlockFigure_Dragged(object sender, SKTouchInfoEventArgs info)
         {
             //GlobalSettings.Logger.LogDebug("DDDDDDDDDDDDD_   Dragged");
-            if (State != FigureState.LongTapped)
+            if (State != FigureState.LongSelected)
             {
                 return;
             }

@@ -77,6 +77,8 @@ namespace HB.FullStack.Mobile.Skia
 
         protected SKSize CanvasSize { get; private set; }
 
+        public FigureState State { get; private set; } = FigureState.None;
+
         public virtual void OnPaint(SKPaintSurfaceEventArgs e)
         {
             SKImageInfo info = e.Info;
@@ -100,6 +102,11 @@ namespace HB.FullStack.Mobile.Skia
             OnUpdateHitTestPath(info);
 
             OnCaculateOutput();
+        }
+
+        public virtual void SetState(FigureState figureState)
+        {
+            State = figureState;
         }
 
         protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas) { }
@@ -377,26 +384,41 @@ namespace HB.FullStack.Mobile.Skia
         public void OnDragged(SKTouchInfoEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Dragged));
+
+            if (State == FigureState.Selected || State == FigureState.LongSelected)
+            {
+                return;
+            }
+
+            SetState(FigureState.Selected);
         }
 
         public void OnTapped(SKTouchInfoEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
+
+            SetState(FigureState.Selected);
         }
 
         public void OnLongTapped(SKTouchInfoEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
+
+            SetState(FigureState.LongSelected);
         }
 
         public void OnCancelled(SKTouchInfoEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
+
+            //SetState(FigureState.None);
         }
 
         public void OnHitFailed()
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
+
+            //SetState(FigureState.None);
         }
 
         #endregion
