@@ -214,7 +214,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         public void SetState(FigureState state)
         {
-            GlobalSettings.Logger.LogDebug(state.ToString());
+            //GlobalSettings.Logger.LogDebug(state.ToString());
 
             if (State == FigureState.LongTapped && state == FigureState.Dragged)
             {
@@ -238,7 +238,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         private void TimeBlockFigure_Dragged(object sender, SKTouchInfoEventArgs info)
         {
-            GlobalSettings.Logger.LogDebug("DDDDDDDDDDDDD_   Dragged");
+            //GlobalSettings.Logger.LogDebug("DDDDDDDDDDDDD_   Dragged");
             if (State != FigureState.LongTapped)
             {
                 return;

@@ -308,7 +308,7 @@ namespace HB.FullStack.Mobile.Skia
                     return;
                 }
 
-                GlobalSettings.Logger.LogDebug("LLLLLLLLLLLLLLLong pressed!");
+                //GlobalSettings.Logger.LogDebug("LLLLLLLLLLLLLLLong pressed!");
 
                 info.LongPressHappend = true;
 
