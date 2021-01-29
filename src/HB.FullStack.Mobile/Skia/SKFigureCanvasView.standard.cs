@@ -263,6 +263,7 @@ namespace HB.FullStack.Mobile.Skia
 
                             if (!EnableFailedToHitEvent)
                             {
+                                //就不用给剩下的Figure发去点击失败消息了
                                 break;
                             }
                         }

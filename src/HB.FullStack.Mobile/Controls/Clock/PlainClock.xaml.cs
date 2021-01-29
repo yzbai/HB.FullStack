@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 using HB.FullStack.Mobile.Base;
 using HB.FullStack.Mobile.Skia;
@@ -150,7 +151,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         private void OnForegroundCanvasViewPainted(object sender, SKPaintSurfaceEventArgs e)
         {
-            TimeBlockFigure? selectedTimeBlock = _currentTimeBlockFigureGroup?.SelectedTimeBlockFigure;
+            TimeBlockFigure? selectedTimeBlock = _currentTimeBlockFigureGroup?.SelectedFigures.FirstOrDefault();
 
             if (selectedTimeBlock != null)
             {

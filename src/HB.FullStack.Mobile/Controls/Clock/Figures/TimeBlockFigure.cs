@@ -8,14 +8,7 @@ using SkiaSharp.Views.Forms;
 
 namespace HB.FullStack.Mobile.Controls.Clock
 {
-    public enum TimeBlockFigureState
-    {
-        Normal,
-        Tapped,
-        LongTapped
-    }
-
-    public class TimeBlockFigure : SKFigure
+    public class TimeBlockFigure : SKFigure, IStatedFigure
     {
         private SKRegion? _previousRegion;
 
@@ -52,24 +45,24 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         public TimeBlockFigure(SKRatioPoint pivotPoint, float radiusRatio, TimeBlockDrawInfo drawInfo)
         {
-            State = TimeBlockFigureState.Normal;
+            State= FigureState.None;
 
             PreviousStartTime = CurrentStartTime = drawInfo.StartTime;
             PreviousEndTime = CurrentEndTime = drawInfo.EndTime;
 
             _color = drawInfo.Color;
 
-            Tapped += TimeBlockFigure_Tapped;
-            LongTapped += TimeBlockFigure_LongTapped;
+            //Tapped += TimeBlockFigure_Tapped;
+            //LongTapped += TimeBlockFigure_LongTapped;
             Dragged += TimeBlockFigure_Dragged;
-            Cancelled += TimeBlockFigure_Cancelled;
-            HitFailed += TimeBlockFigure_HitFailed;
+            //Cancelled += TimeBlockFigure_Cancelled;
+            //HitFailed += TimeBlockFigure_HitFailed;
             this.drawInfo = drawInfo;
             this.pivotPoint = pivotPoint;
             this.radiusRatio = radiusRatio;
         }
 
-        public TimeBlockFigureState State { get; set; }
+        public FigureState State { get; set; }
 
         /// <summary>
         /// 最近的已经确定的开始时间
@@ -176,7 +169,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 canvas.DrawPath(path2, _sectorPaint);
             }
 
-            if (State == TimeBlockFigureState.Tapped)
+            if (State == FigureState.Tapped)
             {
                 if (path1 != null)
                 {
@@ -189,7 +182,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 }
             }
 
-            if (State == TimeBlockFigureState.LongTapped)
+            if (State == FigureState.LongTapped)
             {
                 if (path1 != null)
                 {
@@ -213,20 +206,20 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 return false;
             }
 
-            SKPoint transedPoint = SKUtil.TranslatePointToCenter(skPoint, _previousCanvasSize);
+            SKPoint transedPoint = SKUtil.PivotPointToCenter(skPoint, _previousCanvasSize);
 
             return _previousRegion.Contains((int)transedPoint.X, (int)transedPoint.Y);
         }
 
         private void TimeBlockFigure_Dragged(object sender, SKTouchInfoEventArgs info)
         {
-            if (State != TimeBlockFigureState.LongTapped)
+            if (State != FigureState.LongTapped)
             {
                 return;
             }
 
-            SKPoint previousPoint = SKUtil.TranslatePointToCenter(info.PreviousPoint, _previousCanvasSize);
-            SKPoint currentPoint = SKUtil.TranslatePointToCenter(info.CurrentPoint, _previousCanvasSize);
+            SKPoint previousPoint = SKUtil.PivotPointToCenter(info.PreviousPoint, _previousCanvasSize);
+            SKPoint currentPoint = SKUtil.PivotPointToCenter(info.CurrentPoint, _previousCanvasSize);
 
             double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, new SKPoint(0, 0));
 
@@ -240,38 +233,38 @@ namespace HB.FullStack.Mobile.Controls.Clock
             }
         }
 
-        private void TimeBlockFigure_LongTapped(object sender, SKTouchInfoEventArgs info)
-        {
-            State = TimeBlockFigureState.LongTapped;
+        //private void TimeBlockFigure_LongTapped(object sender, SKTouchInfoEventArgs info)
+        //{
+        //    State = FigureState.LongTapped;
 
-            if (Parent is TimeBlockFigureGroup group)
-            {
-                group.SetLongTapped(this);
-            }
-        }
+        //    if (Parent is TimeBlockFigureGroup group)
+        //    {
+        //        group.SetLongTapped(this);
+        //    }
+        //}
 
-        private void TimeBlockFigure_Tapped(object sender, SKTouchInfoEventArgs info)
-        {
-            State = TimeBlockFigureState.Tapped;
+        //private void TimeBlockFigure_Tapped(object sender, SKTouchInfoEventArgs info)
+        //{
+        //    State = TimeBlockFigureState.Tapped;
 
-            if (Parent is TimeBlockFigureGroup group)
-            {
-                group.SetTapped(this);
-            }
-        }
+        //    if (Parent is TimeBlockFigureGroup group)
+        //    {
+        //        group.SetTapped(this);
+        //    }
+        //}
 
-        private void TimeBlockFigure_Cancelled(object sender, SKTouchInfoEventArgs e)
-        {
-            if (Parent is TimeBlockFigureGroup group)
-            {
-                group.SetAllBackToNormal();
-            }
-        }
+        //private void TimeBlockFigure_Cancelled(object sender, SKTouchInfoEventArgs e)
+        //{
+        //    if (Parent is TimeBlockFigureGroup group)
+        //    {
+        //        group.SetAllBackToNormal();
+        //    }
+        //}
 
-        private void TimeBlockFigure_HitFailed(object sender, EventArgs e)
-        {
-            State = TimeBlockFigureState.Normal;
-        }
+        //private void TimeBlockFigure_HitFailed(object sender, EventArgs e)
+        //{
+        //    State = TimeBlockFigureState.Normal;
+        //}
 
         private void ReSetCurrentTime(double actuallyChangedHour)
         {
@@ -354,6 +347,11 @@ namespace HB.FullStack.Mobile.Controls.Clock
         }
 
         protected override void OnCaculateOutput()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetState(FigureState selected)
         {
             throw new NotImplementedException();
         }

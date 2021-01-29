@@ -96,11 +96,11 @@ namespace HB.FullStack.Mobile.Skia
             OnCaculateOutput();
         }
 
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas);
+        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas) { }
 
-        protected abstract void OnUpdateHitTestPath(SKImageInfo info);
+        protected virtual void OnUpdateHitTestPath(SKImageInfo info) { }
 
-        protected abstract void OnCaculateOutput();
+        protected virtual void OnCaculateOutput() { }
 
         protected virtual void CaculateMatrixByTime(long elapsedMilliseconds) { }
 
@@ -128,6 +128,10 @@ namespace HB.FullStack.Mobile.Skia
         private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
         private readonly Dictionary<long, LongTouchTaskInfo> _longTouchInfos = new Dictionary<long, LongTouchTaskInfo>();
 
+        /// <summary>
+        /// touchInfo在Pressed中放入，在Existed,Release,Cancel中释放
+        /// </summary>
+        /// <param name="args"></param>
         public virtual void ProcessTouchAction(TouchActionEventArgs args)
         {
             if (!EnableTouch)
@@ -189,6 +193,11 @@ namespace HB.FullStack.Mobile.Skia
 
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
+                            if(touchInfo.IsOver)
+                            {
+                                return;
+                            }
+
                             touchInfo.CurrentPoint = curLocation;
 
                             if (touchInfo.StartPoint == curLocation)
@@ -227,22 +236,25 @@ namespace HB.FullStack.Mobile.Skia
                                 _longTouchInfos.Remove(args.Id);
                             }
 
-                            touchInfo.CurrentPoint = curLocation;
-                            touchInfo.IsOver = true;
+                            if (!touchInfo.IsOver)
+                            {
+                                touchInfo.CurrentPoint = curLocation;
+                                touchInfo.IsOver = true;
 
-                            if (touchInfo.StartPoint == touchInfo.CurrentPoint)
-                            //if (SKUtil.Distance(touchInfo.StartPoint, touchInfo.CurrentPoint) < SKUtil.TapTolerantDistance)
-                            {
-                                if (!touchInfo.LongPressHappend)
+                                if (touchInfo.StartPoint == touchInfo.CurrentPoint)
+                                //if (SKUtil.Distance(touchInfo.StartPoint, touchInfo.CurrentPoint) < SKUtil.TapTolerantDistance)
                                 {
-                                    OnTapped(touchInfo);
+                                    if (!touchInfo.LongPressHappend)
+                                    {
+                                        OnTapped(touchInfo);
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                if (EnableDrag)
+                                else
                                 {
-                                    OnDragged(touchInfo);
+                                    if (EnableDrag)
+                                    {
+                                        OnDragged(touchInfo);
+                                    }
                                 }
                             }
 
@@ -265,12 +277,14 @@ namespace HB.FullStack.Mobile.Skia
                                 _longTouchInfos.Remove(args.Id);
                             }
 
-                            touchInfo.IsOver = true;
+                            if (!touchInfo.IsOver)
+                            {
+                                touchInfo.IsOver = true;
 
-                            OnCancelled(touchInfo);
+                                OnCancelled(touchInfo);
+                            }
 
                             _touchInfos.Remove(args.Id);
-
                         }
                     }
                     break;
@@ -289,6 +303,7 @@ namespace HB.FullStack.Mobile.Skia
                 }
 
                 info.LongPressHappend = true;
+                info.IsOver = true;
 
                 OnLongTapped(info);
             }, cancellationToken);
