@@ -21,6 +21,7 @@ namespace HB.FullStack.Mobile.Skia
 
         public bool EnableUnSelectedByHitFailed { get; set; }
 
+        //TODO: make this obserable, and to notify repaint
         protected IList<T> Figures { get; } = new List<T>();
 
         public SKFigureGroup()
@@ -65,8 +66,20 @@ namespace HB.FullStack.Mobile.Skia
         public void AddFigure(T figure)
         {
             figure.Parent = this;
+            figure.CanvasView = this.CanvasView;
 
             Figures.Add(figure);
+        }
+
+        public void AddFigures(params T[] figures)
+        {
+            foreach (T f in figures)
+            {
+                f.Parent = this;
+                f.CanvasView = this.CanvasView;
+            }
+
+            Figures.AddRange(figures);
         }
 
         public bool RemoveFigure(T figure)
@@ -117,6 +130,11 @@ namespace HB.FullStack.Mobile.Skia
             {
                 foreach (SKFigure f in SelectedFigures)
                 {
+                    if (f == figure)
+                    {
+                        continue;
+                    }
+
                     if (f is IStatedFigure statedFigure1)
                     {
                         statedFigure1.SetState(FigureState.UnSelected);
@@ -133,8 +151,8 @@ namespace HB.FullStack.Mobile.Skia
                 FigureState figureState = eventName switch
                 {
                     nameof(OnTapped) => FigureState.Tapped,
-                    nameof(OnLongTapped)=>FigureState.LongTapped,
-                    nameof(OnDragged)=>FigureState.Dragged,
+                    nameof(OnLongTapped) => FigureState.LongTapped,
+                    nameof(OnDragged) => FigureState.Dragged,
                     _ => FigureState.None
                 };
 
@@ -156,6 +174,20 @@ namespace HB.FullStack.Mobile.Skia
         }
 
         #region 事件派发
+
+        private void OnTouchIsOver(SKTouchInfoEventArgs info, T figure, string eventName)
+        {
+            if (info.IsOver)
+            {
+                _hittingFigures.Remove(info.TouchEventId);
+            }
+
+            //Selected
+            if (info.IsOver || info.LongPressHappend)
+            {
+                Select(figure, eventName);
+            }
+        }
 
         private void OnPressed(object? sender, SKTouchInfoEventArgs info)
         {
@@ -181,20 +213,6 @@ namespace HB.FullStack.Mobile.Skia
             figure.OnDragged(info);
 
             OnTouchIsOver(info, figure, nameof(OnDragged));
-        }
-
-        private void OnTouchIsOver(SKTouchInfoEventArgs info, T figure, string eventName)
-        {
-            if (!info.IsOver)
-            {
-                return;
-            }
-
-            _hittingFigures.Remove(info.TouchEventId);
-
-            //Selected
-
-            Select(figure, eventName);
         }
 
         private void OnLongTapped(object? sender, SKTouchInfoEventArgs info)

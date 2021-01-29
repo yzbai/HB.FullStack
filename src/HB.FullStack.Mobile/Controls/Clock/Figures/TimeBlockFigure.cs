@@ -2,6 +2,8 @@
 
 using HB.FullStack.Mobile.Skia;
 
+using Microsoft.Extensions.Logging;
+
 using SkiaSharp;
 using SkiaSharp.Extended;
 using SkiaSharp.Views.Forms;
@@ -11,10 +13,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
     public class TimeBlockFigure : SKFigure, IStatedFigure
     {
         private SKRegion? _previousRegion;
+        private SKPath? _previousPath;
 
         private readonly SKColor _color;
-
-        private SKSize _previousCanvasSize;
 
         private readonly SKPaint _dotPaint = new SKPaint
         {
@@ -39,13 +40,13 @@ namespace HB.FullStack.Mobile.Controls.Clock
             IsAntialias = true,
             StrokeWidth = 10
         };
-        private readonly TimeBlockDrawInfo drawInfo;
-        private readonly SKRatioPoint pivotPoint;
-        private readonly float radiusRatio;
+        private readonly TimeBlockDrawInfo _drawInfo;
+        private readonly float _innerRadiusRatio;
+        private readonly float _outterRadiusRatio;
 
-        public TimeBlockFigure(SKRatioPoint pivotPoint, float radiusRatio, TimeBlockDrawInfo drawInfo)
+        public TimeBlockFigure(float innerRadiusRatio, float outterRadiusRatio, TimeBlockDrawInfo drawInfo)
         {
-            State= FigureState.None;
+            State = FigureState.None;
 
             PreviousStartTime = CurrentStartTime = drawInfo.StartTime;
             PreviousEndTime = CurrentEndTime = drawInfo.EndTime;
@@ -57,9 +58,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
             Dragged += TimeBlockFigure_Dragged;
             //Cancelled += TimeBlockFigure_Cancelled;
             //HitFailed += TimeBlockFigure_HitFailed;
-            this.drawInfo = drawInfo;
-            this.pivotPoint = pivotPoint;
-            this.radiusRatio = radiusRatio;
+            _drawInfo = drawInfo;
+            _innerRadiusRatio = innerRadiusRatio;
+            _outterRadiusRatio = outterRadiusRatio;
         }
 
         public FigureState State { get; set; }
@@ -86,19 +87,17 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
- 
-
-            _previousCanvasSize = info.Size;
-
-            canvas.Translate(info.Width / 2f, info.Height / 2f);
+            //canvas.Translate(info.Width / 2f, info.Height / 2f);
 
             TimeBlockSpanType spanType = GetTimeSpanType(CurrentStartTime.Hour, CurrentEndTime.Hour);
 
             SKPath? path1 = null;
             SKPath? path2 = null;
 
-            float innerRadius = Math.Min(info.Height, info.Width) / 4f;
-            float outterRadius = Math.Min(info.Height, info.Width) / 3f;
+            float length = Math.Min(info.Height, info.Width);
+
+            float innerRadius = length * _innerRadiusRatio;
+            float outterRadius = length * _outterRadiusRatio;
 
             switch (spanType)
             {
@@ -107,7 +106,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
                         (float)GetTimePercent(CurrentStartTime),
                         (float)GetTimePercent(CurrentEndTime),
                         innerRadius);
-
                     break;
 
                 case TimeBlockSpanType.Outter:
@@ -146,12 +144,15 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _sectorPaint.Color = _color;
 
             _previousRegion?.Dispose();
+            _previousPath?.Dispose();
 
             _previousRegion = new SKRegion();
+            _previousPath = new SKPath();
 
             if (path1 != null)
             {
                 _previousRegion.SetPath(path1);
+                _previousPath.AddPath(path1);
                 canvas.DrawPath(path1, _sectorPaint);
             }
 
@@ -160,10 +161,12 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 if (path1 == null)
                 {
                     _previousRegion.SetPath(path2);
+                    _previousPath.AddPath(path2);
                 }
                 else
                 {
                     _previousRegion.Op(path2, SKRegionOperation.Union);
+                    _previousPath = _previousPath.Op(path2, SKPathOp.Union);
                 }
 
                 canvas.DrawPath(path2, _sectorPaint);
@@ -199,27 +202,50 @@ namespace HB.FullStack.Mobile.Controls.Clock
             path2?.Dispose();
         }
 
-        public override bool OnHitTest(SKPoint skPoint, long touchId)
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
         {
-            if (_previousRegion == null)
+            HitTestPath = _previousPath;
+        }
+
+        protected override void OnCaculateOutput()
+        {
+
+        }
+
+        public void SetState(FigureState state)
+        {
+            GlobalSettings.Logger.LogDebug(state.ToString());
+
+            if (State == FigureState.LongTapped && state == FigureState.Dragged)
             {
-                return false;
+                return;
             }
 
-            SKPoint transedPoint = SKUtil.PivotPointToCenter(skPoint, _previousCanvasSize);
-
-            return _previousRegion.Contains((int)transedPoint.X, (int)transedPoint.Y);
+            State = state;
         }
+
+        //public override bool OnHitTest(SKPoint skPoint, long touchId)
+        //{
+        //    if (_previousRegion == null)
+        //    {
+        //        return false;
+        //    }
+
+        //    SKPoint transedPoint = SKUtil.PivotPointToCenter(skPoint, _previousCanvasSize);
+
+        //    return _previousRegion.Contains((int)transedPoint.X, (int)transedPoint.Y);
+        //}
 
         private void TimeBlockFigure_Dragged(object sender, SKTouchInfoEventArgs info)
         {
+            GlobalSettings.Logger.LogDebug("DDDDDDDDDDDDD_   Dragged");
             if (State != FigureState.LongTapped)
             {
                 return;
             }
 
-            SKPoint previousPoint = SKUtil.PivotPointToCenter(info.PreviousPoint, _previousCanvasSize);
-            SKPoint currentPoint = SKUtil.PivotPointToCenter(info.CurrentPoint, _previousCanvasSize);
+            SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);
+            SKPoint currentPoint = GetPivotedPoint(info.CurrentPoint);
 
             double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, new SKPoint(0, 0));
 
@@ -329,7 +355,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 {
                     // managed
                     _previousRegion?.Dispose();
-
+                    _previousPath?.Dispose();
                     _dotPaint.Dispose();
                     _dotPaint2.Dispose();
                     _sectorPaint.Dispose();
@@ -339,21 +365,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
                 _disposed = true;
             }
-        }
-
-        protected override void OnUpdateHitTestPath(SKImageInfo info)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void OnCaculateOutput()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetState(FigureState selected)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion Dispose Pattern

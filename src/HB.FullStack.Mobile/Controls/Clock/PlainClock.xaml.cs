@@ -101,7 +101,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             foreach (var drawInfo in TimeBlockDrawInfos)
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                TimeBlockFigure timeBlockFigure = new TimeBlockFigure(new SKRatioPoint(0.5f,0.5f), Description.TimeBlockRatio, drawInfo);
+                TimeBlockFigure timeBlockFigure = new TimeBlockFigure(0.3f, 0.5f, drawInfo);
 #pragma warning restore CA2000 // Dispose objects before losing scope
                 _currentTimeBlockFigureGroup.AddFigure(timeBlockFigure);
             }

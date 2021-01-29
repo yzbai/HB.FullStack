@@ -6,7 +6,7 @@ namespace HB.FullStack.Mobile.Skia
 {
     public interface IStatedFigure
     {
-        void SetState(FigureState selected);
+        void SetState(FigureState state);
     }
 
     public enum FigureState

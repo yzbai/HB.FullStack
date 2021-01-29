@@ -33,6 +33,7 @@ namespace HB.FullStack.Mobile.Skia
         private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly TouchEffect _touchEffect;
         private Timer? _timer;
 
         public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
@@ -43,21 +44,21 @@ namespace HB.FullStack.Mobile.Skia
 
         public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
 
-        //public bool IsResponsingTimeTick { get; private set; }
+        public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
 
         public bool IsAppearing { get; private set; }
 
-        public bool AutoBringToFront { get; set; }
+        public bool AutoBringToFront { get; set; } = true;
 
-        public bool EnableFailedToHitEvent { get; set; }
+        public bool EnableFailedToHitEvent { get; set; } = true;
 
         public SKFigureCanvasView() : base()
         {
-            TouchEffect touchEffect = new TouchEffect { Capture = true };
+            _touchEffect = new TouchEffect { Capture = true };
 
-            touchEffect.TouchAction += OnTouch;
+            _touchEffect.TouchAction += OnTouch;
 
-            Effects.Add(touchEffect);
+            Effects.Add(_touchEffect);
 
             PaintSurface += OnPaintSurface;
         }
@@ -132,6 +133,7 @@ namespace HB.FullStack.Mobile.Skia
                 foreach (var f in figures)
                 {
                     f.Parent = this;
+                    f.CanvasView = this;
                 }
             }
 

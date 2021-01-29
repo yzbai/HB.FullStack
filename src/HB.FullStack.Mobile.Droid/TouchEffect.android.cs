@@ -66,6 +66,11 @@ namespace HB.FullStack.Mobile.Droid.Effects
 
         void OnTouch(object sender, Android.Views.View.TouchEventArgs args)
         {
+            if(!_libTouchEffect!.Enable)
+            {
+                return;
+            }
+
             // Two object common to all the events
             Android.Views.View? senderView = sender as Android.Views.View;
             MotionEvent? motionEvent = args.Event;

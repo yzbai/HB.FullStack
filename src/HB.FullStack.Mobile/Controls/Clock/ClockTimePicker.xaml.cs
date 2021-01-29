@@ -140,7 +140,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             {
                 foreach (var drawInfo in TimeBlockDrawInfos)
                 {
-                    toAdds.Add(new TimeBlockFigure(new SKRatioPoint(0.5f, 0.5f), Description.TimeBlockRatio, drawInfo));
+                    toAdds.Add(new TimeBlockFigure(0.3f, 0.5f, drawInfo));
                 }
             }
 
@@ -148,12 +148,12 @@ namespace HB.FullStack.Mobile.Controls.Clock
             {
                 foreach (var drawInfo in InProgressTimeBlockDrawInfos)
                 {
-                    toAdds.Add(new TimeBlockFigure(new SKRatioPoint(0.5f, 0.5f), Description.TimeBlockRatio, drawInfo));
+                    toAdds.Add(new TimeBlockFigure(0.3f, 0.5f, drawInfo));
                 }
             }
 
             _hourHandFigure = new HourHandFigure(Description.DialHandRatio, InitialHour) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
-            _minuteHandFigure = new MinuteHandFigure(Description.DialHandRatio, InitialMinute, _hourHandFigure) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f)};
+            _minuteHandFigure = new MinuteHandFigure(Description.DialHandRatio, InitialMinute, _hourHandFigure) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
 
             //_hourHandFigure.SetHour(InitialHour);
             //_minuteHandFigure.SetMinute(InitialMinute);

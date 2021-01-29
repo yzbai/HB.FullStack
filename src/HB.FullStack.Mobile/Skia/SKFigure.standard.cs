@@ -1,5 +1,7 @@
 ﻿using HB.FullStack.Mobile.Effects.Touch;
 
+using Microsoft.Extensions.Logging;
+
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 
@@ -21,6 +23,10 @@ namespace HB.FullStack.Mobile.Skia
 
         public SKFigureCanvasView? CanvasView
         {
+            set
+            {
+                _canvasView = value;
+            }
             get
             {
                 if (_canvasView == null)
@@ -57,13 +63,13 @@ namespace HB.FullStack.Mobile.Skia
 
         public bool ResumeResponseTimeTickAfterTouch { get; set; } = true;
 
-        public bool EnableTouch { get; set; }
+        public bool EnableTouch { get; set; } = true;
 
-        public bool EnableDrag { get; set; }
+        public bool EnableDrag { get; set; } = true;
 
-        public bool EnableLongTap { get; set; }
+        public bool EnableLongTap { get; set; } = true;
 
-        public SKRatioPoint PivotRatioPoint { get; set; }
+        public SKRatioPoint PivotRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
 
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
@@ -78,7 +84,7 @@ namespace HB.FullStack.Mobile.Skia
             SKCanvas canvas = surface.Canvas;
             CanvasSize = info.Size;
 
-            if(EnableTimeTick && CanResponseTimeTick)
+            if (EnableTimeTick && CanResponseTimeTick)
             {
                 CaculateMatrixByTime(CanvasView!.ElapsedMilliseconds);
             }
@@ -193,7 +199,7 @@ namespace HB.FullStack.Mobile.Skia
 
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if(touchInfo.IsOver)
+                            if (touchInfo.IsOver)
                             {
                                 return;
                             }
@@ -204,14 +210,11 @@ namespace HB.FullStack.Mobile.Skia
                             {
                                 //相当于Press
                                 //DO nothing
+                                //华为真机会不停的Move在原地
                             }
                             else
                             {
-                                if (EnableLongTap && _longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
-                                {
-                                    taskWrapper.CancellationTokenSource.Cancel();
-                                    _longTouchInfos.Remove(args.Id);
-                                }
+                                CancelLongTap(args);
 
                                 OnDragged(touchInfo);
 
@@ -230,11 +233,7 @@ namespace HB.FullStack.Mobile.Skia
 
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (EnableLongTap && _longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
-                            {
-                                taskWrapper.CancellationTokenSource.Cancel();
-                                _longTouchInfos.Remove(args.Id);
-                            }
+                            CancelLongTap(args);
 
                             if (!touchInfo.IsOver)
                             {
@@ -271,11 +270,7 @@ namespace HB.FullStack.Mobile.Skia
 
                         if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (EnableLongTap && _longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
-                            {
-                                taskWrapper.CancellationTokenSource.Cancel();
-                                _longTouchInfos.Remove(args.Id);
-                            }
+                            CancelLongTap(args);
 
                             if (!touchInfo.IsOver)
                             {
@@ -291,6 +286,17 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
+        private void CancelLongTap(TouchActionEventArgs args)
+        {
+            if (EnableLongTap && _longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
+            {
+                taskWrapper.CancellationTokenSource.Cancel();
+                taskWrapper.CancellationTokenSource.Dispose();
+
+                _longTouchInfos.Remove(args.Id);
+            }
+        }
+
         private Task LongPressedTaskAsync(SKTouchInfoEventArgs info, CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
@@ -302,10 +308,14 @@ namespace HB.FullStack.Mobile.Skia
                     return;
                 }
 
+                GlobalSettings.Logger.LogDebug("LLLLLLLLLLLLLLLong pressed!");
+
                 info.LongPressHappend = true;
-                info.IsOver = true;
 
                 OnLongTapped(info);
+
+                Device.BeginInvokeOnMainThread(() => CanvasView?.InvalidateSurface());
+
             }, cancellationToken);
         }
 

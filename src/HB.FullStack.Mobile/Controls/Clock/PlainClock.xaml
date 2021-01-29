@@ -8,14 +8,14 @@
         <Grid BindingContext="{x:Reference root}">
             <skia:SKFigureCanvasView x:Name="BackgroundCanvasView"
                                      HorizontalOptions="FillAndExpand"
-                                     IsAnimationMode="True"
+                                     EnableTimeTick="True"
                                      VerticalOptions="FillAndExpand"
                                      Figures="{Binding BackgroundFigures}" />
 
             <skia:SKFigureCanvasView x:Name="ForegroundCanvasView"
                                      HorizontalOptions="FillAndExpand"
                                      VerticalOptions="FillAndExpand"
-                                     IsAnimationMode="True"
+                                     EnableTimeTick="True"
                                      Figures="{Binding ForegroundFigures}"
                                      Painted="OnForegroundCanvasViewPainted" />
         </Grid>
