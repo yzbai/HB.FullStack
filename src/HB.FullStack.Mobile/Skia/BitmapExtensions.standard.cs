@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+
 using SkiaSharp;
 
-namespace HB.FullStack.Mobile.Skia
+namespace SkiaSharp
 {
     public static class BitmapExtensions
     {

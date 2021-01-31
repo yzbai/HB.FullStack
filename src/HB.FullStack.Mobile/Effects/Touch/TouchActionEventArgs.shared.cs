@@ -14,6 +14,9 @@ namespace HB.FullStack.Mobile.Effects.Touch
             IsInContact = isInContact;
         }
 
+        /// <summary>
+        /// 第几个指头
+        /// </summary>
         public long Id { private set; get; }
 
         public TouchActionType Type { private set; get; }

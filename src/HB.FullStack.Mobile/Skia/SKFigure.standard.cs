@@ -7,6 +7,7 @@ using SkiaSharp.Views.Forms;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -67,17 +68,24 @@ namespace HB.FullStack.Mobile.Skia
 
         public bool EnableDrag { get; set; } = true;
 
+        public bool EnableTwoFingers { get; set; }
+
         public bool EnableLongTap { get; set; } = true;
 
         public SKRatioPoint PivotRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
 
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        public virtual SKPath? HitTestPath { get; set; }
+        public SKPath? HitTestPath { get; set; }
 
         protected SKSize CanvasSize { get; private set; }
 
         public FigureState State { get; private set; } = FigureState.None;
+
+        public void SetState(FigureState figureState)
+        {
+            State = figureState;
+        }
 
         public virtual void OnPaint(SKPaintSurfaceEventArgs e)
         {
@@ -92,7 +100,7 @@ namespace HB.FullStack.Mobile.Skia
             }
 
             //Translate to Pivot
-            canvas.Translate(info.Width * PivotRatioPoint.XRatio, info.Height * PivotRatioPoint.YRatio);
+            canvas.Translate(PivotRatioPoint.ToPoint(info.Size));
 
             //变型
             canvas.Concat(ref Matrix);
@@ -104,12 +112,7 @@ namespace HB.FullStack.Mobile.Skia
             OnCaculateOutput();
         }
 
-        public virtual void SetState(FigureState figureState)
-        {
-            State = figureState;
-        }
-
-        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas) { }
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas);
 
         protected virtual void OnUpdateHitTestPath(SKImageInfo info) { }
 
@@ -144,8 +147,7 @@ namespace HB.FullStack.Mobile.Skia
         /// <summary>
         /// touchInfo在Pressed中放入，在Existed,Release,Cancel中释放
         /// </summary>
-        /// <param name="args"></param>
-        public virtual void ProcessTouchAction(TouchActionEventArgs args)
+        public void ProcessTouchAction(TouchActionEventArgs args)
         {
             if (!EnableTouch)
             {
@@ -180,7 +182,7 @@ namespace HB.FullStack.Mobile.Skia
                             LongPressHappend = false
                         };
 
-                        _touchInfos[args.Id] = touchInfo;
+                        _touchInfos.Add(args.Id, touchInfo);
 
                         if (EnableLongTap)
                         {
@@ -204,30 +206,44 @@ namespace HB.FullStack.Mobile.Skia
                             return;
                         }
 
-                        if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
+                        if (!_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            if (touchInfo.IsOver)
-                            {
-                                return;
-                            }
-
-                            touchInfo.CurrentPoint = curLocation;
-
-                            if (touchInfo.StartPoint == curLocation)
-                            {
-                                //相当于Press
-                                //DO nothing
-                                //华为真机会不停的Move在原地
-                            }
-                            else
-                            {
-                                CancelLongTap(args);
-
-                                OnDragged(touchInfo);
-
-                                touchInfo.PreviousPoint = touchInfo.CurrentPoint;
-                            }
+                            return;
                         }
+
+                        if (touchInfo.IsOver)
+                        {
+                            return;
+                        }
+
+                        touchInfo.CurrentPoint = curLocation;
+
+                        if (touchInfo.StartPoint == curLocation)
+                        {
+                            //相当于Press
+                            //DO nothing
+                            //华为真机会不停的Move在原地
+
+                            return;
+                        }
+
+                        if (_touchInfos.Count == 1)
+                        {
+                            CancelLongTap(args);
+
+                            OnDragged(touchInfo);
+                        }
+                        else if (EnableTwoFingers && _touchInfos.Count == 2)
+                        {
+                            CancelLongTap(args);
+
+                            touchInfo.PivotPoint = _touchInfos.Where(p => p.Key != args.Id).First().Value.CurrentPoint;
+
+                            OnTwoFingerDragged(touchInfo);
+                        }
+
+                        touchInfo.PreviousPoint = touchInfo.CurrentPoint;
+
                         break;
                     }
                 case TouchActionType.Exited:
@@ -238,36 +254,40 @@ namespace HB.FullStack.Mobile.Skia
                             CanResponseTimeTick = true;
                         }
 
-                        if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
+                        if (!_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            CancelLongTap(args);
-
-                            if (!touchInfo.IsOver)
-                            {
-                                touchInfo.CurrentPoint = curLocation;
-                                touchInfo.IsOver = true;
-
-                                if (touchInfo.StartPoint == touchInfo.CurrentPoint)
-                                //if (SKUtil.Distance(touchInfo.StartPoint, touchInfo.CurrentPoint) < SKUtil.TapTolerantDistance)
-                                {
-                                    if (!touchInfo.LongPressHappend)
-                                    {
-                                        OnTapped(touchInfo);
-                                    }
-                                }
-                                else
-                                {
-                                    if (EnableDrag)
-                                    {
-                                        OnDragged(touchInfo);
-                                    }
-                                }
-                            }
-
-                            _touchInfos.Remove(args.Id);
+                            return;
                         }
+
+                        CancelLongTap(args);
+
+                        if (touchInfo.IsOver)
+                        {
+                            _touchInfos.Remove(args.Id);
+                            return;
+                        }
+
+                        touchInfo.CurrentPoint = curLocation;
+                        touchInfo.IsOver = true;
+
+                        if (touchInfo.StartPoint == touchInfo.CurrentPoint && !touchInfo.LongPressHappend)
+                        {
+                            OnTapped(touchInfo);
+                        }
+                        else if (EnableDrag && _touchInfos.Count == 1)
+                        {
+                            OnDragged(touchInfo);
+                        }
+                        else if (EnableTwoFingers && _touchInfos.Count == 2)
+                        {
+                            touchInfo.PivotPoint = _touchInfos.Where(p => p.Key != args.Id).First().Value.CurrentPoint;
+                            OnTwoFingerDragged(touchInfo);
+                        }
+
+                        _touchInfos.Remove(args.Id);
+
+                        break;
                     }
-                    break;
                 case TouchActionType.Cancelled:
                     {
                         if (ResumeResponseTimeTickAfterTouch)
@@ -275,21 +295,24 @@ namespace HB.FullStack.Mobile.Skia
                             CanResponseTimeTick = true;
                         }
 
-                        if (_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
+                        if (!_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
                         {
-                            CancelLongTap(args);
-
-                            if (!touchInfo.IsOver)
-                            {
-                                touchInfo.IsOver = true;
-
-                                OnCancelled(touchInfo);
-                            }
-
-                            _touchInfos.Remove(args.Id);
+                            return;
                         }
+
+                        CancelLongTap(args);
+
+                        if (!touchInfo.IsOver)
+                        {
+                            touchInfo.IsOver = true;
+
+                            OnCancelled(touchInfo);
+                        }
+
+                        _touchInfos.Remove(args.Id);
+
+                        break;
                     }
-                    break;
             }
         }
 
@@ -364,6 +387,12 @@ namespace HB.FullStack.Mobile.Skia
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Dragged));
         }
 
+        public event EventHandler<SKTouchInfoEventArgs> TwoFingerDragged
+        {
+            add => _weakEventManager.AddEventHandler(value, nameof(TwoFingerDragged));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(TwoFingerDragged));
+        }
+
         public event EventHandler<SKTouchInfoEventArgs> Cancelled
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Cancelled));
@@ -384,6 +413,18 @@ namespace HB.FullStack.Mobile.Skia
         public void OnDragged(SKTouchInfoEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Dragged));
+
+            if (State == FigureState.Selected || State == FigureState.LongSelected)
+            {
+                return;
+            }
+
+            SetState(FigureState.Selected);
+        }
+
+        public void OnTwoFingerDragged(SKTouchInfoEventArgs touchInfo)
+        {
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
             if (State == FigureState.Selected || State == FigureState.LongSelected)
             {
@@ -418,7 +459,15 @@ namespace HB.FullStack.Mobile.Skia
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
 
-            //SetState(FigureState.None);
+            if (Parent is SKFigureGroup group)
+            {
+                if (group.EnableMultipleSelected)
+                {
+                    return;
+                }
+            }
+
+            SetState(FigureState.None);
         }
 
         #endregion

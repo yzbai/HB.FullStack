@@ -1,13 +1,17 @@
 ﻿using SkiaSharp;
+
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    
+
     public class SKTouchInfoEventArgs : EventArgs
     {
+        /// <summary>
+        /// 第几个指头
+        /// </summary>
         public long TouchEventId { get; set; }
 
         public bool IsOver { get; set; }
@@ -26,6 +30,11 @@ namespace HB.FullStack.Mobile.Skia
         /// 未经Figure的Matrix和Pivot转换的原始地址
         /// </summary>
         public SKPoint CurrentPoint { get; set; }
+
+        /// <summary>
+        /// 两个指头，不动的那个指头为支点
+        /// </summary>
+        public SKPoint PivotPoint { get; set; }
 
         public bool LongPressHappend { get; set; }
 

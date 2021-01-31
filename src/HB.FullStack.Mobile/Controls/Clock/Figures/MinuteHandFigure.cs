@@ -97,7 +97,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             if (info.IsOver)
             {
-                double actuallyMinute = SKUtil.MatrixToMinute(CaculateType.Actually, ref Matrix);
+                double actuallyMinute = SKUtil.MatrixToMinute(EstimateType.Actually, ref Matrix);
 
                 int adjustMinute = AdjustMinuteToPoint();
 
@@ -110,7 +110,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         private int AdjustMinuteToPoint()
         {
-            int roundMinute = (int)SKUtil.MatrixToMinute(CaculateType.Round, ref Matrix); //每1分钟为一段,一共60段。
+            int roundMinute = (int)SKUtil.MatrixToMinute(EstimateType.Round, ref Matrix); //每1分钟为一段,一共60段。
 
             Matrix = SKUtil.MinuteToMatrix(roundMinute);
 

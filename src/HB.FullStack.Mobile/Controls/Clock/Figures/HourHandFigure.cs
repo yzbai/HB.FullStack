@@ -94,14 +94,15 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         private void OnDragged(object sender, SKTouchInfoEventArgs info)
         {
-            SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);
-            SKPoint currentPoint = GetPivotedPoint(info.CurrentPoint);
+            SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);    //新坐标系下的点
+            SKPoint currentPoint = GetPivotedPoint(info.CurrentPoint);      //新坐标系下的点
+            SKPoint piovtPoint = new SKPoint(0, 0);                         //围绕新坐标系的原点
 
-            double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, new SKPoint(0, 0));
+            double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, piovtPoint);
 
             if (rotatedRadian > 0 || CanAntiClockwise)
             {
-                SKMatrix rotatedMatrix = SKMatrix.CreateRotation((float)rotatedRadian, 0, 0);
+                SKMatrix rotatedMatrix = SKMatrix.CreateRotation((float)rotatedRadian, piovtPoint.X, piovtPoint.Y);
 
                 Matrix = Matrix.PostConcat(rotatedMatrix);
             }
@@ -143,8 +144,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
         private void AdjustHourToPoint()
         {
             //纠正：只有十分接近整点时(一分钟)，才纠正
-            double roudHour = SKUtil.MatrixToHour(CaculateType.Round, ref Matrix);
-            double actuallyHour = SKUtil.MatrixToHour(CaculateType.Actually, ref Matrix);
+            double roudHour = SKUtil.MatrixToHour(EstimateType.Round, ref Matrix);
+            double actuallyHour = SKUtil.MatrixToHour(EstimateType.Actually, ref Matrix);
 
             if (Math.Abs(actuallyHour - roudHour) < (11 / 60f)) //纠正的精度，12/60f 表示一个分钟内纠正
             {
@@ -156,8 +157,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
         {
             //时针纠正：根据分针，调整时针的准确位置
 
-            int hour = (int)SKUtil.MatrixToHour(CaculateType.Floor, ref Matrix);
-            int roundHour = (int)SKUtil.MatrixToHour(CaculateType.Round, ref Matrix);
+            int hour = (int)SKUtil.MatrixToHour(EstimateType.Floor, ref Matrix);
+            int roundHour = (int)SKUtil.MatrixToHour(EstimateType.Round, ref Matrix);
 
             //自动调整，超过了0刻度，小时加1
             if (adjustMinute == 0 && 59 <= actuallyMinute && hour != roundHour) // hour != roundHour 是为了解决，分针可以轻微逆时针旋转的bug

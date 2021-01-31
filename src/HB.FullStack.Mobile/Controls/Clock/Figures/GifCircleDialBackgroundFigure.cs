@@ -64,10 +64,6 @@ namespace HB.FullStack.Mobile.Controls.Clock
         /// <summary>
         /// 获取sourceSize大小的bitmap填充Figure的变换矩阵
         /// </summary>
-        /// <param name="canvasSize"></param>
-        /// <param name="sourceSize"></param>
-        /// <param name="stretch"></param>
-        /// <returns></returns>
         public SKMatrix GetFilledMatrix(SKSize canvasSize, SKSize sourceSize, SKStretch stretch = SKStretch.AspectFill)
         {
             SKMatrix transToCenterMatrix = GetTransToFigureCenterMatrix(canvasSize, sourceSize);

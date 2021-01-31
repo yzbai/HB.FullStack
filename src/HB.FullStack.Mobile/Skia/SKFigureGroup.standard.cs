@@ -10,18 +10,21 @@ using System.Text;
 
 namespace HB.FullStack.Mobile.Skia
 {
-    //EnableMultipleSelected
-    public class SKFigureGroup<T> : SKFigure where T : SKFigure
+    public abstract class SKFigureGroup : SKFigure
     {
-        private readonly Dictionary<long, T> _hittingFigures = new Dictionary<long, T>();
-
-        public IList<T> SelectedFigures { get; } = new List<T>();
-
         public bool AutoBringToFront { get; set; } = true;
 
         public bool EnableMultipleSelected { get; set; }
 
         public bool EnableUnSelectedByHitFailed { get; set; } = true;
+    }
+
+    //EnableMultipleSelected
+    public class SKFigureGroup<T> : SKFigureGroup where T : SKFigure
+    {
+        private readonly Dictionary<long, T> _hittingFigures = new Dictionary<long, T>();
+
+        public IList<T> SelectedFigures { get; } = new List<T>();
 
         //TODO: make this obserable, and to notify repaint
         protected IList<T> Figures { get; } = new List<T>();
@@ -48,6 +51,9 @@ namespace HB.FullStack.Mobile.Skia
                 }
             }
         }
+
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas) { }
+
         public override bool OnHitTest(SKPoint skPoint, long touchId)
         {
             bool founded = false;
