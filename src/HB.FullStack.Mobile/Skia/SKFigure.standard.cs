@@ -72,13 +72,20 @@ namespace HB.FullStack.Mobile.Skia
 
         public bool EnableLongTap { get; set; } = true;
 
-        public SKRatioPoint PivotRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
+        /// <summary>
+        ///在原始坐标系下，新坐标系的原点。
+        /// </summary>
+        public SKRatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
 
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        public SKPath? HitTestPath { get; set; }
+        private SKPath? _hitTestPath;
+
+        public SKPath? HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
 
         protected SKSize CanvasSize { get; private set; }
+
+        public bool CanvasSizeChanged { get; set; }
 
         public FigureState State { get; private set; } = FigureState.None;
 
@@ -92,7 +99,16 @@ namespace HB.FullStack.Mobile.Skia
             SKImageInfo info = e.Info;
             SKSurface surface = e.Surface;
             SKCanvas canvas = surface.Canvas;
-            CanvasSize = info.Size;
+
+            if (CanvasSize != info.Size)
+            {
+                CanvasSize = info.Size;
+                CanvasSizeChanged = true;
+            }
+            else
+            {
+                CanvasSizeChanged = false;
+            }
 
             if (EnableTimeTick && CanResponseTimeTick)
             {
@@ -100,9 +116,9 @@ namespace HB.FullStack.Mobile.Skia
             }
 
             //Translate to Pivot
-            canvas.Translate(PivotRatioPoint.ToPoint(info.Size));
+            canvas.Translate(NewCoordinateOriginalRatioPoint.ToSKPoint(info.Size));
 
-            //变型
+            //Matrix
             canvas.Concat(ref Matrix);
 
             OnDraw(info, canvas);
@@ -112,6 +128,11 @@ namespace HB.FullStack.Mobile.Skia
             OnCaculateOutput();
         }
 
+        /// <summary>
+        /// 在新坐标系下画画
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="canvas"></param>
         protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas);
 
         protected virtual void OnUpdateHitTestPath(SKImageInfo info) { }
@@ -122,6 +143,12 @@ namespace HB.FullStack.Mobile.Skia
 
         #region OnTouch
 
+        /// <summary>
+        /// 由SKFigureCanvasView调用
+        /// </summary>
+        /// <param name="skPoint">原始坐标系下的点</param>
+        /// <param name="touchId">第几个指头</param>
+        /// <returns></returns>
         public virtual bool OnHitTest(SKPoint skPoint, long touchId)
         {
             if (!EnableTouch || HitTestPath.IsNullOrEmpty())
@@ -129,11 +156,11 @@ namespace HB.FullStack.Mobile.Skia
                 return false;
             }
 
-            SKPoint pivotedPoint = GetPivotedPoint(skPoint);
+            SKPoint hitPoint = GetNewCoordinatedPoint(skPoint);
 
             if (Matrix.TryInvert(out SKMatrix inversedMatrix))
             {
-                SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(pivotedPoint);
+                SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(hitPoint);
 
                 return HitTestPath.Contains(mappedToOriginPoint.X, mappedToOriginPoint.Y);
             }
@@ -141,7 +168,7 @@ namespace HB.FullStack.Mobile.Skia
             return false;
         }
 
-        private readonly Dictionary<long, SKTouchInfoEventArgs> _touchInfos = new Dictionary<long, SKTouchInfoEventArgs>();
+        private readonly Dictionary<long, SKFigureTouchEventArgs> _touchInfos = new Dictionary<long, SKFigureTouchEventArgs>();
         private readonly Dictionary<long, LongTouchTaskInfo> _longTouchInfos = new Dictionary<long, LongTouchTaskInfo>();
 
         /// <summary>
@@ -154,7 +181,7 @@ namespace HB.FullStack.Mobile.Skia
                 return;
             }
 
-            SKPoint curLocation = SKUtil.ToSKPoint(args.Location);
+            SKPoint curLocation = GetNewCoordinatedPoint(SKUtil.ToSKPoint(args.Location));
 
             //_logger.LogDebug($"{args.Type}, Id:{args.Id}, Location : {args.Location}");
 
@@ -172,7 +199,7 @@ namespace HB.FullStack.Mobile.Skia
                             CanResponseTimeTick = false;
                         }
 
-                        SKTouchInfoEventArgs touchInfo = new SKTouchInfoEventArgs
+                        SKFigureTouchEventArgs touchInfo = new SKFigureTouchEventArgs
                         {
                             StartPoint = curLocation,
                             PreviousPoint = curLocation,
@@ -206,7 +233,7 @@ namespace HB.FullStack.Mobile.Skia
                             return;
                         }
 
-                        if (!_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
+                        if (!_touchInfos.TryGetValue(args.Id, out SKFigureTouchEventArgs? touchInfo))
                         {
                             return;
                         }
@@ -231,7 +258,7 @@ namespace HB.FullStack.Mobile.Skia
                         {
                             CancelLongTap(args);
 
-                            OnDragged(touchInfo);
+                            OnOneFingerDragged(touchInfo);
                         }
                         else if (EnableTwoFingers && _touchInfos.Count == 2)
                         {
@@ -254,7 +281,7 @@ namespace HB.FullStack.Mobile.Skia
                             CanResponseTimeTick = true;
                         }
 
-                        if (!_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
+                        if (!_touchInfos.TryGetValue(args.Id, out SKFigureTouchEventArgs? touchInfo))
                         {
                             return;
                         }
@@ -276,7 +303,7 @@ namespace HB.FullStack.Mobile.Skia
                         }
                         else if (EnableDrag && _touchInfos.Count == 1)
                         {
-                            OnDragged(touchInfo);
+                            OnOneFingerDragged(touchInfo);
                         }
                         else if (EnableTwoFingers && _touchInfos.Count == 2)
                         {
@@ -295,7 +322,7 @@ namespace HB.FullStack.Mobile.Skia
                             CanResponseTimeTick = true;
                         }
 
-                        if (!_touchInfos.TryGetValue(args.Id, out SKTouchInfoEventArgs? touchInfo))
+                        if (!_touchInfos.TryGetValue(args.Id, out SKFigureTouchEventArgs? touchInfo))
                         {
                             return;
                         }
@@ -327,7 +354,7 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
-        private Task LongPressedTaskAsync(SKTouchInfoEventArgs info, CancellationToken cancellationToken)
+        private Task LongPressedTaskAsync(SKFigureTouchEventArgs info, CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
@@ -349,9 +376,9 @@ namespace HB.FullStack.Mobile.Skia
             }, cancellationToken);
         }
 
-        public SKPoint GetPivotedPoint(SKPoint point)
+        protected SKPoint GetNewCoordinatedPoint(SKPoint point)
         {
-            return new SKPoint(point.X - CanvasSize.Width * PivotRatioPoint.XRatio, point.Y - CanvasSize.Height * PivotRatioPoint.YRatio);
+            return new SKPoint(point.X - CanvasSize.Width * NewCoordinateOriginalRatioPoint.XRatio, point.Y - CanvasSize.Height * NewCoordinateOriginalRatioPoint.YRatio);
         }
 
         class LongTouchTaskInfo
@@ -363,37 +390,37 @@ namespace HB.FullStack.Mobile.Skia
 
         private readonly WeakEventManager _weakEventManager = new WeakEventManager();
 
-        public event EventHandler<SKTouchInfoEventArgs> Pressed
+        public event EventHandler<SKFigureTouchEventArgs> Pressed
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Pressed));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Pressed));
         }
 
-        public event EventHandler<SKTouchInfoEventArgs> LongTapped
+        public event EventHandler<SKFigureTouchEventArgs> LongTapped
         {
             add => _weakEventManager.AddEventHandler(value, nameof(LongTapped));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(LongTapped));
         }
 
-        public event EventHandler<SKTouchInfoEventArgs> Tapped
+        public event EventHandler<SKFigureTouchEventArgs> Tapped
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Tapped));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Tapped));
         }
 
-        public event EventHandler<SKTouchInfoEventArgs> Dragged
+        public event EventHandler<SKFigureTouchEventArgs> OneFingerDragged
         {
-            add => _weakEventManager.AddEventHandler(value, nameof(Dragged));
-            remove => _weakEventManager.RemoveEventHandler(value, nameof(Dragged));
+            add => _weakEventManager.AddEventHandler(value, nameof(OneFingerDragged));
+            remove => _weakEventManager.RemoveEventHandler(value, nameof(OneFingerDragged));
         }
 
-        public event EventHandler<SKTouchInfoEventArgs> TwoFingerDragged
+        public event EventHandler<SKFigureTouchEventArgs> TwoFingerDragged
         {
             add => _weakEventManager.AddEventHandler(value, nameof(TwoFingerDragged));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(TwoFingerDragged));
         }
 
-        public event EventHandler<SKTouchInfoEventArgs> Cancelled
+        public event EventHandler<SKFigureTouchEventArgs> Cancelled
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Cancelled));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Cancelled));
@@ -405,14 +432,14 @@ namespace HB.FullStack.Mobile.Skia
             remove => _weakEventManager.RemoveEventHandler(value, nameof(HitFailed));
         }
 
-        public void OnPressed(SKTouchInfoEventArgs touchInfo)
+        public void OnPressed(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Pressed));
         }
 
-        public void OnDragged(SKTouchInfoEventArgs touchInfo)
+        public void OnOneFingerDragged(SKFigureTouchEventArgs touchInfo)
         {
-            _weakEventManager.HandleEvent(this, touchInfo, nameof(Dragged));
+            _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
             if (State == FigureState.Selected || State == FigureState.LongSelected)
             {
@@ -422,7 +449,7 @@ namespace HB.FullStack.Mobile.Skia
             SetState(FigureState.Selected);
         }
 
-        public void OnTwoFingerDragged(SKTouchInfoEventArgs touchInfo)
+        public void OnTwoFingerDragged(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
@@ -434,21 +461,21 @@ namespace HB.FullStack.Mobile.Skia
             SetState(FigureState.Selected);
         }
 
-        public void OnTapped(SKTouchInfoEventArgs touchInfo)
+        public void OnTapped(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
             SetState(FigureState.Selected);
         }
 
-        public void OnLongTapped(SKTouchInfoEventArgs touchInfo)
+        public void OnLongTapped(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
 
             SetState(FigureState.LongSelected);
         }
 
-        public void OnCancelled(SKTouchInfoEventArgs touchInfo)
+        public void OnCancelled(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
 
@@ -483,6 +510,7 @@ namespace HB.FullStack.Mobile.Skia
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
+                    HitTestPath?.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

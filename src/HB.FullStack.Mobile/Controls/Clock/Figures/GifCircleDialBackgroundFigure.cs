@@ -64,7 +64,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         /// <summary>
         /// 获取sourceSize大小的bitmap填充Figure的变换矩阵
         /// </summary>
-        public SKMatrix GetFilledMatrix(SKSize canvasSize, SKSize sourceSize, SKStretch stretch = SKStretch.AspectFill)
+        public SKMatrix GetFilledMatrix(SKSize canvasSize, SKSize sourceSize, SKStretchMode stretch = SKStretchMode.AspectFill)
         {
             SKMatrix transToCenterMatrix = GetTransToFigureCenterMatrix(canvasSize, sourceSize);
 
@@ -79,9 +79,9 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             SKMatrix scaleMatrix = stretch switch
             {
-                SKStretch.AspectFill => SKMatrix.CreateScale(maxScale, maxScale, sourceCenter.X, sourceCenter.Y),
-                SKStretch.AspectFit => SKMatrix.CreateScale(minScale, minScale, sourceCenter.X, sourceCenter.Y),
-                SKStretch.Fill => SKMatrix.CreateScale(widthScale, heightScale, sourceCenter.X, sourceCenter.Y),
+                SKStretchMode.AspectFill => SKMatrix.CreateScale(maxScale, maxScale, sourceCenter.X, sourceCenter.Y),
+                SKStretchMode.AspectFit => SKMatrix.CreateScale(minScale, minScale, sourceCenter.X, sourceCenter.Y),
+                SKStretchMode.Fill => SKMatrix.CreateScale(widthScale, heightScale, sourceCenter.X, sourceCenter.Y),
                 _ => SKMatrix.Identity
             };
 

@@ -34,7 +34,7 @@ namespace HB.FullStack.Mobile.Skia
             Pressed += OnPressed;
             Tapped += OnTapped;
             LongTapped += OnLongTapped;
-            Dragged += OnDragged;
+            OneFingerDragged += OnDragged;
             Cancelled += OnCancelled;
             HitFailed += OnHitFailed;
         }
@@ -163,7 +163,7 @@ namespace HB.FullStack.Mobile.Skia
 
         #region 事件派发
 
-        private void OnPressed(object? sender, SKTouchInfoEventArgs info)
+        private void OnPressed(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
@@ -179,14 +179,14 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
-        private void OnDragged(object? sender, SKTouchInfoEventArgs info)
+        private void OnDragged(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
                 return;
             }
 
-            figure.OnDragged(info);
+            figure.OnOneFingerDragged(info);
 
             Select(figure);
 
@@ -196,7 +196,7 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
-        private void OnLongTapped(object? sender, SKTouchInfoEventArgs info)
+        private void OnLongTapped(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
@@ -213,7 +213,7 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
-        private void OnTapped(object? sender, SKTouchInfoEventArgs info)
+        private void OnTapped(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
             {
@@ -230,7 +230,7 @@ namespace HB.FullStack.Mobile.Skia
             }
         }
 
-        private void OnCancelled(object? sender, SKTouchInfoEventArgs info)
+        private void OnCancelled(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
             {

@@ -53,7 +53,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
             //Tapped += TimeBlockFigure_Tapped;
             //LongTapped += TimeBlockFigure_LongTapped;
-            Dragged += TimeBlockFigure_Dragged;
+            OneFingerDragged += TimeBlockFigure_Dragged;
             //Cancelled += TimeBlockFigure_Cancelled;
             //HitFailed += TimeBlockFigure_HitFailed;
             _drawInfo = drawInfo;
@@ -222,7 +222,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         //    return _previousRegion.Contains((int)transedPoint.X, (int)transedPoint.Y);
         //}
 
-        private void TimeBlockFigure_Dragged(object sender, SKTouchInfoEventArgs info)
+        private void TimeBlockFigure_Dragged(object sender, SKFigureTouchEventArgs info)
         {
             //GlobalSettings.Logger.LogDebug("DDDDDDDDDDDDD_   Dragged");
             if (State != FigureState.LongSelected)
@@ -230,8 +230,10 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 return;
             }
 
-            SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);
-            SKPoint currentPoint = GetPivotedPoint(info.CurrentPoint);
+            //SKPoint previousPoint = GetNewCoordinatedPoint(info.PreviousPoint);
+            //SKPoint currentPoint = GetNewCoordinatedPoint(info.CurrentPoint);
+            SKPoint previousPoint = info.PreviousPoint;
+            SKPoint currentPoint = info.CurrentPoint;
 
             double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, new SKPoint(0, 0));
 

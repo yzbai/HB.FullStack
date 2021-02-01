@@ -30,7 +30,7 @@ namespace HB.FullStack.Mobile.Skia
             {
                 IFileHelper fileService = DependencyService.Resolve<IFileHelper>();
 
-                using Stream stream = await fileService.GetStreamOfResourceAsync(fileName).ConfigureAwait(false);
+                using Stream stream = await fileService.GetResourceStreamAsync(fileName).ConfigureAwait(false);
                 using SKManagedStream sKManagedStream = new SKManagedStream(stream);
                 using SKCodec sKCodec = SKCodec.Create(sKManagedStream);
 

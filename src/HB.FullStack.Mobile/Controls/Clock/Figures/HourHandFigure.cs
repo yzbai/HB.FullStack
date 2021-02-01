@@ -20,7 +20,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
         {
             _handLengthRatio = handLengthRatio;
 
-            Dragged += OnDragged;
+            OneFingerDragged += OnDragged;
 
             InitMatrix(initHour24);
         }
@@ -50,17 +50,24 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            _handLength = Math.Min(info.Height, info.Width) / 2f * _handLengthRatio;
+            if (CanvasSizeChanged)
+            {
+                _handLength = Math.Min(info.Height, info.Width) / 2f * _handLengthRatio;
+            }
+
             canvas.DrawLine(0, 0, 0, -_handLength, _hourPaint);
         }
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
         {
-            SKRect rect = new SKRect(-25, -(_handLength * 3 / 2), 25, -(_handLength / 2));
+            if (CanvasSizeChanged)
+            {
+                HitTestPath = new SKPath();
 
-            HitTestPath = new SKPath();
+                SKRect rect = new SKRect(-25, -(_handLength * 3 / 2), 25, -(_handLength / 2));
 
-            HitTestPath.AddRect(rect);
+                HitTestPath.AddRect(rect);
+            }
         }
 
         protected override void OnCaculateOutput()
@@ -92,13 +99,13 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         #region CaculateMatrixByTouch
 
-        private void OnDragged(object sender, SKTouchInfoEventArgs info)
+        private void OnDragged(object sender, SKFigureTouchEventArgs info)
         {
-            SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);    //新坐标系下的点
-            SKPoint currentPoint = GetPivotedPoint(info.CurrentPoint);      //新坐标系下的点
+            //SKPoint previousPoint = GetNewCoordinatedPoint(info.PreviousPoint);    //新坐标系下的点
+            //SKPoint currentPoint = GetNewCoordinatedPoint(info.CurrentPoint);      //新坐标系下的点
             SKPoint piovtPoint = new SKPoint(0, 0);                         //围绕新坐标系的原点
 
-            double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, piovtPoint);
+            double rotatedRadian = SKUtil.CaculateRotatedRadian(info.PreviousPoint, info.CurrentPoint, piovtPoint);
 
             if (rotatedRadian > 0 || CanAntiClockwise)
             {

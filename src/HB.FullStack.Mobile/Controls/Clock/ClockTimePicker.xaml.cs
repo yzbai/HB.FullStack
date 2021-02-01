@@ -101,14 +101,14 @@ namespace HB.FullStack.Mobile.Controls.Clock
         {
             if (_hourHandFigure != null)
             {
-                _hourHandFigure.Dragged -= OnHandFigureDragged;
+                _hourHandFigure.OneFingerDragged -= OnHandFigureDragged;
                 _hourHandFigure.Dispose();
                 _hourHandFigure = null;
             }
 
             if (_minuteHandFigure != null)
             {
-                _minuteHandFigure.Dragged -= OnHandFigureDragged;
+                _minuteHandFigure.OneFingerDragged -= OnHandFigureDragged;
                 _minuteHandFigure.Dispose();
                 _minuteHandFigure = null;
             }
@@ -152,8 +152,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
                 }
             }
 
-            _hourHandFigure = new HourHandFigure(Description.DialHandRatio, InitialHour) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
-            _minuteHandFigure = new MinuteHandFigure(Description.DialHandRatio, InitialMinute, _hourHandFigure) { PivotRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
+            _hourHandFigure = new HourHandFigure(Description.DialHandRatio, InitialHour) { NewCoordinateOriginalRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
+            _minuteHandFigure = new MinuteHandFigure(Description.DialHandRatio, InitialMinute, _hourHandFigure) { NewCoordinateOriginalRatioPoint = new SKRatioPoint(0.5f, 0.5f) };
 
             //_hourHandFigure.SetHour(InitialHour);
             //_minuteHandFigure.SetMinute(InitialMinute);
@@ -161,8 +161,8 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _hourHandFigure.CanAntiClockwise = CanHourHandAntiClockwise;
             _minuteHandFigure.CanAntiClockwise = CanMinuteHandAntiClockwise;
 
-            _hourHandFigure.Dragged += OnHandFigureDragged;
-            _minuteHandFigure.Dragged += OnHandFigureDragged;
+            _hourHandFigure.OneFingerDragged += OnHandFigureDragged;
+            _minuteHandFigure.OneFingerDragged += OnHandFigureDragged;
 
             toAdds.Add(_hourHandFigure);
             toAdds.Add(_minuteHandFigure);
@@ -240,7 +240,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             IsAM = _hourHandFigure == null || _hourHandFigure.IsAM;
         }
 
-        private void OnHandFigureDragged(object sender, SKTouchInfoEventArgs e)
+        private void OnHandFigureDragged(object sender, SKFigureTouchEventArgs e)
         {
             if (DragedCommand != null)
             {

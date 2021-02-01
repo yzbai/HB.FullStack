@@ -21,14 +21,55 @@ namespace HB.FullStack.Mobile.Skia
 
     public static class SKUtil
     {
-        #region 
+        #region Touch
 
-        public static SKMatrix CaculateTwoFingerDraggedMatrix(SKPoint prevPoint, SKPoint newPoint, SKPoint pivotPoint, TouchManipulationMode mode)
+        public static SKMatrix CaculateOneFingerDraggedMatrix(SKPoint prevPoint, SKPoint curPoint, SKPoint pivotPoint, TouchManipulationMode mode)
+        {
+            if (mode == TouchManipulationMode.None)
+            {
+                return SKMatrix.CreateIdentity();
+            }
+
+            SKMatrix touchMatrix = SKMatrix.CreateIdentity();
+            SKPoint delta = curPoint - prevPoint;
+
+            if (mode == TouchManipulationMode.ScaleDualRotate)  // One-finger rotation
+            {
+                SKPoint oldVector = prevPoint - pivotPoint;
+                SKPoint newVector = curPoint - pivotPoint;
+
+                // Avoid rotation if fingers are too close to center
+                if (Magnitude(newVector) > 25 && Magnitude(oldVector) > 25)
+                {
+                    float prevAngle = (float)Math.Atan2(oldVector.Y, oldVector.X);
+                    float newAngle = (float)Math.Atan2(newVector.Y, newVector.X);
+
+                    // Calculate rotation matrix
+                    float angle = newAngle - prevAngle;
+                    touchMatrix = SKMatrix.CreateRotation(angle, pivotPoint.X, pivotPoint.Y);
+
+                    // Effectively rotate the old vector
+                    float magnitudeRatio = Magnitude(oldVector) / Magnitude(newVector);
+                    oldVector.X = magnitudeRatio * newVector.X;
+                    oldVector.Y = magnitudeRatio * newVector.Y;
+
+                    // Recalculate delta
+                    delta = newVector - oldVector;
+                }
+            }
+
+            // Multiply the rotation matrix by a translation matrix
+            touchMatrix = touchMatrix.PostConcat(SKMatrix.CreateTranslation(delta.X, delta.Y));
+
+            return touchMatrix;
+        }
+
+        public static SKMatrix CaculateTwoFingerDraggedMatrix(SKPoint prevPoint, SKPoint curPoint, SKPoint pivotPoint, TouchManipulationMode mode)
         {
             SKMatrix touchMatrix = SKMatrix.CreateIdentity();
 
             SKPoint oldVector = prevPoint - pivotPoint;
-            SKPoint newVector = newPoint - pivotPoint;
+            SKPoint newVector = curPoint - pivotPoint;
 
             if (mode == TouchManipulationMode.ScaleRotate ||
                 mode == TouchManipulationMode.ScaleDualRotate)
@@ -118,12 +159,12 @@ namespace HB.FullStack.Mobile.Skia
             return newMatrix;
         }
 
-        public static double MatrixToRadian(ref SKMatrix martrix)
+        public static double MatrixToRadian(ref SKMatrix martrix, float pivotX = 0, float pivotY = 0)
         {
             SKPoint minuteFirstPoint = new SKPoint(1, 0);
             SKPoint minuteMapPoint = martrix.MapPoint(minuteFirstPoint);
 
-            return SKUtil.CaculateRotatedRadian(minuteFirstPoint, minuteMapPoint, new SKPoint(0, 0));
+            return CaculateRotatedRadian(minuteFirstPoint, minuteMapPoint, new SKPoint(pivotX, pivotY));
         }
 
         public static double RadianToDegree(double radian)

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Mobile.Skia
 {
 
-    public class SKTouchInfoEventArgs : EventArgs
+    public class SKFigureTouchEventArgs : EventArgs
     {
         /// <summary>
         /// 第几个指头
@@ -17,17 +17,17 @@ namespace HB.FullStack.Mobile.Skia
         public bool IsOver { get; set; }
 
         /// <summary>
-        /// 未经Figure的Matrix和Pivot转换的原始地址
+        /// 未经Figure的Matrix转换的新坐标系下的点
         /// </summary>
         public SKPoint StartPoint { get; set; }
 
         /// <summary>
-        /// 未经Figure的Matrix和Pivot转换的原始地址
+        /// 未经Figure的Matrix转换的新坐标系下的点
         /// </summary>
         public SKPoint PreviousPoint { get; set; }
 
         /// <summary>
-        /// 未经Figure的Matrix和Pivot转换的原始地址
+        /// 未经Figure的Matrix转换的新坐标系下的点
         /// </summary>
         public SKPoint CurrentPoint { get; set; }
 

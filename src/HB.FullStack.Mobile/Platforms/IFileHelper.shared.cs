@@ -11,7 +11,7 @@ namespace HB.FullStack.Mobile.Platforms
     {
         Task SaveAvatarAsync(ImageSource imageSource, long usreId);
 
-        Task<Stream> GetStreamOfResourceAsync(string fileName);
+        Task<Stream> GetResourceStreamAsync(string fileName);
 
         /// <summary>
         /// 如果不存在，返回null

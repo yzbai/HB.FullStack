@@ -25,7 +25,7 @@ namespace HB.FullStack.Mobile.Controls.Clock
             _houHand = new WeakReference<HourHandFigure>(houHand);
             _handLengthRatio = handLengthRatio;
 
-            Dragged += OnDragged;
+            OneFingerDragged += OnDragged;
 
             InitMatrix(initMinute);
         }
@@ -52,18 +52,22 @@ namespace HB.FullStack.Mobile.Controls.Clock
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            _handLength = Math.Min(info.Height, info.Width) / 2f * _handLengthRatio;
+            if (CanvasSizeChanged)
+            {
+                _handLength = Math.Min(info.Height, info.Width) / 2f * _handLengthRatio;
+            }
 
             canvas.DrawLine(0, 0, 0, -_handLength, _minutePaint);
         }
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
         {
-            SKRect rect = new SKRect(-25, -(_handLength * 3 / 2), 25, -(_handLength / 2));
-
-            HitTestPath = new SKPath();
-
-            HitTestPath.AddRect(rect);
+            if (CanvasSizeChanged)
+            {
+                HitTestPath = new SKPath();
+                SKRect rect = new SKRect(-25, -(_handLength * 3 / 2), 25, -(_handLength / 2));
+                HitTestPath.AddRect(rect);
+            }
         }
 
         protected override void OnCaculateOutput()
@@ -71,10 +75,12 @@ namespace HB.FullStack.Mobile.Controls.Clock
             MinuteResult = SKUtil.MatrixToDisplayMinuteResult(ref Matrix);
         }
 
-        private void OnDragged(object sender, SKTouchInfoEventArgs info)
+        private void OnDragged(object sender, SKFigureTouchEventArgs info)
         {
-            SKPoint previousPoint = GetPivotedPoint(info.PreviousPoint);
-            SKPoint currentPoint = GetPivotedPoint(info.CurrentPoint);
+            //SKPoint previousPoint = GetNewCoordinatedPoint(info.PreviousPoint);
+            //SKPoint currentPoint = GetNewCoordinatedPoint(info.CurrentPoint);
+            SKPoint previousPoint = info.PreviousPoint;
+            SKPoint currentPoint = info.CurrentPoint;
 
             double rotatedRadian = SKUtil.CaculateRotatedRadian(previousPoint, currentPoint, new SKPoint(0, 0));
 

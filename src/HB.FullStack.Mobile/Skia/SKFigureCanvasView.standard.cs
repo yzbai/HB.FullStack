@@ -126,13 +126,22 @@ namespace HB.FullStack.Mobile.Skia
 
         private void OnFiguresCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (sender is IEnumerable<SKFigure> figures)
+            switch (e.Action)
             {
-                foreach (var f in figures)
-                {
-                    f.Parent = this;
-                    f.CanvasView = this;
-                }
+                case NotifyCollectionChangedAction.Add:
+                    SetParent(e.NewItems, this);
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    SetParent(e.OldItems, null);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    SetParent(e.OldItems, null);
+                    SetParent(e.NewItems, this);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
             }
 
             if (EnableTimeTick)
@@ -142,6 +151,23 @@ namespace HB.FullStack.Mobile.Skia
             else
             {
                 InvalidateSurface();
+            }
+
+            static void SetParent(IList? list, SKFigureCanvasView? canvas)
+            {
+                if (list == null)
+                {
+                    return;
+                }
+
+                foreach (object f in list)
+                {
+                    if (f is SKFigure figure)
+                    {
+                        figure.Parent = canvas;
+                        figure.CanvasView = canvas;
+                    }
+                }
             }
         }
 

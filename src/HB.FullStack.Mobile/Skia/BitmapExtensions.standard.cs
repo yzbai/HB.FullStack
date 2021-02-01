@@ -8,6 +8,23 @@ using SkiaSharp;
 
 namespace SkiaSharp
 {
+    public class DrawBitmapResult
+    {
+        public SKRect DisplayRect { get; set; }
+
+        public float WidthScale { get; set; }
+
+        public float HeightScale { get; set; }
+
+        public DrawBitmapResult() { }
+
+        public DrawBitmapResult(SKRect displayRect, float widthScale, float heightScale)
+        {
+            DisplayRect = displayRect;
+            WidthScale = widthScale;
+            HeightScale = heightScale;
+        }
+    }
     public static class BitmapExtensions
     {
         /// <summary>
@@ -51,74 +68,82 @@ namespace SkiaSharp
             alpha = (byte)(pixel >> 24);
         }
 
-        public static void DrawBitmap(this SKCanvas canvas, SKBitmap bitmap, SKRect dest,
-                                      SKStretch stretch,
+        /// <summary>
+        /// 返回实际占用的Rect 和 scale
+        /// </summary>
+        public static DrawBitmapResult DrawBitmap(this SKCanvas canvas, SKBitmap bitmap, SKRect dest,
+                                      SKStretchMode stretch,
                                       SKAlignment horizontal = SKAlignment.Center,
                                       SKAlignment vertical = SKAlignment.Center,
                                       SKPaint? paint = null)
         {
-            if (stretch == SKStretch.Fill)
+
+
+            if (stretch == SKStretchMode.Fill)
             {
                 canvas.DrawBitmap(bitmap, dest, paint);
+                return new DrawBitmapResult(dest, dest.Width / bitmap.Width, dest.Height / bitmap.Height);
             }
-            else
+
+            float scale = 1;
+
+            switch (stretch)
             {
-                float scale = 1;
+                case SKStretchMode.None:
+                    break;
 
-                switch (stretch)
-                {
-                    case SKStretch.None:
-                        break;
+                case SKStretchMode.AspectFit:
+                    scale = Math.Min(dest.Width / bitmap.Width, dest.Height / bitmap.Height);
+                    break;
 
-                    case SKStretch.AspectFit:
-                        scale = Math.Min(dest.Width / bitmap.Width, dest.Height / bitmap.Height);
-                        break;
-
-                    case SKStretch.AspectFill:
-                        scale = Math.Max(dest.Width / bitmap.Width, dest.Height / bitmap.Height);
-                        break;
-                }
-
-                SKRect display = CalculateDisplayRect(dest, scale * bitmap.Width, scale * bitmap.Height,
-                                                      horizontal, vertical);
-
-                canvas.DrawBitmap(bitmap, display, paint);
+                case SKStretchMode.AspectFill:
+                    scale = Math.Max(dest.Width / bitmap.Width, dest.Height / bitmap.Height);
+                    break;
             }
+
+            SKRect display = CalculateDisplayRect(dest, scale * bitmap.Width, scale * bitmap.Height, horizontal, vertical);
+
+            canvas.DrawBitmap(bitmap, display, paint);
+
+            return new DrawBitmapResult(display, scale, scale);
         }
 
-        public static void DrawBitmap(this SKCanvas canvas, SKBitmap bitmap, SKRect source, SKRect dest,
-                                      SKStretch stretch,
+        /// <summary>
+        /// 返回实际占用的Rect和Scale
+        /// </summary>
+        public static DrawBitmapResult DrawBitmap(this SKCanvas canvas, SKBitmap bitmap, SKRect source, SKRect dest,
+                                      SKStretchMode stretch,
                                       SKAlignment horizontal = SKAlignment.Center,
                                       SKAlignment vertical = SKAlignment.Center,
                                       SKPaint? paint = null)
         {
-            if (stretch == SKStretch.Fill)
+            if (stretch == SKStretchMode.Fill)
             {
                 canvas.DrawBitmap(bitmap, source, dest, paint);
+                return new DrawBitmapResult(dest, dest.Width / source.Width, dest.Height / source.Height);
             }
-            else
+
+            float scale = 1;
+
+            switch (stretch)
             {
-                float scale = 1;
+                case SKStretchMode.None:
+                    break;
 
-                switch (stretch)
-                {
-                    case SKStretch.None:
-                        break;
+                case SKStretchMode.AspectFit:
+                    scale = Math.Min(dest.Width / source.Width, dest.Height / source.Height);
+                    break;
 
-                    case SKStretch.AspectFit:
-                        scale = Math.Min(dest.Width / source.Width, dest.Height / source.Height);
-                        break;
-
-                    case SKStretch.AspectFill:
-                        scale = Math.Max(dest.Width / source.Width, dest.Height / source.Height);
-                        break;
-                }
-
-                SKRect display = CalculateDisplayRect(dest, scale * source.Width, scale * source.Height,
-                                                      horizontal, vertical);
-
-                canvas.DrawBitmap(bitmap, source, display, paint);
+                case SKStretchMode.AspectFill:
+                    scale = Math.Max(dest.Width / source.Width, dest.Height / source.Height);
+                    break;
             }
+
+            SKRect display = CalculateDisplayRect(dest, scale * source.Width, scale * source.Height, horizontal, vertical);
+
+            canvas.DrawBitmap(bitmap, source, display, paint);
+
+            return new DrawBitmapResult(display, scale, scale);
         }
 
         static SKRect CalculateDisplayRect(SKRect dest, float bmpWidth, float bmpHeight,
@@ -162,7 +187,7 @@ namespace SkiaSharp
         }
     }
 
-    public enum SKStretch
+    public enum SKStretchMode
     {
         None,
         Fill,
