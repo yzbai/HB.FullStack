@@ -29,6 +29,12 @@
 		<EmbeddedResource Include="Styles\materialdesignicons-webfont.ttf" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EmbeddedResource Update="Controls\Cropper\CropperPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
 </Project>
 
 

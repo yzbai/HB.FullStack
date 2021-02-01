@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
 using AsyncAwaitBestPractices;
 
 using Xamarin.CommunityToolkit.ObjectModel;
@@ -54,6 +55,11 @@ namespace HB.FullStack.Mobile.Base
         protected static void PopToRoot()
         {
             Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopToRootAsync());
+        }
+
+        protected static void Pop()
+        {
+            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopAsync());
         }
 
         protected static void PushModal(BaseModalDialog dialog, bool animate = true)
