@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+
 using HB.FullStack.Mobile.Platforms;
+
 using SkiaSharp;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Skia
@@ -30,7 +33,7 @@ namespace HB.FullStack.Mobile.Skia
             {
                 IFileHelper fileService = DependencyService.Resolve<IFileHelper>();
 
-                using Stream stream = await fileService.GetResourceStreamAsync(fileName).ConfigureAwait(false);
+                using Stream stream = await fileService.GetResourceStreamAsync(fileName, ResourceType.Drawable, null).ConfigureAwait(false);
                 using SKManagedStream sKManagedStream = new SKManagedStream(stream);
                 using SKCodec sKCodec = SKCodec.Create(sKManagedStream);
 

@@ -2,17 +2,23 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Platforms
 {
+    public enum ResourceType
+    {
+        Drawable
+    }
+
     public interface IFileHelper
     {
         string GetDirectoryPath(UserFileType fileType);
 
-        Task<Stream> GetResourceStreamAsync(string fileName);
+        Task<Stream> GetResourceStreamAsync(string fileName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null);
 
         Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType);
 

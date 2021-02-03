@@ -8,10 +8,12 @@ using HB.FullStack.Common.Api;
 using HB.FullStack.Mobile.Api;
 using HB.FullStack.Mobile.Controls;
 using HB.FullStack.Mobile.Logging;
+using HB.FullStack.Mobile.Platforms;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -74,7 +76,7 @@ namespace HB.FullStack.Mobile.Base
         protected BaseApplication()
         {
             //Version
-            VersionTracking.Track();         
+            VersionTracking.Track();
         }
 
         protected void InitializeServices(IServiceCollection services)
@@ -177,7 +179,7 @@ namespace HB.FullStack.Mobile.Base
                         break;
                 }
             }
-            else if(ex is MobileException mobileException)
+            else if (ex is MobileException mobileException)
             {
 
             }
