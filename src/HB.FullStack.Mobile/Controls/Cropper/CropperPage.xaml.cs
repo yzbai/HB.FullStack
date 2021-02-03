@@ -24,7 +24,7 @@ namespace HB.FullStack.Mobile.Controls.Cropper
     public partial class CropperPage : BaseContentPage
     {
         private readonly IFileHelper _fileHelper = DependencyService.Resolve<IFileHelper>();
-        private readonly string _resourceName;
+        private readonly string _filePath;
         private readonly string _fileNameWithoutSuffix;
         private readonly UserFileType _userFileType;
         private CropperFrameFigure? _cropperFrameFigure;
@@ -40,9 +40,9 @@ namespace HB.FullStack.Mobile.Controls.Cropper
 
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        public CropperPage(string resourceName, string fileNameWithoutSuffix, UserFileType userFileType)
+        public CropperPage(string filePath, string fileNameWithoutSuffix, UserFileType userFileType)
         {
-            _resourceName = resourceName;
+            _filePath = filePath;
             _fileNameWithoutSuffix = fileNameWithoutSuffix;
             _userFileType = userFileType;
 
@@ -74,7 +74,9 @@ namespace HB.FullStack.Mobile.Controls.Cropper
 
         private void ResumeFigures()
         {
-            _bitmapFigure = new BitmapFigure(0.9f, 0.9f, null)
+            using FileStream stream = new FileStream(_filePath, FileMode.Open);
+
+            _bitmapFigure = new BitmapFigure(0.9f, 0.9f, stream)
             {
                 EnableTwoFingers = true,
                 ManipulationMode = TouchManipulationMode.IsotropicScale
@@ -83,14 +85,6 @@ namespace HB.FullStack.Mobile.Controls.Cropper
             _cropperFrameFigure = new CropperFrameFigure(0.7f, 0.7f, 0.9f, 0.9f);
 
             Figures.AddRange(new SKFigure[] { _bitmapFigure, _cropperFrameFigure });
-
-            _fileHelper.GetResourceStreamAsync(_resourceName).ContinueWith(async streamTask =>
-            {
-                using Stream stream = await streamTask.ConfigureAwait(false);
-
-                _bitmapFigure.SetBitmap(stream);
-
-            }, TaskScheduler.Default).Fire();
         }
 
         private void RemoveFigures()

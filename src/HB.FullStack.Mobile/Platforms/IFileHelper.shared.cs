@@ -16,6 +16,7 @@ namespace HB.FullStack.Mobile.Platforms
 
         Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType);
 
+        bool IsFileExisted(string fileName, UserFileType avatar);
 
         #region Avatar
 

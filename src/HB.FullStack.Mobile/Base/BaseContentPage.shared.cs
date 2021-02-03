@@ -146,6 +146,11 @@ namespace HB.FullStack.Mobile.Base
             return base.OnBackButtonPressed();
         }
 
+        protected static void Push(Page page)
+        {
+            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PushAsync(page));
+        }
+
         protected static void Pop()
         {
             Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopAsync());
