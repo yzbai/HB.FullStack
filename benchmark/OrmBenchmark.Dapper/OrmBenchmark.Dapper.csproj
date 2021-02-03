@@ -9,9 +9,9 @@
   <!-- common NuGet package refs that affect all projects -->
   <ItemGroup>
     <ProjectReference Include="..\OrmBenchmark.Core\OrmBenchmark.Core.csproj" />
-    <PackageReference Include="Dapper" Version="1.50.5" />
-    <PackageReference Include="Dapper.Contrib" Version="1.50.5" />
-    <PackageReference Include="MySql.Data" Version="8.0.22" />
+    <PackageReference Include="Dapper" Version="2.0.78" />
+    <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+    <PackageReference Include="MySql.Data" Version="8.0.23" />
     <PackageReference Include="MySqlConnector" Version="1.2.1" />
   </ItemGroup>
 
