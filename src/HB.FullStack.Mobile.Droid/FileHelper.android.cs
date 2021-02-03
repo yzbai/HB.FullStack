@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#nullable enable
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -87,9 +88,9 @@ namespace HB.FullStack.Mobile.Droid
             }
             resourceName = System.IO.Path.GetFileNameWithoutExtension(resourceName);
 
-            int resId = Platform.AppContext.Resources.GetIdentifier(resourceName, GetResourceTypeName(resourceType), packageName);
+            int resId = Platform.AppContext.Resources!.GetIdentifier(resourceName, GetResourceTypeName(resourceType), packageName);
 
-            using Stream stream = Platform.CurrentActivity.Resources.OpenRawResource(resId);
+            using Stream stream = Platform.CurrentActivity.Resources!.OpenRawResource(resId);
 
             MemoryStream memoryStream = new MemoryStream();
 
@@ -127,7 +128,7 @@ namespace HB.FullStack.Mobile.Droid
 
         public string GetAssetsHtml(string name)
         {
-            AssetManager assetsManager = Platform.CurrentActivity.Assets;
+            AssetManager assetsManager = Platform.CurrentActivity.Assets!;
 
             using Stream stream = assetsManager.Open(name);
 
@@ -158,20 +159,20 @@ namespace HB.FullStack.Mobile.Droid
 
             CreateDirectoryIfNotExist(directoryPath);
 
-            string path = GetAvatarFilePath(userId);
+            string? path = GetAvatarFilePath(userId);
 
-            using Bitmap bitmap = await imageSource.GetBitMapAsync().ConfigureAwait(false);
+            using Bitmap? bitmap = await imageSource.GetBitMapAsync().ConfigureAwait(false);
 
             //using Bitmap scaledBitmap = bitmap.ScaleTo(Avatar_Max_Height, Avatar_Max_Width);
 
             using FileStream fileStream = new FileStream(path, FileMode.Create);
 
-            bool result = await bitmap.CompressAsync(Bitmap.CompressFormat.Png, 100, fileStream).ConfigureAwait(false);
+            bool result = await bitmap!.CompressAsync(Bitmap.CompressFormat.Png, 100, fileStream).ConfigureAwait(false);
 
             await fileStream.FlushAsync().ConfigureAwait(false);
         }
 
-        public string GetAvatarFilePath(long userId)
+        public string? GetAvatarFilePath(long userId)
         {
             string path = System.IO.Path.Combine(AvatarDirectory, $"{userId}.png");
 
@@ -199,3 +200,4 @@ namespace HB.FullStack.Mobile.Droid
         #endregion
     }
 }
+#nullable restore
