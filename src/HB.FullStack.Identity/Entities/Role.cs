@@ -21,6 +21,14 @@ namespace HB.FullStack.Identity.Entities
 
         [EntityProperty(MaxLength = 1024)]
         public string? Comment { get; set; }
+
+        public void Update(string name, string displayName, bool isActivated, string? comment)
+        {
+            Name = name;
+            DisplayName = displayName;
+            IsActivated = isActivated;
+            Comment = comment;
+        }
     }
 
 

@@ -1,5 +1,6 @@
 ﻿
 using HB.FullStack.Database.Def;
+
 using System;
 using System.ComponentModel.DataAnnotations;
 
