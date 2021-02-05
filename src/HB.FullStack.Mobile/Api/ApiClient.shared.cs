@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+
 using Microsoft.Extensions.Options;
 
 using System;
@@ -40,6 +41,13 @@ namespace HB.FullStack.Mobile.Api
         /// <exception cref="ApiException"></exception>
         public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? Array.Empty<T>();
+
+        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource
+        {
+            IEnumerable<T> ts = await GetAsync(request).ConfigureAwait(false);
+
+            return ts.FirstOrDefault();
+        }
 
         /// <exception cref="ApiException"></exception>
         public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource

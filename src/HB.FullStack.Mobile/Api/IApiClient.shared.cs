@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Mobile.Api
@@ -28,12 +29,6 @@ namespace HB.FullStack.Mobile.Api
         /// <exception cref="ApiException"></exception>
         Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource;
 
-
-        async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource
-        {
-            IEnumerable<T> ts = await GetAsync(request).ConfigureAwait(false);
-
-            return ts.FirstOrDefault();
-        }
+        Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource;
     }
 }

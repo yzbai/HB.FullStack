@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+
 using Xamarin.Forms;
 
 namespace Xamarin.Forms
@@ -36,7 +38,7 @@ namespace Xamarin.Forms
                 return null;
             }
 
-            return segments[^1];
+            return segments.Last();//[^1];
         }
     }
 }

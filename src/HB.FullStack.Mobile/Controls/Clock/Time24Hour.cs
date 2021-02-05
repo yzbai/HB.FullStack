@@ -61,7 +61,12 @@ namespace HB.FullStack.Mobile.Controls.Clock
         /// <returns></returns>
         public Time24Hour(string timeString)
         {
+#if NETSTANDARD2_0
+            if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(":"))
+#endif
+#if NETSTANDARD2_1
             if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(':', GlobalSettings.Comparison))
+#endif
             {
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }

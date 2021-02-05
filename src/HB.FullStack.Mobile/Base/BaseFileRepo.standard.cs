@@ -20,7 +20,7 @@ namespace HB.FullStack.Mobile.Repos
         {
             EnsureInternet();
 
-            string suffix = fileSuffix.StartsWith('.') ? fileSuffix : "." + fileSuffix;
+            string suffix = fileSuffix.StartsWith(".", System.StringComparison.InvariantCulture) ? fileSuffix : "." + fileSuffix;
 
             var fileNames = resources.Select(r => $"{r.Id}{fileSuffix}");
 

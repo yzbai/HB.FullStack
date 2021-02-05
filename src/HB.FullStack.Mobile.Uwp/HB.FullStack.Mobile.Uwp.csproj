@@ -138,6 +138,16 @@
       <Version>5.0.0.1931</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj">
+      <Project>{c36f4df9-3218-4a9f-b117-7a1195ddd8ab}</Project>
+      <Name>HB.FullStack.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HB.FullStack.Mobile\HB.FullStack.Mobile.csproj">
+      <Project>{6756ff62-f061-4a3b-bc69-4f197686aa75}</Project>
+      <Name>HB.FullStack.Mobile</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

@@ -198,7 +198,7 @@ namespace HB.FullStack.Mobile.IdBarriers
                 (requestType == ApiRequestType.Get || requestType == ApiRequestType.GetSingle) &&
                 direction == ChangeDirection.FromServer)
             {
-                changedId = IDistributedIdGen.IdGen.GetId();
+                changedId = StaticIdGen.GetId();
                 await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);
             }
 

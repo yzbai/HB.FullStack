@@ -5,7 +5,9 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows.Input;
+
 using HB.FullStack.Mobile.Base;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.Mobile.Controls
@@ -22,7 +24,8 @@ namespace HB.FullStack.Mobile.Controls
         #endregion
         public CardStackView()
         {
-            Content = _root = new Grid {
+            Content = _root = new Grid
+            {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 VerticalOptions = LayoutOptions.FillAndExpand
             };
@@ -38,11 +41,11 @@ namespace HB.FullStack.Mobile.Controls
         #region Inputs
 
         public IList? ItemsSource { get => (IList)GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
-        
+
         public DataTemplate? LabelDataTemplate { get; set; }
-        
+
         public DataTemplate? CardDataTemplate { get; set; }
-        
+
         public int LabelWidth { get; set; } = 60;
 
         public IList<Color>? CardBackgroundColors { get; set; }
@@ -107,7 +110,7 @@ namespace HB.FullStack.Mobile.Controls
 
             //交换
             _cards[index] = _lastCard;
-            _cards[^1] = card;
+            _cards[_cards.Count - 1] = card;
 
             _root.Children.Clear();
 
@@ -178,7 +181,7 @@ namespace HB.FullStack.Mobile.Controls
                     WidthRequest = OneCardWidth
                 };
                 card.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                card.ColumnDefinitions.Add(new ColumnDefinition{ Width = GridLength.Star });
+                card.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
                 card.ColumnDefinitions.Add(new ColumnDefinition { Width = LabelWidth });
                 card.TranslationX = i * LabelWidth;
                 card.BackgroundColor = CardBackgroundColors!.ElementAt(ItemsSource.Count - i - 1);
@@ -193,7 +196,7 @@ namespace HB.FullStack.Mobile.Controls
                 Grid.SetRow(labelView, 0);
                 Grid.SetColumn(labelView, 1);
 
-                card.Children.Add(labelView);                
+                card.Children.Add(labelView);
 
                 _cards.Add(card);
             }

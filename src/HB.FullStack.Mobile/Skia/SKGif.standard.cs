@@ -19,7 +19,7 @@ namespace HB.FullStack.Mobile.Skia
 
         private readonly Task _initializeTask;
 
-        public bool IsReady { get => _initializeTask != null && _initializeTask.IsCompletedSuccessfully; }
+        public bool IsReady { get => _initializeTask != null && _initializeTask.Status == TaskStatus.RanToCompletion; }
 
         public SKGif(string resourceName)
         {

@@ -43,7 +43,7 @@ namespace HB.FullStack.Mobile.Controls.Cropper
         public CropperPage(string filePath, string fileNameWithoutSuffix, UserFileType userFileType)
         {
             _filePath = filePath;
-            _fileNameWithoutSuffix = fileNameWithoutSuffix;
+            _fileNameWithoutSuffix = Path.GetFileNameWithoutExtension(fileNameWithoutSuffix);
             _userFileType = userFileType;
 
             InitializeComponent();
@@ -132,7 +132,7 @@ namespace HB.FullStack.Mobile.Controls.Cropper
 
             using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
 
-            string fileName = _fileNameWithoutSuffix.Contains('.', StringComparison.InvariantCulture) ? _fileNameWithoutSuffix : _fileNameWithoutSuffix + ".png";
+            string fileName = _fileNameWithoutSuffix + ".png";
 
             await _fileHelper.SaveFileAsync(data.ToArray(), fileName, _userFileType).ConfigureAwait(false);
 

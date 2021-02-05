@@ -1,10 +1,12 @@
 ﻿using Microsoft;
 using Microsoft.Extensions.Configuration;
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using Xamarin.Essentials;
 
 namespace HB.FullStack.Mobile
@@ -78,7 +80,7 @@ namespace HB.FullStack.Mobile
         {
             ThrowIf.Empty(appsettingsFile, nameof(appsettingsFile));
 
-            string fileName = $"{executingAssembly.FullName!.Split(",")[0]}.{appsettingsFile}";
+            string fileName = $"{executingAssembly.FullName!.Split(',')[0]}.{appsettingsFile}";
 
             using Stream resFileStream = executingAssembly.GetManifestResourceStream(fileName);
 

@@ -304,7 +304,7 @@ namespace HB.FullStack.Mobile.Controls
                     {
                         if (view is Chip chip)
                         {
-                            if (GroupName.Equals(chip.GroupName, GlobalSettings.Comparison))
+                            if (GroupName!.Equals(chip.GroupName, GlobalSettings.Comparison))
                             {
                                 chip.IsSelected = false;
                                 RefreshVisualState();
