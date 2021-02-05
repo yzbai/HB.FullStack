@@ -36,7 +36,7 @@ namespace HB.FullStack.Database.Def
         public override long Id
         {
             get; set;
-        } = IDistributedIdGen.IdGen.GetId();
+        } = StaticIdGen.GetId();
     }
 
     //public abstract class AutoIncrementIdGuidEntity : AutoIncrementIdEntity

@@ -94,7 +94,7 @@ namespace System
                 return list;
             }
 
-            string[] results = longStr.Split(_separator, StringSplitOptions.None);
+            string[] results = longStr!.Split(_separator, StringSplitOptions.None);
 
             foreach (string str in results)
             {
@@ -141,7 +141,7 @@ namespace System
                 return dict;
             }
 
-            string[] result = jointSubjectNodeSetIds.Split(_separator, StringSplitOptions.None);
+            string[] result = jointSubjectNodeSetIds!.Split(_separator, StringSplitOptions.None);
 
             if (result.Length % 2 != 0)
             {
