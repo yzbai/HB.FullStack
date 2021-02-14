@@ -12,6 +12,12 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+  </ItemGroup>
+
 
 
 
@@ -29,13 +35,6 @@
   <ItemGroup>
     <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
     <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
-  </ItemGroup>
-
-
-
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>
