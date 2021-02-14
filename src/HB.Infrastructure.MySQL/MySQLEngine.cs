@@ -30,7 +30,7 @@ namespace HB.Infrastructure.MySQL
 
         public EngineType EngineType => EngineType.MySQL;
 
-        [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
+        public string FirstDefaultDatabaseName { get; private set; } = null!;
 
         public IEnumerable<string> DatabaseNames { get; private set; }
 

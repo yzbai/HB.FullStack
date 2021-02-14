@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,11 +10,11 @@ namespace HB.FullStack.KVStore
     public class KVStoreEntitySchema
     {
         [DisallowNull, NotNull]
-        public string? EntityTypeFullName { get; set; }
+        public string EntityTypeFullName { get; set; } = null!;
 
         [DisallowNull, NotNull]
-        public string? InstanceName { get; set; }
-        
+        public string InstanceName { get; set; } = null!;
+
         public string? Description { get; set; }
     }
 

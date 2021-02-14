@@ -97,6 +97,19 @@ namespace HB.FullStack.Mobile.Base
             ExecuteAppearedAsync().Fire();
         }
 
+        private async Task ExecuteAppearedAsync()
+        {
+            //TODO: This is a bullshit
+            await Task.Delay(600).ConfigureAwait(true);
+
+            await OnAppearedAsync().ConfigureAwait(true);
+        }
+
+        protected virtual Task OnAppearedAsync()
+        {
+            return Task.CompletedTask;
+        }
+
         protected override void OnDisappearing()
         {
             //Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
@@ -121,19 +134,6 @@ namespace HB.FullStack.Mobile.Base
             {
                 viewModel.OnDisappearing(PageName);
             }
-        }
-
-        private async Task ExecuteAppearedAsync()
-        {
-            //TODO: This is a bullshit
-            await Task.Delay(600).ConfigureAwait(true);
-
-            await OnAppearedAsync().ConfigureAwait(true);
-        }
-
-        protected virtual Task OnAppearedAsync()
-        {
-            return Task.CompletedTask;
         }
 
         protected override bool OnBackButtonPressed()

@@ -10,13 +10,13 @@ namespace HB.FullStack.EventBus
     public class EventSchema
     {
         [DisallowNull, NotNull]
-        public string? EventName { get; set; }
+        public string EventName { get; set; } = null!;
 
         /// <summary>
         /// 比如RedisEventBus中的ConnectionSettings的InstanceName。即处理这个event的设施
         /// </summary>
         [DisallowNull, NotNull]
-        public string? BrokerName { get; set; }
+        public string BrokerName { get; set; } = null!;
 
     }
 

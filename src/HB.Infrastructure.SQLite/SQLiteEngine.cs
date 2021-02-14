@@ -24,7 +24,7 @@ namespace HB.Infrastructure.SQLite
 
         public EngineType EngineType => EngineType.SQLite;
 
-        [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
+        public string FirstDefaultDatabaseName { get; private set; } = null!;
 
         public IEnumerable<string> DatabaseNames { get; private set; }
 
