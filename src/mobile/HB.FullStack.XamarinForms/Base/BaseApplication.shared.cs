@@ -27,7 +27,9 @@ namespace HB.FullStack.XamarinForms.Base
         private IConfiguration? _configuration;
         private readonly IList<Task> _initializeTasks = new List<Task>();
 
-        public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
+        public static new BaseApplication Current => (BaseApplication)Application.Current;
+
+        public INavigation? Navigation { get; set; }
 
 #if DEBUG
         public static string Environment => "Debug";
@@ -35,6 +37,8 @@ namespace HB.FullStack.XamarinForms.Base
 #if RELEASE
         public static string Environment => "Release";
 #endif
+
+        public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
 
         public IConfiguration Configuration
         {
@@ -78,6 +82,8 @@ namespace HB.FullStack.XamarinForms.Base
             //Version
             VersionTracking.Track();
         }
+
+        //public abstract void GotoMainPage();
 
         protected void InitializeServices(IServiceCollection services)
         {

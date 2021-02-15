@@ -38,7 +38,14 @@ namespace Xamarin.Forms
                 return null;
             }
 
-            return segments.Last();//[^1];
+            string pageName = segments[^1];
+
+            if(".." == pageName)
+            {
+                pageName = segments[^2];
+            }
+
+            return pageName;
         }
     }
 }

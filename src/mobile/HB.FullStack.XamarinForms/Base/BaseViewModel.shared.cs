@@ -54,17 +54,27 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected static void PopToRoot()
         {
-            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopToRootAsync());
+            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.Navigation?.PopToRootAsync().Fire());
         }
 
         protected static void Pop()
         {
-            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopAsync());
+            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.Navigation?.PopAsync().Fire());
+        }
+
+        protected static void Push(Page page, bool animated = true)
+        {
+            Device.BeginInvokeOnMainThread(()=> BaseApplication.Current.Navigation?.PushAsync(page, animated).Fire());
         }
 
         protected static void PushModal(BaseModalDialog dialog, bool animate = true)
         {
-            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PushModalAsync(dialog, animate).Fire());
+            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.Navigation?.PushModalAsync(dialog, animate).Fire());
+        }
+
+        protected static void GotoMainPage()
+        {
+            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.GotoMainPage());
         }
     }
 }
