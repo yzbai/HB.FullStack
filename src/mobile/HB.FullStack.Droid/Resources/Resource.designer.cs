@@ -8,9 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("HB.FullStack.Mobile.Droid.Resource", IsApplication=false)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("HB.FullStack.Droid.Resource", IsApplication=false)]
 
-namespace HB.FullStack.Mobile.Droid
+namespace HB.FullStack.Droid
 {
 	
 	

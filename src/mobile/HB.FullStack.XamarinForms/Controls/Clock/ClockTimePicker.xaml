@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<skia:BaseSkiaContentView x:Class="HB.FullStack.XamarinForms.Controls.Clock.ClockTimePicker"
+                          xmlns="http://xamarin.com/schemas/2014/forms"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                          xmlns:base="clr-namespace:HB.FullStack.XamarinForms.Base;assembly=HB.FullStack.XamarinForms"
+                          xmlns:skia="clr-namespace:HB.FullStack.XamarinForms.Skia;assembly=HB.FullStack.XamarinForms"
+                          x:Name="root">
+
+    <skia:BaseSkiaContentView.Content>
+
+        <Grid BindingContext="{x:Reference root}">
+            <skia:SKFigureCanvasView x:Name="BackgroundCanvasView"
+                                     HorizontalOptions="FillAndExpand"
+                                     VerticalOptions="FillAndExpand"
+                                     EnableTimeTick="True"
+                                     Figures="{Binding BackgroundFigures}" />
+            <skia:SKFigureCanvasView x:Name="ForegroundCanvasView"
+                                     HorizontalOptions="FillAndExpand"
+                                     VerticalOptions="FillAndExpand"
+                                     EnableTimeTick="True"
+                                     Figures="{Binding ForegroundFigures}"
+                                     Painted="OnForegroundCanvasViewPainted" />
+        </Grid>
+
+    </skia:BaseSkiaContentView.Content>
+</skia:BaseSkiaContentView>
