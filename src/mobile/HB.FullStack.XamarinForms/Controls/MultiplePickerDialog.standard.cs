@@ -67,7 +67,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
         private void Confirm_Button_Clicked(object sender, EventArgs e)
         {
-            Shell.Current.Navigation.PopModalAsync().Fire();
+            NavigationService.Current.PopModal();
         }
     }
 }

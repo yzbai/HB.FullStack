@@ -65,7 +65,6 @@ namespace HB.FullStack.Database.SQL
 
             addValues.RemoveLast();
             addArgs.RemoveLast();
-            updatePairs.RemoveLast();
 
             EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
 

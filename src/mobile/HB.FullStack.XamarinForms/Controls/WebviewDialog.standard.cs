@@ -37,7 +37,7 @@ namespace HB.FullStack.XamarinForms.Controls
             };
             retButton.Clicked += (sender, e) =>
             {
-                Shell.Current.Navigation.PopModalAsync(false).Fire();
+                NavigationService.Current.PopModal();
             };
 
 

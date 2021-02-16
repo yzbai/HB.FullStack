@@ -49,10 +49,7 @@ namespace HB.FullStack.XamarinForms.Api
                     }
                 });
 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    Shell.Current.Navigation.PushModalAsync(dialog, false).Fire();
-                });
+                NavigationService.Current.PushModal(dialog, false);
             }
         }
     }

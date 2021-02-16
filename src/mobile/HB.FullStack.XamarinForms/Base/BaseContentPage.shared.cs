@@ -11,30 +11,62 @@ namespace HB.FullStack.XamarinForms.Base
 {
     public abstract class BaseContentPage : ContentPage
     {
-        private bool _showNavigationPageNavigationBar = true;
-
         public bool IsAppearing { get; private set; }
 
         public string PageName { get; private set; }
 
-        public bool ShowShellTabBar { get => Shell.GetTabBarIsVisible(this); set => Shell.SetTabBarIsVisible(this, value); }
+        public bool NeedLogined { get; set; }
 
-        public bool ShowShellNavBar { get => Shell.GetNavBarIsVisible(this); set => Shell.SetNavBarIsVisible(this, value); }
-
-        public bool ShowShellNavBarShadow { get => Shell.GetNavBarHasShadow(this); set => Shell.SetNavBarHasShadow(this, value); }
-
-        public bool ShowNavigationPageNavigationBar
+        public bool NavBarIsVisible
         {
-            get => _showNavigationPageNavigationBar;
+            get
+            {
+                if (Application.Current.MainPage is Shell)
+                {
+                    return Shell.GetNavBarIsVisible(this);
+                }
+                else if (Application.Current.MainPage is NavigationPage)
+                {
+                    return NavigationPage.GetHasNavigationBar(this);
+                }
+
+                return false;
+            }
             set
             {
-                _showNavigationPageNavigationBar = value;
-                NavigationPage.SetHasNavigationBar(this, value);
+                if (Application.Current.MainPage is Shell)
+                {
+                    Shell.SetNavBarIsVisible(this, value);
+                }
+                else if (Application.Current.MainPage is NavigationPage)
+                {
+                    NavigationPage.SetHasNavigationBar(this, value);
+                }
+            }
+        }
+
+        public bool BottomTabBarIsVisible
+        {
+            get
+            {
+                if (Application.Current.MainPage is Shell)
+                {
+                    return Shell.GetTabBarIsVisible(this);
+                }
+
+                return false;
+            }
+            set
+            {
+                if (Application.Current.MainPage is Shell)
+                {
+                    Shell.SetTabBarIsVisible(this, value);
+                }
             }
         }
 
         [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public bool ShowStatusBar
+        public bool StatusBarIsVisible
         {
             get
             {
@@ -71,7 +103,11 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected override void OnAppearing()
         {
-            //Application.Current.LogUsage(UsageType.PageAppearing, PageName);
+            if(NeedLogined && !UserPreferences.IsLogined)
+            {
+                NavigationService.Current.PushLoginPage(false);
+                return;
+            }
 
             base.OnAppearing();
 
@@ -144,16 +180,6 @@ namespace HB.FullStack.XamarinForms.Base
             }
 
             return base.OnBackButtonPressed();
-        }
-
-        protected static void Push(Page page)
-        {
-            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PushAsync(page));
-        }
-
-        protected static void Pop()
-        {
-            Device.BeginInvokeOnMainThread(() => Shell.Current.Navigation.PopAsync());
         }
     }
 }

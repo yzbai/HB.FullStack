@@ -32,7 +32,7 @@ namespace HB.Infrastructure.SQLite
         {
             _options = options.Value;
 
-            DatabaseNames = _options.Connections.Select(s => s.DatabaseName);
+            DatabaseNames = _options.Connections.Select(s => s.DatabaseName).ToList();
 
             SetConnectionStrings();
         }

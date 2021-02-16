@@ -149,9 +149,13 @@ namespace HB.FullStack.XamarinForms.Repos
 
             IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
 
-            IEnumerable<TEntity> remotes = ress.Select(res => ToEntity(res));
+            IEnumerable<TEntity> remotes = ress.Select(res => ToEntity(res)).ToList();
 
-            await Database.BatchAddOrUpdateByIdAsync(remotes, transactionContext).ConfigureAwait(false); //考虑Fire（）
+            foreach (TEntity entity in remotes)
+            {
+                await Database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
+            }
+            //await Database.BatchAddOrUpdateByIdAsync(remotes, transactionContext).ConfigureAwait(false); //考虑Fire（）
 
             return remotes;
         }
@@ -172,7 +176,7 @@ namespace HB.FullStack.XamarinForms.Repos
             if (EnsureInternet(AllowOfflineWrite))
             {
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)));
+                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
 
                 await ApiClient.AddAsync(addRequest).ConfigureAwait(false);
 

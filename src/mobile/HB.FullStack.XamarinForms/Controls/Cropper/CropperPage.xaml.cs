@@ -113,7 +113,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
         private void Cancel()
         {
-            Pop();
+            NavigationService.Current.Pop();
         }
 
         private async Task CropAsync()
@@ -136,7 +136,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
             await _fileHelper.SaveFileAsync(data.ToArray(), fileName, _userFileType).ConfigureAwait(false);
 
-            Pop();
+            NavigationService.Current.Pop();
         }
     }
 }

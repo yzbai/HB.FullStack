@@ -9,94 +9,71 @@ namespace HB.FullStack.XamarinForms
 {
     public static class AppStates
     {
-        #region Introduced
+        //#region Introduced
 
-        private const string _introduced_preference_key = nameof(_introduced_preference_key);
+        //private const string _introduced_preference_key = nameof(_introduced_preference_key);
 
-        private static bool? _introduced;
+        //private static bool? _introduced;
 
-        public static bool Introduced
-        {
-            get
-            {
-                if (_introduced.HasValue)
-                {
-                    return _introduced.Value;
-                }
+        //public static bool Introduced
+        //{
+        //    get
+        //    {
+        //        if (_introduced.HasValue)
+        //        {
+        //            return _introduced.Value;
+        //        }
 
-                _introduced = GetPreferenceIntroduced();
+        //        _introduced = GetPreferenceIntroduced();
 
-                if (_introduced.Value && VersionTracking.IsFirstLaunchForCurrentBuild)
-                {
-                    _introduced = false;
-                    SetPreferenceIntroduced(false);
-                }
+        //        if (_introduced.Value && VersionTracking.IsFirstLaunchForCurrentBuild)
+        //        {
+        //            _introduced = false;
+        //            SetPreferenceIntroduced(false);
+        //        }
 
-                return _introduced.Value;
-            }
-            set
-            {
-                _introduced = value;
-                SetPreferenceIntroduced(value);
-            }
-        }
+        //        return _introduced.Value;
+        //    }
+        //    set
+        //    {
+        //        _introduced = value;
+        //        SetPreferenceIntroduced(value);
+        //    }
+        //}
 
-        private static bool GetPreferenceIntroduced()
-        {
-            string? stored = PreferenceHelper.PreferenceGetAsync(_introduced_preference_key).Result;
+        //private static bool GetPreferenceIntroduced()
+        //{
+        //    string? stored = PreferenceHelper.PreferenceGetAsync(_introduced_preference_key).Result;
 
-            if (stored == null)
-            {
-                return false;
-            }
+        //    if (stored == null)
+        //    {
+        //        return false;
+        //    }
 
-            return Convert.ToBoolean(stored, CultureInfo.InvariantCulture);
-        }
+        //    return Convert.ToBoolean(stored, CultureInfo.InvariantCulture);
+        //}
 
-        private static void SetPreferenceIntroduced(bool introduced)
-        {
-            PreferenceHelper.PreferenceSetAsync(_introduced_preference_key, introduced.ToString()).Fire();
-        }
+        //private static void SetPreferenceIntroduced(bool introduced)
+        //{
+        //    PreferenceHelper.PreferenceSetAsync(_introduced_preference_key, introduced.ToString()).Fire();
+        //}
 
-        #endregion
+        //#endregion
 
-        private static bool _needLogin;
+        //public static bool IsLogined
+        //{
+        //    get => UserPreferences.IsLogined;
+        //    set
+        //    {
+        //        UserPreferences.Logout();
+        //    }
+        //}
 
-        public static bool NeedLogin
-        {
-            get 
-            {
-                if (IsLogined)
-                {
-                    _needLogin = true;
-                }
-                return _needLogin; 
-            }
-            set
-            {
-                if (value)
-                {
-                    IsLogined = false;
-                    _needLogin = true;
-                }
-                _needLogin = value;
-            }
-        }
+        //public static bool Registered { get; private set; }
 
-        public static bool IsLogined
-        {
-            get => UserPreferences.IsLogined;
-            set
-            {
-                UserPreferences.Logout();
-            }
-        }
+        //public static void OfflineDataUsed()
+        //{
 
-        public static bool Registered { get; private set; }
-
-        public static void OfflineDataUsed()
-        {
-
-        }
+        //}
     }
 }

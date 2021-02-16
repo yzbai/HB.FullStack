@@ -18,34 +18,5 @@ namespace Xamarin.Forms
         {
             return Shell.Current.CurrentPage.GetType().Name;
         }
-
-        public static string? GetPageName(this ShellNavigationState? state)
-        {
-            if (state == null)
-                return null;
-
-            string? routing = state.Location.OriginalString;
-
-            if (routing == null)
-            {
-                return null;
-            }
-
-            string[]? segments = routing.Split('/');
-
-            if (segments.IsNullOrEmpty())
-            {
-                return null;
-            }
-
-            string pageName = segments[^1];
-
-            if(".." == pageName)
-            {
-                pageName = segments[^2];
-            }
-
-            return pageName;
-        }
     }
 }

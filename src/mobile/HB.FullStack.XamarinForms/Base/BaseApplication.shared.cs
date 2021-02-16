@@ -29,8 +29,6 @@ namespace HB.FullStack.XamarinForms.Base
 
         public static new BaseApplication Current => (BaseApplication)Application.Current;
 
-        public INavigation? Navigation { get; set; }
-
 #if DEBUG
         public static string Environment => "Debug";
 #endif
@@ -82,8 +80,6 @@ namespace HB.FullStack.XamarinForms.Base
             //Version
             VersionTracking.Track();
         }
-
-        //public abstract void GotoMainPage();
 
         protected void InitializeServices(IServiceCollection services)
         {

@@ -40,4 +40,10 @@
   <ItemGroup>
     <Folder Include="Renders\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Base\BaseModalDialog.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

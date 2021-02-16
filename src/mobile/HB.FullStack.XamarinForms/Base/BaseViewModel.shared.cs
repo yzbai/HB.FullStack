@@ -52,29 +52,5 @@ namespace HB.FullStack.XamarinForms.Base
             return Application.Current.MainPage.DisplayAlert(title, message, acceptButton, cancelButton);
         }
 
-        protected static void PopToRoot()
-        {
-            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.Navigation?.PopToRootAsync().Fire());
-        }
-
-        protected static void Pop()
-        {
-            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.Navigation?.PopAsync().Fire());
-        }
-
-        protected static void Push(Page page, bool animated = true)
-        {
-            Device.BeginInvokeOnMainThread(()=> BaseApplication.Current.Navigation?.PushAsync(page, animated).Fire());
-        }
-
-        protected static void PushModal(BaseModalDialog dialog, bool animate = true)
-        {
-            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.Navigation?.PushModalAsync(dialog, animate).Fire());
-        }
-
-        protected static void GotoMainPage()
-        {
-            Device.BeginInvokeOnMainThread(() => BaseApplication.Current.GotoMainPage());
-        }
     }
 }

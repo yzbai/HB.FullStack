@@ -18,19 +18,28 @@ namespace HB.FullStack.XamarinForms
     public static class UserPreferences
     {
         private static long? _userId;
+        private static bool _userIdFirstRead = true;
         private static DateTimeOffset? _userCreateTime;
+        private static bool _userCreateTimeFirstRead = true;
         private static string? _mobile;
+        private static bool _mobileFirstRead = true;
         private static string? _loginName;
+        private static bool _loginNameFirstRead = true;
         private static string? _email;
+        private static bool _emailFirstRead = true;
         private static string? _accessToken;
+        private static bool _accessTokenFirstRead = true;
         private static string? _refreshToken;
+        private static bool _refreshTokenFirstRead = true;
 
         public static long? UserId
         {
             get
             {
-                if (!_userId.HasValue)
+                if (_userIdFirstRead && !_userId.HasValue)
                 {
+                    _userIdFirstRead = false;
+
                     string? storedValue = PreferenceHelper.PreferenceGetAsync(Consts.UserId_Preference_Name).Result;
                     _userId = storedValue == null ? null : Convert.ToInt64(storedValue, CultureInfo.InvariantCulture);
                 }
@@ -52,8 +61,9 @@ namespace HB.FullStack.XamarinForms
         {
             get
             {
-                if (!_userCreateTime.HasValue)
+                if (_userCreateTimeFirstRead && !_userCreateTime.HasValue)
                 {
+                    _userCreateTimeFirstRead = false;
                     string? storedValue = PreferenceHelper.PreferenceGetAsync(Consts.UserCreateTime_Preference_Name).Result;
                     _userCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
                 }
@@ -75,8 +85,9 @@ namespace HB.FullStack.XamarinForms
         {
             get
             {
-                if (_mobile.IsNullOrEmpty())
+                if (_mobileFirstRead && _mobile.IsNullOrEmpty())
                 {
+                    _mobileFirstRead = false;
                     _mobile = PreferenceHelper.PreferenceGetAsync(Consts.Mobile_Preference_Name).Result;
                 }
                 return _mobile;
@@ -96,8 +107,9 @@ namespace HB.FullStack.XamarinForms
         {
             get
             {
-                if (_email.IsNullOrEmpty())
+                if (_emailFirstRead && _email.IsNullOrEmpty())
                 {
+                    _emailFirstRead = false;
                     _email = PreferenceHelper.PreferenceGetAsync(Consts.Email_Preference_Name).Result;
                 }
 
@@ -118,8 +130,9 @@ namespace HB.FullStack.XamarinForms
         {
             get
             {
-                if (_loginName.IsNullOrEmpty())
+                if (_loginNameFirstRead && _loginName.IsNullOrEmpty())
                 {
+                    _loginNameFirstRead = false;
                     _loginName = PreferenceHelper.PreferenceGetAsync(Consts.LoginName_Preference_Name).Result;
                 }
 
@@ -140,8 +153,9 @@ namespace HB.FullStack.XamarinForms
         {
             get 
             {
-                if(_accessToken.IsNullOrEmpty())
+                if(_accessTokenFirstRead && _accessToken.IsNullOrEmpty())
                 {
+                    _accessTokenFirstRead = false;
                     _accessToken = PreferenceHelper.PreferenceGetAsync(Consts.AccessToken_Preference_Name).Result;
                 }
 
@@ -162,8 +176,9 @@ namespace HB.FullStack.XamarinForms
         {
             get
             {
-                if (_refreshToken.IsNullOrEmpty())
+                if (_refreshTokenFirstRead && _refreshToken.IsNullOrEmpty())
                 {
+                    _refreshTokenFirstRead = false;
                     _refreshToken = PreferenceHelper.PreferenceGetAsync(Consts.RefreshToken_Preference_Name).Result;
                 }
 

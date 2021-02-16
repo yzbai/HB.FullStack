@@ -22,7 +22,7 @@ namespace HB.FullStack.XamarinForms.Repos
 
             string suffix = fileSuffix.StartsWith(".", System.StringComparison.InvariantCulture) ? fileSuffix : "." + fileSuffix;
 
-            var fileNames = resources.Select(r => $"{r.Id}{fileSuffix}");
+            var fileNames = resources.Select(r => $"{r.Id}{fileSuffix}").ToList();
 
             FileUpdateRequest<TRes> request = new FileUpdateRequest<TRes>(fileDatas, fileNames, resources);
 

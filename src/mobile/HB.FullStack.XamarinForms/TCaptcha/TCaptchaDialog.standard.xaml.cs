@@ -69,10 +69,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
             PoppedDelegate?.Invoke(json).Fire();
             PoppedDelegate = null;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                Shell.Current.Navigation.PopModalAsync(false).Fire();
-            });
+            NavigationService.Current.PopModal();
         }
 
         protected override IList<IBaseContentView?>? GetAllCustomerControls() => new List<IBaseContentView?> { _webView };

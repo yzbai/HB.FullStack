@@ -38,7 +38,6 @@ namespace HB.FullStack.Droid.Renders
                 Control.Settings.AllowFileAccessFromFileURLs = true;
                 Control.Settings.AllowUniversalAccessFromFileURLs = true;
                 Control.Settings.JavaScriptEnabled = true;
-
                 Control.AddJavascriptInterface(new JSBridge(this), "jsBridge");
 
                 Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {_javascriptFunction}"));

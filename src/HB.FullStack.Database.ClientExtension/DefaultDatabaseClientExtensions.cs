@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
@@ -46,12 +47,12 @@ namespace HB.FullStack.Database
             }
         }
 
-        public static async Task SetByWhereAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext transContext) where T : DatabaseEntity, new()
-        {
-            await database.DeleteAsync<T>(whereExpr, transContext).ConfigureAwait(false);
+        //public static async Task SetByWhereAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext transContext) where T : DatabaseEntity, new()
+        //{
+        //    await database.DeleteAsync<T>(whereExpr, transContext).ConfigureAwait(false);
 
-            await database.BatchAddAsync<T>(newItems, "", transContext).ConfigureAwait(false);
-        }
+        //    await database.BatchAddAsync<T>(newItems, "", transContext).ConfigureAwait(false);
+        //}
 
         /// <summary>
         /// AddOrUpdateByIdAsync
@@ -63,7 +64,7 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
-            ThrowIf.NotValid(item,nameof(item));
+            ThrowIf.NotValid(item, nameof(item));
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
@@ -75,6 +76,11 @@ namespace HB.FullStack.Database
             try
             {
                 item.LastTime = TimeUtil.UtcNow;
+                
+                if (item.Version < 0)
+                {
+                    item.Version = 0;
+                }
 
                 var command = DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
 
@@ -92,7 +98,7 @@ namespace HB.FullStack.Database
             {
                 string detail = $"Item:{SerializeUtil.ToJson(item)}";
 
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex); 
+                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
             }
         }
 
@@ -100,39 +106,44 @@ namespace HB.FullStack.Database
         /// warning: 不改变items！！！！
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseEntity, new()
-        {
-            ThrowIf.NotValid(items, nameof(items));
+        //public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseEntity, new()
+        //{
+        //    ThrowIf.NotValid(items, nameof(items));
 
-            if (!items.Any())
-            {
-                return;
-            }
+        //    if (!items.Any())
+        //    {
+        //        return;
+        //    }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+        //    EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
-            if (!entityDef.DatabaseWriteable)
-            {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Items:{SerializeUtil.ToJson(items)}");
-            }
+        //    if (!entityDef.DatabaseWriteable)
+        //    {
+        //        throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Items:{SerializeUtil.ToJson(items)}");
+        //    }
 
-            try
-            {
-                foreach (var item in items)
-                {
-                    item.LastTime = TimeUtil.UtcNow;
-                }
+        //    try
+        //    {
+        //        foreach (var item in items)
+        //        {
+        //            item.LastTime = TimeUtil.UtcNow;
 
-                var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, entityDef, items, transContext == null);
+        //            if (item.Version < 0)
+        //            {
+        //                item.Version = 0;
+        //            }
+        //        }
 
-                await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, command).ConfigureAwait(false);
-            }
-            catch (Exception ex) when (!(ex is DatabaseException))
-            {
-                string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
-            }
-        }
+        //        var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, entityDef, items, transContext == null);
+
+        //        await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, command).ConfigureAwait(false);
+        //    }
+        //    catch (Exception ex) when (!(ex is DatabaseException))
+        //    {
+        //        string detail = $"Items:{SerializeUtil.ToJson(items)}";
+        //        throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+        //    }
+        //}
 
     }
 }
