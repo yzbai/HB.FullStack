@@ -19,8 +19,31 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.XamarinForms.Repos
 {
+
+    public enum RepoGetMode
+    {
+        None,//Mixed
+        LocalForced,
+        RemoteForced
+    }
+
     public abstract class BaseRepo
     {
+        private static bool _isAppInitTaskFinished;
+
+        protected static void CheckAppInitIsFinished()
+        {
+            if (!_isAppInitTaskFinished)
+            {
+                if (Application.Current is BaseApplication baseApplication)
+                {
+                    baseApplication.InitializeTask.Wait();
+                }
+
+                _isAppInitTaskFinished = true;
+            }
+        }
+
         /// <exception cref="ApiException"></exception>
         protected static void EnsureLogined()
         {
@@ -58,37 +81,13 @@ namespace HB.FullStack.XamarinForms.Repos
 
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource
     {
-        private static bool _isDatabaseInitTaskNotWaitedYet = true;
+        private static readonly MemorySimpleLocker _requestLocker = new MemorySimpleLocker();
 
-        protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
+        protected readonly IDatabase _database;
 
-        protected IDatabase Database { get; }
+        protected readonly IApiClient _apiClient;
 
-        protected IApiClient ApiClient { get; }
-
-        private readonly TimeSpan? _localDataExpiryTime;
-
-        protected BaseRepo(IDatabase database, IApiClient apiClient)
-        {
-            Database = database;
-            ApiClient = apiClient;
-
-            if (_isDatabaseInitTaskNotWaitedYet)
-            {
-                if (Application.Current is BaseApplication baseApplication)
-                {
-                    baseApplication.InitializeTask.Wait();
-                }
-
-                _isDatabaseInitTaskNotWaitedYet = false;
-            }
-
-            _localDataExpiryTime = typeof(TEntity).GetCustomAttribute<LocalDataTimeoutAttribute>()?.ExpiryTime;
-        }
-
-        protected abstract TEntity ToEntity(TRes res);
-
-        protected abstract TRes ToResource(TEntity entity);
+        private readonly TimeSpan _localDataExpiryTime;
 
         protected abstract bool AllowOfflineWrite { get; }
 
@@ -96,75 +95,135 @@ namespace HB.FullStack.XamarinForms.Repos
 
         protected abstract bool NeedLogined { get; }
 
-        protected bool LocalDataAvailable(ApiRequest<TRes> apiRequest)
+        protected BaseRepo(IDatabase database, IApiClient apiClient)
         {
-            if (_localDataExpiryTime.HasValue)
-            {
-                return RequestLocker.NoWaitLock(apiRequest.GetType().FullName!, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture), _localDataExpiryTime.Value);
-            }
+            _database = database;
+            _apiClient = apiClient;
 
-            return false;
+            CheckAppInitIsFinished();
+
+            TimeSpan? attributedLocalDataExpiryTime = typeof(TEntity).GetCustomAttribute<LocalDataTimeoutAttribute>()?.ExpiryTime;
+
+            _localDataExpiryTime = attributedLocalDataExpiryTime == null ? Consts.DefaultLocalDataExpiryTime : attributedLocalDataExpiryTime.Value;
         }
 
-        protected static void TimeoutLocalData(ApiRequest<TRes> apiRequest)
-        {
-            RequestLocker.UnLock(apiRequest.GetType().FullName!, apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture));
-        }
+        protected abstract TEntity ToEntity(TRes res);
+
+        protected abstract TRes ToResource(TEntity entity);
 
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        protected async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext, bool forced = false)
+        protected async Task<IEnumerable<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>> where,
+            ApiRequest<TRes> request,
+            TransactionContext? transactionContext,
+            RepoGetMode getMode)
         {
             if (NeedLogined)
             {
                 EnsureLogined();
             }
 
-            if (!forced && LocalDataAvailable(request))
-            {
-                IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
 
-                if (locals.Any())
-                {
-                    return locals;
-                }
+            //如果强制获取本地，则返回本地
+            if (getMode == RepoGetMode.LocalForced)
+            {
+                return locals;
             }
 
+            return await NetworkBoundGetAsync(locals, request, transactionContext, getMode).ConfigureAwait(false);
+        }
+
+        protected async Task<ObservableTask<IEnumerable<TEntity>>> GetObservableTaskAsync(
+            Expression<Func<TEntity, bool>> where,
+            ApiRequest<TRes> request,
+            TransactionContext? transactionContext = null,
+            RepoGetMode getMode = RepoGetMode.None)
+        {
+            if (NeedLogined)
+            {
+                EnsureLogined();
+            }
+
+            IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
+
+            //如果强制获取本地，则返回本地
+            if (getMode == RepoGetMode.LocalForced)
+            {
+                return new ObservableTask<IEnumerable<TEntity>>(locals, null, BaseApplication.ExceptionHandler);
+            }
+
+            return new ObservableTask<IEnumerable<TEntity>>(
+                locals,
+                () => NetworkBoundGetAsync(locals, request, transactionContext, getMode),
+                BaseApplication.ExceptionHandler);
+        }
+
+        protected async Task<TEntity?> GetFirstOrDefaultAsync(
+            Expression<Func<TEntity, bool>> where,
+            ApiRequest<TRes> request,
+            TransactionContext? transactionContext,
+            RepoGetMode getMode)
+        {
+            IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, getMode).ConfigureAwait(false);
+
+            return entities.FirstOrDefault();
+        }
+
+        protected async Task<ObservableTask<TEntity?>> GetFirstOrDefaultObservableTaskAsync(
+            Expression<Func<TEntity, bool>> where,
+            ApiRequest<TRes> request,
+            TransactionContext? transactionContext = null,
+            RepoGetMode getMode = RepoGetMode.None)
+        {
+            if (NeedLogined)
+            {
+                EnsureLogined();
+            }
+
+            IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
+
+            //如果强制获取本地，则返回本地
+            if (getMode == RepoGetMode.LocalForced)
+            {
+                return new ObservableTask<TEntity?>(locals.FirstOrDefault(), null, BaseApplication.ExceptionHandler);
+            }
+
+            return new ObservableTask<TEntity?>(
+                locals.FirstOrDefault(),
+                async () => (await NetworkBoundGetAsync(locals, request, transactionContext, getMode).ConfigureAwait(false)).FirstOrDefault(),
+                BaseApplication.ExceptionHandler);
+        }
+
+        /// <exception cref="ApiException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        private async Task<IEnumerable<TEntity>> NetworkBoundGetAsync(IEnumerable<TEntity> locals, ApiRequest<TRes> request, TransactionContext? transactionContext, RepoGetMode getMode)
+        {
+            //如果不强制远程，本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
+            if (getMode != RepoGetMode.RemoteForced && LocalDataAvaliable(request, locals))
+            {
+                return locals;
+            }
+
+            //如果没有联网，但允许离线读，被迫使用离线数据
             if (!EnsureInternet(AllowOfflineRead))
             {
-                //被迫使用离线数据
                 NotifyOfflineDataUsed();
 
-                IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
-
-                if (locals.Any())
-                {
-                    return locals;
-                }
-
-                throw new ApiException(ApiErrorCode.ApiNotAvailable);
+                return locals;
             }
 
             //获取远程，更新本地
-
-            IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
-
+            IEnumerable<TRes> ress = await _apiClient.GetAsync(request).ConfigureAwait(false);
             IEnumerable<TEntity> remotes = ress.Select(res => ToEntity(res)).ToList();
 
             foreach (TEntity entity in remotes)
             {
-                await Database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
+                await _database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
             }
-            //await Database.BatchAddOrUpdateByIdAsync(remotes, transactionContext).ConfigureAwait(false); //考虑Fire（）
 
             return remotes;
-        }
-
-        protected async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> where, ApiRequest<TRes> request, TransactionContext? transactionContext, bool forced = false)
-        {
-            IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, forced).ConfigureAwait(false);
-
-            return entities.FirstOrDefault();
         }
 
         /// <exception cref="ApiException"></exception>
@@ -178,14 +237,14 @@ namespace HB.FullStack.XamarinForms.Repos
                 //Remote
                 AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
 
-                await ApiClient.AddAsync(addRequest).ConfigureAwait(false);
+                await _apiClient.AddAsync(addRequest).ConfigureAwait(false);
 
                 //Local
-                await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
+                await _database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
-                //脱网下操作
+                //TODO: 脱网下操作
                 throw new NotSupportedException();
             }
         }
@@ -200,23 +259,53 @@ namespace HB.FullStack.XamarinForms.Repos
             {
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 
-                await ApiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
+                await _apiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
 
-                await Database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
+                await _database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
-                //脱网下操作
+                //TODO: 脱网下操作
                 throw new NotSupportedException();
             }
         }
 
+        private bool LocalDataAvaliable(ApiRequest<TRes> request, IEnumerable<TEntity> locals)
+        {
+            return
+                (locals.Any() && !IsLocalDataExpired(locals, _localDataExpiryTime))
+                ||
+                (!locals.Any() && IsRequestRecently(request));
+        }
+
+        private static bool IsLocalDataExpired(IEnumerable<TEntity> entities, TimeSpan expiryTimeSpan)
+        {
+            DateTimeOffset now = TimeUtil.UtcNow;
+
+            foreach (TEntity entity in entities)
+            {
+                if (now - entity.LastTime > expiryTimeSpan)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsRequestRecently(ApiRequest<TRes> apiRequest)
+        {
+            TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Consts.DefaultApiRequestRateLimit;
+
+            return _requestLocker.NoWaitLock(
+                "request",
+                apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture),
+                expiryTime);
+        }
+
         private static void NotifyOfflineDataUsed()
         {
-            if (Application.Current is BaseApplication baseApplication)
-            {
-                baseApplication.OnOfflineDataUsed();
-            }
+            BaseApplication.Current.OnOfflineDataUsed();
         }
     }
 }

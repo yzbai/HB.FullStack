@@ -59,24 +59,31 @@ namespace HB.FullStack.Droid
             return File.Exists(filePath);
         }
 
-        public async Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType)
+        public async Task SaveFileAsync(byte[] data, string fullPath)
         {
-            string directory = GetDirectoryPath(userFileType);
+            string directory = System.IO.Path.GetDirectoryName(fullPath);
 
             CreateDirectoryIfNotExist(directory);
 
-            string path = System.IO.Path.Combine(directory, fileName);
-
-            using FileStream fileStream = File.Open(path, FileMode.Create);
+            using FileStream fileStream = File.Open(fullPath, FileMode.Create);
 
             await fileStream.WriteAsync(data).ConfigureAwait(false);
 
             await fileStream.FlushAsync().ConfigureAwait(false);
+        }
+
+        public async Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType)
+        {
+            string directory = GetDirectoryPath(userFileType);
+
+            string fullPath = System.IO.Path.Combine(directory, fileName);
+
+            await SaveFileAsync(data, fullPath).ConfigureAwait(false);
 
             //Make sure it shows up in the Photos gallery promptly.
             if (userFileType == UserFileType.Avatar)
             {
-                Android.Media.MediaScannerConnection.ScanFile(Platform.CurrentActivity, new string[] { path }, new string[] { "image/png", "image/jpeg" }, null);
+                Android.Media.MediaScannerConnection.ScanFile(Platform.CurrentActivity, new string[] { fullPath }, new string[] { "image/png", "image/jpeg" }, null);
             }
         }
 

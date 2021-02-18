@@ -24,9 +24,8 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
     public partial class CropperPage : BaseContentPage
     {
         private readonly IFileHelper _fileHelper = DependencyService.Resolve<IFileHelper>();
-        private readonly string _filePath;
-        private readonly string _fileNameWithoutSuffix;
-        private readonly UserFileType _userFileType;
+        private readonly string _imageFullPath;
+        private readonly string _croppedImageFullPath;
         private CropperFrameFigure? _cropperFrameFigure;
         private BitmapFigure? _bitmapFigure;
 
@@ -40,11 +39,10 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        public CropperPage(string filePath, string fileNameWithoutSuffix, UserFileType userFileType)
+        public CropperPage(string imageFullPath, string croppedImageFullPath)
         {
-            _filePath = filePath;
-            _fileNameWithoutSuffix = Path.GetFileNameWithoutExtension(fileNameWithoutSuffix);
-            _userFileType = userFileType;
+            _imageFullPath = imageFullPath;
+            _croppedImageFullPath = croppedImageFullPath;
 
             InitializeComponent();
 
@@ -74,7 +72,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
         private void ResumeFigures()
         {
-            using FileStream stream = new FileStream(_filePath, FileMode.Open);
+            using FileStream stream = new FileStream(_imageFullPath, FileMode.Open);
 
             _bitmapFigure = new BitmapFigure(0.9f, 0.9f, stream)
             {
@@ -123,20 +121,23 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
                 return;
             }
 
-            SKRect cropRect = _cropperFrameFigure.CropRect;
+            using SKBitmap croppedBitmap = _bitmapFigure.Crop(_cropperFrameFigure.CropRect);
 
-            using SKBitmap croppedBitmap = _bitmapFigure.Crop(cropRect);
+            await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath).ConfigureAwait(false);
 
+            NavigationService.Current.Pop();
+        }
+
+        private async Task SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)
+        {
             //Save
-            using SKImage image = SKImage.FromBitmap(croppedBitmap);
+            using SKImage image = SKImage.FromBitmap(sKBitmap);
 
             using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
 
-            string fileName = _fileNameWithoutSuffix + ".png";
+            fullPath = Path.ChangeExtension(fullPath, ".png");
 
-            await _fileHelper.SaveFileAsync(data.ToArray(), fileName, _userFileType).ConfigureAwait(false);
-
-            NavigationService.Current.Pop();
+            await _fileHelper.SaveFileAsync(data.ToArray(), fullPath).ConfigureAwait(false);
         }
     }
 }

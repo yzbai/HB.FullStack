@@ -22,6 +22,8 @@ namespace HB.FullStack.XamarinForms.Platforms
 
         Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType);
 
+        Task SaveFileAsync(byte[] data, string fullPath);
+
         bool IsFileExisted(string fileName, UserFileType avatar);
 
         #region Avatar

@@ -24,5 +24,8 @@ namespace HB.FullStack.XamarinForms
 
         public const float TapTolerantDistanceInDp = 1f;
         public const int LongTapMinDurationInMilliseconds = 400;
+        
+        public static readonly TimeSpan DefaultLocalDataExpiryTime = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan DefaultApiRequestRateLimit = TimeSpan.FromMinutes(1);
     }
 }

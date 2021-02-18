@@ -28,7 +28,7 @@ namespace HB.FullStack.Common.Api
 
         public string? PublicResourceToken { get; set; }
 
-        #endregion Common Parameters
+        #endregion
 
         private readonly string _requestId = SecurityUtil.CreateUniqueToken();
         private bool _needHttpMethodOveride = true;
@@ -42,6 +42,8 @@ namespace HB.FullStack.Common.Api
 
         private ApiAuthType _apiAuthType;
         private string? _apiKeyName;
+
+        private TimeSpan? _rateLimit;
 
         protected ApiRequest() { }
 
@@ -130,6 +132,16 @@ namespace HB.FullStack.Common.Api
         public static string GetRandomStr()
         {
             return SecurityUtil.CreateRandomString(6);
+        }
+
+        public TimeSpan? GetRateLimit()
+        {
+            return _rateLimit;
+        }
+
+        public void SetRateLimit(TimeSpan timeSpan)
+        {
+            _rateLimit = timeSpan;
         }
 
         public string? GetHeader(string name)

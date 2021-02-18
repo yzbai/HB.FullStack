@@ -107,9 +107,7 @@ namespace HB.FullStack.XamarinForms.Api
                 DeviceInfos = DevicePreferences.DeviceInfos
             };
 
-#pragma warning disable CA2000 // Dispose objects before losing scope
             StringContent deviceContent = new StringContent(SerializeUtil.ToJson(deviceWrapper), Encoding.UTF8, "application/json");
-#pragma warning restore CA2000 // Dispose objects before losing scope
 
             if (request.Content == null)
             {

@@ -75,6 +75,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             services.AddSingleton<IApiClient, ApiClient>();
+
         }
 
     }

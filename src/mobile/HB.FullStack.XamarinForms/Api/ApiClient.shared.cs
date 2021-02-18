@@ -42,12 +42,9 @@ namespace HB.FullStack.XamarinForms.Api
         public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? Array.Empty<T>();
 
+        /// <exception cref="ApiException"></exception>
         public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource
-        {
-            IEnumerable<T> ts = await GetAsync(request).ConfigureAwait(false);
-
-            return ts.FirstOrDefault();
-        }
+            => (await GetAsync(request).ConfigureAwait(false)).FirstOrDefault();
 
         /// <exception cref="ApiException"></exception>
         public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource
@@ -61,12 +58,6 @@ namespace HB.FullStack.XamarinForms.Api
         public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
-        /// <summary>
-        /// SendAsync
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="requestType"></param>
-        /// <returns></returns>
         /// <exception cref="ApiException"></exception>
         private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ApiResource where TResponse : class
         {

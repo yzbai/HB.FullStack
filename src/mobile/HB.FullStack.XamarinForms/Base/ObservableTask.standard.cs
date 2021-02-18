@@ -1,11 +1,14 @@
-﻿#nullable disable
+﻿//#nullable disable
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Xamarin.CommunityToolkit.ObjectModel;
 
-namespace System
+namespace HB.FullStack.XamarinForms.Base
 {
     /// <summary>
     /// 这是一个Bindable 的Task，可以让空间binding 这个task，等task完成后，更新结果。
@@ -13,62 +16,68 @@ namespace System
     /// <typeparam name="TResult"></typeparam>
     public sealed class ObservableTask<TResult> : ObservableObject
     {
-        public TResult InitialResult { get; private set; }
+        public TResult? InitialResult { get; private set; }
 
-        public Task<TResult> Task { get; private set; }
+        public Task<TResult>? Task { get; private set; }
 
-        public Task TaskCompletion { get; private set; }
+        public Task? TaskCompletion { get; private set; }
 
-        public TResult Result => (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : InitialResult;
+        public TResult? Result => (Task == null || Task.Status != TaskStatus.RanToCompletion) ? InitialResult : Task.Result;
 
-        public TaskStatus Status { get { return Task.Status; } }
+        public TaskStatus Status => Task == null ? TaskStatus.RanToCompletion : Task.Status;
 
-        public bool IsCompleted { get { return Task.IsCompleted; } }
+        public bool IsCompleted => Task == null || Task.IsCompleted;
 
-        public bool IsNotCompleted { get { return !Task.IsCompleted; } }
+        public bool IsNotCompleted => Task != null && !Task.IsCompleted;
 
-        public bool IsSuccessfullyCompleted { get { return Task.Status == TaskStatus.RanToCompletion; } }
+        public bool IsSuccessfullyCompleted => Task == null || Task.Status == TaskStatus.RanToCompletion;
 
-        public bool IsCanceled { get { return Task.IsCanceled; } }
+        public bool IsCanceled => Task != null && Task.IsCanceled;
 
-        public bool IsFaulted { get { return Task.IsFaulted; } }
+        public bool IsFaulted => Task != null && Task.IsFaulted;
 
-        public AggregateException Exception { get { return Task.Exception; } }
+        public AggregateException? Exception { get { return Task?.Exception; } }
 
-        public Exception InnerException { get { return Exception?.InnerException; } }
+        public Exception? InnerException { get { return Exception?.InnerException; } }
+        
+        public Action<Exception>? ExceptionHandler { get; private set; }
+        public bool ContinueOnCapturedContext { get; private set; }
 
-        public string ErrorMessage { get { return InnerException?.Message; } }
+        public string? ErrorMessage { get { return InnerException?.Message; } }
 
-        private readonly Func<Task<TResult>> _taskFunc;
+        private readonly Func<Task<TResult>>? _taskFunc;
 
-        private readonly Action<Exception> _exceptionHandler;
-
-        private readonly bool _continueOnCapturedContext;
-
-        public ObservableTask(Func<Task<TResult>> taskFunc, TResult initialResult = default, Action<Exception> onException = null, bool continueOnCapturedContext = false)
+        public ObservableTask(TResult? initialResult, Func<Task<TResult>>? taskFunc, Action<Exception>? onException = null, bool continueOnCapturedContext = false)
         {
-            _taskFunc = taskFunc;
             InitialResult = initialResult;
-            _exceptionHandler = onException;
-            _continueOnCapturedContext = continueOnCapturedContext;
+            ExceptionHandler = onException;
+
+            _taskFunc = taskFunc;
+            ContinueOnCapturedContext = continueOnCapturedContext;
 
             TriggerTask();
         }
 
         public async Task RePlayAsync()
         {
-            await TaskCompletion.ConfigureAwait(false);
+            if (TaskCompletion != null)
+            {
+                await TaskCompletion.ConfigureAwait(false);
+            }
 
             TriggerTask();
         }
 
         private void TriggerTask()
         {
-            Task = _taskFunc();
-
-            if (!Task.IsCompleted)
+            if (_taskFunc != null)
             {
-                TaskCompletion = WatchTaskAsync();
+                Task = _taskFunc();
+
+                if (!Task.IsCompleted)
+                {
+                    TaskCompletion = WatchTaskAsync();
+                }
             }
         }
 
@@ -76,20 +85,18 @@ namespace System
         {
             try
             {
-#pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
-                await Task.ConfigureAwait(_continueOnCapturedContext);
-#pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
+                await Task!.ConfigureAwait(ContinueOnCapturedContext);
             }
-            catch (Exception obj) when (_exceptionHandler != null)
+            catch (Exception obj) when (ExceptionHandler != null)
             {
-                _exceptionHandler!(obj);
+                ExceptionHandler!(obj);
             }
 
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(IsCompleted));
             OnPropertyChanged(nameof(IsNotCompleted));
 
-            if (Task.IsCanceled)
+            if (Task!.IsCanceled)
             {
                 OnPropertyChanged(nameof(IsCanceled));
             }
@@ -108,4 +115,4 @@ namespace System
         }
     }
 }
-#nullable restore
+//#nullable restore
