@@ -37,6 +37,8 @@ namespace HB.FullStack.XamarinForms.Platforms
         string? GetAvatarFilePath(long userId);
 
         Task<byte[]?> GetAvatarAsync(long userId);
+        
+        Task SaveAvatarAsync(byte[] avatarData, long userId);
 
         #endregion
     }
@@ -44,5 +46,6 @@ namespace HB.FullStack.XamarinForms.Platforms
     public enum UserFileType
     {
         Avatar,
+        Cache,
     }
 }

@@ -100,40 +100,40 @@ namespace HB.FullStack.XamarinForms.Api
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
             request.RequestUri = request.RequestUri!.AddQuery(ClientNames.DeviceId, deviceId);
 
-            DeviceWrapper deviceWrapper = new()
-            {
-                DeviceId = deviceId,
-                DeviceVersion = DevicePreferences.DeviceVersion,
-                DeviceInfos = DevicePreferences.DeviceInfos
-            };
+            //DeviceWrapper deviceWrapper = new()
+            //{
+            //    DeviceId = deviceId,
+            //    DeviceVersion = DevicePreferences.DeviceVersion,
+            //    DeviceInfos = DevicePreferences.DeviceInfos
+            //};
 
-            StringContent deviceContent = new StringContent(SerializeUtil.ToJson(deviceWrapper), Encoding.UTF8, "application/json");
+            //StringContent deviceContent = new StringContent(SerializeUtil.ToJson(deviceWrapper), Encoding.UTF8, "application/json");
 
-            if (request.Content == null)
-            {
-                request.Content = deviceContent;
-            }
-            else if (request.Content is MultipartFormDataContent content)
-            {
-                content.Add(deviceContent);
-            }
-            else if (request.Content is StringContent stringContent)
-            {
-                try
-                {
-                    MultipartContent multipartContent = new()
-                    {
-                        request.Content,
-                        deviceContent
-                    };
+            //if (request.Content == null)
+            //{
+            //    request.Content = deviceContent;
+            //}
+            //else if (request.Content is MultipartFormDataContent content)
+            //{
+            //    content.Add(deviceContent);
+            //}
+            //else if (request.Content is StringContent stringContent)
+            //{
+            //    try
+            //    {
+            //        MultipartContent multipartContent = new()
+            //        {
+            //            request.Content,
+            //            deviceContent
+            //        };
 
-                    request.Content = multipartContent;
-                }
-                catch (Exception ex)
-                {
-                    GlobalSettings.Logger.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
-                }
-            }
+            //        request.Content = multipartContent;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        GlobalSettings.Logger.Log(LogLevel.Error, ex, $"Url:{request.RequestUri.AbsoluteUri}");
+            //    }
+            //}
         }
 
         private class DeviceWrapper

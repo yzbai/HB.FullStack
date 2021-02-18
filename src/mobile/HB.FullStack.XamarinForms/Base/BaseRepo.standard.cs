@@ -17,16 +17,8 @@ using HB.FullStack.XamarinForms.Base;
 using Microsoft;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.FullStack.XamarinForms.Repos
+namespace HB.FullStack.XamarinForms.Base
 {
-
-    public enum RepoGetMode
-    {
-        None,//Mixed
-        LocalForced,
-        RemoteForced
-    }
-
     public abstract class BaseRepo
     {
         private static bool _isAppInitTaskFinished;

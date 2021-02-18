@@ -97,8 +97,6 @@ namespace HB.FullStack.XamarinForms.Base
                     builder.AddProvider(new LoggerProvider(MinimumLogLevel));
                 });
 
-                services.AddSingleton<TokenAutoRefreshedHttpClientHandler>();
-
                 RegisterServices(services);
 
                 //Build
@@ -112,9 +110,6 @@ namespace HB.FullStack.XamarinForms.Base
                 GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
                 GlobalSettings.MessageExceptionHandler = ExceptionHandler;
                 //_remoteLoggingService = DependencyService.Resolve<IRemoteLoggingService>();
-
-                //UriImageSourceEx
-                AuthUriImageSource.HttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
 
                 //Connectivity
                 //Connectivity.ConnectivityChanged += (s, e) => { OnConnectivityChanged(s, e); };

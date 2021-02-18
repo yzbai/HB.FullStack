@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using HB.FullStack.XamarinForms.Api;
+
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -321,7 +323,20 @@ namespace HB.FullStack.XamarinForms.Controls
             }
         }
 
-        public static HttpClientHandler HttpClientHandler { get; set; }
+        private static TokenAutoRefreshedHttpClientHandler _tokenAutoRefreshedHttpClientHandler;
+
+        public static TokenAutoRefreshedHttpClientHandler HttpClientHandler
+        {
+            get
+            {
+                if (_tokenAutoRefreshedHttpClientHandler == null)
+                {
+                    _tokenAutoRefreshedHttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
+                }
+
+                return _tokenAutoRefreshedHttpClientHandler;
+            }
+        }
     }
 }
 #nullable restore

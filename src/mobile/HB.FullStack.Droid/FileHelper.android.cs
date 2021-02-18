@@ -26,6 +26,7 @@ namespace HB.FullStack.Droid
         //TODO: 图片存储到公共相册中
         public static readonly string AvatarDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "time_avatars");
         public static readonly string OthersDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "others");
+        public static readonly string CacheDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "cache");
 
         private readonly object _locker = new object();
 
@@ -34,6 +35,7 @@ namespace HB.FullStack.Droid
             return fileType switch
             {
                 UserFileType.Avatar => AvatarDirectory,
+                UserFileType.Cache => CacheDirectory,
                 _ => OthersDirectory
             };
         }
@@ -177,6 +179,11 @@ namespace HB.FullStack.Droid
             bool result = await bitmap!.CompressAsync(Bitmap.CompressFormat.Png, 100, fileStream).ConfigureAwait(false);
 
             await fileStream.FlushAsync().ConfigureAwait(false);
+        }
+
+        public Task SaveAvatarAsync(byte[] avatarData, long userId)
+        {
+            return SaveFileAsync(avatarData, userId.ToString(), UserFileType.Avatar);
         }
 
         public string? GetAvatarFilePath(long userId)

@@ -135,10 +135,6 @@ namespace HB.FullStack.XamarinForms.Api
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// AddAuthInfo
-        /// </summary>
-        /// <param name="request"></param>
         /// <exception cref="ApiException"></exception>
         private void AddAuthInfo<T>(ApiRequest<T> request) where T : ApiResource
         {
