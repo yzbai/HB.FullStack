@@ -9,6 +9,7 @@ using Xamarin.Forms;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Common.Utility;
 using HB.FullStack.Common.Api;
+using System.Collections.Generic;
 
 namespace HB.FullStack.XamarinForms.Api
 {
@@ -98,7 +99,8 @@ namespace HB.FullStack.XamarinForms.Api
             string deviceId = DevicePreferences.DeviceId;
 
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
-            request.RequestUri = request.RequestUri!.AddQuery(ClientNames.DeviceId, deviceId);
+
+            request.RequestUri = new Uri( UrlUtil.AddQuerys(request.RequestUri.ToString(), new Dictionary<string, string?> { { ClientNames.DeviceId, deviceId } }));
 
             //DeviceWrapper deviceWrapper = new()
             //{

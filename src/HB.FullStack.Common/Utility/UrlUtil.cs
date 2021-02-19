@@ -3,45 +3,34 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Web;
 
-namespace HB.FullStack.Common.Utility
+namespace System
 {
     public static class UrlUtil
     {
-        public static Uri AddQuery(this Uri uri, string key, string value)
-        {
-            return uri.AddQuerys(new Dictionary<string, string> { { key, value } });
-        }
-
-        public static Uri AddQuerys(this Uri uri, IDictionary<string, string> parameters)
-        {
-            UriBuilder uriBuilder = new UriBuilder(uri);
-
-            NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
-
-            foreach (var kv in parameters)
-            {
-                queries[kv.Key] = kv.Value;
-            }
-
-            uriBuilder.Query = queries.ToString();
-
-            return uriBuilder.Uri;
-        }
-
         public static string AddQuerys(string uri, IDictionary<string, string?> parameters)
         {
-            UriBuilder uriBuilder = new UriBuilder(uri);
+            //不能用UriBuilder，会将相对uri转为绝对uri
+            //UriBuilder uriBuilder = new UriBuilder(uri);
 
-            NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
+            int index = uri.IndexOf('?');
+
+            string oldQuery = index > 0 ? uri.Substring(index + 1) : "";
+
+            NameValueCollection queries = HttpUtility.ParseQueryString(oldQuery);
 
             foreach (var kv in parameters)
             {
                 queries[kv.Key] = kv.Value;
             }
 
-            uriBuilder.Query = queries.ToString();
-
-            return uriBuilder.ToString();
+            if(index > 0)
+            {
+                return uri.Substring(0, index + 1) + queries.ToString();
+            }
+            else
+            {
+                return uri + "?" + queries.ToString();
+            }
         }
     }
 }

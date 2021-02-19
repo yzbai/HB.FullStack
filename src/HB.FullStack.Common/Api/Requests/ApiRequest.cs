@@ -193,7 +193,7 @@ namespace HB.FullStack.Common.Api
 
         public string GetUrl()
         {
-            string url = BuildUrl();
+            string uri = BuildUrl();
 
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
@@ -202,7 +202,7 @@ namespace HB.FullStack.Common.Api
                 { ClientNames.DeviceId, DeviceId }//额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
             };
 
-            return UrlUtil.AddQuerys(url, parameters);
+            return UrlUtil.AddQuerys(uri, parameters);
         }
 
         protected virtual string BuildUrl()
@@ -211,7 +211,7 @@ namespace HB.FullStack.Common.Api
         }
 
         /// <summary>
-        /// 样式: Version1/Resource1/Condition1
+        /// 样式: /Version1/Resource1/Condition1
         /// </summary>
         private static string BuildDefaultUrl(ApiRequest request)
         {
@@ -265,7 +265,7 @@ namespace HB.FullStack.Common.Api
         }
 
         protected ApiRequest(HttpMethod httpMethod, ApiAuthType apiAuthType, string? endPointName, string? apiVersion, string? resourceName, string? condition)
-            :base(httpMethod, apiAuthType, endPointName, apiVersion, resourceName, condition)
+            : base(httpMethod, apiAuthType, endPointName, apiVersion, resourceName, condition)
         { }
 
         public abstract override int GetHashCode();
