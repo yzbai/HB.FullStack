@@ -79,7 +79,7 @@ namespace HB.FullStack.XamarinForms.Api
             try
             {
                 //TODO: 调查这里有必要用using吗
-                using HttpClient httpClient = GetHttpClient(endpoint);
+                HttpClient httpClient = GetHttpClient(endpoint);
 
                 await OnRequestingAsync(request, new ApiEventArgs(ApiRequestType.Stream, request)).ConfigureAwait(false);
 
@@ -124,7 +124,7 @@ namespace HB.FullStack.XamarinForms.Api
 
             try
             {
-                using HttpClient httpClient = GetHttpClient(endpoint);
+                HttpClient httpClient = GetHttpClient(endpoint);
 
                 await OnRequestingAsync(request, new ApiEventArgs(requestType, request)).ConfigureAwait(false);
 
