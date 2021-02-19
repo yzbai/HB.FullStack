@@ -121,8 +121,6 @@ namespace System.Net.Http
             }
 
             //Get的参数也放到body中去
-
-            //TODO: .net 5以后，使用JsonContent
             httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
 
             return httpRequest;
@@ -165,13 +163,23 @@ namespace System.Net.Http
                 return;
             }
 
+            //TODO: 可以处理404等ProblemDetails的返回
             ApiError? apiError = await responseMessage.DeSerializeJsonAsync<ApiError>().ConfigureAwait(false);
 
             responseMessage.Dispose();
 
             if (apiError == null)
             {
-                throw new ApiException(ApiErrorCode.ApiErrorWrongFormat, $"StatusCode:{responseMessage.StatusCode},Reason:{ responseMessage.ReasonPhrase}");
+                ApiErrorCode apiErrorCode = responseMessage.StatusCode switch {
+                
+                    HttpStatusCode.NotFound => ApiErrorCode.ApiNotAvailable,
+                    _=> ApiErrorCode.ApiErrorUnkownFormat,
+                };
+
+                throw new ApiException(apiErrorCode, $"StatusCode:{responseMessage.StatusCode},Reason:{ responseMessage.ReasonPhrase}")
+                {
+                    HttpCode = responseMessage.StatusCode
+                };
             }
             else
             {
@@ -181,6 +189,7 @@ namespace System.Net.Http
                     ModelStates = apiError.ModelStates
                 };
             }
+
         }
     }
 }

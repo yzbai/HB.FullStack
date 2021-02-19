@@ -144,7 +144,7 @@ namespace HB.FullStack.XamarinForms.Base
                         break;
                     case ApiErrorCode.ApiNotAvailable:
                         break;
-                    case ApiErrorCode.ApiErrorWrongFormat:
+                    case ApiErrorCode.ApiErrorUnkownFormat:
                         break;
                     case ApiErrorCode.NotApiResourceEntity:
                         break;

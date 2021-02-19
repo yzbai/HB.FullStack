@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -188,6 +189,8 @@ namespace System
         public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
         {
             Assembly httpFrameworkAssembly = typeof(ExceptionController).Assembly;
+            
+            //services.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
 
             services
                 .AddControllers(options =>

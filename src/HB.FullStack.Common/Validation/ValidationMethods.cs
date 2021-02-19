@@ -58,9 +58,9 @@ namespace HB.FullStack.Common.Validate
             return Regex.IsMatch(text, RegExpressions.Year);
         }
 
-        public static bool IsSmsCode([NotNullWhen(true)] string? text, int smsCodeLength)
+        public static bool IsSmsCode([NotNullWhen(true)] string? text, int? smsCodeLength)
         {
-            if (string.IsNullOrEmpty(text) || text!.Length != smsCodeLength)
+            if (string.IsNullOrEmpty(text) || ( smsCodeLength.HasValue &&  text!.Length != smsCodeLength.Value))
             {
                 return false;
             }

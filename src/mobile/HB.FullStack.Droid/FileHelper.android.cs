@@ -51,14 +51,21 @@ namespace HB.FullStack.Droid
 
         public bool IsFileExisted(string fileName, UserFileType userFileType)
         {
+            fileName = AddFileExtensionIfAbsent(fileName, userFileType);
+
+            string filePath = System.IO.Path.Combine(GetDirectoryPath(userFileType), fileName);
+
+            return File.Exists(filePath);
+        }
+
+        private string AddFileExtensionIfAbsent(string fileName, UserFileType userFileType)
+        {
             if (!fileName.Contains('.'))
             {
                 fileName += GetFileSuffix(userFileType);
             }
 
-            string filePath = System.IO.Path.Combine(GetDirectoryPath(userFileType), fileName);
-
-            return File.Exists(filePath);
+            return fileName;
         }
 
         public async Task SaveFileAsync(byte[] data, string fullPath)
@@ -76,9 +83,7 @@ namespace HB.FullStack.Droid
 
         public async Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType)
         {
-            string directory = GetDirectoryPath(userFileType);
-
-            string fullPath = System.IO.Path.Combine(directory, fileName);
+            string fullPath = GetFileFullPath(fileName, userFileType);
 
             await SaveFileAsync(data, fullPath).ConfigureAwait(false);
 
@@ -87,6 +92,42 @@ namespace HB.FullStack.Droid
             {
                 Android.Media.MediaScannerConnection.ScanFile(Platform.CurrentActivity, new string[] { fullPath }, new string[] { "image/png", "image/jpeg" }, null);
             }
+        }
+
+        private string GetFileFullPath(string fileName, UserFileType userFileType)
+        {
+            fileName = AddFileExtensionIfAbsent(fileName, userFileType);
+
+            string directory = GetDirectoryPath(userFileType);
+
+            return System.IO.Path.Combine(directory, fileName);
+        }
+
+        public async Task SaveFileAsync(Stream stream, string fileName, UserFileType userFileType)
+        {
+            string fullPath = GetFileFullPath(fileName, userFileType);
+
+            using FileStream fileStream = File.Open(fullPath, FileMode.Create);
+
+            await stream.CopyToAsync(fileStream).ConfigureAwait(false);
+
+            await fileStream.FlushAsync().ConfigureAwait(false);
+        }
+
+        public async Task<byte[]?> GetFileAsync(string fullPath)
+        {
+            if(!File.Exists(fullPath))
+            {
+                return null;
+            }
+
+            using FileStream fileStream = new FileStream(fullPath, FileMode.Open);
+
+            using MemoryStream memoryStream = new MemoryStream();
+
+            await fileStream.CopyToAsync(memoryStream).ConfigureAwait(false);
+
+            return memoryStream.ToArray();
         }
 
         public async Task<Stream> GetResourceStreamAsync(string resourceName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null)
@@ -168,7 +209,7 @@ namespace HB.FullStack.Droid
 
             CreateDirectoryIfNotExist(directoryPath);
 
-            string? path = GetAvatarFilePath(userId);
+            string? path = GetAvatarFullPath(userId);
 
             using Bitmap? bitmap = await imageSource.GetBitMapAsync().ConfigureAwait(false);
 
@@ -186,29 +227,28 @@ namespace HB.FullStack.Droid
             return SaveFileAsync(avatarData, userId.ToString(), UserFileType.Avatar);
         }
 
-        public string? GetAvatarFilePath(long userId)
+        public Task SaveAvatarAsync(Stream stream, long userId)
+        {
+            return SaveFileAsync(stream, userId.ToString(), UserFileType.Avatar);
+        }
+
+        public string? GetAvatarFullPath(long userId)
         {
             string path = System.IO.Path.Combine(AvatarDirectory, $"{userId}.png");
 
             return System.IO.File.Exists(path) ? path : null;
         }
 
-        public async Task<byte[]?> GetAvatarAsync(long userId)
+        public Task<byte[]?> GetAvatarAsync(long userId)
         {
-            string? filePath = GetAvatarFilePath(userId);
+            string? fullPath = GetAvatarFullPath(userId);
 
-            if (filePath == null)
+            if (fullPath == null)
             {
-                return null;
+                return Task.FromResult<byte[]?>(null);
             }
 
-            using FileStream fileStream = new FileStream(filePath, FileMode.Open);
-
-            using MemoryStream memoryStream = new MemoryStream();
-
-            await fileStream.CopyToAsync(memoryStream).ConfigureAwait(false);
-
-            return memoryStream.ToArray();
+            return GetFileAsync(fullPath);
         }
 
         #endregion

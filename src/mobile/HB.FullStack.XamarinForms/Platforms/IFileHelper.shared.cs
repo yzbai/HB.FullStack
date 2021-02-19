@@ -24,7 +24,11 @@ namespace HB.FullStack.XamarinForms.Platforms
 
         Task SaveFileAsync(byte[] data, string fullPath);
 
+        Task SaveFileAsync(Stream stream, string fileName, UserFileType userFileType);
+
         bool IsFileExisted(string fileName, UserFileType avatar);
+
+        Task<byte[]?> GetFileAsync(string fullPath);
 
         #region Avatar
 
@@ -34,11 +38,13 @@ namespace HB.FullStack.XamarinForms.Platforms
         /// 如果不存在，返回null
         /// </summary>
         /// <returns></returns>
-        string? GetAvatarFilePath(long userId);
+        string? GetAvatarFullPath(long userId);
 
         Task<byte[]?> GetAvatarAsync(long userId);
         
         Task SaveAvatarAsync(byte[] avatarData, long userId);
+
+        Task SaveAvatarAsync(Stream stream, long userId);
 
         #endregion
     }

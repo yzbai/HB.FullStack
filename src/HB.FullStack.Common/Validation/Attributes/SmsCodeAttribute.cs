@@ -1,20 +1,18 @@
 ﻿#nullable enable
 
-using System.ComponentModel.DataAnnotations;
-
 using HB.FullStack.Common.Validate;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    public sealed class PositiveNumberAttribute : ValidationAttribute
+    public sealed class SmsCodeAttribute : ValidationAttribute
     {
         public bool CanBeNull { get; set; } = true;
 
-        public PositiveNumberAttribute()
+        public SmsCodeAttribute()
         {
             if (string.IsNullOrEmpty(ErrorMessage))
             {
-                ErrorMessage = "Not a Positive Number.";
+                ErrorMessage = "Not a SmsCode.";
             }
         }
 
@@ -22,7 +20,7 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (value == null) { return CanBeNull; }
 
-            return value is string text && ValidationMethods.IsPositiveNumber(text);
+            return value is string text && ValidationMethods.IsSmsCode(text, null);
         }
     }
 }

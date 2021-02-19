@@ -43,7 +43,7 @@ namespace HB.FullStack.Common.Api
 
         public override int GetHashCode()
         {
-            throw new NotSupportedException();
+            return HashCode.Combine(GetType().Name, Resources);
         }
     }
 
