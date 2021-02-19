@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using HB.FullStack.Common.Api;
 using HB.FullStack.XamarinForms.Api;
 
 using Microsoft.Extensions.Logging;
@@ -297,45 +298,63 @@ namespace HB.FullStack.XamarinForms.Controls
             OnSourceChanged();
         }
 
-        public static async Task<Stream> GetStreamCoreAsync(Uri uri, CancellationToken cancellationToken)
+        public static Task<Stream> GetStreamCoreAsync(Uri uri, CancellationToken cancellationToken)
         {
-            if (HttpClientHandler == null)
-            {
-                using (var client = new HttpClient())
-                {
-                    // Do not remove this await otherwise the client will dispose before
-                    // the stream even starts
-                    var result = await StreamWrapper.GetStreamAsync(uri, cancellationToken, client).ConfigureAwait(false);
+            //if (ApiClient == null)
+            //{
+            //    using (var client = new HttpClient())
+            //    {
+            //        // Do not remove this await otherwise the client will dispose before
+            //        // the stream even starts
+            //        var result = await StreamWrapper.GetStreamAsync(uri, cancellationToken, client).ConfigureAwait(false);
 
-                    return result;
-                }
-            }
-            else
-            {
-                using (var client = new HttpClient(HttpClientHandler))
-                {
-                    // Do not remove this await otherwise the client will dispose before
-                    // the stream even starts
-                    var result = await StreamWrapper.GetStreamAsync(uri, cancellationToken, client).ConfigureAwait(false);
+            //        return result;
+            //    }
+            //}
+            //else
+            //{
+            //    using (var client = new HttpClient(HttpClientHandler))
+            //    {
+            //        // Do not remove this await otherwise the client will dispose before
+            //        // the stream even starts
+            //        var result = await StreamWrapper.GetStreamAsync(uri, cancellationToken, client).ConfigureAwait(false);
 
-                    return result;
-                }
-            }
+            //        return result;
+            //    }
+            //}
+
+            return ApiClient.GetStreamAsync(new ImageUrlRequest(uri.AbsoluteUri));
+
         }
 
-        private static TokenAutoRefreshedHttpClientHandler _tokenAutoRefreshedHttpClientHandler;
+        private static IApiClient _apiClient;
 
-        public static TokenAutoRefreshedHttpClientHandler HttpClientHandler
+        public static IApiClient ApiClient
         {
             get
             {
-                if (_tokenAutoRefreshedHttpClientHandler == null)
+                if(_apiClient == null)
                 {
-                    _tokenAutoRefreshedHttpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
+                    _apiClient = DependencyService.Resolve<IApiClient>();
                 }
 
-                return _tokenAutoRefreshedHttpClientHandler;
+                return _apiClient;
             }
+        }
+    }
+
+    internal class ImageUrlRequest : ApiRequest
+    {
+        private readonly string _uri;
+
+        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null)
+        {
+            _uri = uri;
+        }
+
+        protected override string BuildUrl()
+        {
+            return _uri;
         }
     }
 }

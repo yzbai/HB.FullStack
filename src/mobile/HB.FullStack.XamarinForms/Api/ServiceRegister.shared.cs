@@ -1,8 +1,12 @@
 ﻿using HB.FullStack.XamarinForms.Api;
+
 using Microsoft.Extensions.Configuration;
+
 using Polly;
+
 using System;
 using System.Net.Http;
+
 using Xamarin.Essentials;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -33,14 +37,31 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        /// <summary>
-        /// AddApiClientCore
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="options"></param>
-
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
+            //添加默认HttpClient
+            services.AddHttpClient(ApiClient.NO_BASEURL_HTTPCLIENT_NAME, httpClient =>
+            {
+                httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
+            })
+#if DEBUG
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                HttpClientHandler handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                    {
+                        if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                            return true;
+                        return errors == System.Net.Security.SslPolicyErrors.None;
+                    }
+                };
+                return handler;
+            })
+#endif
+            ;
+
+            //添加各站点的HttpClient
             foreach (var endpoint in options.Endpoints)
             {
                 services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
@@ -76,7 +97,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IApiClient, ApiClient>();
 
-            services.AddSingleton<TokenAutoRefreshedHttpClientHandler>();
+            //HttpClientHandler会随着HttpClient Dispose 而Dispose
+            services.AddTransient<TokenAutoRefreshedHttpClientHandler>();
         }
 
     }

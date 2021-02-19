@@ -27,5 +27,21 @@ namespace HB.FullStack.Common.Utility
 
             return uriBuilder.Uri;
         }
+
+        public static string AddQuerys(string uri, IDictionary<string, string?> parameters)
+        {
+            UriBuilder uriBuilder = new UriBuilder(uri);
+
+            NameValueCollection queries = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+            foreach (var kv in parameters)
+            {
+                queries[kv.Key] = kv.Value;
+            }
+
+            uriBuilder.Query = queries.ToString();
+
+            return uriBuilder.ToString();
+        }
     }
 }

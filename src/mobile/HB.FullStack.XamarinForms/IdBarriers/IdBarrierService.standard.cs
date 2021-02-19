@@ -21,6 +21,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             ToServer,
             FromServer
         }
+
         private readonly IIdBarrierRepo _idBarrierRepo;
         private readonly IApiClient _apiClient;
         private readonly ITransaction _transaction;
@@ -33,27 +34,18 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             _transaction = transaction;
         }
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
         /// <exception cref="DatabaseException"></exception>
         /// <exception cref="MobileException"></exception>
         public void Initialize()
         {
-            _apiClient.Requesting += ApiClient_RequestingAsync;
-            _apiClient.Responsed += ApiClient_ResponsedAsync;
+            _apiClient.Requesting += OnApiClientRequestingAsync;
+            _apiClient.Responsed += OnApiClientResponsedAsync;
         }
 
-        //考虑手工硬编码
-        /// <summary>
-        /// ApiClient_RequestingAsync
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
+        //TODO: 考虑手工硬编码
         /// <exception cref="MobileException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        private async Task ApiClient_RequestingAsync(ApiRequest request, ApiEventArgs args)
+        private async Task OnApiClientRequestingAsync(ApiRequest request, ApiEventArgs args)
         {
             if (args.RequestType == ApiRequestType.Add)
             {
@@ -63,15 +55,9 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             await ChangeIdAsync(request, args.RequestId, ChangeDirection.ToServer, args.RequestType).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ApiClient_ResponsedAsync
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         /// <exception cref="MobileException"></exception>
-        private async Task ApiClient_ResponsedAsync(object? sender, ApiEventArgs args)
+        private async Task OnApiClientResponsedAsync(object? sender, ApiEventArgs args)
         {
             switch (args.RequestType)
             {
@@ -108,16 +94,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-
-
-        /// <summary>
-        /// ChangeIdAsync
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="requestId"></param>
-        /// <param name="direction"></param>
-        /// <param name="requestType"></param>
-        /// <returns></returns>
         /// <exception cref="MobileException"></exception>
         /// <exception cref="DatabaseException"></exception>
         private async Task ChangeIdAsync(object? obj, string requestId, ChangeDirection direction, ApiRequestType requestType)
@@ -159,16 +135,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-        /// <summary>
-        /// ConvertLongIdAsync
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="id"></param>
-        /// <param name="propertyInfo"></param>
-        /// <param name="requestType"></param>
-        /// <param name="direction"></param>
-        /// <param name="requestId"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiRequestType requestType, ChangeDirection direction, string requestId)
         {
@@ -205,12 +171,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             propertyInfo.SetValue(obj, changedId);
         }
 
-        /// <summary>
-        /// AddServerIdToClientIdAsync
-        /// </summary>
-        /// <param name="serverId"></param>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         private Task AddServerIdToClientIdAsync(long serverId, long clientId)
         {
@@ -222,12 +182,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             return _idBarrierRepo.AddIdBarrierAsync(clientId: clientId, serverId: serverId);
         }
 
-        /// <summary>
-        /// AddServerIdToClientIdAsync
-        /// </summary>
-        /// <param name="serverIds"></param>
-        /// <param name="clientIds"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         private async Task AddServerIdToClientIdAsync(IEnumerable<long> serverIds, List<long> clientIds)
         {

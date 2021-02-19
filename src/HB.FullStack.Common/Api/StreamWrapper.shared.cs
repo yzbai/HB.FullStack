@@ -4,12 +4,12 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.XamarinForms.Controls
+namespace HB.FullStack.Common.Api
 {
 	/// <summary>
 	/// 从Xamarin.Forms中拷贝
 	/// </summary>
-	internal class StreamWrapper : Stream
+	public class StreamWrapper : Stream
 	{
 		readonly Stream _wrapped;
 		IDisposable? _additionalDisposable;
@@ -91,10 +91,8 @@ namespace HB.FullStack.XamarinForms.Controls
 		}
 
 
-#pragma warning disable CA1068 // CancellationToken parameters must come last
-        public static async Task<Stream?> GetStreamAsync(Uri uri, CancellationToken cancellationToken, HttpClient client)
-#pragma warning restore CA1068 // CancellationToken parameters must come last
-        {
+		public static async Task<Stream?> GetStreamAsync(HttpClient client, Uri uri, CancellationToken cancellationToken)
+		{
 			HttpResponseMessage response = await client.GetAsync(uri, cancellationToken).ConfigureAwait(false);
 			if (!response.IsSuccessStatusCode)
 			{

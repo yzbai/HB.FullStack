@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,5 +31,7 @@ namespace HB.FullStack.XamarinForms.Api
         Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource;
 
         Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource;
+        JwtEndpointSetting GetDefaultJwtEndpointSetting();
+        Task<Stream> GetStreamAsync(ApiRequest request);
     }
 }

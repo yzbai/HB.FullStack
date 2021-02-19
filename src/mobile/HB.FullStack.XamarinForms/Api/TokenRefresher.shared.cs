@@ -22,12 +22,14 @@ namespace HB.FullStack.XamarinForms.Api
         /// <param name="endpointSettings"></param>
         /// <returns></returns>
         /// <exception cref="ApiException"></exception>
-        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings endpointSettings)
+        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings)
         {
             if (UserPreferences.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
+
+            JwtEndpointSetting jwtEndpoint = endpointSettings == null ? apiClient.GetDefaultJwtEndpointSetting() : endpointSettings.JwtEndpoint;
 
             string accessTokenHashKey = SecurityUtil.GetHash(UserPreferences.AccessToken);
 
@@ -35,7 +37,7 @@ namespace HB.FullStack.XamarinForms.Api
             if (!_locker.NoWaitLock(
                 nameof(RefreshAccessTokenAsync),
                 accessTokenHashKey,
-                TimeSpan.FromSeconds(endpointSettings.JwtEndpoint.RefreshIntervalSeconds)))
+                TimeSpan.FromSeconds(jwtEndpoint.RefreshIntervalSeconds)))
             {
                 if (_lastRefreshResults.TryGetValue(accessTokenHashKey, out bool lastRefreshResult))
                 {
@@ -51,10 +53,10 @@ namespace HB.FullStack.XamarinForms.Api
                 if (UserPreferences.RefreshToken.IsNotNullOrEmpty())
                 {
                     RefreshAccessTokenRequest refreshRequest = new RefreshAccessTokenRequest(
-                        endpointSettings.JwtEndpoint!.EndpointName!,
-                        endpointSettings.JwtEndpoint!.Version!,
+                        jwtEndpoint.EndpointName!,
+                        jwtEndpoint.Version!,
                         HttpMethod.Get,
-                        endpointSettings.JwtEndpoint!.ResourceName!,
+                        jwtEndpoint.ResourceName!,
                         UserPreferences.AccessToken,
                         UserPreferences.RefreshToken);
 
@@ -113,7 +115,7 @@ namespace HB.FullStack.XamarinForms.Api
             public string RefreshToken { get; set; } = null!;
 
             public RefreshAccessTokenRequest(string endpointName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken)
-                : base(ApiAuthType.None, httpMethod, "ByRefresh", endpointName, apiVersion, resourceName)
+                :base(httpMethod, ApiAuthType.None, endpointName, apiVersion, resourceName, "ByRefresh")
             {
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;

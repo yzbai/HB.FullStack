@@ -7,5 +7,6 @@
         Delete,
         Get,
         GetSingle,
+        Stream
     }
 }

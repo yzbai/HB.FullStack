@@ -13,6 +13,8 @@ namespace HB.FullStack.XamarinForms.Api
 
         public ApiClientOptions Value => this;
 
+        public JwtEndpointSetting DefaultJwtEndpoint { get; set; } = null!;
+
         public IList<EndpointSettings> Endpoints { get; set; } = new List<EndpointSettings>();
 
         public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();

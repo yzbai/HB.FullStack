@@ -15,7 +15,7 @@ namespace HB.FullStack.XamarinForms.Api
         /// <summary>
         /// 版本
         /// </summary>
-        [Required]
+        //[Required]
         public string? Version { get; set; }
 
         /// <summary>

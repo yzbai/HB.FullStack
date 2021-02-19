@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System;
 
 using HB.FullStack.Common.Api;
-
+using System.IO;
 
 namespace System.Net.Http
 {
@@ -28,16 +28,17 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
-        /// <summary>
-        /// SendAsync
-        /// </summary>
-        /// <param name="httpClient"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
         /// <exception cref="System.ApiException"></exception>
         public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : ApiResource where TResponse : class
         {
-            using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(request).ConfigureAwait(false);
+            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
+
+            if (request is FileUpdateRequest<TResource> fileUpdateRequest)
+            {
+                requestMessage.Content = BuildMultipartContent(fileUpdateRequest);
+            }
+
+            using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
@@ -53,19 +54,23 @@ namespace System.Net.Http
             }
         }
 
-        /// <summary>
-        /// SendCoreAsync
-        /// </summary>
-        /// <param name="httpClient"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request)
+        {
+            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
+
+            //这里不Dispose
+            HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request).ConfigureAwait(false);
+
+            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+
+            return new StreamWrapper(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
+        }
+
         /// <exception cref="ApiException"></exception>
-        private static async Task<HttpResponseMessage> SendCoreAsync<T>(this HttpClient httpClient, ApiRequest<T> request) where T : ApiResource
+        private static async Task<HttpResponseMessage> SendCoreAsync(this HttpClient httpClient, HttpRequestMessage requestMessage, ApiRequest request)
         {
             try
             {
-                using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
-
                 return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
@@ -98,7 +103,7 @@ namespace System.Net.Http
             }
         }
 
-        private static HttpRequestMessage ToHttpRequestMessage<T>(this ApiRequest<T> request) where T : ApiResource
+        private static HttpRequestMessage ToHttpRequestMessage(this ApiRequest request)
         {
             HttpMethod httpMethod = request.GetHttpMethod();
 
@@ -108,24 +113,17 @@ namespace System.Net.Http
                 httpMethod = HttpMethod.Post;
             }
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, BuildUrl(request));
-
-            //Get的参数也放到body中去
-
-            if (request is FileUpdateRequest<T> fileRequest)
-            {
-                httpRequest.Content = BuildMultipartContent(fileRequest);
-            }
-            else
-            {
-                //TODO: .net 5以后，使用JsonContent
-                httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
-            }
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.GetUrl());
 
             foreach (var kv in request.GetHeaders())
             {
                 httpRequest.Headers.Add(kv.Key, kv.Value);
             }
+
+            //Get的参数也放到body中去
+
+            //TODO: .net 5以后，使用JsonContent
+            httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
 
             return httpRequest;
         }
@@ -159,59 +157,6 @@ namespace System.Net.Http
             return content;
         }
 
-        private static string BuildUrl(ApiRequest request)
-        {
-            StringBuilder requestUrlBuilder = new StringBuilder();
-
-            if (!request.GetApiVersion().IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append(request.GetApiVersion());
-            }
-
-            if (!request.GetResourceName().IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append('/');
-                requestUrlBuilder.Append(request.GetResourceName());
-            }
-
-            if (!request.GetCondition().IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append('/');
-                requestUrlBuilder.Append(request.GetCondition());
-            }
-
-            //添加噪音
-            IDictionary<string, string?> parameters = new Dictionary<string, string?>
-            {
-                { ClientNames.RandomStr, ApiRequest.GetRandomStr() },
-                { ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture) },
-                { ClientNames.DeviceId, request.DeviceId }//额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
-            };
-
-            string? query = parameters.ToHttpValueCollection().ToString();
-            requestUrlBuilder.Append('?');
-            requestUrlBuilder.Append(query);
-
-            //放到Body中去
-            //if (request.GetHttpMethod() == HttpMethod.Get)
-            //{
-            //    string query = request.GetParameters().ToHttpValueCollection().ToString();
-
-            //    if (!query.IsNullOrEmpty())
-            //    {
-            //        requestUrlBuilder.Append('?');
-            //        requestUrlBuilder.Append(query);
-            //    }
-            //}
-
-            return requestUrlBuilder.ToString();
-        }
-
-        /// <summary>
-        /// ThrowIfNotSuccessedAsync
-        /// </summary>
-        /// <param name="responseMessage"></param>
-        /// <returns></returns>
         /// <exception cref="ApiException"></exception>
         public static async Task ThrowIfNotSuccessedAsync(HttpResponseMessage responseMessage)
         {
@@ -222,6 +167,8 @@ namespace System.Net.Http
 
             ApiError? apiError = await responseMessage.DeSerializeJsonAsync<ApiError>().ConfigureAwait(false);
 
+            responseMessage.Dispose();
+
             if (apiError == null)
             {
                 throw new ApiException(ApiErrorCode.ApiErrorWrongFormat, $"StatusCode:{responseMessage.StatusCode},Reason:{ responseMessage.ReasonPhrase}");
@@ -230,8 +177,8 @@ namespace System.Net.Http
             {
                 throw new ApiException(apiError.ErrorCode, apiError.Message)
                 {
-                     HttpCode = responseMessage.StatusCode,
-                     ModelStates = apiError.ModelStates
+                    HttpCode = responseMessage.StatusCode,
+                    ModelStates = apiError.ModelStates
                 };
             }
         }
