@@ -234,6 +234,10 @@ namespace System
                 : str;
         }
 
+        public static int ToInt32(this string str)
+        {
+            return Convert.ToInt32(str);
+        }
 
         #endregion Extensions
 
