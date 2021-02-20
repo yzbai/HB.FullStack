@@ -146,12 +146,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// CreateTableAsync
-        /// </summary>
-        /// <param name="def"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext)
         {
@@ -162,12 +156,6 @@ namespace HB.FullStack.Database
             return _databaseEngine.ExecuteCommandNonQueryAsync(transContext.Transaction, def.DatabaseName!, command);
         }
 
-        /// <summary>
-        /// CreateTablesByDatabaseAsync
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext)
         {
@@ -177,11 +165,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// MigarateAsync
-        /// </summary>
-        /// <param name="migrations"></param>
-        /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         private async Task MigarateAsync(IEnumerable<Migration> migrations)
         {

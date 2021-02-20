@@ -18,14 +18,14 @@ namespace HB.FullStack.XamarinForms
 
         public INavigation? Navigation { get; protected set; }
 
-        public void PopToRoot()
+        public void PopToRoot(bool animated = true)
         {
-            Device.BeginInvokeOnMainThread(() => Navigation?.PopToRootAsync().Fire());
+            Device.BeginInvokeOnMainThread(() => Navigation?.PopToRootAsync(animated).Fire());
         }
 
-        public void Pop()
+        public void Pop(bool animated = true)
         {
-            Device.BeginInvokeOnMainThread(() => Navigation?.PopAsync().Fire());
+            Device.BeginInvokeOnMainThread(() => Navigation?.PopAsync(animated).Fire());
         }
 
         public void Push(Page page, bool animated = true)
@@ -38,21 +38,16 @@ namespace HB.FullStack.XamarinForms
             Device.BeginInvokeOnMainThread(() => Navigation?.PushModalAsync(page, animate).Fire());
         }
 
-        public abstract void PopoutRegisterProfilePage();
-
-        public void PopModal()
+        public void PopModal(bool animated = true)
         {
-            Device.BeginInvokeOnMainThread(()=>Navigation?.PopModalAsync().Fire());
+            Device.BeginInvokeOnMainThread(() => Navigation?.PopModalAsync(animated).Fire());
         }
 
-        public abstract void ResetMainPage();
+        public abstract void PopoutPage<TPage>(bool animated = true) where TPage : Page;
+
+        public abstract void PopOrPopoutPageIfAfter<TPage>(bool animated = true) where TPage : Page;
 
         public abstract void PushLoginPage(bool animated = true);
-        
-        public abstract void PopoutLogin(bool animated = true);
 
-        public abstract void PopoutIntroduce();
-
-        
     }
 }
