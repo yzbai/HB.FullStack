@@ -137,12 +137,12 @@ namespace HB.FullStack.XamarinForms.Controls.Clock
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         protected override void OnCaculateOutput()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         //~TicksFigure()

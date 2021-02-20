@@ -289,7 +289,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Consts.DefaultApiRequestRateLimit;
 
-            return _requestLocker.NoWaitLock(
+            return !_requestLocker.NoWaitLock(
                 "request",
                 apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture),
                 expiryTime);

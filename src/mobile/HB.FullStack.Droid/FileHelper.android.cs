@@ -100,6 +100,8 @@ namespace HB.FullStack.Droid
 
             string directory = GetDirectoryPath(userFileType);
 
+            CreateDirectoryIfNotExist(directory);
+
             return System.IO.Path.Combine(directory, fileName);
         }
 
