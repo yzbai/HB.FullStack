@@ -30,11 +30,11 @@ namespace HB.FullStack.XamarinForms.Base
             set { SetProperty(ref _title, value); }
         }
 
-        public virtual void OnAppearing(string pageName)
+        public virtual void OnAppearing(string pageTypeName)
         {
         }
 
-        public virtual void OnDisappearing(string pageName)
+        public virtual void OnDisappearing(string pageTypeName)
         {
 
         }

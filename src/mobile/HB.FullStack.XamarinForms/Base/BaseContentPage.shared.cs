@@ -13,7 +13,7 @@ namespace HB.FullStack.XamarinForms.Base
     {
         public bool IsAppearing { get; private set; }
 
-        public string PageName { get; private set; }
+        public string PageTypeName { get; private set; }
 
         public bool NeedLogined { get; set; }
 
@@ -94,7 +94,7 @@ namespace HB.FullStack.XamarinForms.Base
                 ControlTemplate = (ControlTemplate)controlTemplate;
             }
 
-            PageName = GetType().Name;
+            PageTypeName = GetType().Name;
 
             //Application.Current.LogUsage(UsageType.PageCreate, PageName);
         }
@@ -127,7 +127,7 @@ namespace HB.FullStack.XamarinForms.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnAppearing(PageName);
+                viewModel.OnAppearing(PageTypeName);
             }
 
             ExecuteAppearedAsync().Fire();
@@ -168,7 +168,7 @@ namespace HB.FullStack.XamarinForms.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnDisappearing(PageName);
+                viewModel.OnDisappearing(PageTypeName);
             }
         }
 

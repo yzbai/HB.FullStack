@@ -79,7 +79,11 @@ namespace HB.FullStack.XamarinForms.Base
         {
             //Version
             VersionTracking.Track();
+
+            NavigationService.Init(GetNavigationServiceImpl());
         }
+
+        protected abstract NavigationService GetNavigationServiceImpl();
 
         protected void InitializeServices(IServiceCollection services)
         {
