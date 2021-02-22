@@ -79,6 +79,8 @@ namespace System
         public static DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
         public static long UtcNowUnixTimeMilliseconds => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        public static DateTime LocalNow => DateTime.Now;
     }
 
 }
