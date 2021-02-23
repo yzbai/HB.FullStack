@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace HB.FullStack.XamarinForms.Common
+namespace HB.FullStack.Common
 {
     /// <summary>
     /// 不存在24：00
