@@ -11,6 +11,8 @@ namespace HB.FullStack.XamarinForms
     /// </summary>
     public static class Consts
     {
+        public const string Material_Icon_Font_Family = "MaterialIcon";
+
         public const string UserId_Preference_Name = "wjUfoxCi";
         public const string UserCreateTime_Preference_Name = "WMIliRIP";
         public const string Mobile_Preference_Name = "H8YA3d5aj";

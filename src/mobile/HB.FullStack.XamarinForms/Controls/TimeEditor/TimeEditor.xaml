@@ -4,11 +4,10 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.XamarinForms.Base"
-   
     xmlns:styles="clr-namespace:HB.FullStack.XamarinForms.Styles"
     x:Name="Root">
     <base:BaseContentView.Resources>
-       
+
         <Style
             x:Key="TimeBorder"
             TargetType="Frame">
@@ -49,7 +48,9 @@
                 Grid.Row="1"
                 Grid.Column="3"
                 Style="{StaticResource TimeBorder}">
-                <Entry Text="{Binding Minute}" HorizontalTextAlignment="Center" />
+                <Entry
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding Minute}" />
             </Frame>
 
             <Label
@@ -70,7 +71,7 @@
             <ImageButton
                 Grid.Row="0"
                 Grid.Column="1"
-                Command="{Binding HourChangedCommand }"
+                Command="{Binding HourChangedCommand}"
                 CommandParameter="True"
                 Source="{FontImage FontFamily=MaterialIcon,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronUp},

@@ -66,6 +66,9 @@ namespace HB.FullStack.Droid.Effects
 
         void OnTouch(object sender, Android.Views.View.TouchEventArgs args)
         {
+            args.Handled = false;
+            
+
             if(!_libTouchEffect!.Enable)
             {
                 return;
@@ -79,6 +82,8 @@ namespace HB.FullStack.Droid.Effects
             {
                 return;
             }
+
+            //senderView.Parent?.RequestDisallowInterceptTouchEvent(false);
 
             // Get the pointer index
             int pointerIndex = motionEvent.ActionIndex;

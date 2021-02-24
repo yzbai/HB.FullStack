@@ -22,7 +22,7 @@ namespace HB.FullStack.XamarinForms.Effects.Touch
         public TouchActionType Type { private set; get; }
 
         /// <summary>
-        /// 由底层传来的以左上角为原点的像素坐标
+        /// 由底层传来的以左上角为原点的dp坐标
         /// </summary>
         public Point Location { private set; get; }
 
