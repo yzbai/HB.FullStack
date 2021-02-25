@@ -13,7 +13,6 @@ using Xamarin.Forms;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
-using HB.FullStack.XamarinForms.Effects.Touch;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
@@ -31,9 +30,9 @@ namespace HB.FullStack.XamarinForms.Skia
         public static readonly BindableProperty TimeTickIntervalsProperty = BindableProperty.Create(nameof(TimeTickIntervals), typeof(TimeSpan), typeof(SKFigureCanvasView), TimeSpan.FromMilliseconds(16), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnTimeTickIntervalChanged(); });
 
         private readonly WeakEventManager _eventManager = new WeakEventManager();
-        private readonly Dictionary<long, SKFigure> _touchDictionary = new Dictionary<long, SKFigure>();
+        private readonly Dictionary<long, SKFigure> _fingerFigureDict = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
-        private readonly TouchEffect _touchEffect;
+        //private readonly TouchEffect _touchEffect;
         private Timer? _timer;
 
         public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
@@ -44,7 +43,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
 
-        public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
+        //public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
 
         public bool IsAppearing { get; private set; }
 
@@ -52,11 +51,15 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public SKFigureCanvasView() : base()
         {
-            _touchEffect = new TouchEffect { Capture = true };
+            //_touchEffect = new TouchEffect { Capture = true };
 
-            _touchEffect.TouchAction += OnTouch;
+            //_touchEffect.TouchAction += OnTouch;
 
-            Effects.Add(_touchEffect);
+            //Effects.Add(_touchEffect);
+
+            EnableTouchEvents = true;
+
+            Touch += OnTouch;
 
             PaintSurface += OnPaintSurface;
 
@@ -79,7 +82,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             StopResponseTimeTick();
 
-            _touchDictionary.Clear();
+            _fingerFigureDict.Clear();
         }
 
         public IList<IBaseContentView?>? GetAllCustomerControls() => null;
@@ -236,7 +239,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #region OnTouch
 
-        private void OnTouch(object? sender, TouchActionEventArgs args)
+        private void OnTouch(object sender, SKTouchEventArgs args)
         {
             //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
@@ -245,24 +248,21 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            SKPoint skPoint = SKUtil.ToSKPoint(args.Location);
-
-            long eventId = args.Id;
-
             SKFigure? relatedFigure = null;
 
-            if (_touchDictionary.ContainsKey(eventId))
+            //能找到这个指头对应的Figure
+            if (_fingerFigureDict.ContainsKey(args.Id))
             {
-                relatedFigure = _touchDictionary[eventId];
+                relatedFigure = _fingerFigureDict[args.Id];
             }
 
-            switch (args.Type)
+            switch (args.ActionType)
             {
-                case TouchActionType.Pressed:
+                case SKTouchAction.Pressed:
 
                     if (relatedFigure != null)
                     {
-                        _touchDictionary.Remove(eventId);
+                        _fingerFigureDict.Remove(args.Id);
 
                         return;
                     }
@@ -273,11 +273,11 @@ namespace HB.FullStack.XamarinForms.Skia
                     {
                         SKFigure figure = Figures.ElementAt(i);
 
-                        if (!founded && figure.OnHitTest(skPoint, args.Id))
+                        if (!founded && figure.OnHitTest(args.Location, args.Id))
                         {
                             founded = true;
 
-                            _touchDictionary.Add(eventId, figure);
+                            _fingerFigureDict.Add(args.Id, figure);
 
                             figure.ProcessTouchAction(args);
 
@@ -291,8 +291,9 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                         else
                         {
-                            TouchActionEventArgs unTouchArgs = new TouchActionEventArgs(args.Id, TouchActionType.HitFailed, args.Location, args.IsInContact);
-                            figure.ProcessTouchAction(unTouchArgs);
+
+                            //TouchActionEventArgs unTouchArgs = new TouchActionEventArgs(args.Id, TouchActionType.HitFailed, args.Location, args.IsInContact);
+                            figure.ProcessUnTouchAction(args.Id, args.Location);
                         }
                     }
 
@@ -302,7 +303,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
 
                     break;
-                case TouchActionType.Moved:
+                case SKTouchAction.Moved:
 
                     if (relatedFigure != null)
                     {
@@ -314,14 +315,14 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                     }
                     break;
-                case TouchActionType.Released:
-                case TouchActionType.Exited:
-                case TouchActionType.Cancelled:
+                case SKTouchAction.Released:
+                case SKTouchAction.Exited:
+                case SKTouchAction.Cancelled:
                     if (relatedFigure != null)
                     {
                         relatedFigure.ProcessTouchAction(args);
 
-                        _touchDictionary.Remove(eventId);
+                        _fingerFigureDict.Remove(args.Id);
 
                         //if (!EnableTimeTick)
                         {
@@ -329,6 +330,8 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                     }
 
+                    break;
+                default:
                     break;
             }
         }

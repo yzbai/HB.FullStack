@@ -179,7 +179,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
             return false;
         }
 
-        private void CropperFrameFigure_OneFingerDragged(object sender, SKFigureTouchEventArgs e)
+        private void CropperFrameFigure_OneFingerDragged(object sender, SKFigureTouchInfo e)
         {
             float xOffset = e.CurrentPoint.X - e.PreviousPoint.X;
             float yOffset = e.CurrentPoint.Y - e.PreviousPoint.Y;

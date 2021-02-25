@@ -1,6 +1,4 @@
-﻿using HB.FullStack.XamarinForms.Effects.Touch;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -168,38 +166,33 @@ namespace HB.FullStack.XamarinForms.Skia
             return false;
         }
 
-        private readonly Dictionary<long, SKFigureTouchEventArgs> _touchInfos = new Dictionary<long, SKFigureTouchEventArgs>();
+        private readonly Dictionary<long, SKFigureTouchInfo> _fingerTouchInfos = new Dictionary<long, SKFigureTouchInfo>();
         private readonly Dictionary<long, LongTouchTaskInfo> _longTouchInfos = new Dictionary<long, LongTouchTaskInfo>();
 
         /// <summary>
         /// touchInfo在Pressed中放入，在Existed,Release,Cancel中释放
         /// </summary>
-        public void ProcessTouchAction(TouchActionEventArgs args)
+        public void ProcessTouchAction(SKTouchEventArgs args)
         {
             if (!EnableTouch)
             {
                 return;
             }
 
-            SKPoint curLocation = GetNewCoordinatedPoint(SKUtil.ToSKPoint(args.Location));
+            SKPoint curLocation = GetNewCoordinatedPoint(args.Location);
 
             //_logger.LogDebug($"{args.Type}, Id:{args.Id}, Location : {args.Location}");
 
-            switch (args.Type)
+            switch (args.ActionType)
             {
-                case TouchActionType.HitFailed:
-                    {
-                        OnHitFailed();
-                        break;
-                    }
-                case TouchActionType.Pressed:
+                case SKTouchAction.Pressed:
                     {
                         if (StopResponseTimeTickWhenTouch)
                         {
                             CanResponseTimeTick = false;
                         }
 
-                        SKFigureTouchEventArgs touchInfo = new SKFigureTouchEventArgs
+                        SKFigureTouchInfo touchInfo = new SKFigureTouchInfo
                         {
                             StartPoint = curLocation,
                             PreviousPoint = curLocation,
@@ -209,7 +202,7 @@ namespace HB.FullStack.XamarinForms.Skia
                             LongPressHappend = false
                         };
 
-                        _touchInfos.Add(args.Id, touchInfo);
+                        _fingerTouchInfos.Add(args.Id, touchInfo);
 
                         if (EnableLongTap)
                         {
@@ -226,14 +219,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         break;
                     }
-                case TouchActionType.Moved:
+                case SKTouchAction.Moved:
                     {
                         if (!EnableDrag || !EnableTouch)
                         {
                             return;
                         }
 
-                        if (!_touchInfos.TryGetValue(args.Id, out SKFigureTouchEventArgs? touchInfo))
+                        if (!_fingerTouchInfos.TryGetValue(args.Id, out SKFigureTouchInfo? touchInfo))
                         {
                             return;
                         }
@@ -254,17 +247,17 @@ namespace HB.FullStack.XamarinForms.Skia
                             return;
                         }
 
-                        if (_touchInfos.Count == 1)
+                        if (_fingerTouchInfos.Count == 1)
                         {
                             CancelLongTap(args);
 
                             OnOneFingerDragged(touchInfo);
                         }
-                        else if (EnableTwoFingers && _touchInfos.Count == 2)
+                        else if (EnableTwoFingers && _fingerTouchInfos.Count == 2)
                         {
                             CancelLongTap(args);
 
-                            touchInfo.PivotPoint = _touchInfos.Where(p => p.Key != args.Id).First().Value.CurrentPoint;
+                            touchInfo.PivotPoint = _fingerTouchInfos.Where(p => p.Key != args.Id).First().Value.CurrentPoint;
 
                             OnTwoFingerDragged(touchInfo);
                         }
@@ -273,15 +266,15 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         break;
                     }
-                case TouchActionType.Exited:
-                case TouchActionType.Released:
+                case SKTouchAction.Exited:
+                case SKTouchAction.Released:
                     {
                         if (ResumeResponseTimeTickAfterTouch)
                         {
                             CanResponseTimeTick = true;
                         }
 
-                        if (!_touchInfos.TryGetValue(args.Id, out SKFigureTouchEventArgs? touchInfo))
+                        if (!_fingerTouchInfos.TryGetValue(args.Id, out SKFigureTouchInfo? touchInfo))
                         {
                             return;
                         }
@@ -290,7 +283,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         if (touchInfo.IsOver)
                         {
-                            _touchInfos.Remove(args.Id);
+                            _fingerTouchInfos.Remove(args.Id);
                             return;
                         }
 
@@ -301,28 +294,28 @@ namespace HB.FullStack.XamarinForms.Skia
                         {
                             OnTapped(touchInfo);
                         }
-                        else if (EnableDrag && _touchInfos.Count == 1)
+                        else if (EnableDrag && _fingerTouchInfos.Count == 1)
                         {
                             OnOneFingerDragged(touchInfo);
                         }
-                        else if (EnableTwoFingers && _touchInfos.Count == 2)
+                        else if (EnableTwoFingers && _fingerTouchInfos.Count == 2)
                         {
-                            touchInfo.PivotPoint = _touchInfos.Where(p => p.Key != args.Id).First().Value.CurrentPoint;
+                            touchInfo.PivotPoint = _fingerTouchInfos.Where(p => p.Key != args.Id).First().Value.CurrentPoint;
                             OnTwoFingerDragged(touchInfo);
                         }
 
-                        _touchInfos.Remove(args.Id);
+                        _fingerTouchInfos.Remove(args.Id);
 
                         break;
                     }
-                case TouchActionType.Cancelled:
+                case SKTouchAction.Cancelled:
                     {
                         if (ResumeResponseTimeTickAfterTouch)
                         {
                             CanResponseTimeTick = true;
                         }
 
-                        if (!_touchInfos.TryGetValue(args.Id, out SKFigureTouchEventArgs? touchInfo))
+                        if (!_fingerTouchInfos.TryGetValue(args.Id, out SKFigureTouchInfo? touchInfo))
                         {
                             return;
                         }
@@ -336,14 +329,21 @@ namespace HB.FullStack.XamarinForms.Skia
                             OnCancelled(touchInfo);
                         }
 
-                        _touchInfos.Remove(args.Id);
+                        _fingerTouchInfos.Remove(args.Id);
 
                         break;
                     }
+                default:
+                    break;
             }
         }
 
-        private void CancelLongTap(TouchActionEventArgs args)
+        public void ProcessUnTouchAction(long fingerId, SKPoint location)
+        {
+            OnHitFailed();
+        }
+
+        private void CancelLongTap(SKTouchEventArgs args)
         {
             if (EnableLongTap && _longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
             {
@@ -354,7 +354,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        private Task LongPressedTaskAsync(SKFigureTouchEventArgs info, CancellationToken cancellationToken)
+        private Task LongPressedTaskAsync(SKFigureTouchInfo info, CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
@@ -390,37 +390,37 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private readonly WeakEventManager _weakEventManager = new WeakEventManager();
 
-        public event EventHandler<SKFigureTouchEventArgs> Pressed
+        public event EventHandler<SKFigureTouchInfo> Pressed
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Pressed));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Pressed));
         }
 
-        public event EventHandler<SKFigureTouchEventArgs> LongTapped
+        public event EventHandler<SKFigureTouchInfo> LongTapped
         {
             add => _weakEventManager.AddEventHandler(value, nameof(LongTapped));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(LongTapped));
         }
 
-        public event EventHandler<SKFigureTouchEventArgs> Tapped
+        public event EventHandler<SKFigureTouchInfo> Tapped
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Tapped));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Tapped));
         }
 
-        public event EventHandler<SKFigureTouchEventArgs> OneFingerDragged
+        public event EventHandler<SKFigureTouchInfo> OneFingerDragged
         {
             add => _weakEventManager.AddEventHandler(value, nameof(OneFingerDragged));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(OneFingerDragged));
         }
 
-        public event EventHandler<SKFigureTouchEventArgs> TwoFingerDragged
+        public event EventHandler<SKFigureTouchInfo> TwoFingerDragged
         {
             add => _weakEventManager.AddEventHandler(value, nameof(TwoFingerDragged));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(TwoFingerDragged));
         }
 
-        public event EventHandler<SKFigureTouchEventArgs> Cancelled
+        public event EventHandler<SKFigureTouchInfo> Cancelled
         {
             add => _weakEventManager.AddEventHandler(value, nameof(Cancelled));
             remove => _weakEventManager.RemoveEventHandler(value, nameof(Cancelled));
@@ -432,12 +432,12 @@ namespace HB.FullStack.XamarinForms.Skia
             remove => _weakEventManager.RemoveEventHandler(value, nameof(HitFailed));
         }
 
-        public void OnPressed(SKFigureTouchEventArgs touchInfo)
+        public void OnPressed(SKFigureTouchInfo touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Pressed));
         }
 
-        public void OnOneFingerDragged(SKFigureTouchEventArgs touchInfo)
+        public void OnOneFingerDragged(SKFigureTouchInfo touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
@@ -449,7 +449,7 @@ namespace HB.FullStack.XamarinForms.Skia
             SetState(FigureState.Selected);
         }
 
-        public void OnTwoFingerDragged(SKFigureTouchEventArgs touchInfo)
+        public void OnTwoFingerDragged(SKFigureTouchInfo touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
@@ -461,21 +461,21 @@ namespace HB.FullStack.XamarinForms.Skia
             SetState(FigureState.Selected);
         }
 
-        public void OnTapped(SKFigureTouchEventArgs touchInfo)
+        public void OnTapped(SKFigureTouchInfo touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
             SetState(FigureState.Selected);
         }
 
-        public void OnLongTapped(SKFigureTouchEventArgs touchInfo)
+        public void OnLongTapped(SKFigureTouchInfo touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
 
             SetState(FigureState.LongSelected);
         }
 
-        public void OnCancelled(SKFigureTouchEventArgs touchInfo)
+        public void OnCancelled(SKFigureTouchInfo touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
 
@@ -511,6 +511,8 @@ namespace HB.FullStack.XamarinForms.Skia
                 {
                     // TODO: dispose managed state (managed objects)
                     HitTestPath?.Dispose();
+                    _fingerTouchInfos.Clear();
+                    _longTouchInfos.Clear();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

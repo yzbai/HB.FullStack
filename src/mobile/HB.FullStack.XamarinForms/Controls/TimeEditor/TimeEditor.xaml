@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.XamarinForms.Base"
     xmlns:styles="clr-namespace:HB.FullStack.XamarinForms.Styles"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
     x:Name="Root">
     <base:BaseContentView.Resources>
 
@@ -41,7 +42,12 @@
                 Style="{StaticResource TimeBorder}">
                 <Entry
                     HorizontalTextAlignment="Center"
-                    Text="{Binding Hour}" />
+                    Text="{Binding Hour}">
+                    <Entry.Effects>
+                        <xct:RemoveBorderEffect />
+                        <xct:SelectAllTextEffect />
+                    </Entry.Effects>
+                </Entry>
             </Frame>
 
             <Frame
@@ -50,7 +56,12 @@
                 Style="{StaticResource TimeBorder}">
                 <Entry
                     HorizontalTextAlignment="Center"
-                    Text="{Binding Minute}" />
+                    Text="{Binding Minute}">
+                    <Entry.Effects>
+                        <xct:RemoveBorderEffect />
+                        <xct:SelectAllTextEffect />
+                    </Entry.Effects>
+                </Entry>
             </Frame>
 
             <Label

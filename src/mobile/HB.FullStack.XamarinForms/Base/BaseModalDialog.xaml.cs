@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.XamarinForms.Effects.Touch;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Xamarin.CommunityToolkit.Effects;
+using System.Windows.Input;
 
 namespace HB.FullStack.XamarinForms.Base
 {
@@ -16,6 +17,8 @@ namespace HB.FullStack.XamarinForms.Base
     {
         private Frame? _dialogFrame;
 
+        private ICommand DismissCommand { get; set; }
+
         public bool IsBackgroudClickedToDismiss { get; set; }
 
         public BaseModalDialog()
@@ -23,6 +26,8 @@ namespace HB.FullStack.XamarinForms.Base
             InitializeComponent();
 
             BackgroundColor = Color.FromHex("#80000000");
+
+            DismissCommand = new Command(OnDismiss);
         }
 
         protected override void OnAppearing()
@@ -40,33 +45,18 @@ namespace HB.FullStack.XamarinForms.Base
 
             StackLayout modalDialogContainer = (StackLayout)GetTemplateChild("ModalDialogContainer");
 
-            if (IsBackgroudClickedToDismiss)
-            {
-                TouchEffect touchEffect = new TouchEffect() { Capture = false };
-                touchEffect.TouchAction += TouchEffect_TouchAction;
-
-                modalDialogContainer.Effects.Add(touchEffect);
-            }
+            TouchEffect.SetCommand(modalDialogContainer, DismissCommand);
+            TouchEffect.SetShouldMakeChildrenInputTransparent(modalDialogContainer, false);
         }
 
-        private void TouchEffect_TouchAction(object sender, TouchActionEventArgs args)
+        private void OnDismiss()
         {
-            if (_dialogFrame == null)
+            if (!IsBackgroudClickedToDismiss)
             {
                 return;
             }
 
-            Rectangle rectangle = new Rectangle(_dialogFrame.X, _dialogFrame.Y, _dialogFrame.Width, _dialogFrame.Height);
-
-            if (rectangle.Contains(args.Location))
-            {
-                return;
-            }
-
-            if (args.Type == TouchActionType.Released)
-            {
-                NavigationService.Current.PopModal();
-            }
+            NavigationService.Current.PopModal();
         }
 
         protected override IList<IBaseContentView?>? GetAllCustomerControls() => null;

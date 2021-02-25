@@ -1,4 +1,4 @@
-﻿using HB.FullStack.XamarinForms.Effects.Touch;
+﻿using HB.FullStack.XamarinForms.Common;
 using HB.FullStack.XamarinForms.Skia;
 
 using SkiaSharp;
@@ -10,6 +10,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Controls.Cropper
 {
+
     /// <summary>
     /// 默认以NewCoordinateOriginalRatioPoint为DestRect中心
     /// </summary>
@@ -150,7 +151,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
             }
         }
 
-        private void OnTwoFingerDragged(object sender, SKFigureTouchEventArgs args)
+        private void OnTwoFingerDragged(object sender, SKFigureTouchInfo args)
         {
             SKPoint previousPivotedPoint = args.PreviousPoint;
             SKPoint currentPivotedPoint = args.CurrentPoint;
@@ -161,7 +162,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
             Matrix = Matrix.PostConcat(changedMatrix);
         }
 
-        private void OnOneFingerDragged(object sender, SKFigureTouchEventArgs args)
+        private void OnOneFingerDragged(object sender, SKFigureTouchInfo args)
         {
             SKPoint previousPivotedPoint = args.PreviousPoint;
             SKPoint currentPivotedPoint = args.CurrentPoint;
