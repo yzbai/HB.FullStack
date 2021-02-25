@@ -59,6 +59,8 @@ namespace HB.FullStack.XamarinForms.Skia
             Effects.Add(_touchEffect);
 
             PaintSurface += OnPaintSurface;
+
+            //EnableTouchEvents = false;
         }
 
         public void OnAppearing()
