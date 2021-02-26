@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.FullStack.XamarinForms.Base;
+
+using Microsoft.Extensions.Logging;
 
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -181,7 +183,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             SKPoint curLocation = GetNewCoordinatedPoint(args.Location);
 
-            //_logger.LogDebug($"{args.Type}, Id:{args.Id}, Location : {args.Location}");
+            BaseApplication.LogDebug($"开始处理Touch Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
 
             switch (args.ActionType)
             {
@@ -203,6 +205,7 @@ namespace HB.FullStack.XamarinForms.Skia
                         };
 
                         _fingerTouchInfos.Add(args.Id, touchInfo);
+                        BaseApplication.LogDebug($"加入FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
 
                         if (EnableLongTap)
                         {
@@ -269,6 +272,8 @@ namespace HB.FullStack.XamarinForms.Skia
                 case SKTouchAction.Exited:
                 case SKTouchAction.Released:
                     {
+                        BaseApplication.LogDebug($"进入Exitted,Released. Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+
                         if (ResumeResponseTimeTickAfterTouch)
                         {
                             CanResponseTimeTick = true;
@@ -283,6 +288,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         if (touchInfo.IsOver)
                         {
+                            BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
                             _fingerTouchInfos.Remove(args.Id);
                             return;
                         }
@@ -304,12 +310,14 @@ namespace HB.FullStack.XamarinForms.Skia
                             OnTwoFingerDragged(touchInfo);
                         }
 
+                        BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
                         _fingerTouchInfos.Remove(args.Id);
 
                         break;
                     }
                 case SKTouchAction.Cancelled:
                     {
+                        BaseApplication.LogDebug($"进入Cancelled. Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
                         if (ResumeResponseTimeTickAfterTouch)
                         {
                             CanResponseTimeTick = true;
@@ -329,6 +337,7 @@ namespace HB.FullStack.XamarinForms.Skia
                             OnCancelled(touchInfo);
                         }
 
+                        BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
                         _fingerTouchInfos.Remove(args.Id);
 
                         break;

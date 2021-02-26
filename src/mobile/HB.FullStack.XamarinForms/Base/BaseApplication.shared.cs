@@ -194,6 +194,7 @@ namespace HB.FullStack.XamarinForms.Base
             Log(ex, message, logLevel);
         }
 
+
         public abstract void OnOfflineDataUsed();
 
         public static void Log(Exception? ex, string? message = null, LogLevel logLevel = LogLevel.Error)
@@ -201,6 +202,10 @@ namespace HB.FullStack.XamarinForms.Base
             //_remoteLoggingService.LogAsync(logLevel, ex, message); //这里不加Fire()。避免循环
 
             GlobalSettings.Logger.Log(logLevel, ex, message);
+        }
+        public static void LogDebug(string message)
+        {
+            Log(null, message, LogLevel.Debug);
         }
     }
 }

@@ -59,6 +59,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
             EnableTouchEvents = true;
 
+            
+
             Touch += OnTouch;
 
             PaintSurface += OnPaintSurface;
@@ -241,7 +243,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnTouch(object sender, SKTouchEventArgs args)
         {
-            //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
+            GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
             if (Figures == null)
             {
