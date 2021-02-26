@@ -28,9 +28,5 @@ namespace HB.FullStack.XamarinForms.Effects.Touch
 
         public bool IsInContact { private set; get; }
 
-        /// <summary>
-        /// SKTouchEffect使用
-        /// </summary>
-        public bool IsHandled { get; set; }
     }
 }

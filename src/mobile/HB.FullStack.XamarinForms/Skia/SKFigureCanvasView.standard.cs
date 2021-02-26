@@ -13,7 +13,6 @@ using Xamarin.Forms;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
-using HB.FullStack.XamarinForms.Effects.Touch;
 using SkiaSharp.Views.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
@@ -34,7 +33,6 @@ namespace HB.FullStack.XamarinForms.Skia
         private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _fingerFigureDict = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
-        private readonly SKTouchEffect _touchEffect;
         private Timer? _timer;
 
         public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); set => SetValue(FiguresProperty, value); }
@@ -45,10 +43,6 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
 
-        public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
-
-        public bool EnableTouchEventPropagation { get => _touchEffect.EnableTouchEventPropagation; set => _touchEffect.EnableTouchEventPropagation = value; }
-
         public bool IsAppearing { get; private set; }
 
         public bool AutoBringToFront { get; set; } = true;
@@ -56,13 +50,8 @@ namespace HB.FullStack.XamarinForms.Skia
         public SKFigureCanvasView() : base()
         {
             //Touch
-            _touchEffect = new SKTouchEffect ();
-            _touchEffect.TouchAction += OnTouch;
-
-            Effects.Add(_touchEffect);
-
             EnableTouchEvents = true;
-            base.EnableTouchEvents = false;
+            Touch += OnTouch;
 
             //Paint
             PaintSurface += OnPaintSurface;
@@ -240,7 +229,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #region OnTouch
 
-        private void OnTouch(object sender, TouchActionEventArgs args)
+        private void OnTouch(object sender, SKTouchEventArgs args)
         {
             //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
@@ -249,7 +238,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            SKPoint location = SKUtil.ToSKPoint(args.DpLocation);
+            SKPoint location = args.Location; //SKUtil.ToSKPoint(args.DpLocation);
 
             SKFigure? relatedFigure = null;
 
@@ -261,7 +250,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             switch (args.ActionType)
             {
-                case TouchActionType.Pressed:
+                case SKTouchAction.Pressed:
 
                     if (relatedFigure != null)
                     {
@@ -305,7 +294,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
 
                     break;
-                case TouchActionType.Moved:
+                case SKTouchAction.Moved:
 
                     if (relatedFigure != null)
                     {
@@ -317,9 +306,9 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                     }
                     break;
-                case TouchActionType.Released:
-                case TouchActionType.Exited:
-                case TouchActionType.Cancelled:
+                case SKTouchAction.Released:
+                case SKTouchAction.Exited:
+                case SKTouchAction.Cancelled:
                     if (relatedFigure != null)
                     {
                         relatedFigure.ProcessTouchAction(args);
