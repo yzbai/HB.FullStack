@@ -2,7 +2,7 @@
 using HB.FullStack.XamarinForms.Effects;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
-using SkiaSharp.Views.Forms;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +13,8 @@ using Xamarin.Forms;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
+using HB.FullStack.XamarinForms.Effects.Touch;
+using SkiaSharp.Views.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
@@ -32,10 +34,10 @@ namespace HB.FullStack.XamarinForms.Skia
         private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _fingerFigureDict = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
-        //private readonly TouchEffect _touchEffect;
+        private readonly TouchEffect _touchEffect;
         private Timer? _timer;
 
-        public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); private set => SetValue(FiguresProperty, value); }
+        public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); set => SetValue(FiguresProperty, value); }
 
         public bool EnableTimeTick { get => (bool)GetValue(EnableTimeTickProperty); set => SetValue(EnableTimeTickProperty, value); }
 
@@ -43,7 +45,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public long ElapsedMilliseconds { get => _stopwatch.ElapsedMilliseconds; }
 
-        //public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
+        public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
 
         public bool IsAppearing { get; private set; }
 
@@ -51,21 +53,17 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public SKFigureCanvasView() : base()
         {
-            //_touchEffect = new TouchEffect { Capture = true };
+            //Touch
+            _touchEffect = new TouchEffect { Capture = true };
+            _touchEffect.TouchAction += OnTouch;
 
-            //_touchEffect.TouchAction += OnTouch;
-
-            //Effects.Add(_touchEffect);
+            Effects.Add(_touchEffect);
 
             EnableTouchEvents = true;
+            base.EnableTouchEvents = false;
 
-            
-
-            Touch += OnTouch;
-
+            //Paint
             PaintSurface += OnPaintSurface;
-
-            //EnableTouchEvents = false;
         }
 
         public void OnAppearing()
@@ -105,10 +103,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (newValues != null)
             {
-                foreach (var f in newValues)
-                {
-                    f.Dispose();
-                }
+                SetSKFigureParent(newValues, this);
             }
 
             if (EnableTimeTick)
@@ -136,16 +131,16 @@ namespace HB.FullStack.XamarinForms.Skia
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    SetParent(e.NewItems, this);
+                    SetSKFigureParent(e.NewItems, this);
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    SetParent(e.OldItems, null);
+                    SetSKFigureParent(e.OldItems, null);
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    SetParent(e.OldItems, null);
-                    SetParent(e.NewItems, this);
+                    SetSKFigureParent(e.OldItems, null);
+                    SetSKFigureParent(e.NewItems, this);
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     break;
@@ -160,20 +155,22 @@ namespace HB.FullStack.XamarinForms.Skia
                 InvalidateSurface();
             }
 
-            static void SetParent(IList? list, SKFigureCanvasView? canvas)
-            {
-                if (list == null)
-                {
-                    return;
-                }
+            
+        }
 
-                foreach (object f in list)
+        private static void SetSKFigureParent(IEnumerable? list, SKFigureCanvasView? canvas)
+        {
+            if (list == null)
+            {
+                return;
+            }
+
+            foreach (object f in list)
+            {
+                if (f is SKFigure figure)
                 {
-                    if (f is SKFigure figure)
-                    {
-                        figure.Parent = canvas;
-                        figure.CanvasView = canvas;
-                    }
+                    figure.Parent = canvas;
+                    figure.CanvasView = canvas;
                 }
             }
         }
@@ -241,14 +238,16 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #region OnTouch
 
-        private void OnTouch(object sender, SKTouchEventArgs args)
+        private void OnTouch(object sender, TouchActionEventArgs args)
         {
-            GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
+            //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
-            if (Figures == null)
+            if (Figures.IsNullOrEmpty())
             {
                 return;
             }
+
+            SKPoint location = SKUtil.ToSKPoint(args.DpLocation);
 
             SKFigure? relatedFigure = null;
 
@@ -260,7 +259,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             switch (args.ActionType)
             {
-                case SKTouchAction.Pressed:
+                case TouchActionType.Pressed:
 
                     if (relatedFigure != null)
                     {
@@ -275,7 +274,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     {
                         SKFigure figure = Figures.ElementAt(i);
 
-                        if (!founded && figure.OnHitTest(args.Location, args.Id))
+                        if (!founded && figure.OnHitTest(location, args.Id))
                         {
                             founded = true;
 
@@ -293,9 +292,8 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                         else
                         {
-
                             //TouchActionEventArgs unTouchArgs = new TouchActionEventArgs(args.Id, TouchActionType.HitFailed, args.Location, args.IsInContact);
-                            figure.ProcessUnTouchAction(args.Id, args.Location);
+                            figure.ProcessUnTouchAction(args.Id, location);
                         }
                     }
 
@@ -305,7 +303,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
 
                     break;
-                case SKTouchAction.Moved:
+                case TouchActionType.Moved:
 
                     if (relatedFigure != null)
                     {
@@ -317,9 +315,9 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                     }
                     break;
-                case SKTouchAction.Released:
-                case SKTouchAction.Exited:
-                case SKTouchAction.Cancelled:
+                case TouchActionType.Released:
+                case TouchActionType.Exited:
+                case TouchActionType.Cancelled:
                     if (relatedFigure != null)
                     {
                         relatedFigure.ProcessTouchAction(args);

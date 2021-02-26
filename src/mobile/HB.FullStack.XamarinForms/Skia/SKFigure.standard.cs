@@ -1,6 +1,5 @@
 ﻿using HB.FullStack.XamarinForms.Base;
-
-using Microsoft.Extensions.Logging;
+using HB.FullStack.XamarinForms.Effects.Touch;
 
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -19,6 +18,7 @@ namespace HB.FullStack.XamarinForms.Skia
     public abstract class SKFigure : ObservableObject, IDisposable
     {
         private SKFigureCanvasView? _canvasView;
+        private SKPath? _hitTestPath;
 
         public object? Parent { get; set; }
 
@@ -77,17 +77,15 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         public SKRatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
 
-        public SKMatrix Matrix = SKMatrix.CreateIdentity();
-
-        private SKPath? _hitTestPath;
-
-        public SKPath? HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
-
-        protected SKSize CanvasSize { get; private set; }
-
+        public SKSize CanvasSize { get; private set; }
+        
         public bool CanvasSizeChanged { get; set; }
 
         public FigureState State { get; private set; } = FigureState.None;
+
+        public SKPath? HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
+        
+        public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
         public void SetState(FigureState figureState)
         {
@@ -174,20 +172,22 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <summary>
         /// touchInfo在Pressed中放入，在Existed,Release,Cancel中释放
         /// </summary>
-        public void ProcessTouchAction(SKTouchEventArgs args)
+        public void ProcessTouchAction(TouchActionEventArgs args)
         {
             if (!EnableTouch)
             {
                 return;
             }
 
-            SKPoint curLocation = GetNewCoordinatedPoint(args.Location);
+            SKPoint location = SKUtil.ToSKPoint(args.DpLocation);
+
+            SKPoint curLocation = GetNewCoordinatedPoint(location);
 
             BaseApplication.LogDebug($"开始处理Touch Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
 
             switch (args.ActionType)
             {
-                case SKTouchAction.Pressed:
+                case TouchActionType.Pressed:
                     {
                         if (StopResponseTimeTickWhenTouch)
                         {
@@ -222,7 +222,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         break;
                     }
-                case SKTouchAction.Moved:
+                case TouchActionType.Moved:
                     {
                         if (!EnableDrag || !EnableTouch)
                         {
@@ -269,8 +269,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         break;
                     }
-                case SKTouchAction.Exited:
-                case SKTouchAction.Released:
+                case TouchActionType.Exited:
+                case TouchActionType.Released:
                     {
                         BaseApplication.LogDebug($"进入Exitted,Released. Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
 
@@ -315,7 +315,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
                         break;
                     }
-                case SKTouchAction.Cancelled:
+                case TouchActionType.Cancelled:
                     {
                         BaseApplication.LogDebug($"进入Cancelled. Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
                         if (ResumeResponseTimeTickAfterTouch)
@@ -352,7 +352,7 @@ namespace HB.FullStack.XamarinForms.Skia
             OnHitFailed();
         }
 
-        private void CancelLongTap(SKTouchEventArgs args)
+        private void CancelLongTap(TouchActionEventArgs args)
         {
             if (EnableLongTap && _longTouchInfos.TryGetValue(args.Id, out LongTouchTaskInfo? taskWrapper))
             {

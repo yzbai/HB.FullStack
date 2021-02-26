@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.XamarinForms.Common
+namespace HB.FullStack.XamarinForms.Effects.Touch
 {
     public enum TouchManipulationMode
     {

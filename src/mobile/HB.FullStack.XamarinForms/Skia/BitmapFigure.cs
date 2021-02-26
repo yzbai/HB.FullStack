@@ -1,14 +1,14 @@
-﻿using HB.FullStack.XamarinForms.Common;
+﻿using HB.FullStack.XamarinForms.Effects.Touch;
 using HB.FullStack.XamarinForms.Skia;
 
 using SkiaSharp;
-using SkiaSharp.Views.Forms;
+
 
 using System.IO;
 
 using Xamarin.Forms;
 
-namespace HB.FullStack.XamarinForms.Controls.Cropper
+namespace HB.FullStack.XamarinForms.Skia
 {
 
     /// <summary>
@@ -131,7 +131,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
             {
                 SKRect mappedDestRect = Matrix.Invert().MapRect(_destRect);
 
-                SKPaint paint = new SKPaint { IsStroke = true, StrokeWidth = 10, Color = Color.Red.ToSKColor() };
+                SKPaint paint = new SKPaint { IsStroke = true, StrokeWidth = 10, Color = SKColors.Red };
 
                 canvas.DrawRect(mappedDestRect, paint);
 

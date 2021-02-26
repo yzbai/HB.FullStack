@@ -1,4 +1,5 @@
-﻿using HB.FullStack.XamarinForms.Common;
+﻿
+using HB.FullStack.XamarinForms.Effects.Touch;
 
 using Microsoft;
 
