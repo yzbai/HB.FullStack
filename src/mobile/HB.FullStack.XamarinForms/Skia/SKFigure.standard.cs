@@ -178,6 +178,8 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 return;
             }
+            
+            args.IsHandled = true;
 
             SKPoint location = SKUtil.ToSKPoint(args.DpLocation);
 

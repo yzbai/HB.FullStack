@@ -34,7 +34,7 @@ namespace HB.FullStack.XamarinForms.Skia
         private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _fingerFigureDict = new Dictionary<long, SKFigure>();
         private readonly Stopwatch _stopwatch = new Stopwatch();
-        private readonly TouchEffect _touchEffect;
+        private readonly SKTouchEffect _touchEffect;
         private Timer? _timer;
 
         public IList<SKFigure> Figures { get => (IList<SKFigure>)GetValue(FiguresProperty); set => SetValue(FiguresProperty, value); }
@@ -47,6 +47,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public new bool EnableTouchEvents { get => _touchEffect.Enable; set => _touchEffect.Enable = value; }
 
+        public bool EnableTouchEventPropagation { get => _touchEffect.EnableTouchEventPropagation; set => _touchEffect.EnableTouchEventPropagation = value; }
+
         public bool IsAppearing { get; private set; }
 
         public bool AutoBringToFront { get; set; } = true;
@@ -54,7 +56,7 @@ namespace HB.FullStack.XamarinForms.Skia
         public SKFigureCanvasView() : base()
         {
             //Touch
-            _touchEffect = new TouchEffect { Capture = true };
+            _touchEffect = new SKTouchEffect ();
             _touchEffect.TouchAction += OnTouch;
 
             Effects.Add(_touchEffect);

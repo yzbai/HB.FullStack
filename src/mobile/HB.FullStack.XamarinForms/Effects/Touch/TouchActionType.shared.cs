@@ -7,8 +7,6 @@ namespace HB.FullStack.XamarinForms.Effects.Touch
         Moved,
         Released,
         Exited,
-        Cancelled,
-
-        HitFailed // hittest is false
+        Cancelled
     }
 }

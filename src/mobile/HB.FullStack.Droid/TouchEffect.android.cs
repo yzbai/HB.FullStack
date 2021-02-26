@@ -211,7 +211,7 @@ namespace HB.FullStack.Droid.Effects
             }
         }
 
-        bool FireEvent(TouchEffect touchEffect, int id, TouchActionType actionType, Point pointerLocation, bool isInContact)
+        void FireEvent(TouchEffect touchEffect, int id, TouchActionType actionType, Point pointerLocation, bool isInContact)
         {
             // Get the method to call for firing events
             Action<Element, TouchActionEventArgs> onTouchAction = touchEffect._libTouchEffect!.OnTouchAction;
@@ -226,8 +226,6 @@ namespace HB.FullStack.Droid.Effects
             TouchActionEventArgs args = new TouchActionEventArgs(id, actionType, point, isInContact);
 
             onTouchAction(touchEffect._formsElement!, args);
-
-            return args.IsHandled;
         }
     }
 }
