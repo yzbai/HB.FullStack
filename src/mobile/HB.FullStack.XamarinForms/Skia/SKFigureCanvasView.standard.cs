@@ -97,15 +97,6 @@ namespace HB.FullStack.XamarinForms.Skia
                 SetSKFigureParent(newValues, this);
             }
 
-            if (EnableTimeTick)
-            {
-                ResumeResponseTimeTick();
-            }
-            else
-            {
-                InvalidateSurface();
-            }
-
             if (oldValues is ObservableCollection<SKFigure> oldCollection)
             {
                 oldCollection.CollectionChanged -= OnFiguresCollectionChanged;
@@ -114,6 +105,16 @@ namespace HB.FullStack.XamarinForms.Skia
             if (newValues is ObservableCollection<SKFigure> newCollection)
             {
                 newCollection.CollectionChanged += OnFiguresCollectionChanged;
+            }
+
+            //TODO: 调查可能与OnFiguresCollectionChanged里的重画 重复
+            if (EnableTimeTick)
+            {
+                ResumeResponseTimeTick();
+            }
+            else
+            {
+                InvalidateSurface();
             }
         }
 
@@ -144,9 +145,7 @@ namespace HB.FullStack.XamarinForms.Skia
             else
             {
                 InvalidateSurface();
-            }
-
-            
+            }            
         }
 
         private static void SetSKFigureParent(IEnumerable? list, SKFigureCanvasView? canvas)
@@ -256,6 +255,8 @@ namespace HB.FullStack.XamarinForms.Skia
                     {
                         _fingerFigureDict.Remove(args.Id);
 
+                        BaseApplication.LogError("不应该到这里：_fingerFigureDict没有清除前一个相关Touch事件");
+
                         return;
                     }
 
@@ -265,7 +266,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     {
                         SKFigure figure = Figures.ElementAt(i);
 
-                        if (!founded && figure.OnHitTest(location, args.Id))
+                        if (!founded && figure.EnableTouch && figure.OnHitTest(location, args.Id))
                         {
                             founded = true;
 

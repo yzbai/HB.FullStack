@@ -207,5 +207,10 @@ namespace HB.FullStack.XamarinForms.Base
         {
             Log(null, message, LogLevel.Debug);
         }
+
+        public static void LogError(string message)
+        {
+            Log(null, message, LogLevel.Error);
+        }
     }
 }
