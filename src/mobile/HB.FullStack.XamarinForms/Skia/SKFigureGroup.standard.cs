@@ -19,6 +19,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public bool EnableMultipleSelected { get; set; }
 
+        public bool EnableMultipleLongSelected { get; set; }
+
         public bool EnableUnSelectedByHitFailed { get; set; } = true;
     }
 
@@ -89,6 +91,8 @@ namespace HB.FullStack.XamarinForms.Skia
         }
 
         private readonly Dictionary<long, TFigure> _hittingFigures = new Dictionary<long, TFigure>();
+
+        public FigureState SelectedFiguresState { get; private set; }
 
         public IList<TFigure> SelectedFigures { get; } = new List<TFigure>();
 
@@ -204,9 +208,25 @@ namespace HB.FullStack.XamarinForms.Skia
             SelectedFigures.Clear();
         }
 
-        private void Select(TFigure figure)
+        private void CheckSelected(TFigure figure)
         {
-            if (!EnableMultipleSelected)
+            if (figure.State != FigureState.Selected && figure.State != FigureState.LongSelected)
+            {
+                return;
+            }
+
+            if (SelectedFiguresState != figure.State 
+                || (figure.State == FigureState.Selected && !EnableMultipleSelected) 
+                || (figure.State == FigureState.LongSelected && !EnableMultipleLongSelected))
+            {
+                UnSelectAllExcept(figure);
+            }
+            else
+            {
+                SelectedFigures.Add(figure);
+            }
+
+            void UnSelectAllExcept(TFigure figure)
             {
                 foreach (SKFigure sf in SelectedFigures)
                 {
@@ -219,9 +239,9 @@ namespace HB.FullStack.XamarinForms.Skia
                 }
 
                 SelectedFigures.Clear();
+                SelectedFiguresState = figure.State;
+                SelectedFigures.Add(figure);
             }
-
-            SelectedFigures.Add(figure);
         }
 
         #region 事件派发
@@ -251,7 +271,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             figure.OnOneFingerDragged(info);
 
-            Select(figure);
+            CheckSelected(figure);
 
             if (info.IsOver)
             {
@@ -268,7 +288,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             figure.OnLongTapped(info);
 
-            Select(figure);
+            CheckSelected(figure);
 
             if (info.IsOver)
             {
@@ -285,7 +305,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             figure.OnTapped(info);
 
-            Select(figure);
+            CheckSelected(figure);
 
             if (info.IsOver)
             {
@@ -301,6 +321,8 @@ namespace HB.FullStack.XamarinForms.Skia
             }
 
             figure.OnCancelled(info);
+
+            //CheckSelected(figure);
 
             if (info.IsOver)
             {

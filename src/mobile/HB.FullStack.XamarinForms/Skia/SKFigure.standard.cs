@@ -48,7 +48,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            OnDraw(info, canvas, InitDrawData);
+            OnDraw(info, canvas, InitDrawData, State);
         }
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
@@ -76,19 +76,19 @@ namespace HB.FullStack.XamarinForms.Skia
             }
 
             OnCaculateOutput(out TDrawData? newResult, InitDrawData);
+            
+            if (newResult != null)
+            {
+                newResult.State = State;
+            }
 
             if (newResult != ResultDrawData)
             {
-                if(newResult != null)
-                {
-                    newResult.State = State;
-                }
-
                 ResultDrawData = newResult;
             }
         }
 
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawData initDrawData);
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawData initDrawData, FigureState currentState);
 
         protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawData initDrawData);
 
@@ -589,7 +589,14 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            SetState(FigureState.Selected);
+            if (State == FigureState.Selected)
+            {
+                SetState(FigureState.None);
+            }
+            else if(State == FigureState.None)
+            {
+                SetState(FigureState.Selected);
+            }
         }
 
         public void OnLongTapped(SKFigureTouchInfo touchInfo)
