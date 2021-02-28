@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.XamarinForms.Skia.Generic
+namespace HB.FullStack.XamarinForms.Skia
 {
     public abstract class SKFigureDrawData : IEquatable<SKFigureDrawData>
     {

@@ -1,10 +1,15 @@
-﻿using SkiaSharp;
+﻿
+using SkiaSharp;
 using SkiaSharp.Views.Forms;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
+
+using Xamarin.CommunityToolkit.ObjectModel;
+using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
@@ -18,14 +23,80 @@ namespace HB.FullStack.XamarinForms.Skia
     }
 
     //EnableMultipleSelected
-    public class SKFigureCollection<T> : SKFigureCollection where T : SKFigure
+    public class SKFigureCollection<TFigure, TDrawData> : SKFigureCollection where TFigure : SKFigure<TDrawData>, new() where TDrawData : SKFigureDrawData
     {
-        private readonly Dictionary<long, T> _hittingFigures = new Dictionary<long, T>();
+        public static BindableProperty ResultDrawDatasProperty = BindableProperty.Create(
+            nameof(ResultDrawDatas),
+            typeof(IList<TDrawData>),
+            typeof(SKFigureCollection<TFigure, TDrawData>),
+            null,
+            BindingMode.OneWayToSource);
 
-        public IList<T> SelectedFigures { get; } = new List<T>();
+        public IList<TDrawData?>? ResultDrawDatas { get => (IList<TDrawData?>?)GetValue(ResultDrawDatasProperty); set => SetValue(ResultDrawDatasProperty, value); }
+
+        public static BindableProperty InitDrawDatasProperty = BindableProperty.Create(
+            nameof(InitDrawDatas),
+            typeof(IList<TDrawData>),
+            typeof(SKFigureCollection<TFigure, TDrawData>),
+            null,
+            BindingMode.OneWay,
+            propertyChanged: (b, oldValues, newValues) => ((SKFigureCollection<TFigure, TDrawData>)b).OnInitDrawDatasChanged((IList<TDrawData>?)oldValues, (IList<TDrawData>?)newValues));
+
+        public IList<TDrawData>? InitDrawDatas { get => (IList<TDrawData>?)GetValue(InitDrawDatasProperty); set => SetValue(InitDrawDatasProperty, value); }
+
+        private void OnInitDrawDatasChanged(IList<TDrawData>? oldValues, IList<TDrawData>? newValues)
+        {
+            //Create and Add Figures
+            ResumeFigures();
+
+            if (oldValues is ObservableCollection<TDrawData> oldCollection)
+            {
+                oldCollection.CollectionChanged -= OnInitDrawDatasCollectionChanged;
+            }
+
+            if (newValues is ObservableCollection<TDrawData> newCollection)
+            {
+                newCollection.CollectionChanged += OnInitDrawDatasCollectionChanged;
+            }
+
+            InvalidateMatrixAndSurface();
+        }
+
+        private void ResumeFigures()
+        {
+            ClearFigures();
+
+            if (InitDrawDatas == null)
+            {
+                return;
+            }
+
+            ResultDrawDatas = new ObservableRangeCollection<TDrawData?>(Enumerable.Repeat<TDrawData?>(null, InitDrawDatas.Count));
+
+            for (int i = 0; i < InitDrawDatas.Count; ++i)
+            {
+                TFigure figure = new TFigure();
+                figure.SetBinding(SKFigure<TDrawData>.InitDrawDataProperty, new Binding($"{nameof(InitDrawDatas)}[{i}]", source: this));
+                figure.SetBinding(SKFigure<TDrawData>.ResultDrawDataProperty, new Binding($"{nameof(ResultDrawDatas)}[{i}]", source: this));
+
+                AddFigure(figure);
+            }
+        }
+
+        private void OnInitDrawDatasCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ResumeFigures();
+
+            InvalidateMatrixAndSurface();
+        }
+
+
+        private readonly Dictionary<long, TFigure> _hittingFigures = new Dictionary<long, TFigure>();
+
+        public IList<TFigure> SelectedFigures { get; } = new List<TFigure>();
 
         //TODO: make this obserable, and to notify repaint
-        protected IList<T> Figures { get; } = new List<T>();
+        protected IList<TFigure> Figures { get; } = new List<TFigure>();
 
         public SKFigureCollection()
         {
@@ -41,7 +112,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             SKCanvas canvas = e.Surface.Canvas;
 
-            foreach (T figure in Figures)
+            foreach (TFigure figure in Figures)
             {
                 using (new SKAutoCanvasRestore(canvas))
                 {
@@ -56,7 +127,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             for (int i = Figures.Count - 1; i >= 0; i--)
             {
-                T figure = Figures[i];
+                TFigure figure = Figures[i];
 
                 if (!founded && figure.OnHitTest(location, fingerId))
                 {
@@ -73,7 +144,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return founded;
         }
 
-        public void AddFigure(T figure)
+        public void AddFigure(TFigure figure)
         {
             figure.Parent = this;
             figure.CanvasView = this.CanvasView;
@@ -81,9 +152,9 @@ namespace HB.FullStack.XamarinForms.Skia
             Figures.Add(figure);
         }
 
-        public void AddFigures(params T[] figures)
+        public void AddFigures(params TFigure[] figures)
         {
-            foreach (T f in figures)
+            foreach (TFigure f in figures)
             {
                 f.Parent = this;
                 f.CanvasView = this.CanvasView;
@@ -92,7 +163,7 @@ namespace HB.FullStack.XamarinForms.Skia
             Figures.AddRange(figures);
         }
 
-        public bool RemoveFigure(T figure)
+        public bool RemoveFigure(TFigure figure)
         {
             figure.Dispose();
 
@@ -111,7 +182,7 @@ namespace HB.FullStack.XamarinForms.Skia
             _hittingFigures.Clear();
             SelectedFigures.Clear();
 
-            foreach (T figure in Figures)
+            foreach (TFigure figure in Figures)
             {
                 figure.Dispose();
             }
@@ -119,7 +190,7 @@ namespace HB.FullStack.XamarinForms.Skia
             Figures.Clear();
         }
 
-        public void UnSelect(T figure)
+        public void UnSelect(TFigure figure)
         {
             SelectedFigures.Remove(figure);
 
@@ -136,7 +207,7 @@ namespace HB.FullStack.XamarinForms.Skia
             SelectedFigures.Clear();
         }
 
-        private void Select(T figure)
+        private void Select(TFigure figure)
         {
             if (!EnableMultipleSelected)
             {
@@ -160,7 +231,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnPressed(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -176,7 +247,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnDragged(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -193,7 +264,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnLongTapped(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -210,7 +281,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnTapped(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -227,7 +298,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnCancelled(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -249,7 +320,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 UnSelectAll();
             }
 
-            foreach (T figure in Figures)
+            foreach (TFigure figure in Figures)
             {
                 figure.OnHitFailed();
             }
