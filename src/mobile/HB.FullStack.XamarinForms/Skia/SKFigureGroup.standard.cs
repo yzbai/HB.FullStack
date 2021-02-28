@@ -13,7 +13,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public abstract class SKFigureCollection : SKFigure
+    public abstract class SKFigureGroup : SKFigure
     {
         public bool AutoBringToFront { get; set; } = true;
 
@@ -23,27 +23,25 @@ namespace HB.FullStack.XamarinForms.Skia
     }
 
     //EnableMultipleSelected
-    public class SKFigureCollection<TFigure, TDrawData> : SKFigureCollection where TFigure : SKFigure<TDrawData>, new() where TDrawData : SKFigureDrawData
+    public class SKFigureGroup<TFigure, TDrawData> : SKFigureGroup where TFigure : SKFigure<TDrawData>, new() where TDrawData : SKFigureDrawData
     {
+        public static BindableProperty InitDrawDatasProperty = BindableProperty.Create(
+               nameof(InitDrawDatas),
+               typeof(IList<TDrawData>),
+               typeof(SKFigureGroup<TFigure, TDrawData>),
+               null,
+               BindingMode.OneWay,
+               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawData>)b).OnInitDrawDatasChanged((IList<TDrawData>?)oldValues, (IList<TDrawData>?)newValues));
+
         public static BindableProperty ResultDrawDatasProperty = BindableProperty.Create(
             nameof(ResultDrawDatas),
             typeof(IList<TDrawData>),
-            typeof(SKFigureCollection<TFigure, TDrawData>),
+            typeof(SKFigureGroup<TFigure, TDrawData>),
             null,
             BindingMode.OneWayToSource);
 
-        public IList<TDrawData?>? ResultDrawDatas { get => (IList<TDrawData?>?)GetValue(ResultDrawDatasProperty); set => SetValue(ResultDrawDatasProperty, value); }
-
-        public static BindableProperty InitDrawDatasProperty = BindableProperty.Create(
-            nameof(InitDrawDatas),
-            typeof(IList<TDrawData>),
-            typeof(SKFigureCollection<TFigure, TDrawData>),
-            null,
-            BindingMode.OneWay,
-            propertyChanged: (b, oldValues, newValues) => ((SKFigureCollection<TFigure, TDrawData>)b).OnInitDrawDatasChanged((IList<TDrawData>?)oldValues, (IList<TDrawData>?)newValues));
-
         public IList<TDrawData>? InitDrawDatas { get => (IList<TDrawData>?)GetValue(InitDrawDatasProperty); set => SetValue(InitDrawDatasProperty, value); }
-
+        public IList<TDrawData?>? ResultDrawDatas { get => (IList<TDrawData?>?)GetValue(ResultDrawDatasProperty); set => SetValue(ResultDrawDatasProperty, value); }
         private void OnInitDrawDatasChanged(IList<TDrawData>? oldValues, IList<TDrawData>? newValues)
         {
             //Create and Add Figures
@@ -90,7 +88,6 @@ namespace HB.FullStack.XamarinForms.Skia
             InvalidateMatrixAndSurface();
         }
 
-
         private readonly Dictionary<long, TFigure> _hittingFigures = new Dictionary<long, TFigure>();
 
         public IList<TFigure> SelectedFigures { get; } = new List<TFigure>();
@@ -98,7 +95,7 @@ namespace HB.FullStack.XamarinForms.Skia
         //TODO: make this obserable, and to notify repaint
         protected IList<TFigure> Figures { get; } = new List<TFigure>();
 
-        public SKFigureCollection()
+        public SKFigureGroup()
         {
             Pressed += OnPressed;
             Tapped += OnTapped;

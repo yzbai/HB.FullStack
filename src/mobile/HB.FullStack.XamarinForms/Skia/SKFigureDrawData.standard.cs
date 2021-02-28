@@ -4,7 +4,7 @@ namespace HB.FullStack.XamarinForms.Skia
 {
     public abstract class SKFigureDrawData : IEquatable<SKFigureDrawData>
     {
-        public bool IsSelected { get; set; }
+        public FigureState State { get; set; }
 
         public bool Equals(SKFigureDrawData? other)
         {

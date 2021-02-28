@@ -79,6 +79,11 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (newResult != ResultDrawData)
             {
+                if(newResult != null)
+                {
+                    newResult.State = State;
+                }
+
                 ResultDrawData = newResult;
             }
         }
@@ -184,7 +189,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            if (Parent is SKFigureCollection)
+            if (Parent is SKFigureGroup)
             {
                 //留给集合统一处理
                 return;
@@ -605,7 +610,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
 
-            if (Parent is SKFigureCollection collection)
+            if (Parent is SKFigureGroup collection)
             {
                 if (collection.EnableMultipleSelected)
                 {
