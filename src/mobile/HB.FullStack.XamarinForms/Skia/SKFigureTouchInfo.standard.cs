@@ -12,7 +12,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <summary>
         /// 第几个指头
         /// </summary>
-        public long TouchEventId { get; set; }
+        public long FingerId { get; set; }
 
         public bool IsOver { get; set; }
 

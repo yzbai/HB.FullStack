@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using SkiaSharp.Views.Forms;
+using Xamarin.CommunityToolkit.ObjectModel;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
@@ -26,9 +27,34 @@ namespace HB.FullStack.XamarinForms.Skia
     [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "当Page Disappearing时，会调用所有BaseContentView的Disappering。那里会dispose")]
     public class SKFigureCanvasView : SKCanvasView, IBaseContentView
     {
-        public static readonly BindableProperty FiguresProperty = BindableProperty.Create(nameof(Figures), typeof(IList<SKFigure>), typeof(SKFigureCanvasView), new ObservableCollection<SKFigure>(), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((IList<SKFigure>?)o, (IList<SKFigure>?)n); });
-        public static readonly BindableProperty EnableTimeTickProperty = BindableProperty.Create(nameof(EnableTimeTick), typeof(bool), typeof(SKFigureCanvasView), false, propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnEnableTimeTickChanged((bool)o, (bool)n); });
-        public static readonly BindableProperty TimeTickIntervalsProperty = BindableProperty.Create(nameof(TimeTickIntervals), typeof(TimeSpan), typeof(SKFigureCanvasView), TimeSpan.FromMilliseconds(16), propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnTimeTickIntervalChanged(); });
+        public static readonly BindableProperty FiguresProperty = BindableProperty.Create(
+            nameof(Figures),
+            typeof(IList<SKFigure>),
+            typeof(SKFigureCanvasView),
+            defaultValue: null,
+            defaultValueCreator: b =>
+            {
+                ObservableRangeCollection<SKFigure> figures = new ObservableRangeCollection<SKFigure>();
+
+                figures.CollectionChanged += ((SKFigureCanvasView)b).OnFiguresCollectionChanged;
+
+                return figures;
+            },
+            propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnFiguresChanged((IList<SKFigure>?)o, (IList<SKFigure>?)n); });
+
+        public static readonly BindableProperty EnableTimeTickProperty = BindableProperty.Create(
+            nameof(EnableTimeTick),
+            typeof(bool),
+            typeof(SKFigureCanvasView),
+            false,
+            propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnEnableTimeTickChanged((bool)o, (bool)n); });
+
+        public static readonly BindableProperty TimeTickIntervalsProperty = BindableProperty.Create(
+            nameof(TimeTickIntervals),
+            typeof(TimeSpan),
+            typeof(SKFigureCanvasView),
+            TimeSpan.FromMilliseconds(16),
+            propertyChanged: (b, o, n) => { ((SKFigureCanvasView)b).OnTimeTickIntervalChanged(); });
 
         private readonly WeakEventManager _eventManager = new WeakEventManager();
         private readonly Dictionary<long, SKFigure> _fingerFigureDict = new Dictionary<long, SKFigure>();
@@ -145,7 +171,7 @@ namespace HB.FullStack.XamarinForms.Skia
             else
             {
                 InvalidateSurface();
-            }            
+            }
         }
 
         private static void SetSKFigureParent(IEnumerable? list, SKFigureCanvasView? canvas)

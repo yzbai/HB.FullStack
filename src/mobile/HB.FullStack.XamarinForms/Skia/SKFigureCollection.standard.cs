@@ -8,7 +8,7 @@ using System.Text;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public abstract class SKFigureGroup : SKFigure
+    public abstract class SKFigureCollection : SKFigure
     {
         public bool AutoBringToFront { get; set; } = true;
 
@@ -18,7 +18,7 @@ namespace HB.FullStack.XamarinForms.Skia
     }
 
     //EnableMultipleSelected
-    public class SKFigureGroup<T> : SKFigureGroup where T : SKFigure
+    public class SKFigureCollection<T> : SKFigureCollection where T : SKFigure
     {
         private readonly Dictionary<long, T> _hittingFigures = new Dictionary<long, T>();
 
@@ -27,7 +27,7 @@ namespace HB.FullStack.XamarinForms.Skia
         //TODO: make this obserable, and to notify repaint
         protected IList<T> Figures { get; } = new List<T>();
 
-        public SKFigureGroup()
+        public SKFigureCollection()
         {
             Pressed += OnPressed;
             Tapped += OnTapped;
@@ -49,8 +49,6 @@ namespace HB.FullStack.XamarinForms.Skia
                 }
             }
         }
-
-        protected override void OnDraw(SKImageInfo info, SKCanvas canvas) { }
 
         public override bool OnHitTest(SKPoint location, long fingerId)
         {
@@ -108,7 +106,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return Figures.Remove(figure);
         }
 
-        public void Clear()
+        public void ClearFigures()
         {
             _hittingFigures.Clear();
             SelectedFigures.Clear();
@@ -162,7 +160,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnPressed(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
             {
                 return;
             }
@@ -178,7 +176,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnDragged(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
             {
                 return;
             }
@@ -189,13 +187,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.TouchEventId);
+                _hittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnLongTapped(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
             {
                 return;
             }
@@ -206,13 +204,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.TouchEventId);
+                _hittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnTapped(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
             {
                 return;
             }
@@ -223,13 +221,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.TouchEventId);
+                _hittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnCancelled(object? sender, SKFigureTouchInfo info)
         {
-            if (!_hittingFigures.TryGetValue(info.TouchEventId, out T? figure))
+            if (!_hittingFigures.TryGetValue(info.FingerId, out T? figure))
             {
                 return;
             }
@@ -238,7 +236,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.TouchEventId);
+                _hittingFigures.Remove(info.FingerId);
             }
         }
 
@@ -272,7 +270,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 if (disposing)
                 {
                     // managed
-                    Clear();
+                    ClearFigures();
                 }
 
                 //unmanaged

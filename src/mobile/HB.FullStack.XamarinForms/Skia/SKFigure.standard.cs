@@ -1,5 +1,4 @@
-﻿using HB.FullStack.XamarinForms.Base;
-
+﻿
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 
@@ -9,15 +8,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public abstract class SKFigure : ObservableObject, IDisposable
+    public abstract class SKFigure : BindableObject, IDisposable
     {
         private SKFigureCanvasView? _canvasView;
-        private SKPath? _hitTestPath;
+        private SKPath _hitTestPath = new SKPath();
 
         public object? Parent { get; set; }
 
@@ -77,18 +75,46 @@ namespace HB.FullStack.XamarinForms.Skia
         public SKRatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
 
         public SKSize CanvasSize { get; private set; }
-        
+
         public bool CanvasSizeChanged { get; set; }
 
         public FigureState State { get; private set; } = FigureState.None;
 
-        public SKPath? HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
-        
+        public SKPath HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
+
         public SKMatrix Matrix = SKMatrix.CreateIdentity();
 
         public void SetState(FigureState figureState)
         {
             State = figureState;
+        }
+
+        public void InvalidateOnlySurface(bool evenTimeTickEnabled = false)
+        {
+            if (Parent == null || CanvasView == null)
+            {
+                return;
+            }
+
+            if (CanvasView.EnableTimeTick && !evenTimeTickEnabled)
+            {
+                return;
+            }
+
+            if (Parent is SKFigureCollection)
+            {
+                //留给集合统一处理
+                return;
+            }
+
+            CanvasView.InvalidateSurface();
+        }
+
+        public void InvalidateMatrixAndSurface(bool evenTimeTickEnabled = false)
+        {
+            Matrix = SKMatrix.CreateIdentity();
+
+            InvalidateOnlySurface(evenTimeTickEnabled);
         }
 
         public virtual void OnPaint(SKPaintSurfaceEventArgs e)
@@ -130,7 +156,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         /// <param name="info"></param>
         /// <param name="canvas"></param>
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas);
+        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas) { }
 
         protected virtual void OnUpdateHitTestPath(SKImageInfo info) { }
 
@@ -177,7 +203,7 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 return;
             }
-            
+
             args.Handled = true;
 
             SKPoint location = args.Location;// SKUtil.ToSKPoint(args.DpLocation);
@@ -200,7 +226,7 @@ namespace HB.FullStack.XamarinForms.Skia
                             StartPoint = curLocation,
                             PreviousPoint = curLocation,
                             CurrentPoint = curLocation,
-                            TouchEventId = args.Id,
+                            FingerId = args.Id,
                             IsOver = false,
                             LongPressHappend = false
                         };
@@ -496,9 +522,9 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
 
-            if (Parent is SKFigureGroup group)
+            if (Parent is SKFigureCollection collection)
             {
-                if (group.EnableMultipleSelected)
+                if (collection.EnableMultipleSelected)
                 {
                     return;
                 }
