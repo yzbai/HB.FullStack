@@ -18,7 +18,7 @@ namespace HB.FullStack.Common
         /// <summary>
         /// 获取验证结果。用foeach
         /// </summary>
-        IList<ValidationResult> GetValidateResults(bool rePerformValidate = false);
+        IList<ValidationResult> GetValidateResults(bool forced = false);
 
         string GetValidateErrorMessage();
 

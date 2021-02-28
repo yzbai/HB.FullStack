@@ -32,7 +32,7 @@ namespace HB.FullStack.Identity
         /// 用于签名的证书。签名让内容无法篡改，但可以被别人看到
         /// </summary>
         [DisallowNull, NotNull]
-        public string? SigningCertificateSubject { get; set; }
+        public string SigningCertificateSubject { get; set; } = null!;
 
 
         //TODO: 在appsettings.json中暂时用了DataProtection的证书，正式发布时需要换掉
@@ -40,7 +40,7 @@ namespace HB.FullStack.Identity
         /// 用于加密的证书。用于内容不被别人看到
         /// </summary>
         [DisallowNull, NotNull]
-        public string? EncryptingCertificateSubject { get; set; }
+        public string EncryptingCertificateSubject { get; set; } = null!;
 
         public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; } = new OpenIdConnectConfiguration();
 

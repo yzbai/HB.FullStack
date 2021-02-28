@@ -4,8 +4,11 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+
 using HB.FullStack.Common.IdGen;
+
 using IdGen;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +25,7 @@ namespace HB.Infrastructure.IdGen
             var structure = new IdStructure(settings.TimestampBits, settings.GeneratorIdBits, settings.SequenceBits);
             var options = new IdGeneratorOptions(structure, new DefaultTimeSource(settings.Epoch));
 
-            IDistributedIdGen.IdGen = new IdGenDistributedId(settings.MachineId, options);
+            StaticIdGen.IdGen = new IdGenDistributedId(settings.MachineId, options);
         }
 
         private readonly IdGenerator _idGen;

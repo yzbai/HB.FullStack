@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Api
 
         ModelValidationError,
         ApiNotAvailable,
-        ApiErrorWrongFormat,
+        ApiErrorUnkownFormat,
         NotApiResourceEntity,
         ApiSmsCodeInvalid,
         ApiPublicResourceTokenNeeded,

@@ -4,8 +4,15 @@ namespace System
 {
     public struct UtcNowTicks : IEquatable<UtcNowTicks>
     {
-        public long Ticks { get; set; }
         public static UtcNowTicks Empty => new UtcNowTicks { Ticks = -1 };
+        public static UtcNowTicks Instance => new UtcNowTicks { Ticks = DateTimeOffset.UtcNow.Ticks };
+
+        private UtcNowTicks(long ticks)
+        {
+            Ticks = ticks;
+        }
+
+        public long Ticks { get; internal set; }
 
         public bool IsEmpty()
         {
@@ -65,13 +72,15 @@ namespace System
 
     public static class TimeUtil
     {
-        public static UtcNowTicks UtcNowTicks => new UtcNowTicks { Ticks = DateTimeOffset.UtcNow.Ticks };
+        public static UtcNowTicks UtcNowTicks => UtcNowTicks.Instance;
 
         public static long UtcNowUnixTimeSeconds => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         public static DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
         public static long UtcNowUnixTimeMilliseconds => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        public static DateTime LocalNow => DateTime.Now;
     }
 
 }

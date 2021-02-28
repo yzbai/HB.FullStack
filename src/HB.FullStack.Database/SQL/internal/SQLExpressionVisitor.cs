@@ -260,7 +260,7 @@ namespace HB.FullStack.Database.SQL
 
                 EntityDef entityDef = EntityDefFactory.GetDef(entityType)!;
                 EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
-                    ?? throw new DatabaseException( DatabaseErrorCode.DatabaseDefError, $"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
+                    ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
 
                 string prefix = "";
 
@@ -735,7 +735,12 @@ namespace HB.FullStack.Database.SQL
 
         private static bool IsTableField(Type type, object quotedExp)
         {
+#if NETSTANDARD2_1
             string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "", GlobalSettings.Comparison);
+#endif
+#if NETSTANDARD2_0
+            string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "");
+#endif
 
             EntityDef? entityDef = EntityDefFactory.GetDef(type);
 

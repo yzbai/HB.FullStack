@@ -7,7 +7,7 @@ namespace System
 {
     public class ApiException : Exception
     {
-        public HttpStatusCode HttpCode { get; set; }
+        public HttpStatusCode? HttpCode { get; set; }
 
         public ApiErrorCode ErrorCode { get; }
 

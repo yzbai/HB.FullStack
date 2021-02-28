@@ -12,12 +12,6 @@ namespace HB.FullStack.Common.Api
         private readonly IEnumerable<byte[]> _files;
         private readonly IEnumerable<string> _fileNames;
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="files"></param>
-        /// <param name="fileNames"></param>
-        /// <param name="resources"></param>
         /// <exception cref="ApiException"></exception>
         public FileUpdateRequest(IEnumerable<byte[]> files, IEnumerable<string> fileNames, IEnumerable<T> resources) : base(resources)
         {
@@ -26,8 +20,6 @@ namespace HB.FullStack.Common.Api
             _files = files;
             _fileNames = fileNames;
         }
-
-        
 
         /// <summary>
         /// ctor

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ServiceStack.OrmLite.MySql" Version="5.10.2" />
+    <PackageReference Include="ServiceStack.OrmLite.MySql" Version="5.10.4" />
   </ItemGroup>
 
   <!-- common NuGet package refs that affect all projects -->

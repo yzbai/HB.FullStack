@@ -86,7 +86,7 @@ namespace System
         private const string _charCollection = "0,1,2,3,4,5,6,7,8,9,a,s,d,f,g,h,z,c,v,b,n,m,k,q,w,e,r,t,y,u,p,A,S,D,F,G,H,Z,C,V,B,N,M,K,Q,W,E,R,T,Y,U,P"; //定义验证码字符及出现频次 ,避免出现0 o j i l 1 x;
         private static readonly string[] _charArray = _charCollection.Split(',');
         private static readonly string[] _numbericCharArray = _charCollection.Substring(0, 20).Split(',');
-
+        private static readonly RandomNumberGenerator _randomNumberGenerator = RandomNumberGenerator.Create();
 
         public static string CreateRandomString(int length)
         {
@@ -98,8 +98,6 @@ namespace System
             return CreateRandomString(length, _numbericCharArray);
         }
 
-
-
         private static string CreateRandomString(int length, string[] charArray)
         {
             Random random = new Random(Guid.NewGuid().GetHashCode());
@@ -108,11 +106,38 @@ namespace System
 
             for (int i = 0; i < length; i++)
             {
-                randomString += charArray[RandomNumberGenerator.GetInt32(0, arrayLength)];
+                randomString += charArray[GetRandomInteger(0, arrayLength - 1)];
             }
 
             return randomString;
         }
+
+
+        /// <summary>
+        /// [0.0, 1.0]
+        /// </summary>
+        public static double GetRandomDouble()
+        {
+            byte[] b = new byte[4];
+            _randomNumberGenerator.GetBytes(b);
+            return BitConverter.ToUInt32(b, 0) / (double)uint.MaxValue;
+        }
+
+        /// <summary>
+        /// [minValue, maxValue]
+        /// </summary>
+        public static int GetRandomInteger(int minValue, int maxValue)
+        {
+#if NETSTANDARD2_0
+            long range = (long)maxValue - minValue;
+
+            return (int)((long)Math.Floor(GetRandomDouble() * range) + minValue);
+#endif
+#if NETSTANDARD2_1
+            return RandomNumberGenerator.GetInt32(minValue, maxValue + 1);
+#endif
+        }
+
 
         #endregion Random String
 

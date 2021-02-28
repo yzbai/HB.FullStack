@@ -3,8 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Net.Http;
+using System.Text;
 
+using HB.FullStack.Common.Utility;
 
 namespace HB.FullStack.Common.Api
 {
@@ -28,13 +31,13 @@ namespace HB.FullStack.Common.Api
 
         public string? PublicResourceToken { get; set; }
 
-        #endregion Common Parameters
+        #endregion
 
         private readonly string _requestId = SecurityUtil.CreateUniqueToken();
         private bool _needHttpMethodOveride = true;
-        private string _endpointName = null!;
-        private string _apiVersion = null!;
-        private string _resourceName = null!;
+        private string? _endpointName;
+        private string? _apiVersion;
+        private string? _resourceName;
 
         private HttpMethod _httpMethod = null!;
         private string? _condition;
@@ -43,9 +46,10 @@ namespace HB.FullStack.Common.Api
         private ApiAuthType _apiAuthType;
         private string? _apiKeyName;
 
-        protected ApiRequest() { }
+        private TimeSpan? _rateLimit;
+        //protected ApiRequest() { }
 
-        protected ApiRequest(ApiAuthType apiAuthType, string endPointName, string apiVersion, HttpMethod httpMethod, string resourceName, string? condition)
+        protected ApiRequest(HttpMethod httpMethod, ApiAuthType apiAuthType, string? endPointName, string? apiVersion, string? resourceName, string? condition)
         {
             _apiAuthType = apiAuthType;
             _endpointName = endPointName;
@@ -67,7 +71,7 @@ namespace HB.FullStack.Common.Api
             return _requestId;
         }
 
-        public string GetEndpointName()
+        public string? GetEndpointName()
         {
             return _endpointName;
         }
@@ -77,7 +81,7 @@ namespace HB.FullStack.Common.Api
             _endpointName = endpointName;
         }
 
-        public string GetApiVersion()
+        public string? GetApiVersion()
         {
             return _apiVersion;
         }
@@ -97,7 +101,7 @@ namespace HB.FullStack.Common.Api
             _httpMethod = httpMethod;
         }
 
-        public string GetResourceName()
+        public string? GetResourceName()
         {
             return _resourceName;
         }
@@ -130,6 +134,16 @@ namespace HB.FullStack.Common.Api
         public static string GetRandomStr()
         {
             return SecurityUtil.CreateRandomString(6);
+        }
+
+        public TimeSpan? GetRateLimit()
+        {
+            return _rateLimit;
+        }
+
+        public void SetRateLimit(TimeSpan timeSpan)
+        {
+            _rateLimit = timeSpan;
         }
 
         public string? GetHeader(string name)
@@ -176,6 +190,52 @@ namespace HB.FullStack.Common.Api
         {
             return DeviceInfos.Name;
         }
+
+        public string GetUrl()
+        {
+            string uri = BuildUrl();
+
+            IDictionary<string, string?> parameters = new Dictionary<string, string?>
+            {
+                { ClientNames.RandomStr, ApiRequest.GetRandomStr() },
+                { ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture) },
+                { ClientNames.DeviceId, DeviceId }//额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
+            };
+
+            return UrlUtil.AddQuerys(uri, parameters);
+        }
+
+        protected virtual string BuildUrl()
+        {
+            return BuildDefaultUrl(this);
+        }
+
+        /// <summary>
+        /// 样式: /Version1/Resource1/Condition1
+        /// </summary>
+        private static string BuildDefaultUrl(ApiRequest request)
+        {
+            StringBuilder requestUrlBuilder = new StringBuilder();
+
+            if (!request.GetApiVersion().IsNullOrEmpty())
+            {
+                requestUrlBuilder.Append(request.GetApiVersion());
+            }
+
+            if (!request.GetResourceName().IsNullOrEmpty())
+            {
+                requestUrlBuilder.Append('/');
+                requestUrlBuilder.Append(request.GetResourceName());
+            }
+
+            if (!request.GetCondition().IsNullOrEmpty())
+            {
+                requestUrlBuilder.Append('/');
+                requestUrlBuilder.Append(request.GetCondition());
+            }
+
+            return requestUrlBuilder.ToString();
+        }
     }
 #pragma warning restore CA1024 // Use properties where appropriate
 
@@ -186,52 +246,27 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         /// <param name="httpMethod"></param>
         /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
-        protected ApiRequest(HttpMethod httpMethod, string? condition)
+        protected ApiRequest(HttpMethod httpMethod, string? condition) : this(ApiAuthType.Jwt, httpMethod, condition)
         {
-            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
-
-            SetEndpointName(def.EndpointName);
-            SetApiVersion(def.ApiVersion);
-            SetResourceName(def.Name);
-            SetHttpMethod(httpMethod);
-            SetCondition(condition);
-            SetApiAuthType(ApiAuthType.Jwt);
         }
 
-        protected ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition)
+        protected ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition) : this(ApiAuthType.ApiKey, httpMethod, condition)
         {
-            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
-
-            SetEndpointName(def.EndpointName);
-            SetApiVersion(def.ApiVersion);
-            SetResourceName(def.Name);
-            SetHttpMethod(httpMethod);
-            SetCondition(condition);
-            SetApiAuthType(ApiAuthType.ApiKey);
             SetApiKeyName(apiKeyName);
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : this(httpMethod, apiAuthType, null, null, null, condition)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             SetEndpointName(def.EndpointName);
             SetApiVersion(def.ApiVersion);
             SetResourceName(def.Name);
-            SetHttpMethod(httpMethod);
-            SetCondition(condition);
-            SetApiAuthType(apiAuthType);
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition, string endpointName, string apiVersion, string resourceName)
-        {
-            SetEndpointName(endpointName);
-            SetApiVersion(apiVersion);
-            SetResourceName(resourceName);
-            SetHttpMethod(httpMethod);
-            SetCondition(condition);
-            SetApiAuthType(apiAuthType);
-        }
+        protected ApiRequest(HttpMethod httpMethod, ApiAuthType apiAuthType, string? endPointName, string? apiVersion, string? resourceName, string? condition)
+            : base(httpMethod, apiAuthType, endPointName, apiVersion, resourceName, condition)
+        { }
 
         public abstract override int GetHashCode();
     }

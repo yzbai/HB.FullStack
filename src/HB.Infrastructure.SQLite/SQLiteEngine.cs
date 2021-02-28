@@ -24,7 +24,7 @@ namespace HB.Infrastructure.SQLite
 
         public EngineType EngineType => EngineType.SQLite;
 
-        [NotNull, DisallowNull] public string? FirstDefaultDatabaseName { get; private set; }
+        public string FirstDefaultDatabaseName { get; private set; } = null!;
 
         public IEnumerable<string> DatabaseNames { get; private set; }
 
@@ -32,7 +32,7 @@ namespace HB.Infrastructure.SQLite
         {
             _options = options.Value;
 
-            DatabaseNames = _options.Connections.Select(s => s.DatabaseName);
+            DatabaseNames = _options.Connections.Select(s => s.DatabaseName).ToList();
 
             SetConnectionStrings();
         }
@@ -77,10 +77,12 @@ namespace HB.Infrastructure.SQLite
 
         public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
         {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
             SqliteCommand command = new SqliteCommand(engineCommand.CommandText)
             {
                 CommandType = CommandType.Text
             };
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
             if (engineCommand.Parameters == null)
             {

@@ -36,3 +36,13 @@ dotnet_diagnostic.CA2227.severity = none
 
 #CA1031：不要捕捉一般异常类型
 dotnet_diagnostic.CA1031.severity = none
+
+
+#CA1032: Implement standard exception constructors
+dotnet_diagnostic.CA1032.severity = none
+
+#CA1716
+dotnet_diagnostic.CA1716.severity = none
+
+# IDE0090: Use 'new(...)'
+dotnet_diagnostic.IDE0090.severity = none

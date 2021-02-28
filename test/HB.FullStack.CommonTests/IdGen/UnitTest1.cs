@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.IdGen;
+
 using Xunit;
 
 namespace HB.Infrastructure.IdGen.Tests
@@ -47,7 +49,7 @@ namespace HB.Infrastructure.IdGen.Tests
                 int taskID = Task.CurrentId!.Value;
                 for (int i = 0; i < 10; ++i)
                 {
-                    long id = IDistributedIdGen.IdGen.GetId();
+                    long id = StaticIdGen.GetId();
                     Debug.WriteLine($"{id}    {taskID}");
                     if (!dict.TryAdd(id, taskID))
                     {

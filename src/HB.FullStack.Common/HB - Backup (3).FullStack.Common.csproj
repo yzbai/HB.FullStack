@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+	<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+	<LangVersion>Latest</LangVersion>
+	<Nullable>enable</Nullable>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<WarningsAsErrors />
+	<EnableNETAnalyzers>true</EnableNETAnalyzers>
+	<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+  </PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+	</ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="AsyncAwaitBestPractices" Version="5.0.2" />
+	
+	<PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.8.55" />
+	<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.8.55">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.8.33" />
+	<PackageReference Include="MsgPack.Cli" Version="1.0.1" />
+	<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+	<PackageReference Include="System.Text.Json" Version="5.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="5.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

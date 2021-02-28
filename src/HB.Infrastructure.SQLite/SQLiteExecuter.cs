@@ -74,7 +74,7 @@ namespace HB.Infrastructure.SQLite
             {
                 if (reader != null)
                 {
-                    await reader.DisposeAsync().ConfigureAwait(false);
+                    await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
                 if (isOwnedConnection)

@@ -29,8 +29,8 @@ namespace System
 
         public static void Configure(JsonSerializerOptions jsonSerializerOptions)
         {
-            //jsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-            //jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            jsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
         }
 
