@@ -11,30 +11,17 @@ namespace Playground
 
     class TestServer
     {
-        static string StsEndpoint = "sts.aliyuncs.com";
-        static string AccessKey = "LTAI4GG6iiBxoJAQWxLZpeAi";
-        static string AccessSecret = "G6V7wRtc5biL4mdj7szUDw5hxP5imC";
+        static string StsEndpoint = "";
+        static string AccessKey = "";
+        static string AccessSecret = "";
 
-        static string BucketName = "mycolorfultime-private-dev";
+        static string BucketName = "";
 
-        static string Arn = "acs:ram::50186796:role/oss-mycolorfultime-app-write-assume-role";
+        static string Arn = "";
 
-        static string RoleSessionName = "MyColorfulTime_App_User_Assume_Role";
+        static string RoleSessionName = "";
 
-        public static readonly string RolePolicy = @"
-{
-    ""Statement"": [
-        {
-            ""Action"": ""oss:*"",
-            ""Effect"": ""Allow"",
-            ""Resource"": [
-                ""acs:oss:*:*:mycolorfultime-private-dev"",
-                ""acs:oss:*:*:mycolorfultime-private-dev/*""
-            ]
-        }
-    ],
-    ""Version"": ""1""
-}";
+        public static readonly string RolePolicy = @"";
 
         private DefaultAcsClient _acsClient;
 
@@ -72,7 +59,7 @@ namespace Playground
     class TestClient
     {
         static string OssEndpoint = "oss-cn-hangzhou.aliyuncs.com";
-        static string BucketName = "mycolorfultime-private-dev";
+        static string BucketName = "";
         private string _fileName;
 
         public TestClient()
