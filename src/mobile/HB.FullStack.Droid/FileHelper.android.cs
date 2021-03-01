@@ -81,7 +81,7 @@ namespace HB.FullStack.Droid
             await fileStream.FlushAsync().ConfigureAwait(false);
         }
 
-        public async Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType)
+        public async Task<string> SaveFileAsync(byte[] data, string fileName, UserFileType userFileType)
         {
             string fullPath = GetFileFullPath(fileName, userFileType);
 
@@ -92,6 +92,8 @@ namespace HB.FullStack.Droid
             {
                 Android.Media.MediaScannerConnection.ScanFile(Platform.CurrentActivity, new string[] { fullPath }, new string[] { "image/png", "image/jpeg" }, null);
             }
+
+            return fullPath;
         }
 
         private string GetFileFullPath(string fileName, UserFileType userFileType)
@@ -105,7 +107,7 @@ namespace HB.FullStack.Droid
             return System.IO.Path.Combine(directory, fileName);
         }
 
-        public async Task SaveFileAsync(Stream stream, string fileName, UserFileType userFileType)
+        public async Task<string> SaveFileAsync(Stream stream, string fileName, UserFileType userFileType)
         {
             string fullPath = GetFileFullPath(fileName, userFileType);
 
@@ -114,6 +116,8 @@ namespace HB.FullStack.Droid
             await stream.CopyToAsync(fileStream).ConfigureAwait(false);
 
             await fileStream.FlushAsync().ConfigureAwait(false);
+
+            return fullPath;
         }
 
         public async Task<byte[]?> GetFileAsync(string fullPath)
@@ -203,6 +207,11 @@ namespace HB.FullStack.Droid
             }
         }
 
+        public Stream GetAssetStream(string fileName)
+        {
+            return Platform.CurrentActivity.Assets!.Open(fileName);
+        }
+
         #region Avatar
 
         public async Task SaveAvatarAsync(ImageSource imageSource, long userId)
@@ -252,6 +261,8 @@ namespace HB.FullStack.Droid
 
             return GetFileAsync(fullPath);
         }
+
+        
 
         #endregion
     }

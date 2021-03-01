@@ -20,15 +20,24 @@ namespace HB.FullStack.XamarinForms.Platforms
 
         Task<Stream> GetResourceStreamAsync(string fileName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null);
 
-        Task SaveFileAsync(byte[] data, string fileName, UserFileType userFileType);
+        Task<string> SaveFileAsync(byte[] data, string fileName, UserFileType userFileType);
 
         Task SaveFileAsync(byte[] data, string fullPath);
 
-        Task SaveFileAsync(Stream stream, string fileName, UserFileType userFileType);
+        /// <summary>
+        /// 返回fullPath
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="fileName"></param>
+        /// <param name="userFileType"></param>
+        /// <returns></returns>
+        Task<string> SaveFileAsync(Stream stream, string fileName, UserFileType userFileType);
 
         bool IsFileExisted(string fileName, UserFileType avatar);
 
         Task<byte[]?> GetFileAsync(string fullPath);
+
+        Stream GetAssetStream(string fileName);
 
         #region Avatar
 
