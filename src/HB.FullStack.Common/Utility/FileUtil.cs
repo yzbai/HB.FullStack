@@ -5,12 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging;
 
 namespace System
 {
     public static class FileUtil
     {
+        private static readonly object _locker = new object();
+
         public static IDictionary<string, List<byte[]>> FileSignatures { get; private set; } = new Dictionary<string, List<byte[]>>
         {
             { ".gif", new List<byte[]> { new byte[] { 0x47, 0x49, 0x46, 0x38 } } },
@@ -97,18 +100,38 @@ namespace System
             }
         }
 
-        public static bool TrySaveToFile(byte[] buffer, string path)
+        private static void CreateDirectoryIfNotExist(string directoryPath)
         {
+            if (!Directory.Exists(directoryPath))
+            {
+                lock (_locker)
+                {
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+                }
+            }
+        }
+
+        public static async Task<bool> TrySaveFileAsync(Stream stream, string fullPath, bool @override = true, bool createDirectoryIfNotExist = true)
+        {
+            FileMode fileMode = @override ? FileMode.Create : FileMode.CreateNew;
+
             try
             {
-                using FileStream fileStream = new FileStream(path, FileMode.CreateNew);
-                using BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+                string directory = Path.GetDirectoryName(fullPath);
 
-                binaryWriter.Write(buffer);
+                if (createDirectoryIfNotExist)
+                {
+                    CreateDirectoryIfNotExist(directory);
+                }
 
-                binaryWriter.Close();
+                using FileStream fileStream = File.Open(fullPath, fileMode);
 
-                fileStream.Close();
+                await stream.CopyToAsync(fileStream).ConfigureAwait(false);
+
+                await fileStream.FlushAsync().ConfigureAwait(false);
 
                 return true;
             }
@@ -130,11 +153,68 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// ComputeFileHash
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
+        public static async Task<bool> TrySaveFileAsync(byte[] data, string fullPath, bool @override = true, bool createDirectoryIfNotExist = true)
+        {
+            FileMode fileMode = @override ? FileMode.Create : FileMode.CreateNew;
+
+            try
+            {
+                string directory = Path.GetDirectoryName(fullPath);
+
+                if (createDirectoryIfNotExist)
+                {
+                    CreateDirectoryIfNotExist(directory);
+                }
+
+                using FileStream fileStream = File.Open(fullPath, fileMode);
+
+                await fileStream.WriteAsync(data).ConfigureAwait(false);
+
+                await fileStream.FlushAsync().ConfigureAwait(false);
+
+                return true;
+            }
+            catch (System.Security.SecurityException)
+            {
+                return false;
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (System.ObjectDisposedException)
+            {
+                return false;
+            }
+        }
+
+        public static async Task<byte[]?> TryGetFileAsync(string fullPath)
+        {
+            if (!File.Exists(fullPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                using FileStream fileStream = new FileStream(fullPath, FileMode.Open);
+
+                using MemoryStream memoryStream = new MemoryStream();
+
+                await fileStream.CopyToAsync(memoryStream).ConfigureAwait(false);
+
+                return memoryStream.ToArray();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         /// <exception cref="FileLoadException"></exception>
         /// <exception cref="IOException"></exception>
         public static byte[] ComputeFileHash(string filePath)

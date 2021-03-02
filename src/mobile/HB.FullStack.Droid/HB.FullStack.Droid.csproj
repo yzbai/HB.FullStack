@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthImageSourceHandler.android.cs" />
-    <Compile Include="FileHelper.android.cs" />
+    <Compile Include="PlatformLocalFileHelper.android.cs" />
     <Compile Include="FocusEffect.android.cs" />
     <Compile Include="HybridWebViewRenderer.android.cs" />
     <Compile Include="ImageExtensions.android.cs" />

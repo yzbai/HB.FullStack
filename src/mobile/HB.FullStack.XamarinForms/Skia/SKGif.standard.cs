@@ -31,7 +31,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             return Task.Run(async () =>
             {
-                IFileHelper fileService = DependencyService.Resolve<IFileHelper>();
+                IPlatformLocalFileHelper fileService = DependencyService.Resolve<IPlatformLocalFileHelper>();
 
                 using Stream stream = await fileService.GetResourceStreamAsync(fileName, ResourceType.Drawable, null).ConfigureAwait(false);
                 using SKManagedStream sKManagedStream = new SKManagedStream(stream);
