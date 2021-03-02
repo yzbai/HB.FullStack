@@ -42,6 +42,7 @@ namespace HB.FullStack.XamarinForms.Platforms
         #region Avatar
 
         Task SaveAvatarAsync(ImageSource imageSource, long usreId);
+        bool IsDirectoryExisted(string directoryFullPath);
 
         /// <summary>
         /// 如果不存在，返回null
@@ -62,5 +63,6 @@ namespace HB.FullStack.XamarinForms.Platforms
     {
         Avatar,
         Cache,
+        ClockTheme,
     }
 }

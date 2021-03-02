@@ -69,6 +69,11 @@ namespace HB.FullStack.XamarinForms.Base
                 throw new ApiException(HB.FullStack.Common.Api.ApiErrorCode.NullReturn, $"Parameter: {entityName}");
             }
         }
+
+        protected BaseRepo()
+        {
+            CheckAppInitIsFinished();
+        }
     }
 
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource
@@ -91,8 +96,6 @@ namespace HB.FullStack.XamarinForms.Base
         {
             _database = database;
             _apiClient = apiClient;
-
-            CheckAppInitIsFinished();
 
             TimeSpan? attributedLocalDataExpiryTime = typeof(TEntity).GetCustomAttribute<LocalDataTimeoutAttribute>()?.ExpiryTime;
 

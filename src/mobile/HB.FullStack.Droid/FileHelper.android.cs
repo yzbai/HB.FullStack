@@ -24,6 +24,7 @@ namespace HB.FullStack.Droid
     public class FileHelper : IFileHelper
     {
         //TODO: 图片存储到公共相册中
+        public static readonly string ClockThemeDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "clocktheme");
         public static readonly string AvatarDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "time_avatars");
         public static readonly string OthersDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "others");
         public static readonly string CacheDirectory = System.IO.Path.Combine(FileSystem.AppDataDirectory, "cache");
@@ -36,6 +37,7 @@ namespace HB.FullStack.Droid
             {
                 UserFileType.Avatar => AvatarDirectory,
                 UserFileType.Cache => CacheDirectory,
+                UserFileType.ClockTheme=>ClockThemeDirectory,
                 _ => OthersDirectory
             };
         }
@@ -47,6 +49,10 @@ namespace HB.FullStack.Droid
                 UserFileType.Avatar => ".png",
                 _ => "",
             };
+        }
+        public bool IsDirectoryExisted(string directoryFullPath)
+        {
+            return Directory.Exists(directoryFullPath);
         }
 
         public bool IsFileExisted(string fileName, UserFileType userFileType)
