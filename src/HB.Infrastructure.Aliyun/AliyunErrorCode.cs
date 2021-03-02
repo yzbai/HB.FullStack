@@ -3,6 +3,7 @@
     public enum AliyunErrorCode
     {
         OssError,
-        SmsError
+        SmsError,
+        StsError
     }
 }

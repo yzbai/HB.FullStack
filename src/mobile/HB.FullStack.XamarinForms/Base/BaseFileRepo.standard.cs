@@ -25,8 +25,6 @@ namespace HB.FullStack.XamarinForms.Base
             }
         }
 
-        protected static MemorySimpleLocker _requestLocker = new MemorySimpleLocker();
-
         protected IApiClient ApiClient { get; }
 
         protected BaseFileRepo(IApiClient apiClient)

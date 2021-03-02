@@ -15,8 +15,6 @@ namespace Playground
         static string AccessKey = "";
         static string AccessSecret = "";
 
-        static string BucketName = "";
-
         static string Arn = "";
 
         static string RoleSessionName = "";

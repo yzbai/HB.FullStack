@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.Infrastructure.Aliyun
+namespace HB.Infrastructure.Aliyun.Sts
 {
     public class AliyunStsToken
     {
@@ -14,21 +14,24 @@ namespace HB.Infrastructure.Aliyun
 
         public string AccessKeySecret { get; set; }
 
-        public string ExpirationAt { get; set; }
+        public DateTimeOffset ExpirationAt { get; set; }
 
         public string AssumedRoleId { get; set; }
 
         public string AssumedRoleName { get; set; }
 
-        public AliyunStsToken(string requestId, string securityToken, string accessKeyId, string accessKeySecret, string expirationAt, string assumedRoleId, string assumedRoleName)
+        public string[] Resources { get; set; }
+
+        public AliyunStsToken(string requestId, string securityToken, string accessKeyId, string accessKeySecret, string expirationAt, string assumedRoleId, string assumedRoleName, string[] resources)
         {
             RequestId = requestId;
             SecurityToken = securityToken;
             AccessKeyId = accessKeyId;
             AccessKeySecret = accessKeySecret;
-            ExpirationAt = expirationAt;
+            ExpirationAt = DateTimeOffset.Parse(expirationAt);
             AssumedRoleId = assumedRoleId;
             AssumedRoleName = assumedRoleName;
+            Resources = resources;
         }
 
     }

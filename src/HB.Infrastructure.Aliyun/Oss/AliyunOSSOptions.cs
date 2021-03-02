@@ -30,22 +30,6 @@ namespace HB.Infrastructure.Aliyun.Oss
 
         [DisallowNull, NotNull]
         public string BucketUserDirectory { get; set; } = null!;
-
-        public OssStsSettings Sts { get; set; } = new OssStsSettings();
-    }
-
-    public class OssStsSettings
-    {
-        [DisallowNull, NotNull]
-        public string Endpoint { get; set; } = null!;
-
-        public int ExpireSeconds { get; set; } = 3600;
-
-        [DisallowNull, NotNull]
-        public string ReadArn { get; set; } = null!;
-
-        [DisallowNull, NotNull]
-        public string WriteArn { get; set; } = null!;
     }
 
     public class AliyunOssOptions : IOptions<AliyunOssOptions>

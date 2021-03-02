@@ -23,6 +23,8 @@ namespace HB.FullStack.XamarinForms.Base
     {
         private static bool _isAppInitTaskFinished;
 
+        protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
+
         protected static void CheckAppInitIsFinished()
         {
             if (!_isAppInitTaskFinished)
@@ -78,8 +80,6 @@ namespace HB.FullStack.XamarinForms.Base
 
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource
     {
-        private static readonly MemorySimpleLocker _requestLocker = new MemorySimpleLocker();
-
         protected readonly IDatabase _database;
 
         protected readonly IApiClient _apiClient;
@@ -292,7 +292,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Consts.DefaultApiRequestRateLimit;
 
-            return !_requestLocker.NoWaitLock(
+            return !RequestLocker.NoWaitLock(
                 "request",
                 apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture),
                 expiryTime);
