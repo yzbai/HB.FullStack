@@ -238,14 +238,14 @@ namespace HB.FullStack.XamarinForms.Base
 
             //版本1：如果Id每次都是随机，会造成永远只添加，比如AliyunStsToken，服务器端返回Id=-1，导致每次获取后，Id都不一致
             //所以Id默认为-1的实体就不要用Id作为主键了
-            foreach (TEntity entity in remotes)
-            {
-                await Database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
-            }
+            //foreach (TEntity entity in remotes)
+            //{
+            //    await Database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
+            //}
 
-            //版本2：先删除locals，然后再添加,由于是假删除，IdBarrier中并没有删除对应关系，导致服务器ID映射的客户端ID重复
-            //await _database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
-            //await _database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
+            //版本2：先删除locals，然后再添加,由于是假删除，IdBarrier中并没有删除对应关系，导致服务器ID映射的客户端ID重复，这时，不应该用IdGenEntity作为实体，选用Autoincrement，比如AliyunStsToken
+            await Database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
+            await Database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
 
             return remotes;
         }
