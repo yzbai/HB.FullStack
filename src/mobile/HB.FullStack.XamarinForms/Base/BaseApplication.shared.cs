@@ -204,14 +204,14 @@ namespace HB.FullStack.XamarinForms.Base
 
             GlobalSettings.Logger.Log(logLevel, ex, message);
         }
-        public static void LogDebug(string message)
+        public static void LogDebug(string message, Exception? ex = null)
         {
-            Log(null, message, LogLevel.Debug);
+            Log(ex, message, LogLevel.Debug);
         }
 
-        public static void LogError(string message)
+        public static void LogError(string message, Exception? ex = null)
         {
-            Log(null, message, LogLevel.Error);
+            Log(ex, message, LogLevel.Error);
         }
     }
 }
