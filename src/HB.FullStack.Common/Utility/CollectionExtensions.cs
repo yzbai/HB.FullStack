@@ -96,8 +96,11 @@ namespace System
 
             foreach (object obj in ts)
             {
-                stringBuilder.Append(obj.ToString());
-                stringBuilder.Append(seprator);
+                if (obj != null)
+                {
+                    stringBuilder.Append(obj.ToString());
+                    stringBuilder.Append(seprator);
+                }
             }
 
             if (stringBuilder.Length != 0)
