@@ -130,7 +130,7 @@ namespace HB.FullStack.Database.Converter
                 }
                 else if (trueType != dbValueType)
                 {
-                    typeValue = Convert.ChangeType(dbValue, trueType, CultureInfo.InvariantCulture);
+                    typeValue = Convert.ChangeType(dbValue, trueType, GlobalSettings.Culture);
                 }
                 else
                 {
@@ -213,7 +213,7 @@ namespace HB.FullStack.Database.Converter
                 //Enum e => e.ToString(),
                 DBNull _ => "null",
                 DateTime _ => throw new DatabaseException(DatabaseErrorCode.UseDateTimeOffsetOnly),
-                DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", CultureInfo.InvariantCulture),
+                DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", GlobalSettings.Culture),
                 bool b => b ? "1" : "0",
                 _ => dbValue.ToString()!
             };

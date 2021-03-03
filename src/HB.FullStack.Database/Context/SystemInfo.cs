@@ -46,7 +46,7 @@ namespace HB.FullStack.Database
             {
                 if (_sysDict.TryGetValue(SystemInfoNames.Version, out string? value))
                 {
-                    return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                    return Convert.ToInt32(value, GlobalSettings.Culture);
                 }
 
                 throw new DatabaseException(DatabaseErrorCode.VersionNotFoundInSystemInfoTable);

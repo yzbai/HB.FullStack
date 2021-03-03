@@ -9,16 +9,16 @@ namespace HB.FullStack.Common.Api
 	/// <summary>
 	/// 从Xamarin.Forms中拷贝
 	/// </summary>
-	public class StreamWrapper : Stream
+	public class WrappedStream : Stream
 	{
 		readonly Stream _wrapped;
 		IDisposable? _additionalDisposable;
 
-		public StreamWrapper(Stream wrapped) : this(wrapped, null)
+		public WrappedStream(Stream wrapped) : this(wrapped, null)
 		{
 		}
 
-		public StreamWrapper(Stream wrapped, IDisposable? additionalDisposable)
+		public WrappedStream(Stream wrapped, IDisposable? additionalDisposable)
 		{
 			if (wrapped == null)
 				throw new ArgumentNullException(nameof(wrapped));
@@ -102,7 +102,7 @@ namespace HB.FullStack.Common.Api
 
 			// the HttpResponseMessage needs to be disposed of after the calling code is done with the stream
 			// otherwise the stream may get disposed before the caller can use it
-			return new StreamWrapper(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
+			return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
 		}
 	}
 }

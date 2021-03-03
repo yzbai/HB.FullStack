@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace HB.Infrastructure.Aliyun.Sts
@@ -20,7 +21,7 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         public string AssumedRoleName { get; set; }
 
-        public string[] Resources { get; set; }
+        public IList<string> Resources { get; set; } = new List<string>();
 
         public AliyunStsToken(string requestId, string securityToken, string accessKeyId, string accessKeySecret, string expirationAt, string assumedRoleId, string assumedRoleName, string[] resources)
         {
@@ -28,7 +29,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             SecurityToken = securityToken;
             AccessKeyId = accessKeyId;
             AccessKeySecret = accessKeySecret;
-            ExpirationAt = DateTimeOffset.Parse(expirationAt);
+            ExpirationAt = DateTimeOffset.Parse(expirationAt, GlobalSettings.Culture);
             AssumedRoleId = assumedRoleId;
             AssumedRoleName = assumedRoleName;
             Resources = resources;

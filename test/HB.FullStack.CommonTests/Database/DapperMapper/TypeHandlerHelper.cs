@@ -22,7 +22,7 @@ namespace ClassLibrary1
 
             if (dbValueType == typeof(string))
             {
-                return DateTimeOffset.Parse(value.ToString(), CultureInfo.InvariantCulture);
+                return DateTimeOffset.Parse(value.ToString(), GlobalSettings.Culture);
             }
             else if (dbValueType == typeof(long))
             {

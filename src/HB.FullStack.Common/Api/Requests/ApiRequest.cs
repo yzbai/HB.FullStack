@@ -198,7 +198,7 @@ namespace HB.FullStack.Common.Api
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
                 { ClientNames.RandomStr, ApiRequest.GetRandomStr() },
-                { ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture) },
+                { ClientNames.Timestamp, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(GlobalSettings.Culture) },
                 { ClientNames.DeviceId, DeviceId }//额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
             };
 

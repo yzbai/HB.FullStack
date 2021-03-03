@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.Caching.Distributed
     {
         public static Task SetIntAsync(this IDistributedCache cache, string key, int value, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            return cache.SetStringAsync(key, Convert.ToString(value, CultureInfo.InvariantCulture), options, token);
+            return cache.SetStringAsync(key, Convert.ToString(value, GlobalSettings.Culture), options, token);
 
         }
 
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.Caching.Distributed
                 return null;
             }
 
-            return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+            return Convert.ToInt32(value, GlobalSettings.Culture);
         }
 
         public static async Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class

@@ -99,7 +99,7 @@ namespace HB.FullStack.DatabaseTests
                     PublisherEntity entity = lst.ElementAt(i);
                     //entity.Guid = Guid.NewGuid().ToString();
                     entity.Type = PublisherType.Online;
-                    entity.Name = "ÖÐsfasfafÎÄÃû×Ö";
+                    entity.Name = "ï¿½ï¿½sfasfafï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
                     entity.Books = new List<string>() { "xxx", "tttt" };
                     entity.BookAuthors = new Dictionary<string, Author>()
                     {
@@ -470,7 +470,7 @@ namespace HB.FullStack.DatabaseTests
         [Fact]
         public async Task Test_EntityMapperAsync()
         {
-            GlobalSettings.Logger.LogInformation($"µ±Ç°Process,{Environment.ProcessId}");
+            GlobalSettings.Logger.LogInformation($"ï¿½ï¿½Ç°Process,{Environment.ProcessId}");
 
             IDatabase database = _mysql;
 
@@ -594,7 +594,7 @@ namespace HB.FullStack.DatabaseTests
 
                 Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
 
-                //Warning: Èç¹ûÓÃDapper£¬Ð¡ÐÄDateTimeOffsetµÄ´æ´¢£¬»á¶ªÊ§offset£¬È»ºó×ª»ØÀ´Ê±ºò£¬»á¼ÓÉÏµ±µØÊ±¼äµÄoffset
+                //Warning: ï¿½ï¿½ï¿½ï¿½ï¿½Dapperï¿½ï¿½Ð¡ï¿½ï¿½DateTimeOffsetï¿½Ä´æ´¢ï¿½ï¿½ï¿½á¶ªÊ§offsetï¿½ï¿½È»ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ò£¬»ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
 
 

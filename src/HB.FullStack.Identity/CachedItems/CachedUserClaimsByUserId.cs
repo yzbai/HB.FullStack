@@ -23,7 +23,7 @@ namespace HB.FullStack.Identity
 
         public static CachedUserClaimsByUserId Key(long userId)
         {
-            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString(CultureInfo.InvariantCulture));
+            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString(GlobalSettings.Culture));
 
             return item;
         }

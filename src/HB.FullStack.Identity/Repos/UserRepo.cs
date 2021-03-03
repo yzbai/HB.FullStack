@@ -51,7 +51,7 @@ namespace HB.FullStack.Identity
         {
             return await TryCacheAsideAsync(
                 dimensionKeyName: nameof(User.Id),
-                dimensionKeyValue: userId.ToString(CultureInfo.InvariantCulture),
+                dimensionKeyValue: userId.ToString(GlobalSettings.Culture),
                 dbRetrieve: db =>
                 {
                     return db.ScalarAsync<User>(userId, transContext);
