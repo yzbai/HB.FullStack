@@ -25,7 +25,7 @@ namespace HB.FullStack.Cache
         /// <exception cref="CacheException"></exception>
         public static Task SetIntAsync(this ICache cache, string key, int value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            return cache.SetStringAsync(key, value.ToString(CultureInfo.InvariantCulture), utcTicks, options, token);
+            return cache.SetStringAsync(key, value.ToString(GlobalSettings.Culture), utcTicks, options, token);
         }
 
         /// <exception cref="CacheException"></exception>
@@ -40,7 +40,7 @@ namespace HB.FullStack.Cache
                     return null;
                 }
 
-                return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                return Convert.ToInt32(value, GlobalSettings.Culture);
             }
             catch (FormatException ex)
             {

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 
 using Microsoft;
@@ -236,7 +237,7 @@ namespace System
 
         public static int ToInt32(this string str)
         {
-            return Convert.ToInt32(str);
+            return Convert.ToInt32(str, GlobalSettings.Culture); ;
         }
 
         #endregion Extensions

@@ -159,10 +159,10 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 _ => -1,
             };
 
-            if (changedId < 0 &&
-                //propertyInfo.Name == nameof(Resource.Id) &&
-                (requestType == ApiRequestType.Get || requestType == ApiRequestType.GetSingle) &&
-                direction == ChangeDirection.FromServer)
+            if (direction == ChangeDirection.FromServer 
+                && changedId < 0 
+                && id > 0 
+                &&(requestType == ApiRequestType.Get || requestType == ApiRequestType.GetSingle))
             {
                 changedId = StaticIdGen.GetId();
                 await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);

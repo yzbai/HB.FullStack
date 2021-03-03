@@ -23,9 +23,9 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "已在Disappear中Dispose")]
     public partial class CropperPage : BaseContentPage
     {
-        private readonly IFileHelper _fileHelper = DependencyService.Resolve<IFileHelper>();
         private readonly string _imageFullPath;
         private readonly string _croppedImageFullPath;
+        private readonly Action<bool> _onCroppFinish;
         private CropperFrameFigure? _cropperFrameFigure;
         private BitmapFigure? _bitmapFigure;
 
@@ -39,11 +39,11 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        public CropperPage(string imageFullPath, string croppedImageFullPath)
+        public CropperPage(string imageFullPath, string croppedImageFullPath, Action<bool> onCroppFinish)
         {
             _imageFullPath = imageFullPath;
             _croppedImageFullPath = croppedImageFullPath;
-
+            _onCroppFinish = onCroppFinish;
             InitializeComponent();
 
             CropCommand = new AsyncCommand(CropAsync, onException: GlobalSettings.ExceptionHandler);
@@ -123,12 +123,14 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
             using SKBitmap croppedBitmap = _bitmapFigure.Crop(_cropperFrameFigure.CropRect);
 
-            await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath).ConfigureAwait(false);
+            bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath).ConfigureAwait(false);
 
+            _onCroppFinish(isSucceed);
+            
             NavigationService.Current.Pop();
         }
 
-        private async Task SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)
+        private async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)
         {
             //Save
             using SKImage image = SKImage.FromBitmap(sKBitmap);
@@ -137,7 +139,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
             fullPath = Path.ChangeExtension(fullPath, ".png");
 
-            await _fileHelper.SaveFileAsync(data.ToArray(), fullPath).ConfigureAwait(false);
+            return await FileUtil.TrySaveFileAsync(data.ToArray(), fullPath).ConfigureAwait(false);
         }
     }
 }

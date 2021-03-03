@@ -63,7 +63,7 @@ namespace System.Net.Http
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
-            return new StreamWrapper(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
+            return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
         }
 
         /// <exception cref="ApiException"></exception>

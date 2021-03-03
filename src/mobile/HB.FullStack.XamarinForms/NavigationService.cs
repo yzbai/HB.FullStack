@@ -58,7 +58,7 @@ namespace HB.FullStack.XamarinForms
         /// <summary>
         /// 当前navStack[0]的PageType
         /// </summary>
-        public Type? CurrentRootPageType { get; private set; }
+        public Type? CurrentRootPageType { get; set; }
 
         public void PopoutPage<TPage>(bool animated = true)
         {
@@ -72,14 +72,21 @@ namespace HB.FullStack.XamarinForms
             //Shell的坑navStack[0]永远是null, 所以不能用navStack[0] is TPage来判断
             if (CurrentRootPageType == typeof(TPage))
             {
-                CurrentRootPageType = ResumeRouting();
+                ResumeRouting();
             }
             else
             {
-                while (navStack[^1] is not TPage)
+                List<Page> toRemoves = new List<Page>();
+
+                for (int i = navStack.Count - 1; i>=0; --i)
                 {
-                    Navigation?.RemovePage(navStack[^1]);
+                    if(navStack[i] is not TPage)
+                    {
+                        toRemoves.Add(navStack[i]);
+                    }
                 }
+
+                toRemoves.ForEach(p => Navigation?.RemovePage(p));
 
                 Device.BeginInvokeOnMainThread(() => Navigation?.PopAsync(animated));
             }
@@ -99,7 +106,7 @@ namespace HB.FullStack.XamarinForms
 
             if (CurrentRootPageType == typeof(TPage))
             {
-                CurrentRootPageType = ResumeRouting();
+                ResumeRouting();
             }
 
             foreach (var page in Navigation.NavigationStack)
@@ -118,7 +125,7 @@ namespace HB.FullStack.XamarinForms
         /// 返回当前NavStac栈顶的PageType
         /// </summary>
         /// <returns></returns>
-        public abstract Type? ResumeRouting();
+        public abstract void ResumeRouting();
 
         public abstract void PushLoginPage(bool animated = true);
 

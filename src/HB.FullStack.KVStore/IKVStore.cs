@@ -17,7 +17,7 @@ namespace HB.FullStack.KVStore
         /// <exception cref="KVStoreException"></exception>
         Task<T?> GetAsync<T>(long key) where T : KVStoreEntity, new()
         {
-            return GetAsync<T>(key.ToString(CultureInfo.InvariantCulture));
+            return GetAsync<T>(key.ToString(GlobalSettings.Culture));
         }
 
         /// <exception cref="KVStoreException"></exception>

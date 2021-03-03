@@ -7,12 +7,13 @@ namespace System
 {
     public static class UrlUtil
     {
+        [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:URI-like parameters should not be strings", Justification = "<Pending>")]
         public static string AddQuerys(string uri, IDictionary<string, string?> parameters)
         {
             //不能用UriBuilder，会将相对uri转为绝对uri
             //UriBuilder uriBuilder = new UriBuilder(uri);
 
-            int index = uri.IndexOf('?');
+            int index = uri.IndexOf('?',StringComparison.InvariantCulture);
 
             string oldQuery = index > 0 ? uri.Substring(index + 1) : "";
 

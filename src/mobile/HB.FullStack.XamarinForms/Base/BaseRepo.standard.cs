@@ -23,6 +23,8 @@ namespace HB.FullStack.XamarinForms.Base
     {
         private static bool _isAppInitTaskFinished;
 
+        protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
+
         protected static void CheckAppInitIsFinished()
         {
             if (!_isAppInitTaskFinished)
@@ -46,11 +48,11 @@ namespace HB.FullStack.XamarinForms.Base
         }
 
         /// <exception cref="ApiException"></exception>
-        protected static bool EnsureInternet(bool allowOffline = false)
+        protected static bool EnsureInternet(bool throwIfNot = true)
         {
             if (Connectivity.NetworkAccess != NetworkAccess.Internet)
             {
-                if (!allowOffline)
+                if (throwIfNot)
                 {
                     throw new ApiException(ApiErrorCode.ApiNotAvailable);
                 }
@@ -69,12 +71,17 @@ namespace HB.FullStack.XamarinForms.Base
                 throw new ApiException(HB.FullStack.Common.Api.ApiErrorCode.NullReturn, $"Parameter: {entityName}");
             }
         }
+
+        protected BaseRepo()
+        {
+            CheckAppInitIsFinished();
+        }
     }
+
+    public delegate bool IfUseLocalData<TEntity, TRes>(ApiRequest<TRes> request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new() where TRes : ApiResource;
 
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource
     {
-        private static readonly MemorySimpleLocker _requestLocker = new MemorySimpleLocker();
-
         protected readonly IDatabase _database;
 
         protected readonly IApiClient _apiClient;
@@ -92,16 +99,14 @@ namespace HB.FullStack.XamarinForms.Base
             _database = database;
             _apiClient = apiClient;
 
-            CheckAppInitIsFinished();
-
             TimeSpan? attributedLocalDataExpiryTime = typeof(TEntity).GetCustomAttribute<LocalDataTimeoutAttribute>()?.ExpiryTime;
 
             _localDataExpiryTime = attributedLocalDataExpiryTime == null ? Consts.DefaultLocalDataExpiryTime : attributedLocalDataExpiryTime.Value;
         }
 
-        protected abstract TEntity ToEntity(TRes res);
+        protected abstract IEnumerable<TEntity> ToEntities(TRes res);
 
-        protected abstract TRes ToResource(TEntity entity);
+        protected abstract IEnumerable<TRes> ToResources(TEntity entity);
 
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
@@ -109,12 +114,15 @@ namespace HB.FullStack.XamarinForms.Base
             Expression<Func<TEntity, bool>> where,
             ApiRequest<TRes> request,
             TransactionContext? transactionContext,
-            RepoGetMode getMode)
+            RepoGetMode getMode,
+            IfUseLocalData<TEntity, TRes>? ifUseLocalData = null)
         {
             if (NeedLogined)
             {
                 EnsureLogined();
             }
+
+            //TODO:尝试引入Cache
 
             IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
 
@@ -124,14 +132,20 @@ namespace HB.FullStack.XamarinForms.Base
                 return locals;
             }
 
-            return await NetworkBoundGetAsync(locals, request, transactionContext, getMode).ConfigureAwait(false);
+            if(ifUseLocalData == null)
+            {
+                ifUseLocalData = DefaultLocalDataAvaliable;
+            }
+
+            return await NetworkBoundGetAsync(locals, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
         }
 
         protected async Task<ObservableTask<IEnumerable<TEntity>>> GetObservableTaskAsync(
             Expression<Func<TEntity, bool>> where,
             ApiRequest<TRes> request,
             TransactionContext? transactionContext = null,
-            RepoGetMode getMode = RepoGetMode.None)
+            RepoGetMode getMode = RepoGetMode.None,
+            IfUseLocalData<TEntity, TRes>? ifUseLocalData = null)
         {
             if (NeedLogined)
             {
@@ -146,9 +160,14 @@ namespace HB.FullStack.XamarinForms.Base
                 return new ObservableTask<IEnumerable<TEntity>>(locals, null, BaseApplication.ExceptionHandler);
             }
 
+            if (ifUseLocalData == null)
+            {
+                ifUseLocalData = DefaultLocalDataAvaliable;
+            }
+
             return new ObservableTask<IEnumerable<TEntity>>(
                 locals,
-                () => NetworkBoundGetAsync(locals, request, transactionContext, getMode),
+                () => NetworkBoundGetAsync(locals, request, transactionContext, getMode, ifUseLocalData),
                 BaseApplication.ExceptionHandler);
         }
 
@@ -156,9 +175,10 @@ namespace HB.FullStack.XamarinForms.Base
             Expression<Func<TEntity, bool>> where,
             ApiRequest<TRes> request,
             TransactionContext? transactionContext,
-            RepoGetMode getMode)
+            RepoGetMode getMode,
+            IfUseLocalData<TEntity, TRes>? ifUseLocalData = null)
         {
-            IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, getMode).ConfigureAwait(false);
+            IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
             return entities.FirstOrDefault();
         }
@@ -167,7 +187,8 @@ namespace HB.FullStack.XamarinForms.Base
             Expression<Func<TEntity, bool>> where,
             ApiRequest<TRes> request,
             TransactionContext? transactionContext = null,
-            RepoGetMode getMode = RepoGetMode.None)
+            RepoGetMode getMode = RepoGetMode.None,
+            IfUseLocalData<TEntity, TRes>? ifUseLocalData = null)
         {
             if (NeedLogined)
             {
@@ -182,24 +203,29 @@ namespace HB.FullStack.XamarinForms.Base
                 return new ObservableTask<TEntity?>(locals.FirstOrDefault(), null, BaseApplication.ExceptionHandler);
             }
 
+            if (ifUseLocalData == null)
+            {
+                ifUseLocalData = DefaultLocalDataAvaliable;
+            }
+
             return new ObservableTask<TEntity?>(
                 locals.FirstOrDefault(),
-                async () => (await NetworkBoundGetAsync(locals, request, transactionContext, getMode).ConfigureAwait(false)).FirstOrDefault(),
+                async () => (await NetworkBoundGetAsync(locals, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
                 BaseApplication.ExceptionHandler);
         }
 
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        private async Task<IEnumerable<TEntity>> NetworkBoundGetAsync(IEnumerable<TEntity> locals, ApiRequest<TRes> request, TransactionContext? transactionContext, RepoGetMode getMode)
+        private async Task<IEnumerable<TEntity>> NetworkBoundGetAsync(IEnumerable<TEntity> locals, ApiRequest<TRes> request, TransactionContext? transactionContext, RepoGetMode getMode, IfUseLocalData<TEntity, TRes> ifUseLocalData )
         {
-            //如果不强制远程，本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
-            if (getMode != RepoGetMode.RemoteForced && LocalDataAvaliable(request, locals))
+            //如果不强制远程，并且满足使用本地数据条件
+            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(request, locals))
             {
                 return locals;
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!EnsureInternet(AllowOfflineRead))
+            if (!EnsureInternet(!AllowOfflineRead))
             {
                 NotifyOfflineDataUsed();
 
@@ -208,12 +234,17 @@ namespace HB.FullStack.XamarinForms.Base
 
             //获取远程，更新本地
             IEnumerable<TRes> ress = await _apiClient.GetAsync(request).ConfigureAwait(false);
-            IEnumerable<TEntity> remotes = ress.Select(res => ToEntity(res)).ToList();
+            IEnumerable<TEntity> remotes = ress.SelectMany(res => ToEntities(res)).ToList();
 
-            foreach (TEntity entity in remotes)
-            {
-                await _database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
-            }
+            //版本1：如果Id每次都是随机，会造成永远只添加，比如AliyunStsToken，服务器端返回Id=-1，导致每次获取后，Id都不一致
+            //foreach (TEntity entity in remotes)
+            //{
+            //    await _database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
+            //}
+
+            //版本2：先删除locals，然后再添加
+            await _database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
+            await _database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
 
             return remotes;
         }
@@ -224,10 +255,10 @@ namespace HB.FullStack.XamarinForms.Base
         {
             ThrowIf.NotValid(entities, nameof(entities));
 
-            if (EnsureInternet(AllowOfflineWrite))
+            if (EnsureInternet(!AllowOfflineWrite))
             {
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
+                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.SelectMany(k => ToResources(k)).ToList());
 
                 await _apiClient.AddAsync(addRequest).ConfigureAwait(false);
 
@@ -247,9 +278,9 @@ namespace HB.FullStack.XamarinForms.Base
         {
             ThrowIf.NotValid(entity, nameof(entity));
 
-            if (EnsureInternet(AllowOfflineWrite))
+            if (EnsureInternet(!AllowOfflineWrite))
             {
-                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
+                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResources(entity));
 
                 await _apiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
 
@@ -262,8 +293,9 @@ namespace HB.FullStack.XamarinForms.Base
             }
         }
 
-        private bool LocalDataAvaliable(ApiRequest<TRes> request, IEnumerable<TEntity> locals)
+        private bool DefaultLocalDataAvaliable(ApiRequest<TRes> request, IEnumerable<TEntity> locals)
         {
+            //本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
             return
                 (locals.Any() && !IsLocalDataExpired(locals, _localDataExpiryTime))
                 ||
@@ -285,11 +317,11 @@ namespace HB.FullStack.XamarinForms.Base
             return false;
         }
 
-        private bool IsRequestRecently(ApiRequest<TRes> apiRequest)
+        private static bool IsRequestRecently(ApiRequest<TRes> apiRequest)
         {
             TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Consts.DefaultApiRequestRateLimit;
 
-            return !_requestLocker.NoWaitLock(
+            return !RequestLocker.NoWaitLock(
                 "request",
                 apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture),
                 expiryTime);

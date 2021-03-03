@@ -30,7 +30,7 @@ namespace HB.FullStack.Identity
 
         public static CachedRolesByUserId Key(long userId)
         {
-            return new CachedRolesByUserId(userId.ToString(CultureInfo.InvariantCulture));
+            return new CachedRolesByUserId(userId.ToString(GlobalSettings.Culture));
         }
     }
 }

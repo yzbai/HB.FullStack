@@ -1,5 +1,6 @@
 ﻿using Aliyun.Acs.Core;
 using Aliyun.Acs.Core.Profile;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +16,14 @@ namespace HB.Infrastructure.Aliyun
                 return;
             }
 
-            DefaultProfile.GetProfile().AddEndpoint(productName + regionId, regionId, productName, endpoint);
+            string endpointName = "";
+
+            if (productName.IsNotNullOrEmpty() && regionId.IsNotNullOrEmpty())
+            {
+                endpointName = productName + regionId;
+            }
+
+            DefaultProfile.GetProfile().AddEndpoint(endpointName, regionId, productName, endpoint);
         }
 
         public static IAcsClient CreateAcsClient(string regionId, string accessKeyId, string accessKeySecret)

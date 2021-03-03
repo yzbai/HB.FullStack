@@ -591,11 +591,11 @@ namespace HB.FullStack.Identity
         {
             IList<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(CultureInfo.InvariantCulture)),
+                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
                 new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
 
-                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString(CultureInfo.InvariantCulture)),
+                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString(GlobalSettings.Culture)),
                 new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId)
             };
 

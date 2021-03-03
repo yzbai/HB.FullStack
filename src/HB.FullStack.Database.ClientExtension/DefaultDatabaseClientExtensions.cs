@@ -47,13 +47,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        //public static async Task SetByWhereAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, IEnumerable<T> newItems, TransactionContext transContext) where T : DatabaseEntity, new()
-        //{
-        //    await database.DeleteAsync<T>(whereExpr, transContext).ConfigureAwait(false);
-
-        //    await database.BatchAddAsync<T>(newItems, "", transContext).ConfigureAwait(false);
-        //}
-
         /// <summary>
         /// AddOrUpdateByIdAsync
         /// </summary>

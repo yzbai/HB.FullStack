@@ -153,7 +153,8 @@ namespace HB.FullStack.XamarinForms.Base
                     case ApiErrorCode.NotApiResourceEntity:
                         break;
                     case ApiErrorCode.ApiSmsCodeInvalid:
-                        //TODO: 使用Toast随后
+                        //TODO: 使用Toast随后,
+                        //TODO: 不显示，调查
                         Application.Current.MainPage.DisplayAlert("","短信验证码不对", "知道了");
                         break;
                     case ApiErrorCode.ApiPublicResourceTokenNeeded:

@@ -4,7 +4,7 @@ namespace HB.FullStack.XamarinForms.Skia
 {
     public abstract class SKFigureDrawData : IEquatable<SKFigureDrawData>
     {
-        public bool IsSelected { get; set; }
+        public FigureState State { get; set; }
 
         public bool Equals(SKFigureDrawData? other)
         {
@@ -13,7 +13,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return false;
             }
 
-            return EqualsImpl(other);
+            return State == other.State && EqualsImpl(other);
         }
 
         public static bool operator ==(SKFigureDrawData? d1, SKFigureDrawData? d2)
@@ -28,7 +28,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return false;
             }
 
-            return d1.EqualsImpl(d2);
+            return d1.Equals(d2);
         }
 
         public static bool operator !=(SKFigureDrawData? d1, SKFigureDrawData? d2)
@@ -46,8 +46,17 @@ namespace HB.FullStack.XamarinForms.Skia
             return false;
         }
 
+        public override int GetHashCode()
+        {
+            HashCode hashCode = GetHashCodeImpl();
+            hashCode.Add(State);
+
+            return hashCode.ToHashCode();
+        }
+
         protected abstract bool EqualsImpl(SKFigureDrawData other);
 
-        public abstract override int GetHashCode();
+        protected abstract HashCode GetHashCodeImpl();
+
     }
 }

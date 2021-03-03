@@ -5,9 +5,6 @@ using HB.FullStack.Database.Def;
 
 namespace HB.FullStack.Identity.Entities
 {
-    /// <summary>
-    /// ½ÇÉ«
-    /// </summary>
     public class Role : IdGenEntity
     {
         [EntityProperty(Unique = true, NotNull = true)]

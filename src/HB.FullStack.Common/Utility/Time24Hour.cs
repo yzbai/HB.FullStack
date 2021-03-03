@@ -101,8 +101,8 @@ namespace HB.FullStack.Common
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }
 
-            int hour = Convert.ToInt32(parts[0], CultureInfo.InvariantCulture);
-            int minute = Convert.ToInt32(parts[1], CultureInfo.InvariantCulture);
+            int hour = Convert.ToInt32(parts[0], GlobalSettings.Culture);
+            int minute = Convert.ToInt32(parts[1], GlobalSettings.Culture);
 
             if (!isAM && hour != 12)
             {

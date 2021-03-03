@@ -58,6 +58,11 @@ namespace HB.FullStack.XamarinForms.IdBarriers
         /// <exception cref="DatabaseException"></exception>
         public async Task<long> GetClientIdAsync(long serverId)
         {
+            if(serverId <= 0)
+            {
+                return -1;
+            }
+
             IdBarrier? barrier = await _database.ScalarAsync<IdBarrier>(item => item.ServerId == serverId, null).ConfigureAwait(false);
 
             if (barrier == null)

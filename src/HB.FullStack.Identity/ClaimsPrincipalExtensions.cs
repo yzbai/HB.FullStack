@@ -20,7 +20,7 @@ namespace System
 
         public static long GetUserId(this ClaimsPrincipal principal)
         {
-            return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.UserId), CultureInfo.InvariantCulture);
+            return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.UserId), GlobalSettings.Culture);
         }
 
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
@@ -35,7 +35,7 @@ namespace System
 
         public static long GetSignInTokenId(this ClaimsPrincipal principal)
         {
-            return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId), CultureInfo.InvariantCulture);
+            return Convert.ToInt64(principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId), GlobalSettings.Culture);
         }
 
         public static string? GetDeviceId(this ClaimsPrincipal principal)

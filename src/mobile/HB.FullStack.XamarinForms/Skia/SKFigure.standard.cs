@@ -48,7 +48,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            OnDraw(info, canvas, InitDrawData);
+            OnDraw(info, canvas, InitDrawData, State);
         }
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
@@ -76,6 +76,11 @@ namespace HB.FullStack.XamarinForms.Skia
             }
 
             OnCaculateOutput(out TDrawData? newResult, InitDrawData);
+            
+            if (newResult != null)
+            {
+                newResult.State = State;
+            }
 
             if (newResult != ResultDrawData)
             {
@@ -83,7 +88,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawData initDrawData);
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawData initDrawData, FigureState currentState);
 
         protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawData initDrawData);
 
@@ -184,7 +189,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            if (Parent is SKFigureCollection)
+            if (Parent is SKFigureGroup)
             {
                 //留给集合统一处理
                 return;
@@ -584,7 +589,14 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            SetState(FigureState.Selected);
+            if (State == FigureState.Selected)
+            {
+                SetState(FigureState.None);
+            }
+            else if(State == FigureState.None)
+            {
+                SetState(FigureState.Selected);
+            }
         }
 
         public void OnLongTapped(SKFigureTouchInfo touchInfo)
@@ -605,7 +617,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
 
-            if (Parent is SKFigureCollection collection)
+            if (Parent is SKFigureGroup collection)
             {
                 if (collection.EnableMultipleSelected)
                 {

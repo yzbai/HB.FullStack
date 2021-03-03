@@ -296,7 +296,7 @@ namespace ClassLibrary1
 
             while (true)
             {
-                var arity = int.Parse(currentValueTupleType.Name.Substring("ValueTuple`".Length), CultureInfo.InvariantCulture);
+                var arity = int.Parse(currentValueTupleType.Name.Substring("ValueTuple`".Length), GlobalSettings.Culture);
                 var constructorParameterTypes = new Type[arity];
                 var restField = (FieldInfo)null;
 
@@ -308,7 +308,7 @@ namespace ClassLibrary1
                     }
                     else if (field.Name.StartsWith("Item", StringComparison.Ordinal))
                     {
-                        var elementNumber = int.Parse(field.Name.Substring("Item".Length), CultureInfo.InvariantCulture);
+                        var elementNumber = int.Parse(field.Name.Substring("Item".Length), GlobalSettings.Culture);
                         constructorParameterTypes[elementNumber - 1] = field.FieldType;
                     }
                 }
