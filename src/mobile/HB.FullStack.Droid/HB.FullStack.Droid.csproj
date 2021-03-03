@@ -68,7 +68,7 @@
     <PackageReference Include="SkiaSharp.Views.Forms">
       <Version>2.80.2</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.7" />
+    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
     <PackageReference Include="Xamarin.CommunityToolkit">
       <Version>1.0.3</Version>
     </PackageReference>
