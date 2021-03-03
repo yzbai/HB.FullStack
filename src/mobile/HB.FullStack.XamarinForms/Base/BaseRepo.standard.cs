@@ -82,9 +82,9 @@ namespace HB.FullStack.XamarinForms.Base
 
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource
     {
-        protected readonly IDatabase _database;
+        protected IDatabase Database { get;}
 
-        protected readonly IApiClient _apiClient;
+        protected IApiClient ApiClient { get; }
 
         private readonly TimeSpan _localDataExpiryTime;
 
@@ -96,8 +96,8 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected BaseRepo(IDatabase database, IApiClient apiClient)
         {
-            _database = database;
-            _apiClient = apiClient;
+            Database = database;
+            ApiClient = apiClient;
 
             TimeSpan? attributedLocalDataExpiryTime = typeof(TEntity).GetCustomAttribute<LocalDataTimeoutAttribute>()?.ExpiryTime;
 
@@ -124,7 +124,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             //TODO:尝试引入Cache
 
-            IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
@@ -152,7 +152,7 @@ namespace HB.FullStack.XamarinForms.Base
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
@@ -195,7 +195,7 @@ namespace HB.FullStack.XamarinForms.Base
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await _database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
@@ -233,18 +233,19 @@ namespace HB.FullStack.XamarinForms.Base
             }
 
             //获取远程，更新本地
-            IEnumerable<TRes> ress = await _apiClient.GetAsync(request).ConfigureAwait(false);
+            IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
             IEnumerable<TEntity> remotes = ress.SelectMany(res => ToEntities(res)).ToList();
 
             //版本1：如果Id每次都是随机，会造成永远只添加，比如AliyunStsToken，服务器端返回Id=-1，导致每次获取后，Id都不一致
-            //foreach (TEntity entity in remotes)
-            //{
-            //    await _database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
-            //}
+            //所以Id默认为-1的实体就不要用Id作为主键了
+            foreach (TEntity entity in remotes)
+            {
+                await Database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
+            }
 
-            //版本2：先删除locals，然后再添加
-            await _database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
-            await _database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
+            //版本2：先删除locals，然后再添加,由于是假删除，IdBarrier中并没有删除对应关系，导致服务器ID映射的客户端ID重复
+            //await _database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
+            //await _database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
 
             return remotes;
         }
@@ -260,10 +261,10 @@ namespace HB.FullStack.XamarinForms.Base
                 //Remote
                 AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.SelectMany(k => ToResources(k)).ToList());
 
-                await _apiClient.AddAsync(addRequest).ConfigureAwait(false);
+                await ApiClient.AddAsync(addRequest).ConfigureAwait(false);
 
                 //Local
-                await _database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
+                await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
@@ -282,9 +283,9 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResources(entity));
 
-                await _apiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
+                await ApiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
 
-                await _database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
+                await Database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
             }
             else
             {

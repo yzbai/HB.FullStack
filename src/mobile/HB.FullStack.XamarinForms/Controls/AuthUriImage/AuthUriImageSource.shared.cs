@@ -280,7 +280,7 @@ namespace HB.FullStack.XamarinForms.Controls
                     sem.Release();
                     return null;
                 }
-                var wrapped = new StreamWrapper(stream);
+                var wrapped = new WrappedStream(stream);
                 wrapped.Disposed += (o, e) => sem.Release();
                 return wrapped;
             }
@@ -298,6 +298,7 @@ namespace HB.FullStack.XamarinForms.Controls
             OnSourceChanged();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public static Task<Stream> GetStreamCoreAsync(Uri uri, CancellationToken cancellationToken)
         {
             //if (ApiClient == null)

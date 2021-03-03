@@ -246,7 +246,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #region 事件派发
 
-        private void OnPressed(object? sender, SKFigureTouchInfo info)
+        private void OnPressed(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
@@ -262,7 +262,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        private void OnDragged(object? sender, SKFigureTouchInfo info)
+        private void OnDragged(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
@@ -279,7 +279,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        private void OnLongTapped(object? sender, SKFigureTouchInfo info)
+        private void OnLongTapped(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
@@ -296,7 +296,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        private void OnTapped(object? sender, SKFigureTouchInfo info)
+        private void OnTapped(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
@@ -313,7 +313,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        private void OnCancelled(object? sender, SKFigureTouchInfo info)
+        private void OnCancelled(object? sender, SKFigureTouchEventArgs info)
         {
             if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {

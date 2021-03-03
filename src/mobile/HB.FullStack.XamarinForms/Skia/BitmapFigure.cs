@@ -151,7 +151,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        private void OnTwoFingerDragged(object sender, SKFigureTouchInfo args)
+        private void OnTwoFingerDragged(object sender, SKFigureTouchEventArgs args)
         {
             SKPoint previousPivotedPoint = args.PreviousPoint;
             SKPoint currentPivotedPoint = args.CurrentPoint;
@@ -162,7 +162,7 @@ namespace HB.FullStack.XamarinForms.Skia
             Matrix = Matrix.PostConcat(changedMatrix);
         }
 
-        private void OnOneFingerDragged(object sender, SKFigureTouchInfo args)
+        private void OnOneFingerDragged(object sender, SKFigureTouchEventArgs args)
         {
             SKPoint previousPivotedPoint = args.PreviousPoint;
             SKPoint currentPivotedPoint = args.CurrentPoint;

@@ -79,14 +79,12 @@ namespace HB.FullStack.XamarinForms.Base
         {
             //Version
             VersionTracking.Track();
-
-            NavigationService.Init(GetNavigationServiceImpl());
         }
-
-        protected abstract NavigationService GetNavigationServiceImpl();
 
         protected void InitializeServices(IServiceCollection services)
         {
+            NavigationService.Init(GetNavigationServiceImpl());
+
             RegisterBaseServices(services);
 
             ConfigureBaseServices();
@@ -127,6 +125,8 @@ namespace HB.FullStack.XamarinForms.Base
             task.Fire();
             _initializeTasks.Add(task);
         }
+
+        protected abstract NavigationService GetNavigationServiceImpl();
 
         protected abstract void RegisterServices(IServiceCollection services);
 
