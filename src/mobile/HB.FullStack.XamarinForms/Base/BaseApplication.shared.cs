@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
 using HB.FullStack.XamarinForms.Api;
 using HB.FullStack.XamarinForms.Controls;
+using HB.FullStack.XamarinForms.Files;
 using HB.FullStack.XamarinForms.Logging;
 using HB.FullStack.XamarinForms.Platforms;
 
@@ -28,6 +29,8 @@ namespace HB.FullStack.XamarinForms.Base
         private readonly IList<Task> _initializeTasks = new List<Task>();
 
         public static new BaseApplication Current => (BaseApplication)Application.Current;
+
+        public static IPlatformHelper PlatformHelper = DependencyService.Resolve<IPlatformHelper>();
 
 #if DEBUG
         public static string Environment => "Debug";
@@ -75,10 +78,15 @@ namespace HB.FullStack.XamarinForms.Base
             }
         }
 
+        public abstract string InitAssetFileName { get; set; }
+
         protected BaseApplication()
         {
             //Version
             VersionTracking.Track();
+
+            //FileService
+            AddInitTask(IFileService.InitializeAsync(InitAssetFileName));
         }
 
         protected void InitializeServices(IServiceCollection services)

@@ -116,9 +116,11 @@ namespace HB.FullStack.Database
                 try
                 {
                     SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
+                    
                     //表明是新数据库
                     if (sys.Version == 0)
                     {
+                        //要求新数据必须从version = 1开始
                         if (_databaseSettings.Version != 1)
                         {
                             await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);

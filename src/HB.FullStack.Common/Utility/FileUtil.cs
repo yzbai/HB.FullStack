@@ -100,7 +100,7 @@ namespace System
             }
         }
 
-        private static void CreateDirectoryIfNotExist(string directoryPath)
+        public static void CreateDirectoryIfNotExist(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
             {

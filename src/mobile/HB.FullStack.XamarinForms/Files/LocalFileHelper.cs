@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 using Xamarin.Essentials;
 
-namespace HB.FullStack.XamarinForms
+namespace HB.FullStack.XamarinForms.Files
 {
     public static class LocalFileHelper
     {
-        private static Dictionary<Enum, string> _directoies = new Dictionary<Enum, string>();
+        private static Dictionary<string, string> _directoies = new Dictionary<string, string>();
 
-        public static string GetDirectoryPath(Enum fileCategory, params string?[] subCategories)
+        public static string GetDirectoryPath(string fileCategory, params string?[] subCategories)
         {
             if(!_directoies.ContainsKey(fileCategory))
             {
@@ -24,7 +24,7 @@ namespace HB.FullStack.XamarinForms
         }
 
         [return:NotNullIfNotNull("fileName")]
-        public static string? GetFileFullPath(string? fileName, Enum fileCategory, params string?[] subCategories)
+        public static string? GetFileFullPath(string? fileName, string fileCategory, params string?[] subCategories)
         {
             if(fileName == null)
             {
@@ -38,17 +38,22 @@ namespace HB.FullStack.XamarinForms
             return Path.Combine(directory, fileName);
         }
 
-        public static bool IsFileExisted(string fileName, Enum fileCategory, params string?[] subCategories)
+        public static bool IsFileExisted(string fileName, string fileCategory, params string?[] subCategories)
         {
             string fullPath = GetFileFullPath(fileName, fileCategory, subCategories);
+            
+            return System.IO.File.Exists(fullPath);
+        }
 
-            return File.Exists(fullPath);
+        public static string GetRootDirectory()
+        {
+            return FileSystem.AppDataDirectory;
         }
 
         /// <summary>
         /// 返回Null表示失败
         /// </summary>
-        public static async Task<string?> SaveFileAsync(byte[] data, string fileName, Enum fileCategory, params string?[] subCategories)
+        public static async Task<string?> SaveFileAsync(byte[] data, string fileName, string fileCategory, params string?[] subCategories)
         {
             string fullPath = GetFileFullPath(fileName, fileCategory, subCategories);
 
@@ -66,7 +71,7 @@ namespace HB.FullStack.XamarinForms
         /// <summary>
         /// 返回Null表示失败
         /// </summary>
-        public static async Task<string?> SaveFileAsync(Stream stream, string fileName, Enum fileCategory, params string?[] subCategories)
+        public static async Task<string?> SaveFileAsync(Stream stream, string fileName, string fileCategory, params string?[] subCategories)
         {
             string fullPath = GetFileFullPath(fileName, fileCategory, subCategories);
 

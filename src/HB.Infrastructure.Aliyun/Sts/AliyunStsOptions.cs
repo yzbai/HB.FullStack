@@ -18,8 +18,6 @@ namespace HB.Infrastructure.Aliyun.Sts
         public string RoleSessionName { get; set; } = null!;
         
         public int ExpireSeconds { get; set; } = 3600;
-
-        public string? RolePolicy { get; set; } 
     }
 
     public class AliyunStsOptions : IOptions<AliyunStsOptions>

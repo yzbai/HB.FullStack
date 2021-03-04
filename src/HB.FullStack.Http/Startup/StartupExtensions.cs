@@ -229,7 +229,7 @@ namespace System
         /// <param name="lockManager"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager)
+        public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
             GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
 
@@ -247,7 +247,7 @@ namespace System
 
                 GlobalSettings.Logger.LogDebug($"获取了初始化数据库的锁:{database.DatabaseNames.ToJoinedString(",")}");
 
-                await database.InitializeAsync().ConfigureAwait(false);
+                await database.InitializeAsync(migrations).ConfigureAwait(false);
             }
             finally
             {

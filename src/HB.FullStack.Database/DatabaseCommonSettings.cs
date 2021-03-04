@@ -6,6 +6,9 @@ namespace HB.FullStack.Database
 {
     public class DatabaseCommonSettings
     {
+        /// <summary>
+        /// 初始数据库从1开始
+        /// </summary>
         public int Version { get; set; }
 
         public int DefaultVarcharLength { get; set; } = 200;

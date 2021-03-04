@@ -19,6 +19,9 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         private readonly IAcsClient _acsClient;
 
+
+        private readonly string _rolePolicyTemplate = "{\"Statement\": [{\"Action\": \"oss:*\",\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:mycolorfultime-private-dev\",\"acs:oss:*:*:mycolorfultime-private-dev/*\"]}],\"Version\": \"1\"}";
+
         public AliyunStsService(IOptions<AliyunStsOptions> options, ILogger<AliyunStsService> logger)
         {
             _options = options.Value;
