@@ -7,6 +7,7 @@
         ResourceNotFound,
         BizError,
         NotLogined,
-        AliyunStsTokenError
+        AliyunStsTokenError,
+        FileServiceError
     }
 }

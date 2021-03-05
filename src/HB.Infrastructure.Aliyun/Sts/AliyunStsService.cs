@@ -14,8 +14,8 @@ namespace HB.Infrastructure.Aliyun.Sts
 {
     internal class AliyunStsService : IAliyunStsService
     {
-        private const string OSS_WRITE_POLICY_TEMPLATE = "{\"Statement\": [{\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}],\"Version\": \"1\"}";
-        private const string OSS_READ_POLICY_TEMPLATE = "{\"Statement\": [{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}],\"Version\": \"1\"}";
+        private const string OSS_WRITE_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
+        private const string OSS_READ_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
 
         private readonly AliyunStsOptions _options;
         private readonly ILogger _logger;

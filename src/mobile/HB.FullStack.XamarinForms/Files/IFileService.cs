@@ -24,6 +24,6 @@ namespace HB.FullStack.XamarinForms.Files
 
         Task<string?> GetFileAsync(string directory, string fileName, bool remoteForced = false);
 
-        Task UploadFileAsync(string sourceFullPath, string destDirectory, string destFileName);
+        Task UploadFileAsync(string sourceFullPath, string destDirectory, string destFileName, bool recheckPermissionForced = false);
     }
 }

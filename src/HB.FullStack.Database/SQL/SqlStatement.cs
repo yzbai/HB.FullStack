@@ -46,6 +46,19 @@ namespace HB.FullStack.Database.SQL
             return false;
         }
 
+        /// <summary>
+        /// longStr是否包含pattern
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="longStr"></param>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public static bool StartWith<T>(T longStr, T pattern)
+        {
+            //TODO:  完成SQL like模糊查询的映射
+            throw new NotImplementedException();
+        }
+
         public static string Desc<T>(T value)
         {
             return value == null ? "" : value.ToString() + " DESC";
