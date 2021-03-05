@@ -72,7 +72,14 @@ namespace HB.FullStack.Database.SQL
 
 			if (returnId)
 			{
-				sql += $"select {selectArgs} from {entityDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {primaryKeyProperty.DbParameterizedName}_{number};";
+				if (entityDef.IsIdAutoIncrement)
+				{
+					sql += $"select {selectArgs} from {entityDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(engineType)};";
+				}
+				else
+				{
+					sql += $"select {selectArgs} from {entityDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {primaryKeyProperty.DbParameterizedName}_{number};";
+				}
 			}
 
 			return sql;

@@ -8,6 +8,9 @@
         BizError,
         NotLogined,
         AliyunStsTokenError,
-        FileServiceError
+        FileServiceError,
+        AliyunOssPutObjectError,
+        LocalFileCopyError,
+        LocalFileSaveError
     }
 }

@@ -135,20 +135,9 @@ namespace System
 
                 return true;
             }
-            catch (System.Security.SecurityException)
+            catch (Exception ex)
             {
-                return false;
-            }
-            catch (System.UnauthorizedAccessException)
-            {
-                return false;
-            }
-            catch (IOException)
-            {
-                return false;
-            }
-            catch (System.ObjectDisposedException)
-            {
+                GlobalSettings.Logger.LogError(ex, $"保存文件stream出错, fullPath:{fullPath}, override:{@override}, createDirectoryIfNotExist:{createDirectoryIfNotExist}");
                 return false;
             }
         }
@@ -174,20 +163,9 @@ namespace System
 
                 return true;
             }
-            catch (System.Security.SecurityException)
+            catch (Exception ex)
             {
-                return false;
-            }
-            catch (System.UnauthorizedAccessException)
-            {
-                return false;
-            }
-            catch (IOException)
-            {
-                return false;
-            }
-            catch (System.ObjectDisposedException)
-            {
+                GlobalSettings.Logger.LogError(ex, $"保存文件data出错, fullPath:{fullPath}, override:{@override}, createDirectoryIfNotExist:{createDirectoryIfNotExist}");
                 return false;
             }
         }
@@ -209,8 +187,9 @@ namespace System
 
                 return memoryStream.ToArray();
             }
-            catch
+            catch (Exception ex)
             {
+                GlobalSettings.Logger.LogError(ex, $"读取文件出错，FullPath: {fullPath}");
                 return null;
             }
         }

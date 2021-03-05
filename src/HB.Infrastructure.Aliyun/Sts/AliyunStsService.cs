@@ -14,7 +14,7 @@ namespace HB.Infrastructure.Aliyun.Sts
 {
     internal class AliyunStsService : IAliyunStsService
     {
-        private const string OSS_WRITE_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
+        private const string OSS_WRITE_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\", \"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
         private const string OSS_READ_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
 
         private readonly AliyunStsOptions _options;
@@ -53,6 +53,8 @@ namespace HB.Infrastructure.Aliyun.Sts
                 return null;
             }
 
+            directory = directory.TrimEnd('/');
+
             string ossResourceName = $"acs:oss:*:*:{bucketName}";
 
             if (!_resourceAssumedRoleDict.TryGetValue(ossResourceName, out AssumedRole assumedRole))
@@ -60,7 +62,7 @@ namespace HB.Infrastructure.Aliyun.Sts
                 return null;
             }
 
-            string policy = string.Format(GlobalSettings.Culture, readOnly ? OSS_READ_POLICY_TEMPLATE : OSS_WRITE_POLICY_TEMPLATE, bucketName, directory);
+            string policy = string.Format(GlobalSettings.Culture, readOnly ? OSS_READ_POLICY_TEMPLATE : OSS_WRITE_POLICY_TEMPLATE, bucketName, directory.IsNullOrEmpty() ? "*" : directory + "/*");
 
             AssumeRoleRequest request = new AssumeRoleRequest
             {
@@ -74,13 +76,6 @@ namespace HB.Infrastructure.Aliyun.Sts
             try
             {
                 AssumeRoleResponse assumedRoleResponse = _acsClient.GetAcsResponse(request);
-
-                if (!assumedRoleResponse.HttpResponse.isSuccess())
-                {
-                    throw new AliyunException(
-                        AliyunErrorCode.StsError, 
-                        $"返回不正确. Code:{assumedRoleResponse.HttpResponse.Status}, userId:{userId}, bucketname:{bucketName}, direcotry:{directory}, readOnly:{readOnly}");
-                }
 
                 AliyunStsToken stsToken = new AliyunStsToken
                 {
@@ -101,7 +96,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             {
                 //TODO: 处理报错
                 throw new AliyunException(
-                    AliyunErrorCode.StsError, 
+                    AliyunErrorCode.StsError,
                     $"发生异常。 userId:{userId}, bucketname:{bucketName}, direcotry:{directory}, readOnly:{readOnly}", ex);
             }
         }

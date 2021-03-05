@@ -22,8 +22,23 @@ namespace HB.FullStack.XamarinForms.Files
             }
         }
 
-        Task<string?> GetFileAsync(string directory, string fileName, bool remoteForced = false);
+        /// <summary>
+        /// 返回本地 FullPath
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="fileName"></param>
+        /// <param name="remoteForced"></param>
+        /// <returns></returns>
+        Task<string> GetFileAsync(string directory, string fileName, bool remoteForced = false);
 
-        Task UploadFileAsync(string sourceFullPath, string destDirectory, string destFileName, bool recheckPermissionForced = false);
+        /// <summary>
+        /// 返回Local FullPath
+        /// </summary>
+        /// <param name="sourceFullPath"></param>
+        /// <param name="destDirectory"></param>
+        /// <param name="destFileName"></param>
+        /// <param name="recheckPermissionForced"></param>
+        /// <returns></returns>
+        Task<string> SetFileAsync(string sourceFullPath, string destDirectory, string destFileName, bool recheckPermissionForced = false);
     }
 }

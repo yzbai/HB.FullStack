@@ -48,13 +48,13 @@ namespace HB.FullStack.XamarinForms.Files
         /// <summary>
         /// 返回Null表示失败
         /// </summary>
-        public static Task<string?> SaveFileAsync(Stream stream, string directory, string fileName)
+        public static Task<string> SaveFileAsync(Stream stream, string directory, string fileName)
         {
             string fullPath = GetFullPath(directory, fileName);
             return SaveFileAsync(stream, fullPath);
         }
 
-        private static async Task<string?> SaveFileAsync(Stream stream, string fullPath)
+        private static async Task<string> SaveFileAsync(Stream stream, string fullPath)
         {
             if (await FileUtil.TrySaveFileAsync(stream, fullPath).ConfigureAwait(false))
             {
@@ -62,7 +62,7 @@ namespace HB.FullStack.XamarinForms.Files
             }
             else
             {
-                return null;
+                throw new MobileException(MobileErrorCode.LocalFileSaveError, $"fullPath:{fullPath}");
             }
         }
     }

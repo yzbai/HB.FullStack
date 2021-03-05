@@ -735,12 +735,14 @@ namespace HB.FullStack.Database.SQL
 
         private static bool IsTableField(Type type, object quotedExp)
         {
-#if NETSTANDARD2_1
-            string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "", GlobalSettings.Comparison);
-#endif
-#if NETSTANDARD2_0
+            //#if NETSTANDARD2_1
+            //            string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "", GlobalSettings.Comparison);
+            //#endif
+            //#if NETSTANDARD2_0
+#pragma warning disable CA1307 // Specify StringComparison for clarity
             string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "");
-#endif
+#pragma warning restore CA1307 // Specify StringComparison for clarity
+                              //#endif
 
             EntityDef? entityDef = EntityDefFactory.GetDef(type);
 
