@@ -6,6 +6,7 @@
         IdBarrierError,
         ResourceNotFound,
         BizError,
-        NotLogined
+        NotLogined,
+        AliyunStsTokenError
     }
 }

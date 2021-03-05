@@ -12,6 +12,11 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Common
 {
+    /// <summary>
+    /// 警告：这是NoWaitLock，即两个前程前后或同时抢夺，一个成功，另一个不等待，直接返回，即不保证都能运行。
+    /// 注意与Semphro区分开.
+    /// 适合做RequestLimiter，即一段时间内请求数量限制
+    /// </summary>
     public class MemorySimpleLocker
     {
         private const int _maxItems = 100;
@@ -26,7 +31,8 @@ namespace HB.FullStack.Common
         private static readonly object _locker = new object();
 
         /// <summary>
-        /// 不等待立即返回
+        /// 警告：这是NoWaitLock，即两个前程前后或同时抢夺，一个成功，另一个不等待，直接返回，即不保证都能运行。
+        /// 注意与Semphro区分开
         /// </summary>
         /// <param name="resourceType"></param>
         /// <param name="resource"></param>

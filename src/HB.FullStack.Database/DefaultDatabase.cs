@@ -86,7 +86,9 @@ namespace HB.FullStack.Database
         {
             if (_databaseSettings.AutomaticCreateTable)
             {
-                await AutoCreateTablesIfBrandNewAsync().ConfigureAwait(false);
+                IEnumerable<Migration>? initializeMigrations = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == 1);
+
+                await AutoCreateTablesIfBrandNewAsync(initializeMigrations).ConfigureAwait(false);
 
                 _logger.LogInformation("Database Auto Create Tables Finished.");
             }
@@ -107,7 +109,7 @@ namespace HB.FullStack.Database
         /// </summary>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        private async Task AutoCreateTablesIfBrandNewAsync()
+        private async Task AutoCreateTablesIfBrandNewAsync(IEnumerable<Migration>? initializeMigrations)
         {
             foreach (string databaseName in _databaseEngine.DatabaseNames)
             {
@@ -116,7 +118,7 @@ namespace HB.FullStack.Database
                 try
                 {
                     SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
-                    
+
                     //表明是新数据库
                     if (sys.Version == 0)
                     {
@@ -130,6 +132,19 @@ namespace HB.FullStack.Database
                         await CreateTablesByDatabaseAsync(databaseName, transactionContext).ConfigureAwait(false);
 
                         await UpdateSystemVersionAsync(databaseName, 1, transactionContext.Transaction).ConfigureAwait(false);
+
+                        //初始化数据
+                        IEnumerable<Migration>? curInitMigrations = initializeMigrations?.Where(m => m.DatabaseName.Equals(databaseName, GlobalSettings.ComparisonIgnoreCase)).ToList();
+
+                        if (curInitMigrations.IsNotNullOrEmpty())
+                        {
+                            if (curInitMigrations.Count() > 1)
+                            {
+                                throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Database : {databaseName} have more than one Initialize Migrations");
+                            }
+
+                            await ApplyMigration(databaseName, transactionContext, curInitMigrations.First()).ConfigureAwait(false);
+                        }
                     }
 
                     await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
@@ -190,9 +205,9 @@ namespace HB.FullStack.Database
                             throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Lack Migrations for {sys.DatabaseName}");
                         }
 
-                        IOrderedEnumerable<Migration> curOrderedMigrations = migrations
-                            .Where(m => m.TargetSchema.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
-                            .OrderBy(m => m.OldVersion);
+                        IEnumerable<Migration> curOrderedMigrations = migrations
+                            .Where(m => m.DatabaseName.Equals(sys.DatabaseName, GlobalSettings.ComparisonIgnoreCase))
+                            .OrderBy(m => m.OldVersion).ToList();
 
                         if (curOrderedMigrations == null)
                         {
@@ -206,9 +221,7 @@ namespace HB.FullStack.Database
 
                         foreach (Migration migration in curOrderedMigrations)
                         {
-                            EngineCommand command = new EngineCommand(migration.SqlStatement);
-
-                            await _databaseEngine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, databaseName, command).ConfigureAwait(false);
+                            await ApplyMigration(databaseName, transactionContext, migration).ConfigureAwait(false);
                         }
 
                         await UpdateSystemVersionAsync(sys.DatabaseName, _databaseSettings.Version, transactionContext.Transaction).ConfigureAwait(false);
@@ -230,7 +243,24 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static bool CheckMigration(int startVersion, int endVersion, IOrderedEnumerable<Migration> curOrderedMigrations)
+        private async Task ApplyMigration(string databaseName, TransactionContext transactionContext, Migration migration)
+        {
+            _logger.LogInformation($"数据库Migration, database:{databaseName}, from :{migration.OldVersion}, to :{migration.NewVersion}, sql:{migration.SqlStatement}");
+
+            if (migration.SqlStatement.IsNotNullOrEmpty())
+            {
+                EngineCommand command = new EngineCommand(migration.SqlStatement);
+
+                await _databaseEngine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, databaseName, command).ConfigureAwait(false);
+            }
+
+            if (migration.ModifyFunc != null)
+            {
+                await migration.ModifyFunc(this, transactionContext).ConfigureAwait(false);
+            }
+        }
+
+        private static bool CheckMigration(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
         {
             int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
 
@@ -947,7 +977,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        
+
 
         /// <summary>
         /// Version控制,反应Version变化

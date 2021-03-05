@@ -14,21 +14,30 @@ namespace HB.Infrastructure.Aliyun.Sts
 {
     internal class AliyunStsService : IAliyunStsService
     {
+        private const string OSS_WRITE_POLICY_TEMPLATE = "{\"Statement\": [{\"Action\": [\"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}],\"Version\": \"1\"}";
+        private const string OSS_READ_POLICY_TEMPLATE = "{\"Statement\": [{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}],\"Version\": \"1\"}";
+
         private readonly AliyunStsOptions _options;
         private readonly ILogger _logger;
-
         private readonly IAcsClient _acsClient;
+        private readonly Dictionary<string, AssumedRole> _resourceAssumedRoleDict = new Dictionary<string, AssumedRole>();
 
-
-        private readonly string _rolePolicyTemplate = "{\"Statement\": [{\"Action\": \"oss:*\",\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:mycolorfultime-private-dev\",\"acs:oss:*:*:mycolorfultime-private-dev/*\"]}],\"Version\": \"1\"}";
 
         public AliyunStsService(IOptions<AliyunStsOptions> options, ILogger<AliyunStsService> logger)
         {
             _options = options.Value;
             _logger = logger;
 
-            AliyunUtil.AddEndpoint(ProductNames.STS, "", _options.Endpoint);
+            AliyunUtil.AddEndpoint(AliyunProductNames.STS, "", _options.Endpoint);
             _acsClient = AliyunUtil.CreateAcsClient("", _options.AccessKeyId, _options.AccessKeySecret);
+
+            foreach (AssumedRole assumedRole in _options.AssumedRoles)
+            {
+                foreach (string resource in assumedRole.Resources)
+                {
+                    _resourceAssumedRoleDict[resource] = assumedRole;
+                }
+            }
         }
 
         private static string GetRoleSessionName(long userId)
@@ -37,45 +46,63 @@ namespace HB.Infrastructure.Aliyun.Sts
         }
 
         /// <exception cref="AliyunException"></exception>
-        public AliyunStsToken? GetStsToken(string resource, long userId)
+        public AliyunStsToken? RequestOssStsToken(long userId, string bucketName, string directory, bool readOnly)
         {
-            StsSetting? stsSetting = _options.StsSettings.SingleOrDefault(s => s.ResourceNames.Contains(resource));
-
-            if (stsSetting == null)
+            if (bucketName.IsNullOrEmpty() || userId < 0 || directory.IsNullOrEmpty())
             {
                 return null;
             }
 
+            string ossResourceName = $"acs:oss:*:*:{bucketName}";
+
+            if (!_resourceAssumedRoleDict.TryGetValue(ossResourceName, out AssumedRole assumedRole))
+            {
+                return null;
+            }
+
+            string policy = string.Format(GlobalSettings.Culture, readOnly ? OSS_READ_POLICY_TEMPLATE : OSS_WRITE_POLICY_TEMPLATE, bucketName, directory);
+
             AssumeRoleRequest request = new AssumeRoleRequest
             {
                 AcceptFormat = FormatType.JSON,
-                RoleArn = stsSetting.Arn,
+                RoleArn = assumedRole.Arn,
                 RoleSessionName = GetRoleSessionName(userId),
-                DurationSeconds = stsSetting.ExpireSeconds,
-                Policy = stsSetting.RolePolicy
+                DurationSeconds = assumedRole.ExpireSeconds,
+                Policy = policy
             };
 
             try
             {
-                AssumeRoleResponse assumeRoleResponse = _acsClient.GetAcsResponse(request);
+                AssumeRoleResponse assumedRoleResponse = _acsClient.GetAcsResponse(request);
 
-                AliyunStsToken stsToken = new AliyunStsToken(
-                    assumeRoleResponse.RequestId,
-                    assumeRoleResponse.Credentials.SecurityToken,
-                    assumeRoleResponse.Credentials.AccessKeyId,
-                    assumeRoleResponse.Credentials.AccessKeySecret,
-                    assumeRoleResponse.Credentials.Expiration,
-                    assumeRoleResponse.AssumedRoleUser.AssumedRoleId,
-                    assumeRoleResponse.AssumedRoleUser.Arn,
-                    stsSetting.ResourceNames.ToArray()
-                );
+                if (!assumedRoleResponse.HttpResponse.isSuccess())
+                {
+                    throw new AliyunException(
+                        AliyunErrorCode.StsError, 
+                        $"返回不正确. Code:{assumedRoleResponse.HttpResponse.Status}, userId:{userId}, bucketname:{bucketName}, direcotry:{directory}, readOnly:{readOnly}");
+                }
+
+                AliyunStsToken stsToken = new AliyunStsToken
+                {
+                    RequestId = assumedRoleResponse.RequestId,
+                    SecurityToken = assumedRoleResponse.Credentials.SecurityToken,
+                    AccessKeyId = assumedRoleResponse.Credentials.AccessKeyId,
+                    AccessKeySecret = assumedRoleResponse.Credentials.AccessKeySecret,
+                    ExpirationAt = DateTimeOffset.Parse(assumedRoleResponse.Credentials.Expiration, GlobalSettings.Culture),
+                    ArId = assumedRoleResponse.AssumedRoleUser.AssumedRoleId,
+                    Arn = assumedRoleResponse.AssumedRoleUser.Arn,
+                    Directory = directory,
+                    ReadOnly = readOnly
+                };
 
                 return stsToken;
             }
             catch (Exception ex)
             {
                 //TODO: 处理报错
-                throw new AliyunException(AliyunErrorCode.OssError, $"AliyunOssAssumeRoleRequestFailed", ex);
+                throw new AliyunException(
+                    AliyunErrorCode.StsError, 
+                    $"发生异常。 userId:{userId}, bucketname:{bucketName}, direcotry:{directory}, readOnly:{readOnly}", ex);
             }
         }
     }

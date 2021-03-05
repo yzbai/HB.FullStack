@@ -16,6 +16,7 @@ using Xamarin.Forms;
 using HB.FullStack.XamarinForms.Base;
 using Microsoft;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.XamarinForms.Base
 {
@@ -54,7 +55,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (throwIfNot)
                 {
-                    throw new ApiException(ApiErrorCode.ApiNotAvailable);
+                    throw new ApiException(ApiErrorCode.ApiNotAvailable,"没有联网，且不允许离线");
                 }
 
                 return false;
@@ -87,6 +88,7 @@ namespace HB.FullStack.XamarinForms.Base
         protected IApiClient ApiClient { get; }
 
         private readonly TimeSpan _localDataExpiryTime;
+        private readonly ILogger _logger;
 
         protected abstract bool AllowOfflineWrite { get; }
 
@@ -94,8 +96,9 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected abstract bool NeedLogined { get; }
 
-        protected BaseRepo(IDatabase database, IApiClient apiClient)
+        protected BaseRepo(ILogger logger, IDatabase database, IApiClient apiClient)
         {
+            _logger = logger;
             Database = database;
             ApiClient = apiClient;
 
@@ -119,6 +122,8 @@ namespace HB.FullStack.XamarinForms.Base
         {
             if (NeedLogined)
             {
+                _logger.LogDebug($"检查Logined");
+
                 EnsureLogined();
             }
 
@@ -129,6 +134,7 @@ namespace HB.FullStack.XamarinForms.Base
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
+                _logger.LogDebug($"本地强制模式，返回");
                 return locals;
             }
 
@@ -221,12 +227,14 @@ namespace HB.FullStack.XamarinForms.Base
             //如果不强制远程，并且满足使用本地数据条件
             if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(request, locals))
             {
+                _logger.LogDebug("本地数据可用，返回本地");
                 return locals;
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
             if (!EnsureInternet(!AllowOfflineRead))
             {
+                _logger.LogDebug("未联网，允许离线读， 使用离线数据");
                 NotifyOfflineDataUsed();
 
                 return locals;
@@ -235,6 +243,8 @@ namespace HB.FullStack.XamarinForms.Base
             //获取远程，更新本地
             IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
             IEnumerable<TEntity> remotes = ress.SelectMany(res => ToEntities(res)).ToList();
+
+            _logger.LogDebug("远程数据获取完毕");
 
             //版本1：如果Id每次都是随机，会造成永远只添加，比如AliyunStsToken，服务器端返回Id=-1，导致每次获取后，Id都不一致
             //所以Id默认为-1的实体就不要用Id作为主键了
@@ -246,6 +256,8 @@ namespace HB.FullStack.XamarinForms.Base
             //版本2：先删除locals，然后再添加,由于是假删除，IdBarrier中并没有删除对应关系，导致服务器ID映射的客户端ID重复，这时，不应该用IdGenEntity作为实体，选用Autoincrement，比如AliyunStsToken
             await Database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
             await Database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
+
+            _logger.LogDebug("重新添加远程数据到本地数据库");
 
             return remotes;
         }

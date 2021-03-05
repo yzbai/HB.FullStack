@@ -18,12 +18,12 @@ namespace HB.FullStack.XamarinForms.Files
                 //将Assets里的初始文件解压缩到用户文件中去
 
                 using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileHelper.GetRootDirectory()).ConfigureAwait(false);
+                await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
             }
         }
 
-        Task<string?> GetFileAsync(string fileName, string fileCategory, string? subCategory = null, string? thirdCategory = null, string? forthCategory = null,  bool remoteForced = false);
+        Task<string?> GetFileAsync(string directory, string fileName, bool remoteForced = false);
 
-        Task UploadFileAsync(string fullPath, string fileCategory, string? subCategory = null, string? thirdCategory = null, string? forthCategory = null);
+        Task UploadFileAsync(string sourceFullPath, string destDirectory, string destFileName);
     }
 }

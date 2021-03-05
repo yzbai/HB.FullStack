@@ -43,6 +43,15 @@ namespace HB.FullStack.Repository
             Logger.LogInformation($"{GetType().Name} 初始化完成");
         }
 
+        public void RegisterEntityChangedEvents(AsyncEventHandler<TEntity, DatabaseWriteEventArgs> OnEntityChanged)
+        {
+            EntityAdded += OnEntityChanged;
+
+            EntityUpdated += OnEntityChanged;
+
+            EntityDeleted += OnEntityChanged;
+        }
+
         #region Events
 
 #pragma warning disable CA1003 // Use generic event handler instances
@@ -395,12 +404,6 @@ namespace HB.FullStack.Repository
             return EntityCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
 
-        /// <summary>
-        /// TryCacheAsideAsync
-        /// </summary>
-        /// <param name="cachedItem"></param>
-        /// <param name="dbRetrieve"></param>
-        /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
         protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
@@ -416,7 +419,7 @@ namespace HB.FullStack.Repository
         }
 
         /// <exception cref="CacheException"></exception>
-        protected void InvalidateCache<TResult>(CachedItem<TResult> cachedItem) where TResult : class
+        public void InvalidateCache<TResult>(CachedItem<TResult> cachedItem) where TResult : class
         {
             CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
         }

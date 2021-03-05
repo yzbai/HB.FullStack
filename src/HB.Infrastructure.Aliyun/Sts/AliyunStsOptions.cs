@@ -7,31 +7,29 @@ using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.Aliyun.Sts
 {
-    public class StsSetting
+    public class AssumedRole
     {
-        public IList<string> ResourceNames { get; set; } = new List<string>();
-
-        [DisallowNull, NotNull]
         public string Arn { get; set; } = null!;
 
-        [DisallowNull, NotNull]
-        public string RoleSessionName { get; set; } = null!;
+        public IList<string> Resources { get; set; } = new List<string>();
         
         public int ExpireSeconds { get; set; } = 3600;
     }
 
     public class AliyunStsOptions : IOptions<AliyunStsOptions>
     {
-        [DisallowNull, NotNull]
         public string Endpoint { get; set; } = null!;
 
-        [DisallowNull, NotNull]
+        /// <summary>
+        /// 拥有AliyunSTSAssumeRoleAccess权限的用户
+        /// </summary>
+        public string UserName { get; set; } = null!;
+
         public string AccessKeyId { get; set; } = null!;
 
-        [DisallowNull, NotNull]
         public string AccessKeySecret { get; set; } = null!;
 
-        public IList<StsSetting> StsSettings { get; set; } = new List<StsSetting>();
+        public IList<AssumedRole> AssumedRoles { get; set; } = new List<AssumedRole>();
 
         public AliyunStsOptions Value => this;
     }
