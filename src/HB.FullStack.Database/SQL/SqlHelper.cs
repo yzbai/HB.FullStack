@@ -454,12 +454,12 @@ namespace HB.FullStack.Database.SQL
 					}
 				}
 
-				if (length >= 16383) //因为utf8mb4编码，一个汉字4个字节
+				if (length >= LengthConvention.MaxVarcharLength) //因为utf8mb4编码，一个汉字4个字节
 				{
 					dbTypeStatement = "MEDIUMTEXT";
 				}
 
-				if (length >= 4194303)
+				if (length >= LengthConvention.MaxMediumTextLength)
 				{
 					throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"字段长度太长。{propertyDef.EntityDef.EntityFullName} : {propertyDef.Name}");
 				}
