@@ -136,6 +136,10 @@ namespace HB.FullStack.Common.Api
             return SecurityUtil.CreateRandomString(6);
         }
 
+        /// <summary>
+        /// 告知BaseRepo这个请求在多长时间内是有效的
+        /// </summary>
+        /// <returns></returns>
         public TimeSpan? GetRateLimit()
         {
             return _rateLimit;

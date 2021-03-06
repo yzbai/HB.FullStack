@@ -1,4 +1,6 @@
 ﻿
+using HB.FullStack.Common;
+
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 
@@ -12,7 +14,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public abstract class SKFigure<TDrawData> : SKFigure where TDrawData : SKFigureDrawData
+    public abstract class SKFigure<TDrawData> : SKFigure where TDrawData : FigureDrawData
     {
         public static BindableProperty InitDrawDataProperty = BindableProperty.Create(
                     nameof(InitDrawData),
@@ -161,7 +163,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <summary>
         ///在原始坐标系下，新坐标系的原点。
         /// </summary>
-        public SKRatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new SKRatioPoint(0.5f, 0.5f);
+        public RatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new RatioPoint(0.5f, 0.5f);
 
         public SKSize CanvasSize { get; private set; }
 

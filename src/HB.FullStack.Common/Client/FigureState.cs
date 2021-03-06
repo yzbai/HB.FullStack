@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.XamarinForms.Skia
+namespace HB.FullStack.Common
 {
     public enum FigureState
     {

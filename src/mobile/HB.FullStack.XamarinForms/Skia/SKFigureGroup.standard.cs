@@ -1,4 +1,6 @@
 ﻿
+using HB.FullStack.Common;
+
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 
@@ -25,7 +27,7 @@ namespace HB.FullStack.XamarinForms.Skia
     }
 
     //EnableMultipleSelected
-    public class SKFigureGroup<TFigure, TDrawData> : SKFigureGroup where TFigure : SKFigure<TDrawData>, new() where TDrawData : SKFigureDrawData
+    public class SKFigureGroup<TFigure, TDrawData> : SKFigureGroup where TFigure : SKFigure<TDrawData>, new() where TDrawData : FigureDrawData
     {
         public static BindableProperty InitDrawDatasProperty = BindableProperty.Create(
                nameof(InitDrawDatas),
