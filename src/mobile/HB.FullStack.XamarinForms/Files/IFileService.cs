@@ -6,6 +6,8 @@ using HB.FullStack.XamarinForms;
 
 
 using Xamarin.Essentials;
+using Xamarin.Forms;
+using System;
 
 namespace HB.FullStack.XamarinForms.Files
 {
@@ -40,5 +42,8 @@ namespace HB.FullStack.XamarinForms.Files
         /// <param name="recheckPermissionForced"></param>
         /// <returns></returns>
         Task<string> SetFileAsync(string sourceFullPath, string destDirectory, string destFileName, bool recheckPermissionForced = false);
+
+        ObservableTask<ImageSource> GetImageSourceTask(string directory, string fileName, string? defaultFileName, bool remoteForced = false);
+        ObservableTask<ImageSource> GetImageSourceTask(string directory, string? initFileName, Func<Task<string?>> getFileNameAsyncFunc, string? defaultFileName, bool remoteForced = false);
     }
 }
