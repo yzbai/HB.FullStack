@@ -17,7 +17,7 @@ namespace HB.FullStack.Common
     /// 注意与Semphro区分开.
     /// 适合做RequestLimiter，即一段时间内请求数量限制
     /// </summary>
-    public class MemorySimpleLocker
+    public class MemorySimpleLocker : ISimpleLocker
     {
         private const int _maxItems = 100;
 
