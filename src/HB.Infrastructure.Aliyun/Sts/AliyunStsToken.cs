@@ -7,33 +7,23 @@ namespace HB.Infrastructure.Aliyun.Sts
 {
     public class AliyunStsToken
     {
-        public string RequestId { get; set; }
+        public string RequestId { get; set; } = null!;
 
-        public string SecurityToken { get; set; }
+        public string SecurityToken { get; set; } = null!;
 
-        public string AccessKeyId { get; set; }
+        public string AccessKeyId { get; set; } = null!;
 
-        public string AccessKeySecret { get; set; }
+        public string AccessKeySecret { get; set; } = null!;
 
         public DateTimeOffset ExpirationAt { get; set; }
 
-        public string AssumedRoleId { get; set; }
+        public string ArId { get; set; } = null!;
 
-        public string AssumedRoleName { get; set; }
+        public string Arn { get; set; } = null!;
 
-        public IList<string> Resources { get; set; } = new List<string>();
+        public string Directory { get; set; } = null!;
 
-        public AliyunStsToken(string requestId, string securityToken, string accessKeyId, string accessKeySecret, string expirationAt, string assumedRoleId, string assumedRoleName, string[] resources)
-        {
-            RequestId = requestId;
-            SecurityToken = securityToken;
-            AccessKeyId = accessKeyId;
-            AccessKeySecret = accessKeySecret;
-            ExpirationAt = DateTimeOffset.Parse(expirationAt, GlobalSettings.Culture);
-            AssumedRoleId = assumedRoleId;
-            AssumedRoleName = assumedRoleName;
-            Resources = resources;
-        }
+        public bool ReadOnly { get; set; }
 
     }
 }

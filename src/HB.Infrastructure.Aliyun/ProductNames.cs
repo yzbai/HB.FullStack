@@ -4,12 +4,19 @@ using System.Text;
 
 namespace HB.Infrastructure.Aliyun
 {
-    internal class ProductNames
+    internal class AliyunProductNames
     {
         public const string SMS = "Dysmsapi";
 
         public const string OSS = "Oss";
 
         public const string STS = "Sts";
+    }
+
+    public enum AliyunProduct
+    {
+        Sms,
+        Oss,
+        Sts
     }
 }

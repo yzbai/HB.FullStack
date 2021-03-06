@@ -14,8 +14,6 @@ namespace HB.FullStack.Database.Def
 {
     internal static class EntityDefFactory
     {
-        public const int DEFAULT_VARCHAR_LENGTH = 200;
-
         public static int VarcharDefaultLength { get; set; }
 
         private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
@@ -29,7 +27,7 @@ namespace HB.FullStack.Database.Def
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
-            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
+            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DefaultVarcharLength : databaseSettings.DefaultVarcharLength;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -209,7 +207,7 @@ namespace HB.FullStack.Database.Def
                     {
                         entityPropertyAttribute = new EntityPropertyAttribute
                         {
-                            MaxLength = Consts.LastUserMaxLength
+                            MaxLength = LengthConvention.LastUserMaxLength
                         };
                     }
                     else

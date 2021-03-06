@@ -14,10 +14,25 @@ namespace HB.FullStack.XamarinForms.Platforms
         Drawable
     }
 
-    public interface IPlatformLocalFileHelper
+    public interface IPlatformHelper
     {
-        Task<Stream> GetResourceStreamAsync(string fileName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null);
+        #region StatusBar
 
-        Stream GetAssetStream(string fileName);
+        bool IsStatusBarShowing { get; }
+
+        void ShowStatusBar();
+
+        void HideStatusBar();
+
+        #endregion
+
+        #region File
+
+        Task<Stream> GetResourceStreamAsync(string fileName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null);
+        Task UnZipAsync(Stream stream, string directory);
+
+        #endregion
+
+        //Stream GetAssetStream(string fileName);
     }
 }

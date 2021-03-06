@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-
-    public class SKFigureTouchInfo : EventArgs
+    public class SKFigureTouchEventArgs : EventArgs
     {
         /// <summary>
         /// 第几个指头

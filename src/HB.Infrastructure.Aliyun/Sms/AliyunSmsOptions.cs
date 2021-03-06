@@ -17,8 +17,11 @@ namespace HB.Infrastructure.Aliyun.Sms
         [DisallowNull, NotNull]
         public string Endpoint { get; set; } = null!;
 
+        /// <summary>
+        /// 拥有AliyunDysmsFullAccess权限的用户
+        /// </summary>
         [DisallowNull, NotNull]
-        public string AccessLoginName { get; set; } = null!;
+        public string UserName { get; set; } = null!;
 
         [DisallowNull, NotNull]
         public string AccessKeyId { get; set; } = null!;

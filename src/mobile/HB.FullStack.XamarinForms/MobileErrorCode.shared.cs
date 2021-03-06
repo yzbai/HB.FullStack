@@ -6,6 +6,11 @@
         IdBarrierError,
         ResourceNotFound,
         BizError,
-        NotLogined
+        NotLogined,
+        AliyunStsTokenError,
+        FileServiceError,
+        AliyunOssPutObjectError,
+        LocalFileCopyError,
+        LocalFileSaveError
     }
 }

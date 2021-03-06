@@ -130,7 +130,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
             NavigationService.Current.Pop();
         }
 
-        private async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)
+        private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)
         {
             //Save
             using SKImage image = SKImage.FromBitmap(sKBitmap);

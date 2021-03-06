@@ -11,7 +11,7 @@ using HB.FullStack.XamarinForms.Base;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace HB.FullStack.XamarinForms.Controls.TimeEditor
+namespace HB.FullStack.XamarinForms.Controls
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class TimeEditor : BaseContentView
@@ -37,9 +37,9 @@ namespace HB.FullStack.XamarinForms.Controls.TimeEditor
             }
         }
 
-        public string Hour => (IsDisplay24HourFormat ? Time.Hour : (Time.Hour > 12 ? Time.Hour - 12 : Time.Hour)).ToString("D2");
+        public string Hour => (IsDisplay24HourFormat ? Time.Hour : (Time.Hour > 12 ? Time.Hour - 12 : Time.Hour)).ToString("D2", GlobalSettings.Culture);
 
-        public string Minute => Time.Minute.ToString();
+        public string Minute => Time.Minute.ToString(GlobalSettings.Culture);
 
         public string AmPm => Time.IsAm ? "上午" : "下午";
 
@@ -77,29 +77,32 @@ namespace HB.FullStack.XamarinForms.Controls.TimeEditor
 
         private void OnMinuteChanged(object obj)
         {
-            bool isUp = Convert.ToBoolean(obj);
+            bool isUp = Convert.ToBoolean(obj, GlobalSettings.Culture);
             Time = Time.AddTime(0, isUp ? 1 : -1);
         }
 
         private void OnHourChanged(object obj)
         {
-            bool isUp = Convert.ToBoolean(obj);
+            bool isUp = Convert.ToBoolean(obj, GlobalSettings.Culture);
             Time = Time.AddTime(isUp ? 1 : -1, 0);
         }
 
         private void OnAmPmChanged(object obj)
         {
-            bool isUp = Convert.ToBoolean(obj);
+            bool isUp = Convert.ToBoolean(obj, GlobalSettings.Culture);
             Time = Time.AddTime(Time.IsAm ? 12 : -12, 0);
         }
 
         public override IList<IBaseContentView?>? GetAllCustomerControls() => null;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         private void OnIsDisplay24HourFormatChanged(bool oldValue, object newValue)
         {
 
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         private void OnTimeChanged(Time24Hour oldValue, Time24Hour newValue)
         {
             OnPropertyChanged(nameof(Hour));

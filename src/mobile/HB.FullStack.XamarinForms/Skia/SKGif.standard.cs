@@ -27,13 +27,15 @@ namespace HB.FullStack.XamarinForms.Skia
             _initializeTask.Fire();
         }
 
+#pragma warning disable CA1801 // Review unused parameters
         private Task InitializeAsync(string fileName)
+#pragma warning restore CA1801 // Review unused parameters
         {
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
-                IPlatformLocalFileHelper fileService = DependencyService.Resolve<IPlatformLocalFileHelper>();
+                IPlatformHelper fileService = DependencyService.Resolve<IPlatformHelper>();
 
-                using Stream stream = await fileService.GetResourceStreamAsync(fileName, ResourceType.Drawable, null).ConfigureAwait(false);
+                using Stream stream = null!;// await fileService.GetResourceStreamAsync(fileName, ResourceType.Drawable, null).ConfigureAwait(false);
                 using SKManagedStream sKManagedStream = new SKManagedStream(stream);
                 using SKCodec sKCodec = SKCodec.Create(sKManagedStream);
 

@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace HB.FullStack.XamarinForms.Skia
+namespace HB.FullStack.Common
 {
-    public abstract class SKFigureDrawData : IEquatable<SKFigureDrawData>
+    public abstract class FigureDrawData : IEquatable<FigureDrawData>
     {
         public FigureState State { get; set; }
 
-        public bool Equals(SKFigureDrawData? other)
+        public bool Equals(FigureDrawData? other)
         {
             if(ReferenceEquals(other, null))
             {
@@ -16,7 +16,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return State == other.State && EqualsImpl(other);
         }
 
-        public static bool operator ==(SKFigureDrawData? d1, SKFigureDrawData? d2)
+        public static bool operator ==(FigureDrawData? d1, FigureDrawData? d2)
         {
             if (ReferenceEquals(d1, d2))
             {
@@ -31,14 +31,14 @@ namespace HB.FullStack.XamarinForms.Skia
             return d1.Equals(d2);
         }
 
-        public static bool operator !=(SKFigureDrawData? d1, SKFigureDrawData? d2)
+        public static bool operator !=(FigureDrawData? d1, FigureDrawData? d2)
         {
             return !(d1 == d2);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is SKFigureDrawData data)
+            if (obj is FigureDrawData data)
             {
                 return Equals(data);
             }
@@ -54,7 +54,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return hashCode.ToHashCode();
         }
 
-        protected abstract bool EqualsImpl(SKFigureDrawData other);
+        protected abstract bool EqualsImpl(FigureDrawData other);
 
         protected abstract HashCode GetHashCodeImpl();
 

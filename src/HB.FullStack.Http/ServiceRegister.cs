@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Server;
-using HB.FullStack.Server.File;
 using HB.FullStack.Server.Filters;
 using HB.FullStack.Server.Security;
 
@@ -14,20 +13,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FullStackServerServiceRegister
     {
-        public static IServiceCollection AddServerService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddServerService(this IServiceCollection services)
         {
             services.AddOptions();
-            services.Configure<ServerOptions>(configuration);
-
-            AddCore(services);
-
-            return services;
-        }
-
-        public static IServiceCollection AddServerService(this IServiceCollection services, Action<ServerOptions> action)
-        {
-            services.AddOptions();
-            services.Configure(action);
 
             AddCore(services);
 
@@ -37,7 +25,6 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void AddCore(IServiceCollection services)
         {
             //HB.FullStack.Server
-            services.AddSingleton<IFileService, DefaultFileService>();
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<IPublicResourceTokenManager, PublicResourceTokenManager>();
             services.AddScoped<CheckPublicResourceTokenFilter>();

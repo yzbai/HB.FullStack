@@ -29,6 +29,8 @@ dotnet_diagnostic.CA1062.severity = none
 #在适用处使用事件
 dotnet_diagnostic.CA1030.severity = none
 
+dotnet_diagnostic.CA2211.severity = none
+dotnet_diagnostic.CA1711.severity = none
 
 # 这条规则目前有bug，只在IList上触发，而对于IEnumerable没反应，且应为BindableProperty的特殊写法，故此先禁用 2020.5.29
 dotnet_diagnostic.CA2227.severity = none

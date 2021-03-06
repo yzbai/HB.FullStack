@@ -2,7 +2,7 @@
 {
     public sealed class LongIdAttribute : RangeAttribute
     {
-        public LongIdAttribute() : base(0.0, long.MaxValue)
+        public LongIdAttribute() : base(1.0, long.MaxValue)
         {
 
         }

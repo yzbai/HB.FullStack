@@ -11,7 +11,7 @@ using HB.FullStack.Database.Engine;
 namespace HB.FullStack.Database.SQL
 {
     /// <summary>
-    /// SQLÌõ¼þ.
+    /// SQLï¿½ï¿½ï¿½ï¿½.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class WhereExpression<T>/* : SQLExpression*/
@@ -102,7 +102,7 @@ namespace HB.FullStack.Database.SQL
         #region Where
 
         /// <summary>
-        /// Ìí¼Ó×Ö·û´®Ä£°åÌõ¼þ¡£
+        /// ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         /// </summary>
         /// <param name="sqlFilter">ex: A={0} and B={1} and C in ({2})</param>
         /// <param name="filterParams">ex: ["name",12, new SqlInValues(new int[]{1,2,3})]</param>
@@ -140,12 +140,12 @@ namespace HB.FullStack.Database.SQL
         }
 
         /// <summary>
-        /// Ö»Ö§³Ö²»´øTypeConverter(È«¾Ö»òÕßÊôÐÔÌØÓÐ)µÄ×Ö¶Î
+        /// Ö»Ö§ï¿½Ö²ï¿½ï¿½ï¿½TypeConverter(È«ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½Ö¶ï¿½
         /// </summary>
         /// <param name="sqlText"></param>
         /// <param name="sqlParams"></param>
         /// <returns></returns>
-        //TODO:  ²ÎÊý»¯£¬¶ø²»ÊÇ×é³ÉÒ»¸ösql£¬ÓÐ×¢Èë·çÏÕ
+        //TODO:  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½sqlï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½
         /// <exception cref="DatabaseException"></exception>
         private static string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
         {
@@ -277,7 +277,7 @@ namespace HB.FullStack.Database.SQL
         /// <exception cref="DatabaseException"></exception>
         public WhereExpression<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            //TODO: µ÷²éÕâ¸ö
+            //TODO: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             string oldSeparator = _expressionContext.Seperator;
             _expressionContext.Seperator = string.Empty;
             _groupByString = keySelector.ToStatement(_expressionContext);

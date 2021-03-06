@@ -52,13 +52,15 @@ namespace HB.FullStack.Server.Filters
                         OnError(context);
                         return;
                     }
-
+                    //TODO: Remove this
+#if !DEBUG
                     if (!await _smsService.ValidateAsync(mobile!, smsCode!).ConfigureAwait(false))
                     {
                         _authorizationService.OnSignInFailedBySmsAsync(mobile!, apiRequest.GetLastUser()).Fire();
                         OnError(context);
                         return;
                     }
+#endif
                 }
                 else
                 {
@@ -71,7 +73,7 @@ namespace HB.FullStack.Server.Filters
             catch (Exception ex)
             {
                 OnError(context);
-                _logger.LogError(ex, "SmsCode 验证失败");
+                _logger.LogCritical(ex, "SmsCode 验证部分代码出问题");
             }
         }
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Server
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]
     public class ServerException : Exception
     {
         public ServerErrorCode ErrorCode { get; set; }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
 using HB.FullStack.XamarinForms.Api;
 using HB.FullStack.XamarinForms.Controls;
+using HB.FullStack.XamarinForms.Files;
 using HB.FullStack.XamarinForms.Logging;
 using HB.FullStack.XamarinForms.Platforms;
 
@@ -28,6 +29,8 @@ namespace HB.FullStack.XamarinForms.Base
         private readonly IList<Task> _initializeTasks = new List<Task>();
 
         public static new BaseApplication Current => (BaseApplication)Application.Current;
+
+        public static IPlatformHelper PlatformHelper = DependencyService.Resolve<IPlatformHelper>();
 
 #if DEBUG
         public static string Environment => "Debug";
@@ -75,18 +78,21 @@ namespace HB.FullStack.XamarinForms.Base
             }
         }
 
+        public abstract string InitAssetFileName { get; set; }
+
         protected BaseApplication()
         {
             //Version
             VersionTracking.Track();
 
-            NavigationService.Init(GetNavigationServiceImpl());
+            //FileService
+            AddInitTask(IFileService.InitializeAsync(InitAssetFileName));
         }
-
-        protected abstract NavigationService GetNavigationServiceImpl();
 
         protected void InitializeServices(IServiceCollection services)
         {
+            NavigationService.Init(GetNavigationServiceImpl());
+
             RegisterBaseServices(services);
 
             ConfigureBaseServices();
@@ -127,6 +133,8 @@ namespace HB.FullStack.XamarinForms.Base
             task.Fire();
             _initializeTasks.Add(task);
         }
+
+        protected abstract NavigationService GetNavigationServiceImpl();
 
         protected abstract void RegisterServices(IServiceCollection services);
 
@@ -204,14 +212,14 @@ namespace HB.FullStack.XamarinForms.Base
 
             GlobalSettings.Logger.Log(logLevel, ex, message);
         }
-        public static void LogDebug(string message)
+        public static void LogDebug(string message, Exception? ex = null)
         {
-            Log(null, message, LogLevel.Debug);
+            Log(ex, message, LogLevel.Debug);
         }
 
-        public static void LogError(string message)
+        public static void LogError(string message, Exception? ex = null)
         {
-            Log(null, message, LogLevel.Error);
+            Log(ex, message, LogLevel.Error);
         }
     }
 }

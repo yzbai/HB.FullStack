@@ -35,5 +35,6 @@ namespace HB.FullStack.Common.Api
         RequestCanceled,
         AliyunStsTokenReturnNull,
         AliyunOssPutObjectError,
+        TokenRefreshError,
     }
 }

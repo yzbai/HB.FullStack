@@ -148,14 +148,14 @@ namespace HB.FullStack.Identity
                 {
                     if (!PassowrdCheck(user, context.Password!))
                     {
-                        OnSignInFailed(userLoginControl, lastUser);
+                        await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
 
                         throw new IdentityException(IdentityErrorCode.AuthorizationPasswordWrong, $"SignInContext:{SerializeUtil.ToJson(context)}");
                     }
                 }
 
                 //其他检查
-                PreSignInCheck(user, userLoginControl, lastUser);
+                await PreSignInCheckAsync(user, userLoginControl, lastUser).ConfigureAwait(false);
 
                 //注销其他客户端
                 await DeleteSignInTokensAsync(user.Id, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
@@ -404,7 +404,7 @@ namespace HB.FullStack.Identity
 
             UserLoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
-            OnSignInFailed(userLoginControl, lastUser);
+            await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -467,7 +467,7 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="KVStoreException"></exception>
-        private void PreSignInCheck(User user, UserLoginControl userLoginControl, string lastUser)
+        private async Task PreSignInCheckAsync(User user, UserLoginControl userLoginControl, string lastUser)
         {
             ThrowIf.Null(user, nameof(user));
 
@@ -504,12 +504,12 @@ namespace HB.FullStack.Identity
             }
 
             //重置LoginControl
-            if (userLoginControl.LockoutEnabled || userLoginControl.LoginFailedCount == 0)
+            if (userLoginControl.LockoutEnabled || userLoginControl.LoginFailedCount != 0)
             {
                 userLoginControl.LockoutEnabled = false;
                 userLoginControl.LoginFailedCount = 0;
 
-                _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
+                await _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).ConfigureAwait(false);
             }
 
             if (signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
@@ -524,7 +524,7 @@ namespace HB.FullStack.Identity
         /// <param name="userLoginControl"></param>
         /// <param name="lastUser"></param>
         /// <exception cref="KVStoreException"></exception>
-        private void OnSignInFailed(UserLoginControl userLoginControl, string lastUser)
+        private async Task OnSignInFailedAsync(UserLoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
             {
@@ -542,7 +542,7 @@ namespace HB.FullStack.Identity
                 userLoginControl.LoginFailedCount++;
             }
 
-            _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).Fire();
+            await _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).ConfigureAwait(false);
         }
 
         /// <summary>

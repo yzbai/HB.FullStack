@@ -4,17 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using SkiaSharp;
-
-namespace HB.FullStack.XamarinForms.Skia
+namespace HB.FullStack.Common
 {
-
     /// <summary>
     /// 比例点
     /// </summary>
-    public struct SKRatioPoint : IEquatable<SKRatioPoint>
+    public struct RatioPoint : IEquatable<RatioPoint>
     {
-        public static SKRatioPoint Empty => new SKRatioPoint(0, 0);
+        public static RatioPoint Empty => new RatioPoint(0, 0);
 
         /// <summary>
         /// X = XRation * Canvas.Width
@@ -26,27 +23,17 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         public float YRatio { get; set; }
 
-        public bool IsEmpty => XRatio == 0 && YRatio == 0;
+        public bool IsEmpty() => XRatio == 0 && YRatio == 0;
 
-        public SKRatioPoint(float xRatio, float yRatio)
+        public RatioPoint(float xRatio, float yRatio)
         {
             XRatio = xRatio;
             YRatio = yRatio;
         }
 
-        public SKPoint ToSKPoint(float containerWidth, float containerHeight)
-        {
-            return new SKPoint(XRatio * containerWidth, YRatio * containerHeight);
-        }
-
-        public SKPoint ToSKPoint(SKSize containerSize)
-        {
-            return new SKPoint(XRatio * containerSize.Width, YRatio * containerSize.Height);
-        }
-
         public override bool Equals(object obj)
         {
-            if (obj is SKRatioPoint point)
+            if (obj is RatioPoint point)
             {
                 return Equals(point);
             }
@@ -59,17 +46,17 @@ namespace HB.FullStack.XamarinForms.Skia
             return HashCode.Combine(XRatio, YRatio);
         }
 
-        public static bool operator ==(SKRatioPoint left, SKRatioPoint right)
+        public static bool operator ==(RatioPoint left, RatioPoint right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(SKRatioPoint left, SKRatioPoint right)
+        public static bool operator !=(RatioPoint left, RatioPoint right)
         {
             return !(left == right);
         }
 
-        public bool Equals(SKRatioPoint other)
+        public bool Equals(RatioPoint other)
         {
             return XRatio == other.XRatio && YRatio == other.YRatio;
         }
