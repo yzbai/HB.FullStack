@@ -104,7 +104,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             TimeSpan? attributedLocalDataExpiryTime = typeof(TEntity).GetCustomAttribute<LocalDataTimeoutAttribute>()?.ExpiryTime;
 
-            _localDataExpiryTime = attributedLocalDataExpiryTime == null ? Consts.DefaultLocalDataExpiryTime : attributedLocalDataExpiryTime.Value;
+            _localDataExpiryTime = attributedLocalDataExpiryTime == null ? Conventions.DefaultLocalDataExpiryTime : attributedLocalDataExpiryTime.Value;
         }
 
         protected abstract IEnumerable<TEntity> ToEntities(TRes res);
@@ -332,7 +332,7 @@ namespace HB.FullStack.XamarinForms.Base
 
         private static bool IsRequestRecently(ApiRequest<TRes> apiRequest)
         {
-            TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Consts.DefaultApiRequestRateLimit;
+            TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Conventions.DefaultApiRequestRateLimit;
 
             return !RequestLocker.NoWaitLock(
                 "request",

@@ -24,7 +24,7 @@ namespace HB.FullStack.XamarinForms.Effects.Touch
         /// </summary>
         public bool Enable { get; set; } = true;
 
-        public TouchEffect() : base($"{Consts.EffectsGroupName}.{nameof(TouchEffect)}")
+        public TouchEffect() : base($"{Conventions.EffectsGroupName}.{nameof(TouchEffect)}")
         {
         }
 

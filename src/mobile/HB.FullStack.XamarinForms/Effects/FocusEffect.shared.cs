@@ -9,7 +9,7 @@ namespace HB.FullStack.XamarinForms.Effects
 {
     public class FocusEffect : RoutingEffect
     {
-        public FocusEffect() : base($"{Consts.EffectsGroupName}.{nameof(FocusEffect)}")
+        public FocusEffect() : base($"{Conventions.EffectsGroupName}.{nameof(FocusEffect)}")
         {
         }
     }

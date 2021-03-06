@@ -28,4 +28,4 @@ using Xamarin.Forms;
 //      Revision
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: ResolutionGroupName(Consts.EffectsGroupName)]
+[assembly: ResolutionGroupName(Conventions.EffectsGroupName)]

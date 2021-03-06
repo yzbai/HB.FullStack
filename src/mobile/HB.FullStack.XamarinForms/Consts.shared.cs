@@ -9,7 +9,7 @@ namespace HB.FullStack.XamarinForms
     /// <summary>
     /// 警告：不要修改
     /// </summary>
-    public static class Consts
+    public static class Conventions
     {
         public const string Material_Icon_Font_Family = "MaterialIcon";
 

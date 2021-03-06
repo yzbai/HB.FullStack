@@ -486,7 +486,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             return Task.Run(async () =>
             {
-                await Task.Delay(Consts.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
+                await Task.Delay(Conventions.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
