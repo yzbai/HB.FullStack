@@ -71,6 +71,7 @@ namespace HB.FullStack
             GlobalSettings.Logger = ServiceProvider.GetRequiredService<ILogger<ServiceFixture_MySql>>();
 
 
+
             ServiceProvider.GetRequiredService<IDatabase>().InitializeAsync().Wait();
 
 

@@ -184,6 +184,12 @@ namespace HB.FullStack.Database.SQL
                 left = Visit(b.Left, context);
                 right = Visit(b.Right, context);
 
+                if(left is EnumMemberAccess enumMemberAccess)
+                {
+                    //将right转为enum对应的字符串
+                    right = Enum.ToObject(enumMemberAccess.EnumType, right).ToString();
+                }
+
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;

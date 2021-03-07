@@ -6,6 +6,9 @@ using HB.FullStack.XamarinForms;
 
 
 using Xamarin.Essentials;
+using Xamarin.Forms;
+using System;
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.XamarinForms.Files
 {
@@ -17,8 +20,15 @@ namespace HB.FullStack.XamarinForms.Files
             {
                 //将Assets里的初始文件解压缩到用户文件中去
 
-                using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                try
+                {
+                    using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
+                    await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                }
+                catch(Exception ex)
+                {
+                    GlobalSettings.Logger.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
+                }
             }
         }
 
@@ -40,5 +50,8 @@ namespace HB.FullStack.XamarinForms.Files
         /// <param name="recheckPermissionForced"></param>
         /// <returns></returns>
         Task<string> SetFileAsync(string sourceFullPath, string destDirectory, string destFileName, bool recheckPermissionForced = false);
+
+        ObservableTask<ImageSource> GetImageSourceTask(string directory, string fileName, string? defaultFileName, bool remoteForced = false);
+        ObservableTask<ImageSource> GetImageSourceTask(string directory, string? initFileName, Func<Task<string?>> getFileNameAsyncFunc, string? defaultFileName, bool remoteForced = false);
     }
 }

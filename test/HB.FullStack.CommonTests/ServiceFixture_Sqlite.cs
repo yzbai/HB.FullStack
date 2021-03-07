@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.Configuration;
@@ -48,12 +49,16 @@ namespace HB.FullStack
                 {
                     options.CommonSettings.Version = 1;
 
-                    options.Connections.Add(new DatabaseConnectionSettings
+                    var connSettings = new DatabaseConnectionSettings
                     {
-                        DatabaseName = "sqlite_test2.db",
-                        ConnectionString = "Data Source=sqlite_test2.db",
+                        DatabaseName = $"s{TimeUtil.UtcNowUnixTimeSeconds}.db",
                         IsMaster = true
-                    });
+                    };
+
+                    connSettings.ConnectionString = $"Data Source={connSettings.DatabaseName}";
+
+                    options.Connections.Add(connSettings);
+
                 });
 
             ServiceProvider = services.BuildServiceProvider();
