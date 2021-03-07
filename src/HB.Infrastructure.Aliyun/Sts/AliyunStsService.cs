@@ -86,7 +86,6 @@ namespace HB.Infrastructure.Aliyun.Sts
                     ExpirationAt = DateTimeOffset.Parse(assumedRoleResponse.Credentials.Expiration, GlobalSettings.Culture),
                     ArId = assumedRoleResponse.AssumedRoleUser.AssumedRoleId,
                     Arn = assumedRoleResponse.AssumedRoleUser.Arn,
-                    Directory = directory,
                     ReadOnly = readOnly
                 };
 
