@@ -163,8 +163,6 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-
-
         public async Task Test_4_Add_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
@@ -217,7 +215,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (testEntities.Count == 0)
                 {
-                    throw new  Exception("No Entity to update");
+                    throw new Exception("No Entity to update");
                 }
 
                 PublisherEntity entity = testEntities[0];
@@ -426,7 +424,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (testEntities.Count == 0)
                 {
-                    throw new  Exception("No Entity to update");
+                    throw new Exception("No Entity to update");
                 }
 
                 PublisherEntity entity = testEntities[0];
@@ -762,6 +760,34 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Stop();
 
             _output.WriteLine($"Reflection: {stopwatch.ElapsedMilliseconds}");
+        }
+
+        [Fact]
+        public async Task Test_10_Enum_TestAsync()
+        {
+            IDatabase database = _mysql;
+            ITransaction transaction = _mysqlTransaction;
+
+            IList<PublisherEntity> publishers = Mocker.GetPublishers();
+
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+
+            try
+            {
+                await database.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _output.WriteLine(ex.Message);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                throw;
+            }
+
+            IEnumerable<PublisherEntity> publisherEntities = await database.RetrieveAsync<PublisherEntity>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
+
+            Assert.True(publisherEntities.Any() && publisherEntities.All(p => p.Type == PublisherType.Big));
         }
     }
 }

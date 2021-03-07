@@ -8,6 +8,7 @@ using HB.FullStack.XamarinForms;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.XamarinForms.Files
 {
@@ -19,8 +20,15 @@ namespace HB.FullStack.XamarinForms.Files
             {
                 //将Assets里的初始文件解压缩到用户文件中去
 
-                using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                try
+                {
+                    using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
+                    await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                }
+                catch(Exception ex)
+                {
+                    GlobalSettings.Logger.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
+                }
             }
         }
 

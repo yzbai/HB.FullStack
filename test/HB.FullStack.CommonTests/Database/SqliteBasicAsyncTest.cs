@@ -15,6 +15,8 @@ using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -665,6 +667,33 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
+        [Fact]
+        public async Task Test_10_Enum_TestAsync()
+        {
+            IDatabase database = _sqlite;
+            ITransaction transaction = _sqlIteTransaction;
+
+            IList<PublisherEntity> publishers = Mocker.GetPublishers();
+
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+
+            try
+            {
+                await database.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _output.WriteLine(ex.Message);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                throw;
+            }
+
+            IEnumerable<PublisherEntity> publisherEntities = await database.RetrieveAsync<PublisherEntity>(p => p.Type == PublisherType.Big, null).ConfigureAwait(false);
+
+            Assert.True(publisherEntities.All(p => p.Type == PublisherType.Big));
+        }
 
     }
 }

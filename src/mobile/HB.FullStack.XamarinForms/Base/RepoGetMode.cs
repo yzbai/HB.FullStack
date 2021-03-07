@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.XamarinForms
+﻿namespace HB.FullStack.XamarinForms.Base
 {
     public enum RepoGetMode
     {
