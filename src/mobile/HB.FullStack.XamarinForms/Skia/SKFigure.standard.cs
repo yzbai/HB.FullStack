@@ -22,7 +22,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     typeof(SKFigure<TDrawData>),
                     null,
                     BindingMode.OneWay,
-                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawData>)b).OnInitDrawDataChanged((TDrawData?)oldValue, (TDrawData?)newValue));
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawData>)b).OnBaseInitDrawDataChanged((TDrawData?)oldValue, (TDrawData?)newValue));
 
         public static BindableProperty ResultDrawDataProperty = BindableProperty.Create(
                     nameof(ResultDrawData),
@@ -37,12 +37,18 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected bool HitPathNeedUpdate { get; set; }
 
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
-        private void OnInitDrawDataChanged(TDrawData? oldValue, TDrawData? newValue)
+        private void OnBaseInitDrawDataChanged(TDrawData? oldValue, TDrawData? newValue)
         {
             HitPathNeedUpdate = true;
+
+            OnInitDrawDataChanged();
+
             InvalidateMatrixAndSurface();
         }
+
+        protected abstract void OnInitDrawDataChanged();
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {

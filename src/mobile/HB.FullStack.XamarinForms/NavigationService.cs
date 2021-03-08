@@ -84,6 +84,10 @@ namespace HB.FullStack.XamarinForms
                     {
                         toRemoves.Add(navStack[i]);
                     }
+                    else
+                    {
+                        break;
+                    }
                 }
 
                 toRemoves.ForEach(p => Navigation?.RemovePage(p));
