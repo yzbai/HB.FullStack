@@ -14,7 +14,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public abstract class SKFigure<TDrawData> : SKFigure where TDrawData : FigureDrawData
+    public abstract class SKFigure<TDrawData> : SKFigure where TDrawData : FigureData
     {
         public static BindableProperty InitDrawDataProperty = BindableProperty.Create(
                     nameof(InitDrawData),

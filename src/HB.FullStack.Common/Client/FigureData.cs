@@ -2,11 +2,11 @@
 
 namespace HB.FullStack.Common
 {
-    public abstract class FigureDrawData : IEquatable<FigureDrawData>
+    public abstract class FigureData : IEquatable<FigureData>
     {
         public FigureState State { get; set; }
 
-        public bool Equals(FigureDrawData? other)
+        public bool Equals(FigureData? other)
         {
             if(ReferenceEquals(other, null))
             {
@@ -16,7 +16,7 @@ namespace HB.FullStack.Common
             return State == other.State && EqualsImpl(other);
         }
 
-        public static bool operator ==(FigureDrawData? d1, FigureDrawData? d2)
+        public static bool operator ==(FigureData? d1, FigureData? d2)
         {
             if (ReferenceEquals(d1, d2))
             {
@@ -31,14 +31,14 @@ namespace HB.FullStack.Common
             return d1.Equals(d2);
         }
 
-        public static bool operator !=(FigureDrawData? d1, FigureDrawData? d2)
+        public static bool operator !=(FigureData? d1, FigureData? d2)
         {
             return !(d1 == d2);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is FigureDrawData data)
+            if (obj is FigureData data)
             {
                 return Equals(data);
             }
@@ -54,7 +54,7 @@ namespace HB.FullStack.Common
             return hashCode.ToHashCode();
         }
 
-        protected abstract bool EqualsImpl(FigureDrawData other);
+        protected abstract bool EqualsImpl(FigureData other);
 
         protected abstract HashCode GetHashCodeImpl();
 

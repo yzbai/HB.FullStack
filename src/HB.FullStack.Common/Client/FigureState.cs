@@ -6,8 +6,8 @@ namespace HB.FullStack.Common
 {
     public enum FigureState
     {
-        None,
-        Selected,
-        LongSelected,
+        None = 0,
+        Selected = 1,
+        LongSelected = 2,
     }
 }
