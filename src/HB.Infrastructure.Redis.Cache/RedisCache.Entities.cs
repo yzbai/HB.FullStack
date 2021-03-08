@@ -37,7 +37,7 @@ namespace HB.Infrastructure.Redis.Cache
         /// keys:id1, id2, id3
         /// argv:3(id_number), sldexp, nowInUnixSeconds
         /// </summary>
-        public const string _luaEntitiesGetAndRefresh = @"
+        public const string LUA_ENTITIES_GET_AND_REFRESH = @"
 local number = tonumber(ARGV[1])
 local existCount = redis.call('exists', unpack(KEYS))
 if (existCount ~= number) then
@@ -83,7 +83,7 @@ return array
         /// KEYS:dimensionKey1, dimensionKey2, dimensionKey3
         /// ARGV:3(entity_count), sldexp, nowInUnixSeconds
         /// </summary>
-        public const string _luaEntitiesGetAndRefreshByDimension = @"
+        public const string LUA_ENTITIES_GET_AND_REFRESH_BY_DIMENSION = @"
 
 local number = tonumber(ARGV[1])
 local existCount = redis.call('exists', unpack(KEYS))
@@ -137,7 +137,7 @@ return array";
         /// keys: entity1_idKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_idKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
         /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
         /// </summary>
-        public const string _luaEntitiesSet = @"
+        public const string LUA_ENTITIES_SET = @"
 local entityNum = tonumber(ARGV[3])
 local dimNum = tonumber(ARGV[4])
 local rt={}
@@ -179,7 +179,7 @@ return rt";
         /// keys: idKey1, idKey2, idKey3
         /// argv: 3(entity_num), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
         /// </summary>
-        public const string _luaEntitiesRemove = @" 
+        public const string LUA_ENTITIES_REMOVE = @" 
 local entityNum = tonumber(ARGV[1])
 for j=1, entityNum do
 
@@ -201,7 +201,7 @@ end
         /// keys:entity1_dimensionkey, entity2_dimensionkey, entity3_dimensionKey
         /// argv: 3(entity_count), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
         /// </summary>
-        public const string _luaEntitiesRemoveByDimension = @"
+        public const string LUA_ENTITIES_REMOVE_BY_DIMENSION = @"
 local entityNum = tonumber(ARGV[1])
 
 for j = 1, entityNum do
@@ -223,6 +223,57 @@ for j = 1, entityNum do
                     redis.call('del', i) 
                 end
             end
+        end
+    end
+end
+";
+        /// <summary>
+        /// keys:entity1_dimensionkey, entity2_dimensionkey, entity3_dimensionKey
+        /// argv: 3(entity_count)
+        /// </summary>
+        public const string LUA_ENTITIES_REMOVE_BY_DIMENSION_FORCED_NO_VERSION = @"
+local entityNum = tonumber(ARGV[1])
+
+for j = 1, entityNum do
+    local id = redis.call('get',KEYS[j])
+
+    if (id) then
+
+       
+
+        local data= redis.call('hget',id, 'dim') 
+
+        if (not data) then
+            redis.call('del', KEYS[1])
+        else
+            redis.call('del',id)
+    
+            if (data~='') then
+                for i in string.gmatch(data, '%S+') do
+                    redis.call('del', i) 
+                end
+            end
+        end
+    end
+end
+";
+        /// <summary>
+        /// keys: idKey1, idKey2, idKey3
+        /// argv: 3(entity_num)
+        /// </summary>
+        public const string LUA_ENTITIES_REMOVE_FORECED_NO_VERSION = @" 
+local entityNum = tonumber(ARGV[1])
+for j=1, entityNum do
+
+    
+
+    local data=redis.call('hget', KEYS[j], 'dim')
+
+    redis.call('del', KEYS[j]) 
+
+    if(data and data~='') then
+        for i in string.gmatch(data, '%S+') do
+            redis.call('del', i)
         end
     end
 end
@@ -274,9 +325,18 @@ end
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
+                _logger.LogError(ex, "分析这个GetEntitiesAsync.情况1，程序中实体改了");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                try
+                {
+                    await ForcedRemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+                }
+                catch(Exception ex2)
+                {
+                    _logger.LogError(ex2, "在强制删除中出错，{TEntity}, dimKey:{dimensionKeyname} ", typeof(TEntity).Name, dimensionKeyName);
+                }
+
+                throw new CacheException(CacheErrorCode.Unkown, "缓存中取值时，未知错误, 删除此项缓存", ex);
             }
         }
 
@@ -383,9 +443,42 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
+                _logger.LogError(ex, "分析这个RemoveEntitiesAsync");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误RemoveEntitiesAsync", ex);
+            }
+        }
+
+        private async Task ForcedRemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+            ThrowIfNotCacheEnabled(entityDef);
+            ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
+
+            List<RedisKey> redisKeys = new List<RedisKey>();
+            List<RedisValue> redisValues = new List<RedisValue>();
+
+            byte[] loadedScript = AddForcedRemoveEntitiesRedisInfo<TEntity>(dimensionKeyName, dimensionKeyValues, entityDef, redisKeys, redisValues);
+
+            IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
+
+            try
+            {
+                await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray(), redisValues.ToArray()).ConfigureAwait(false);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogError(ex, "NOSCRIPT, will try again.");
+
+                InitLoadedLuas();
+
+                await ForcedRemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "分析这个ForcedRemoveEntitiesAsync");
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误ForcedRemoveEntitiesAsync", ex);
             }
         }
 
@@ -432,6 +525,36 @@ end
             {
                 redisValues.Add(updatedVersion);
             }
+
+            return loadedScript;
+        }
+
+        private byte[] AddForcedRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues,  CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
+        {
+            byte[] loadedScript;
+
+            if (entityDef.KeyProperty.Name == dimensionKeyName)
+            {
+                foreach (object dimensionKeyValue in dimensionKeyValues)
+                {
+                    redisKeys.Add(GetRealKey(entityDef.Name, dimensionKeyValue.ToString()!));
+                }
+
+                loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesForcedRemoveLua;
+            }
+            else
+            {
+                foreach (string dimensionKeyValue in dimensionKeyValues)
+                {
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue));
+                }
+
+                loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesForcedRemoveByDimensionLua;
+            }
+
+            /// argv: 3(entity_count)
+
+            redisValues.Add(redisKeys.Count);
 
             return loadedScript;
         }

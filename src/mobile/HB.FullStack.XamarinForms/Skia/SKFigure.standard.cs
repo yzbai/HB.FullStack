@@ -14,6 +14,27 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
+    public class EmptyResultData : FigureData
+    {
+        protected override bool EqualsImpl(FigureData other)
+        {
+            return other is EmptyResultData;
+        }
+
+        protected override HashCode GetHashCodeImpl()
+        {
+            return new HashCode();
+        }
+    }
+
+    public abstract class SKFigure<TDrawData> : SKFigure<TDrawData, EmptyResultData> where TDrawData : FigureData
+    {
+        protected override void OnCaculateOutput(out EmptyResultData? newResultDrawData, TDrawData initDrawData)
+        {
+            newResultDrawData = null;
+        }
+    }
+
     public abstract class SKFigure<TDrawData, TResultData> : SKFigure 
         where TDrawData : FigureData 
         where TResultData : FigureData

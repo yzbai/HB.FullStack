@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Cache;
+using HB.FullStack.Common;
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace HB.Infrastructure.Redis.Cache
         // ARGV[4] = data - byte[]
         // ARGV[5] = utcTicks
         // this order should not change LUA script depends on it
-        public const string _luaSetWithTimestamp = @"
+        public const string LUA_SET_WITH_TIMESTAMP = @"
 local minTimestamp = redis.call('get', '_minTS'..KEYS[1])
 
 if(minTimestamp and tonumber(minTimestamp)>tonumber(ARGV[5])) then
@@ -47,7 +48,7 @@ return 1";
         /// keys: key
         /// argv:utcTicks, invalidationKey_expire_seconds
         /// </summary>
-        public const string _luaRemoveWithTimestamp = @"
+        public const string LUA_REMOVE_WITH_TIMESTAMP = @"
 redis.call('set', '_minTS'..KEYS[1], ARGV[1], 'EX', ARGV[2])
 return redis.call('del', KEYS[1])
 ";
@@ -56,7 +57,7 @@ return redis.call('del', KEYS[1])
         /// keys:key
         /// argv:utcTicks
         /// </summary>
-        public const string _luaGetAndRefresh = @"
+        public const string LUA_GET_AND_REFRESH = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
 
 if (not data[3]) then
@@ -110,9 +111,18 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
+                _logger.LogError(ex, "分析这个GetAsync");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                try
+                {
+                    await RemoveAsync(key, TimeUtil.UtcNowTicks, token).ConfigureAwait(false);
+                }
+                catch (Exception ex2)
+                {
+                    _logger.LogError(ex2, "在因为Get异常而删除中出错，Key:{key} ", key);
+                }
+
+                throw new CacheException(CacheErrorCode.Unkown, "未知错误GetAsync Timestamp, 未知错误, 删除此项缓存", ex);
             }
         }
 

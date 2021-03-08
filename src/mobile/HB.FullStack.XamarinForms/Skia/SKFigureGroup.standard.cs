@@ -26,10 +26,17 @@ namespace HB.FullStack.XamarinForms.Skia
         public bool EnableUnSelectedByHitFailed { get; set; } = true;
     }
 
-    //EnableMultipleSelected
-    public abstract class SKFigureGroup<TFigure, TDrawData, TResultData> : SKFigureGroup 
-        where TFigure : SKFigure<TDrawData, TResultData>, new() 
-        where TDrawData : FigureData 
+    public abstract class SKFigureGroup<TFigure, TDrawData> : SKFigureGroup<TFigure, TDrawData, EmptyResultData>
+    where TFigure : SKFigure<TDrawData>, new()
+    where TDrawData : FigureData
+    {
+
+    }
+
+
+    public abstract class SKFigureGroup<TFigure, TDrawData, TResultData> : SKFigureGroup
+        where TFigure : SKFigure<TDrawData, TResultData>, new()
+        where TDrawData : FigureData
         where TResultData : FigureData
     {
         public static BindableProperty DrawDatasProperty = BindableProperty.Create(
@@ -48,9 +55,9 @@ namespace HB.FullStack.XamarinForms.Skia
             BindingMode.OneWayToSource);
 
         public IList<TDrawData>? DrawDatas { get => (IList<TDrawData>?)GetValue(DrawDatasProperty); set => SetValue(DrawDatasProperty, value); }
-        
+
         public IList<TResultData?>? ResultDatas { get => (IList<TResultData?>?)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
-        
+
         private void OnBaseDrawDatasChanged(IList<TDrawData>? oldValues, IList<TDrawData>? newValues)
         {
             //Create and Add Figures
@@ -105,7 +112,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        
+
         private readonly Dictionary<long, TFigure> _hittingFigures = new Dictionary<long, TFigure>();
 
         public FigureState SelectedFiguresState { get; private set; }
@@ -231,8 +238,8 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            if (SelectedFiguresState != figure.State 
-                || (figure.State == FigureState.Selected && !EnableMultipleSelected) 
+            if (SelectedFiguresState != figure.State
+                || (figure.State == FigureState.Selected && !EnableMultipleSelected)
                 || (figure.State == FigureState.LongSelected && !EnableMultipleLongSelected))
             {
                 UnSelectAllExcept(figure);
