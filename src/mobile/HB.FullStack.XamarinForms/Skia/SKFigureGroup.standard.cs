@@ -27,71 +27,85 @@ namespace HB.FullStack.XamarinForms.Skia
     }
 
     //EnableMultipleSelected
-    public class SKFigureGroup<TFigure, TDrawData> : SKFigureGroup where TFigure : SKFigure<TDrawData>, new() where TDrawData : FigureData
+    public abstract class SKFigureGroup<TFigure, TDrawData, TResultData> : SKFigureGroup 
+        where TFigure : SKFigure<TDrawData, TResultData>, new() 
+        where TDrawData : FigureData 
+        where TResultData : FigureData
     {
-        public static BindableProperty InitDrawDatasProperty = BindableProperty.Create(
-               nameof(InitDrawDatas),
+        public static BindableProperty DrawDatasProperty = BindableProperty.Create(
+               nameof(DrawDatas),
                typeof(IList<TDrawData>),
-               typeof(SKFigureGroup<TFigure, TDrawData>),
+               typeof(SKFigureGroup<TFigure, TDrawData, TResultData>),
                null,
                BindingMode.OneWay,
-               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawData>)b).OnInitDrawDatasChanged((IList<TDrawData>?)oldValues, (IList<TDrawData>?)newValues));
+               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawData, TResultData>)b).OnBaseDrawDatasChanged((IList<TDrawData>?)oldValues, (IList<TDrawData>?)newValues));
 
-        public static BindableProperty ResultDrawDatasProperty = BindableProperty.Create(
-            nameof(ResultDrawDatas),
-            typeof(IList<TDrawData>),
-            typeof(SKFigureGroup<TFigure, TDrawData>),
+        public static BindableProperty ResultDatasProperty = BindableProperty.Create(
+            nameof(ResultDatas),
+            typeof(IList<TResultData>),
+            typeof(SKFigureGroup<TFigure, TDrawData, TResultData>),
             null,
             BindingMode.OneWayToSource);
 
-        public IList<TDrawData>? InitDrawDatas { get => (IList<TDrawData>?)GetValue(InitDrawDatasProperty); set => SetValue(InitDrawDatasProperty, value); }
-        public IList<TDrawData?>? ResultDrawDatas { get => (IList<TDrawData?>?)GetValue(ResultDrawDatasProperty); set => SetValue(ResultDrawDatasProperty, value); }
-        private void OnInitDrawDatasChanged(IList<TDrawData>? oldValues, IList<TDrawData>? newValues)
+        public IList<TDrawData>? DrawDatas { get => (IList<TDrawData>?)GetValue(DrawDatasProperty); set => SetValue(DrawDatasProperty, value); }
+        
+        public IList<TResultData?>? ResultDatas { get => (IList<TResultData?>?)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
+        
+        private void OnBaseDrawDatasChanged(IList<TDrawData>? oldValues, IList<TDrawData>? newValues)
         {
             //Create and Add Figures
             ResumeFigures();
 
             if (oldValues is ObservableCollection<TDrawData> oldCollection)
             {
-                oldCollection.CollectionChanged -= OnInitDrawDatasCollectionChanged;
+                oldCollection.CollectionChanged -= OnBaseDrawDatasCollectionChanged;
             }
 
             if (newValues is ObservableCollection<TDrawData> newCollection)
             {
-                newCollection.CollectionChanged += OnInitDrawDatasCollectionChanged;
+                newCollection.CollectionChanged += OnBaseDrawDatasCollectionChanged;
             }
+
+            OnDrawDatasChanged();
 
             InvalidateMatrixAndSurface();
         }
+
+        protected abstract void OnDrawDatasChanged();
+
+        private void OnBaseDrawDatasCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ResumeFigures();
+
+            OnDrawDatasCollectionChanged();
+
+            InvalidateMatrixAndSurface();
+        }
+
+        protected abstract void OnDrawDatasCollectionChanged();
 
         private void ResumeFigures()
         {
             ClearFigures();
 
-            if (InitDrawDatas == null)
+            if (DrawDatas == null)
             {
                 return;
             }
 
-            ResultDrawDatas = new ObservableRangeCollection<TDrawData?>(Enumerable.Repeat<TDrawData?>(null, InitDrawDatas.Count));
+            ResultDatas = new ObservableRangeCollection<TResultData?>(Enumerable.Repeat<TResultData?>(null, DrawDatas.Count));
 
-            for (int i = 0; i < InitDrawDatas.Count; ++i)
+            for (int i = 0; i < DrawDatas.Count; ++i)
             {
                 TFigure figure = new TFigure();
-                figure.SetBinding(SKFigure<TDrawData>.InitDrawDataProperty, new Binding($"{nameof(InitDrawDatas)}[{i}]", source: this));
-                figure.SetBinding(SKFigure<TDrawData>.ResultDrawDataProperty, new Binding($"{nameof(ResultDrawDatas)}[{i}]", source: this));
+                figure.SetBinding(SKFigure<TDrawData, TResultData>.DrawDataProperty, new Binding($"{nameof(DrawDatas)}[{i}]", source: this));
+                figure.SetBinding(SKFigure<TDrawData, TResultData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
 
                 AddFigure(figure);
             }
         }
 
-        private void OnInitDrawDatasCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            ResumeFigures();
-
-            InvalidateMatrixAndSurface();
-        }
-
+        
         private readonly Dictionary<long, TFigure> _hittingFigures = new Dictionary<long, TFigure>();
 
         public FigureState SelectedFiguresState { get; private set; }
@@ -101,7 +115,7 @@ namespace HB.FullStack.XamarinForms.Skia
         //TODO: make this obserable, and to notify repaint
         protected IList<TFigure> Figures { get; } = new List<TFigure>();
 
-        public SKFigureGroup()
+        protected SKFigureGroup()
         {
             Pressed += OnPressed;
             Tapped += OnTapped;
