@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using HB.FullStack.XamarinForms.Platforms;
 
+using Microsoft.Extensions.Logging;
+
 using SkiaSharp;
 
 using Xamarin.Forms;
@@ -52,10 +54,14 @@ namespace HB.FullStack.XamarinForms.Skia
             }
 
             IsReady = true;
+
+            GlobalSettings.Logger.LogDebug("SkGif已经加载完毕");
         }
 
         public SKBitmap GetBitmap(long elapsedMilliseconds)
         {
+            
+
             int msec = (int)(elapsedMilliseconds % _totalDuration);
             int frame;
 
@@ -66,6 +72,8 @@ namespace HB.FullStack.XamarinForms.Skia
                     break;
                 }
             }
+
+            //GlobalSettings.Logger.LogDebug("SKGif 获取 第 {frame} frame 图像", frame);
 
             return _bitmaps![frame];
         }
