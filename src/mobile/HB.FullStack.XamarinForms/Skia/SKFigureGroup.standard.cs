@@ -39,13 +39,13 @@ namespace HB.FullStack.XamarinForms.Skia
         where TDrawData : FigureData
         where TResultData : FigureData
     {
-        public static BindableProperty DrawDatasProperty = BindableProperty.Create(
-               nameof(DrawDatas),
-               typeof(IList<TDrawData>),
+        public static BindableProperty DrawDataProperty = BindableProperty.Create(
+               nameof(DrawData),
+               typeof(TDrawData),
                typeof(SKFigureGroup<TFigure, TDrawData, TResultData>),
                null,
                BindingMode.OneWay,
-               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawData, TResultData>)b).OnBaseDrawDatasChanged((IList<TDrawData>?)oldValues, (IList<TDrawData>?)newValues));
+               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawData, TResultData>)b).OnBaseDrawDatasChanged());
 
         public static BindableProperty ResultDatasProperty = BindableProperty.Create(
             nameof(ResultDatas),
@@ -54,76 +54,13 @@ namespace HB.FullStack.XamarinForms.Skia
             null,
             BindingMode.OneWayToSource);
 
-        public IList<TDrawData>? DrawDatas { get => (IList<TDrawData>?)GetValue(DrawDatasProperty); set => SetValue(DrawDatasProperty, value); }
+        public TDrawData? DrawData { get => (TDrawData?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
 
-        public IList<TResultData?>? ResultDatas { get => (IList<TResultData?>?)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
-
-        private void OnBaseDrawDatasChanged(IList<TDrawData>? oldValues, IList<TDrawData>? newValues)
-        {
-            //Create and Add Figures
-            ResumeFigures();
-
-            if (oldValues is ObservableCollection<TDrawData> oldCollection)
-            {
-                oldCollection.CollectionChanged -= OnBaseDrawDatasCollectionChanged;
-            }
-
-            if (newValues is ObservableCollection<TDrawData> newCollection)
-            {
-                newCollection.CollectionChanged += OnBaseDrawDatasCollectionChanged;
-            }
-
-            OnDrawDatasChanged();
-
-            InvalidateMatrixAndSurface();
-        }
-
-        protected abstract void OnDrawDatasChanged();
-
-        private void OnBaseDrawDatasCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            ResumeFigures();
-
-            OnDrawDatasCollectionChanged();
-
-            InvalidateMatrixAndSurface();
-        }
-
-        protected abstract void OnDrawDatasCollectionChanged();
-
-        private void ResumeFigures()
-        {
-            ClearFigures();
-
-            if (DrawDatas == null)
-            {
-                return;
-            }
-
-            ResultDatas = new ObservableRangeCollection<TResultData?>(Enumerable.Repeat<TResultData?>(null, DrawDatas.Count));
-
-            for (int i = 0; i < DrawDatas.Count; ++i)
-            {
-                TFigure figure = new TFigure();
-                figure.SetBinding(SKFigure<TDrawData, TResultData>.DrawDataProperty, new Binding($"{nameof(DrawDatas)}[{i}]", source: this));
-                figure.SetBinding(SKFigure<TDrawData, TResultData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
-
-                AddFigure(figure);
-            }
-        }
-
-
-        private readonly Dictionary<long, TFigure> _hittingFigures = new Dictionary<long, TFigure>();
-
-        public FigureState SelectedFiguresState { get; private set; }
-
-        public IList<TFigure> SelectedFigures { get; } = new List<TFigure>();
-
-        //TODO: make this obserable, and to notify repaint
-        protected IList<TFigure> Figures { get; } = new List<TFigure>();
-
+        public IList<TResultData?> ResultDatas { get => (IList<TResultData?>)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
         protected SKFigureGroup()
         {
+            ResultDatas = new ObservableRangeCollection<TResultData?>();
+
             Pressed += OnPressed;
             Tapped += OnTapped;
             LongTapped += OnLongTapped;
@@ -131,6 +68,25 @@ namespace HB.FullStack.XamarinForms.Skia
             Cancelled += OnCancelled;
             HitFailed += OnHitFailed;
         }
+
+        private void OnBaseDrawDatasChanged()
+        {
+            //OnDrawDatasChanged();
+
+            InvalidateMatrixAndSurface();
+        }
+
+        //protected abstract void OnDrawDatasChanged();
+
+        protected IList<TFigure> Figures { get; } = new List<TFigure>();
+
+        protected Dictionary<long, TFigure> HittingFigures { get; } = new Dictionary<long, TFigure>();
+
+        public IList<TFigure> SelectedFigures { get; } = new List<TFigure>();
+
+        public FigureState SelectedFiguresState { get; private set; }
+
+        private Dictionary<TFigure, int> _resultDataBindingIndexDict = new Dictionary<TFigure, int>();
 
         public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
@@ -157,7 +113,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 {
                     founded = true;
 
-                    _hittingFigures[fingerId] = figure;
+                    HittingFigures[fingerId] = figure;
                 }
                 else
                 {
@@ -170,40 +126,60 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public void AddFigure(TFigure figure)
         {
-            figure.Parent = this;
-            figure.CanvasView = this.CanvasView;
+            BindingFigure(figure);
 
             Figures.Add(figure);
         }
-
         public void AddFigures(params TFigure[] figures)
         {
             foreach (TFigure f in figures)
             {
-                f.Parent = this;
-                f.CanvasView = this.CanvasView;
+                BindingFigure(f);
             }
 
             Figures.AddRange(figures);
         }
 
-        public bool RemoveFigure(TFigure figure)
+        private void BindingFigure(TFigure figure)
         {
-            figure.Dispose();
+            figure.Parent = this;
+            figure.CanvasView = this.CanvasView;
 
-            _hittingFigures
+            ResultDatas.Add(null);
+
+            int bindingIndex = ResultDatas.Count - 1;
+
+            figure.SetBinding(SKFigure<TDrawData, TResultData>.DrawDataProperty, new Binding(nameof(DrawData), source: this));
+            figure.SetBinding(SKFigure<TDrawData, TResultData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{bindingIndex}]", source: this));
+
+            _resultDataBindingIndexDict[figure] = bindingIndex;
+        }
+
+        public void RemoveFigure(TFigure figure)
+        {
+            HittingFigures
                 .Where(p => p.Value == figure)
                 .ToList()
-                .ForEach(p => _hittingFigures.Remove(p.Key));
+                .ForEach(p => HittingFigures.Remove(p.Key));
 
             SelectedFigures.Remove(figure);
 
-            return Figures.Remove(figure);
+            if (_resultDataBindingIndexDict.TryGetValue(figure, out int bindingIndex))
+            {
+                ResultDatas[bindingIndex] = null;//不能删除，会乱次序
+                _resultDataBindingIndexDict.Remove(figure);
+            }
+
+            figure.Dispose();
+            Figures.Remove(figure);
         }
 
         public void ClearFigures()
         {
-            _hittingFigures.Clear();
+            ResultDatas.Clear();
+            _resultDataBindingIndexDict.Clear();
+
+            HittingFigures.Clear();
             SelectedFigures.Clear();
 
             foreach (TFigure figure in Figures)
@@ -271,7 +247,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnPressed(object? sender, SKFigureTouchEventArgs info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
+            if (!HittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -287,7 +263,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnDragged(object? sender, SKFigureTouchEventArgs info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
+            if (!HittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -298,13 +274,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.FingerId);
+                HittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnLongTapped(object? sender, SKFigureTouchEventArgs info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
+            if (!HittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -315,13 +291,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.FingerId);
+                HittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnTapped(object? sender, SKFigureTouchEventArgs info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
+            if (!HittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -332,13 +308,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.FingerId);
+                HittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnCancelled(object? sender, SKFigureTouchEventArgs info)
         {
-            if (!_hittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
+            if (!HittingFigures.TryGetValue(info.FingerId, out TFigure? figure))
             {
                 return;
             }
@@ -349,13 +325,13 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (info.IsOver)
             {
-                _hittingFigures.Remove(info.FingerId);
+                HittingFigures.Remove(info.FingerId);
             }
         }
 
         private void OnHitFailed(object? sender, EventArgs e)
         {
-            _hittingFigures.Clear();
+            HittingFigures.Clear();
 
             if (EnableUnSelectedByHitFailed)
             {
