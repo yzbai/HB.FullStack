@@ -353,6 +353,11 @@ namespace HB.FullStack.XamarinForms.Controls
             _uri = uri;
         }
 
+        public override string ToDebugInfo()
+        {
+            return $"ImageUrlRequest Uri:{_uri}";
+        }
+
         protected override string BuildUrl()
         {
             return _uri;
