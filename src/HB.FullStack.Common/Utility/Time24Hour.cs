@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common
 {
@@ -26,7 +27,8 @@ namespace HB.FullStack.Common
             }
         }
 
-        public int HourIn12 => (!IsAm && Hour != 12) ? Hour -= 12 : Hour;
+        [JsonIgnore]
+        public int HourIn12 => (!IsAm && Hour != 12) ? Hour - 12 : Hour;
 
         private int _minute;
 
@@ -46,7 +48,8 @@ namespace HB.FullStack.Common
             }
         }
 
-        public bool IsAm { get => Hour >= 12; }
+        [JsonIgnore]
+        public bool IsAm { get => Hour < 12; }
         public static Time24Hour LocalNow
         {
             get
@@ -84,14 +87,14 @@ namespace HB.FullStack.Common
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }
 
-            bool isAM = true;
+            bool? isAM = null;
             string str = timeString.Trim();
 
             if (!char.IsNumber(str, 0))
             {
                 string ampmStr = str.Substring(0, 2);
 
-                isAM = ampmStr.IsIn("上午", "AM", "am");
+                isAM = ampmStr.IsIn("上午", "AM", "am", "Am", "aM");
 
                 str = str.Remove(0, 2);
             }
@@ -106,15 +109,23 @@ namespace HB.FullStack.Common
             int hour = Convert.ToInt32(parts[0], GlobalSettings.Culture);
             int minute = Convert.ToInt32(parts[1], GlobalSettings.Culture);
 
-            if (!isAM && hour != 12)
+            if (isAM.HasValue)
             {
-                hour += 12;
+                if (!isAM.Value && hour != 12)
+                {
+                    hour += 12;
+                }
             }
 
             _hour = 0;
             _minute = 0;
             Hour = hour;
             Minute = minute;
+
+            if (Hour < 0 || Hour >= 24 || Minute < 0 || Minute >= 60)
+            {
+                throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
+            }
         }
 
         public Time24Hour AddTime(int changedHour, int changedMinute)
