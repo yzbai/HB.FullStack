@@ -45,5 +45,10 @@ namespace HB.FullStack.Common.Api
         {
             return HashCode.Combine(GetType().Name, Resources);
         }
+
+        public override string ToDebugInfo()
+        {
+            return $"UpdateRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
+        }
     }
 }
