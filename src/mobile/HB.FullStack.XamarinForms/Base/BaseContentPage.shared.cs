@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using HB.FullStack.XamarinForms.Platforms;
 
+using Microsoft.Extensions.Logging;
+
 using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Base
@@ -120,6 +122,10 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 foreach (var v in customerControls)
                 {
+                    if(v == null)
+                    {
+                        GlobalSettings.Logger.LogDebug("######################   Shit happend!");
+                    }
                     v?.OnAppearing();
                 }
             }

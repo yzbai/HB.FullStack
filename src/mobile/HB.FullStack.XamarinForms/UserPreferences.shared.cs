@@ -27,9 +27,9 @@ namespace HB.FullStack.XamarinForms
         private static bool _loginNameFirstRead = true;
         private static string? _email;
         private static bool _emailFirstRead = true;
-        private static string? _accessToken;
+        private static string _accessToken = null!;
         private static bool _accessTokenFirstRead = true;
-        private static string? _refreshToken;
+        private static string _refreshToken = null!;
         private static bool _refreshTokenFirstRead = true;
 
         public static long? UserId
@@ -149,14 +149,17 @@ namespace HB.FullStack.XamarinForms
             }
         }
 
-        public static string? AccessToken
+        public static string AccessToken
         {
-            get 
+            get
             {
-                if(_accessTokenFirstRead && _accessToken.IsNullOrEmpty())
+                if (_accessTokenFirstRead && _accessToken.IsNullOrEmpty())
                 {
                     _accessTokenFirstRead = false;
-                    _accessToken = PreferenceHelper.PreferenceGetAsync(Conventions.AccessToken_Preference_Name).Result;
+
+                    string? stored = PreferenceHelper.PreferenceGetAsync(Conventions.AccessToken_Preference_Name).Result;
+
+                    _accessToken = stored ?? "";
                 }
 
                 return _accessToken;
@@ -165,21 +168,20 @@ namespace HB.FullStack.XamarinForms
             {
                 _accessToken = value;
 
-                if (_accessToken.IsNotNullOrEmpty())
-                {
-                    PreferenceHelper.PreferenceSetAsync(Conventions.AccessToken_Preference_Name, _accessToken).Wait();
-                }
+                PreferenceHelper.PreferenceSetAsync(Conventions.AccessToken_Preference_Name, _accessToken).Wait();
             }
         }
 
-        public static string? RefreshToken
+        public static string RefreshToken
         {
             get
             {
                 if (_refreshTokenFirstRead && _refreshToken.IsNullOrEmpty())
                 {
                     _refreshTokenFirstRead = false;
-                    _refreshToken = PreferenceHelper.PreferenceGetAsync(Conventions.RefreshToken_Preference_Name).Result;
+                    string? stored = PreferenceHelper.PreferenceGetAsync(Conventions.RefreshToken_Preference_Name).Result;
+
+                    _refreshToken = stored ?? "";
                 }
 
                 return _refreshToken;
@@ -188,10 +190,7 @@ namespace HB.FullStack.XamarinForms
             {
                 _refreshToken = value;
 
-                if (_refreshToken.IsNotNullOrEmpty())
-                {
-                    PreferenceHelper.PreferenceSetAsync(Conventions.RefreshToken_Preference_Name, _refreshToken).Wait();
-                }
+                PreferenceHelper.PreferenceSetAsync(Conventions.RefreshToken_Preference_Name, _refreshToken).Wait();
             }
         }
 
@@ -204,14 +203,14 @@ namespace HB.FullStack.XamarinForms
             Mobile = mobile;
             Email = email;
             LoginName = loginName;
-            AccessToken = accessToken;
-            RefreshToken = refreshToken;
+            AccessToken = accessToken ?? "";
+            RefreshToken = refreshToken ?? "";
         }
 
         public static void Logout()
         {
-            AccessToken = null;
-            RefreshToken = null;
+            AccessToken = "";
+            RefreshToken = "";
         }
     }
 }

@@ -149,6 +149,11 @@ namespace HB.FullStack.XamarinForms.Api
             {
                 return HashCode.Combine(AccessToken, RefreshToken);
             }
+
+            public override string ToDebugInfo()
+            {
+                return "RefreshAccessTokenRequest";
+            }
         }
     }
 }

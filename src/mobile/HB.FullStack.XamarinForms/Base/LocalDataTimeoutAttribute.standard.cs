@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace System.ComponentModel.DataAnnotations
+namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class LocalDataTimeoutAttribute : Attribute

@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using HB.FullStack.XamarinForms.Platforms;
 
+using Microsoft.Extensions.Logging;
+
 using SkiaSharp;
 
 using Xamarin.Forms;
@@ -17,53 +19,49 @@ namespace HB.FullStack.XamarinForms.Skia
         private int[]? _accumulatedDurations;
         private int _totalDuration;
 
-        private readonly Task _initializeTask;
+        public bool IsReady { get; private set; }
 
-        public bool IsReady { get => _initializeTask != null && _initializeTask.Status == TaskStatus.RanToCompletion; }
-
-        public SKGif(string resourceName)
+        public SKGif()
         {
-            _initializeTask = InitializeAsync(resourceName);
-            _initializeTask.Fire();
         }
 
-#pragma warning disable CA1801 // Review unused parameters
-        private Task InitializeAsync(string fileName)
-#pragma warning restore CA1801 // Review unused parameters
+        public void Load(Stream stream)
         {
-            return Task.Run(() =>
+            IsReady = false;
+
+            using SKManagedStream sKManagedStream = new SKManagedStream(stream);
+            using SKCodec sKCodec = SKCodec.Create(sKManagedStream);
+
+            int frameCount = sKCodec.FrameCount;
+            _bitmaps = new SKBitmap[frameCount];
+            _durations = new int[frameCount];
+            _accumulatedDurations = new int[frameCount];
+
+            for (int frame = 0; frame < frameCount; frame++)
             {
-                IPlatformHelper fileService = DependencyService.Resolve<IPlatformHelper>();
+                //get time line
+                _durations[frame] = sKCodec.FrameInfo[frame].Duration;
+                _totalDuration += _durations[frame];
+                _accumulatedDurations[frame] = _durations[frame] + (frame == 0 ? 0 : _accumulatedDurations[frame - 1]);
 
-                using Stream stream = null!;// await fileService.GetResourceStreamAsync(fileName, ResourceType.Drawable, null).ConfigureAwait(false);
-                using SKManagedStream sKManagedStream = new SKManagedStream(stream);
-                using SKCodec sKCodec = SKCodec.Create(sKManagedStream);
+                //get image
+                SKImageInfo sKImageInfo = new SKImageInfo(sKCodec.Info.Width, sKCodec.Info.Height);
+                _bitmaps[frame] = new SKBitmap(sKImageInfo);
 
-                int frameCount = sKCodec.FrameCount;
-                _bitmaps = new SKBitmap[frameCount];
-                _durations = new int[frameCount];
-                _accumulatedDurations = new int[frameCount];
+                IntPtr pointer = _bitmaps[frame].GetPixels();
 
-                for (int frame = 0; frame < frameCount; frame++)
-                {
-                    //get time line
-                    _durations[frame] = sKCodec.FrameInfo[frame].Duration;
-                    _totalDuration += _durations[frame];
-                    _accumulatedDurations[frame] = _durations[frame] + (frame == 0 ? 0 : _accumulatedDurations[frame - 1]);
+                sKCodec.GetPixels(sKImageInfo, pointer, new SKCodecOptions(frame));
+            }
 
-                    //get image
-                    SKImageInfo sKImageInfo = new SKImageInfo(sKCodec.Info.Width, sKCodec.Info.Height);
-                    _bitmaps[frame] = new SKBitmap(sKImageInfo);
+            IsReady = true;
 
-                    IntPtr pointer = _bitmaps[frame].GetPixels();
-
-                    sKCodec.GetPixels(sKImageInfo, pointer, new SKCodecOptions(frame));
-                }
-            });
+            GlobalSettings.Logger.LogDebug("SkGif已经加载完毕");
         }
 
         public SKBitmap GetBitmap(long elapsedMilliseconds)
         {
+            
+
             int msec = (int)(elapsedMilliseconds % _totalDuration);
             int frame;
 
@@ -74,6 +72,8 @@ namespace HB.FullStack.XamarinForms.Skia
                     break;
                 }
             }
+
+            //GlobalSettings.Logger.LogDebug("SKGif 获取 第 {frame} frame 图像", frame);
 
             return _bitmaps![frame];
         }
@@ -94,6 +94,8 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 if (disposeManaged)
                 {
+                    IsReady = false;
+
                     // managed
                     if (_bitmaps.IsNotNullOrEmpty())
                     {

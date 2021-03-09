@@ -85,12 +85,17 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public void OnAppearing()
         {
+            GlobalSettings.Logger.LogDebug("SKFigureCanvasView即将显示. Type: {type}", this.GetType().Name);
+
             IsAppearing = true;
 
             if (EnableTimeTick)
             {
+                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 2);
                 ResumeResponseTimeTick();
             }
+
+            GlobalSettings.Logger.LogDebug("SKFigureCanvasView 结束 即将显示. Type: {type}", this.GetType().Name);
         }
 
         public void OnDisappearing()
@@ -136,6 +141,7 @@ namespace HB.FullStack.XamarinForms.Skia
             //TODO: 调查可能与OnFiguresCollectionChanged里的重画 重复
             if (EnableTimeTick)
             {
+                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 3);
                 ResumeResponseTimeTick();
             }
             else
@@ -166,6 +172,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (EnableTimeTick)
             {
+                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 4);
                 ResumeResponseTimeTick();
             }
             else
@@ -197,16 +204,20 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnEnableTimeTickChanged(bool oldValue, bool newValue)
         {
+            GlobalSettings.Logger.LogDebug("SKFigureCanvasView EnableTimeTick 改变 from {old} to {new}", oldValue, newValue);
+
             if (oldValue == newValue)
             {
+                GlobalSettings.Logger.LogDebug("SKFigureCanvasView EnableTimeTick 与上次改变相同，直接返回 from {old} to {new}", oldValue, newValue);
                 return;
             }
 
             if (newValue && IsAppearing)
             {
+                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 1);
                 ResumeResponseTimeTick();
             }
-            else
+            else if (!newValue)
             {
                 StopResponseTimeTick();
             }
@@ -214,6 +225,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnTimeTickIntervalChanged()
         {
+            GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 6);
             ResumeResponseTimeTick();
         }
 
@@ -224,21 +236,18 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
+            GlobalSettings.Logger.LogDebug("SKFigureCanvasView开启TimeTick模式");
+
             _stopwatch.Restart();
             //IsResponsingTimeTick = true;
 
-            if (_timer == null)
-            {
-                _timer = new Timer(
-                    new TimerCallback(state => Device.BeginInvokeOnMainThread(() => InvalidateSurface())),
-                    null,
-                    TimeSpan.Zero,
-                    TimeTickIntervals);
-            }
-            else
-            {
-                _timer.Change(TimeSpan.Zero, TimeTickIntervals);
-            }
+            _timer?.Dispose();
+
+            _timer = new Timer(
+                new TimerCallback(state => Device.BeginInvokeOnMainThread(() => InvalidateSurface())),
+                null,
+                TimeSpan.Zero,
+                TimeTickIntervals);
         }
 
         private void StopResponseTimeTick()
@@ -248,6 +257,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
             //IsResponsingTimeTick = false;
             _stopwatch.Stop();
+
+            GlobalSettings.Logger.LogDebug("SKFigureCanvasView关闭TimeTick模式");
         }
 
         #endregion

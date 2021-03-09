@@ -122,7 +122,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             if (NeedLogined)
             {
-                _logger.LogDebug($"检查Logined");
+                _logger.LogDebug("检查Logined, Type:{type}", typeof(TEntity).Name);
 
                 EnsureLogined();
             }
@@ -134,7 +134,7 @@ namespace HB.FullStack.XamarinForms.Base
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                _logger.LogDebug($"本地强制模式，返回");
+                _logger.LogDebug("本地强制模式，返回, Type:{type}", typeof(TEntity).Name);
                 return locals;
             }
 
@@ -227,14 +227,14 @@ namespace HB.FullStack.XamarinForms.Base
             //如果不强制远程，并且满足使用本地数据条件
             if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(request, locals))
             {
-                _logger.LogDebug("本地数据可用，返回本地");
+                _logger.LogDebug("本地数据可用，返回本地, Type:{type}", typeof(TEntity).Name);
                 return locals;
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
             if (!EnsureInternet(!AllowOfflineRead))
             {
-                _logger.LogDebug("未联网，允许离线读， 使用离线数据");
+                _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TEntity).Name);
                 NotifyOfflineDataUsed();
 
                 return locals;
@@ -244,7 +244,7 @@ namespace HB.FullStack.XamarinForms.Base
             IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
             IEnumerable<TEntity> remotes = ress.SelectMany(res => ToEntities(res)).ToList();
 
-            _logger.LogDebug("远程数据获取完毕");
+            _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TEntity).Name);
 
             //版本1：如果Id每次都是随机，会造成永远只添加，比如AliyunStsToken，服务器端返回Id = -1，导致每次获取后，Id都不一致
             //所以Id默认为 - 1的实体就不要用Id作为主键了
@@ -257,7 +257,7 @@ namespace HB.FullStack.XamarinForms.Base
             //await Database.BatchDeleteAsync(locals, "", transactionContext).ConfigureAwait(false);
             //await Database.BatchAddAsync(remotes, "", transactionContext).ConfigureAwait(false);
 
-            _logger.LogDebug("重新添加远程数据到本地数据库");
+            _logger.LogDebug("重新添加远程数据到本地数据库, Type:{type}", typeof(TEntity).Name);
 
             return remotes;
         }

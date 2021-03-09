@@ -17,7 +17,6 @@ namespace HB.FullStack.Common.Api
 
         public AddRequest(IEnumerable<T> ress) : this()
         {
-
             Resources.AddRange(ress);
         }
 
@@ -44,6 +43,11 @@ namespace HB.FullStack.Common.Api
         public override int GetHashCode()
         {
             return HashCode.Combine(GetType().Name, Resources);
+        }
+
+        public override string ToDebugInfo()
+        {
+            return $"AddRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
         }
     }
 

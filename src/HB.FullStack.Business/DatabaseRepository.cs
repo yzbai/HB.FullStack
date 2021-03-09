@@ -370,7 +370,7 @@ namespace HB.FullStack.Repository
         /// <exception cref="DatabaseException"></exception>
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
-            var results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
+            IEnumerable<TEntity>? results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
                 dimensionKeyName,
                 new object[] { dimensionKeyValue },
                 async dbReader =>
@@ -391,8 +391,11 @@ namespace HB.FullStack.Repository
 
             if (results.IsNullOrEmpty())
             {
+                Logger.LogDebug("Repo中没有找到 {EntityType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TEntity).Name, dimensionKeyName, dimensionKeyValue);
                 return null;
             }
+
+            Logger.LogDebug("Repo中 找到 {EntityType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TEntity).Name, dimensionKeyName, dimensionKeyValue);
 
             return results.ElementAt(0);
         }

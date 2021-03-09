@@ -23,11 +23,12 @@ namespace HB.FullStack.Repository
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
-
+            
             (IEnumerable<TEntity>? cachedEntities, bool allExists) = await cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
 
             if (allExists)
             {
+                logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
                 return cachedEntities!;
             }
 
@@ -50,6 +51,7 @@ namespace HB.FullStack.Repository
 
             if (@lock.IsAcquired)
             {
+
                 //Double check
                 (cachedEntities, allExists) = await cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
 

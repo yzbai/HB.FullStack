@@ -14,20 +14,23 @@ namespace HB.FullStack.XamarinForms.Files
 {
     public interface IFileService
     {
-        public static async Task InitializeAsync(string assetFileName)
+        public static async Task InitializeAsync(string? assetFileName)
         {
             if (VersionTracking.IsFirstLaunchEver)
             {
                 //将Assets里的初始文件解压缩到用户文件中去
 
-                try
+                if (assetFileName.IsNotNullOrEmpty())
                 {
-                    using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                    await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
-                }
-                catch(Exception ex)
-                {
-                    GlobalSettings.Logger.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
+                    try
+                    {
+                        using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
+                        await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        GlobalSettings.Logger.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
+                    }
                 }
             }
         }

@@ -13,6 +13,10 @@
         public byte[] LoadedEntitiesSetLua { get; internal set; } = null!;
         public byte[] LoadedEntitiesRemoveLua { get; internal set; } = null!;
         public byte[] LoadedEntitiesRemoveByDimensionLua { get; internal set; } = null!;
+
+        public byte[] LoadedEntitiesForcedRemoveLua { get; internal set; } = null!;
+        public byte[] LoadedEntitiesForcedRemoveByDimensionLua { get; internal set; } = null!;
+
         public byte[] LoadedSetWithTimestampLua { get; internal set; } = null!;
         public byte[] LoadedRemoveWithTimestampLua { get; internal set; } = null!;
     }
