@@ -372,6 +372,11 @@ namespace HB.FullStack.XamarinForms.Skia
 
     public static class SKExtensions
     {
+        public static void SetTextSizeByWidth(this SKPaint paint, float width, char sample = '1')
+        {
+            paint.TextSize = width * paint.TextSize / paint.MeasureText(sample.ToString());
+        }
+
         public static bool IsNullOrEmpty([ValidatedNotNull][NotNullWhen(false)] this SKPath? path)
         {
             return path == null || path.IsEmpty;
