@@ -26,6 +26,8 @@ namespace HB.FullStack.Common
             }
         }
 
+        public int HourIn12 => (!IsAm && Hour != 12) ? Hour -= 12 : Hour;
+
         private int _minute;
 
         public int Minute

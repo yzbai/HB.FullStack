@@ -14,11 +14,11 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public class EmptyResultData : FigureData
+    public class EmptyData : FigureData
     {
         protected override bool EqualsImpl(FigureData other)
         {
-            return other is EmptyResultData;
+            return other is EmptyData;
         }
 
         protected override HashCode GetHashCodeImpl()
@@ -27,42 +27,53 @@ namespace HB.FullStack.XamarinForms.Skia
         }
     }
 
-    public abstract class SKFigure<TDrawData> : SKFigure<TDrawData, EmptyResultData> where TDrawData : FigureData
+    public abstract class SKFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureData
     {
-        protected override void OnCaculateOutput(out EmptyResultData? newResultDrawData, TDrawData initDrawData)
+        protected override void OnCaculateOutput(out EmptyData? newResultDrawData, TDrawInfo initDrawData)
         {
             newResultDrawData = null;
         }
     }
 
-    public abstract class SKFigure<TDrawData, TResultData> : SKFigure 
-        where TDrawData : FigureData 
-        where TResultData : FigureData
+    public abstract class SKFigure<TDrawInfo, TData> : SKFigure 
+        where TDrawInfo : FigureData 
+        where TData : FigureData
     {
         public static BindableProperty DrawDataProperty = BindableProperty.Create(
                     nameof(DrawData),
-                    typeof(TDrawData),
-                    typeof(SKFigure<TDrawData, TResultData>),
+                    typeof(TDrawInfo),
+                    typeof(SKFigure<TDrawInfo, TData>),
                     null,
                     BindingMode.OneWay,
-                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawData, TResultData>)b).OnBaseDrawDataChanged((TDrawData?)oldValue, (TDrawData?)newValue));
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseDrawDataChanged((TDrawInfo?)oldValue, (TDrawInfo?)newValue));
+
+        public static BindableProperty InitDataProperty = BindableProperty.Create(
+                    nameof(InitData),
+                    typeof(TData),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWay,
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseInitDataChanged());
+
 
         public static BindableProperty ResultDataProperty = BindableProperty.Create(
                     nameof(ResultData),
-                    typeof(TResultData),
-                    typeof(SKFigure<TDrawData, TResultData>),
+                    typeof(TData),
+                    typeof(SKFigure<TDrawInfo, TData>),
                     null,
                     BindingMode.OneWayToSource);
 
-        public TDrawData? DrawData { get => (TDrawData?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
+        public TDrawInfo? DrawData { get => (TDrawInfo?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
 
-        public TResultData? ResultData { get => (TResultData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
+        public TData? InitData { get => (TData?)GetValue(InitDataProperty); set => SetValue(InitDataProperty, value); }
+
+        public TData? ResultData { get => (TData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
 
         protected bool HitPathNeedUpdate { get; set; }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
-        private void OnBaseDrawDataChanged(TDrawData? oldValue, TDrawData? newValue)
+        private void OnBaseDrawDataChanged(TDrawInfo? oldValue, TDrawInfo? newValue)
         {
             HitPathNeedUpdate = true;
 
@@ -70,6 +81,15 @@ namespace HB.FullStack.XamarinForms.Skia
 
             InvalidateMatrixAndSurface();
         }
+
+        private void OnBaseInitDataChanged()
+        {
+            OnInitDataChanged();
+
+            InvalidateOnlySurface();
+        }
+
+        protected abstract void OnInitDataChanged();
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
@@ -105,7 +125,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            OnCaculateOutput(out TResultData? newResult, DrawData);
+            OnCaculateOutput(out TData? newResult, DrawData);
 
             if (newResult != null)
             {
@@ -120,11 +140,11 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected abstract void OnDrawDataChanged();
 
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawData initDrawData, FigureState currentState);
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawInfo initDrawData, FigureState currentState);
 
-        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawData initDrawData);
+        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo initDrawData);
 
-        protected abstract void OnCaculateOutput(out TResultData? newResultDrawData, TDrawData initDrawData);
+        protected abstract void OnCaculateOutput(out TData? newResultDrawData, TDrawInfo initDrawData);
     }
     public abstract class SKFigure : BindableObject, IDisposable
     {

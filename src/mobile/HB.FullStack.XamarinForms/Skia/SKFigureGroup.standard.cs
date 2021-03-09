@@ -26,40 +26,53 @@ namespace HB.FullStack.XamarinForms.Skia
         public bool EnableUnSelectedByHitFailed { get; set; } = true;
     }
 
-    public abstract class SKFigureGroup<TFigure, TDrawData> : SKFigureGroup<TFigure, TDrawData, EmptyResultData>
-    where TFigure : SKFigure<TDrawData>, new()
-    where TDrawData : FigureData
+    public abstract class SKFigureGroup<TFigure, TDrawInfo> : SKFigureGroup<TFigure, TDrawInfo, EmptyData>
+    where TFigure : SKFigure<TDrawInfo>, new()
+    where TDrawInfo : FigureData
     {
 
     }
 
 
-    public abstract class SKFigureGroup<TFigure, TDrawData, TResultData> : SKFigureGroup
-        where TFigure : SKFigure<TDrawData, TResultData>, new()
-        where TDrawData : FigureData
-        where TResultData : FigureData
+    public abstract class SKFigureGroup<TFigure, TDrawInfo, TData> : SKFigureGroup
+        where TFigure : SKFigure<TDrawInfo, TData>, new()
+        where TDrawInfo : FigureData
+        where TData : FigureData
     {
         public static BindableProperty DrawDataProperty = BindableProperty.Create(
                nameof(DrawData),
-               typeof(TDrawData),
-               typeof(SKFigureGroup<TFigure, TDrawData, TResultData>),
+               typeof(TDrawInfo),
+               typeof(SKFigureGroup<TFigure, TDrawInfo, TData>),
                null,
                BindingMode.OneWay,
-               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawData, TResultData>)b).OnBaseDrawDatasChanged());
+               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawInfo, TData>)b).OnDrawDatasChanged());
+
+        public static BindableProperty InitDatasProperty = BindableProperty.Create(
+            nameof(InitDatas),
+            typeof(IList<TData>),
+            typeof(SKFigureGroup<TFigure, TDrawInfo, TData>),
+            null,
+            BindingMode.OneWay,
+            propertyChanged:(b, oldValues, newValues)=> ((SKFigureGroup<TFigure, TDrawInfo, TData>)b).OnInitDatasChanged((IList<TData>?)oldValues, (IList<TData>?)newValues));
+
+        
 
         public static BindableProperty ResultDatasProperty = BindableProperty.Create(
             nameof(ResultDatas),
-            typeof(IList<TResultData>),
-            typeof(SKFigureGroup<TFigure, TDrawData, TResultData>),
+            typeof(IList<TData>),
+            typeof(SKFigureGroup<TFigure, TDrawInfo, TData>),
             null,
             BindingMode.OneWayToSource);
 
-        public TDrawData? DrawData { get => (TDrawData?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
+        public TDrawInfo? DrawData { get => (TDrawInfo?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
 
-        public IList<TResultData?> ResultDatas { get => (IList<TResultData?>)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
+        public IList<TData?> InitDatas { get => (IList<TData?>)GetValue(InitDatasProperty); set => SetValue(InitDatasProperty, value); }
+
+        public IList<TData?> ResultDatas { get => (IList<TData?>)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
+
         protected SKFigureGroup()
         {
-            ResultDatas = new ObservableRangeCollection<TResultData?>();
+            ResultDatas = new ObservableRangeCollection<TData?>();
 
             Pressed += OnPressed;
             Tapped += OnTapped;
@@ -69,11 +82,37 @@ namespace HB.FullStack.XamarinForms.Skia
             HitFailed += OnHitFailed;
         }
 
-        private void OnBaseDrawDatasChanged()
+        private void OnDrawDatasChanged()
         {
             //OnDrawDatasChanged();
 
             InvalidateMatrixAndSurface();
+        }
+
+        private void OnInitDatasChanged(IList<TData>? oldValues, IList<TData>? newValues)
+        {
+            if(oldValues is ObservableCollection<TData> collection)
+            {
+                collection.CollectionChanged -= OnInitDatasCollectionChanged;
+            }
+
+            if(newValues is ObservableCollection<TData> newCollection)
+            {
+                newCollection.CollectionChanged += OnInitDatasCollectionChanged;
+            }
+
+
+                //大变动
+
+            InvalidateOnlySurface();
+        }
+
+        private void OnInitDatasCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            
+            // 大变动
+            
+
         }
 
         //protected abstract void OnDrawDatasChanged();
@@ -149,8 +188,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
             int bindingIndex = ResultDatas.Count - 1;
 
-            figure.SetBinding(SKFigure<TDrawData, TResultData>.DrawDataProperty, new Binding(nameof(DrawData), source: this));
-            figure.SetBinding(SKFigure<TDrawData, TResultData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{bindingIndex}]", source: this));
+            figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawDataProperty, new Binding(nameof(DrawData), source: this));
+            figure.SetBinding(SKFigure<TDrawInfo, TData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{bindingIndex}]", source: this));
 
             _resultDataBindingIndexDict[figure] = bindingIndex;
         }
