@@ -508,9 +508,9 @@ end
             }
             else
             {
-                foreach (string dimensionKeyValue in dimensionKeyValues)
+                foreach (object dimensionKeyValue in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue));
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue.ToString()));
                 }
 
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesRemoveByDimensionLua;
@@ -544,9 +544,9 @@ end
             }
             else
             {
-                foreach (string dimensionKeyValue in dimensionKeyValues)
+                foreach (object dimensionKeyValue in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue));
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue.ToString()));
                 }
 
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesForcedRemoveByDimensionLua;

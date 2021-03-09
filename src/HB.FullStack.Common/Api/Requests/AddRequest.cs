@@ -17,7 +17,6 @@ namespace HB.FullStack.Common.Api
 
         public AddRequest(IEnumerable<T> ress) : this()
         {
-
             Resources.AddRange(ress);
         }
 

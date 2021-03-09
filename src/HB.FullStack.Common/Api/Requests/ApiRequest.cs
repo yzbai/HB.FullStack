@@ -240,6 +240,8 @@ namespace HB.FullStack.Common.Api
 
             return requestUrlBuilder.ToString();
         }
+
+        public abstract string ToDebugInfo();
     }
 #pragma warning restore CA1024 // Use properties where appropriate
 
