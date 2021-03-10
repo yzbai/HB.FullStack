@@ -27,6 +27,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
@@ -139,6 +140,17 @@ namespace System
                         OnTokenValidated = onTokenValidated,
                         OnForbidden = onForbidden
                     };
+#if DEBUG
+                    //这是为了ubuntu这货，在开发阶段不认开发证书。这个http请求，是由jwt audience 发向 jwt authority的。authority配置了正式证书后，就没问题了
+                    jwtOptions.BackchannelHttpHandler = new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                        {
+                            return true;
+                        }
+                    };
+#endif
+
                 });
         }
 

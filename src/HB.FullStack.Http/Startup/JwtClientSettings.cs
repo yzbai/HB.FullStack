@@ -18,9 +18,6 @@ namespace HB.FullStack.Server
         /// </summary>
         public string? JwtContentCertificateSubject { get; set; }
 
-        /// <summary>
-        /// 用来解密Jwt Server 发来的token内容，是公钥cer
-        /// </summary>
         public string? JwtContentCertificateFileName { get; set; }
 
         public string? JwtContentCertificateFilePassword { get; set; }
