@@ -146,7 +146,9 @@ namespace System
                     {
                         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                         {
-                            return true;
+                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                                return true;
+                            return errors == System.Net.Security.SslPolicyErrors.None;
                         }
                     };
 #endif
