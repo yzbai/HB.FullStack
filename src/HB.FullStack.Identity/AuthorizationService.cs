@@ -551,34 +551,24 @@ namespace HB.FullStack.Identity
         /// <exception cref="IdentityException"></exception>
         private void InitializeCredencials()
         {
-            #region Initialize Jwt Signing Credentials
-
-            X509Certificate2? cert = CertificateUtil.GetBySubject(_options.SigningCertificateSubject);
-
-            if (cert == null)
-            {
-                throw new IdentityException(IdentityErrorCode.JwtSigningCertNotFound, $"Subject:{_options.SigningCertificateSubject}");
-            }
+            //Initialize Jwt Signing Credentials
+            X509Certificate2? cert = CertificateUtil.GetCertificateFromSubjectOrFile(
+                _options.JwtSigningCertificateSubject,
+                _options.JwtSigningCertificateFileName,
+                _options.JwtSigningCertificateFilePassword);
 
             _signingCredentials = CredentialHelper.GetSigningCredentials(cert, _options.SigningAlgorithm);
             _jsonWebKeySetJson = CredentialHelper.CreateJsonWebKeySetJson(cert);
             _issuerSigningKeys = CredentialHelper.GetIssuerSigningKeys(cert);
 
-            #endregion
-
-            #region Initialize Jwt Content Encrypt/Decrypt Credentials
-
-            X509Certificate2? encryptionCert = CertificateUtil.GetBySubject(_options.EncryptingCertificateSubject);
-
-            if (encryptionCert == null)
-            {
-                throw new IdentityException(IdentityErrorCode.JwtEncryptionCertNotFound, $"Subject:{_options.EncryptingCertificateSubject}");
-            }
+            //Initialize Jwt Content Encrypt/Decrypt Credentials
+            X509Certificate2 encryptionCert = CertificateUtil.GetCertificateFromSubjectOrFile(
+                _options.JwtContentCertificateSubject,
+                _options.JwtContentCertificateFileName,
+                _options.JwtContentCertificateFilePassword);
 
             _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);
             _decryptionSecurityKey = CredentialHelper.GetSecurityKey(encryptionCert);
-
-            #endregion
         }
 
         private static bool PassowrdCheck(User user, string password)

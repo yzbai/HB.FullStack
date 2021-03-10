@@ -76,7 +76,7 @@ namespace Microsoft.Extensions.Logging
 
         public static void LogCritical2(
             this ILogger logger,
-            Exception exception,
+            Exception? exception,
             string message,
             [CallerLineNumber] int sourceLineNumber = 0,
             [CallerMemberName] string memberName = "",

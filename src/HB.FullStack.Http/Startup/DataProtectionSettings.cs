@@ -10,8 +10,11 @@ namespace HB.FullStack.Server
         [DisallowNull, NotNull]
         public string ApplicationName { get; set; } = null!;
 
-        [DisallowNull, NotNull]
-        public string CertificateSubject { get; set; } = null!;
+        public string? CertificateSubject { get; set; }
+
+        public string? CertificateFileName { get; set; }
+
+        public string? CertificateFilePassword { get; set; }
 
         [DisallowNull, NotNull]
         public string RedisConnectString { get; set; } = null!;

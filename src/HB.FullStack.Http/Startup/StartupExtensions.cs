@@ -21,7 +21,9 @@ using Microsoft.IdentityModel.Tokens;
 using Polly;
 
 using Serilog;
+
 using StackExchange.Redis;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,13 +50,11 @@ namespace System
             action(dataProtectionSettings);
 
             string redisKey = $"{dataProtectionSettings.ApplicationName}_{EnvironmentUtil.AspNetCoreEnvironment}_dpk";
-            X509Certificate2? certificate2 = CertificateUtil.GetBySubject(dataProtectionSettings.CertificateSubject);
 
-            if (certificate2 == null)
-            {
-                Log.Fatal($"Cert For DataProtection not found. CertSubject:{dataProtectionSettings.CertificateSubject}");
-                throw new ServerException(ServerErrorCode.DataProtectionCertNotFound, $"Subject:{dataProtectionSettings.CertificateSubject}");
-            }
+            X509Certificate2 certificate2 = CertificateUtil.GetCertificateFromSubjectOrFile(
+                dataProtectionSettings.CertificateSubject,
+                dataProtectionSettings.CertificateFileName,
+                dataProtectionSettings.CertificateFilePassword);
 
             ConfigurationOptions redisConfigurationOptions = ConfigurationOptions.Parse(dataProtectionSettings.RedisConnectString);
             redisConfigurationOptions.AllowAdmin = false;
@@ -93,18 +93,17 @@ namespace System
         /// <param name="authority">当局。我该去向谁核实，即是谁颁发了这个jwt</param>
         /// <returns></returns>
         /// <exception cref="ServerException"></exception>
-        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration,
+            Func<JwtBearerChallengeContext, Task> onChallenge,
+            Func<TokenValidatedContext, Task> onTokenValidated,
+            Func<AuthenticationFailedContext, Task> onAuthenticationFailed,
+            Func<ForbiddenContext, Task> onForbidden,
+            Func<MessageReceivedContext, Task> onMessageReceived)
         {
             JwtClientSettings jwtSettings = new JwtClientSettings();
             configuration.Bind(jwtSettings);
 
-            //TODO: 在appsettings.json中暂时用了DataProtection的证书，正式发布时需要换掉
-            X509Certificate2? encryptCert = CertificateUtil.GetBySubject(jwtSettings.DecryptionCertificateSubject);
-
-            if (encryptCert == null)
-            {
-                throw new ServerException(ServerErrorCode.JwtEncryptionCertNotFound, $"Subject:{jwtSettings.DecryptionCertificateSubject}");
-            }
+            X509Certificate2 encryptCert = CertificateUtil.GetCertificateFromSubjectOrFile(jwtSettings.JwtContentCertificateSubject, jwtSettings.JwtContentCertificateFileName, null);
 
             return
                 services
@@ -113,7 +112,7 @@ namespace System
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer((Action<JwtBearerOptions>)(jwtOptions =>
+                .AddJwtBearer(jwtOptions =>
                 {
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
@@ -131,65 +130,19 @@ namespace System
                     };
                     jwtOptions.Events = new JwtBearerEvents
                     {
-                        OnChallenge = c =>
-                        {
-                            c.HandleResponse();
-                            c.Response.StatusCode = 401;
-
-                            //if (c.Request.Path.StartsWithSegments("/api", GlobalSettings.ComparisonIgnoreCase))
-                            //{
-                            c.Response.ContentType = "application/problem+json";
-
-                            ApiErrorCode error = c.AuthenticateFailure switch
-                            {
-                                null => ApiErrorCode.NoAuthority,
-                                SecurityTokenExpiredException s => ApiErrorCode.AccessTokenExpired,
-                                _ => ApiErrorCode.NoAuthority
-                            };
-
-                            ApiError errorResponse = new ApiError(error, $"Exception:{c.AuthenticateFailure?.Message}, Error:{c.Error}, ErrorDescription:{c.ErrorDescription}, ErrorUri:{c.ErrorUri}");
-
-                            return c.Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
-                            //}
-                            //else
-                            //{
-                            //    return Task.CompletedTask;
-                            //}
-                        },
-                        OnAuthenticationFailed = c =>
-                        {
-                            //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
-                            return Task.CompletedTask;
-                        },
-                        OnMessageReceived = c =>
-                        {
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = c =>
-                        {
-                            //验证DeviceId 与 JWT 中的DeviceId 是否一致
-                            string? jwt_DeviceId = c.Principal?.GetDeviceId();
-                            string request_DeviceId = c.HttpContext.Request.GetValue(ClientNames.DeviceId);
-
-                            if (!string.IsNullOrWhiteSpace(jwt_DeviceId) && jwt_DeviceId.Equals(request_DeviceId, GlobalSettings.ComparisonIgnoreCase))
-                            {
-                                return Task.CompletedTask;
-                            }
-
-                            c.Fail("Token DeviceId do not match Request DeviceId");
-
-                            Log.Warning($"DeviceId:{request_DeviceId} do not match Request DeviceId : {jwt_DeviceId}");
-
-                            return Task.CompletedTask;
-                        }
+                        OnChallenge = onChallenge,
+                        OnAuthenticationFailed = onAuthenticationFailed,
+                        OnMessageReceived = onMessageReceived,
+                        OnTokenValidated = onTokenValidated,
+                        OnForbidden = onForbidden
                     };
-                }));
+                });
         }
 
         public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
         {
             Assembly httpFrameworkAssembly = typeof(ExceptionController).Assembly;
-            
+
             //services.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
 
             services
@@ -264,5 +217,6 @@ namespace System
         {
             throw new DatabaseException(DatabaseErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
         }
+
     }
 }
