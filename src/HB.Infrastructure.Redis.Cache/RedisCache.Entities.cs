@@ -336,7 +336,7 @@ end
                     _logger.LogError(ex2, "在强制删除中出错，{TEntity}, dimKey:{dimensionKeyname} ", typeof(TEntity).Name, dimensionKeyName);
                 }
 
-                throw new CacheException(CacheErrorCode.Unkown, "缓存中取值时，未知错误, 删除此项缓存", ex);
+                throw new CacheException(CacheErrorCode.UnkownButDeleted, "缓存中取值时，未知错误, 删除此项缓存", ex);
             }
         }
 

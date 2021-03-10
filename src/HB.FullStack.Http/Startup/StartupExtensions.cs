@@ -103,7 +103,10 @@ namespace System
             JwtClientSettings jwtSettings = new JwtClientSettings();
             configuration.Bind(jwtSettings);
 
-            X509Certificate2 encryptCert = CertificateUtil.GetCertificateFromSubjectOrFile(jwtSettings.JwtContentCertificateSubject, jwtSettings.JwtContentCertificateFileName, null);
+            X509Certificate2 encryptCert = CertificateUtil.GetCertificateFromSubjectOrFile(
+                jwtSettings.JwtContentCertificateSubject, 
+                jwtSettings.JwtContentCertificateFileName, 
+                jwtSettings.JwtContentCertificateFilePassword);
 
             return
                 services

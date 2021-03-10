@@ -16,6 +16,7 @@ namespace HB.FullStack.Cache
         NoSuchDimensionKey,
         NotEnabledForEntity,
         Unkown,
-        NotACacheEntity
+        NotACacheEntity,
+        UnkownButDeleted
     }
 }

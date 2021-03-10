@@ -8,7 +8,7 @@ namespace System
     {
         private static string? _aspnetcore_environment;
 
-        public static string AspNetCoreEnvironment
+        public static string? AspNetCoreEnvironment
         {
             get
             {
@@ -17,13 +17,13 @@ namespace System
                     _aspnetcore_environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 }
 
-                return _aspnetcore_environment!;
+                return _aspnetcore_environment;
             }
         }
 
         public static bool IsDevelopment()
         {
-            return AspNetCoreEnvironment.Equals("Development", GlobalSettings.ComparisonIgnoreCase);
+            return "Development".Equals(AspNetCoreEnvironment, GlobalSettings.ComparisonIgnoreCase);
         }
     }
 }
