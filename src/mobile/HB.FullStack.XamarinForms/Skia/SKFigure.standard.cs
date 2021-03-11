@@ -29,9 +29,9 @@ namespace HB.FullStack.XamarinForms.Skia
 
     public abstract class SKFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureData
     {
-        protected override void OnCaculateOutput(out EmptyData? newResultDrawData, TDrawInfo initDrawData)
+        protected override void OnCaculateOutput(out EmptyData? newResultData, TDrawInfo drawInfo)
         {
-            newResultDrawData = null;
+            newResultData = null;
         }
     }
 
@@ -69,8 +69,6 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public TData? ResultData { get => (TData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
 
-        protected bool HitPathNeedUpdate { get; set; }
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         private void OnBaseDrawDataChanged(TDrawInfo? oldValue, TDrawInfo? newValue)
@@ -84,16 +82,19 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnBaseInitDataChanged()
         {
+            HitPathNeedUpdate = true;
+
             OnInitDataChanged();
 
-            InvalidateOnlySurface();
+            //InvalidateOnlySurface();
+            InvalidateMatrixAndSurface();
         }
 
         protected abstract void OnInitDataChanged();
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            if (DrawData == null)
+            if (DrawData == null )
             {
                 return;
             }
@@ -108,7 +109,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            if (CanvasSizeChanged || HitPathNeedUpdate)
+            if (HitPathNeedUpdate)
             {
                 HitPathNeedUpdate = false;
 
@@ -140,16 +141,23 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected abstract void OnDrawDataChanged();
 
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawInfo initDrawData, FigureState currentState);
+        /// <summary>
+        /// 是指按照CanvasSize、DrawData、InitData来作画
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="canvas"></param>
+        /// <param name="drawInfo"></param>
+        /// <param name="currentState"></param>
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawInfo drawInfo, FigureState currentState);
 
-        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo initDrawData);
+        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo drawInfo);
 
-        protected abstract void OnCaculateOutput(out TData? newResultDrawData, TDrawInfo initDrawData);
+        protected abstract void OnCaculateOutput(out TData? newResultData, TDrawInfo drawInfo);
     }
     public abstract class SKFigure : BindableObject, IDisposable
     {
-        private SKFigureCanvasView? _canvasView;
-        private SKPath _hitTestPath = new SKPath();
+        private SKFigureCanvasView? _canvasViewBB;
+        private SKPath _hitTestPathBB = new SKPath();
 
         public object? Parent { get; set; }
 
@@ -157,11 +165,11 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             set
             {
-                _canvasView = value;
+                _canvasViewBB = value;
             }
             get
             {
-                if (_canvasView == null)
+                if (_canvasViewBB == null)
                 {
                     object? obj = Parent;
 
@@ -169,7 +177,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     {
                         if (obj is SKFigureCanvasView canvasView)
                         {
-                            _canvasView = canvasView;
+                            _canvasViewBB = canvasView;
                             break;
                         }
                         else if (obj is SKFigure figure)
@@ -183,7 +191,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
                 }
 
-                return _canvasView;
+                return _canvasViewBB;
             }
         }
 
@@ -214,9 +222,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public FigureState State { get; private set; } = FigureState.None;
 
-        public SKPath HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
+        public SKPath HitTestPath { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
 
-        public SKMatrix Matrix = SKMatrix.CreateIdentity();
+        protected bool HitPathNeedUpdate { get; set; }
+
+        /// <summary>
+        /// 主要用来记录Touch带来的变化，OnInitDataChanged中，不要改变
+        /// </summary>
+        protected SKMatrix Matrix = SKMatrix.CreateIdentity();
 
         public void SetState(FigureState figureState)
         {
@@ -261,6 +274,7 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 CanvasSize = info.Size;
                 CanvasSizeChanged = true;
+                HitPathNeedUpdate = true;
             }
             else
             {
@@ -308,7 +322,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <returns></returns>
         public virtual bool OnHitTest(SKPoint location, long fingerId)
         {
-            if (!EnableTouch || HitTestPath.IsNullOrEmpty())
+            if (!EnableTouch)
             {
                 return false;
             }
@@ -319,10 +333,20 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(hitPoint);
 
-                return HitTestPath.Contains(mappedToOriginPoint.X, mappedToOriginPoint.Y);
+                return IsHitted(mappedToOriginPoint);
             }
 
             return false;
+        }
+
+        protected virtual bool IsHitted(SKPoint point)
+        {
+            if(HitTestPath.IsNullOrEmpty())
+            {
+                return false;
+            }
+
+            return HitTestPath.Contains(point.X, point.Y);
         }
 
         private readonly Dictionary<long, SKFigureTouchEventArgs> _fingerTouchInfos = new Dictionary<long, SKFigureTouchEventArgs>();
@@ -688,7 +712,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    _hitTestPath.Dispose();
+                    _hitTestPathBB.Dispose();
                     _fingerTouchInfos.Clear();
                     _longTouchInfos.Clear();
                 }
