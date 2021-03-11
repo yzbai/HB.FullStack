@@ -128,9 +128,9 @@ namespace HB.FullStack.XamarinForms.Skia
                 figure.Parent = this;
                 figure.CanvasView = this.CanvasView;
 
-                figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawDataProperty, new Binding(nameof(DrawData), source: this));
+                figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawInfoProperty, new Binding(nameof(DrawData), source: this));
                 figure.SetBinding(SKFigure<TDrawInfo, TData>.InitDataProperty, new Binding($"{nameof(InitDatas)}[{i}]", source: this));
-                figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
+                figure.SetBinding(SKFigure<TDrawInfo, TData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
 
                 Figures.Add(figure);
             }
@@ -141,11 +141,11 @@ namespace HB.FullStack.XamarinForms.Skia
             HittingFigures.Clear();
             SelectedFigures.Clear();
 
-            InitDatas?.Clear();
-            ResultDatas?.Clear();
+            //InitDatas?.Clear();
+            //ResultDatas?.Clear();
 
-            InitDatas = null;
-            ResultDatas = null;
+            //InitDatas = null;
+            //ResultDatas = null;
 
             foreach (TFigure figure in Figures)
             {
@@ -165,7 +165,20 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public override void OnPaint(SKPaintSurfaceEventArgs e)
         {
-            SKCanvas canvas = e.Surface.Canvas;
+            SKImageInfo info = e.Info;
+            SKSurface surface = e.Surface;
+            SKCanvas canvas = surface.Canvas;
+
+            if (CanvasSize != info.Size)
+            {
+                CanvasSize = info.Size;
+                CanvasSizeChanged = true;
+                HitTestPathNeedUpdate = true;
+            }
+            else
+            {
+                CanvasSizeChanged = false;
+            }
 
             foreach (TFigure figure in Figures)
             {

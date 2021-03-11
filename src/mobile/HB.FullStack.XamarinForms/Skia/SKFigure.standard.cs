@@ -35,12 +35,12 @@ namespace HB.FullStack.XamarinForms.Skia
         }
     }
 
-    public abstract class SKFigure<TDrawInfo, TData> : SKFigure 
-        where TDrawInfo : FigureData 
+    public abstract class SKFigure<TDrawInfo, TData> : SKFigure
+        where TDrawInfo : FigureData
         where TData : FigureData
     {
-        public static BindableProperty DrawDataProperty = BindableProperty.Create(
-                    nameof(DrawData),
+        public static BindableProperty DrawInfoProperty = BindableProperty.Create(
+                    nameof(DrawInfo),
                     typeof(TDrawInfo),
                     typeof(SKFigure<TDrawInfo, TData>),
                     null,
@@ -63,7 +63,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     null,
                     BindingMode.OneWayToSource);
 
-        public TDrawInfo? DrawData { get => (TDrawInfo?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
+        public TDrawInfo? DrawInfo { get => (TDrawInfo?)GetValue(DrawInfoProperty); set => SetValue(DrawInfoProperty, value); }
 
         public TData? InitData { get => (TData?)GetValue(InitDataProperty); set => SetValue(InitDataProperty, value); }
 
@@ -73,7 +73,7 @@ namespace HB.FullStack.XamarinForms.Skia
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         private void OnBaseDrawDataChanged(TDrawInfo? oldValue, TDrawInfo? newValue)
         {
-            HitPathNeedUpdate = true;
+            HitTestPathNeedUpdate = true;
 
             OnDrawDataChanged();
 
@@ -82,7 +82,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnBaseInitDataChanged()
         {
-            HitPathNeedUpdate = true;
+            HitTestPathNeedUpdate = true;
 
             OnInitDataChanged();
 
@@ -94,39 +94,39 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            if (DrawData == null )
+            if (DrawInfo == null)
             {
                 return;
             }
 
-            OnDraw(info, canvas, DrawData, State);
+            OnDraw(info, canvas, DrawInfo, State);
         }
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
         {
-            if (DrawData == null)
+            if (DrawInfo == null)
             {
                 return;
             }
 
-            if (HitPathNeedUpdate)
+            if (HitTestPathNeedUpdate)
             {
-                HitPathNeedUpdate = false;
+                HitTestPathNeedUpdate = false;
 
                 HitTestPath.Reset();
 
-                OnUpdateHitTestPath(info, DrawData);
+                OnUpdateHitTestPath(info, DrawInfo);
             }
         }
 
         protected override void OnCaculateOutput()
         {
-            if (DrawData == null)
+            if (DrawInfo == null)
             {
                 return;
             }
 
-            OnCaculateOutput(out TData? newResult, DrawData);
+            OnCaculateOutput(out TData? newResult, DrawInfo);
 
             if (newResult != null)
             {
@@ -153,6 +153,7 @@ namespace HB.FullStack.XamarinForms.Skia
         protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo drawInfo);
 
         protected abstract void OnCaculateOutput(out TData? newResultData, TDrawInfo drawInfo);
+
     }
     public abstract class SKFigure : BindableObject, IDisposable
     {
@@ -216,7 +217,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         public RatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new RatioPoint(0.5f, 0.5f);
 
-        public SKSize CanvasSize { get; private set; }
+        public SKSize CanvasSize { get; protected set; }
 
         public bool CanvasSizeChanged { get; set; }
 
@@ -224,7 +225,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public SKPath HitTestPath { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
 
-        protected bool HitPathNeedUpdate { get; set; }
+        protected bool HitTestPathNeedUpdate { get; set; }
 
         /// <summary>
         /// 主要用来记录Touch带来的变化，OnInitDataChanged中，不要改变
@@ -274,7 +275,7 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 CanvasSize = info.Size;
                 CanvasSizeChanged = true;
-                HitPathNeedUpdate = true;
+                HitTestPathNeedUpdate = true;
             }
             else
             {
@@ -341,7 +342,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected virtual bool IsHitted(SKPoint point)
         {
-            if(HitTestPath.IsNullOrEmpty())
+            if (HitTestPath.IsNullOrEmpty())
             {
                 return false;
             }

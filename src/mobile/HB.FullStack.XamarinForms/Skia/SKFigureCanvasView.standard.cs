@@ -172,8 +172,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (EnableTimeTick)
             {
-                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 4);
-                ResumeResponseTimeTick();
+                //GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 4);
+                //ResumeResponseTimeTick();
             }
             else
             {

@@ -144,6 +144,11 @@ namespace HB.FullStack.Common
                 changedHour--;
                 newMinute += 60;
             }
+            else if(newMinute>= 60)
+            {
+                changedHour++;
+                newMinute -= 60;
+            }
 
             newhour += (changedHour % 24);
 

@@ -362,10 +362,10 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <summary>
         /// 将以左上角为坐标系的点，转换为以中心为坐标系上的点。同一个点。
         /// </summary>
-        public static SKPoint PivotPointToCenter(SKPoint skPoint, SKSize canvasSize)
-        {
-            return new SKPoint(skPoint.X - canvasSize.Width / 2, skPoint.Y - canvasSize.Height / 2);
-        }
+        //public static SKPoint PivotPointToCenter(SKPoint skPoint, SKSize canvasSize)
+        //{
+        //    return new SKPoint(skPoint.X - canvasSize.Width / 2, skPoint.Y - canvasSize.Height / 2);
+        //}
 
         #endregion
     }
