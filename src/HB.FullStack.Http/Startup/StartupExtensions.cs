@@ -118,6 +118,9 @@ namespace System
                 })
                 .AddJwtBearer(jwtOptions =>
                 {
+#if DEBUG
+                    jwtOptions.RequireHttpsMetadata = false;
+#endif
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
                     jwtOptions.TokenValidationParameters = new TokenValidationParameters

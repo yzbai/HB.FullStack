@@ -231,14 +231,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void CheckSelected(TFigure figure)
         {
-            if (figure.State != FigureState.Selected && figure.State != FigureState.LongSelected)
+            if (figure.CurrentState != FigureState.Selected && figure.CurrentState != FigureState.LongSelected)
             {
                 return;
             }
 
-            if (SelectedFiguresState != figure.State
-                || (figure.State == FigureState.Selected && !EnableMultipleSelected)
-                || (figure.State == FigureState.LongSelected && !EnableMultipleLongSelected))
+            if (SelectedFiguresState != figure.CurrentState
+                || (figure.CurrentState == FigureState.Selected && !EnableMultipleSelected)
+                || (figure.CurrentState == FigureState.LongSelected && !EnableMultipleLongSelected))
             {
                 UnSelectAllExcept(figure);
             }
@@ -260,7 +260,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 }
 
                 SelectedFigures.Clear();
-                SelectedFiguresState = figure.State;
+                SelectedFiguresState = figure.CurrentState;
                 SelectedFigures.Add(figure);
             }
         }

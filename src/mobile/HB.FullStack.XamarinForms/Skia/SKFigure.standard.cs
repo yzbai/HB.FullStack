@@ -99,7 +99,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            OnDraw(info, canvas, DrawInfo, State);
+            OnDraw(info, canvas, DrawInfo, CurrentState);
         }
 
         protected override void OnUpdateHitTestPath(SKImageInfo info)
@@ -130,7 +130,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (newResult != null)
             {
-                newResult.State = State;
+                newResult.State = CurrentState;
             }
 
             if (newResult != ResultData)
@@ -221,7 +221,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public bool CanvasSizeChanged { get; set; }
 
-        public FigureState State { get; private set; } = FigureState.None;
+        public FigureState CurrentState { get; private set; } = FigureState.None;
 
         public SKPath HitTestPath { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
 
@@ -234,7 +234,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public void SetState(FigureState figureState)
         {
-            State = figureState;
+            CurrentState = figureState;
         }
 
         public void InvalidateOnlySurface(bool evenTimeTickEnabled = false)
@@ -637,7 +637,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
-            if (State == FigureState.Selected || State == FigureState.LongSelected)
+            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
             {
                 return;
             }
@@ -649,7 +649,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
-            if (State == FigureState.Selected || State == FigureState.LongSelected)
+            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
             {
                 return;
             }
@@ -661,11 +661,11 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            if (State == FigureState.Selected)
+            if (CurrentState == FigureState.Selected)
             {
                 SetState(FigureState.None);
             }
-            else if (State == FigureState.None)
+            else if (CurrentState == FigureState.None)
             {
                 SetState(FigureState.Selected);
             }
