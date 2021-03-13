@@ -16,7 +16,7 @@ namespace System
 
         [NotNull] public static StringComparison ComparisonIgnoreCase { get; set; } = StringComparison.InvariantCultureIgnoreCase;
 
-        public static ILogger Logger { get; set; } = null!;
+        public static ILogger? Logger { get; set; }
 
         public static Action<Exception?, string?, LogLevel> MessageExceptionHandler { get; set; } = (ex, msg, level) => { Logger.Log(level, ex, $"开火失败 : {msg}"); };
 

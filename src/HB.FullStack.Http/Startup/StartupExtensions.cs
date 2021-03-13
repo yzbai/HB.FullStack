@@ -118,9 +118,9 @@ namespace System
                 })
                 .AddJwtBearer(jwtOptions =>
                 {
-#if DEBUG
-                    jwtOptions.RequireHttpsMetadata = false;
-#endif
+//#if DEBUG
+//                    jwtOptions.RequireHttpsMetadata = false;
+//#endif
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
                     jwtOptions.TokenValidationParameters = new TokenValidationParameters
@@ -143,18 +143,18 @@ namespace System
                         OnTokenValidated = onTokenValidated,
                         OnForbidden = onForbidden
                     };
-#if DEBUG
-                    //这是为了ubuntu这货，在开发阶段不认开发证书。这个http请求，是由jwt audience 发向 jwt authority的。authority配置了正式证书后，就没问题了
-                    jwtOptions.BackchannelHttpHandler = new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                        {
-                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
-                                return true;
-                            return errors == System.Net.Security.SslPolicyErrors.None;
-                        }
-                    };
-#endif
+//#if DEBUG
+//                    //这是为了ubuntu这货，在开发阶段不认开发证书。这个http请求，是由jwt audience 发向 jwt authority的。authority配置了正式证书后，就没问题了
+//                    jwtOptions.BackchannelHttpHandler = new HttpClientHandler
+//                    {
+//                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+//                        {
+//                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+//                                return true;
+//                            return errors == System.Net.Security.SslPolicyErrors.None;
+//                        }
+//                    };
+//#endif
 
                 });
         }

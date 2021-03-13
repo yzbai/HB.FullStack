@@ -15,13 +15,13 @@ namespace System
 
             if (certificate2 == null)
             {
-                GlobalSettings.Logger.LogWarning2($"证书 {fullPath} 没有打包，将试图再服务器中寻找");
+                GlobalSettings.Logger?.LogWarning2($"证书 {fullPath} 没有打包，将试图再服务器中寻找");
 
                 certificate2 = CertificateUtil.GetBySubject(subject);
 
                 if (certificate2 == null)
                 {
-                    GlobalSettings.Logger.LogCritical2(null, $"根据Subject证书, {subject} 没有找到，将无法启动服务!");
+                    GlobalSettings.Logger?.LogCritical2(null, $"根据Subject证书, {subject} 没有找到，将无法启动服务!");
 
 #pragma warning disable CA2201 // Do not raise reserved exception types
                     throw new Exception($"证书没有找到，Subject:{subject} or File : {fullPath}");

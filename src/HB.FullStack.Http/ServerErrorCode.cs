@@ -3,6 +3,7 @@
     public enum ServerErrorCode
     {
         DataProtectionCertNotFound,
-        JwtEncryptionCertNotFound
+        JwtEncryptionCertNotFound,
+        StartupError
     }
 }
