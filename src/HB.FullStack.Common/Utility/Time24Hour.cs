@@ -164,43 +164,6 @@ namespace HB.FullStack.Common
             return new Time24Hour(newhour, newMinute);
         }
 
-        public static bool operator ==(Time24Hour time1, Time24Hour time2)
-        {
-            return time1.Hour == time2.Hour && time1.Minute == time2.Minute;
-        }
-
-        public static bool operator !=(Time24Hour time1, Time24Hour time2)
-        {
-            return !(time1 == time2);
-        }
-
-        public static bool operator >(Time24Hour time1, Time24Hour time2)
-        {
-            if (time1.Hour != time2.Hour)
-            {
-                return time1.Hour > time2.Hour;
-            }
-            else
-            {
-                return time1.Minute > time2.Minute;
-            }
-        }
-
-        public static bool operator <(Time24Hour time1, Time24Hour time2)
-        {
-            return time1 != time2 && !(time1 > time2);
-        }
-
-        public static bool operator >=(Time24Hour time1, Time24Hour time2)
-        {
-            return time1 == time2 || time1 > time2;
-        }
-
-        public static bool operator <=(Time24Hour time1, Time24Hour time2)
-        {
-            return time1 == time2 || time1 < time2;
-        }
-
         public override bool Equals(object obj)
         {
             if (obj is Time24Hour time)
@@ -238,6 +201,64 @@ namespace HB.FullStack.Common
         {
             return $"{Hour}:{Minute}";
         }
+
+        public static bool operator ==(Time24Hour time1, Time24Hour time2)
+        {
+            return time1.Hour == time2.Hour && time1.Minute == time2.Minute;
+        }
+
+        public static bool operator !=(Time24Hour time1, Time24Hour time2)
+        {
+            return !(time1 == time2);
+        }
+
+        public static bool operator >(Time24Hour time1, Time24Hour time2)
+        {
+            if (time1.Hour != time2.Hour)
+            {
+                return time1.Hour > time2.Hour;
+            }
+            else
+            {
+                return time1.Minute > time2.Minute;
+            }
+        }
+
+        public static bool operator <(Time24Hour time1, Time24Hour time2)
+        {
+            return time1 != time2 && !(time1 > time2);
+        }
+
+        public static bool operator >=(Time24Hour time1, Time24Hour time2)
+        {
+            return time1 == time2 || time1 > time2;
+        }
+
+        public static bool operator <=(Time24Hour time1, Time24Hour time2)
+        {
+            return time1 == time2 || time1 < time2;
+        }
+
+        public static bool operator +(Time24Hour item1, Time24Hour item2)
+        {
+
+        }
+
+        public static bool operator -(Time24Hour item1, Time24Hour item2)
+        {
+            return false;
+        }
+        
+        public static bool Add(Time24Hour left, Time24Hour right)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static bool Subtract(Time24Hour left, Time24Hour right)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 
     //public static class Time24HourExtensions
