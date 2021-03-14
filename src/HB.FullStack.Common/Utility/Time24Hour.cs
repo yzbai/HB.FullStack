@@ -9,6 +9,19 @@ namespace HB.FullStack.Common
     /// </summary>
     public struct Time24Hour : IEquatable<Time24Hour>
     {
+        private int _day;
+
+        /// <summary>
+        /// 为了应对跨天的时间块
+        /// Day = 0 为当前天
+        /// Day = 1 为后一天
+        /// </summary>
+        public int Day
+        {
+            get => _day;
+            set => _day = value;
+        }
+
         private int _hour;
 
         public int Hour
@@ -60,10 +73,13 @@ namespace HB.FullStack.Common
             }
         }
 
-        public Time24Hour(int hour24, int minute)
+        public Time24Hour(int hour24, int minute, int day = 0)
         {
             _hour = 0;
             _minute = 0;
+            _day = 0;
+
+            Day = day;
             Hour = hour24;
             Minute = minute;
         }
@@ -119,6 +135,8 @@ namespace HB.FullStack.Common
 
             _hour = 0;
             _minute = 0;
+            _day = 0;
+
             Hour = hour;
             Minute = minute;
 
@@ -130,38 +148,35 @@ namespace HB.FullStack.Common
 
         public Time24Hour AddTime(int changedHour, int changedMinute)
         {
-            int newhour = Hour;
-            int newMinute = Minute;
+            int newDay = Day;
+            int newhour = Hour + changedHour;
+            int newMinute = Minute + changedMinute;
 
-            changedHour += (changedMinute / 60);
-
-            changedMinute %= 60;
-
-            newMinute += changedMinute;
-
-            if (newMinute < 0)
+            while(newMinute < 0)
             {
-                changedHour--;
+                newhour--;
                 newMinute += 60;
             }
-            else if(newMinute>= 60)
+
+            while (newMinute >= 60)
             {
-                changedHour++;
+                newhour++;
                 newMinute -= 60;
             }
 
-            newhour += (changedHour % 24);
-
-            if (newhour < 0)
+            while (newhour < 0)
             {
+                newDay--;
                 newhour += 24;
             }
-            else
+
+            while (newhour >= 24)
             {
-                newhour %= 24;
+                newDay++;
+                newhour -= 24;
             }
 
-            return new Time24Hour(newhour, newMinute);
+            return new Time24Hour(newhour, newMinute, newDay);
         }
 
         public override bool Equals(object obj)
@@ -239,24 +254,17 @@ namespace HB.FullStack.Common
             return time1 == time2 || time1 < time2;
         }
 
-        public static bool operator +(Time24Hour item1, Time24Hour item2)
+        public static TimeSpan operator -(Time24Hour item1, Time24Hour item2)
         {
-
+            return Subtract(item1, item2);
         }
 
-        public static bool operator -(Time24Hour item1, Time24Hour item2)
+        public static TimeSpan Subtract(Time24Hour left, Time24Hour right)
         {
-            return false;
-        }
-        
-        public static bool Add(Time24Hour left, Time24Hour right)
-        {
-            throw new NotImplementedException();
-        }
+            int minutes1 = left.Hour * 60 + left.Minute;
+            int minutes2 = right.Hour * 60 + right.Minute;
 
-        public static bool Subtract(Time24Hour left, Time24Hour right)
-        {
-            throw new NotImplementedException();
+            return TimeSpan.FromMinutes(Math.Abs(minutes1 - minutes2));
         }
 
     }
