@@ -88,6 +88,7 @@ namespace HB.FullStack.Common
         /// example:
         /// 上午9：12
         /// pm12:02
+        /// 0:13:34
         /// </summary>
         /// <param name="timeString"></param>
         /// <returns></returns>
@@ -117,13 +118,24 @@ namespace HB.FullStack.Common
 
             string[] parts = str.Split(':');
 
-            if (parts.Length != 2)
+            if (parts.Length != 2 && parts.Length != 3)
             {
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }
 
-            int hour = Convert.ToInt32(parts[0], GlobalSettings.Culture);
-            int minute = Convert.ToInt32(parts[1], GlobalSettings.Culture);
+            int day = 0, hour = 0, minute = 0;
+
+            if(parts.Length == 2)
+            {
+                hour = Convert.ToInt32(parts[0], GlobalSettings.Culture);
+                minute = Convert.ToInt32(parts[1], GlobalSettings.Culture);
+            }
+            else if(parts.Length == 3)
+            {
+                day = Convert.ToInt32(parts[0], GlobalSettings.Culture);
+                hour = Convert.ToInt32(parts[1], GlobalSettings.Culture);
+                minute = Convert.ToInt32(parts[2], GlobalSettings.Culture);
+            }
 
             if (isAM.HasValue)
             {
@@ -137,6 +149,7 @@ namespace HB.FullStack.Common
             _minute = 0;
             _day = 0;
 
+            Day = day;
             Hour = hour;
             Minute = minute;
 
@@ -214,7 +227,7 @@ namespace HB.FullStack.Common
 
         public override string ToString()
         {
-            return $"{Hour}:{Minute}";
+            return $"{Day}:{Hour}:{Minute}";
         }
 
         public static bool operator ==(Time24Hour time1, Time24Hour time2)
