@@ -436,6 +436,15 @@ namespace HB.FullStack.XamarinForms.Skia
                             return;
                         }
 
+                        if (touchInfo.FirstMove == null)
+                        {
+                            touchInfo.FirstMove = true;
+                        }
+                        else
+                        {
+                            touchInfo.FirstMove = false;
+                        }
+
                         if (_fingerTouchInfos.Count == 1)
                         {
                             CancelLongTap(args);

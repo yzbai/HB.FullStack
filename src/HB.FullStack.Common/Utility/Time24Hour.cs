@@ -274,10 +274,10 @@ namespace HB.FullStack.Common
 
         public static TimeSpan Subtract(Time24Hour left, Time24Hour right)
         {
-            int minutes1 = left.Hour * 60 + left.Minute;
-            int minutes2 = right.Hour * 60 + right.Minute;
+            int minutes1 = left.Day * 24 * 60 + left.Hour * 60 + left.Minute;
+            int minutes2 = left.Day * 24 * 60 + right.Hour * 60 + right.Minute;
 
-            return TimeSpan.FromMinutes(Math.Abs(minutes1 - minutes2));
+            return TimeSpan.FromMinutes(minutes1 - minutes2);
         }
 
     }

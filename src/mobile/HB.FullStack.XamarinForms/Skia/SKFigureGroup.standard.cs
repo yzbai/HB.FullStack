@@ -155,7 +155,7 @@ namespace HB.FullStack.XamarinForms.Skia
             Figures.Clear();
         }
 
-        private IList<TFigure> Figures { get; } = new List<TFigure>();
+        protected IList<TFigure> Figures { get; } = new List<TFigure>();
 
         protected Dictionary<long, TFigure> HittingFigures { get; } = new Dictionary<long, TFigure>();
 
