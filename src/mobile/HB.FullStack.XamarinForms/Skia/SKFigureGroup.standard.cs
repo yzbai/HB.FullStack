@@ -40,8 +40,8 @@ namespace HB.FullStack.XamarinForms.Skia
         where TDrawInfo : FigureData
         where TData : FigureData
     {
-        public static BindableProperty DrawDataProperty = BindableProperty.Create(
-               nameof(DrawData),
+        public static BindableProperty DrawInfoProperty = BindableProperty.Create(
+               nameof(DrawInfo),
                typeof(TDrawInfo),
                typeof(SKFigureGroup<TFigure, TDrawInfo, TData>),
                null,
@@ -65,7 +65,7 @@ namespace HB.FullStack.XamarinForms.Skia
             null,
             BindingMode.OneWayToSource);
 
-        public TDrawInfo? DrawData { get => (TDrawInfo?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
+        public TDrawInfo? DrawInfo { get => (TDrawInfo?)GetValue(DrawInfoProperty); set => SetValue(DrawInfoProperty, value); }
 
         public IList<TData?>? InitDatas { get => (IList<TData?>)GetValue(InitDatasProperty); set => SetValue(InitDatasProperty, value); }
 
@@ -128,7 +128,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 figure.Parent = this;
                 figure.CanvasView = this.CanvasView;
 
-                figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawInfoProperty, new Binding(nameof(DrawData), source: this));
+                figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawInfoProperty, new Binding(nameof(DrawInfo), source: this));
                 figure.SetBinding(SKFigure<TDrawInfo, TData>.InitDataProperty, new Binding($"{nameof(InitDatas)}[{i}]", source: this));
                 figure.SetBinding(SKFigure<TDrawInfo, TData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
 
