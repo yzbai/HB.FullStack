@@ -29,9 +29,17 @@ namespace HB.FullStack.Common
             get { return _hour; }
             set
             {
-                if (value >= 0 && value < 24)
+                if (value >= 0 && value <= 24)
                 {
-                    _hour = value;
+                    if (value == 24)
+                    {
+                        _day++;
+                        _hour = 0;
+                    }
+                    else
+                    {
+                        _hour = value;
+                    }
                 }
                 else
                 {
