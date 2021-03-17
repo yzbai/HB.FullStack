@@ -20,6 +20,20 @@ namespace HB.FullStack.XamarinForms.Skia
         Actually
     }
 
+    public static class SKConsts
+    {
+        public const int MINUTES_ONE_DAY = 24 * 60;
+
+        public const float HALF_PI = (float)(0.5 * Math.PI);
+        public const float TWO_PI = (float)(2 * Math.PI);
+
+        public const float RADIANS_ONE_DEGREE = (float)(Math.PI / 180);
+        //public const float RADIANS_ONE_DAY = (float)(4 * Math.PI);
+        //public const float RADIANS_ONE_HOUR = (float)Math.PI / 6;
+        //public const float RADIANS_ONE_MINUTE = (float)(Math.PI / 360);
+        public const float DEGREES_ONE_RADIAN = (float)(180 / Math.PI);
+    }
+
     public static class SKUtil
     {
         #region Touch

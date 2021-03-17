@@ -237,19 +237,19 @@ namespace HB.FullStack.XamarinForms.Skia
             CurrentState = figureState;
         }
 
-        public void InvalidateOnlySurface(bool evenTimeTickEnabled = false)
+        public void InvalidateOnlySurface(bool forced = false)
         {
             if (Parent == null || CanvasView == null)
             {
                 return;
             }
 
-            if (CanvasView.EnableTimeTick && !evenTimeTickEnabled)
+            if (CanvasView.EnableTimeTick && !forced)
             {
                 return;
             }
 
-            if (Parent is SKFigureGroup)
+            if (Parent is SKFigureGroup && !forced)
             {
                 //留给集合统一处理
                 return;
@@ -258,11 +258,11 @@ namespace HB.FullStack.XamarinForms.Skia
             CanvasView.InvalidateSurface();
         }
 
-        public void InvalidateMatrixAndSurface(bool evenTimeTickEnabled = false)
+        public void InvalidateMatrixAndSurface(bool forced = false)
         {
             Matrix = SKMatrix.CreateIdentity();
 
-            InvalidateOnlySurface(evenTimeTickEnabled);
+            InvalidateOnlySurface(forced);
         }
 
         public virtual void OnPaint(SKPaintSurfaceEventArgs e)

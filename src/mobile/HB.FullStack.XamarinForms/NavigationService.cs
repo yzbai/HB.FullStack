@@ -78,9 +78,9 @@ namespace HB.FullStack.XamarinForms
             {
                 List<Page> toRemoves = new List<Page>();
 
-                for (int i = navStack.Count - 1; i>=0; --i)
+                for (int i = navStack.Count - 1; i >= 0; --i)
                 {
-                    if(navStack[i] is not TPage)
+                    if (navStack[i] is not TPage)
                     {
                         toRemoves.Add(navStack[i]);
                     }
@@ -90,9 +90,12 @@ namespace HB.FullStack.XamarinForms
                     }
                 }
 
-                toRemoves.ForEach(p => Navigation?.RemovePage(p));
+                Device.BeginInvokeOnMainThread(async () =>
+                {
+                    toRemoves.ForEach(p => Navigation?.RemovePage(p));
 
-                Device.BeginInvokeOnMainThread(() => Navigation?.PopAsync(animated));
+                    await Navigation!.PopAsync(animated).ConfigureAwait(true);
+                });
             }
         }
 

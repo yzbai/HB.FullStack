@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Xml.Linq;
 
 using Xamarin.CommunityToolkit.ObjectModel;
 using Xamarin.Forms;
@@ -27,16 +28,13 @@ namespace HB.FullStack.XamarinForms.Skia
         public bool EnableUnSelectedByHitFailed { get; set; } = true;
     }
 
-    public abstract class SKFigureGroup<TFigure, TDrawInfo> : SKFigureGroup<TFigure, TDrawInfo, EmptyData>
-    where TFigure : SKFigure<TDrawInfo>, new()
-    where TDrawInfo : FigureData
+    public interface IFigureFactory
     {
-
+        object Create<TFigure>();
     }
 
-
     public abstract class SKFigureGroup<TFigure, TDrawInfo, TData> : SKFigureGroup
-        where TFigure : SKFigure<TDrawInfo, TData>, new()
+        where TFigure : SKFigure<TDrawInfo, TData>//, new()
         where TDrawInfo : FigureData
         where TData : FigureData
     {
@@ -65,13 +63,15 @@ namespace HB.FullStack.XamarinForms.Skia
             null,
             BindingMode.OneWayToSource);
 
+        private readonly IFigureFactory _figureFactory;
+
         public TDrawInfo? DrawInfo { get => (TDrawInfo?)GetValue(DrawInfoProperty); set => SetValue(DrawInfoProperty, value); }
 
         public IList<TData?>? InitDatas { get => (IList<TData?>)GetValue(InitDatasProperty); set => SetValue(InitDatasProperty, value); }
 
         public IList<TData?>? ResultDatas { get => (IList<TData?>)GetValue(ResultDatasProperty); set => SetValue(ResultDatasProperty, value); }
 
-        protected SKFigureGroup()
+        protected SKFigureGroup(IFigureFactory figureFactory)
         {
             Pressed += OnPressed;
             Tapped += OnTapped;
@@ -79,6 +79,7 @@ namespace HB.FullStack.XamarinForms.Skia
             OneFingerDragged += OnDragged;
             Cancelled += OnCancelled;
             HitFailed += OnHitFailed;
+            _figureFactory = figureFactory;
         }
 
         private void OnDrawDatasChanged()
@@ -124,7 +125,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             for (int i = 0; i < InitDatas.Count; ++i)
             {
-                TFigure figure = new TFigure();
+                TFigure figure = (TFigure)_figureFactory.Create<TFigure>();
                 figure.Parent = this;
                 figure.CanvasView = this.CanvasView;
 
@@ -370,8 +371,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #region Dispose Pattern
 
-
         private bool _disposed;
+        
 
         protected override void Dispose(bool disposing)
         {
@@ -392,5 +393,15 @@ namespace HB.FullStack.XamarinForms.Skia
         }
 
         #endregion
+    }
+
+
+    public abstract class SKFigureGroup<TFigure, TDrawInfo> : SKFigureGroup<TFigure, TDrawInfo, EmptyData>
+        where TFigure : SKFigure<TDrawInfo>, new()
+        where TDrawInfo : FigureData
+    {
+        protected SKFigureGroup(IFigureFactory figureFactory) : base(figureFactory)
+        {
+        }
     }
 }
