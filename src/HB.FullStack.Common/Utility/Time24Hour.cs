@@ -250,7 +250,11 @@ namespace HB.FullStack.Common
 
         public static bool operator >(Time24Hour time1, Time24Hour time2)
         {
-            if (time1.Hour != time2.Hour)
+            if(time1.Day != time2.Day)
+            {
+                return time1.Day > time2.Day;
+            }
+            else if (time1.Hour != time2.Hour)
             {
                 return time1.Hour > time2.Hour;
             }
@@ -283,7 +287,7 @@ namespace HB.FullStack.Common
         public static TimeSpan Subtract(Time24Hour left, Time24Hour right)
         {
             int minutes1 = left.Day * 24 * 60 + left.Hour * 60 + left.Minute;
-            int minutes2 = left.Day * 24 * 60 + right.Hour * 60 + right.Minute;
+            int minutes2 = right.Day * 24 * 60 + right.Hour * 60 + right.Minute;
 
             return TimeSpan.FromMinutes(minutes1 - minutes2);
         }
