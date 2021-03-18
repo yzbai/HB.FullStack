@@ -33,6 +33,12 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             newResultData = null;
         }
+
+        protected override void OnInitDataChanged()
+        {
+            //Do nothing
+        }
+
     }
 
     public abstract class SKFigure<TDrawInfo, TData> : SKFigure
@@ -75,7 +81,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             HitTestPathNeedUpdate = true;
 
-            OnDrawDataChanged();
+            OnDrawInfoChanged();
 
             InvalidateMatrixAndSurface();
         }
@@ -139,7 +145,7 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        protected abstract void OnDrawDataChanged();
+        protected abstract void OnDrawInfoChanged();
 
         /// <summary>
         /// 是指按照CanvasSize、DrawData、InitData来作画
