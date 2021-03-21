@@ -14,153 +14,6 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public class EmptyData : FigureData
-    {
-        protected override bool EqualsImpl(FigureData other)
-        {
-            return other is EmptyData;
-        }
-
-        protected override HashCode GetHashCodeImpl()
-        {
-            return new HashCode();
-        }
-    }
-
-    public abstract class SKFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureData
-    {
-        protected override void OnCaculateOutput(out EmptyData? newResultData, TDrawInfo drawInfo)
-        {
-            newResultData = null;
-        }
-
-        protected override void OnInitDataChanged()
-        {
-            //Do nothing
-        }
-
-    }
-
-    public abstract class SKFigure<TDrawInfo, TData> : SKFigure
-        where TDrawInfo : FigureData
-        where TData : FigureData
-    {
-        public static BindableProperty DrawInfoProperty = BindableProperty.Create(
-                    nameof(DrawInfo),
-                    typeof(TDrawInfo),
-                    typeof(SKFigure<TDrawInfo, TData>),
-                    null,
-                    BindingMode.OneWay,
-                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseDrawDataChanged((TDrawInfo?)oldValue, (TDrawInfo?)newValue));
-
-        public static BindableProperty InitDataProperty = BindableProperty.Create(
-                    nameof(InitData),
-                    typeof(TData),
-                    typeof(SKFigure<TDrawInfo, TData>),
-                    null,
-                    BindingMode.OneWay,
-                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseInitDataChanged());
-
-
-        public static BindableProperty ResultDataProperty = BindableProperty.Create(
-                    nameof(ResultData),
-                    typeof(TData),
-                    typeof(SKFigure<TDrawInfo, TData>),
-                    null,
-                    BindingMode.OneWayToSource);
-
-        public TDrawInfo? DrawInfo { get => (TDrawInfo?)GetValue(DrawInfoProperty); set => SetValue(DrawInfoProperty, value); }
-
-        public TData? InitData { get => (TData?)GetValue(InitDataProperty); set => SetValue(InitDataProperty, value); }
-
-        public TData? ResultData { get => (TData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
-
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
-        private void OnBaseDrawDataChanged(TDrawInfo? oldValue, TDrawInfo? newValue)
-        {
-            HitTestPathNeedUpdate = true;
-
-            OnDrawInfoChanged();
-
-            InvalidateMatrixAndSurface();
-        }
-
-        private void OnBaseInitDataChanged()
-        {
-            HitTestPathNeedUpdate = true;
-
-            OnInitDataChanged();
-
-            //InvalidateOnlySurface();
-            InvalidateMatrixAndSurface();
-        }
-
-        protected abstract void OnInitDataChanged();
-
-        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
-        {
-            if (DrawInfo == null)
-            {
-                return;
-            }
-
-            OnDraw(info, canvas, DrawInfo, CurrentState);
-        }
-
-        protected override void OnUpdateHitTestPath(SKImageInfo info)
-        {
-            if (DrawInfo == null)
-            {
-                return;
-            }
-
-            if (HitTestPathNeedUpdate)
-            {
-                HitTestPathNeedUpdate = false;
-
-                HitTestPath.Reset();
-
-                OnUpdateHitTestPath(info, DrawInfo);
-            }
-        }
-
-        protected override void OnCaculateOutput()
-        {
-            if (DrawInfo == null)
-            {
-                return;
-            }
-
-            OnCaculateOutput(out TData? newResult, DrawInfo);
-
-            if (newResult != null)
-            {
-                newResult.State = CurrentState;
-            }
-
-            if (newResult != ResultData)
-            {
-                ResultData = newResult;
-            }
-        }
-
-        protected abstract void OnDrawInfoChanged();
-
-        /// <summary>
-        /// 是指按照CanvasSize、DrawData、InitData来作画
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="canvas"></param>
-        /// <param name="drawInfo"></param>
-        /// <param name="currentState"></param>
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawInfo drawInfo, FigureState currentState);
-
-        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo drawInfo);
-
-        protected abstract void OnCaculateOutput(out TData? newResultData, TDrawInfo drawInfo);
-
-    }
     public abstract class SKFigure : BindableObject, IDisposable
     {
         private SKFigureCanvasView? _canvasViewBB;
@@ -346,6 +199,11 @@ namespace HB.FullStack.XamarinForms.Skia
             return false;
         }
 
+        /// <summary>
+        /// point已经经过当前坐标系和Matrix转化的点
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
         protected virtual bool IsHitted(SKPoint point)
         {
             if (HitTestPath.IsNullOrEmpty())
@@ -755,5 +613,163 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #endregion
 
+    }
+
+    public abstract class SKFigure<TDrawInfo, TData> : SKFigure
+        where TDrawInfo : FigureData
+        where TData : FigureData
+    {
+        public static BindableProperty DrawInfoProperty = BindableProperty.Create(
+                    nameof(DrawInfo),
+                    typeof(TDrawInfo),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWay,
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseDrawDataChanged());
+
+        public static BindableProperty InitDataProperty = BindableProperty.Create(
+                    nameof(InitData),
+                    typeof(TData),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWay,
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseInitDataChanged());
+
+
+        public static BindableProperty ResultDataProperty = BindableProperty.Create(
+                    nameof(ResultData),
+                    typeof(TData),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWayToSource);
+
+        public TDrawInfo? DrawInfo { get => (TDrawInfo?)GetValue(DrawInfoProperty); set => SetValue(DrawInfoProperty, value); }
+
+        public TData? InitData { get => (TData?)GetValue(InitDataProperty); set => SetValue(InitDataProperty, value); }
+
+        public TData? ResultData { get => (TData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
+
+        private void OnBaseDrawDataChanged()
+        {
+            HitTestPathNeedUpdate = true;
+
+            if(DrawInfo != null)
+            {
+                OnDrawInfoOrCanvasSizeChanged();
+            }
+
+            InvalidateMatrixAndSurface();
+        }
+
+        private void OnBaseInitDataChanged()
+        {
+            HitTestPathNeedUpdate = true;
+
+            OnInitDataChanged();
+
+            InvalidateMatrixAndSurface();
+        }
+
+        protected abstract void OnInitDataChanged();
+
+        protected new void OnDraw(SKImageInfo info, SKCanvas canvas)
+        {
+            if (DrawInfo == null)
+            {
+                return;
+            }
+
+            if(CanvasSizeChanged)
+            {
+                OnDrawInfoOrCanvasSizeChanged();
+            }
+
+            OnDraw(info, canvas, DrawInfo, CurrentState);
+        }
+
+        /// <summary>
+        /// 计算因为DrawInfo或者CanvasSize发生变化，引起的绘画数据变化
+        /// </summary>
+        protected abstract void OnDrawInfoOrCanvasSizeChanged();
+
+        protected new void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            if (DrawInfo == null)
+            {
+                return;
+            }
+
+            if (HitTestPathNeedUpdate)
+            {
+                HitTestPathNeedUpdate = false;
+
+                HitTestPath.Reset();
+
+                OnUpdateHitTestPath(info, DrawInfo);
+            }
+        }
+
+        protected new void OnCaculateOutput()
+        {
+            if (DrawInfo == null)
+            {
+                return;
+            }
+
+            OnCaculateOutput(out TData? newResult, DrawInfo);
+
+            if (newResult != null)
+            {
+                newResult.State = CurrentState;
+            }
+
+            if (newResult != ResultData)
+            {
+                ResultData = newResult;
+            }
+        }
+
+        //protected abstract void OnDrawInfoChanged();
+
+        /// <summary>
+        /// 是指按照CanvasSize、DrawData、InitData来作画
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="canvas"></param>
+        /// <param name="drawInfo"></param>
+        /// <param name="currentState"></param>
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawInfo drawInfo, FigureState currentState);
+
+        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo drawInfo);
+
+        protected abstract void OnCaculateOutput(out TData? newResultData, TDrawInfo drawInfo);
+
+    }
+    
+    public abstract class SKFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureData
+    {
+        protected override void OnCaculateOutput(out EmptyData? newResultData, TDrawInfo drawInfo)
+        {
+            newResultData = null;
+        }
+
+        protected override void OnInitDataChanged()
+        {
+            //Do nothing
+        }
+
+    }
+    
+    public class EmptyData : FigureData
+    {
+        protected override bool EqualsImpl(FigureData other)
+        {
+            return other is EmptyData;
+        }
+
+        protected override HashCode GetHashCodeImpl()
+        {
+            return new HashCode();
+        }
     }
 }

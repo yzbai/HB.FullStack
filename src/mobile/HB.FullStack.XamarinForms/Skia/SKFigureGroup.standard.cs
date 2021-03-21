@@ -44,7 +44,7 @@ namespace HB.FullStack.XamarinForms.Skia
                typeof(SKFigureGroup<TFigure, TDrawInfo, TData>),
                null,
                BindingMode.OneWay,
-               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawInfo, TData>)b).OnDrawDatasChanged());
+               propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawInfo, TData>)b).OnBaseDrawDatasChanged());
 
         public static BindableProperty InitDatasProperty = BindableProperty.Create(
             nameof(InitDatas),
@@ -53,7 +53,6 @@ namespace HB.FullStack.XamarinForms.Skia
             null,
             BindingMode.OneWay,
             propertyChanged: (b, oldValues, newValues) => ((SKFigureGroup<TFigure, TDrawInfo, TData>)b).OnInitDatasChanged((IList<TData>?)oldValues, (IList<TData>?)newValues));
-
 
 
         public static BindableProperty ResultDatasProperty = BindableProperty.Create(
@@ -73,18 +72,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected SKFigureGroup(IFigureFactory figureFactory)
         {
+            _figureFactory = figureFactory;
+
             Pressed += OnPressed;
             Tapped += OnTapped;
             LongTapped += OnLongTapped;
             OneFingerDragged += OnDragged;
             Cancelled += OnCancelled;
             HitFailed += OnHitFailed;
-            _figureFactory = figureFactory;
-        }
-
-        private void OnDrawDatasChanged()
-        {
-            InvalidateMatrixAndSurface();
         }
 
         private void OnInitDatasChanged(IList<TData>? oldValues, IList<TData>? newValues)
@@ -111,6 +106,15 @@ namespace HB.FullStack.XamarinForms.Skia
 
             InvalidateMatrixAndSurface();
         }
+
+        private void OnBaseDrawDatasChanged()
+        {
+            ReCaculateMiddleDrawInfo();
+            InvalidateMatrixAndSurface();
+        }
+
+   
+        protected abstract void ReCaculateMiddleDrawInfo();
 
         private void ResumeFigures()
         {
@@ -175,6 +179,8 @@ namespace HB.FullStack.XamarinForms.Skia
                 CanvasSize = info.Size;
                 CanvasSizeChanged = true;
                 HitTestPathNeedUpdate = true;
+
+                ReCaculateMiddleDrawInfo();
             }
             else
             {
