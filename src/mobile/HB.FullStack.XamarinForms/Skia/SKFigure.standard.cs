@@ -108,7 +108,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            if (Parent is SKFigureGroup && !forced)
+            if (Parent is ISKFigureGroup && !forced)
             {
                 //留给集合统一处理
                 return;
@@ -562,7 +562,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
 
-            if (Parent is SKFigureGroup collection)
+            if (Parent is ISKFigureGroup collection)
             {
                 if (collection.EnableMultipleSelected)
                 {
@@ -684,7 +684,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 OnDrawInfoOrCanvasSizeChanged();
             }
 
-            OnDraw(info, canvas, DrawInfo, CurrentState);
+            OnDrawFigure(info, canvas);
         }
 
         /// <summary>
@@ -705,7 +705,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
                 HitTestPath.Reset();
 
-                OnUpdateHitTestPath(info, DrawInfo);
+                OnUpdateFigureHitTestPath(info);
             }
         }
 
@@ -716,7 +716,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 return;
             }
 
-            OnCaculateOutput(out TData? newResult, DrawInfo);
+            OnCaculateFigureOutput(out TData? newResult);
 
             if (newResult != null)
             {
@@ -738,17 +738,17 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <param name="canvas"></param>
         /// <param name="drawInfo"></param>
         /// <param name="currentState"></param>
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawInfo drawInfo, FigureState currentState);
+        protected abstract void OnDrawFigure(SKImageInfo info, SKCanvas canvas);
 
-        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawInfo drawInfo);
+        protected abstract void OnUpdateFigureHitTestPath(SKImageInfo info);
 
-        protected abstract void OnCaculateOutput(out TData? newResultData, TDrawInfo drawInfo);
+        protected abstract void OnCaculateFigureOutput(out TData? newResultData);
 
     }
     
     public abstract class SKFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureData
     {
-        protected override void OnCaculateOutput(out EmptyData? newResultData, TDrawInfo drawInfo)
+        protected override void OnCaculateFigureOutput(out EmptyData? newResultData)
         {
             newResultData = null;
         }
@@ -759,7 +759,19 @@ namespace HB.FullStack.XamarinForms.Skia
         }
 
     }
-    
+
+    public class EmptyDrawInfo : FigureData
+    {
+        protected override bool EqualsImpl(FigureData other)
+        {
+            return other is EmptyDrawInfo;
+        }
+
+        protected override HashCode GetHashCodeImpl()
+        {
+            return new HashCode();
+        }
+    }
     public class EmptyData : FigureData
     {
         protected override bool EqualsImpl(FigureData other)
