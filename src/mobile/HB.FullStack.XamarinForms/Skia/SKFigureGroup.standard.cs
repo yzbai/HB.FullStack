@@ -127,10 +127,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void OnBaseDrawDatasChanged()
         {
-            if (DrawInfo != null)
-            {
-                OnDrawInfoOrCanvasSizeChanged();
-            }
+            OnDrawInfoOrCanvasSizeChanged();
 
             InvalidateMatrixAndSurface();
         }
@@ -156,11 +153,18 @@ namespace HB.FullStack.XamarinForms.Skia
                 CanvasSizeChanged = false;
             }
 
-            foreach (SKDataFigure<TData> figure in Figures)
+            for (int i = 0; i < Figures.Count; ++i)
             {
                 using (new SKAutoCanvasRestore(canvas))
                 {
-                    figure.OnPaint(e);
+                    try
+                    {
+                        Figures[i].OnPaint(e);
+                    }
+                    catch(Exception ex)
+                    {
+                        GlobalSettings.ExceptionHandler(ex);
+                    }
                 }
             }
         }
@@ -187,7 +191,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             return founded;
         }
-        
+
         private void ResumeFigures()
         {
             ClearFigures();
@@ -206,8 +210,8 @@ namespace HB.FullStack.XamarinForms.Skia
                 figure.CanvasView = this.CanvasView;
 
                 //figure.SetBinding(SKFigure<TDrawInfo, TData>.DrawInfoProperty, new Binding(nameof(DrawInfo), source: this));
-                figure.SetBinding(SKFigure<TDrawInfo, TData>.InitDataProperty, new Binding($"{nameof(InitDatas)}[{i}]", source: this));
-                figure.SetBinding(SKFigure<TDrawInfo, TData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
+                figure.SetBinding(SKDataFigure<TData>.InitDataProperty, new Binding($"{nameof(InitDatas)}[{i}]", source: this));
+                figure.SetBinding(SKDataFigure<TData>.ResultDataProperty, new Binding($"{nameof(ResultDatas)}[{i}]", source: this));
 
                 Figures.Add(figure);
             }
@@ -391,7 +395,7 @@ namespace HB.FullStack.XamarinForms.Skia
         #region Dispose Pattern
 
         private bool _disposed;
-        
+
 
         protected override void Dispose(bool disposing)
         {

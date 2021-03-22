@@ -653,10 +653,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             HitTestPathNeedUpdate = true;
 
-            if(DrawInfo != null)
-            {
-                OnDrawInfoOrCanvasSizeChanged();
-            }
+            OnDrawInfoOrCanvasSizeChanged();
 
             InvalidateMatrixAndSurface();
         }
@@ -672,14 +669,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
         protected abstract void OnInitDataChanged();
 
-        protected new void OnDraw(SKImageInfo info, SKCanvas canvas)
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
         {
-            if (DrawInfo == null)
-            {
-                return;
-            }
+            //if (DrawInfo == null)
+            //{
+            //    return;
+            //}
 
-            if(CanvasSizeChanged)
+            if (CanvasSizeChanged)
             {
                 OnDrawInfoOrCanvasSizeChanged();
             }
@@ -692,12 +689,12 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         protected abstract void OnDrawInfoOrCanvasSizeChanged();
 
-        protected new void OnUpdateHitTestPath(SKImageInfo info)
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
         {
-            if (DrawInfo == null)
-            {
-                return;
-            }
+            //if (DrawInfo == null)
+            //{
+            //    return;
+            //}
 
             if (HitTestPathNeedUpdate)
             {
@@ -709,12 +706,12 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        protected new void OnCaculateOutput()
+        protected override void OnCaculateOutput()
         {
-            if (DrawInfo == null)
-            {
-                return;
-            }
+            //if (DrawInfo == null)
+            //{
+            //    return;
+            //}
 
             OnCaculateFigureOutput(out TData? newResult);
 
@@ -745,7 +742,7 @@ namespace HB.FullStack.XamarinForms.Skia
         protected abstract void OnCaculateFigureOutput(out TData? newResultData);
 
     }
-    
+
     public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureDrawInfo
     {
         protected override void OnCaculateFigureOutput(out EmptyData? newResultData)
@@ -764,7 +761,7 @@ namespace HB.FullStack.XamarinForms.Skia
     {
         protected override void OnDrawInfoOrCanvasSizeChanged()
         {
-            if(Parent is ISKFigureGroup group)
+            if (Parent is ISKFigureGroup group)
             {
                 group.OnDrawInfoOrCanvasSizeChanged();
             }

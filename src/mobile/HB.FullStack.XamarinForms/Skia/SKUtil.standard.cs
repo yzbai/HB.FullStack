@@ -36,6 +36,27 @@ namespace HB.FullStack.XamarinForms.Skia
 
     public static class SKUtil
     {
+        /// <summary>
+        /// 获得以x轴开始的弧度
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static double GetPointRadian(SKPoint point)
+        {
+            float radius = point.Length;
+
+            double radian = point.Y > 0 ? (float)Math.Acos(point.X / radius) : (float)Math.Asin(point.Y / radius);
+
+            //处理第三象限
+            if (point.X < 0 && point.Y < 0)
+            {
+                radian = Math.Abs(radian) + Math.PI;
+            }
+
+            return radian;
+        }
+
+
         #region Touch
 
         public static SKMatrix CaculateOneFingerDraggedMatrix(SKPoint prevPoint, SKPoint curPoint, SKPoint pivotPoint, TouchManipulationMode mode)
