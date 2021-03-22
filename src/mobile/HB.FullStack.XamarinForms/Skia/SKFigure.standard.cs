@@ -616,7 +616,7 @@ namespace HB.FullStack.XamarinForms.Skia
     }
 
     public abstract class SKFigure<TDrawInfo, TData> : SKFigure
-        where TDrawInfo : FigureData
+        where TDrawInfo : FigureDrawInfo
         where TData : FigureData
     {
         public static BindableProperty DrawInfoProperty = BindableProperty.Create(
@@ -746,7 +746,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
     }
     
-    public abstract class SKFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureData
+    public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureDrawInfo
     {
         protected override void OnCaculateFigureOutput(out EmptyData? newResultData)
         {
@@ -760,9 +760,20 @@ namespace HB.FullStack.XamarinForms.Skia
 
     }
 
-    public class EmptyDrawInfo : FigureData
+    public abstract class SKDataFigure<TData> : SKFigure<EmptyDrawInfo, TData> where TData : FigureData
     {
-        protected override bool EqualsImpl(FigureData other)
+        protected override void OnDrawInfoOrCanvasSizeChanged()
+        {
+            if(Parent is ISKFigureGroup group)
+            {
+                group.OnDrawInfoOrCanvasSizeChanged();
+            }
+        }
+    }
+
+    public class EmptyDrawInfo : FigureDrawInfo
+    {
+        protected override bool EqualsImpl(FigureDrawInfo other)
         {
             return other is EmptyDrawInfo;
         }
