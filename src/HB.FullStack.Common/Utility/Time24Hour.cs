@@ -133,12 +133,12 @@ namespace HB.FullStack.Common
 
             int day = 0, hour = 0, minute = 0;
 
-            if(parts.Length == 2)
+            if (parts.Length == 2)
             {
                 hour = Convert.ToInt32(parts[0], GlobalSettings.Culture);
                 minute = Convert.ToInt32(parts[1], GlobalSettings.Culture);
             }
-            else if(parts.Length == 3)
+            else if (parts.Length == 3)
             {
                 day = Convert.ToInt32(parts[0], GlobalSettings.Culture);
                 hour = Convert.ToInt32(parts[1], GlobalSettings.Culture);
@@ -173,7 +173,7 @@ namespace HB.FullStack.Common
             int newhour = Hour + changedHour;
             int newMinute = Minute + changedMinute;
 
-            while(newMinute < 0)
+            while (newMinute < 0)
             {
                 newhour--;
                 newMinute += 60;
@@ -235,7 +235,7 @@ namespace HB.FullStack.Common
 
         public override string ToString()
         {
-            return $"{Day}:{Hour}:{Minute}";
+            return $"{Hour}:{Minute}";
         }
 
         public static bool operator ==(Time24Hour time1, Time24Hour time2)
@@ -250,7 +250,7 @@ namespace HB.FullStack.Common
 
         public static bool operator >(Time24Hour time1, Time24Hour time2)
         {
-            if(time1.Day != time2.Day)
+            if (time1.Day != time2.Day)
             {
                 return time1.Day > time2.Day;
             }
