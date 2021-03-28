@@ -28,6 +28,16 @@ namespace HB.FullStack.Common.Validate
             return Regex.IsMatch(str, RegExpressions.MobilePhone);
         }
 
+        public static bool IsAllNumber([NotNullWhen(true)] string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+
+            return Regex.IsMatch(text, RegExpressions.Number);
+        }
+
         public static bool IsPositiveNumber([NotNullWhen(true)] string? text)
         {
             if (string.IsNullOrEmpty(text))

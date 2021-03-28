@@ -53,14 +53,13 @@ namespace HB.FullStack.Server.Filters
                         return;
                     }
                     //TODO: Remove this
-#if !DEBUG
+
                     if (!await _smsService.ValidateAsync(mobile!, smsCode!).ConfigureAwait(false))
                     {
                         _authorizationService.OnSignInFailedBySmsAsync(mobile!, apiRequest.GetLastUser()).Fire();
                         OnError(context);
                         return;
                     }
-#endif
                 }
                 else
                 {
