@@ -40,6 +40,18 @@ namespace System
             return JsonSerializer.Serialize(entity, _jsonSerializerOptions);
         }
 
+        public static string? TryToJson(object? entity)
+        {
+            try
+            {
+                return ToJson(entity);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         [return: MaybeNull]
         public static T FromJson<T>(string? jsonString)
         {

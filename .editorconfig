@@ -10,6 +10,8 @@ dotnet_diagnostic.CA1824.severity = none
 dotnet_diagnostic.CA1024.severity = none
 
 dotnet_diagnostic.CA1055.severity = none
+dotnet_diagnostic.CA1054.severity = none
+dotnet_diagnostic.CA1056.severity = none
 
 # Avoid uninstantiated internal classe
 dotnet_diagnostic.CA1812.severity = none
