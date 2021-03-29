@@ -3,6 +3,7 @@ using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
 using HB.FullStack.Server;
+using HB.FullStack.Server.UserActivityTrace;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -172,6 +173,8 @@ namespace System
                     AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
                     //options.Filters
+
+                    options.Filters.AddService<UserActivityFilter>(int.MaxValue);
                 })
                 .AddJsonOptions(options =>
                 {

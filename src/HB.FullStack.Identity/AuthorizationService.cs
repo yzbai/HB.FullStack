@@ -586,7 +586,7 @@ namespace HB.FullStack.Identity
                 new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
 
                 new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString(GlobalSettings.Culture)),
-                new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId)
+                new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId),
             };
 
             foreach (UserClaim item in userClaims)

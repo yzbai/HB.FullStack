@@ -6,6 +6,7 @@
 
         public const string SignInTokenId = "HB.SignInTokenId";
 
+
         public const string SecurityStamp = "HB.SecurityStamp";
 
         public const string Audience = "aud";

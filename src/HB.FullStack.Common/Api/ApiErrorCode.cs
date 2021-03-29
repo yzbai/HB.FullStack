@@ -36,5 +36,6 @@ namespace HB.FullStack.Common.Api
         AliyunStsTokenReturnNull,
         AliyunOssPutObjectError,
         TokenRefreshError,
+        UserActivityFilterError,
     }
 }
