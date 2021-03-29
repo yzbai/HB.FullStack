@@ -9,6 +9,7 @@ using HB.FullStack.Common.Api;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.UserActivityTrace
@@ -34,13 +35,48 @@ namespace HB.FullStack.Server.UserActivityTrace
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
                 string? arguments = SerializeUtil.TryToJson(context.ActionArguments);
 
-                await next().ConfigureAwait(false);
+                if (arguments != null && arguments.Length > UserActivity.MAX_ARGUMENTS_LENGTH)
+                {
+                    arguments = arguments.Substring(0, UserActivity.MAX_ARGUMENTS_LENGTH);
+                }
 
-                int? resultStatusCode = context.HttpContext?.Response?.StatusCode;
+                ActionExecutedContext? resultContext = await next().ConfigureAwait(false);
 
-                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, arguments, resultStatusCode).Fire();
+                int? resultStatusCode = null;
+                string? resultError = null;
+                string? resultType = null;
+
+                if (resultContext?.Result != null)
+                {
+                    resultType = resultContext.Result.ToString();
+
+                    if (resultContext.Result is BadRequestObjectResult badRequestObjectResult)
+                    {
+                        resultStatusCode = badRequestObjectResult.StatusCode;
+
+                        if (badRequestObjectResult.Value is ApiError apiError)
+                        {
+                            resultError = SerializeUtil.TryToJson(apiError);
+
+                            if(resultError != null && resultError.Length > UserActivity.MAX_RESULT_ERROR_LENGTH)
+                            {
+                                resultError = resultError.Substring(0, UserActivity.MAX_RESULT_ERROR_LENGTH);
+                            }
+                        }
+                    }
+                    else if (resultContext.Result is IStatusCodeActionResult statusCodeResult)
+                    {
+                        resultStatusCode = statusCodeResult.StatusCode;
+                    }
+                }
+                else
+                {
+                    resultStatusCode = resultContext?.HttpContext.Response.StatusCode;
+                }
+
+                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, arguments, resultStatusCode, resultType, resultError).Fire();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "UserActivityFilter中捕捉到错误，不应该。请检查,是否有漏捕捉。Url:{url}", context.HttpContext?.Request?.GetDisplayUrl());
                 OnError(context);
@@ -49,7 +85,7 @@ namespace HB.FullStack.Server.UserActivityTrace
 
         private static void OnError(ActionExecutingContext context)
         {
-            if(context != null)
+            if (context != null)
             {
                 context.Result = new BadRequestObjectResult(new ApiError(ApiErrorCode.UserActivityFilterError));
             }

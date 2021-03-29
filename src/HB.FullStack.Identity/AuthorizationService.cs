@@ -253,7 +253,7 @@ namespace HB.FullStack.Identity
                 throw new IdentityException(IdentityErrorCode.AuthorizationInvalideDeviceId, $"Context: {SerializeUtil.ToJson(context)}");
             }
 
-            long userId = claimsPrincipal.GetUserId();
+            long userId = claimsPrincipal.GetUserId().GetValueOrDefault();
 
             if (userId <= 0)
             {
@@ -268,7 +268,7 @@ namespace HB.FullStack.Identity
             try
             {
                 signInToken = await _signInTokenRepo.GetByConditionAsync(
-                    claimsPrincipal.GetSignInTokenId(),
+                    claimsPrincipal.GetSignInTokenId().GetValueOrDefault(),
                     context.RefreshToken,
                     context.DeviceId,
                     userId,

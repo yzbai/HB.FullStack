@@ -174,7 +174,7 @@ namespace System
                     options.Filters.Add(new AuthorizeFilter(policy));
                     //options.Filters
 
-                    options.Filters.AddService<UserActivityFilter>(int.MaxValue);
+                    options.Filters.AddService<UserActivityFilter>();
                 })
                 .AddJsonOptions(options =>
                 {
