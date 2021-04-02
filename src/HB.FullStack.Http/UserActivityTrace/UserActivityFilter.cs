@@ -33,6 +33,7 @@ namespace HB.FullStack.Server.UserActivityTrace
                 long? userId = context.HttpContext?.User?.GetUserId();
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
+                string? httpMethod = context.HttpContext?.Request?.Method;
                 string? arguments = SerializeUtil.TryToJson(context.ActionArguments);
 
                 if (arguments != null && arguments.Length > UserActivity.MAX_ARGUMENTS_LENGTH)
@@ -69,12 +70,8 @@ namespace HB.FullStack.Server.UserActivityTrace
                         resultStatusCode = statusCodeResult.StatusCode;
                     }
                 }
-                else
-                {
-                    resultStatusCode = resultContext?.HttpContext.Response.StatusCode;
-                }
 
-                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, arguments, resultStatusCode, resultType, resultError).Fire();
+                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, resultError).Fire();
             }
             catch (Exception ex)
             {

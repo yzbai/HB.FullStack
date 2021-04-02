@@ -86,15 +86,21 @@ namespace HB.FullStack.XamarinForms.Base
             VersionTracking.Track();
 
             //FileService
-            AddInitTask(IFileService.InitializeAsync(InitAssetFileName));
+            if (VersionTracking.IsFirstLaunchEver)
+            {
+                AddInitTask(IFileService.UnzipInitFilesAsync(InitAssetFileName));
+            }
         }
 
         protected void InitializeServices(IServiceCollection services)
         {
+            //设置导航
             NavigationService.Init(GetNavigationServiceImpl());
 
+            //注册服务
             RegisterBaseServices(services);
 
+            //配置服务
             ConfigureBaseServices();
 
             void RegisterBaseServices(IServiceCollection services)

@@ -8,7 +8,7 @@ namespace HB.FullStack.Server.UserActivityTrace
     {
 
 #pragma warning disable CA1054 // URI-like parameters should not be strings
-        Task RecordUserActivityAsync(long? signInTokenId, long? userId, string? ip, string? url, string? arguments, int? resultStatusCode, string? resultType, string? resultError);
+        Task RecordUserActivityAsync(long? signInTokenId, long? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, string? resultError);
 #pragma warning restore CA1054 // URI-like parameters should not be strings
     }
 }

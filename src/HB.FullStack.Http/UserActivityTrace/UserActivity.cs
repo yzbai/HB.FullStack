@@ -16,12 +16,13 @@ namespace HB.FullStack.Server.UserActivityTrace
 
         public UserActivity() { }
 
-        public UserActivity(long? signInTokenId, long? userId, string? ip, string? url, string? arguments, int? resultStatusCode, string? resultType, string? resultError)
+        public UserActivity(long? signInTokenId, long? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, string? resultError)
         {
             SignInTokenId = signInTokenId;
             UserId = userId;
             Ip = ip;
             Url = url;
+            HttpMethod = httpMethod;
             Arguments = arguments;
             ResultStatusCode = resultStatusCode;
             ResultType = resultType;
@@ -39,6 +40,9 @@ namespace HB.FullStack.Server.UserActivityTrace
 
         [EntityProperty]
         public string? Url { get; set; }
+
+        [EntityProperty(MaxLength = 10)]
+        public string? HttpMethod { get; set; }
 
         [EntityProperty(MaxLength = MAX_ARGUMENTS_LENGTH)]
         public string? Arguments { get; set; }
