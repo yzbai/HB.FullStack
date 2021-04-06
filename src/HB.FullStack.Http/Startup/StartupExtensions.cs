@@ -238,7 +238,7 @@ namespace System
         /// <exception cref="DatabaseException"></exception>
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
         {
-            throw new DatabaseException(DatabaseErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
+            throw new ServerException(ServerErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
         }
 
     }

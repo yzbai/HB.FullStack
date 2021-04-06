@@ -4,6 +4,7 @@
     {
         DataProtectionCertNotFound,
         JwtEncryptionCertNotFound,
-        StartupError
+        StartupError,
+        DatabaseInitLockError
     }
 }

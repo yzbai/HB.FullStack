@@ -13,30 +13,18 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 
         /// </summary>
-        public static EventCode DatabaseTransactionConnectionIsNull = new EventCode(1000, nameof(DatabaseTransactionConnectionIsNull), "");
         public static EventCode ExecuterError = new EventCode(1001, nameof(ExecuterError), "");
         public static EventCode Unkown = new EventCode(1002, nameof(Unkown), "");
-        public static EventCode DatabaseNameNotFoundInSystemInfoTable = new EventCode(1003, nameof(DatabaseNameNotFoundInSystemInfoTable), "");
-        public static EventCode VersionNotFoundInSystemInfoTable = new EventCode(1004, nameof(VersionNotFoundInSystemInfoTable), "");
-        public static EventCode MigrateOldVersionErrorMessage = new EventCode(1005, nameof(MigrateOldVersionErrorMessage), "");
-        public static EventCode MigrateVersionStepErrorMessage = new EventCode(1006, nameof(MigrateVersionStepErrorMessage), "");
         public static EventCode UseDateTimeOffsetOnly = new EventCode(1007, nameof(UseDateTimeOffsetOnly), "");
-        public static EventCode DatabaseUnSupported = new EventCode(1008, nameof(DatabaseUnSupported), "");
         public static EventCode EntityError = new EventCode(1009, nameof(EntityError), "");
-        public static EventCode DatabaseDefError = new EventCode(1010, nameof(DatabaseDefError), "");
-        public static EventCode DatabaseVersionNotSet = new EventCode(1011, nameof(DatabaseVersionNotSet), "");
-        public static EventCode LackPropertyDef = new EventCode(1012, nameof(LackPropertyDef), "");
         public static EventCode MapperError = new EventCode(1013, nameof(MapperError), "");
         public static EventCode SqlError = new EventCode(1014, nameof(SqlError), "");
-        public static EventCode VersionShouldBePositive = new EventCode(1015, nameof(VersionShouldBePositive), "");
         public static EventCode DatabaseTableCreateError = new EventCode(1016, nameof(DatabaseTableCreateError), "");
         public static EventCode MigrateError = new EventCode(1017, nameof(MigrateError), "");
         public static EventCode FoundTooMuch = new EventCode(1018, nameof(FoundTooMuch), "");
         public static EventCode DatabaseNotWriteable = new EventCode(1019, nameof(DatabaseNotWriteable), "");
         public static EventCode NotFound = new EventCode(1020, nameof(NotFound), "");
         public static EventCode TransactionError = new EventCode(1021, nameof(TransactionError), "");
-        public static EventCode DatabaseTransactionAlreadyFinished = new EventCode(1022, nameof(DatabaseTransactionAlreadyFinished), "");
-        public static EventCode DatabaseInitLockError = new EventCode(1023, nameof(DatabaseInitLockError), "");
         public static EventCode SystemInfoError = new EventCode(1024, nameof(SystemInfoError), "");
     }
 
@@ -44,9 +32,10 @@ namespace HB.FullStack.Database
     {
         public static Exception VersionShouldBePositive(int wrongVersion)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.VersionShouldBePositive);
+            DatabaseException exception = new DatabaseException(EventCodes.SystemInfoError);
 
             exception.Data["WrongVersion"] = wrongVersion;
+            exception.Data["Cause"] = "Version Should Be Positive";
 
             return exception;
         }
