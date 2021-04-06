@@ -977,8 +977,6 @@ namespace HB.FullStack.Database
             }
         }
 
-
-
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>

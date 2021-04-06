@@ -37,12 +37,12 @@ namespace HB.FullStack.Database
 
             if (oldVersion < 0)
             {
-                throw new DatabaseException(DatabaseErrorCode.MigrateOldVersionErrorMessage);
+                throw Exceptions.DatabaseMigrateError(databaseName, "oldVersion < 0");
             }
 
             if (newVersion != oldVersion + 1)
             {
-                throw new DatabaseException(DatabaseErrorCode.MigrateVersionStepErrorMessage);
+                throw Exceptions.DatabaseMigrateError(databaseName, "newVersion != oldVersoin + 1 ");
             }
 
             DatabaseName = databaseName;

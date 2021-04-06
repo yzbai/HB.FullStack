@@ -50,6 +50,11 @@ namespace HB.FullStack.Database
             return exception;
         }
 
+        public static Exception DatabaseExecuterError(string commandText, Exception innerException)
+        {
+            throw new NotImplementedException();
+        }
+
         internal static Exception DatabaseTransactionAlreadyFinished(string? callerMemberName, int callerLineNumber)
         {
             DatabaseException exception = new DatabaseException(EventCodes.DatabaseTransactionAlreadyFinished);
@@ -108,6 +113,51 @@ namespace HB.FullStack.Database
         }
 
         internal static Exception NotFound(string entityFullName, string item, string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception SystemInfoError(string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception UseDateTimeOffsetOnly()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception NotSupported(string type, Type propertyType, string property)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception EntityError(string type, string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception EntityError(string type, string propertyName, string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception EntityVersionError(string type, int version, string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception MapperError(Exception innerException)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Exception SqlJoinTypeMixedError()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception TransactionConnectionIsNull(string commandText)
         {
             throw new NotImplementedException();
         }

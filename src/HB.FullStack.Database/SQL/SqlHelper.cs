@@ -461,7 +461,7 @@ namespace HB.FullStack.Database.SQL
 
 				if (length >= LengthConvention.MaxMediumTextLength)
 				{
-					throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"字段长度太长。{propertyDef.EntityDef.EntityFullName} : {propertyDef.Name}");
+					throw Exceptions.EntityError(propertyDef.EntityDef.EntityFullName, propertyDef.Name, "字段长度太长");
 				}
 
 				if (propertyDef.IsLengthFixed)
@@ -485,7 +485,7 @@ namespace HB.FullStack.Database.SQL
 
 			if (primaryKeyPropertyDef == null)
 			{
-				throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"Entity:{entityDef.EntityFullName} no primary key");
+				throw Exceptions.EntityError(entityDef.EntityFullName, "", "no primary key");
 			}
 
 			string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;
