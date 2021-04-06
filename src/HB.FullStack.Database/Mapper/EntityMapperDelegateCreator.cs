@@ -62,7 +62,7 @@ namespace HB.FullStack.Database.Mapper
                 System.Reflection.Emit.Label allFinished = il.DefineLabel();
 
                 ConstructorInfo ctor = def.EntityType.GetDefaultConstructor() 
-                    ?? throw Exceptions.EntityError(def.EntityFullName, "实体没有默认构造函数");
+                    ?? throw Exceptions.EntityError(def.EntityFullName,"", "实体没有默认构造函数");
 
                 il.Emit(OpCodes.Ldtoken, def.EntityType);
                 il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);

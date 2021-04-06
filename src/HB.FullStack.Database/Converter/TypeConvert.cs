@@ -257,7 +257,7 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw Exceptions.NotSupported(type: propertyDef.EntityDef.EntityFullName, propertyType:propertyDef.NullableUnderlyingType ?? propertyDef.Type, property:propertyDef.Name);
+            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName:(propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName:propertyDef.Name);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace HB.FullStack.Database.Converter
             {
                 return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
             }
-            throw Exceptions.NotSupported(type: propertyDef.EntityDef.EntityFullName, propertyType: propertyDef.NullableUnderlyingType ?? propertyDef.Type, property: propertyDef.Name);
+            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)

@@ -175,7 +175,7 @@ namespace HB.FullStack.Database.Def
 
             if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw Exceptions.EntityError(type:entityType.FullName, cause: "不是Entity，或者没有DatabaseEntityAttribute.");
+                throw Exceptions.EntityError(type:entityType.FullName,"", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
             }
 
             EntityDef entityDef = new EntityDef

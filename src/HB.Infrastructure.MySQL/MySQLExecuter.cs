@@ -93,7 +93,7 @@ namespace HB.Infrastructure.MySQL
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                throw Exceptions.DatabaseExecuterError(commandText:command.CommandText, innerException: ex);
+                throw Exceptions.ExecuterError(commandText:command.CommandText, innerException: ex);
             }
         }
 
@@ -151,7 +151,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                throw Exceptions.DatabaseExecuterError(commandText: command.CommandText, innerException: ex);
+                throw Exceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
             }
         }
 
@@ -210,7 +210,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                throw Exceptions.DatabaseExecuterError(commandText: command.CommandText, innerException: ex);
+                throw Exceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
             }
         }
 
