@@ -13,22 +13,19 @@ namespace HB.FullStack.Database
     /// </summary>
     internal static class DatabaseEventCodes
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public static EventCode ExecuterError = new EventCode(1001, nameof(ExecuterError), "");
-        public static EventCode Unkown = new EventCode(1002, nameof(Unkown), "");
-        public static EventCode UseDateTimeOffsetOnly = new EventCode(1007, nameof(UseDateTimeOffsetOnly), "");
-        public static EventCode EntityError = new EventCode(1009, nameof(EntityError), "");
-        public static EventCode MapperError = new EventCode(1013, nameof(MapperError), "");
-        public static EventCode SqlError = new EventCode(1014, nameof(SqlError), "");
-        public static EventCode DatabaseTableCreateError = new EventCode(1016, nameof(DatabaseTableCreateError), "");
-        public static EventCode MigrateError = new EventCode(1017, nameof(MigrateError), "");
-        public static EventCode FoundTooMuch = new EventCode(1018, nameof(FoundTooMuch), "");
-        public static EventCode DatabaseNotWriteable = new EventCode(1019, nameof(DatabaseNotWriteable), "");
-        public static EventCode NotFound = new EventCode(1020, nameof(NotFound), "");
-        public static EventCode TransactionError = new EventCode(1021, nameof(TransactionError), "");
-        public static EventCode SystemInfoError = new EventCode(1024, nameof(SystemInfoError), "");
+        public static EventCode ExecuterError { get; set; } = new EventCode(1001, nameof(ExecuterError), "");
+        public static EventCode Unkown { get; set; } = new EventCode(1002, nameof(Unkown), "");
+        public static EventCode UseDateTimeOffsetOnly { get; set; } = new EventCode(1007, nameof(UseDateTimeOffsetOnly), "");
+        public static EventCode EntityError { get; set; } = new EventCode(1009, nameof(EntityError), "");
+        public static EventCode MapperError { get; set; } = new EventCode(1013, nameof(MapperError), "");
+        public static EventCode SqlError { get; set; } = new EventCode(1014, nameof(SqlError), "");
+        public static EventCode DatabaseTableCreateError { get; set; } = new EventCode(1016, nameof(DatabaseTableCreateError), "");
+        public static EventCode MigrateError { get; set; } = new EventCode(1017, nameof(MigrateError), "");
+        public static EventCode FoundTooMuch { get; set; } = new EventCode(1018, nameof(FoundTooMuch), "");
+        public static EventCode DatabaseNotWriteable { get; set; } = new EventCode(1019, nameof(DatabaseNotWriteable), "");
+        public static EventCode NotFound { get; set; } = new EventCode(1020, nameof(NotFound), "");
+        public static EventCode TransactionError { get; set; } = new EventCode(1021, nameof(TransactionError), "");
+        public static EventCode SystemInfoError { get; set; } = new EventCode(1024, nameof(SystemInfoError), "");
     }
 
     internal static class Exceptions
@@ -46,7 +43,7 @@ namespace HB.FullStack.Database
         internal static Exception ExecuterError(string commandText, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(DatabaseEventCodes.ExecuterError, innerException);
-            
+
             exception.Data["CommandText"] = commandText;
 
             return exception;
@@ -73,7 +70,7 @@ namespace HB.FullStack.Database
 
         internal static Exception TableCreateError(int version, string databaseName, string cause, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(DatabaseEventCodes.DatabaseTableCreateError, cause, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.DatabaseTableCreateError, innerException);
 
             exception.Data["DatabaseVersion"] = version;
             exception.Data["DatabaseName"] = databaseName;
@@ -84,7 +81,7 @@ namespace HB.FullStack.Database
 
         internal static Exception MigrateError(string databaseName, string cause, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(DatabaseEventCodes.MigrateError, cause, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.MigrateError, innerException);
 
             exception.Data["DatabaseName"] = databaseName;
             exception.Data["Cause"] = cause;
@@ -144,8 +141,8 @@ namespace HB.FullStack.Database
 
             return exception;
         }
-        
-        
+
+
 
         internal static Exception NotWriteable(string type, string database)
         {

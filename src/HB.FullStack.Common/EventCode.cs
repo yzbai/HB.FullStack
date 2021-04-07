@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-    public readonly struct EventCode : IEquatable<EventCode>
+    public class EventCode : IEquatable<EventCode>
     {
         public static readonly EventCode Empty = new EventCode(0);
 
@@ -20,14 +20,24 @@ namespace System
             return new EventCode(i);
         }
 
-        public static bool operator ==(EventCode left, EventCode right)
+        public static bool operator ==(EventCode? left, EventCode? right)
         {
+            if (left == null && right == null)
+            {
+                return true;
+            }
+
+            if (left == null || right == null)
+            {
+                return false;
+            }
+
             return left.Equals(right);
         }
 
-        public static bool operator !=(EventCode left, EventCode right)
+        public static bool operator !=(EventCode? left, EventCode? right)
         {
-            return !left.Equals(right);
+            return !(left == right);
         }
 
         public EventCode(int id, string? name = null, string? message = null)
@@ -42,22 +52,21 @@ namespace System
             return Name ?? Id.ToString(CultureInfo.InvariantCulture);
         }
 
-        public bool Equals(EventCode other)
+        public bool Equals(EventCode? other)
         {
-            return Id == other.Id;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
+            if(ReferenceEquals(other,null))
             {
                 return false;
             }
 
-            if (obj is EventCode)
+            return Id == other.Id;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is EventCode eventCode)
             {
-                EventCode other = (EventCode)obj;
-                return Equals(other);
+                return Equals(eventCode);
             }
 
             return false;

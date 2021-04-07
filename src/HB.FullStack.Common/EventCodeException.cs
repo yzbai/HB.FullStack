@@ -12,16 +12,6 @@
             EventCode = eventCode;
         }
 
-        public EventCodeException(EventCode eventCode, string? message) : base(eventCode.Message + " - " + message)
-        {
-            EventCode = eventCode;
-        }
-
-        public EventCodeException(EventCode eventCode, string? message, Exception? innerException) : base(eventCode.Message + " - " + message, innerException)
-        {
-            EventCode = eventCode;
-        }
-
         public EventCode EventCode
         {
             get

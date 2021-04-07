@@ -16,12 +16,5 @@ namespace System
         {
         }
 
-        public DatabaseException(EventCode eventCode, string? message) : base(eventCode, message)
-        {
-        }
-
-        public DatabaseException(EventCode eventCode, string? message, Exception? innerException) : base(eventCode, message, innerException)
-        {
-        }
     }
 }
