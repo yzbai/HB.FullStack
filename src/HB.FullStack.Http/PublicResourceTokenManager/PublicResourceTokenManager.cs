@@ -27,7 +27,7 @@ namespace HB.FullStack.Server
             _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenManager));
         }
 
-        
+
         /// <summary>
         /// GetNewTokenAsync
         /// </summary>
@@ -68,18 +68,18 @@ namespace HB.FullStack.Server
 
                 if (token.IsNullOrEmpty() || token.Length != _tokenlength || !token.StartsWith(_prefix, GlobalSettings.Comparison))
                 {
-                    _logger.LogWarning($"UnProtected Failed. May has an attack. Input:{protectedToken}.");
+                    _logger.LogWarning("UnProtected Failed. May has an attack. {protectedToken}.", protectedToken);
                     return false;
                 }
             }
             catch (FormatException ex)
             {
-                _logger.LogError(ex, $"protectedToken:{protectedToken}");
+                _logger.LogError(ex, "{protectedToken}", protectedToken);
                 return false;
             }
             catch (CryptographicException ex)
             {
-                _logger.LogError(ex, $"protectedToken:{protectedToken}");
+                _logger.LogError(ex, "{protectedToken}", protectedToken);
                 return false;
             }
 

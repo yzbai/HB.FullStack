@@ -381,11 +381,11 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogWarning($"检测到，Cache Invalidation Concurrency冲突，已被阻止. Entity:{entityDef.Name}, Id:{SerializeUtil.ToJson(entities.ElementAt(i))}");
+                        _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {Entity}, {Id}",entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
                     }
                     else if (rt == 9)
                     {
-                        _logger.LogWarning($"检测到，Cache Update Concurrency冲突，已被阻止. Entity:{entityDef.Name}, Id:{SerializeUtil.ToJson(entities.ElementAt(i))}");
+                        _logger.LogWarning("检测到，Cache Update Concurrency冲突，已被阻止. {Entity}, {Id}", entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
                     }
                 }
 

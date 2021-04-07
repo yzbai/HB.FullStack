@@ -75,7 +75,7 @@ namespace HB.FullStack.Server.UserActivityTrace
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "UserActivityFilter中捕捉到错误，不应该。请检查,是否有漏捕捉。Url:{url}", context.HttpContext?.Request?.GetDisplayUrl());
+                _logger.LogError(ex, "UserActivityFilter中捕捉到错误，不应该。请检查,是否有漏捕捉。{url}", context.HttpContext?.Request?.GetDisplayUrl());
                 OnError(context);
             }
         }

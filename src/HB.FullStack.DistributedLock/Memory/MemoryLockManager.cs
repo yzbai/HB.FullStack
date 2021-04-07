@@ -118,7 +118,9 @@ namespace HB.FullStack.Lock.Memory
         {
             if (memoryLock.Status != MemoryLockStatus.Acquired)
             {
-                _logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{memoryLock.ResourceKeys.ToJoinedString(",")}, Status:{memoryLock.Status}");
+                _logger.LogDebug(
+                    "锁已不是获取状态，停止自动延期... {ThreadID}, {ResourceKeys}, {Status}",
+                    Thread.CurrentThread.ManagedThreadId, memoryLock.ResourceKeys, memoryLock.Status);
                 return;
             }
 

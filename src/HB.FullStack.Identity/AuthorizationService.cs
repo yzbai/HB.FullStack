@@ -344,7 +344,7 @@ namespace HB.FullStack.Identity
                 }
                 else
                 {
-                    _logger.LogWarning($"尝试删除不存在的SignInToken. SignInTokenId:{signInTokenId}");
+                    _logger.LogWarning("尝试删除不存在的SignInToken. {SignInTokenId}", signInTokenId);
                 }
 
                 await transContext.CommitAsync().ConfigureAwait(false);
@@ -533,7 +533,7 @@ namespace HB.FullStack.Identity
                     userLoginControl.LockoutEnabled = true;
                     userLoginControl.LockoutEndDate = TimeUtil.UtcNow + _options.SignInOptions.LockoutTimeSpan;
 
-                    _logger.LogWarning($"有用户重复登陆失败，账户已锁定.UserId:{userLoginControl.UserId}, LastUser:{lastUser}");
+                    _logger.LogWarning("有用户重复登陆失败，账户已锁定.{UserId}, {LastUser}", userLoginControl.UserId, lastUser);
                 }
             }
 

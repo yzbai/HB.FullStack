@@ -84,26 +84,25 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
-            using (_logger.BeginScope("数据库初始化"))
+            using IDisposable? scope = _logger.BeginScope("数据库初始化");
+
+            if (_databaseSettings.AutomaticCreateTable)
             {
-                if (_databaseSettings.AutomaticCreateTable)
-                {
-                    IEnumerable<Migration>? initializeMigrations = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == 1);
+                IEnumerable<Migration>? initializeMigrations = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == 1);
 
-                    await AutoCreateTablesIfBrandNewAsync(initializeMigrations).ConfigureAwait(false);
+                await AutoCreateTablesIfBrandNewAsync(initializeMigrations).ConfigureAwait(false);
 
-                    _logger.LogInformation("Database Auto Create Tables Finished.");
-                }
-
-                if (migrations != null && migrations.Any())
-                {
-                    await MigarateAsync(migrations).ConfigureAwait(false);
-
-                    _logger.LogInformation("Database Migarate Finished.");
-                }
-
-                _logger.LogInformation("数据初始化成功！");
+                _logger.LogInformation("Database Auto Create Tables Finished.");
             }
+
+            if (migrations != null && migrations.Any())
+            {
+                await MigarateAsync(migrations).ConfigureAwait(false);
+
+                _logger.LogInformation("Database Migarate Finished.");
+            }
+
+            _logger.LogInformation("数据初始化成功！");
         }
 
         /// <summary>
@@ -170,7 +169,7 @@ namespace HB.FullStack.Database
         {
             var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, false);
 
-            _logger.LogInformation($"Table创建：SQL:{command.CommandText}");
+            _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
 
             return _databaseEngine.ExecuteCommandNonQueryAsync(transContext.Transaction, def.DatabaseName!, command);
         }
@@ -247,7 +246,9 @@ namespace HB.FullStack.Database
 
         private async Task ApplyMigration(string databaseName, TransactionContext transactionContext, Migration migration)
         {
-            _logger.LogInformation($"数据库Migration, database:{databaseName}, from :{migration.OldVersion}, to :{migration.NewVersion}, sql:{migration.SqlStatement}");
+            _logger.LogInformation(
+                "数据库Migration, {DatabaseName}, from {OldVersion}, to {NewVersion}, {Sql}", 
+                databaseName, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
 
             if (migration.SqlStatement.IsNotNullOrEmpty())
             {
@@ -403,7 +404,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw Exceptions.FoundTooMuch(type:typeof(T).FullName, from:fromCondition?.ToStatement(), where:whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw Exceptions.FoundTooMuch(type: typeof(T).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -443,7 +444,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(type:selectDef.EntityFullName, from:fromCondition?.ToStatement(), where:whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw Exceptions.UnKown(type: selectDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -961,7 +962,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw Exceptions.UnKown(type:entityDef.EntityFullName, item:SerializeUtil.ToJson(item), ex);
+                throw Exceptions.UnKown(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -1003,11 +1004,11 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw Exceptions.NotFound(type:entityDef.EntityFullName ,item:SerializeUtil.ToJson(item), "");
+                    throw Exceptions.NotFound(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
                 }
                 else
                 {
-                    throw Exceptions.FoundTooMuch(entityDef.EntityFullName, item:SerializeUtil.ToJson(item));
+                    throw Exceptions.FoundTooMuch(entityDef.EntityFullName, item: SerializeUtil.ToJson(item));
                 }
             }
             catch (DatabaseException ex)
@@ -1256,7 +1257,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items),"");
+                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1341,7 +1342,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items),"");
+                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1397,7 +1398,7 @@ namespace HB.FullStack.Database
         {
             if (!entityDef.DatabaseWriteable)
             {
-                throw Exceptions.NotWriteable(type:entityDef.EntityFullName, database:entityDef.DatabaseName);
+                throw Exceptions.NotWriteable(type: entityDef.EntityFullName, database: entityDef.DatabaseName);
             }
         }
     }

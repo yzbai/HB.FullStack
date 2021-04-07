@@ -111,7 +111,7 @@ return array";
 
             InitLoadedLuas();
 
-            _logger.LogInformation($"RedisKVStoreEngine初始化完成");
+            _logger.LogInformation("RedisKVStoreEngine初始化完成");
         }
 
         private void InitLoadedLuas()

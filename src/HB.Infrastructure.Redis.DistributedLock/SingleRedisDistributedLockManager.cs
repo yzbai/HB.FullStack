@@ -90,7 +90,7 @@ return 1";
 
 			InitLoadedLuas(_options.ConnectionSetting, _logger);
 
-			_logger.LogInformation($"SingleRedisDistributedLockManager初始化完成");
+			_logger.LogInformation("SingleRedisDistributedLockManager初始化完成");
 		}
 
 		/// <summary>
@@ -105,13 +105,13 @@ return 1";
 		{
 			if (expiryTime < _minimumExpiryTime)
 			{
-				_logger.LogWarning($"Expiry time {expiryTime.TotalMilliseconds}ms too low, setting to {_minimumExpiryTime.TotalMilliseconds}ms");
+				_logger.LogWarning("Expiry {settingTime} ms too low, setting to {minimumExpiryTime} ms", expiryTime.TotalMilliseconds, _minimumExpiryTime.TotalMilliseconds);
 				expiryTime = _minimumExpiryTime;
 			}
 
 			if (retryInterval != null && retryInterval.Value < _minimumRetryTime)
 			{
-				_logger.LogWarning($"Retry time {retryInterval.Value.TotalMilliseconds}ms too low, setting to {_minimumRetryTime.TotalMilliseconds}ms");
+				_logger.LogWarning("Retry {settingTime} ms too low, setting to {minimumRetryTime} ms",  retryInterval.Value.TotalMilliseconds, _minimumRetryTime.TotalMilliseconds);
 				retryInterval = _minimumRetryTime;
 			}
 

@@ -42,7 +42,7 @@ namespace HB.Infrastructure.Redis.EventBus
             _lockManager = lockManager;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
 
-            _logger.LogInformation($"RedisEventBusEngine初始化完成");
+            _logger.LogInformation("RedisEventBusEngine初始化完成");
         }
 
         /// <summary>

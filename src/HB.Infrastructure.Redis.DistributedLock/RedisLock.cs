@@ -79,7 +79,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         protected virtual void Dispose(bool disposing)
         {
-            _logger.LogDebug($"锁开始Dispose，Resources:{Resources.ToJoinedString(",")}");
+            _logger.LogDebug("锁开始Dispose，{Resources}", Resources);
 
             if (!_disposedValue)
             {
@@ -111,7 +111,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// <exception cref="LockException"></exception>
         protected virtual async ValueTask DisposeAsync(bool disposing)
         {
-            _logger.LogDebug($"锁开始Dispose，Resources:{Resources.ToJoinedString(",")}");
+            _logger.LogDebug("锁开始Dispose，{Resources}", Resources);
 
             if (!_disposedValue)
             {
