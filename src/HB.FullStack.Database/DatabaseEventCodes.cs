@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 using HB.FullStack.Database.Def;
 using HB.FullStack.Database.SQL;
 
+[assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
+[assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]
 namespace HB.FullStack.Database
 {
     /// <summary>
     /// from 1000 ~ 1999
     /// </summary>
-    internal static class EventCodes
+    internal static class DatabaseEventCodes
     {
         /// <summary>
         /// 
@@ -28,11 +31,11 @@ namespace HB.FullStack.Database
         public static EventCode SystemInfoError = new EventCode(1024, nameof(SystemInfoError), "");
     }
 
-    public static class Exceptions
+    internal static class Exceptions
     {
-        public static Exception VersionShouldBePositive(int wrongVersion)
+        internal static Exception VersionShouldBePositive(int wrongVersion)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.SystemInfoError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.SystemInfoError);
 
             exception.Data["WrongVersion"] = wrongVersion;
             exception.Data["Cause"] = "Version Should Be Positive";
@@ -40,9 +43,9 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        public static Exception ExecuterError(string commandText, Exception? innerException = null)
+        internal static Exception ExecuterError(string commandText, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.ExecuterError, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.ExecuterError, innerException);
             
             exception.Data["CommandText"] = commandText;
 
@@ -51,7 +54,7 @@ namespace HB.FullStack.Database
 
         internal static Exception TransactionError(string cause, string? callerMemberName, int callerLineNumber)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.TransactionError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.TransactionError);
             exception.Data["CallerMemeberName"] = callerMemberName;
             exception.Data["CallerLineNumber"] = callerLineNumber;
             exception.Data["Cause"] = cause;
@@ -59,9 +62,9 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        public static Exception TransactionConnectionIsNull(string commandText)
+        internal static Exception TransactionConnectionIsNull(string commandText)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.TransactionError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.TransactionError);
             exception.Data["CommandText"] = commandText;
             exception.Data["Cause"] = "Connection Is Null";
 
@@ -70,7 +73,7 @@ namespace HB.FullStack.Database
 
         internal static Exception TableCreateError(int version, string databaseName, string cause, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.DatabaseTableCreateError, cause, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.DatabaseTableCreateError, cause, innerException);
 
             exception.Data["DatabaseVersion"] = version;
             exception.Data["DatabaseName"] = databaseName;
@@ -81,7 +84,7 @@ namespace HB.FullStack.Database
 
         internal static Exception MigrateError(string databaseName, string cause, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.MigrateError, cause, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.MigrateError, cause, innerException);
 
             exception.Data["DatabaseName"] = databaseName;
             exception.Data["Cause"] = cause;
@@ -91,7 +94,7 @@ namespace HB.FullStack.Database
 
         internal static Exception FoundTooMuch(string type, string? from, string? where)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.FoundTooMuch);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.FoundTooMuch);
 
             exception.Data["Type"] = type;
             exception.Data["From"] = from;
@@ -102,7 +105,7 @@ namespace HB.FullStack.Database
 
         internal static Exception FoundTooMuch(string type, string item)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.FoundTooMuch);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.FoundTooMuch);
 
             exception.Data["Type"] = type;
             exception.Data["Item"] = item;
@@ -112,7 +115,7 @@ namespace HB.FullStack.Database
 
         internal static Exception UnKown(string type, string? from, string? where, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.Unkown, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.Unkown, innerException);
 
             exception.Data["Type"] = type;
             exception.Data["From"] = from;
@@ -123,7 +126,7 @@ namespace HB.FullStack.Database
 
         internal static Exception UnKown(string type, string item, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.Unkown, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.Unkown, innerException);
 
             exception.Data["Type"] = type;
             exception.Data["item"] = item;
@@ -133,7 +136,7 @@ namespace HB.FullStack.Database
 
         internal static Exception NotFound(string type, string item, string? cause)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.NotFound);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.NotFound);
 
             exception.Data["Type"] = type;
             exception.Data["item"] = item;
@@ -146,7 +149,7 @@ namespace HB.FullStack.Database
 
         internal static Exception NotWriteable(string type, string database)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.DatabaseNotWriteable);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.DatabaseNotWriteable);
 
             exception.Data["Type"] = type;
             exception.Data["Database"] = database;
@@ -156,7 +159,7 @@ namespace HB.FullStack.Database
 
         internal static Exception SystemInfoError(string cause)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.SystemInfoError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.SystemInfoError);
 
             exception.Data["Cause"] = cause;
 
@@ -165,7 +168,7 @@ namespace HB.FullStack.Database
 
         internal static Exception UseDateTimeOffsetOnly()
         {
-            DatabaseException exception = new DatabaseException(EventCodes.UseDateTimeOffsetOnly);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.UseDateTimeOffsetOnly);
 
 
             return exception;
@@ -173,7 +176,7 @@ namespace HB.FullStack.Database
 
         internal static Exception EntityHasNotSupportedPropertyType(string type, string propertyTypeName, string propertyName)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.EntityError);
 
             exception.Data["Type"] = type;
             exception.Data["PropertyTypeName"] = propertyTypeName;
@@ -184,7 +187,7 @@ namespace HB.FullStack.Database
 
         internal static Exception EntityError(string type, string propertyName, string cause)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.EntityError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = cause;
@@ -195,7 +198,7 @@ namespace HB.FullStack.Database
 
         internal static Exception EntityVersionError(string type, int version, string cause)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.EntityError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = "Version Error. - " + cause;
@@ -206,20 +209,18 @@ namespace HB.FullStack.Database
 
         internal static Exception MapperError(Exception innerException)
         {
-            DatabaseException exception = new DatabaseException(EventCodes.MapperError, innerException);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.MapperError, innerException);
 
             return exception;
         }
 
         internal static Exception SqlJoinTypeMixedError()
         {
-            DatabaseException exception = new DatabaseException(EventCodes.SqlError);
+            DatabaseException exception = new DatabaseException(DatabaseEventCodes.SqlError);
 
             exception.Data["Cause"] = "Sql join type mixed.";
 
             return exception;
         }
-
-        
     }
 }

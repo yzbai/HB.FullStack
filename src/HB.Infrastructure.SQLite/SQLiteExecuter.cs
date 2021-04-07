@@ -82,7 +82,7 @@ namespace HB.Infrastructure.SQLite
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                throw new DatabaseException(DatabaseErrorCode.DatabaseExecuterError, $"CommandText:{command.CommandText}", ex);
+                throw Exceptions.ExecuterError(command.CommandText, ex);
             }
         }
 
@@ -138,7 +138,7 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseExecuterError, $"CommandText:{command.CommandText}", ex);
+                throw Exceptions.ExecuterError(command.CommandText, ex);
             }
         }
 
@@ -199,7 +199,7 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseExecuterError, $"CommandText:{command.CommandText}", ex);
+                throw Exceptions.ExecuterError(command.CommandText, ex);
             }
         }
 
