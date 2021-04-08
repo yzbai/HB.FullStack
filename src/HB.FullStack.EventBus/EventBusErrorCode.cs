@@ -4,11 +4,14 @@ using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("HB.Infrastructure.Redis.EventBus")]
 namespace HB.FullStack.EventBus
 {
+    /// <summary>
+    /// from 3000 - 3999
+    /// </summary>
     internal static class EventBusErrorCodes
     {
         public static ErrorCode NoHandler { get; set; } = new ErrorCode(3000, nameof(NoHandler), "");
-        public static ErrorCode HandlerAlreadyExisted { get; set; } = new ErrorCode(3000, nameof(HandlerAlreadyExisted), "");
-        public static ErrorCode SettingsError { get; set; } = new ErrorCode(3000, nameof(SettingsError), "");
+        public static ErrorCode HandlerAlreadyExisted { get; set; } = new ErrorCode(3001, nameof(HandlerAlreadyExisted), "");
+        public static ErrorCode SettingsError { get; set; } = new ErrorCode(3002, nameof(SettingsError), "");
     }
 
     internal static class Exceptions
