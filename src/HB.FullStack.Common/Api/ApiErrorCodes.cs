@@ -67,12 +67,22 @@ namespace HB.FullStack.Common.Api
             throw new NotImplementedException();
         }
 
+        public static Exception ClientError(string cause, Exception innerException)
+        {
+            throw new NotImplementedException();
+        }
+
         public static Exception ServerReturnError(ErrorCode errorCode)
         {
             throw new NotImplementedException();
         }
 
         public static Exception NotApiResourceEntity(string type)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception AliyunOssPutObjectError()
         {
             throw new NotImplementedException();
         }
@@ -93,6 +103,36 @@ namespace HB.FullStack.Common.Api
         }
 
         public static Exception ServerUnkownError(string fileName, Exception innerException)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception ModelValidationError(string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception NoAuthority()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception TokenRefreshError(string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception NoInternet(string cause)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception ServerNullReturn(string parameter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception AliyunStsTokenReturnNull()
         {
             throw new NotImplementedException();
         }

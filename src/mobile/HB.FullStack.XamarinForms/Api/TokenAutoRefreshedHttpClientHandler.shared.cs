@@ -63,7 +63,7 @@ namespace HB.FullStack.XamarinForms.Api
             }
             catch (ApiException ex)
             {
-                if (ex.HttpCode == System.Net.HttpStatusCode.Unauthorized && ex.ErrorCode == ApiErrorCode.AccessTokenExpired)
+                if (ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     await TokenRefresher.RefreshAccessTokenAsync(_apiClient, endpointSettings).ConfigureAwait(false);
 

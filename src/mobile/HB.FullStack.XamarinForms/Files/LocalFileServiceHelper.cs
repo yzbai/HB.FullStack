@@ -62,7 +62,7 @@ namespace HB.FullStack.XamarinForms.Files
             }
             else
             {
-                throw new MobileException(MobileErrorCode.LocalFileSaveError, $"fullPath:{fullPath}");
+                throw MobileExceptions.LocalFileSaveError(fullPath:fullPath);
             }
         }
     }

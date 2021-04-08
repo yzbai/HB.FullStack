@@ -44,7 +44,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             if (!UserPreferences.IsLogined)
             {
-                throw new ApiException(ApiErrorCode.NoAuthority);
+                throw ApiExceptions.NoAuthority();
             }
         }
 
@@ -55,7 +55,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (throwIfNot)
                 {
-                    throw new ApiException(ApiErrorCode.ApiNotAvailable,"没有联网，且不允许离线");
+                    throw ApiExceptions.NoInternet(cause:"没有联网，且不允许离线");
                 }
 
                 return false;
@@ -69,7 +69,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             if (obj == null)
             {
-                throw new ApiException(HB.FullStack.Common.Api.ApiErrorCode.NullReturn, $"Parameter: {entityName}");
+                throw ApiExceptions.ServerNullReturn(parameter: entityName);
             }
         }
 

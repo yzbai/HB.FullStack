@@ -6,6 +6,7 @@ using HB.FullStack.Database.SQL;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
 [assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]
+[assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
 namespace HB.FullStack.Database
 {
     /// <summary>
