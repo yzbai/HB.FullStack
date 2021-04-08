@@ -5,25 +5,14 @@ using HB.FullStack.Cache;
 
 namespace System
 {
-    public class CacheException : Exception
+    public class CacheException : ErrorCodeException
     {
-        public CacheErrorCode ErrorCode { get; set; }
-
-        public CacheException(CacheErrorCode errorCode) : base()
+        public CacheException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public CacheException(CacheErrorCode errorCode, string message) : base(message)
+        public CacheException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
         }
-
-        public CacheException(CacheErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
-        }
-
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
     }
 }

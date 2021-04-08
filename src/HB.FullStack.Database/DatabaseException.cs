@@ -6,13 +6,13 @@ using HB.FullStack.Database;
 
 namespace System
 {
-    public class DatabaseException : EventCodeException
+    public class DatabaseException : ErrorCodeException
     {
-        public DatabaseException(EventCode eventCode) : base(eventCode)
+        public DatabaseException(ErrorCode eventCode) : base(eventCode)
         {
         }
 
-        public DatabaseException(EventCode eventCode, Exception? innerException) : base(eventCode, innerException)
+        public DatabaseException(ErrorCode eventCode, Exception? innerException) : base(eventCode, innerException)
         {
         }
 

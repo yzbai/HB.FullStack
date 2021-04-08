@@ -4,9 +4,9 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-    public class EventCode : IEquatable<EventCode>
+    public class ErrorCode : IEquatable<ErrorCode>
     {
-        public static readonly EventCode Empty = new EventCode(0);
+        public static readonly ErrorCode Empty = new ErrorCode(0);
 
         public int Id { get; }
 
@@ -15,12 +15,12 @@ namespace System
         public string? Message { get; }
 
 
-        public static implicit operator EventCode(int i)
+        public static implicit operator ErrorCode(int i)
         {
-            return new EventCode(i);
+            return new ErrorCode(i);
         }
 
-        public static bool operator ==(EventCode? left, EventCode? right)
+        public static bool operator ==(ErrorCode? left, ErrorCode? right)
         {
             if (left == null && right == null)
             {
@@ -35,12 +35,12 @@ namespace System
             return left.Equals(right);
         }
 
-        public static bool operator !=(EventCode? left, EventCode? right)
+        public static bool operator !=(ErrorCode? left, ErrorCode? right)
         {
             return !(left == right);
         }
 
-        public EventCode(int id, string? name = null, string? message = null)
+        public ErrorCode(int id, string? name = null, string? message = null)
         {
             Id = id;
             Name = name;
@@ -52,7 +52,7 @@ namespace System
             return Name ?? Id.ToString(CultureInfo.InvariantCulture);
         }
 
-        public bool Equals(EventCode? other)
+        public bool Equals(ErrorCode? other)
         {
             if(ReferenceEquals(other,null))
             {
@@ -64,7 +64,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            if (obj is EventCode eventCode)
+            if (obj is ErrorCode eventCode)
             {
                 return Equals(eventCode);
             }
@@ -77,9 +77,9 @@ namespace System
             return Id;
         }
 
-        public static EventCode FromInt32(int code)
+        public static ErrorCode FromInt32(int code)
         {
-            return new EventCode(code);
+            return new ErrorCode(code);
         }
 
         public Microsoft.Extensions.Logging.EventId ToEventId()

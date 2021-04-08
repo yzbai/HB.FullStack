@@ -948,7 +948,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.EventCode == DatabaseEventCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);
                 }
@@ -1013,7 +1013,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.EventCode == DatabaseEventCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);
                 }
@@ -1079,7 +1079,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.EventCode == DatabaseEventCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);
                 }
@@ -1177,7 +1177,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.EventCode == DatabaseEventCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItems(items);
                 }
@@ -1262,7 +1262,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.EventCode == DatabaseEventCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItems(items);
                 }
@@ -1347,7 +1347,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.EventCode == DatabaseEventCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItems(items);
                 }

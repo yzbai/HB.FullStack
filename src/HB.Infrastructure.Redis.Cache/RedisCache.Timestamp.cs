@@ -122,7 +122,7 @@ return data[3]";
                     _logger.LogError(ex2, "在因为Get异常而删除中出错，Key:{key} ", key);
                 }
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误GetAsync Timestamp, 未知错误, 删除此项缓存", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
 
@@ -192,7 +192,7 @@ return data[3]";
             {
                 _logger.LogError(ex, "分析这个");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
 
@@ -240,7 +240,7 @@ return data[3]";
             {
                 _logger.LogError(ex, "分析这个");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
     }

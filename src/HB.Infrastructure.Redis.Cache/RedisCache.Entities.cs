@@ -323,7 +323,7 @@ end
 
                 return await GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "分析这个GetEntitiesAsync.情况1，程序中实体改了");
 
@@ -331,12 +331,12 @@ end
                 {
                     await ForcedRemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
                 }
-                catch(Exception ex2)
+                catch (Exception ex2)
                 {
                     _logger.LogError(ex2, "在强制删除中出错，{TEntity}, dimKey:{dimensionKeyname} ", typeof(TEntity).Name, dimensionKeyName);
                 }
 
-                throw new CacheException(CacheErrorCode.UnkownButDeleted, "缓存中取值时，未知错误, 删除此项缓存", ex);
+                throw Exceptions.UnkownButDeleted(cause: "缓存中取值时，未知错误, 删除此项缓存", innerException: ex);
             }
         }
 
@@ -381,7 +381,7 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {Entity}, {Id}",entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
+                        _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {Entity}, {Id}", entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
                     }
                     else if (rt == 9)
                     {
@@ -403,7 +403,7 @@ end
             {
                 _logger.LogError(ex, "分析这个");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                throw Exceptions.Unkown(redisKeys, redisValues, ex);
             }
         }
 
@@ -445,7 +445,7 @@ end
             {
                 _logger.LogError(ex, "分析这个RemoveEntitiesAsync");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误RemoveEntitiesAsync", ex);
+                throw Exceptions.Unkown(redisKeys, redisValues, ex);
             }
         }
 
@@ -478,7 +478,7 @@ end
             {
                 _logger.LogError(ex, "分析这个ForcedRemoveEntitiesAsync");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误ForcedRemoveEntitiesAsync", ex);
+                throw Exceptions.Unkown(redisKeys, redisValues, ex);
             }
         }
 
@@ -529,7 +529,7 @@ end
             return loadedScript;
         }
 
-        private byte[] AddForcedRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues,  CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
+        private byte[] AddForcedRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             byte[] loadedScript;
 
