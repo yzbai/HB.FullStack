@@ -2,8 +2,8 @@
 using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
-using HB.FullStack.Server;
-using HB.FullStack.Server.UserActivityTrace;
+using HB.FullStack.WebApi;
+using HB.FullStack.WebApi.UserActivityTrace;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -45,7 +45,7 @@ namespace System
         /// <param name="services"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        /// <exception cref="ServerException"></exception>
+        /// <exception cref="WebApiException"></exception>
         public static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
             DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
@@ -94,7 +94,7 @@ namespace System
         /// <param name="audience">我是谁，即jwt是颁发给谁的</param>
         /// <param name="authority">当局。我该去向谁核实，即是谁颁发了这个jwt</param>
         /// <returns></returns>
-        /// <exception cref="ServerException"></exception>
+        /// <exception cref="WebApiException"></exception>
         public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration,
             Func<JwtBearerChallengeContext, Task> onChallenge,
             Func<TokenValidatedContext, Task> onTokenValidated,
@@ -236,7 +236,7 @@ namespace System
         /// <exception cref="DatabaseException"></exception>
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
         {
-            throw new ServerException(ServerErrorCode.DatabaseInitLockError, $"Database:{databaseNames.ToJoinedString(",")}");
+            throw WebApiExceptions.DatabaseInitLockError(databases:databaseNames);
         }
 
     }

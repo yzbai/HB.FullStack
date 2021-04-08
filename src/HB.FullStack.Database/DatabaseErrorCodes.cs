@@ -13,19 +13,19 @@ namespace HB.FullStack.Database
     /// </summary>
     internal static class DatabaseErrorCodes
     {
-        public static ErrorCode ExecuterError { get; set; } = new ErrorCode(1001, nameof(ExecuterError), "");
-        public static ErrorCode Unkown { get; set; } = new ErrorCode(1002, nameof(Unkown), "");
-        public static ErrorCode UseDateTimeOffsetOnly { get; set; } = new ErrorCode(1007, nameof(UseDateTimeOffsetOnly), "");
-        public static ErrorCode EntityError { get; set; } = new ErrorCode(1009, nameof(EntityError), "");
-        public static ErrorCode MapperError { get; set; } = new ErrorCode(1013, nameof(MapperError), "");
-        public static ErrorCode SqlError { get; set; } = new ErrorCode(1014, nameof(SqlError), "");
-        public static ErrorCode DatabaseTableCreateError { get; set; } = new ErrorCode(1016, nameof(DatabaseTableCreateError), "");
-        public static ErrorCode MigrateError { get; set; } = new ErrorCode(1017, nameof(MigrateError), "");
-        public static ErrorCode FoundTooMuch { get; set; } = new ErrorCode(1018, nameof(FoundTooMuch), "");
-        public static ErrorCode DatabaseNotWriteable { get; set; } = new ErrorCode(1019, nameof(DatabaseNotWriteable), "");
-        public static ErrorCode NotFound { get; set; } = new ErrorCode(1020, nameof(NotFound), "");
-        public static ErrorCode TransactionError { get; set; } = new ErrorCode(1021, nameof(TransactionError), "");
-        public static ErrorCode SystemInfoError { get; set; } = new ErrorCode(1024, nameof(SystemInfoError), "");
+        public static ErrorCode ExecuterError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 0, nameof(ExecuterError), "");
+        public static ErrorCode Unkown { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 1, nameof(Unkown), "");
+        public static ErrorCode UseDateTimeOffsetOnly { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 2, nameof(UseDateTimeOffsetOnly), "");
+        public static ErrorCode EntityError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 3, nameof(EntityError), "");
+        public static ErrorCode MapperError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 4, nameof(MapperError), "");
+        public static ErrorCode SqlError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 5, nameof(SqlError), "");
+        public static ErrorCode DatabaseTableCreateError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 6, nameof(DatabaseTableCreateError), "");
+        public static ErrorCode MigrateError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 7, nameof(MigrateError), "");
+        public static ErrorCode FoundTooMuch { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 8, nameof(FoundTooMuch), "");
+        public static ErrorCode DatabaseNotWriteable { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 9, nameof(DatabaseNotWriteable), "");
+        public static ErrorCode NotFound { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 10, nameof(NotFound), "");
+        public static ErrorCode TransactionError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 11, nameof(TransactionError), "");
+        public static ErrorCode SystemInfoError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 12, nameof(SystemInfoError), "");
     }
 
     internal static class Exceptions

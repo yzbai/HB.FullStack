@@ -5,7 +5,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 
-namespace HB.FullStack.Server.Security
+namespace HB.FullStack.WebApi.Security
 {
     public static class InvalidTokenErrorMessages
     {

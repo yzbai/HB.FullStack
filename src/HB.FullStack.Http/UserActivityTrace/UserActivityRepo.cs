@@ -11,7 +11,7 @@ using HB.FullStack.Repository;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Server.UserActivityTrace
+namespace HB.FullStack.WebApi.UserActivityTrace
 {
     public class UserActivityRepo : DatabaseRepository<UserActivity>
     {

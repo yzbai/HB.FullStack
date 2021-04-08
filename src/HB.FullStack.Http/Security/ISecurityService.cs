@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
 using Microsoft.AspNetCore.Http;
 
-namespace HB.FullStack.Server.Security
+namespace HB.FullStack.WebApi.Security
 {
     public interface ISecurityService
     {

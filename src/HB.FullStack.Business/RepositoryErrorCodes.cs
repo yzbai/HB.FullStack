@@ -5,9 +5,9 @@
     /// </summary>
     internal static class RepositoryErrorCodes
     {
-        public static ErrorCode CacheKeyNotSet { get; set; } = new ErrorCode(7000, nameof(CacheKeyNotSet), "");
-        public static ErrorCode CacheValueNotSet { get; set; } = new ErrorCode(7001, nameof(CacheValueNotSet), "");
-        public static ErrorCode UtcTicksNotSet { get; set; } = new ErrorCode(7002, nameof(UtcTicksNotSet), "");
+        public static ErrorCode CacheKeyNotSet { get; set; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 0, nameof(CacheKeyNotSet), "");
+        public static ErrorCode CacheValueNotSet { get; set; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 1, nameof(CacheValueNotSet), "");
+        public static ErrorCode UtcTicksNotSet { get; set; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 2, nameof(UtcTicksNotSet), "");
     }
 
     internal static class Exceptions

@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Tencent
         {
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting? apiKeySetting))
             {
-                throw new TencentException( TencentErrorCode.CapthaError,$"lack ApiKeySettings for AppId:{appid}");
+                throw Exceptions.CapthaError(appId:appid, cause:"lack ApiKeySettings for AppId");
             }
 
             string query = new Dictionary<string, string?> {

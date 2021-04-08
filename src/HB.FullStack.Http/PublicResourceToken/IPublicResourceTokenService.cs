@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     /// <summary>
     /// 公开资源，即不需要验证就和获取的资源，需要先获取Token

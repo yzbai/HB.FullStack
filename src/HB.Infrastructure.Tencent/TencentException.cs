@@ -6,26 +6,14 @@ using HB.Infrastructure.Tencent;
 
 namespace System
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]
-    public class TencentException : Exception
+    public class TencentException : ErrorCodeException
     {
-        public TencentErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public TencentException(TencentErrorCode errorCode) : base()
+        public TencentException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public TencentException(TencentErrorCode errorCode, string message) : base(message)
+        public TencentException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public TencentException(TencentErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

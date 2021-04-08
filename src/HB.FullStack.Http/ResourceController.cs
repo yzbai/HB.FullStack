@@ -10,7 +10,7 @@ using HB.FullStack.Common.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     public class ResourceController<T> : BaseController where T : ApiResource
     {

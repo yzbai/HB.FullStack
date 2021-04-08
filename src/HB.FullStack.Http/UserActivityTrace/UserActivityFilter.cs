@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Server.UserActivityTrace
+namespace HB.FullStack.WebApi.UserActivityTrace
 {
     public class UserActivityFilter : IAsyncActionFilter
     {

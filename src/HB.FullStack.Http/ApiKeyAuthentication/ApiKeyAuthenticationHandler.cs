@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Server.ApiKeyAuthentication
+namespace HB.FullStack.WebApi.ApiKeyAuthentication
 {
     public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyOptions>
     {

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     [ApiController]
     public class ExceptionController : BaseController

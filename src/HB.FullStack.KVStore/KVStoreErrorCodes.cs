@@ -11,17 +11,17 @@ namespace HB.FullStack.KVStore
     /// </summary>
     internal static class KVStoreErrorCodes
     {
-        public static ErrorCode LoadedLuaNotFound { get; set; } = new ErrorCode(4000, nameof(LoadedLuaNotFound), "");
-        public static ErrorCode RedisConnectionFailed { get; set; } = new ErrorCode(4001, nameof(RedisConnectionFailed), "");
-        public static ErrorCode KVStoreRedisTimeout { get; set; } = new ErrorCode(4002, nameof(KVStoreRedisTimeout), "");
-        public static ErrorCode KVStoreError { get; set; } = new ErrorCode(4003, nameof(KVStoreError), "");
-        public static ErrorCode NoSuchInstance { get; set; } = new ErrorCode(4004, nameof(NoSuchInstance), "");
-        public static ErrorCode KVStoreExistAlready { get; set; } = new ErrorCode(4005, nameof(KVStoreExistAlready), "");
-        public static ErrorCode KVStoreVersionNotMatched { get; set; } = new ErrorCode(4006, nameof(KVStoreVersionNotMatched), "");
-        public static ErrorCode NoEntitySchemaFound { get; set; } = new ErrorCode(4007, nameof(NoEntitySchemaFound), "");
-        public static ErrorCode LackKVStoreKeyAttributeError { get; set; } = new ErrorCode(4008, nameof(LackKVStoreKeyAttributeError), "");
-        public static ErrorCode VersionsKeysNotEqualError { get; set; } = new ErrorCode(4009, nameof(VersionsKeysNotEqualError), "");
-        public static ErrorCode UnKown { get; set; } = new ErrorCode(4010, nameof(UnKown), "");
+        public static ErrorCode LoadedLuaNotFound { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 0, nameof(LoadedLuaNotFound), "");
+        public static ErrorCode RedisConnectionFailed { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 1, nameof(RedisConnectionFailed), "");
+        public static ErrorCode KVStoreRedisTimeout { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 2, nameof(KVStoreRedisTimeout), "");
+        public static ErrorCode KVStoreError { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 3, nameof(KVStoreError), "");
+        public static ErrorCode NoSuchInstance { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 4, nameof(NoSuchInstance), "");
+        public static ErrorCode KVStoreExistAlready { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 5, nameof(KVStoreExistAlready), "");
+        public static ErrorCode KVStoreVersionNotMatched { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 6, nameof(KVStoreVersionNotMatched), "");
+        public static ErrorCode NoEntitySchemaFound { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 7, nameof(NoEntitySchemaFound), "");
+        public static ErrorCode LackKVStoreKeyAttributeError { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 8, nameof(LackKVStoreKeyAttributeError), "");
+        public static ErrorCode VersionsKeysNotEqualError { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 9, nameof(VersionsKeysNotEqualError), "");
+        public static ErrorCode UnKown { get; set; } = new ErrorCode(ErrorCodeStartIds.KV_STORE + 10, nameof(UnKown), "");
     }
 
     internal static class Exceptions

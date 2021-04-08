@@ -3,7 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     public class BaseController : ControllerBase
     {

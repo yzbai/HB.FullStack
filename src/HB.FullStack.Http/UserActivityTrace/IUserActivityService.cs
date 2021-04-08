@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using StackExchange.Redis;
 
-namespace HB.FullStack.Server.UserActivityTrace
+namespace HB.FullStack.WebApi.UserActivityTrace
 {
     public interface IUserActivityService
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Server.UserActivityTrace
+namespace HB.FullStack.WebApi.UserActivityTrace
 {
     public class UserActivityService : IUserActivityService
     {

@@ -10,8 +10,8 @@ namespace HB.FullStack.Lock
     /// </summary>
     internal static class LockErrorCodes
     {
-        public static ErrorCode DistributedLockUnLockFailed { get; set; } = new ErrorCode(5000, nameof(DistributedLockUnLockFailed), "");
-        public static ErrorCode MemoryLockError { get; set; } = new ErrorCode(5001, nameof(MemoryLockError), "");
+        public static ErrorCode DistributedLockUnLockFailed { get; set; } = new ErrorCode(ErrorCodeStartIds.LOCK + 0, nameof(DistributedLockUnLockFailed), "");
+        public static ErrorCode MemoryLockError { get; set; } = new ErrorCode(ErrorCodeStartIds.LOCK + 1, nameof(MemoryLockError), "");
     }
 
     internal static class Exceptions

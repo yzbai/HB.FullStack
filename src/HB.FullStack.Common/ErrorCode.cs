@@ -4,6 +4,20 @@ using System.Runtime.Serialization;
 
 namespace System
 {
+    public static class ErrorCodeStartIds
+    {
+        public const int DATABASE = 1000;
+        public const int CACHE = 2000;
+        public const int EVENT_BUS = 3000;
+        public const int KV_STORE = 4000;
+        public const int LOCK = 5000;
+        public const int REPOSITORY = 6000;
+        public const int ALIYUN = 7000;
+        public const int IDENTITY = 8000;
+        public const int TENCENT = 9000;
+        public const int WEB_API = 10000;
+    }
+
     public class ErrorCode : IEquatable<ErrorCode>
     {
         public static readonly ErrorCode Empty = new ErrorCode(0);

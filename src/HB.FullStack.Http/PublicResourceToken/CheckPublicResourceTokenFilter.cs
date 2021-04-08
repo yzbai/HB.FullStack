@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using HB.FullStack.Common.Api;
 using Microsoft.Extensions.Logging;
-using HB.FullStack.Server.Security;
+using HB.FullStack.WebApi.Security;
 
-namespace HB.FullStack.Server.Filters
+namespace HB.FullStack.WebApi.Filters
 {
     public class CheckPublicResourceTokenFilter : IAsyncActionFilter
     {

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Server;
+using HB.FullStack.WebApi;
 using Microsoft.AspNetCore.Http;
 
-namespace HB.FullStack.Server.Security
+namespace HB.FullStack.WebApi.Security
 {
     public class DefaultSecurityService : ISecurityService
     {

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-[assembly:InternalsVisibleTo("HB.Infrastructure.Redis.Cache")]
+[assembly: InternalsVisibleTo("HB.Infrastructure.Redis.Cache")]
 namespace HB.FullStack.Cache
 {
     /// <summary>
@@ -13,16 +13,16 @@ namespace HB.FullStack.Cache
     /// </summary>
     internal static class CacheErrorCodes
     {
-        public static ErrorCode SlidingTimeBiggerThanMaxAlive { get; set; } = new ErrorCode(2000, nameof(SlidingTimeBiggerThanMaxAlive), "");
-        public static ErrorCode EntityNotHaveKeyAttribute { get; set; } = new ErrorCode(2001, nameof(EntityNotHaveKeyAttribute), "");
-        public static ErrorCode ConvertError { get; set; } = new ErrorCode(2002, nameof(ConvertError), "");
-        public static ErrorCode CacheLoadedLuaNotFound { get; set; } = new ErrorCode(2003, nameof(CacheLoadedLuaNotFound), "");
-        public static ErrorCode CacheInstanceNotFound { get; set; } = new ErrorCode(2004, nameof(CacheInstanceNotFound), "");
-        public static ErrorCode NoSuchDimensionKey { get; set; } = new ErrorCode(2005, nameof(NoSuchDimensionKey), "");
-        public static ErrorCode NotEnabledForEntity { get; set; } = new ErrorCode(2006, nameof(NotEnabledForEntity), "");
-        public static ErrorCode Unkown { get; set; } = new ErrorCode(2007, nameof(Unkown), "");
-        public static ErrorCode NotACacheEntity { get; set; } = new ErrorCode(2008, nameof(NotACacheEntity), "");
-        public static ErrorCode UnkownButDeleted { get; set; } = new ErrorCode(2009, nameof(UnkownButDeleted), "");
+        public static ErrorCode SlidingTimeBiggerThanMaxAlive { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 0, nameof(SlidingTimeBiggerThanMaxAlive), "");
+        public static ErrorCode EntityNotHaveKeyAttribute { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 1, nameof(EntityNotHaveKeyAttribute), "");
+        public static ErrorCode ConvertError { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 2, nameof(ConvertError), "");
+        public static ErrorCode CacheLoadedLuaNotFound { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 3, nameof(CacheLoadedLuaNotFound), "");
+        public static ErrorCode CacheInstanceNotFound { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 4, nameof(CacheInstanceNotFound), "");
+        public static ErrorCode NoSuchDimensionKey { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 5, nameof(NoSuchDimensionKey), "");
+        public static ErrorCode NotEnabledForEntity { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 6, nameof(NotEnabledForEntity), "");
+        public static ErrorCode Unkown { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 7, nameof(Unkown), "");
+        public static ErrorCode NotACacheEntity { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 8, nameof(NotACacheEntity), "");
+        public static ErrorCode UnkownButDeleted { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 9, nameof(UnkownButDeleted), "");
 
     }
 

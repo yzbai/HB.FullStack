@@ -44,12 +44,12 @@ namespace HB.FullStack.Identity
 
             if (mobile == null && email == null && loginName == null)
             {
-                throw new IdentityException(IdentityErrorCode.IdentityMobileEmailLoginNameAllNull);
+                throw Exceptions.IdentityMobileEmailLoginNameAllNull();
             }
 
             if (!mobileConfirmed && !emailConfirmed && password == null)
             {
-                throw new IdentityException(IdentityErrorCode.IdentityNothingConfirmed);
+                throw Exceptions.IdentityNothingConfirmed();
             }
 
             bool ownTrans = transactionContext == null;
@@ -62,7 +62,7 @@ namespace HB.FullStack.Identity
 
                 if (count != 0)
                 {
-                    throw new IdentityException(IdentityErrorCode.IdentityAlreadyTaken, $"userType:{typeof(User)}, mobile:{mobile}, email:{email}, loginName:{loginName}");
+                    throw Exceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
                 }
 
                 User user = new User(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
@@ -113,7 +113,7 @@ namespace HB.FullStack.Identity
 
                 if (count != 0)
                 {
-                    throw new IdentityException(IdentityErrorCode.FoundTooMuch, $"已经有相同的角色. UserId:{userId}, RoleId:{roleId}");
+                    throw Exceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
                 }
 
                 RoleOfUser ru = new RoleOfUser(userId, roleId);
@@ -151,7 +151,7 @@ namespace HB.FullStack.Identity
 
                 if (stored == null)
                 {
-                    throw new IdentityException(IdentityErrorCode.NotFound, $"没有找到这样的角色. UserId:{userId}, RoleId:{roleId}");
+                    throw Exceptions.NotFound(userId: userId, roleId: roleId, cause: "没有找到这样的角色");
                 }
 
                 await _roleOfUserRepo.DeleteAsync(stored, lastUser, trans).ConfigureAwait(false);

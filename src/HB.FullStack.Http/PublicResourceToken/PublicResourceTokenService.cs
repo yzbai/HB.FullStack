@@ -8,7 +8,7 @@ using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     internal class PublicResourceTokenService : IPublicResourceTokenService
     {

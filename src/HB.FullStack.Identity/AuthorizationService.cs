@@ -138,7 +138,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null)
                 {
-                    throw new IdentityException(IdentityErrorCode.AuthorizationNotFound, $"SignInContext:{SerializeUtil.ToJson(context)}");
+                    throw Exceptions.AuthorizationNotFound(signInContext:context);
                 }
 
                 UserLoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
@@ -150,7 +150,7 @@ namespace HB.FullStack.Identity
                     {
                         await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
 
-                        throw new IdentityException(IdentityErrorCode.AuthorizationPasswordWrong, $"SignInContext:{SerializeUtil.ToJson(context)}");
+                        throw Exceptions.AuthorizationPasswordWrong(signInContext:context);
                     }
                 }
 
@@ -224,7 +224,7 @@ namespace HB.FullStack.Identity
 
             if (!distributedLock.IsAcquired)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationTooFrequent, $"Context:{SerializeUtil.ToJson(context)}");
+                throw Exceptions.AuthorizationTooFrequent(context:context);
             }
 
             //AccessToken, Claims 验证
@@ -237,7 +237,7 @@ namespace HB.FullStack.Identity
             }
             catch (Exception ex)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideAccessToken, $"Context: {SerializeUtil.ToJson(context)}", ex);
+                throw Exceptions.AuthorizationInvalideAccessToken(context:context,innerException: ex);
             }
 
             //TODO: 这里缺DeviceId验证. 放在了StartupUtil.cs中
@@ -245,19 +245,19 @@ namespace HB.FullStack.Identity
             if (claimsPrincipal == null)
             {
                 //TODO: Black concern SigninToken by RefreshToken
-                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideAccessToken, $"Context: {SerializeUtil.ToJson(context)}");
+                throw Exceptions.AuthorizationInvalideAccessToken(context: context);
             }
 
             if (claimsPrincipal.GetDeviceId() != context.DeviceId)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideDeviceId, $"Context: {SerializeUtil.ToJson(context)}");
+                throw Exceptions.AuthorizationInvalideDeviceId(context: context);
             }
 
             long userId = claimsPrincipal.GetUserId().GetValueOrDefault();
 
             if (userId <= 0)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationInvalideUserId, $"Context: {SerializeUtil.ToJson(context)}");
+                throw Exceptions.AuthorizationInvalideUserId(context: context) ;
             }
 
             //SignInToken 验证
@@ -276,14 +276,14 @@ namespace HB.FullStack.Identity
 
                 if (signInToken == null || signInToken.Blacked)
                 {
-                    throw new IdentityException(IdentityErrorCode.AuthorizationNoTokenInStore, $"Refresh token error. signInToken not saved in db. ");
+                    throw Exceptions.AuthorizationNoTokenInStore(cause:"Refresh token error. signInToken not saved in db. ");
                 }
 
                 //验证SignInToken过期问题
 
                 if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
-                    throw new IdentityException(IdentityErrorCode.AuthorizationRefreshTokenExpired, $"Refresh Token Expired.");
+                    throw Exceptions.AuthorizationRefreshTokenExpired();
                 }
 
                 // User 信息变动验证
@@ -292,7 +292,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
-                    throw new IdentityException(IdentityErrorCode.AuthorizationUserSecurityStampChanged, $"Refresh token error. User SecurityStamp Changed.");
+                    throw Exceptions.AuthorizationUserSecurityStampChanged(cause:"Refresh token error. User SecurityStamp Changed.");
                 }
 
                 // 更新SignInToken
@@ -476,19 +476,19 @@ namespace HB.FullStack.Identity
             //2, 手机验证
             if (signInOptions.RequireMobileConfirmed && !user.MobileConfirmed)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationMobileNotConfirmed, $"用户手机需要通过验证. UserId:{user.Id}");
+                throw Exceptions.AuthorizationMobileNotConfirmed(userId:user.Id);
             }
 
             //3, 邮件验证
             if (signInOptions.RequireEmailConfirmed && !user.EmailConfirmed)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationEmailNotConfirmed, $"用户邮箱需要通过验证. UserId:{user.Id}");
+                throw Exceptions.AuthorizationEmailNotConfirmed(userId:user.Id);
             }
 
             //4, Lockout 检查
             if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
             {
-                throw new IdentityException(IdentityErrorCode.AuthorizationLockedOut, $"用户已经被锁定。LockoutEndDate:{userLoginControl.LockoutEndDate}, UserId:{user.Id}");
+                throw Exceptions.AuthorizationLockedOut(lockoutEndDate:userLoginControl.LockoutEndDate, userId:user.Id);
             }
 
             //5, 一段时间内,最大失败数检测
@@ -498,7 +498,7 @@ namespace HB.FullStack.Identity
                 {
                     if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
                     {
-                        throw new IdentityException(IdentityErrorCode.AuthorizationOverMaxFailedCount, $"用户今日已经达到最大失败登陆数. UserId:{user.Id}");
+                        throw Exceptions.AuthorizationOverMaxFailedCount(userId:user.Id);
                     }
                 }
             }

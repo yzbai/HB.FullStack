@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Def;
 
-namespace HB.FullStack.Server.UserActivityTrace
+namespace HB.FullStack.WebApi.UserActivityTrace
 {
     public class UserActivity : IdGenEntity
     {
