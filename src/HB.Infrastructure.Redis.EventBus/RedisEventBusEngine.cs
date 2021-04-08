@@ -74,7 +74,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             if (!_consumeTaskManagers.ContainsKey(eventType))
             {
-                throw new EventBusException(EventBusErrorCode.NoHandler, $"Handler Not Existed for EventType:{eventType}");
+                throw Exceptions.NoHandler(eventType: eventType);
             }
 
             _consumeTaskManagers[eventType].Start();
@@ -93,7 +93,7 @@ namespace HB.Infrastructure.Redis.EventBus
             {
                 if (_consumeTaskManagers.ContainsKey(eventType))
                 {
-                    throw new EventBusException( EventBusErrorCode.HandlerAlreadyExisted, $"Handler already exists for EventType: {eventType}, BrokerName:{brokerName}");
+                    throw Exceptions.HandlerAlreadyExisted(eventType: eventType, brokerName: brokerName);
                 }
 
                 ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventType, eventHandler, _logger);
@@ -116,7 +116,7 @@ namespace HB.Infrastructure.Redis.EventBus
             {
                 if (!_consumeTaskManagers.ContainsKey(eventType))
                 {
-                    throw new EventBusException(EventBusErrorCode.NoHandler, $"Handler for EventType:{eventType} not Exist.");
+                    throw Exceptions.NoHandler(eventType);
                 }
 
                 //_consumeTaskManagers[eventType] = null;
@@ -169,7 +169,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting? instanceSetting))
             {
-                throw new EventBusException(EventBusErrorCode.SettingsError, $"Not Found matched RedisInstanceSetting for Broker: {brokerName}.");
+                throw Exceptions.SettingsError(brokerName, $"Not Found matched RedisInstanceSetting");
             }
 
             return instanceSetting;

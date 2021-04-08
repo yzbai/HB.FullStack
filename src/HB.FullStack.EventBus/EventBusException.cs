@@ -6,25 +6,14 @@ using HB.FullStack.EventBus;
 
 namespace System
 {
-    public class EventBusException : Exception
+    public class EventBusException : ErrorCodeException
     {
-        public EventBusErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public EventBusException(EventBusErrorCode errorCode) : base()
+        public EventBusException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public EventBusException(EventBusErrorCode errorCode, string message) : base(message)
+        public EventBusException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public EventBusException(EventBusErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }
