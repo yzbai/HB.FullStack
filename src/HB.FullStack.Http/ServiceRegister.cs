@@ -36,7 +36,6 @@ namespace Microsoft.Extensions.DependencyInjection
             
             
             services.AddScoped<CheckPublicResourceTokenFilter>();
-            services.AddScoped<CheckSmsCodeFilter>();
         }
     }
 }

@@ -6,6 +6,9 @@ using Aliyun.Acs.Core.Exceptions;
 
 namespace HB.Infrastructure.Aliyun
 {
+    /// <summary>
+    /// from 6000 - 6999
+    /// </summary>
     internal static class AliyunErrorCodes
     {
         public static ErrorCode OssError { get; set; } = new ErrorCode(6000, nameof(OssError), "");

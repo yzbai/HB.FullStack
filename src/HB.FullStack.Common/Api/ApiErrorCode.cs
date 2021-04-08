@@ -18,6 +18,8 @@ namespace HB.FullStack.Common.Api
         ApiErrorUnkownFormat,
         NotApiResourceEntity,
         ApiSmsCodeInvalid,
+        SmsServiceError,
+
         ApiPublicResourceTokenNeeded,
         ApiPublicResourceTokenError,
         ApiUploadEmptyFile,

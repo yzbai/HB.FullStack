@@ -6,27 +6,14 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public class RepositoryException: Exception
+    public class RepositoryException : ErrorCodeException
     {
-
-        public RepositoryErrorCode ErrorCode { get; set; }
-
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public RepositoryException(RepositoryErrorCode errorCode) : base()
+        public RepositoryException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public RepositoryException(RepositoryErrorCode errorCode, string message) : base(message)
+        public RepositoryException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public RepositoryException(RepositoryErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }
