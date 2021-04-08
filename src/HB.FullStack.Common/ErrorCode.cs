@@ -12,7 +12,9 @@ namespace System
 
         public string? Name { get; }
 
-        public string? Message { get; }
+        public string? Message { get; private set; }
+
+        public string? Detail { get; set; }
 
 
         public static implicit operator ErrorCode(int i)
@@ -45,6 +47,13 @@ namespace System
             Id = id;
             Name = name;
             Message = message;
+        }
+
+        public ErrorCode(ErrorCode other)
+        {
+            Id = other.Id;
+            Name = other.Name;
+            Message = other.Message;
         }
 
         public override string ToString()
@@ -85,6 +94,16 @@ namespace System
         public Microsoft.Extensions.Logging.EventId ToEventId()
         {
             return new Microsoft.Extensions.Logging.EventId(Id, Name);
+        }
+
+        public ErrorCode AppendDetail(string? detail)
+        {
+            ErrorCode newErrorCode = new ErrorCode(this)
+            {
+                Detail = detail
+            };
+
+            return newErrorCode;
         }
     }
 }

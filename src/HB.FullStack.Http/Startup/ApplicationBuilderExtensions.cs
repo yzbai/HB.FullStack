@@ -22,11 +22,9 @@ namespace Microsoft.AspNetCore.Builder
              {
                  if (!context.Request.IsHttps)
                  {
-                     ApiError errorResponse = new ApiError(ApiErrorCode.ApiHttpsRequired);
-
                      context.Response.StatusCode = 400;
                      context.Response.ContentType = "application/json";
-                     await context.Response.WriteAsync(SerializeUtil.ToJson(errorResponse)).ConfigureAwait(false);
+                     await context.Response.WriteAsync(SerializeUtil.ToJson(ApiErrorCodes.HttpsRequired)).ConfigureAwait(false);
                  }
                  else
                  {

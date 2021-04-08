@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Server
 {
-    internal class PublicResourceTokenManager : IPublicResourceTokenManager
+    internal class PublicResourceTokenService : IPublicResourceTokenService
     {
         private const string _prefix = "PRT_";
         private readonly int _tokenlength = 36 + _prefix.Length;
@@ -19,12 +19,12 @@ namespace HB.FullStack.Server
         private readonly IDataProtector _dataProtector;
         private readonly ILogger _logger;
 
-        public PublicResourceTokenManager(ICache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenManager> logger)
+        public PublicResourceTokenService(ICache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenService> logger)
         {
             _cache = cache;
             _logger = logger;
 
-            _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenManager));
+            _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenService));
         }
 
 

@@ -76,16 +76,16 @@ namespace System.Net.Http
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {
                 // Handle timeout.
-                throw new ApiException(ApiErrorCode.Timeout, $"Request:{SerializeUtil.ToJson(request)}", ex);
+                throw ApiExceptions.ClientTimeout(request: request, innerException: ex);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is SocketException)
             {
-                throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}", ex);
+                throw ApiExceptions.ApiNotAvailable(request: request, innerExceptions: ex);
             }
             catch (TaskCanceledException ex)
             {
                 // Handle cancellation.
-                throw new ApiException(ApiErrorCode.RequestCanceled, $"Request:{SerializeUtil.ToJson(request)}", ex);
+                throw ApiExceptions.RequestCanceled(request: request, innerException: ex);
             }
             //TODO: when using .net 5
             //catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -95,11 +95,11 @@ namespace System.Net.Http
             //}
             catch (OperationCanceledException ex)
             {
-                throw new ApiException(ApiErrorCode.ApiNotAvailable, $"Request:{SerializeUtil.ToJson(request)}", ex);
+                throw ApiExceptions.ApiNotAvailable(request, ex);
             }
             catch (Exception ex)
             {
-                throw new ApiException(ApiErrorCode.ClientError, $"ApiRequestUtils.GetResponse {request.GetResourceName()}", ex);
+                throw ApiExceptions.ClientUnkownError(request: request, innerException: ex);
             }
         }
 
@@ -164,30 +164,17 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
-            ApiError? apiError = await responseMessage.DeSerializeJsonAsync<ApiError>().ConfigureAwait(false);
+            ErrorCode? errorCode = await responseMessage.DeSerializeJsonAsync<ErrorCode>().ConfigureAwait(false);
 
             responseMessage.Dispose();
 
-            if (apiError == null)
+            if (errorCode == null)
             {
-                ApiErrorCode apiErrorCode = responseMessage.StatusCode switch {
-                
-                    HttpStatusCode.NotFound => ApiErrorCode.ApiNotAvailable,
-                    _=> ApiErrorCode.ApiErrorUnkownFormat,
-                };
-
-                throw new ApiException(apiErrorCode, $"StatusCode:{responseMessage.StatusCode},Reason:{ responseMessage.ReasonPhrase}")
-                {
-                    HttpCode = responseMessage.StatusCode
-                };
+                throw ApiExceptions.ServerUnkownError(response: responseMessage);
             }
             else
             {
-                throw new ApiException(apiError.ErrorCode, apiError.Message)
-                {
-                    HttpCode = responseMessage.StatusCode,
-                    ModelStates = apiError.ModelStates
-                };
+                throw ApiExceptions.ServerReturnError(errorCode);
             }
 
         }

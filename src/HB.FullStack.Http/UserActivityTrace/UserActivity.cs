@@ -16,7 +16,7 @@ namespace HB.FullStack.Server.UserActivityTrace
 
         public UserActivity() { }
 
-        public UserActivity(long? signInTokenId, long? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, string? resultError)
+        public UserActivity(long? signInTokenId, long? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
         {
             SignInTokenId = signInTokenId;
             UserId = userId;
@@ -26,6 +26,15 @@ namespace HB.FullStack.Server.UserActivityTrace
             Arguments = arguments;
             ResultStatusCode = resultStatusCode;
             ResultType = resultType;
+
+            
+            string? resultError = SerializeUtil.TryToJson(errorCode);
+
+            if (resultError != null && resultError.Length > UserActivity.MAX_RESULT_ERROR_LENGTH)
+            {
+                resultError = resultError.Substring(0, UserActivity.MAX_RESULT_ERROR_LENGTH);
+            }
+
             ResultError = resultError;
         }
 

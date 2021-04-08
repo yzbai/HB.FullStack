@@ -84,7 +84,7 @@ namespace HB.FullStack.Common.Api
         {
             if (files.Count() != fileNames.Count())
             {
-                throw new ApiException(ApiErrorCode.ModelValidationError);
+                throw new ApiException(ApiErrorCodes.ModelValidationError);
             }
         }
     }

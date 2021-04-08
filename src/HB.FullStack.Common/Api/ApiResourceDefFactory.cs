@@ -51,7 +51,7 @@ namespace HB.FullStack.Common.Api
 
             if (attr == null)
             {
-                throw new ApiException(ApiErrorCode.NotApiResourceEntity, $"Type:{type.FullName}");
+                throw ApiExceptions.NotApiResourceEntity(type:type.FullName);
             }
 
             return new ApiResourceDef

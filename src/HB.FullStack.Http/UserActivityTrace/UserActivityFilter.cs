@@ -44,7 +44,7 @@ namespace HB.FullStack.Server.UserActivityTrace
                 ActionExecutedContext? resultContext = await next().ConfigureAwait(false);
 
                 int? resultStatusCode = null;
-                string? resultError = null;
+                ErrorCode? errorCode = null;
                 string? resultType = null;
 
                 if (resultContext?.Result != null)
@@ -55,14 +55,9 @@ namespace HB.FullStack.Server.UserActivityTrace
                     {
                         resultStatusCode = badRequestObjectResult.StatusCode;
 
-                        if (badRequestObjectResult.Value is ApiError apiError)
+                        if (badRequestObjectResult.Value is ErrorCode err)
                         {
-                            resultError = SerializeUtil.TryToJson(apiError);
-
-                            if(resultError != null && resultError.Length > UserActivity.MAX_RESULT_ERROR_LENGTH)
-                            {
-                                resultError = resultError.Substring(0, UserActivity.MAX_RESULT_ERROR_LENGTH);
-                            }
+                            errorCode = err;
                         }
                     }
                     else if (resultContext.Result is IStatusCodeActionResult statusCodeResult)
@@ -71,7 +66,7 @@ namespace HB.FullStack.Server.UserActivityTrace
                     }
                 }
 
-                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, resultError).Fire();
+                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode).Fire();
             }
             catch (Exception ex)
             {
@@ -84,7 +79,7 @@ namespace HB.FullStack.Server.UserActivityTrace
         {
             if (context != null)
             {
-                context.Result = new BadRequestObjectResult(new ApiError(ApiErrorCode.UserActivityFilterError));
+                context.Result = new BadRequestObjectResult(ApiErrorCodes.UserActivityFilterError);
             }
         }
     }

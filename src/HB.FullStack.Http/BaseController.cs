@@ -7,9 +7,9 @@ namespace HB.FullStack.Server
 {
     public class BaseController : ControllerBase
     {
-        protected BadRequestObjectResult Error(ApiErrorCode errorCode, string? message = null)
+        protected BadRequestObjectResult Error(ErrorCode errorCode)
         {
-            return BadRequest(new ApiError(errorCode, message ?? errorCode.ToString()));
+            return BadRequest(errorCode);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             //HB.FullStack.Server
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
-            services.AddSingleton<IPublicResourceTokenManager, PublicResourceTokenManager>();
+            services.AddSingleton<IPublicResourceTokenService, PublicResourceTokenService>();
 
             //UserActivity
             services.AddSingleton<UserActivityRepo>();
