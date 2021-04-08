@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
             {
-                throw new LockException( LockErrorCode.MemoryLockError, $"MemoryLockManager需要MemoryCache服务");
+                throw Exceptions.MemoryLockError(cause:"MemoryLockManager需要MemoryCache服务");
             }
 
             services.Configure<MemoryLockOptions>(configuration);
@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
             {
-                throw new LockException(LockErrorCode.MemoryLockError, $"MemoryLockManager需要MemoryCache服务");
+                throw Exceptions.MemoryLockError(cause: "MemoryLockManager需要MemoryCache服务");
             }
 
             services.Configure(action);

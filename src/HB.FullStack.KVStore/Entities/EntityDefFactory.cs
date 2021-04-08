@@ -122,7 +122,7 @@ namespace HB.FullStack.KVStore.Entities
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreEntitySchema? storeEntitySchema))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreNoEntitySchemaFound, $"Type:{type.FullName}");
+                throw Exceptions.NoEntitySchemaFound(type:type.FullName);
             }
 
             KVStoreEntityDef entityDef = new KVStoreEntityDef(storeEntitySchema.InstanceName, type);
@@ -153,7 +153,7 @@ namespace HB.FullStack.KVStore.Entities
             {
                 if (backupKeyPropertyInfo == null)
                 {
-                    throw new KVStoreException(KVStoreErrorCode.LackKVStoreKeyAttributeErrorMessage);
+                    throw Exceptions.LackKVStoreKeyAttributeError(type:entityDef.EntityType.FullName);
                 }
 
                 entityDef.KeyPropertyInfos.Add(0, backupKeyPropertyInfo);

@@ -94,9 +94,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             catch (Exception ex)
             {
                 //TODO: 处理报错
-                throw new AliyunException(
-                    AliyunErrorCode.StsError,
-                    $"发生异常。 userId:{userId}, bucketname:{bucketName}, direcotry:{directory}, readOnly:{readOnly}", ex);
+                throw Exceptions.StsError(userId:userId, bucketname:bucketName, direcotry:directory, readOnly:readOnly, ex);
             }
         }
     }
