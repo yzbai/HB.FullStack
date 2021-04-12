@@ -93,36 +93,18 @@ namespace HB.FullStack.Common
         }
 
         /// <summary>
-        /// example:
-        /// 上午9：12
-        /// pm12:02
-        /// 0:13:34
+        /// {day}:{hour}:{minute}
         /// </summary>
         /// <param name="timeString"></param>
         /// <returns></returns>
         public Time24Hour(string timeString)
         {
-#if NETSTANDARD2_0
-            if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(":"))
-#endif
-#if NETSTANDARD2_1
             if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(':', GlobalSettings.Comparison))
-#endif
             {
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }
 
-            bool? isAM = null;
             string str = timeString.Trim();
-
-            if (!char.IsNumber(str, 0))
-            {
-                string ampmStr = str.Substring(0, 2);
-
-                isAM = ampmStr.IsIn("上午", "AM", "am", "Am", "aM");
-
-                str = str.Remove(0, 2);
-            }
 
             string[] parts = str.Split(':');
 
@@ -143,14 +125,6 @@ namespace HB.FullStack.Common
                 day = Convert.ToInt32(parts[0], GlobalSettings.Culture);
                 hour = Convert.ToInt32(parts[1], GlobalSettings.Culture);
                 minute = Convert.ToInt32(parts[2], GlobalSettings.Culture);
-            }
-
-            if (isAM.HasValue)
-            {
-                if (!isAM.Value && hour != 12)
-                {
-                    hour += 12;
-                }
             }
 
             _hour = 0;
@@ -235,7 +209,7 @@ namespace HB.FullStack.Common
 
         public override string ToString()
         {
-            return $"{Hour}:{Minute}";
+            return $"{Day}:{Hour}:{Minute}";
         }
 
         public static bool operator ==(Time24Hour time1, Time24Hour time2)
