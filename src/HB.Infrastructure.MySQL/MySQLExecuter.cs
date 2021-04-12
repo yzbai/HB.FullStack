@@ -203,7 +203,7 @@ namespace HB.Infrastructure.MySQL
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                 }
-
+                
                 command.Connection = conn;
 
                 return await command.ExecuteNonQueryAsync().ConfigureAwait(false);

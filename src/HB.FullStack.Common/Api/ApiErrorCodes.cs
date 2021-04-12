@@ -42,9 +42,12 @@ namespace HB.FullStack.Common.Api
 
     public static class ApiExceptions
     {
-        public static Exception ApiNotAvailable(ApiRequest request, Exception innerExceptions)
+        public static Exception ApiNotAvailable(ApiRequest request, Exception innerException)
         {
             throw new NotImplementedException();
+            //ApiException exception = new ApiException(ApiErrorCodes.ApiNotAvailable, innerException);
+
+            //return exception;
         }
 
         public static Exception RequestCanceled(ApiRequest request, Exception innerException)

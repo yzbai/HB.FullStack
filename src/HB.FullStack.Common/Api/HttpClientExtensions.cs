@@ -80,7 +80,7 @@ namespace System.Net.Http
             }
             catch (TaskCanceledException ex) when (ex.InnerException is SocketException)
             {
-                throw ApiExceptions.ApiNotAvailable(request: request, innerExceptions: ex);
+                throw ApiExceptions.ApiNotAvailable(request: request, innerException: ex);
             }
             catch (TaskCanceledException ex)
             {
