@@ -8,25 +8,14 @@ using HB.FullStack.Identity;
 
 namespace System
 {
-    public class IdentityException : Exception
+    public class IdentityException : ErrorCodeException
     {
-        public IdentityErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public IdentityException(IdentityErrorCode errorCode) : base()
+        public IdentityException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public IdentityException(IdentityErrorCode errorCode, string message) : base(message)
+        public IdentityException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public IdentityException(IdentityErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

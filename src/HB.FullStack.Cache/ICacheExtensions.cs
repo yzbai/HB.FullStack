@@ -44,11 +44,11 @@ namespace HB.FullStack.Cache
             }
             catch (FormatException ex)
             {
-                throw new CacheException(CacheErrorCode.ConvertError, $"Key:{key}", ex);
+                throw Exceptions.ConvertError(key:key, innerException: ex);
             }
             catch(OverflowException ex)
             {
-                throw new CacheException(CacheErrorCode.ConvertError, $"Key:{key}", ex);
+                throw Exceptions.ConvertError(key:key, innerException: ex);
             }
         }
 
@@ -73,7 +73,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not CacheException)
             {
-                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
+                throw Exceptions.Unkown(key:key, value:value, innerException: ex);
             }
         }
 
@@ -95,7 +95,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not CacheException)
             {
-                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
 
@@ -120,7 +120,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not CacheException)
             {
-                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}, Value:{SerializeUtil.ToJson(value!)}", ex);
+                throw Exceptions.Unkown(key, value, ex);
             }
         }
 
@@ -142,7 +142,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not CacheException)
             {
-                throw new CacheException(CacheErrorCode.Unkown, $"Key:{key}", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
     }

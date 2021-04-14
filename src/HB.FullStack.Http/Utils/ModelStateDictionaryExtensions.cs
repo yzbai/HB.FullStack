@@ -8,14 +8,15 @@ namespace System
 {
     public static class ModelStateDictionaryExtensions
     {
-        public static IDictionary<string, IEnumerable<string>> GetErrors(this ModelStateDictionary dicts)
+        public static string? GetErrors(this ModelStateDictionary dicts)
         {
-            Dictionary<string, IEnumerable<string>> errorDict = new Dictionary<string, IEnumerable<string>>();
 
             if (dicts.IsNullOrEmpty())
             {
-                return errorDict;
+                return null;
             }
+
+            Dictionary<string, IEnumerable<string>> errorDict = new Dictionary<string, IEnumerable<string>>();
 
             foreach (KeyValuePair<string, ModelStateEntry> states in dicts)
             {
@@ -25,7 +26,7 @@ namespace System
                 }
             }
 
-            return errorDict;
+            return SerializeUtil.TryToJson(errorDict);
         }
     }
 }

@@ -76,7 +76,7 @@ namespace HB.FullStack.EventBus
                 return eventSchema.BrokerName;
             }
 
-            throw new EventBusException( EventBusErrorCode.SettingsError,  $"Not Found Matched EventSchema for EventType:{eventName}");
+            throw Exceptions.SettingsError(eventName: eventName, cause: "Not Found Matched EventSchema for EventType");
         }
 
         public void Close()

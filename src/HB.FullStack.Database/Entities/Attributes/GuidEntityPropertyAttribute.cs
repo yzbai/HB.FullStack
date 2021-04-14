@@ -2,7 +2,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     public class GuidEntityPropertyAttribute : EntityPropertyAttribute
     {

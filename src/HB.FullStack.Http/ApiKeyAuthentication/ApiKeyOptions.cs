@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.FullStack.Server.ApiKeyAuthentication
+namespace HB.FullStack.WebApi.ApiKeyAuthentication
 {
     public class ApiKeyOptions : AuthenticationSchemeOptions
     {

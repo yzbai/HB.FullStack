@@ -74,24 +74,24 @@ namespace HB.Infrastructure.Aliyun.Sms
                 else
                 {
                     string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
-                    throw new AliyunException( AliyunErrorCode.SmsError, errorMessage);
+                    throw Exceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message:sendResult?.Message);
                 }
             }
             catch(CacheException ex)
             {
-                throw new SmsException(SmsErrorCode.CacheError, "", ex);
+                throw Exceptions.SmsCacheError("", ex);
             }
             catch(AliyunException ex)
             {
-                throw new SmsException(SmsErrorCode.ServerError, "", ex);
+                throw Exceptions.SmsServerError("", ex);
             }
             catch (JsonException ex)
             {
-                throw new SmsException(SmsErrorCode.FormatError, "阿里云短信服务，格式返回错误", ex);
+                throw Exceptions.SmsFormatError( "阿里云短信服务，格式返回错误", ex);
             }
             catch (ClientException ex)
             {
-                throw new SmsException(SmsErrorCode.ClientError, "AliyunSmsServiceDownErrorMessage", ex);
+                throw Exceptions.SmsClientError("AliyunSmsServiceDownErrorMessage", ex);
             }
         }
 
@@ -111,7 +111,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (CacheException ex)
             {
-                throw new SmsException(SmsErrorCode.CacheError, "", ex);
+                throw Exceptions.SmsCacheError( "", ex);
             }
         }
 #endif
@@ -125,7 +125,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// <exception cref="SmsException"></exception>
         public async Task<bool> ValidateAsync(string mobile, string code)
         {
-            if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsPositiveNumber(code))
+            if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsAllNumber(code))
             {
                 return false;
             }
@@ -138,7 +138,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (CacheException ex)
             {
-                throw new SmsException(SmsErrorCode.CacheError, "", ex);
+                throw Exceptions.SmsCacheError( "", ex);
             }
         }
 

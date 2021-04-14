@@ -4,26 +4,14 @@ using System.Text;
 
 namespace System
 {
-    public class MobileException : Exception
+    public class MobileException : ErrorCodeException
     {
-        public MobileErrorCode ErrorCode { get; set; }
-
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public MobileException(MobileErrorCode errorCode) : base()
+        public MobileException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public MobileException(MobileErrorCode errorCode, string message) : base(message)
+        public MobileException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public MobileException(MobileErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

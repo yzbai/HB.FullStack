@@ -29,13 +29,13 @@ namespace HB.FullStack.XamarinForms.Api
                     await onSuccessDelegate(resource).ConfigureAwait(false);
                 }
             }
-            catch (ApiException ex) when (ex.ErrorCode == ApiErrorCode.ApiPublicResourceTokenNeeded)
+            catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.PublicResourceTokenNeeded)
             {
                 TCaptchaDialog dialog = new TCaptchaDialog(async (result) =>
                 {
                     if (result.IsNullOrEmpty())
                     {
-                        GlobalSettings.ExceptionHandler.Invoke(new ApiException(ApiErrorCode.ApiCapthaError));
+                        GlobalSettings.ExceptionHandler.Invoke(new ApiException(ApiErrorCodes.ApiCapthaError));
                         return;
                     }
 

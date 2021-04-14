@@ -6,25 +6,14 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public class SmsException : Exception
+    public class SmsException : ErrorCodeException
     {
-        public SmsErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public SmsException(SmsErrorCode errorCode) : base()
+        public SmsException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public SmsException(SmsErrorCode errorCode, string message) : base(message)
+        public SmsException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public SmsException(SmsErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

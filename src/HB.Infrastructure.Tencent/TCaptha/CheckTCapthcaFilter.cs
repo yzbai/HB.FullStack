@@ -33,12 +33,12 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (firstArgumentValue is not ApiRequest apiRequest)
                 {
-                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                     return;
                 }
                 if (apiRequest.PublicResourceToken.IsNullOrEmpty())
                 {
-                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                     return;
                 }
 
@@ -46,7 +46,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (result == null || !result.IsSuccessed)
                 {
-                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                     return;
                 }
 
@@ -54,7 +54,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (!verifyResult)
                 {
-                    OnError(context, ApiErrorCode.ApiPublicResourceTokenError);
+                    OnError(context, ApiErrorCodes.PublicResourceTokenError);
                     return;
                 }
 
@@ -62,16 +62,16 @@ namespace HB.Infrastructure.Tencent.TCaptha
             }
             catch (Exception ex)
             {
-                OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                 _logger.LogError(ex, "TCaptcha 验证执行失败");
             }
         }
 
-        private static void OnError(ActionExecutingContext? context, ApiErrorCode error)
+        private static void OnError(ActionExecutingContext? context, ErrorCode error)
         {
             if (context != null)
             {
-                context.Result = new BadRequestObjectResult(new ApiError(error));
+                context.Result = new BadRequestObjectResult(error);
             }
         }
     }

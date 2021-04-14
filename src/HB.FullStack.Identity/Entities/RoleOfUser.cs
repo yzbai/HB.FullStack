@@ -1,5 +1,5 @@
 ﻿
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
@@ -11,15 +11,13 @@ namespace HB.FullStack.Identity.Entities
     /// </summary>
     public class RoleOfUser : IdGenEntity
     {
-        [Required]
+        [LongId]
         [ForeignKey(typeof(User))]
-        [EntityProperty(NotNull = true)]
         public long UserId { get; set; }
 
 
-        [Required]
+        [LongId]
         [ForeignKey(typeof(Role))]
-        [EntityProperty(NotNull = true)]
         public long RoleId { get; set; }
 
         public RoleOfUser() { }

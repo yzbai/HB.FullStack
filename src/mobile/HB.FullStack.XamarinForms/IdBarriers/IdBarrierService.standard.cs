@@ -130,7 +130,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 }
                 else
                 {
-                    throw new MobileException(MobileErrorCode.IdBarrierError, $"Id Barrier碰到无法解析的类型");
+                    throw MobileExceptions.IdBarrierError(cause:"Id Barrier碰到无法解析的类型");
                 }
             }
         }

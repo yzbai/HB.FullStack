@@ -1,7 +1,22 @@
-﻿namespace HB.Infrastructure.Tencent
+﻿using System;
+
+namespace HB.Infrastructure.Tencent
 {
-    public enum TencentErrorCode
+    internal static class TencentErrorCodes
     {
-        CapthaError
+        public static ErrorCode CapthaError { get; set; } = new ErrorCode(ErrorCodeStartIds.TENCENT + 0, nameof(CapthaError), "");
+    }
+
+    internal static class Exceptions
+    {
+        internal static Exception CapthaError(string appId, string cause)
+        {
+            TencentException exception = new TencentException(TencentErrorCodes.CapthaError);
+
+            exception.Data["AppId"] = appId;
+            exception.Data["Cause"] = cause;
+
+            return exception;
+        }
     }
 }

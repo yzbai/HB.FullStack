@@ -20,8 +20,43 @@ namespace HB.FullStack.XamarinForms.Skia
         Actually
     }
 
+    public static class SKConsts
+    {
+        public const int MINUTES_ONE_DAY = 24 * 60;
+
+        public const float HALF_PI = (float)(0.5 * Math.PI);
+        public const float TWO_PI = (float)(2 * Math.PI);
+
+        public const float RADIANS_ONE_DEGREE = (float)(Math.PI / 180);
+        //public const float RADIANS_ONE_DAY = (float)(4 * Math.PI);
+        //public const float RADIANS_ONE_HOUR = (float)Math.PI / 6;
+        //public const float RADIANS_ONE_MINUTE = (float)(Math.PI / 360);
+        public const float DEGREES_ONE_RADIAN = (float)(180 / Math.PI);
+    }
+
     public static class SKUtil
     {
+        /// <summary>
+        /// 获得以x轴开始的弧度
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static double GetPointRadian(SKPoint point)
+        {
+            float radius = point.Length;
+
+            double radian = point.Y > 0 ? (float)Math.Acos(point.X / radius) : (float)Math.Asin(point.Y / radius);
+
+            //处理第三象限
+            if (point.X < 0 && point.Y < 0)
+            {
+                radian = Math.Abs(radian) + Math.PI;
+            }
+
+            return radian;
+        }
+
+
         #region Touch
 
         public static SKMatrix CaculateOneFingerDraggedMatrix(SKPoint prevPoint, SKPoint curPoint, SKPoint pivotPoint, TouchManipulationMode mode)
@@ -362,16 +397,21 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <summary>
         /// 将以左上角为坐标系的点，转换为以中心为坐标系上的点。同一个点。
         /// </summary>
-        public static SKPoint PivotPointToCenter(SKPoint skPoint, SKSize canvasSize)
-        {
-            return new SKPoint(skPoint.X - canvasSize.Width / 2, skPoint.Y - canvasSize.Height / 2);
-        }
+        //public static SKPoint PivotPointToCenter(SKPoint skPoint, SKSize canvasSize)
+        //{
+        //    return new SKPoint(skPoint.X - canvasSize.Width / 2, skPoint.Y - canvasSize.Height / 2);
+        //}
 
         #endregion
     }
 
     public static class SKExtensions
     {
+        public static void SetTextSizeByWidth(this SKPaint paint, float width, char sample = '1')
+        {
+            paint.TextSize = width * paint.TextSize / paint.MeasureText(sample.ToString());
+        }
+
         public static bool IsNullOrEmpty([ValidatedNotNull][NotNullWhen(false)] this SKPath? path)
         {
             return path == null || path.IsEmpty;

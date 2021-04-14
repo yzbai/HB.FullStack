@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Data;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
 
@@ -40,7 +41,7 @@ namespace HB.FullStack.Database
         /// <param name="context"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public async Task CommitAsync(TransactionContext context)
+        public async Task CommitAsync(TransactionContext context, [CallerMemberName]string? callerMemberName = null, [CallerLineNumber]int callerLineNumber = 0 )
         {
             //if (context == null || context.Transaction == null)
             //{
@@ -54,7 +55,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseTransactionAlreadyFinishedMessage);
+                throw Exceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
             }
 
             try
@@ -86,7 +87,7 @@ namespace HB.FullStack.Database
         /// <param name="context"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
-        public async Task RollbackAsync(TransactionContext context)
+        public async Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
         {
             //if (context == null || context.Transaction == null)
             //{
@@ -100,7 +101,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseTransactionAlreadyFinishedMessage);
+                throw Exceptions.TransactionError("AlreadyFinished",callerMemberName, callerLineNumber);
             }
 
             try

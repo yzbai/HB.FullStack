@@ -6,17 +6,17 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using HB.FullStack.Common.Api;
 using Microsoft.Extensions.Logging;
-using HB.FullStack.Server.Security;
+using HB.FullStack.WebApi.Security;
 
-namespace HB.FullStack.Server.Filters
+namespace HB.FullStack.WebApi.Filters
 {
     public class CheckPublicResourceTokenFilter : IAsyncActionFilter
     {
         private readonly ILogger<CheckPublicResourceTokenFilter> _logger;
         private readonly ISecurityService _securityService;
-        private readonly IPublicResourceTokenManager _publicResourceTokenManager;
+        private readonly IPublicResourceTokenService _publicResourceTokenManager;
 
-        public CheckPublicResourceTokenFilter(ILogger<CheckPublicResourceTokenFilter> logger, ISecurityService securityService, IPublicResourceTokenManager publicResourceTokenManager)
+        public CheckPublicResourceTokenFilter(ILogger<CheckPublicResourceTokenFilter> logger, ISecurityService securityService, IPublicResourceTokenService publicResourceTokenManager)
         {
             _logger = logger;
             _securityService = securityService;
@@ -42,21 +42,20 @@ namespace HB.FullStack.Server.Filters
                     {
                         if (apiRequest.PublicResourceToken.IsNullOrEmpty())
                         {
-                            OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                            OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                             return;
                         }
 
                         if (!await _publicResourceTokenManager.CheckTokenAsync(apiRequest.PublicResourceToken).ConfigureAwait(false))
                         {
-                            OnError(context, ApiErrorCode.ApiPublicResourceTokenError);
+                            OnError(context, ApiErrorCodes.PublicResourceTokenError);
                             return;
                         }
-
                     }
                 }
                 else
                 {
-                    OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                     return;
                 }
 
@@ -64,21 +63,21 @@ namespace HB.FullStack.Server.Filters
             }
             catch (CacheException ex)
             {
-                OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");
             }
             catch (Exception ex)
             {
-                OnError(context, ApiErrorCode.ApiPublicResourceTokenNeeded);
+                OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");
             }
         }
 
-        private static void OnError(ActionExecutingContext? context, ApiErrorCode error)
+        private static void OnError(ActionExecutingContext? context, ErrorCode error)
         {
             if (context != null)
             {
-                context.Result = new BadRequestObjectResult(new ApiError(error));
+                context.Result = new BadRequestObjectResult(error);
             }
         }
     }

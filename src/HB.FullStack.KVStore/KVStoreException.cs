@@ -8,25 +8,14 @@ using HB.FullStack.KVStore;
 
 namespace System
 {
-    public class KVStoreException : Exception
+    public class KVStoreException : ErrorCodeException
     {
-        public KVStoreErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public KVStoreException(KVStoreErrorCode errorCode) : base()
+        public KVStoreException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public KVStoreException(KVStoreErrorCode errorCode, string message) : base(message)
+        public KVStoreException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public KVStoreException(KVStoreErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

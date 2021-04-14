@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Server;
+using HB.FullStack.WebApi;
 using Microsoft.AspNetCore.Http;
 
-namespace HB.FullStack.Server.Security
+namespace HB.FullStack.WebApi.Security
 {
     public class DefaultSecurityService : ISecurityService
     {
@@ -57,12 +57,12 @@ namespace HB.FullStack.Server.Security
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedFileSuffixes.IsNullOrEmpty())
             {
-                throw new ApiException(ApiErrorCode.ApiUploadEmptyFile);
+                throw ApiExceptions.ApiUploadEmptyFile();
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw new ApiException(ApiErrorCode.ApiUploadOverSize);
+                throw ApiExceptions.ApiUploadOverSize();
             }
 
             try
@@ -76,13 +76,13 @@ namespace HB.FullStack.Server.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw new ApiException(ApiErrorCode.ApiUploadEmptyFile);
+                    throw ApiExceptions.ApiUploadEmptyFile();
                 }
 
                 if (!IsValidFileExtensionAndSignature(
                     formFile.FileName, memoryStream, permittedFileSuffixes))
                 {
-                    throw new ApiException(ApiErrorCode.ApiUploadWrongType);
+                    throw ApiExceptions.ApiUploadWrongType();
                 }
                 else
                 {
@@ -91,7 +91,7 @@ namespace HB.FullStack.Server.Security
             }
             catch (Exception ex)
             {
-                throw new ApiException(ApiErrorCode.ServerError, $"文件名称{formFile.FileName}", ex);
+                throw ApiExceptions.ServerUnkownError(fileName:formFile.FileName,innerException: ex);
             }
         }
 

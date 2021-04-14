@@ -3,13 +3,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     public class BaseController : ControllerBase
     {
-        protected BadRequestObjectResult Error(ApiErrorCode errorCode, string? message = null)
+        protected BadRequestObjectResult Error(ErrorCode errorCode)
         {
-            return BadRequest(new ApiError(errorCode, message ?? errorCode.ToString()));
+            return BadRequest(errorCode);
         }
     }
 }

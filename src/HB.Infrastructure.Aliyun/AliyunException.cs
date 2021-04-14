@@ -8,25 +8,14 @@ using HB.Infrastructure.Aliyun;
 
 namespace System
 {
-    public class AliyunException : Exception
+    public class AliyunException : ErrorCodeException
     {
-        public AliyunErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public AliyunException(AliyunErrorCode errorCode) : base()
+        public AliyunException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public AliyunException(AliyunErrorCode errorCode, string message) : base(message)
+        public AliyunException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public AliyunException(AliyunErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

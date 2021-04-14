@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     public class JwtClientSettings
     {
@@ -16,7 +16,10 @@ namespace HB.FullStack.Server
         /// <summary>
         /// 要与AuthorizationServerOptions中的EncryptingCertificateSubject相同
         /// </summary>
-        [DisallowNull, NotNull]
-        public string DecryptionCertificateSubject { get; set; } = null!;
+        public string? JwtContentCertificateSubject { get; set; }
+
+        public string? JwtContentCertificateFileName { get; set; }
+
+        public string? JwtContentCertificateFilePassword { get; set; }
     }
 }

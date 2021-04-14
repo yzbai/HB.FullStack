@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}");
+                throw Exceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
             }
 
             try
@@ -43,7 +43,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, whereExpr.ToString(), ex);
             }
         }
 
@@ -63,13 +63,13 @@ namespace HB.FullStack.Database
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Entity:{SerializeUtil.ToJson(item)}");
+                throw Exceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
             }
 
             try
             {
                 item.LastTime = TimeUtil.UtcNow;
-                
+
                 if (item.Version < 0)
                 {
                     item.Version = 0;
@@ -89,9 +89,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (!(ex is DatabaseException))
             {
-                string detail = $"Item:{SerializeUtil.ToJson(item)}";
-
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
         }
 

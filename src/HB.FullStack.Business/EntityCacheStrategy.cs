@@ -23,13 +23,21 @@ namespace HB.FullStack.Repository
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
-            
-            (IEnumerable<TEntity>? cachedEntities, bool allExists) = await cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
 
-            if (allExists)
+            try
             {
-                logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
-                return cachedEntities!;
+                (IEnumerable<TEntity>? cachedEntities, bool allExists) = await cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
+
+                if (allExists)
+                {
+                    logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
+                    return cachedEntities!;
+                }
+            }
+            catch(Exception ex)
+            {
+                //有可能实体定义发生改变，导致缓存读取出错
+                logger.LogError2(ex, $"读取缓存出错，缓存可能已经被删除，继续读取数据库，dimensionKeyName:{dimensionKeyName}, dimensionKeyValues:{SerializeUtil.ToJson(dimensionKeyValues)}");
             }
 
             //常规做法是先获取锁（参看历史）。
@@ -52,12 +60,21 @@ namespace HB.FullStack.Repository
             if (@lock.IsAcquired)
             {
 
-                //Double check
-                (cachedEntities, allExists) = await cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
-
-                if (allExists)
+                try
                 {
-                    return cachedEntities!;
+                    //Double check
+                    (IEnumerable<TEntity>? cachedEntities, bool allExists) = await cache.GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
+
+                    if (allExists)
+                    {
+                        logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
+                        return cachedEntities!;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //有可能实体定义发生改变，导致缓存读取出错
+                    logger.LogError2(ex, $"！！！这里是读取缓存的DoubleCheck，这里不应该出现，缓存可能已经被删除，继续读取数据库，dimensionKeyName:{dimensionKeyName}, dimensionKeyValues:{SerializeUtil.ToJson(dimensionKeyValues)}");
                 }
 
                 IEnumerable<TEntity> entities = await dbRetrieve(database).ConfigureAwait(false);

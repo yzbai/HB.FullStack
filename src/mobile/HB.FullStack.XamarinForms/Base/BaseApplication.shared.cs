@@ -86,15 +86,21 @@ namespace HB.FullStack.XamarinForms.Base
             VersionTracking.Track();
 
             //FileService
-            AddInitTask(IFileService.InitializeAsync(InitAssetFileName));
+            if (VersionTracking.IsFirstLaunchEver)
+            {
+                AddInitTask(IFileService.UnzipInitFilesAsync(InitAssetFileName));
+            }
         }
 
         protected void InitializeServices(IServiceCollection services)
         {
+            //设置导航
             NavigationService.Init(GetNavigationServiceImpl());
 
+            //注册服务
             RegisterBaseServices(services);
 
+            //配置服务
             ConfigureBaseServices();
 
             void RegisterBaseServices(IServiceCollection services)
@@ -146,50 +152,6 @@ namespace HB.FullStack.XamarinForms.Base
         {
             if (ex is ApiException apiEx)
             {
-                switch (apiEx.ErrorCode)
-                {
-                    case ApiErrorCode.NoAuthority:
-                        break;
-                    case ApiErrorCode.AccessTokenExpired:
-                        break;
-                    case ApiErrorCode.ModelValidationError:
-                        break;
-                    case ApiErrorCode.ApiNotAvailable:
-                        break;
-                    case ApiErrorCode.ApiErrorUnkownFormat:
-                        break;
-                    case ApiErrorCode.NotApiResourceEntity:
-                        break;
-                    case ApiErrorCode.ApiSmsCodeInvalid:
-                        //TODO: 使用Toast随后,
-                        //TODO: 不显示，调查
-                        Application.Current.MainPage.DisplayAlert("","短信验证码不对", "知道了");
-                        break;
-                    case ApiErrorCode.ApiPublicResourceTokenNeeded:
-                        break;
-                    case ApiErrorCode.ApiPublicResourceTokenError:
-                        break;
-                    case ApiErrorCode.ApiUploadEmptyFile:
-                        break;
-                    case ApiErrorCode.ApiUploadOverSize:
-                        break;
-                    case ApiErrorCode.ApiUploadWrongType:
-                        break;
-                    case ApiErrorCode.ApiHttpsRequired:
-                        break;
-                    case ApiErrorCode.FromExceptionController:
-                        break;
-                    case ApiErrorCode.ApiCapthaError:
-                        break;
-                    case ApiErrorCode.ApiUploadFailed:
-                        break;
-                    case ApiErrorCode.ServerError:
-                        break;
-                    case ApiErrorCode.ClientError:
-                        break;
-                    default:
-                        break;
-                }
             }
             else if (ex is MobileException mobileException)
             {

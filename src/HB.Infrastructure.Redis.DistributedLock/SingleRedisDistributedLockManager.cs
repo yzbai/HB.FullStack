@@ -90,7 +90,7 @@ return 1";
 
 			InitLoadedLuas(_options.ConnectionSetting, _logger);
 
-			_logger.LogInformation($"SingleRedisDistributedLockManager初始化完成");
+			_logger.LogInformation("SingleRedisDistributedLockManager初始化完成");
 		}
 
 		/// <summary>
@@ -105,13 +105,13 @@ return 1";
 		{
 			if (expiryTime < _minimumExpiryTime)
 			{
-				_logger.LogWarning($"Expiry time {expiryTime.TotalMilliseconds}ms too low, setting to {_minimumExpiryTime.TotalMilliseconds}ms");
+				_logger.LogWarning("Expiry {settingTime} ms too low, setting to {minimumExpiryTime} ms", expiryTime.TotalMilliseconds, _minimumExpiryTime.TotalMilliseconds);
 				expiryTime = _minimumExpiryTime;
 			}
 
 			if (retryInterval != null && retryInterval.Value < _minimumRetryTime)
 			{
-				_logger.LogWarning($"Retry time {retryInterval.Value.TotalMilliseconds}ms too low, setting to {_minimumRetryTime.TotalMilliseconds}ms");
+				_logger.LogWarning("Retry {settingTime} ms too low, setting to {minimumRetryTime} ms",  retryInterval.Value.TotalMilliseconds, _minimumRetryTime.TotalMilliseconds);
 				retryInterval = _minimumRetryTime;
 			}
 
@@ -331,7 +331,7 @@ return 1";
 				}
 				else
 				{
-					ThrowIfUnlockFailed(redisLock);
+					throw Exceptions.DistributedLockUnLockFailed(threadId: Thread.CurrentThread.ManagedThreadId, resources: redisLock.Resources);
 				}
 			}
 			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -340,23 +340,12 @@ return 1";
 
 				await ReleaseResourceAsync(redisLock, logger).ConfigureAwait(false);
 			}
-			catch(Exception ex)
+			catch(Exception ex) when (ex is not LockException)
 			{
-				string message = $"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}";
-				logger.LogDebug(message);
+				logger.LogDebug(ex, "锁解锁失败... {ThreadID}, {Resources}", Thread.CurrentThread.ManagedThreadId, redisLock.Resources);
 
-				throw new LockException(LockErrorCode.DistributedLockUnLockFailed, message, ex);
+				throw Exceptions.DistributedLockUnLockFailed(threadId: Thread.CurrentThread.ManagedThreadId, resources:redisLock.Resources, innerException: ex);
 			}
-		}
-
-		/// <summary>
-		/// ThrowIfUnlockFailed
-		/// </summary>
-		/// <param name="redisLock"></param>
-		/// <exception cref="LockException"></exception>
-		private static void ThrowIfUnlockFailed(RedisLock redisLock)
-		{
-			throw new LockException(LockErrorCode.DistributedLockUnLockFailed, $"锁解锁失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 		}
 
 		private static void AddReleaseResourceRedisInfo(RedisLock redisLock, List<RedisKey> redisKeys, List<RedisValue> redisValues)

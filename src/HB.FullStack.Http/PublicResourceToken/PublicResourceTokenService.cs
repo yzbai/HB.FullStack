@@ -8,9 +8,9 @@ using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
-    internal class PublicResourceTokenManager : IPublicResourceTokenManager
+    internal class PublicResourceTokenService : IPublicResourceTokenService
     {
         private const string _prefix = "PRT_";
         private readonly int _tokenlength = 36 + _prefix.Length;
@@ -19,15 +19,15 @@ namespace HB.FullStack.Server
         private readonly IDataProtector _dataProtector;
         private readonly ILogger _logger;
 
-        public PublicResourceTokenManager(ICache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenManager> logger)
+        public PublicResourceTokenService(ICache cache, IDataProtectionProvider dataProtectionProvider, ILogger<PublicResourceTokenService> logger)
         {
             _cache = cache;
             _logger = logger;
 
-            _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenManager));
+            _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenService));
         }
 
-        
+
         /// <summary>
         /// GetNewTokenAsync
         /// </summary>
@@ -68,18 +68,18 @@ namespace HB.FullStack.Server
 
                 if (token.IsNullOrEmpty() || token.Length != _tokenlength || !token.StartsWith(_prefix, GlobalSettings.Comparison))
                 {
-                    _logger.LogWarning($"UnProtected Failed. May has an attack. Input:{protectedToken}.");
+                    _logger.LogWarning("UnProtected Failed. May has an attack. {protectedToken}.", protectedToken);
                     return false;
                 }
             }
             catch (FormatException ex)
             {
-                _logger.LogError(ex, $"protectedToken:{protectedToken}");
+                _logger.LogError(ex, "{protectedToken}", protectedToken);
                 return false;
             }
             catch (CryptographicException ex)
             {
-                _logger.LogError(ex, $"protectedToken:{protectedToken}");
+                _logger.LogError(ex, "{protectedToken}", protectedToken);
                 return false;
             }
 

@@ -68,7 +68,7 @@ namespace HB.FullStack.Cache
 
             if (def.SlidingTime > def.AbsoluteTimeRelativeToNow)
             {
-                throw new CacheException(CacheErrorCode.CacheSlidingTimeBiggerThanMaxAlive, $"{def.Name}");
+                throw Exceptions.CacheSlidingTimeBiggerThanMaxAlive(type: def.Name);
             }
 
             bool foundkeyAttribute = false;
@@ -98,7 +98,7 @@ namespace HB.FullStack.Cache
 
             if (def.KeyProperty == null)
             {
-                throw new CacheException(CacheErrorCode.CacheEntityNotHaveKeyAttribute, $"entity:{entityType.FullName}");
+                throw Exceptions.CacheEntityNotHaveKeyAttribute(type: entityType.FullName);
             }
 
             return def;

@@ -60,7 +60,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.Endpoint;
             }
 
-            throw new AliyunException( AliyunErrorCode.OssError,$"No Such Bucket : {bucket}");
+            throw Exceptions.OssError(bucket:bucket, cause:"No Such Bucket");
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.RegionId;
             }
 
-            throw new AliyunException( AliyunErrorCode.OssError,$"No Such Bucket : {bucket}");
+            throw Exceptions.OssError(bucket: bucket, cause: "No Such Bucket");
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.BucketUserDirectory + seprator + userGuid;
             }
 
-            throw new AliyunException( AliyunErrorCode.OssError,$"No Such Bucket : {bucket}");
+            throw Exceptions.OssError(bucket: bucket, cause: "No Such Bucket");
         }
 
         private static string GetRoleSessionName(string userGuid)

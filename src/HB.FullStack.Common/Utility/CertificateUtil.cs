@@ -1,18 +1,49 @@
 ﻿#nullable enable
 
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
+
+using Microsoft.Extensions.Logging;
 
 namespace System
 {
     public static class CertificateUtil
     {
+        public static X509Certificate2 GetCertificateFromSubjectOrFile(string? subject, string? fullPath, string? password)
+        {
+            X509Certificate2? certificate2 = CertificateUtil.GetByFileName(fullPath, password);
+
+            if (certificate2 == null)
+            {
+                GlobalSettings.Logger?.LogWarning2($"证书 {fullPath} 没有打包，将试图再服务器中寻找");
+
+                certificate2 = CertificateUtil.GetBySubject(subject);
+
+                if (certificate2 == null)
+                {
+                    GlobalSettings.Logger?.LogCritical2(null, $"根据Subject证书, {subject} 没有找到，将无法启动服务!");
+
+#pragma warning disable CA2201 // Do not raise reserved exception types
+                    throw new Exception($"证书没有找到，Subject:{subject} or File : {fullPath}");
+#pragma warning restore CA2201 // Do not raise reserved exception types
+                }
+            }
+
+            return certificate2;
+        }
+
         /// <summary>
         /// 在CurrentUser中和LocalMachine中寻找
         /// </summary>
         /// <param name="subjectName"></param>
         /// <returns></returns>
-        public static X509Certificate2? GetBySubject(string subjectName)
+        public static X509Certificate2? GetBySubject(string? subjectName)
         {
+            if (subjectName.IsNullOrEmpty())
+            {
+                return null;
+            }
+
             return GetBySubject(subjectName, StoreLocation.CurrentUser) ?? GetBySubject(subjectName, StoreLocation.LocalMachine);
         }
 
@@ -55,6 +86,21 @@ namespace System
             }
 
             return collection[0];
+        }
+
+        public static X509Certificate2? GetByFileName(string? fullPath, string? certificateFilePassword)
+        {
+            if (string.IsNullOrEmpty(fullPath))
+            {
+                return null;
+            }
+
+            if (!File.Exists(fullPath))
+            {
+                return null;
+            }
+
+            return certificateFilePassword.IsNullOrEmpty() ? new X509Certificate2(fullPath) : new X509Certificate2(fullPath, certificateFilePassword);
         }
 
     }

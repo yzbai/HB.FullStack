@@ -1,29 +1,20 @@
 ﻿#nullable enable
 
+using System.Runtime.Serialization;
+
 using HB.FullStack.Database;
 
 namespace System
 {
-    public class DatabaseException : Exception
+    public class DatabaseException : ErrorCodeException
     {
-
-        public DatabaseErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public DatabaseException(DatabaseErrorCode errorCode) : base()
+        public DatabaseException(ErrorCode eventCode) : base(eventCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public DatabaseException(DatabaseErrorCode errorCode, string message) : base(message)
+        public DatabaseException(ErrorCode eventCode, Exception? innerException) : base(eventCode, innerException)
         {
-            ErrorCode = errorCode;
         }
 
-        public DatabaseException(DatabaseErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
-        }
     }
 }

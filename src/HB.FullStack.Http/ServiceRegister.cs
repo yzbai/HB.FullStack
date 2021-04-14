@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Server;
-using HB.FullStack.Server.Filters;
-using HB.FullStack.Server.Security;
+using HB.FullStack.WebApi;
+using HB.FullStack.WebApi.Filters;
+using HB.FullStack.WebApi.Security;
+using HB.FullStack.WebApi.UserActivityTrace;
 
 using Microsoft.Extensions.Configuration;
 namespace Microsoft.Extensions.DependencyInjection
@@ -26,10 +27,15 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             //HB.FullStack.Server
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
-            services.AddSingleton<IPublicResourceTokenManager, PublicResourceTokenManager>();
+            services.AddSingleton<IPublicResourceTokenService, PublicResourceTokenService>();
+
+            //UserActivity
+            services.AddSingleton<UserActivityRepo>();
+            services.AddSingleton<IUserActivityService, UserActivityService>();
+            services.AddScoped<UserActivityFilter>();
+            
+            
             services.AddScoped<CheckPublicResourceTokenFilter>();
-            services.AddScoped<CheckSmsCodeFilter>();
-           
         }
     }
 }

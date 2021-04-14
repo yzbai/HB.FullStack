@@ -101,7 +101,7 @@ namespace HB.Infrastructure.Redis.Cache
                 return loadedLuas2;
             }
 
-            throw new CacheException(CacheErrorCode.CacheLoadedLuaNotFound, $"Instance: {instanceName}");
+            throw Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
         }
 
         /// <exception cref="CacheException"></exception>
@@ -114,7 +114,7 @@ namespace HB.Infrastructure.Redis.Cache
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw new CacheException(CacheErrorCode.CacheInstanceNotFound, $"Can not found Such Redis Instance: {instanceName}");
+            throw Exceptions.InstanceNotFound(instanceName: instanceName);
         }
 
         /// <exception cref="CacheException"></exception>
@@ -133,7 +133,7 @@ namespace HB.Infrastructure.Redis.Cache
                 return RedisInstanceManager.GetDatabase(setting, _logger);
             }
 
-            throw new CacheException(CacheErrorCode.CacheInstanceNotFound, $"Can not found Such Redis Instance: {instanceName}");
+            throw Exceptions.InstanceNotFound(instanceName);
         }
 
         /// <exception cref="CacheException"></exception>
@@ -157,7 +157,7 @@ namespace HB.Infrastructure.Redis.Cache
         {
             if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                throw new CacheException(CacheErrorCode.NoSuchDimensionKey, $"{entityDef.Name}, {dimensionKeyName}");
+                throw Exceptions.NoSuchDimensionKey(type:entityDef.Name, dimensionKeyName:dimensionKeyName);
             }
         }
 
@@ -170,7 +170,7 @@ namespace HB.Infrastructure.Redis.Cache
         {
             if (!entityDef.IsCacheable)
             {
-                throw new CacheException(CacheErrorCode.NotEnabledForEntity, $"{entityDef.Name}");
+                throw Exceptions.NotEnabledForEntity(type:entityDef.Name);
             }
         }
 

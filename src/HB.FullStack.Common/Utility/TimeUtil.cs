@@ -81,6 +81,25 @@ namespace System
         public static long UtcNowUnixTimeMilliseconds => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         public static DateTime LocalNow => DateTime.Now;
+
+        public static DateTimeOffset CreateOnlyTime(int day, int hour, int minutes)
+        {
+            //[0001/1/1 0:00:00 +00:00]
+            return new DateTimeOffset(1, 1, day, hour, minutes, 0, TimeSpan.Zero);
+        }
+    }
+
+    public static class DateTimeOffsetExtensions
+    {
+        public static bool IsAM(this DateTimeOffset dateTimeOffset)
+        {
+            return dateTimeOffset.Hour < 12;
+        }
+
+        public static DateTimeOffset Add(this DateTimeOffset dateTimeOffset, int hours, int minutes)
+        {
+            return dateTimeOffset.AddMinutes(hours * 60 + minutes);
+        }
     }
 
 }

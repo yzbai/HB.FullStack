@@ -13,6 +13,11 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         public long FingerId { get; set; }
 
+        /// <summary>
+        /// 第一个Move事件
+        /// </summary>
+        public bool? FirstMove { get; set; }
+
         public bool IsOver { get; set; }
 
         /// <summary>

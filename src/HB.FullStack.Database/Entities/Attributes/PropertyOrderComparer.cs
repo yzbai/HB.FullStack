@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     public class PropertyOrderComparer : Comparer<PropertyInfo>
     {

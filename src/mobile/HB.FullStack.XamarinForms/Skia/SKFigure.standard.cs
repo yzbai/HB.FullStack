@@ -14,122 +14,10 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    public class EmptyResultData : FigureData
-    {
-        protected override bool EqualsImpl(FigureData other)
-        {
-            return other is EmptyResultData;
-        }
-
-        protected override HashCode GetHashCodeImpl()
-        {
-            return new HashCode();
-        }
-    }
-
-    public abstract class SKFigure<TDrawData> : SKFigure<TDrawData, EmptyResultData> where TDrawData : FigureData
-    {
-        protected override void OnCaculateOutput(out EmptyResultData? newResultDrawData, TDrawData initDrawData)
-        {
-            newResultDrawData = null;
-        }
-    }
-
-    public abstract class SKFigure<TDrawData, TResultData> : SKFigure 
-        where TDrawData : FigureData 
-        where TResultData : FigureData
-    {
-        public static BindableProperty DrawDataProperty = BindableProperty.Create(
-                    nameof(DrawData),
-                    typeof(TDrawData),
-                    typeof(SKFigure<TDrawData, TResultData>),
-                    null,
-                    BindingMode.OneWay,
-                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawData, TResultData>)b).OnBaseDrawDataChanged((TDrawData?)oldValue, (TDrawData?)newValue));
-
-        public static BindableProperty ResultDataProperty = BindableProperty.Create(
-                    nameof(ResultData),
-                    typeof(TResultData),
-                    typeof(SKFigure<TDrawData, TResultData>),
-                    null,
-                    BindingMode.OneWayToSource);
-
-        public TDrawData? DrawData { get => (TDrawData?)GetValue(DrawDataProperty); set => SetValue(DrawDataProperty, value); }
-
-        public TResultData? ResultData { get => (TResultData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
-
-        protected bool HitPathNeedUpdate { get; set; }
-
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
-        private void OnBaseDrawDataChanged(TDrawData? oldValue, TDrawData? newValue)
-        {
-            HitPathNeedUpdate = true;
-
-            OnDrawDataChanged();
-
-            InvalidateMatrixAndSurface();
-        }
-
-        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
-        {
-            if (DrawData == null)
-            {
-                return;
-            }
-
-            OnDraw(info, canvas, DrawData, State);
-        }
-
-        protected override void OnUpdateHitTestPath(SKImageInfo info)
-        {
-            if (DrawData == null)
-            {
-                return;
-            }
-
-            if (CanvasSizeChanged || HitPathNeedUpdate)
-            {
-                HitPathNeedUpdate = false;
-
-                HitTestPath.Reset();
-
-                OnUpdateHitTestPath(info, DrawData);
-            }
-        }
-
-        protected override void OnCaculateOutput()
-        {
-            if (DrawData == null)
-            {
-                return;
-            }
-
-            OnCaculateOutput(out TResultData? newResult, DrawData);
-
-            if (newResult != null)
-            {
-                newResult.State = State;
-            }
-
-            if (newResult != ResultData)
-            {
-                ResultData = newResult;
-            }
-        }
-
-        protected abstract void OnDrawDataChanged();
-
-        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas, TDrawData initDrawData, FigureState currentState);
-
-        protected abstract void OnUpdateHitTestPath(SKImageInfo info, TDrawData initDrawData);
-
-        protected abstract void OnCaculateOutput(out TResultData? newResultDrawData, TDrawData initDrawData);
-    }
     public abstract class SKFigure : BindableObject, IDisposable
     {
-        private SKFigureCanvasView? _canvasView;
-        private SKPath _hitTestPath = new SKPath();
+        private SKFigureCanvasView? _canvasViewBB;
+        private SKPath _hitTestPathBB = new SKPath();
 
         public object? Parent { get; set; }
 
@@ -137,11 +25,11 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             set
             {
-                _canvasView = value;
+                _canvasViewBB = value;
             }
             get
             {
-                if (_canvasView == null)
+                if (_canvasViewBB == null)
                 {
                     object? obj = Parent;
 
@@ -149,7 +37,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     {
                         if (obj is SKFigureCanvasView canvasView)
                         {
-                            _canvasView = canvasView;
+                            _canvasViewBB = canvasView;
                             break;
                         }
                         else if (obj is SKFigure figure)
@@ -163,7 +51,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
                 }
 
-                return _canvasView;
+                return _canvasViewBB;
             }
         }
 
@@ -188,34 +76,39 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         public RatioPoint NewCoordinateOriginalRatioPoint { get; set; } = new RatioPoint(0.5f, 0.5f);
 
-        public SKSize CanvasSize { get; private set; }
+        public SKSize CanvasSize { get; protected set; }
 
         public bool CanvasSizeChanged { get; set; }
 
-        public FigureState State { get; private set; } = FigureState.None;
+        public FigureState CurrentState { get; private set; } = FigureState.None;
 
-        public SKPath HitTestPath { get => _hitTestPath; set { _hitTestPath?.Dispose(); _hitTestPath = value; } }
+        public SKPath HitTestPath { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
 
-        public SKMatrix Matrix = SKMatrix.CreateIdentity();
+        protected bool HitTestPathNeedUpdate { get; set; }
+
+        /// <summary>
+        /// 主要用来记录Touch带来的变化，OnInitDataChanged中，不要改变
+        /// </summary>
+        protected SKMatrix Matrix = SKMatrix.CreateIdentity();
 
         public void SetState(FigureState figureState)
         {
-            State = figureState;
+            CurrentState = figureState;
         }
 
-        public void InvalidateOnlySurface(bool evenTimeTickEnabled = false)
+        public void InvalidateOnlySurface(bool forced = false)
         {
             if (Parent == null || CanvasView == null)
             {
                 return;
             }
 
-            if (CanvasView.EnableTimeTick && !evenTimeTickEnabled)
+            if (CanvasView.EnableTimeTick && !forced)
             {
                 return;
             }
 
-            if (Parent is SKFigureGroup)
+            if (Parent is ISKFigureGroup && !forced)
             {
                 //留给集合统一处理
                 return;
@@ -224,11 +117,11 @@ namespace HB.FullStack.XamarinForms.Skia
             CanvasView.InvalidateSurface();
         }
 
-        public void InvalidateMatrixAndSurface(bool evenTimeTickEnabled = false)
+        public void InvalidateMatrixAndSurface(bool forced = false)
         {
             Matrix = SKMatrix.CreateIdentity();
 
-            InvalidateOnlySurface(evenTimeTickEnabled);
+            InvalidateOnlySurface(forced);
         }
 
         public virtual void OnPaint(SKPaintSurfaceEventArgs e)
@@ -241,6 +134,7 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 CanvasSize = info.Size;
                 CanvasSizeChanged = true;
+                HitTestPathNeedUpdate = true;
             }
             else
             {
@@ -288,7 +182,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// <returns></returns>
         public virtual bool OnHitTest(SKPoint location, long fingerId)
         {
-            if (!EnableTouch || HitTestPath.IsNullOrEmpty())
+            if (!EnableTouch)
             {
                 return false;
             }
@@ -299,10 +193,25 @@ namespace HB.FullStack.XamarinForms.Skia
             {
                 SKPoint mappedToOriginPoint = inversedMatrix.MapPoint(hitPoint);
 
-                return HitTestPath.Contains(mappedToOriginPoint.X, mappedToOriginPoint.Y);
+                return IsHitted(mappedToOriginPoint);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// point已经经过当前坐标系和Matrix转化的点
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        protected virtual bool IsHitted(SKPoint point)
+        {
+            if (HitTestPath.IsNullOrEmpty())
+            {
+                return false;
+            }
+
+            return HitTestPath.Contains(point.X, point.Y);
         }
 
         private readonly Dictionary<long, SKFigureTouchEventArgs> _fingerTouchInfos = new Dictionary<long, SKFigureTouchEventArgs>();
@@ -389,6 +298,15 @@ namespace HB.FullStack.XamarinForms.Skia
                             //华为真机会不停的Move在原地
 
                             return;
+                        }
+
+                        if (touchInfo.FirstMove == null)
+                        {
+                            touchInfo.FirstMove = true;
+                        }
+                        else
+                        {
+                            touchInfo.FirstMove = false;
                         }
 
                         if (_fingerTouchInfos.Count == 1)
@@ -592,7 +510,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
-            if (State == FigureState.Selected || State == FigureState.LongSelected)
+            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
             {
                 return;
             }
@@ -604,7 +522,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
-            if (State == FigureState.Selected || State == FigureState.LongSelected)
+            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
             {
                 return;
             }
@@ -616,11 +534,11 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            if (State == FigureState.Selected)
+            if (CurrentState == FigureState.Selected)
             {
                 SetState(FigureState.None);
             }
-            else if (State == FigureState.None)
+            else if (CurrentState == FigureState.None)
             {
                 SetState(FigureState.Selected);
             }
@@ -644,7 +562,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
 
-            if (Parent is SKFigureGroup collection)
+            if (Parent is ISKFigureGroup collection)
             {
                 if (collection.EnableMultipleSelected)
                 {
@@ -668,7 +586,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    _hitTestPath.Dispose();
+                    _hitTestPathBB.Dispose();
                     _fingerTouchInfos.Clear();
                     _longTouchInfos.Clear();
                 }
@@ -695,5 +613,183 @@ namespace HB.FullStack.XamarinForms.Skia
 
         #endregion
 
+    }
+
+    public abstract class SKFigure<TDrawInfo, TData> : SKFigure
+        where TDrawInfo : FigureDrawInfo
+        where TData : FigureData
+    {
+        public static BindableProperty DrawInfoProperty = BindableProperty.Create(
+                    nameof(DrawInfo),
+                    typeof(TDrawInfo),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWay,
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseDrawDataChanged());
+
+        public static BindableProperty InitDataProperty = BindableProperty.Create(
+                    nameof(InitData),
+                    typeof(TData),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWay,
+                    propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseInitDataChanged());
+
+
+        public static BindableProperty ResultDataProperty = BindableProperty.Create(
+                    nameof(ResultData),
+                    typeof(TData),
+                    typeof(SKFigure<TDrawInfo, TData>),
+                    null,
+                    BindingMode.OneWayToSource);
+
+        public TDrawInfo? DrawInfo { get => (TDrawInfo?)GetValue(DrawInfoProperty); set => SetValue(DrawInfoProperty, value); }
+
+        public TData? InitData { get => (TData?)GetValue(InitDataProperty); set => SetValue(InitDataProperty, value); }
+
+        public TData? ResultData { get => (TData?)GetValue(ResultDataProperty); set => SetValue(ResultDataProperty, value); }
+
+        private void OnBaseDrawDataChanged()
+        {
+            HitTestPathNeedUpdate = true;
+
+            OnDrawInfoOrCanvasSizeChanged();
+
+            InvalidateMatrixAndSurface();
+        }
+
+        private void OnBaseInitDataChanged()
+        {
+            HitTestPathNeedUpdate = true;
+
+            OnInitDataChanged();
+
+            InvalidateMatrixAndSurface();
+        }
+
+        protected abstract void OnInitDataChanged();
+
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
+        {
+            //if (DrawInfo == null)
+            //{
+            //    return;
+            //}
+
+            if (CanvasSizeChanged)
+            {
+                OnDrawInfoOrCanvasSizeChanged();
+            }
+
+            OnDrawFigure(info, canvas);
+        }
+
+        /// <summary>
+        /// 计算因为DrawInfo或者CanvasSize发生变化，引起的绘画数据变化
+        /// </summary>
+        protected abstract void OnDrawInfoOrCanvasSizeChanged();
+
+        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        {
+            //if (DrawInfo == null)
+            //{
+            //    return;
+            //}
+
+            if (HitTestPathNeedUpdate)
+            {
+                HitTestPathNeedUpdate = false;
+
+                HitTestPath.Reset();
+
+                OnUpdateFigureHitTestPath(info);
+            }
+        }
+
+        protected override void OnCaculateOutput()
+        {
+            //if (DrawInfo == null)
+            //{
+            //    return;
+            //}
+
+            OnCaculateFigureOutput(out TData? newResult);
+
+            if (newResult != null)
+            {
+                newResult.State = CurrentState;
+            }
+
+            if (newResult != ResultData)
+            {
+                ResultData = newResult;
+            }
+        }
+
+        //protected abstract void OnDrawInfoChanged();
+
+        /// <summary>
+        /// 是指按照CanvasSize、DrawData、InitData来作画
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="canvas"></param>
+        /// <param name="drawInfo"></param>
+        /// <param name="currentState"></param>
+        protected abstract void OnDrawFigure(SKImageInfo info, SKCanvas canvas);
+
+        protected abstract void OnUpdateFigureHitTestPath(SKImageInfo info);
+
+        protected abstract void OnCaculateFigureOutput(out TData? newResultData);
+
+    }
+
+    public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureDrawInfo
+    {
+        protected override void OnCaculateFigureOutput(out EmptyData? newResultData)
+        {
+            newResultData = null;
+        }
+
+        protected override void OnInitDataChanged()
+        {
+            //Do nothing
+        }
+
+    }
+
+    public abstract class SKDataFigure<TData> : SKFigure<EmptyDrawInfo, TData> where TData : FigureData
+    {
+        protected override void OnDrawInfoOrCanvasSizeChanged()
+        {
+            if (Parent is ISKFigureGroup group)
+            {
+                group.OnDrawInfoOrCanvasSizeChanged();
+            }
+        }
+    }
+
+    public class EmptyDrawInfo : FigureDrawInfo
+    {
+        protected override bool EqualsImpl(FigureDrawInfo other)
+        {
+            return other is EmptyDrawInfo;
+        }
+
+        protected override HashCode GetHashCodeImpl()
+        {
+            return new HashCode();
+        }
+    }
+    public class EmptyData : FigureData
+    {
+        protected override bool EqualsImpl(FigureData other)
+        {
+            return other is EmptyData;
+        }
+
+        protected override HashCode GetHashCodeImpl()
+        {
+            return new HashCode();
+        }
     }
 }

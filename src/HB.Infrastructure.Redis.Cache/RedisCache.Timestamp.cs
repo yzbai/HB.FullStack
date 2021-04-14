@@ -122,7 +122,7 @@ return data[3]";
                     _logger.LogError(ex2, "在因为Get异常而删除中出错，Key:{key} ", key);
                 }
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误GetAsync Timestamp, 未知错误, 删除此项缓存", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
 
@@ -170,11 +170,11 @@ return data[3]";
                 }
                 else if (rt == 8)
                 {
-                    _logger.LogWarning($"检测到，Cache Invalidation Concurrency冲突，已被阻止. key:{key}, Timestamp:{utcTicks}");
+                    _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {key}, {Timestamp}", key, utcTicks);
                 }
                 else if (rt == 9)
                 {
-                    _logger.LogWarning($"检测到，Cache Update Concurrency冲突，已被阻止. key:{key}, Timestamp:{utcTicks}");
+                    _logger.LogWarning("检测到，Cache Update Concurrency冲突，已被阻止. {key}, {Timestamp}", key, utcTicks);
                 }
 
                 return false;
@@ -192,7 +192,7 @@ return data[3]";
             {
                 _logger.LogError(ex, "分析这个");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
 
@@ -240,7 +240,7 @@ return data[3]";
             {
                 _logger.LogError(ex, "分析这个");
 
-                throw new CacheException(CacheErrorCode.Unkown, "未知错误", ex);
+                throw Exceptions.Unkown(key, null, ex);
             }
         }
     }

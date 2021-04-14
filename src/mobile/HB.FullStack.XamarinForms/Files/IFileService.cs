@@ -14,23 +14,27 @@ namespace HB.FullStack.XamarinForms.Files
 {
     public interface IFileService
     {
-        public static async Task InitializeAsync(string? assetFileName)
-        {
-            if (VersionTracking.IsFirstLaunchEver)
-            {
-                //将Assets里的初始文件解压缩到用户文件中去
 
-                if (assetFileName.IsNotNullOrEmpty())
+        //TODO: 测试，第一次运行，点击后，立马切换出去，是否正常初始化成功
+        /// <summary>
+        /// 解压初始文件，常用在下载后的第一次运行
+        /// </summary>
+        /// <param name="assetFileName"></param>
+        /// <returns></returns>
+        public static async Task UnzipInitFilesAsync(string? assetFileName)
+        {
+            //将Assets里的初始文件解压缩到用户文件中去
+
+            if (assetFileName.IsNotNullOrEmpty())
+            {
+                try
                 {
-                    try
-                    {
-                        using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                        await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        GlobalSettings.Logger.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
-                    }
+                    using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
+                    await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    GlobalSettings.Logger.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
                 }
             }
         }

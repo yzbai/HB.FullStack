@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database
 {
@@ -16,10 +17,10 @@ namespace HB.FullStack.Database
         Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity;
 
         /// <exception cref="System.DatabaseException">Ignore.</exception>
-        Task RollbackAsync(TransactionContext context);
+        Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
 
         /// <exception cref="DatabaseException"></exception>
-        Task CommitAsync(TransactionContext context);
+        Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
     }
 
 #if NETSTANDARD2_0

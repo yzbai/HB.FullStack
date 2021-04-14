@@ -85,7 +85,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
             {
-                throw new IdentityException(IdentityErrorCode.ServiceRegisterError, "AuthroizationService需要IdentityService");
+                throw Exceptions.ServiceRegisterError(cause:"AuthroizationService需要IdentityService");
             }
         }
     }

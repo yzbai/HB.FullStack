@@ -1,5 +1,5 @@
 ﻿
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -42,25 +42,21 @@ namespace HB.FullStack.Identity.Entities
         /// 
         /// </summary>
         [Password]
-        [EntityProperty]
         public string? PasswordHash { get; set; }
 
         /// <summary>
         /// "手机号码是否验证"
         /// </summary>
-        [EntityProperty]
         public bool MobileConfirmed { get; set; }
 
         /// <summary>
         /// "邮箱是否验证"
         /// </summary>
-        [EntityProperty]
         public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// "Two Factor"
         /// </summary>
-        [EntityProperty]
         public bool TwoFactorEnabled { get; set; }
 
         public User() { }

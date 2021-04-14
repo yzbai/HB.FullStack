@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Mapper;
 
@@ -63,7 +63,7 @@ namespace HB.FullStack.Database
 
             if (_databaseSettings.Version < 0)
             {
-                throw new DatabaseException(DatabaseErrorCode.VersionShouldBePositiveMessage);
+                throw Exceptions.VersionShouldBePositive(_databaseSettings.Version);
             }
         }
 
@@ -84,6 +84,8 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
+            using IDisposable? scope = _logger.BeginScope("数据库初始化");
+
             if (_databaseSettings.AutomaticCreateTable)
             {
                 IEnumerable<Migration>? initializeMigrations = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == 1);
@@ -101,7 +103,6 @@ namespace HB.FullStack.Database
             }
 
             _logger.LogInformation("数据初始化成功！");
-
         }
 
         /// <summary>
@@ -126,7 +127,7 @@ namespace HB.FullStack.Database
                         if (_databaseSettings.Version != 1)
                         {
                             await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                            throw new DatabaseException(DatabaseErrorCode.DatabaseTableCreateError, $"Database:{databaseName} does not exists, database Version must be 1");
+                            throw Exceptions.TableCreateError(_databaseSettings.Version, databaseName, "Database does not exists, database Version must be 1");
                         }
 
                         await CreateTablesByDatabaseAsync(databaseName, transactionContext).ConfigureAwait(false);
@@ -140,7 +141,7 @@ namespace HB.FullStack.Database
                         {
                             if (curInitMigrations.Count() > 1)
                             {
-                                throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Database : {databaseName} have more than one Initialize Migrations");
+                                throw Exceptions.MigrateError(databaseName, "Database have more than one Initialize Migrations");
                             }
 
                             await ApplyMigration(databaseName, transactionContext, curInitMigrations.First()).ConfigureAwait(false);
@@ -158,7 +159,7 @@ namespace HB.FullStack.Database
                 {
                     await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseTableCreateError, $"Database:{databaseName}", ex);
+                    throw Exceptions.TableCreateError(_databaseSettings.Version, databaseName, "Unkown", ex);
                 }
             }
         }
@@ -168,7 +169,7 @@ namespace HB.FullStack.Database
         {
             var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, false);
 
-            _logger.LogInformation($"Table创建：SQL:{command.CommandText}");
+            _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
 
             return _databaseEngine.ExecuteCommandNonQueryAsync(transContext.Transaction, def.DatabaseName!, command);
         }
@@ -187,7 +188,7 @@ namespace HB.FullStack.Database
         {
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, "Resources.MigrationVersionErrorMessage");
+                throw Exceptions.MigrateError("", "Migraion NewVersion <= OldVersion");
             }
 
             foreach (string databaseName in _databaseEngine.DatabaseNames)
@@ -202,7 +203,7 @@ namespace HB.FullStack.Database
                     {
                         if (migrations == null)
                         {
-                            throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Lack Migrations for {sys.DatabaseName}");
+                            throw Exceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
                         }
 
                         IEnumerable<Migration> curOrderedMigrations = migrations
@@ -211,15 +212,15 @@ namespace HB.FullStack.Database
 
                         if (curOrderedMigrations == null)
                         {
-                            throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Lack Migrations for {sys.DatabaseName}");
+                            throw Exceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
                         }
 
-                        if (!CheckMigration(sys.Version, _databaseSettings.Version, curOrderedMigrations))
+                        if (!CheckMigrations(sys.Version, _databaseSettings.Version, curOrderedMigrations!))
                         {
-                            throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Can not perform Migration on ${sys.DatabaseName}, because the migrations provided is not sufficient.");
+                            throw Exceptions.MigrateError(sys.DatabaseName, "Migrations not sufficient.");
                         }
 
-                        foreach (Migration migration in curOrderedMigrations)
+                        foreach (Migration migration in curOrderedMigrations!)
                         {
                             await ApplyMigration(databaseName, transactionContext, migration).ConfigureAwait(false);
                         }
@@ -238,14 +239,16 @@ namespace HB.FullStack.Database
                 {
                     await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseMigrateError, $"Database:{databaseName}", ex);
+                    throw Exceptions.MigrateError(databaseName, "", ex);
                 }
             }
         }
 
         private async Task ApplyMigration(string databaseName, TransactionContext transactionContext, Migration migration)
         {
-            _logger.LogInformation($"数据库Migration, database:{databaseName}, from :{migration.OldVersion}, to :{migration.NewVersion}, sql:{migration.SqlStatement}");
+            _logger.LogInformation(
+                "数据库Migration, {DatabaseName}, from {OldVersion}, to {NewVersion}, {Sql}", 
+                databaseName, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
 
             if (migration.SqlStatement.IsNotNullOrEmpty())
             {
@@ -260,7 +263,14 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static bool CheckMigration(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
+        /// <summary>
+        /// 检查是否依次提供了不中断的Migration
+        /// </summary>
+        /// <param name="startVersion"></param>
+        /// <param name="endVersion"></param>
+        /// <param name="curOrderedMigrations"></param>
+        /// <returns></returns>
+        private static bool CheckMigrations(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
         {
             int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
 
@@ -394,8 +404,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                string detail = $"Scalar retrieve return more than one result. From:{fromCondition}, Where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseFoundTooMuch, $"Type:{typeof(T).FullName}, {detail}");
+                throw Exceptions.FoundTooMuch(type: typeof(T).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -435,8 +444,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                string detail = $"from:{fromCondition}, where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{selectDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(type: selectDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -469,9 +477,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                string detail = $" from:{fromCondition}, where:{whereCondition}";
-
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -526,8 +532,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                string detail = $"from:{fromCondition}, where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -760,8 +765,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                string detail = $"from:{fromCondition}, where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{sourceEntityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -800,8 +804,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                string message = $"Scalar retrieve return more than one result. From:{fromCondition}, Where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseFoundTooMuch, $"Type:{typeof(TSource).FullName}, {message}");
+                throw Exceptions.FoundTooMuch(typeof(TSource).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -867,8 +870,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                string detail = $"from:{fromCondition}, where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{sourceEntityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -909,8 +911,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                string message = $"Scalar retrieve return more than one result. From:{fromCondition}, Where:{whereCondition}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseFoundTooMuch, $"Type:{typeof(TSource).FullName}, {message}");
+                throw Exceptions.FoundTooMuch(typeof(TSource).FullName, fromCondition.ToStatement(), whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -947,7 +948,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);
                 }
@@ -961,7 +962,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, Item:{SerializeUtil.ToJson(item)}", ex);
+                throw Exceptions.UnKown(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -976,8 +977,6 @@ namespace HB.FullStack.Database
                 item.Version = -1;
             }
         }
-
-
 
         /// <summary>
         /// Version控制,反应Version变化
@@ -1005,16 +1004,16 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName},Entity:{SerializeUtil.ToJson(item)}");
+                    throw Exceptions.NotFound(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
                 }
                 else
                 {
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseFoundTooMuch, $"Type:{entityDef.EntityFullName}, Multiple Rows Affected instead of one. Something go wrong. Entity:{SerializeUtil.ToJson(item)}");
+                    throw Exceptions.FoundTooMuch(entityDef.EntityFullName, item: SerializeUtil.ToJson(item));
                 }
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);
                 }
@@ -1028,8 +1027,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                string detail = $"Item:{SerializeUtil.ToJson(item)}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -1074,14 +1072,14 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName}, Entity:{SerializeUtil.ToJson(item)}");
+                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(item), "");
                 }
 
-                throw new DatabaseException(DatabaseErrorCode.DatabaseFoundTooMuch, $"Type:{entityDef.EntityFullName}, Multiple Rows Affected instead of one. Something go wrong. Entity:{SerializeUtil.ToJson(item)}");
+                throw Exceptions.FoundTooMuch(entityDef.EntityFullName, SerializeUtil.ToJson(item));
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);
                 }
@@ -1095,8 +1093,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                string detail = $"Item:{SerializeUtil.ToJson(item)}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -1180,7 +1177,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItems(items);
                 }
@@ -1194,8 +1191,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1253,7 +1249,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName}, BatchUpdate wrong, not found the {count}th data item. Items:{SerializeUtil.ToJson(items)}");
+                        throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "BatchUpdate");
                     }
 
                     count++;
@@ -1261,12 +1257,12 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName}, BatchUpdate wrong number return. Some data item not found. Items:{SerializeUtil.ToJson(items)}");
+                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItems(items);
                 }
@@ -1280,8 +1276,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1339,7 +1334,7 @@ namespace HB.FullStack.Database
 
                     if (affected != 1)
                     {
-                        throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName} BatchDelete wrong, not found the {" + count + "}th data item. Items:{SerializeUtil.ToJson(items)}");
+                        throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
                     }
 
                     count++;
@@ -1347,12 +1342,12 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw new DatabaseException(DatabaseErrorCode.DatabaseNotFound, $"Type:{entityDef.EntityFullName}, BatchDelete wrong number return. Some data item not found. Items:{SerializeUtil.ToJson(items)}");
+                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCode.DatabaseExecuterError)
+                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItems(items);
                 }
@@ -1366,8 +1361,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{ entityDef.EntityFullName}, {detail}", ex);
+                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1404,7 +1398,7 @@ namespace HB.FullStack.Database
         {
             if (!entityDef.DatabaseWriteable)
             {
-                throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Database:{entityDef.DatabaseName}");
+                throw Exceptions.NotWriteable(type: entityDef.EntityFullName, database: entityDef.DatabaseName);
             }
         }
     }

@@ -38,7 +38,9 @@ namespace SkiaSharp
         {
             Assembly assembly = type.GetTypeInfo().Assembly;
 
-            using Stream stream = assembly.GetManifestResourceStream(resourceID) ?? throw new MobileException(MobileErrorCode.ResourceNotFound, $"ResourceId:{resourceID}");
+            using Stream stream = assembly.GetManifestResourceStream(resourceID)
+                ?? throw MobileExceptions.ResourceNotFound(resourceId: resourceID);
+
             return SKBitmap.Decode(stream);
         }
 

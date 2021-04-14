@@ -85,7 +85,7 @@ namespace HB.FullStack.Repository
         {
             if (UtcTikcs.IsEmpty())
             {
-                throw new RepositoryException(RepositoryErrorCode.UtcTicksNotSet, $"ResourceType:{ResourceType}, CacheKey:{CacheKey}, CacheValue:{CacheValue}");
+                throw Exceptions.UtcTicksNotSet(resourceType:ResourceType, cacheKey:CacheKey, cacheValue:CacheValue);
             }
         }
 
@@ -93,7 +93,7 @@ namespace HB.FullStack.Repository
         {
             if (CacheValue == null)
             {
-                throw new RepositoryException(RepositoryErrorCode.CacheValueNotSet, $"ResourceType:{ResourceType}, CacheKey:{CacheKey}");
+                throw Exceptions.CacheValueNotSet(resourceType:ResourceType, cacheKey:CacheKey);
             }
         }
 
@@ -101,7 +101,7 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(CacheKey))
             {
-                throw new RepositoryException(RepositoryErrorCode.CacheKeyNotSet, $"ResourceType:{ResourceType}");
+                throw Exceptions.CacheKeyNotSet(resourceType:ResourceType);
             }
         }
     }

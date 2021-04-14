@@ -10,7 +10,7 @@ using HB.FullStack.Database.SQL;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     internal static class EntityDefFactory
     {
@@ -27,7 +27,7 @@ namespace HB.FullStack.Database.Def
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
-            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DefaultVarcharLength : databaseSettings.DefaultVarcharLength;
+            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -175,7 +175,7 @@ namespace HB.FullStack.Database.Def
 
             if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw new DatabaseException(DatabaseErrorCode.NotADatabaseEntity, $"Type不是Entity，或者没有DatabaseEntityAttribute. Type:{entityType}");
+                throw Exceptions.EntityError(type:entityType.FullName,"", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
             }
 
             EntityDef entityDef = new EntityDef
@@ -199,20 +199,20 @@ namespace HB.FullStack.Database.Def
 
                 if (entityPropertyAttribute == null)
                 {
-                    if (info.Name == nameof(Entity.Version) || info.Name == nameof(Entity.Deleted) || info.Name == nameof(Entity.LastTime) || info.Name == nameof(Entity.CreateTime))
+                    IgnoreEntityPropertyAttribute? ignoreAttribute = info.GetCustomAttribute<IgnoreEntityPropertyAttribute>(true);
+
+                    if(ignoreAttribute != null)
                     {
-                        entityPropertyAttribute = new EntityPropertyAttribute();
-                    }
-                    else if (info.Name == nameof(Entity.LastUser))
-                    {
-                        entityPropertyAttribute = new EntityPropertyAttribute
-                        {
-                            MaxLength = LengthConvention.LastUserMaxLength
-                        };
+                        continue;
                     }
                     else
                     {
-                        continue;
+                        entityPropertyAttribute = new EntityPropertyAttribute();
+                    }
+
+                    if (info.Name == nameof(Entity.LastUser))
+                    {
+                        entityPropertyAttribute.MaxLength = LengthConvention.LAST_USER_MAX_LENGTH;
                     }
                 }
 
@@ -252,10 +252,10 @@ namespace HB.FullStack.Database.Def
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体属性缺少Set方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
+                ?? throw Exceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause:"实体属性缺少Set方法. ");
 
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"实体属性缺少Get方法. Entity:{entityDef.EntityFullName}, Property:{propertyInfo.Name}");
+                ?? throw Exceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
 
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;

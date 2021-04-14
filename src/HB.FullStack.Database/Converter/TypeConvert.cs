@@ -6,7 +6,7 @@ using System.Data;
 using System.Globalization;
 using System.Reflection;
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
@@ -212,7 +212,7 @@ namespace HB.FullStack.Database.Converter
                 //null => "null",
                 //Enum e => e.ToString(),
                 DBNull _ => "null",
-                DateTime _ => throw new DatabaseException(DatabaseErrorCode.UseDateTimeOffsetOnly),
+                DateTime _ => throw Exceptions.UseDateTimeOffsetOnly(),
                 DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", GlobalSettings.Culture),
                 bool b => b ? "1" : "0",
                 _ => dbValue.ToString()!
@@ -257,7 +257,7 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw new DatabaseException(DatabaseErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
+            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName:(propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName:propertyDef.Name);
         }
 
         /// <summary>
@@ -290,8 +290,7 @@ namespace HB.FullStack.Database.Converter
             {
                 return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
             }
-
-            throw new DatabaseException(DatabaseErrorCode.DatabaseUnSupported, $"Unspoorted Type:{propertyDef.NullableUnderlyingType ?? propertyDef.Type}, Property:{propertyDef.Name}, Entity:{propertyDef.EntityDef.EntityFullName}");
+            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)

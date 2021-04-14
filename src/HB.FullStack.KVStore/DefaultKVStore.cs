@@ -77,7 +77,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{typeof(T).FullName}, StoreName:{entityDef.KVStoreName}, EntityName: { entityDef.EntityType.FullName}, Key:{SerializeUtil.ToJson(keys)}", ex);
+                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: keys, innerException: ex);
             }
         }
 
@@ -87,10 +87,9 @@ namespace HB.FullStack.KVStore
         /// <exception cref="KVStoreException"></exception>
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
+            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
             try
             {
-                KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
-
                 IEnumerable<Tuple<string?, int>> tuples = await _engine.EntityGetAllAsync(
                     entityDef.KVStoreName,
                     entityDef.EntityType.FullName!).ConfigureAwait(false);
@@ -99,7 +98,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{typeof(T).FullName}", ex);
+                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: null, innerException: ex);
             }
         }
 
@@ -128,9 +127,10 @@ namespace HB.FullStack.KVStore
 
             ThrowIf.NotValid(items, nameof(items));
 
+            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+
             try
             {
-                KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
                 foreach (var t in items)
                 {
@@ -153,7 +153,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{typeof(T).FullName}, Items:{SerializeUtil.ToJson(items)}", ex);
+                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
             }
         }
 
@@ -182,9 +182,10 @@ namespace HB.FullStack.KVStore
 
             ThrowIf.NotValid(items, nameof(items));
 
+            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+
             try
             {
-                KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
                 IEnumerable<int> originalVersions = items.Select(t => t.Version).ToArray();
 
@@ -210,7 +211,7 @@ namespace HB.FullStack.KVStore
 
             catch (Exception ex) when (!(ex is KVStoreException))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{typeof(T).FullName}, Items:{SerializeUtil.ToJson(items)}", ex);
+                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
             }
         }
 
@@ -221,9 +222,10 @@ namespace HB.FullStack.KVStore
         /// <exception cref="KVStoreException"></exception>
         public async Task DeleteAllAsync<T>() where T : KVStoreEntity, new()
         {
+            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+
             try
             {
-                KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
                 await _engine.EntityDeleteAllAsync(
                    entityDef.KVStoreName,
@@ -232,7 +234,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{typeof(T).FullName}", ex);
+                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, null, ex);
             }
         }
 
@@ -254,12 +256,13 @@ namespace HB.FullStack.KVStore
 
             if (keys.Count() != versions.Count())
             {
-                throw new KVStoreException(KVStoreErrorCode.VersionsKeysNotEqualErrorMessage);
+                throw Exceptions.VersionsKeysNotEqualError();
             }
+
+            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             try
             {
-                KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
                 await _engine.EntityDeleteAsync(
                     entityDef.KVStoreName,
@@ -270,7 +273,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (!(ex is KVStoreException))
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{typeof(T).FullName}, keyValues:{SerializeUtil.ToJson(keys)}, versions:{SerializeUtil.ToJson(versions)}", ex);
+                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, keys: keys, values: versions, innerException: ex);
             }
         }
 

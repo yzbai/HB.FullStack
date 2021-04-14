@@ -8,25 +8,14 @@ using HB.FullStack.Lock;
 
 namespace System
 {
-    public class LockException : Exception
+    public class LockException : ErrorCodeException
     {
-        public LockErrorCode ErrorCode { get; set; }
-        public override string Message => $"ErrorCode:{ErrorCode}, Message:{base.Message}";
-
-
-        public LockException(LockErrorCode errorCode) : base()
+        public LockException(ErrorCode errorCode) : base(errorCode)
         {
-            ErrorCode = errorCode;
         }
 
-        public LockException(LockErrorCode errorCode, string message) : base(message)
+        public LockException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
-            ErrorCode = errorCode;
-        }
-
-        public LockException(LockErrorCode errorCode, string message, Exception innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Server.ApiKeyAuthentication
+namespace HB.FullStack.WebApi.ApiKeyAuthentication
 {
     public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyOptions>
     {
@@ -60,9 +60,7 @@ namespace HB.FullStack.Server.ApiKeyAuthentication
             Response.StatusCode = 401;
             Response.ContentType = "application/problem+json";
 
-            ApiError errorResponse = new ApiError(ApiErrorCode.NoAuthority);
-
-            return Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
+            return Response.WriteAsync(SerializeUtil.ToJson(ApiErrorCodes.NoAuthority));
         }
 
         protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
@@ -70,9 +68,7 @@ namespace HB.FullStack.Server.ApiKeyAuthentication
             Response.StatusCode = 403;
             Response.ContentType = "application/problem+json";
 
-            ApiError errorResponse = new ApiError(ApiErrorCode.NoAuthority);
-
-            return Response.WriteAsync(SerializeUtil.ToJson(errorResponse));
+            return Response.WriteAsync(SerializeUtil.ToJson(ApiErrorCodes.NoAuthority));
         }
     }
 }

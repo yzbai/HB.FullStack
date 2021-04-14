@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Server.ApiKeyAuthentication;
+﻿using HB.FullStack.WebApi.ApiKeyAuthentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using System;

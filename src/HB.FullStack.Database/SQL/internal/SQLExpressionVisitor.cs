@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -266,7 +266,7 @@ namespace HB.FullStack.Database.SQL
 
                 EntityDef entityDef = EntityDefFactory.GetDef(entityType)!;
                 EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
-                    ?? throw new DatabaseException(DatabaseErrorCode.DatabaseDefError, $"Lack property definition: {m.Member.Name} of Entity:{entityDef.EntityFullName}");
+                    ?? throw Exceptions.EntityError(entityDef.EntityFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
 

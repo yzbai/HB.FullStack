@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Server
+namespace HB.FullStack.WebApi
 {
     [ApiController]
     public class ExceptionController : BaseController
@@ -25,9 +25,7 @@ namespace HB.FullStack.Server
 
             _logger.LogError(exceptionHandlerFeature.Error, "Error From ExceptionController");
 
-            ApiError apiErrorResponse = new ApiError(ApiErrorCode.FromExceptionController, exceptionHandlerFeature.Error.Message);
-
-            return new BadRequestObjectResult(apiErrorResponse)
+            return new BadRequestObjectResult(ApiErrorCodes.FromExceptionController.AppendDetail(exceptionHandlerFeature.Error.Message))
             {
                 ContentTypes = { "application/problem+json" }
             };

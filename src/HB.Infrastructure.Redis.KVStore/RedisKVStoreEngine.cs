@@ -111,7 +111,7 @@ return array";
 
             InitLoadedLuas();
 
-            _logger.LogInformation($"RedisKVStoreEngine初始化完成");
+            _logger.LogInformation("RedisKVStoreEngine初始化完成");
         }
 
         private void InitLoadedLuas()
@@ -152,7 +152,7 @@ return array";
                 return loadedLuas2;
             }
 
-            throw new KVStoreException(KVStoreErrorCode.CacheLoadedLuaNotFound, $"Can not found LoadedLua Redis Instance: {instanceName}");
+            throw Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
         }
 
         /// <summary>
@@ -198,15 +198,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisConnectionFailed, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(type: entityName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisTimeout, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisTimeout(type: entityName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{entityName}", ex);
+                throw Exceptions.Unkown(type: entityName, innerException: ex);
             }
         }
 
@@ -256,15 +256,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisConnectionFailed, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(type: entityName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisTimeout, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisTimeout(type: entityName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{entityName}", ex);
+                throw Exceptions.Unkown(entityName, ex);
             }
         }
 
@@ -300,11 +300,11 @@ return array";
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                KVStoreErrorCode error = MapResultToErrorCode(result);
+                ErrorCode error = MapResultToErrorCode(result);
 
-                if (error != KVStoreErrorCode.OK)
+                if (error != ErrorCode.Empty)
                 {
-                    throw new KVStoreException(error, $"Type:{entityName}");
+                    throw Exceptions.WriteError(type: entityName, storeName:storeName, keys:entityKeys, values:entityJsons, errorCode:error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -317,15 +317,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisConnectionFailed, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisTimeout, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{entityName}", ex);
+                throw Exceptions.Unkown(entityName, storeName, entityKeys, ex);
             }
         }
 
@@ -378,11 +378,11 @@ return array";
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                KVStoreErrorCode error = MapResultToErrorCode(result);
+                ErrorCode error = MapResultToErrorCode(result);
 
-                if (error != KVStoreErrorCode.OK)
+                if (error != ErrorCode.Empty)
                 {
-                    throw new KVStoreException(error, $"Type:{entityName}");
+                    throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityJsons, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -395,15 +395,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisConnectionFailed, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisTimeout, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{entityName}", ex);
+                throw Exceptions.Unkown(entityName, ex);
             }
         }
 
@@ -460,11 +460,11 @@ return array";
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                KVStoreErrorCode error = MapResultToErrorCode(result);
+                ErrorCode error = MapResultToErrorCode(result);
 
-                if (error != KVStoreErrorCode.OK)
+                if (error != ErrorCode.Empty)
                 {
-                    throw new KVStoreException(error, $"Type:{entityName}");
+                    throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityVersions, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -477,15 +477,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisConnectionFailed, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisTimeout, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{entityName}", ex);
+                throw Exceptions.Unkown(entityName, ex);
             }
         }
 
@@ -527,15 +527,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisConnectionFailed, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreRedisTimeout, $"Type:{entityName}", ex);
+                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
             }
             catch (Exception ex)
             {
-                throw new KVStoreException(KVStoreErrorCode.KVStoreError, $"Type:{entityName}", ex);
+                throw Exceptions.Unkown(entityName, ex);
             }
         }
 
@@ -560,7 +560,7 @@ return array";
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw new KVStoreException(KVStoreErrorCode.NoSuchInstance , $"Can not found Such Redis Instance: {instanceName}");
+            throw Exceptions.NoSuchInstance(instanceName:instanceName);
         }
 
         private string EntityNameKey(string entityName)
@@ -573,17 +573,17 @@ return array";
             return _options.ApplicationName + entityName + "_V";
         }
 
-        private static KVStoreErrorCode MapResultToErrorCode(RedisResult redisResult)
+        private static ErrorCode MapResultToErrorCode(RedisResult redisResult)
         {
             int result = (int)redisResult;
 
-            KVStoreErrorCode error = result switch
+            ErrorCode error = result switch
             {
-                9 => KVStoreErrorCode.KVStoreExistAlready,
-                7 => KVStoreErrorCode.KVStoreVersionNotMatched,
-                0 => KVStoreErrorCode.KVStoreError,
-                1 => KVStoreErrorCode.OK,
-                _ => KVStoreErrorCode.KVStoreError,
+                9 => KVStoreErrorCodes.KVStoreExistAlready,
+                7 => KVStoreErrorCodes.KVStoreVersionNotMatched,
+                0 => KVStoreErrorCodes.KVStoreError,
+                1 => ErrorCode.Empty,
+                _ => KVStoreErrorCodes.KVStoreError,
             };
 
             return error;
