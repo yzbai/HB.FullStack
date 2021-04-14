@@ -7,23 +7,22 @@ namespace HB.FullStack.Identity.Entities
 {
     public class SignInToken : IdGenEntity
     {
-        [Required]
+        [LongId]
         [ForeignKey(typeof(User))]
-        [EntityProperty(NotNull = true)]
         public long UserId { get; set; }
 
         [Required]
         [EntityProperty(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
-        [EntityProperty]
+        
         public DateTimeOffset? ExpireAt { get; set; }
 
-        [EntityProperty]
-        public long RefreshCount { get; set; } = 0;
+        
+        public long RefreshCount { get; set; }
 
-        [EntityProperty]
-        public bool Blacked { get; set; } = false;
+        
+        public bool Blacked { get; set; }
 
 
         #region Device
@@ -44,27 +43,27 @@ namespace HB.FullStack.Identity.Entities
         #region Device Infos
 
         [Required]
-        [EntityProperty]
+        
         public string DeviceName { get; set; } = null!;
 
         [Required]
-        [EntityProperty]
+        
         public string DeviceModel { get; set; } = null!;
 
         [Required]
-        [EntityProperty]
+        
         public string DeviceOSVersion { get; set; } = null!;
 
         [Required]
-        [EntityProperty]
+        
         public string DevicePlatform { get; set; } = null!;
 
         [Required]
-        [EntityProperty]
+        
         public DeviceIdiom DeviceIdiom { get; set; } = DeviceIdiom.Unknown;
 
         [Required]
-        [EntityProperty]
+        
         public string DeviceType { get; set; } = null!;
 
         #endregion

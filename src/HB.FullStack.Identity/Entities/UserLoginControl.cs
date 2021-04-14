@@ -11,7 +11,7 @@ namespace HB.FullStack.Identity.Entities
 {
     public class UserLoginControl : KVStoreEntity
     {
-        [Required]
+        [LongId]
         [KVStoreKey]
         public long UserId { get; set; }
 

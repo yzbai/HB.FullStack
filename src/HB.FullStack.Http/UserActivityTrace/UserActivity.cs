@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
 using HB.FullStack.Database.Entities;
+using HB.FullStack.Identity.Entities;
 
 namespace HB.FullStack.WebApi.UserActivityTrace
 {
@@ -38,16 +40,18 @@ namespace HB.FullStack.WebApi.UserActivityTrace
             ResultError = resultError;
         }
 
-        [EntityProperty]
+        [LongId]
+        [ForeignKey(typeof(User))]
         public long? UserId { get; set; }
 
-        [EntityProperty]
+        [LongId]
+        [ForeignKey(typeof(SignInToken))]
         public long? SignInTokenId { get; set; }
 
-        [EntityProperty]
+        
         public string? Ip { get; set; }
 
-        [EntityProperty]
+        
         public string? Url { get; set; }
 
         [EntityProperty(MaxLength = 10)]
@@ -56,10 +60,10 @@ namespace HB.FullStack.WebApi.UserActivityTrace
         [EntityProperty(MaxLength = MAX_ARGUMENTS_LENGTH)]
         public string? Arguments { get; set; }
 
-        [EntityProperty]
+        
         public int? ResultStatusCode { get; set; }
 
-        [EntityProperty]
+        
         public string? ResultType { get; set; }
         
         [EntityProperty(MaxLength = MAX_RESULT_ERROR_LENGTH)]

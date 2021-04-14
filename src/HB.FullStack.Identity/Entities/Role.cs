@@ -13,7 +13,7 @@ namespace HB.FullStack.Identity.Entities
         [EntityProperty(MaxLength = 500, NotNull = true)]
         public string DisplayName { get; set; } = default!;
 
-        [EntityProperty]
+        
         public bool IsActivated { get; set; }
 
         [EntityProperty(MaxLength = 1024)]

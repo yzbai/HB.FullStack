@@ -199,20 +199,20 @@ namespace HB.FullStack.Database.Entities
 
                 if (entityPropertyAttribute == null)
                 {
-                    if (info.Name == nameof(Entity.Version) || info.Name == nameof(Entity.Deleted) || info.Name == nameof(Entity.LastTime) || info.Name == nameof(Entity.CreateTime))
+                    IgnoreEntityPropertyAttribute? ignoreAttribute = info.GetCustomAttribute<IgnoreEntityPropertyAttribute>(true);
+
+                    if(ignoreAttribute != null)
                     {
-                        entityPropertyAttribute = new EntityPropertyAttribute();
-                    }
-                    else if (info.Name == nameof(Entity.LastUser))
-                    {
-                        entityPropertyAttribute = new EntityPropertyAttribute
-                        {
-                            MaxLength = LengthConvention.LAST_USER_MAX_LENGTH
-                        };
+                        continue;
                     }
                     else
                     {
-                        continue;
+                        entityPropertyAttribute = new EntityPropertyAttribute();
+                    }
+
+                    if (info.Name == nameof(Entity.LastUser))
+                    {
+                        entityPropertyAttribute.MaxLength = LengthConvention.LAST_USER_MAX_LENGTH;
                     }
                 }
 
