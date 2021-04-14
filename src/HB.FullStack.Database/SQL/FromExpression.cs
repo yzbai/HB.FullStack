@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Runtime.Versioning;
 using System.Text;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.SQL

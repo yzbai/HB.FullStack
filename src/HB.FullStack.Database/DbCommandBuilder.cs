@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;

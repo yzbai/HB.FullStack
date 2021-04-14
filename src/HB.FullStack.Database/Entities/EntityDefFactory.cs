@@ -10,7 +10,7 @@ using HB.FullStack.Database.SQL;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     internal static class EntityDefFactory
     {
@@ -27,7 +27,7 @@ namespace HB.FullStack.Database.Def
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
-            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DefaultVarcharLength : databaseSettings.DefaultVarcharLength;
+            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -207,7 +207,7 @@ namespace HB.FullStack.Database.Def
                     {
                         entityPropertyAttribute = new EntityPropertyAttribute
                         {
-                            MaxLength = LengthConvention.LastUserMaxLength
+                            MaxLength = LengthConvention.LAST_USER_MAX_LENGTH
                         };
                     }
                     else

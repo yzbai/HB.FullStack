@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     /// <summary>
     /// 对TableDomain中的属性的数据库表字段描述

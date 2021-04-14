@@ -8,7 +8,7 @@ using System.Text;
 
 using HB.FullStack.Common;
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.SQL
@@ -454,12 +454,12 @@ namespace HB.FullStack.Database.SQL
 					}
 				}
 
-				if (length >= LengthConvention.MaxVarcharLength) //因为utf8mb4编码，一个汉字4个字节
+				if (length >= LengthConvention.MAX_VARCHAR_LENGTH) //因为utf8mb4编码，一个汉字4个字节
 				{
 					dbTypeStatement = "MEDIUMTEXT";
 				}
 
-				if (length >= LengthConvention.MaxMediumTextLength)
+				if (length >= LengthConvention.MAX_MEDIUM_TEXT_LENGTH)
 				{
 					throw Exceptions.EntityError(propertyDef.EntityDef.EntityFullName, propertyDef.Name, "字段长度太长");
 				}

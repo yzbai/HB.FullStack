@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {

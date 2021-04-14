@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     public abstract class DatabaseEntity : Entity
     {

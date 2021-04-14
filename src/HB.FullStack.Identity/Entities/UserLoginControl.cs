@@ -1,5 +1,5 @@
 ﻿
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.KVStore;
 using HB.FullStack.KVStore.Entities;
 using System;

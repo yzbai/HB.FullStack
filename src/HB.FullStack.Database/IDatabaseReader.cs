@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database

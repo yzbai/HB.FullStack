@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.SQL;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]

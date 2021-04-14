@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
 

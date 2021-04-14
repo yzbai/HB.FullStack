@@ -1,7 +1,7 @@
 ﻿using HB.FullStack.Cache;
 using HB.FullStack.Common;
 using HB.FullStack.Database;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Lock.Memory;
 using Microsoft.Extensions.Logging;
 

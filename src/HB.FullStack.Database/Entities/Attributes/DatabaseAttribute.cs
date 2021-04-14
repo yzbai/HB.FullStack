@@ -2,7 +2,7 @@
 
 using System;
 
-namespace HB.FullStack.Database.Def
+namespace HB.FullStack.Database.Entities
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class DatabaseAttribute : Attribute

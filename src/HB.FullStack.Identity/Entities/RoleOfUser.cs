@@ -1,5 +1,5 @@
 ﻿
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System;
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database
 {
