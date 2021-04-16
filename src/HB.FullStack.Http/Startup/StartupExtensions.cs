@@ -162,7 +162,7 @@ namespace System
 
         public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
         {
-            Assembly httpFrameworkAssembly = typeof(ExceptionController).Assembly;
+            Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
 
             //services.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
 

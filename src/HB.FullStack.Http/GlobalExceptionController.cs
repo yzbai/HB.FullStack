@@ -9,16 +9,16 @@ using System.Text;
 namespace HB.FullStack.WebApi
 {
     [ApiController]
-    public class ExceptionController : BaseController
+    public class GlobalExceptionController : BaseController
     {
         private readonly ILogger _logger;
 
-        public ExceptionController(ILogger<ExceptionController> logger)
+        public GlobalExceptionController(ILogger<GlobalExceptionController> logger)
         {
             _logger = logger;
         }
 
-        [Route("exception")]
+        [Route("GlobalException")]
         public IActionResult Exception()
         {
             IExceptionHandlerFeature exceptionHandlerFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();

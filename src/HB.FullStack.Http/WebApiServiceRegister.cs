@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FullStackServerServiceRegister
     {
-        public static IServiceCollection AddServerService(this IServiceCollection services)
+        public static IServiceCollection AddWebApiServerService(this IServiceCollection services)
         {
             services.AddOptions();
 
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddCore(IServiceCollection services)
         {
-            //HB.FullStack.Server
+            //HB.FullStack.WebApi
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<IPublicResourceTokenService, PublicResourceTokenService>();
 
