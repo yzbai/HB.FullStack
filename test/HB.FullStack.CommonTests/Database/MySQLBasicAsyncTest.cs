@@ -2,8 +2,8 @@ using ClassLibrary1;
 
 using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.Def;
 using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;

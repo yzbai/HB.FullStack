@@ -1,7 +1,7 @@
 ﻿using HB.FullStack.Common;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 
 using System;
 using System.Collections.Generic;
@@ -77,7 +77,7 @@ namespace HB.FullStack.DatabaseTests.Data
 
     }
 
- 
+
 
     [CacheEntity]
     public class PublisherEntity : IdGenEntity
@@ -92,7 +92,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = LengthConvention.MaxVarcharLength / 2, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -219,7 +219,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = LengthConvention.MaxVarcharLength / 2, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ namespace HB.FullStack.Benchmark.Database
 
             _transaction = serviceFixture.ServiceProvider.GetRequiredService<ITransaction>();
 
-            _transactionContext = _transaction.BeginTransactionAsync<Post>(System.Data.IsolationLevel.ReadUncommitted).Result;
+            _transactionContext = _transaction.BeginTransactionAsync<Post>(IsolationLevel.ReadUncommitted).Result;
         }
 
         public async Task<IPost?> GetItemAsObjectAsync(int Id)

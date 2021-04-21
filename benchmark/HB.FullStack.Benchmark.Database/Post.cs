@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
+
 using OrmBenchmark.Core;
 
 namespace HB.FullStack.Benchmark.Database

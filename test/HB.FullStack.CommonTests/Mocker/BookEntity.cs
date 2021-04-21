@@ -1,7 +1,8 @@
-﻿using HB.FullStack.Database.Def;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.DatabaseTests.Data
 {
