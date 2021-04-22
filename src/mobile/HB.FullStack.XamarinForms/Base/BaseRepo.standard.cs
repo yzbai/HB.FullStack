@@ -10,13 +10,13 @@ using HB.FullStack.XamarinForms.Api;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Database;
-using HB.FullStack.Database.Def;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using HB.FullStack.XamarinForms.Base;
 using Microsoft;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.XamarinForms.Base
 {
