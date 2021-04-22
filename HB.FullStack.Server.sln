@@ -53,6 +53,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructures", "Infrastr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{3BAF3F98-EE2A-467F-BF25-2BAB1409F511}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Tencent", "src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj", "{7A73BA23-17B7-45CE-8D8F-23161FDFC55B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{05d89622-f591-4330-affc-2ca4987addef}*SharedItemsImports = 13
@@ -134,6 +136,10 @@ Global
 		{3C33BC22-DF68-4C84-A940-E5F2DE261FA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C33BC22-DF68-4C84-A940-E5F2DE261FA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C33BC22-DF68-4C84-A940-E5F2DE261FA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A73BA23-17B7-45CE-8D8F-23161FDFC55B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A73BA23-17B7-45CE-8D8F-23161FDFC55B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A73BA23-17B7-45CE-8D8F-23161FDFC55B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A73BA23-17B7-45CE-8D8F-23161FDFC55B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,6 +160,7 @@ Global
 		{1EBED9D1-D2E4-4E70-8469-218E89E8AC7A} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 		{05D89622-F591-4330-AFFC-2CA4987ADDEF} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 		{3C33BC22-DF68-4C84-A940-E5F2DE261FA7} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
+		{7A73BA23-17B7-45CE-8D8F-23161FDFC55B} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}
