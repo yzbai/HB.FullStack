@@ -49,7 +49,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HB.Infrastructure.Redis.Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Aliyun", "src\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj", "{3C33BC22-DF68-4C84-A940-E5F2DE261FA7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructures", "Infrastructures", "{5DDFD808-395F-4463-BDDC-D56089B1E77C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{5DDFD808-395F-4463-BDDC-D56089B1E77C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mobile", "Mobile", "{3BAF3F98-EE2A-467F-BF25-2BAB1409F511}"
 EndProject
