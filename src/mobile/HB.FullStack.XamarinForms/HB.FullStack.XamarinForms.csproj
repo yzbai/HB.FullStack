@@ -35,7 +35,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
-    <ProjectReference Include="..\..\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj" />
   </ItemGroup>
 
   <ItemGroup>
