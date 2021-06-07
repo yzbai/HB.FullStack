@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;MonoAndroid10.0</TargetFrameworks>
+		<!--<TargetFrameworks>netstandard2.1;Xamarin.iOS10;MonoAndroid10.0;Xamarin.WatchOS10;Xamarin.Mac20</TargetFrameworks>-->
+		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);</TargetFrameworks>
+		<AssemblyName>HB.FullStack.Mobile</AssemblyName>
+		<RootNamespace>HB.FullStack.Mobile</RootNamespace>
+		<PackageId>HB.FullStack.Mobile</PackageId>
+		<Summary>common Xamarin converters, effects, behaviors etc.</Summary>
+		<PackageTag>xamarin,ios,android,uwp,xamarin.forms,effects,controls,converters,animations,toolkit,kit,communitytoolkit,xamarincommunitytoolkit,watchos,tvos,tizen,Microsoft.Toolkit.Xamarin.Forms</PackageTag>
+		<Title>HB.FullStack.Mobile</Title>
+		<Description>A collection of Animations, Behaviors, Converters, and Effects for mobile development with Xamarin.Forms. It simplifies and demonstrates common developer tasks building iOS, Android, and UWP apps with Xamarin.Forms.</Description>
+		<Product>$(AssemblyName) ($(TargetFramework))</Product>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
+		<Version>1.0.0</Version>
+		<PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+		<Authors>Brlite</Authors>
+		<Owners>Brlite</Owners>
+		<NeutralLanguage>en</NeutralLanguage>
+		<DefineConstants>$(DefineConstants);</DefineConstants>
+		<UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<Configurations>Debug;Release</Configurations>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<DebugType>portable</DebugType>
+		<NoWarn>SA1123</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>Latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+		<!-- Manage TargetFrameworks for development (Debug Mode) -->
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+		<!-- Manage TargetFrameworks for distribution (Release Mode) -->
+	</PropertyGroup>
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) AND '$(OS)' == 'Windows_NT' ">
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+		<DefineConstants>UWP</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0.14393'">
+		<DefineConstants>$(DefineConstants);UWP_14393</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0.16299' ">
+		<DefineConstants>$(DefineConstants);UWP_16299;UWP_14393</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0.18362' ">
+		<DefineConstants>$(DefineConstants);UWP_18362;UWP_16299;UWP_14393</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0.19041' ">
+		<DefineConstants>$(DefineConstants);UWP_19041;UWP_18362;UWP_16299;UWP_14393</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="**/*.shared.cs" />
+		<Compile Include="**/*.shared.*.cs" />
+		<PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.2" />
+		<PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
+		<PackageReference Include="Svg.Skia" Version="0.5.0" />
+		<PackageReference Include="Xamarin.CommunityToolkit" Version="1.1.0" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+		<PackageReference Include="Xamarin.CommunityToolkit.Markup" Version="1.1.0" />
+		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+		<PackageReference Include="mdoc" Version="5.8.0" PrivateAssets="all" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<Compile Include="**/*.netstandard.cs" />
+		<Compile Include="**/*.netstandard*.cs" />
+		<!-- Remove obj to prevent stale code from other implementations from being included -->
+		<Compile Remove="obj\**" />
+		<EmbeddedResource Remove="obj\**" />
+		<None Remove="obj\**" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard1.0')) ">
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+		<PackageReference Include="System.ComponentModel" Version="4.3.0" />
+		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
+		<PackageReference Update="NETStandard.Library" PrivateAssets="all" />
+		<Compile Include="**\*.netstandard.cs" />
+		<Compile Include="**\*.netstandard.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard2.0')) ">
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+		<Compile Include="**\*.netstandard.cs" />
+		<Compile Include="**\*.netstandard.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard2.1')) ">
+		<Compile Include="**\*.netstandard.cs" />
+		<Compile Include="**\*.netstandard.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.10" />
+		<Compile Include="**\*.uwp.cs" />
+		<Compile Include="**\*.uwp.*.cs" />
+		<!--
+		  If you need to add sdk references:
+		   <SDKReference Include="WindowsMobile, Version=10.0.16299.0">
+			<Name>Windows Mobile Extensions for the UWP</Name>
+		  </SDKReference>
+		-->
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<Compile Include="**\*.android.cs" />
+		<Compile Include="**\*.android.*.cs" />
+		<!--Resources-->
+		<AndroidResource Include="Resources\**\*.axml" />
+		<AndroidResource Include="Resources\**\*.xml" />
+		<AndroidResource Include="Resources\**\*.png" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+		<Compile Include="**\*.ios.cs" />
+		<Compile Include="**\*.ios.*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.TVOS')) ">
+		<Compile Include="**\*.tvos.cs" />
+		<Compile Include="**\*.tvos.*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.Mac')) ">
+		<Reference Include="netstandard" Condition=" '$(OS)' == 'Windows_NT' " />
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+		<Compile Include="**\*.macos.cs" />
+		<Compile Include="**\*.macos.*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.WatchOS')) ">
+		<Compile Include="**\*.watchos.cs" />
+		<Compile Include="**\*.watchos.*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<Compile Include="**\*.tizen.cs" />
+		<Compile Include="**\*.tizen.*.cs" />
+	</ItemGroup>
+
+	
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) AND '$(OS)' == 'Windows_NT' ">
+		<Compile Include="**\*.wpf.cs" />
+		<Compile Include="**\*.wpf.*.cs" />
+		<PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.1874" />
+	</ItemGroup>
+
+	
+
+	<ItemGroup>
+		<Compile Remove="build\*.cs" />
+		<None Include="build\**\*.cs;build\**\*.targets" Pack="true" PackagePath="build" />
+	</ItemGroup>
+
+
+
+	
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+	  <ProjectReference Include="..\..\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj" />
+	  <ProjectReference Include="..\..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
+	</ItemGroup>
+	<Import Project="..\..\mdoc.targets" Condition=" '$(OS)' == 'Windows_NT' AND '$(GenerateApiDocs)' == 'true'" />
+</Project>

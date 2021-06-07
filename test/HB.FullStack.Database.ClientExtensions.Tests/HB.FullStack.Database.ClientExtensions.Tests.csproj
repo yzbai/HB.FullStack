@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
   </ItemGroup>
