@@ -51,5 +51,20 @@
         {
             throw new NotImplementedException();
         }
+
+        public static Exception OverTime(string casuse, string requestDirectory, bool needWrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception NotLogined()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Exception ValidateError(string cause, string mobile)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

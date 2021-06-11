@@ -2,6 +2,9 @@
 
 namespace HB.FullStack.Common
 {
+    /// <summary>
+    /// Figure中的数据与状态
+    /// </summary>
     public abstract class FigureData : IEquatable<FigureData>
     {
         public FigureState State { get; set; }

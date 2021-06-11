@@ -2,6 +2,9 @@
 
 namespace HB.FullStack.Common
 {
+    /// <summary>
+    /// 用于绘制Figure的参数
+    /// </summary>
     public abstract class FigureDrawInfo : IEquatable<FigureDrawInfo>
     {
         public bool Equals(FigureDrawInfo? other)
