@@ -19,15 +19,15 @@
   <ItemGroup>
 	<PackageReference Include="AsyncAwaitBestPractices" Version="5.1.0" />
 	
-	<PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.9.60" />
-	<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
+	<PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.10.56" />
+	<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.10.56">
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
-	<PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.9.32" />
+	<PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.10.26" />
 	<PackageReference Include="MsgPack.Cli" Version="1.0.1" />
 	<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-	<PackageReference Include="System.Text.Json" Version="5.0.1" />
+	<PackageReference Include="System.Text.Json" Version="5.0.2" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="5.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />

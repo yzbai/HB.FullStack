@@ -29,7 +29,8 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceId.IsNullOrEmpty())
                 {
-                    string? stored = PreferenceHelper.PreferenceGetAsync(DeviceId_Preference_Name).Result;
+                    string? stored = ThreadUtil.JoinableTaskFactory.Run(async () => await PreferenceHelper.PreferenceGetAsync(DeviceId_Preference_Name).ConfigureAwait(false));
+                    //string? stored = PreferenceHelper.PreferenceGetAsync(DeviceId_Preference_Name).Result;
 
                     if (stored.IsNullOrEmpty())
                     {

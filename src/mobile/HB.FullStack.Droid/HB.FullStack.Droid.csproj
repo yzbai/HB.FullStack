@@ -73,7 +73,7 @@
     </PackageReference>
     <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
     <PackageReference Include="Xamarin.CommunityToolkit">
-      <Version>1.1.0</Version>
+      <Version>1.2.0-pre2</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
       <Version>1.6.1</Version>
@@ -90,11 +90,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\HB.FullStack.Common\HB.FullStack.Common.csproj">
-      <Project>{3f4b4365-f180-438a-8585-43c4a79797da}</Project>
+      <Project>{8549a27a-5de3-44e0-b9c7-0264ac0c6042}</Project>
       <Name>HB.FullStack.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj">
+      <Project>{46d7cde3-184f-44b6-8e2c-04270437e538}</Project>
+      <Name>HB.FullStack.Database.ClientExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HB.FullStack.Database\HB.FullStack.Database.csproj">
+      <Project>{16885759-5868-4484-b946-63d977522c91}</Project>
+      <Name>HB.FullStack.Database</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj">
+      <Project>{da1bf01a-2950-4d0e-8cdd-04f9d7d62030}</Project>
+      <Name>HB.Infrastructure.IdGen</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj">
+      <Project>{e5011cf3-d6c9-430e-b1c9-fb873c4f2b02}</Project>
+      <Name>HB.Infrastructure.SQLite</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HB.FullStack.XamarinForms\HB.FullStack.XamarinForms.csproj">
-      <Project>{fa74479b-1d0f-47c2-8b50-39a1cf204e75}</Project>
+      <Project>{0080bde6-075f-454f-b97b-a1b48b3f1b08}</Project>
       <Name>HB.FullStack.XamarinForms</Name>
     </ProjectReference>
   </ItemGroup>

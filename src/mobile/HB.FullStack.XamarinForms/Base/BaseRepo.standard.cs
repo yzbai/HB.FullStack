@@ -17,6 +17,7 @@ using Microsoft;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Database.Entities;
+using Microsoft.VisualStudio.Threading;
 
 namespace HB.FullStack.XamarinForms.Base
 {
@@ -32,7 +33,8 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (Application.Current is BaseApplication baseApplication)
                 {
-                    baseApplication.InitializeTask.Wait();
+                    ThreadUtil.JoinableTaskFactory.Run(async () => await baseApplication.InitializeTask.ConfigureAwait(false));
+                    //baseApplication.InitializeTask.Wait();
                 }
 
                 _isAppInitTaskFinished = true;
