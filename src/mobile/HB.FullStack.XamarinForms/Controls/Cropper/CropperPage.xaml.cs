@@ -48,7 +48,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
             CropCommand = new AsyncCommand(CropAsync, onException: GlobalSettings.ExceptionHandler);
             RotateCommand = new Command(Rotate);
-            CancelCommand = new Command(Cancel);
+            CancelCommand = new AsyncCommand(CancelAsync);
             ResetCommand = new Command(Reset);
 
             BindingContext = this;
@@ -109,9 +109,9 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
             _bitmapFigure?.Rotate90(false);
         }
 
-        private void Cancel()
+        private async Task CancelAsync()
         {
-            NavigationService.Current.Pop();
+            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
 
         private async Task CropAsync()
@@ -127,7 +127,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
             _onCroppFinish(isSucceed);
             
-            NavigationService.Current.Pop();
+            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
 
         private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)

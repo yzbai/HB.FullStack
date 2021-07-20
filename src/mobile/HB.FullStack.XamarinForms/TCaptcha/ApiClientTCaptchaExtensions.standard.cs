@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.XamarinForms.Base;
 using HB.FullStack.XamarinForms.TCaptcha;
 
 using Xamarin.Forms;
@@ -49,7 +50,7 @@ namespace HB.FullStack.XamarinForms.Api
                     }
                 });
 
-                NavigationService.Current.PushModal(dialog, false);
+                await INavigationService.Current.GotoAsync(dialog, false).ConfigureAwait(false);
             }
         }
     }

@@ -27,7 +27,7 @@ namespace System
                 return null;
             }
 
-            return Convert.ToInt64(strUserId, GlobalSettings.Culture);
+            return Convert.ToInt64(strUserId, CultureInfo.InvariantCulture);
         }
 
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
@@ -44,7 +44,7 @@ namespace System
         {
             string? str = principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId);
 
-            return str.IsNullOrEmpty() ? null : Convert.ToInt64(str, GlobalSettings.Culture);
+            return str.IsNullOrEmpty() ? null : Convert.ToInt64(str, CultureInfo.InvariantCulture);
         }
 
         public static string? GetDeviceId(this ClaimsPrincipal principal)

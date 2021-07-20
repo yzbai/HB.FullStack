@@ -65,9 +65,9 @@ namespace HB.FullStack.XamarinForms.Controls
             }.Invoke(v => v.BindingContext = this);
         }
 
-        private void Confirm_Button_Clicked(object sender, EventArgs e)
+        private async void Confirm_Button_Clicked(object sender, EventArgs e)
         {
-            NavigationService.Current.PopModal();
+            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
     }
 }

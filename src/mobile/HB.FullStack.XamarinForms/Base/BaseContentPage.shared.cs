@@ -17,7 +17,7 @@ namespace HB.FullStack.XamarinForms.Base
 
         public string PageTypeName { get; private set; }
 
-        public bool NeedLogined { get; set; }
+        //public bool NeedLogined { get; set; }
 
         public bool NavBarIsVisible
         {
@@ -72,17 +72,17 @@ namespace HB.FullStack.XamarinForms.Base
         {
             get
             {
-                return BaseApplication.PlatformHelper.IsStatusBarShowing;
+                return IPlatformHelper.Current.IsStatusBarShowing;
             }
             set
             {
                 if (value)
                 {
-                    BaseApplication.PlatformHelper.ShowStatusBar();
+                    IPlatformHelper.Current.ShowStatusBar();
                 }
                 else
                 {
-                    BaseApplication.PlatformHelper.HideStatusBar();
+                    IPlatformHelper.Current.HideStatusBar();
                 }
             }
         }
@@ -105,11 +105,14 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected override void OnAppearing()
         {
-            if(NeedLogined && !UserPreferences.IsLogined)
-            {
-                NavigationService.Current.PushLoginPage(false);
-                return;
-            }
+            // 放到AppShell中去集中控制路由
+            //if(NeedLogined && !UserPreferences.IsLogined)
+            //{
+            //    INavigationService.Current.PushLoginPage(false);
+            //    BaseApplication.NavigationService.PushLoginPage(false);
+            //    NavigationService.Current.PushLoginPage(false);
+            //    return;
+            //}
 
             base.OnAppearing();
 
@@ -120,12 +123,13 @@ namespace HB.FullStack.XamarinForms.Base
 
             if (customerControls != null)
             {
-                foreach (var v in customerControls)
+                foreach (IBaseContentView? v in customerControls)
                 {
                     if(v == null)
                     {
                         GlobalSettings.Logger.LogDebug("######################   Shit happend!");
                     }
+
                     v?.OnAppearing();
                 }
             }

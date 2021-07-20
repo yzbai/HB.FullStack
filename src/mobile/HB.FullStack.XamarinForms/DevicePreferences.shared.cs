@@ -13,7 +13,6 @@ namespace HB.FullStack.XamarinForms
 {
     public static class DevicePreferences
     {
-        private const string DeviceId_Preference_Name = "dbuKErtT";
         private const int Address_Request_Interval_Seconds = 60;
 
         private static string? _deviceId;
@@ -29,13 +28,12 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceId.IsNullOrEmpty())
                 {
-                    string? stored = ThreadUtil.JoinableTaskFactory.Run(async () => await PreferenceHelper.PreferenceGetAsync(DeviceId_Preference_Name).ConfigureAwait(false));
-                    //string? stored = PreferenceHelper.PreferenceGetAsync(DeviceId_Preference_Name).Result;
+                    string? stored = PreferenceHelper.Get(Conventions.Preference_Name_DeviceId);
 
                     if (stored.IsNullOrEmpty())
                     {
                         stored = ClientUtils.CreateNewDeviceId();
-                        PreferenceHelper.PreferenceSetAsync(DeviceId_Preference_Name, stored).Wait();
+                        PreferenceHelper.Set(Conventions.Preference_Name_DeviceId, stored);
                     }
 
                     _deviceId = stored;

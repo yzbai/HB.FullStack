@@ -16,6 +16,20 @@ namespace HB.FullStack.XamarinForms.Platforms
 
     public interface IPlatformHelper
     {
+        private static IPlatformHelper? _current;
+        public static IPlatformHelper Current
+        {
+            get
+            {
+                if (_current == null)
+                {
+                    _current = DependencyService.Resolve<IPlatformHelper>();
+                }
+
+                return _current;
+            }
+        }
+
         #region StatusBar
 
         bool IsStatusBarShowing { get; }

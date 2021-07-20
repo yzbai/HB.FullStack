@@ -35,9 +35,9 @@ namespace HB.FullStack.XamarinForms.Controls
             {
                 Text = "返回"
             };
-            retButton.Clicked += (sender, e) =>
+            retButton.Clicked += async (sender, e) =>
             {
-                NavigationService.Current.PopModal();
+                await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
             };
 
 

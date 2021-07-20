@@ -19,6 +19,7 @@ namespace System
         public const int MOBILE = 11000;
     }
 
+    //TODO: 使用Record改写
     public class ErrorCode : IEquatable<ErrorCode>
     {
         public static readonly ErrorCode Empty = new ErrorCode(0);
@@ -39,12 +40,12 @@ namespace System
 
         public static bool operator ==(ErrorCode? left, ErrorCode? right)
         {
-            if (left == null && right == null)
+            if (left is null && right is null)
             {
                 return true;
             }
 
-            if (left == null || right == null)
+            if (left is null || right is null)
             {
                 return false;
             }

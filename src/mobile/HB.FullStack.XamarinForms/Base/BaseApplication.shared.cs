@@ -30,7 +30,6 @@ namespace HB.FullStack.XamarinForms.Base
 
         public static new BaseApplication Current => (BaseApplication)Application.Current;
 
-        public static IPlatformHelper PlatformHelper = DependencyService.Resolve<IPlatformHelper>();
 
 #if DEBUG
         public static string Environment => "Debug";
@@ -94,9 +93,6 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected void InitializeServices(IServiceCollection services)
         {
-            //设置导航
-            NavigationService.Init(GetNavigationServiceImpl());
-
             //注册服务
             RegisterBaseServices(services);
 
@@ -139,8 +135,6 @@ namespace HB.FullStack.XamarinForms.Base
             task.Fire();
             _initializeTasks.Add(task);
         }
-
-        protected abstract NavigationService GetNavigationServiceImpl();
 
         protected abstract void RegisterServices(IServiceCollection services);
 

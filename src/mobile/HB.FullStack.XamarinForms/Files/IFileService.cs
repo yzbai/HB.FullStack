@@ -9,6 +9,7 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using System;
 using Microsoft.Extensions.Logging;
+using HB.FullStack.XamarinForms.Platforms;
 
 namespace HB.FullStack.XamarinForms.Files
 {
@@ -30,7 +31,7 @@ namespace HB.FullStack.XamarinForms.Files
                 try
                 {
                     using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                    await BaseApplication.PlatformHelper.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
+                    await IPlatformHelper.Current.UnZipAsync(initDatasStream, LocalFileServiceHelper.PathRoot).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

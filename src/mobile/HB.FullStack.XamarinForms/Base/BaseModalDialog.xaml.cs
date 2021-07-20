@@ -9,6 +9,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xamarin.CommunityToolkit.Effects;
 using System.Windows.Input;
+using Xamarin.CommunityToolkit.ObjectModel;
 
 namespace HB.FullStack.XamarinForms.Base
 {
@@ -24,10 +25,12 @@ namespace HB.FullStack.XamarinForms.Base
         public BaseModalDialog()
         {
             InitializeComponent();
+            
+            Shell.SetPresentationMode(this, PresentationMode.ModalAnimated);
 
             BackgroundColor = Color.FromHex("#80000000");
 
-            DismissCommand = new Command(OnDismiss);
+            DismissCommand = new AsyncCommand(OnDismissAsync);
         }
 
         protected override void OnAppearing()
@@ -49,14 +52,15 @@ namespace HB.FullStack.XamarinForms.Base
             TouchEffect.SetShouldMakeChildrenInputTransparent(modalDialogContainer, false);
         }
 
-        private void OnDismiss()
+        private async Task OnDismissAsync()
         {
             if (!IsBackgroudClickedToDismiss)
             {
                 return;
             }
 
-            NavigationService.Current.PopModal();
+
+            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
 
         protected override IList<IBaseContentView?>? GetAllCustomerControls() => null;

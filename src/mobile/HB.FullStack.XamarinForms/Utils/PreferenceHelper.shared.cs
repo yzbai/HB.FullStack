@@ -11,6 +11,7 @@ using Xamarin.Forms;
 namespace HB.FullStack.XamarinForms.Utils
 {
     //TODO: 如果SecurityStorage不支持，改用普通的Preference
+    
     public static class PreferenceHelper
     {
         private static bool? _securityNotSupported;
@@ -34,7 +35,7 @@ namespace HB.FullStack.XamarinForms.Utils
             }
         }
 
-        public static async Task<string?> PreferenceGetAsync(string key)
+        static async Task<string?> GetAsync(string key)
         {
             try
             {
@@ -53,11 +54,16 @@ namespace HB.FullStack.XamarinForms.Utils
 
                 SecurityStorageSupported = false;
 
-                return await PreferenceGetAsync(key).ConfigureAwait(false);
+                return await GetAsync(key).ConfigureAwait(false);
             }
         }
 
-        public static async Task PreferenceSetAsync(string key, string value)
+        public static string? Get(string key)
+        {
+            return ThreadUtil.JoinableTaskFactory.Run(async () => await GetAsync(key).ConfigureAwait(false));
+        }
+
+        static async Task SetAsync(string key, string value)
         {
             try
             {
@@ -76,8 +82,14 @@ namespace HB.FullStack.XamarinForms.Utils
 
                 SecurityStorageSupported = false;
 
-                await PreferenceSetAsync(key, value).ConfigureAwait(false);
+                await SetAsync(key, value).ConfigureAwait(false);
             }
+        }
+
+        //TODO: 考虑非异步方法
+        public static void Set(string key, string value)
+        {
+            ThreadUtil.JoinableTaskFactory.Run(async () => await SetAsync(key, value).ConfigureAwait(false));
         }
     }
 }
