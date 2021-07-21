@@ -103,7 +103,7 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             // 放到AppShell中去集中控制路由
             //if(NeedLogined && !UserPreferences.IsLogined)
@@ -137,10 +137,10 @@ namespace HB.FullStack.XamarinForms.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnAppearing(PageTypeName);
+                await viewModel.OnAppearingAsync(PageTypeName).ConfigureAwait(false);
             }
 
-            ExecuteAppearedAsync().Fire();
+            await ExecuteAppearedAsync().ConfigureAwait(false);
         }
 
         private async Task ExecuteAppearedAsync()
@@ -156,7 +156,7 @@ namespace HB.FullStack.XamarinForms.Base
             return Task.CompletedTask;
         }
 
-        protected override void OnDisappearing()
+        protected override async void OnDisappearing()
         {
             //Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
 
@@ -178,7 +178,7 @@ namespace HB.FullStack.XamarinForms.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnDisappearing(PageTypeName);
+                await viewModel.OnDisappearingAsync(PageTypeName).ConfigureAwait(false);
             }
         }
 

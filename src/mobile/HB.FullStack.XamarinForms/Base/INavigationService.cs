@@ -18,7 +18,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             get
             {
-                if(_current == null)
+                if (_current == null)
                 {
                     _current = DependencyService.Resolve<INavigationService>();
                 }
@@ -39,6 +39,11 @@ namespace HB.FullStack.XamarinForms.Base
         /// <param name="animated"></param>
         /// <returns></returns>
         Task GotoAsync(string uri, bool animated = false);
+        
+        Task GotoAsync(string uri, IDictionary<string, string> parameters, bool animated = false);
+
+        Task GotoAsync(Page page, bool animated = false);
+
 
         /// <summary>
         /// 返回
@@ -51,13 +56,13 @@ namespace HB.FullStack.XamarinForms.Base
 
         #region 传统的，不需要再Shell的Routings中登记的，需要成对使用
 
-        Task PushAsync(ContentPage page, bool animated = false);
+        Task PushAsync(Page page, bool animated = false);
 
-        Task PopAsync(ContentPage page, bool animated = false);
+        Task PopAsync(bool animated = false);
 
-        Task PushModalAsync(ContentPage page, bool animated = false);
+        Task PushModalAsync(Page page, bool animated = false);
 
-        Task PopModalAsync(ContentPage page, bool animated = false);
+        Task PopModalAsync(bool animated = false);
 
         #endregion
     }
