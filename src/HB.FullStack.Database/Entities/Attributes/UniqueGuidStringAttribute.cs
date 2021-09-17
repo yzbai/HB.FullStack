@@ -4,9 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace HB.FullStack.Database.Entities
 {
-    public class UniqueGuidEntityPropertyAttribute : GuidEntityPropertyAttribute
+    public class UniqueGuidStringAttribute : GuidStringAttribute
     {
-        public UniqueGuidEntityPropertyAttribute([CallerLineNumber] int number = 0) : base(number)
+        public UniqueGuidStringAttribute([CallerLineNumber] int number = 0) : base(number)
         {
             Unique = true;
             NotNull = true;

@@ -96,6 +96,23 @@ namespace HB.FullStack.DatabaseTests.Data
         }
 
 
+        public static Guid_PublisherEntity Guid_MockOnePublisherEntity()
+        {
+            Guid_PublisherEntity entity = new Guid_PublisherEntity
+            {
+                Type = PublisherType.Online,
+                Name = "中文名字",
+                Books = new List<string>() { "Cat", "Dog" },
+                BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                BookAuthors = new Dictionary<string, Author>()
+                {
+                    { "Cat", new Author() { Mobile="111", Name="BB" } },
+                    { "Dog", new Author() { Mobile="222", Name="sx" } }
+                }
+            };
+
+            return entity;
+        }
 
         public static PublisherEntity_Client MockOnePublisherEntity_Client()
         {
@@ -125,6 +142,28 @@ namespace HB.FullStack.DatabaseTests.Data
             for (int i = 0; i < length; ++i)
             {
                 publisherEntities.Add(new PublisherEntity
+                {
+                    Books = new List<string> { "a", "v", "c" },
+                    Type = (PublisherType)random.Next(0, 3),
+                    Name = "Publisher" + i.ToString(),
+                    //BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                    BookAuthors = new Dictionary<string, Author> { { "a", new Author { Mobile = "xxxx", Name = "tttt" } }, { "xxx", new Author { Mobile = "gggg", Name = "safas" } } }
+                });
+            }
+
+            return publisherEntities;
+        }
+
+        public static List<Guid_PublisherEntity> Guid_GetPublishers(int? count = null)
+        {
+            List<Guid_PublisherEntity> publisherEntities = new List<Guid_PublisherEntity>();
+
+            Random random = new Random();
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                publisherEntities.Add(new Guid_PublisherEntity
                 {
                     Books = new List<string> { "a", "v", "c" },
                     Type = (PublisherType)random.Next(0, 3),

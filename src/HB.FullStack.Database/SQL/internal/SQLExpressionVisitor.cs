@@ -207,7 +207,21 @@ namespace HB.FullStack.Database.SQL
                     }
                     else
                     {
-                        string paramPlaceholder = context.ParamPlaceHolderPrefix + context.ParamCounter++;
+                        string paramPlaceholder = context.GetNextParamPlaceholder();
+                        
+                        if (b.Left is MemberExpression memberLeft)
+                        {
+                            Type entityType = memberLeft.Expression.Type;
+                            string propertyName = memberLeft.Member.Name;
+
+                            EntityPropertyDef? propertyDef = EntityDefFactory.GetDef(entityType)?.GetPropertyDef(propertyName);
+
+                            if(propertyDef != null)
+                            {
+                                right = TypeConvert.TypeValueToDbValue(right, propertyDef, context.EngineType);
+                            }
+                        }
+
                         context.AddParameter(paramPlaceholder, right);
                         right = paramPlaceholder;
                     }

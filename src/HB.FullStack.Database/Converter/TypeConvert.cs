@@ -68,9 +68,12 @@ namespace HB.FullStack.Database.Converter
         static TypeConvert()
         {
             //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
-            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetConverter(), EngineType.MySQL);
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetTypeConverter(), EngineType.MySQL);
 
-            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetConverter(), EngineType.SQLite);
+            //解决MySql存储Guid的问题，存储为Binary(16)
+            RegisterGlobalTypeConverter(typeof(Guid), new MySqlGuidTypeConverter(), EngineType.MySQL);
+
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetTypeConverter(), EngineType.SQLite);
         }
 
         public static void RegisterGlobalTypeConverter(Type type, ITypeConverter typeConverter, EngineType engineType)

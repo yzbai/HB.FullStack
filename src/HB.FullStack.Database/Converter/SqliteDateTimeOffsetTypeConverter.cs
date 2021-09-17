@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace HB.FullStack.Database.Converter
 {
-    internal class SqliteDateTimeOffsetConverter : ITypeConverter
+    internal class SqliteDateTimeOffsetTypeConverter : ITypeConverter
     {
         public DbType DbType => DbType.String;
 

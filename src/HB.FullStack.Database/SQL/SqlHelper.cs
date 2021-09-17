@@ -464,15 +464,15 @@ namespace HB.FullStack.Database.SQL
 					throw Exceptions.EntityError(propertyDef.EntityDef.EntityFullName, propertyDef.Name, "字段长度太长");
 				}
 
-				if (propertyDef.IsLengthFixed)
-				{
-					dbTypeStatement = "CHAR";
-				}
+				//if (propertyDef.IsLengthFixed )
+				//{
+				//	dbTypeStatement = "CHAR";
+				//}
 
 				string lengthStatement = (length == 0 || dbTypeStatement == "MEDIUMTEXT") ? "" : "(" + length + ")";
 				string nullableStatement = propertyDef.IsNullable == true ? "" : " NOT NULL ";
 				string autoIncrementStatement = propertyDef.IsAutoIncrementPrimaryKey ? "AUTO_INCREMENT" : "";
-				string uniqueStatement = !propertyDef.IsAutoIncrementPrimaryKey && !propertyDef.IsForeignKey && propertyDef.IsUnique ? " UNIQUE " : "";
+				string uniqueStatement = !propertyDef.IsPrimaryKey && !propertyDef.IsForeignKey && propertyDef.IsUnique ? " UNIQUE " : "";
 
 				propertySqlBuilder.Append($" {propertyDef.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {uniqueStatement},");
 

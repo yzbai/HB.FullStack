@@ -5,7 +5,7 @@ using System.Data;
 
 namespace HB.FullStack.Database.Converter
 {
-    internal class MySqlDateTimeOffsetConverter : ITypeConverter
+    internal class MySqlDateTimeOffsetTypeConverter : ITypeConverter
     {
         public DbType DbType => DbType.Int64;
 

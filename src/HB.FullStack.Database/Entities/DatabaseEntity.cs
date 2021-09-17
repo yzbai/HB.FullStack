@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -58,10 +59,11 @@ namespace HB.FullStack.Database.Entities
 
     public abstract class GuidEntity : DatabaseEntity
     {
+        //TODO: 思考换成Binary存储
         [Required]
         [PrimaryKey]
-        [UniqueGuidEntityProperty(0)]
+        [UniqueGuidString(0)]
         [CacheKey]
-        public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
+        public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
     }
 }

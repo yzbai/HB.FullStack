@@ -12,7 +12,7 @@ namespace HB.FullStack.Database.SQL
 
         public string Seperator { get; set; } = " ";
 
-        public int ParamCounter { get; set; }
+        public int ParamCounter { get; private set; }
 
         public string ParamPlaceHolderPrefix { get; set; } = "_";
 
@@ -29,6 +29,11 @@ namespace HB.FullStack.Database.SQL
         public SQLExpressionVisitorContenxt(EngineType engineType)
         {
             EngineType = engineType;
+        }
+
+        public string GetNextParamPlaceholder()
+        {
+            return ParamPlaceHolderPrefix + ParamCounter++;
         }
 
         public void AddParameter(string key, object value)

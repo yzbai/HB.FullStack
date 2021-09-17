@@ -13,7 +13,7 @@ namespace HB.FullStack.Identity.Entities
     public class User : IdGenEntity
     {
         [Required]
-        [GuidEntityProperty(NotNull = true)]
+        [GuidString(NotNull = true)]
         public string SecurityStamp { get; set; } = default!;
 
         /// <summary>

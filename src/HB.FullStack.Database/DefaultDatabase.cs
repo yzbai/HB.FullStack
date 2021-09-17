@@ -638,10 +638,11 @@ namespace HB.FullStack.Database
         /// <param name="transContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public Task<T?> ScalarAsync<T>(string guid, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+        public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
+            where T : GuidEntity, new()
         {
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidEntity.Guid), EngineType)}={{0}}", guid);
+            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidEntity.Id), EngineType)}={{0}}", guid);
+            WhereExpression<T> where = Where<T>(t => t.Id == id);
 
             return ScalarAsync(where, transContext);
         }
@@ -1162,7 +1163,7 @@ namespace HB.FullStack.Database
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((GuidEntity)(object)item).Guid);
+                        newIds.Add(((GuidEntity)(object)item).Id);
                     }
                 }
                 else

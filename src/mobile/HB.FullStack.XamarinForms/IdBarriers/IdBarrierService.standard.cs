@@ -128,6 +128,10 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                         await ChangeIdAsync(subObj, requestId, direction, requestType).ConfigureAwait(false);
                     }
                 }
+                else if (propertyInfo.PropertyType.IsClass)
+                {
+                    await ChangeIdAsync(propertyValue, requestId, direction, requestType).ConfigureAwait(false);
+                }
                 else
                 {
                     throw MobileExceptions.IdBarrierError(cause:"Id Barrier碰到无法解析的类型");
@@ -167,7 +171,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 changedId = StaticIdGen.GetId();
                 await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);
             }
-            //如果服务器返回Id=-1，即这个数据不是使用Id来作为主键的，客户端实体应该避免使用IdGenEntity
+            //TODO: 如果服务器返回Id=-1，即这个数据不是使用Id来作为主键的，客户端实体应该避免使用IdGenEntity
 
             propertyInfo.SetValue(obj, changedId);
         }

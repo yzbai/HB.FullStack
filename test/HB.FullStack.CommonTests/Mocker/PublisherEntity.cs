@@ -126,6 +126,52 @@ namespace HB.FullStack.DatabaseTests.Data
 
     }
 
+    public class Guid_PublisherEntity : GuidEntity
+    {
+
+        [EntityProperty]
+        public string Name { get; set; } = default!;
+
+        [EntityProperty(Converter = typeof(JsonTypeConverter))]
+        public IList<string> Books { get; set; } = default!;
+
+        [EntityProperty(Converter = typeof(JsonTypeConverter))]
+        public IDictionary<string, Author> BookAuthors { get; set; } = default!;
+
+        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        public IDictionary<string, string> BookNames { get; set; } = default!;
+
+        [EntityProperty]
+        public PublisherType Type { get; set; }
+
+        [EntityProperty]
+        public int? Number { get; set; }
+
+        [EntityProperty]
+        public int? Number1 { get; set; } = 111;
+
+        [EntityProperty]
+        public PublisherType? Type2 { get; set; }
+
+        [EntityProperty]
+        public PublisherType? Type3 { get; set; }
+
+        [EntityProperty]
+        public string? Name2 { get; set; }
+
+        [EntityProperty]
+        public string? Name3 { get; set; } = "xxxx";
+
+        [EntityProperty]
+        public DateTimeOffset? DDD { get; set; }
+
+
+        [EntityProperty]
+        public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
+
+
+    }
+
     public enum PublisherType
     {
         Online,
