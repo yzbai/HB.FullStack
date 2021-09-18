@@ -40,7 +40,7 @@ namespace HB.FullStack.Database.Entities
 
     public abstract class GuidEntity : DatabaseEntity
     {
-        [Required]
+        [NoEmptyGuid]
         [PrimaryKey]
         [UniqueGuidString(0)]
         [CacheKey]

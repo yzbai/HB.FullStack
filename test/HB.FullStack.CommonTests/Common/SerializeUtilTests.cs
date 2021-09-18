@@ -48,9 +48,9 @@ namespace System.Tests
 
             NumberTestCls? obj = SerializeUtil.FromJson<NumberTestCls>(json);
 
-            NumberTestCls newtonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<NumberTestCls>(json);
+            NumberTestCls? newtonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<NumberTestCls>(json);
 
-            Assert.True(obj!.Number == newtonObj.Number && obj.Price == newtonObj.Price);
+            Assert.True(obj!.Number == newtonObj?.Number && obj.Price == newtonObj.Price);
         }
 
         [Fact]

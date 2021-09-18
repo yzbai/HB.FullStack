@@ -239,7 +239,7 @@ namespace HB.FullStack.Cache.Test
 
     public class VersionData
     {
-        public string Guid { get; set; }
+        public string Guid { get; set; } = null!;
         public int Version { get; set; }
     }
 }

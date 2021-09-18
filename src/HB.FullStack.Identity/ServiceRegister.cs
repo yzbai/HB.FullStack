@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //internal
             services.AddSingleton<UserRepo>();
-            services.AddSingleton<RoleOfUserRepo>();
+            services.AddSingleton<UserRoleRepo>();
             services.AddSingleton<UserClaimRepo>();
             services.AddSingleton<RoleRepo>();
             services.AddSingleton<UserLoginControlRepo>();

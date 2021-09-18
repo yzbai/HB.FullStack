@@ -20,10 +20,10 @@ namespace HB.FullStack.Identity
         Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser);
 
         /// <exception cref="DatabaseException"></exception>
-        Task SignOutAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
+        Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
 
         /// <exception cref="DatabaseException"></exception>
-        Task SignOutAsync(long signInTokenId, string lastUser);
+        Task SignOutAsync(Guid signInTokenId, string lastUser);
 
         /// <exception cref="KVStoreException"></exception>
         /// <exception cref="DatabaseException"></exception>

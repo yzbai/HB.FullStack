@@ -80,7 +80,7 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception FoundTooMuch(long userId, long roleId, string cause)
+        internal static Exception FoundTooMuch(Guid userId, Guid roleId, string cause)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.FoundTooMuch);
             exception.Data["UserId"] = userId;
@@ -121,7 +121,7 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationMobileNotConfirmed(long userId)
+        internal static Exception AuthorizationMobileNotConfirmed(Guid userId)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationMobileNotConfirmed);
             exception.Data["UserId"] = userId;
@@ -129,7 +129,7 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationEmailNotConfirmed(long userId)
+        internal static Exception AuthorizationEmailNotConfirmed(Guid userId)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationEmailNotConfirmed);
             exception.Data["UserId"] = userId;
@@ -137,7 +137,7 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationLockedOut(DateTimeOffset? lockoutEndDate, long userId)
+        internal static Exception AuthorizationLockedOut(DateTimeOffset? lockoutEndDate, Guid userId)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationLockedOut);
             exception.Data["UserId"] = userId;
@@ -146,7 +146,7 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationOverMaxFailedCount(long userId)
+        internal static Exception AuthorizationOverMaxFailedCount(Guid userId)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationOverMaxFailedCount);
             exception.Data["UserId"] = userId;
@@ -162,7 +162,7 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception NotFound(long userId, long roleId, string cause)
+        internal static Exception NotFound(Guid userId, Guid roleId, string cause)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.NotFound);
             exception.Data["UserId"] = userId;

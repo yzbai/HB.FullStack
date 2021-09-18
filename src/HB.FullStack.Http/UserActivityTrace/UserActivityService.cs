@@ -15,7 +15,7 @@ namespace HB.FullStack.WebApi.UserActivityTrace
             _userActivityRepo = userActivityRepo;
         }
 
-        public async Task RecordUserActivityAsync(long? signInTokenId, long? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
+        public async Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
         {
             UserActivity userActivity = new UserActivity(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode);
 

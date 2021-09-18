@@ -47,11 +47,11 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<User?> GetByIdAsync(long userId, TransactionContext? transContext = null)
+        public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
                 dimensionKeyName: nameof(User.Id),
-                dimensionKeyValue: userId.ToString(GlobalSettings.Culture),
+                dimensionKeyValue: userId.ToString(),
                 dbRetrieve: db =>
                 {
                     return db.ScalarAsync<User>(userId, transContext);

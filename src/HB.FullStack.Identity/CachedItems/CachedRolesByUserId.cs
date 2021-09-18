@@ -28,9 +28,9 @@ namespace HB.FullStack.Identity
         public override TimeSpan? SlidingExpiration => null;
 
 
-        public static CachedRolesByUserId Key(long userId)
+        public static CachedRolesByUserId Key(Guid userId)
         {
-            return new CachedRolesByUserId(userId.ToString(GlobalSettings.Culture));
+            return new CachedRolesByUserId(userId.ToString());
         }
     }
 }

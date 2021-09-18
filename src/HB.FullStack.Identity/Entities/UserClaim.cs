@@ -5,11 +5,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class UserClaim : FlackIdEntity
+    public class UserClaim : GuidEntity
     {
-        [LongId]
+        [NoEmptyGuid]
         [ForeignKey(typeof(User))]
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [EntityProperty(MaxLength = 65530, NotNull = true)]
         public string ClaimType { get; set; } = default!;

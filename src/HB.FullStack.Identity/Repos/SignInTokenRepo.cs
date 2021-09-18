@@ -24,17 +24,17 @@ namespace HB.FullStack.Identity
 
         #region Read
 
-        public Task<IEnumerable<SignInToken>> GetByUserIdAsync(long userId, TransactionContext? transactionContext)
+        public Task<IEnumerable<SignInToken>> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext)
         {
             return _databaseReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByIdAsync(long signInTokenId, TransactionContext? transactionContext)
+        public Task<SignInToken?> GetByIdAsync(Guid signInTokenId, TransactionContext? transactionContext)
         {
             return _databaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByConditionAsync(long signInTokenId, string? refreshToken, string deviceId, long userId, TransactionContext? transContext = null)
+        public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
         {
             if (refreshToken.IsNullOrEmpty())
             {

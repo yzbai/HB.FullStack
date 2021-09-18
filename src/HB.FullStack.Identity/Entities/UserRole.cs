@@ -1,6 +1,7 @@
 ﻿
 using HB.FullStack.Database.Entities;
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
@@ -9,20 +10,20 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    public class RoleOfUser : FlackIdEntity
+    public class UserRole : GuidEntity
     {
-        [LongId]
+        [NoEmptyGuid]
         [ForeignKey(typeof(User))]
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
 
 
-        [LongId]
+        [NoEmptyGuid]
         [ForeignKey(typeof(Role))]
-        public long RoleId { get; set; }
+        public Guid RoleId { get; set; }
 
-        public RoleOfUser() { }
+        public UserRole() { }
 
-        public RoleOfUser(long userId, long roleId)
+        public UserRole(Guid userId, Guid roleId)
         {
             UserId = userId;
             RoleId = roleId;

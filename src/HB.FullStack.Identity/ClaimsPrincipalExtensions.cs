@@ -18,7 +18,7 @@ namespace System
             return null;
         }
 
-        public static long? GetUserId(this ClaimsPrincipal principal)
+        public static Guid? GetUserId(this ClaimsPrincipal principal)
         {
             string? strUserId = principal.GetClaimValue(ClaimExtensionTypes.UserId);
 
@@ -27,7 +27,7 @@ namespace System
                 return null;
             }
 
-            return Convert.ToInt64(strUserId, CultureInfo.InvariantCulture);
+            return new Guid(strUserId);
         }
 
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
@@ -40,11 +40,11 @@ namespace System
             return principal.GetClaimValue(ClaimExtensionTypes.Audience);
         }
 
-        public static long? GetSignInTokenId(this ClaimsPrincipal principal)
+        public static Guid? GetSignInTokenId(this ClaimsPrincipal principal)
         {
             string? str = principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId);
 
-            return str.IsNullOrEmpty() ? null : Convert.ToInt64(str, CultureInfo.InvariantCulture);
+            return str.IsNullOrEmpty() ? null : new Guid(str);
         }
 
         public static string? GetDeviceId(this ClaimsPrincipal principal)

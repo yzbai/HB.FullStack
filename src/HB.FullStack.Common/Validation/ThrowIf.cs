@@ -151,12 +151,13 @@ namespace System
             return lst;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
+        public static void Empty(ref Guid guid, string paramName)
+        {
+            if(guid == Guid.Empty)
+            {
+                throw new ArgumentException($"Empty Guid. Parameter: {paramName}");
+            }
+        }
 
         public static string Empty(string str, string paramName)
         {

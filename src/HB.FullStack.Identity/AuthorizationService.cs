@@ -25,7 +25,7 @@ namespace HB.FullStack.Identity
 
         private readonly UserRepo _userRepo;
         private readonly SignInTokenRepo _signInTokenRepo;
-        private readonly RoleOfUserRepo _roleOfUserRepo;
+        private readonly UserRoleRepo _roleOfUserRepo;
         private readonly UserClaimRepo _userClaimRepo;
         private readonly UserLoginControlRepo _userLoginControlRepo;
 
@@ -62,7 +62,7 @@ namespace HB.FullStack.Identity
             IDistributedLockManager lockManager,
             UserRepo userRepo,
             SignInTokenRepo signInTokenRepo,
-            RoleOfUserRepo roleOfUserRepo,
+            UserRoleRepo roleOfUserRepo,
             UserClaimRepo userClaimRepo,
             UserLoginControlRepo userLoginControlRepo,
             IIdentityService identityService)
@@ -253,9 +253,9 @@ namespace HB.FullStack.Identity
                 throw Exceptions.AuthorizationInvalideDeviceId(context: context);
             }
 
-            long userId = claimsPrincipal.GetUserId().GetValueOrDefault();
+            Guid userId = claimsPrincipal.GetUserId().GetValueOrDefault();
 
-            if (userId <= 0)
+            if (userId.IsEmpty())
             {
                 throw Exceptions.AuthorizationInvalideUserId(context: context) ;
             }
@@ -328,9 +328,9 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public async Task SignOutAsync(long signInTokenId, string lastUser)
+        public async Task SignOutAsync(Guid signInTokenId, string lastUser)
         {
-            ThrowIf.NotLongId(signInTokenId, nameof(signInTokenId));
+            ThrowIf.Empty(ref signInTokenId, nameof(signInTokenId));
 
             TransactionContext transContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
@@ -365,9 +365,9 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public async Task SignOutAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
+        public async Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
-            ThrowIf.NotLongId(userId, nameof(userId));
+            ThrowIf.Empty(ref userId, nameof(userId));
 
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
@@ -417,7 +417,7 @@ namespace HB.FullStack.Identity
         /// <param name="transactionContext"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        private async Task DeleteSignInTokensAsync(long userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
+        private async Task DeleteSignInTokensAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
         {
             IEnumerable<SignInToken> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
 
@@ -581,11 +581,11 @@ namespace HB.FullStack.Identity
         {
             IList<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString(GlobalSettings.Culture)),
+                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString()),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
                 new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
 
-                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString(GlobalSettings.Culture)),
+                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString()),
                 new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId),
             };
 
@@ -611,7 +611,7 @@ namespace HB.FullStack.Identity
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="KVStoreException"></exception>
-        private async Task<UserLoginControl> GetOrCreateUserLoginControlAsync(string lastUser, long userId)
+        private async Task<UserLoginControl> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
         {
             UserLoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
 

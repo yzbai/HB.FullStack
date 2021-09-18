@@ -11,14 +11,14 @@ using HB.FullStack.Identity.Entities;
 
 namespace HB.FullStack.WebApi.UserActivityTrace
 {
-    public class UserActivity : FlackIdEntity
+    public class UserActivity : GuidEntity
     {
         public const int MAX_ARGUMENTS_LENGTH = 2000;
         public const int MAX_RESULT_ERROR_LENGTH = 1000;
 
         public UserActivity() { }
 
-        public UserActivity(long? signInTokenId, long? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
+        public UserActivity(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
         {
             SignInTokenId = signInTokenId;
             UserId = userId;
@@ -40,13 +40,11 @@ namespace HB.FullStack.WebApi.UserActivityTrace
             ResultError = resultError;
         }
 
-        [LongId]
         [ForeignKey(typeof(User))]
-        public long? UserId { get; set; }
+        public Guid? UserId { get; set; }
 
-        [LongId]
         [ForeignKey(typeof(SignInToken))]
-        public long? SignInTokenId { get; set; }
+        public Guid? SignInTokenId { get; set; }
 
         
         public string? Ip { get; set; }

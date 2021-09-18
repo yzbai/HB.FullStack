@@ -11,9 +11,9 @@ namespace HB.FullStack.Identity.Entities
 {
     public class UserLoginControl : KVStoreEntity
     {
-        [LongId]
+        [NoEmptyGuid]
         [KVStoreKey]
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
 
 
         public bool LockoutEnabled { get; set; }

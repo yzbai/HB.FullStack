@@ -49,7 +49,7 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public Task<IEnumerable<UserClaim>> GetByUserIdAsync(long userId, TransactionContext? transContext = null)
+        public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return TryCacheAsideAsync(CachedUserClaimsByUserId.Key(userId), dbReader =>
             {

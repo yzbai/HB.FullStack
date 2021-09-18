@@ -11,7 +11,7 @@ namespace HB.FullStack.Identity
     {
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        Task AddRolesToUserAsync(long userId, long roleId, string lastUser);
+        Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser);
 
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
@@ -19,6 +19,6 @@ namespace HB.FullStack.Identity
 
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        Task RemoveRoleFromUserAsync(long userId, long roleId, string lastUser);
+        Task RemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
     }
 }

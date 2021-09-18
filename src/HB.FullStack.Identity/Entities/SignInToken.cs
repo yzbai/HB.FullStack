@@ -5,11 +5,11 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class SignInToken : FlackIdEntity
+    public class SignInToken : GuidEntity
     {
-        [LongId]
+        [NoEmptyGuid]
         [ForeignKey(typeof(User))]
-        public long UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
         [EntityProperty(NotNull = true, NeedIndex = true)]
@@ -71,7 +71,7 @@ namespace HB.FullStack.Identity.Entities
         public SignInToken() { }
 
         public SignInToken(
-            long userId,
+            Guid userId,
             string refreshToken,
             DateTimeOffset? expireAt,
             string deviceId,

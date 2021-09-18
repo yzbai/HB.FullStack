@@ -10,12 +10,12 @@ namespace HB.FullStack.Identity
     {
         private readonly ITransaction _transaction;
         private readonly UserRepo _userRepo;
-        private readonly RoleOfUserRepo _roleOfUserRepo;
+        private readonly UserRoleRepo _userRoleRepo;
 
-        public IdentityService(ITransaction transaction, UserRepo userRepo, RoleOfUserRepo roleOfUserRepo)
+        public IdentityService(ITransaction transaction, UserRepo userRepo, UserRoleRepo userRoleRepo)
         {
             _userRepo = userRepo;
-            _roleOfUserRepo = roleOfUserRepo;
+            _userRoleRepo = userRoleRepo;
             _transaction = transaction;
         }
 
@@ -100,25 +100,25 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task AddRolesToUserAsync(long userId, long roleId, string lastUser)
+        public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
         {
-            ThrowIf.NotLongId(userId, nameof(userId));
-            ThrowIf.NotLongId(roleId, nameof(roleId));
+            ThrowIf.Empty(ref userId, nameof(userId));
+            ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<RoleOfUser>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
             try
             {
                 //查重
-                long count = await _roleOfUserRepo.CountByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+                long count = await _userRoleRepo.CountByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
 
                 if (count != 0)
                 {
                     throw Exceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
                 }
 
-                RoleOfUser ru = new RoleOfUser(userId, roleId);
+                UserRole ru = new UserRole(userId, roleId);
 
-                await _roleOfUserRepo.UpdateAsync(ru, lastUser, trans).ConfigureAwait(false);
+                await _userRoleRepo.UpdateAsync(ru, lastUser, trans).ConfigureAwait(false);
 
                 await trans.CommitAsync().ConfigureAwait(false);
             }
@@ -138,23 +138,23 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task RemoveRoleFromUserAsync(long userId, long roleId, string lastUser)
+        public async Task RemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
         {
-            ThrowIf.NotLongId(userId, nameof(userId));
-            ThrowIf.NotLongId(roleId, nameof(roleId));
+            ThrowIf.Empty(ref userId, nameof(userId));
+            ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<RoleOfUser>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
             try
             {
                 //查重
-                RoleOfUser? stored = await _roleOfUserRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+                UserRole? stored = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
 
                 if (stored == null)
                 {
                     throw Exceptions.NotFound(userId: userId, roleId: roleId, cause: "没有找到这样的角色");
                 }
 
-                await _roleOfUserRepo.DeleteAsync(stored, lastUser, trans).ConfigureAwait(false);
+                await _userRoleRepo.DeleteAsync(stored, lastUser, trans).ConfigureAwait(false);
 
                 await trans.CommitAsync().ConfigureAwait(false);
             }

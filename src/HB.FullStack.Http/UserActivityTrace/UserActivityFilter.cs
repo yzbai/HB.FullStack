@@ -29,8 +29,8 @@ namespace HB.FullStack.WebApi.UserActivityTrace
         {
             try
             {
-                long? signInTokenId = context.HttpContext?.User?.GetSignInTokenId();
-                long? userId = context.HttpContext?.User?.GetUserId();
+                Guid? signInTokenId = context.HttpContext?.User?.GetSignInTokenId();
+                Guid? userId = context.HttpContext?.User?.GetUserId();
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
                 string? httpMethod = context.HttpContext?.Request?.Method;

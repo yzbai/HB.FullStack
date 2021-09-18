@@ -168,15 +168,15 @@ namespace HB.FullStack.Cache.Test
 
             await _cache.SetAsync(nameof(Book) + book.Id.ToString(), book, utcNowTicks2, entryOptions).ConfigureAwait(false);
 
-            Book cached = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
+            Book? cached = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
 
-            Assert.True(cached.Name == oldName);
+            Assert.True(cached?.Name == oldName);
 
             await _cache.SetAsync(nameof(Book) + book.Id.ToString(), book, utcNowTicks3, entryOptions).ConfigureAwait(false);
 
-            Book cached2 = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
+            Book? cached2 = await _cache.GetAsync<Book>(nameof(Book) + book.Id.ToString());
 
-            Assert.True(cached2.Name == book.Name);
+            Assert.True(cached2?.Name == book.Name);
         }
 
         /// <summary>

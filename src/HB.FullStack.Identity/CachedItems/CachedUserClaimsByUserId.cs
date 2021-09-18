@@ -21,9 +21,9 @@ namespace HB.FullStack.Identity
 
         public override TimeSpan? SlidingExpiration => null;
 
-        public static CachedUserClaimsByUserId Key(long userId)
+        public static CachedUserClaimsByUserId Key(Guid userId)
         {
-            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString(GlobalSettings.Culture));
+            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString());
 
             return item;
         }
