@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
+using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.SQL;
 
@@ -27,6 +28,8 @@ namespace HB.FullStack.Database
         public static ErrorCode NotFound { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 10, nameof(NotFound), "");
         public static ErrorCode TransactionError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 11, nameof(TransactionError), "");
         public static ErrorCode SystemInfoError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 12, nameof(SystemInfoError), "");
+        public static ErrorCode NotSupported { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 13, nameof(NotSupported), "");
+        public static ErrorCode BatchError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 14, nameof(BatchError), "");
     }
 
     internal static class Exceptions
@@ -217,6 +220,25 @@ namespace HB.FullStack.Database
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.SqlError);
 
             exception.Data["Cause"] = "Sql join type mixed.";
+
+            return exception;
+        }
+
+        internal static Exception NotSupportYet(string cause, EngineType engineType)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotSupported);
+            exception.Data["Cause"] = cause;
+            exception.Data["EngineType"] = engineType.ToString();
+
+            return exception;
+        }
+
+        internal static Exception TooManyForBatch(string cause, int count, string lastUser)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.BatchError);
+            exception.Data["Cause"] = cause;
+            exception.Data["Count"] = count;
+            exception.Data["LastUser"] = lastUser;
 
             return exception;
         }

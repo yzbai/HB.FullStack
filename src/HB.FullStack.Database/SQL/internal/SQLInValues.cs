@@ -12,13 +12,13 @@ namespace HB.FullStack.Database.SQL
     /// </summary>
     internal class SQLInValues
     {
-        private readonly IEnumerable _values;
+        public IEnumerable Values { get; private set; }
 
         public int Count { get; private set; }
 
         public SQLInValues(IEnumerable values)
         {
-            _values = values;
+            Values = values;
 
             if (values != null)
             {
@@ -27,42 +27,6 @@ namespace HB.FullStack.Database.SQL
                     ++Count;
                 }
             }
-        }
-
-        /// <summary>
-        /// ToSqlInString
-        /// </summary>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        /// <exception cref="System.DatabaseException"></exception>
-        public string ToSqlInString(EngineType engineType)
-        {
-            if (Count == 0)
-                return "NULL";
-
-            return SqlJoin(_values, engineType);
-        }
-
-        /// <summary>
-        /// SqlJoin
-        /// </summary>
-        /// <param name="values"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        /// <exception cref="System.DatabaseException"></exception>
-        public static string SqlJoin(IEnumerable values, EngineType engineType)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (object value in values)
-            {
-                sb.Append(TypeConvert.TypeValueToDbValueStatement(value, quotedIfNeed: true, engineType));
-                sb.Append(',');
-            }
-
-            sb.Remove(sb.Length - 1, 1);
-
-            return sb.ToString();
         }
     }
 }

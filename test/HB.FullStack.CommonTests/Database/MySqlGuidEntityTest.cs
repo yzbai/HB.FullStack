@@ -90,16 +90,20 @@ namespace HB.FullStack.DatabaseTests
             ITransaction transaction = _mysqlTransaction;
             TransactionContext transContext = await transaction.BeginTransactionAsync<Guid_PublisherEntity>().ConfigureAwait(false);
 
+            string updatedName = SecurityUtil.CreateUniqueToken();
+
+            int count = 800;
+
             try
             {
-                IEnumerable<Guid_PublisherEntity> lst = await database.RetrieveAllAsync<Guid_PublisherEntity>(transContext).ConfigureAwait(false);
+                IEnumerable<Guid_PublisherEntity> lst = await database.PageAsync<Guid_PublisherEntity>(1, count, transContext).ConfigureAwait(false);
 
-                for (int i = 0; i < lst.Count(); i += 2)
+                for (int i = 0; i < lst.Count(); i ++)
                 {
                     Guid_PublisherEntity entity = lst.ElementAt(i);
                     //entity.Guid = Guid.NewGuid().ToString();
                     entity.Type = PublisherType.Online;
-                    entity.Name = "asfasdfasdfsss";
+                    entity.Name = updatedName;
                     entity.Books = new List<string>() { "xxx", "tttt" };
                     entity.BookAuthors = new Dictionary<string, Author>()
                     {
@@ -111,6 +115,10 @@ namespace HB.FullStack.DatabaseTests
                 await database.BatchUpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
 
                 await transaction.CommitAsync(transContext).ConfigureAwait(false);
+
+                lst = await database.PageAsync<Guid_PublisherEntity>(1, count, null);
+
+                Assert.True(lst.All(t => t.Name == updatedName));
 
             }
             catch (Exception ex)
@@ -718,9 +726,9 @@ namespace HB.FullStack.DatabaseTests
             {
                 Assert.True(dict.ContainsKey(kv.Key));
 
-                Assert.True(TypeConvert.TypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+                Assert.True(TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
 
-                    TypeConvert.TypeValueToDbValueStatement(kv.Value, false, engineType));
+                    TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
             }
         }
 
@@ -786,5 +794,88 @@ namespace HB.FullStack.DatabaseTests
 
             Assert.True(publisherEntities.Any() && publisherEntities.All(p => p.Type == PublisherType.Big));
         }
+
+        [Fact]
+        public async Task Guid_Test_11_StartWith_TestAsync()
+        {
+            IDatabase database = _mysql;
+            ITransaction transaction = _mysqlTransaction;
+
+            IList<Guid_PublisherEntity> publishers = Mocker.Guid_GetPublishers();
+
+            foreach(var entity in publishers)
+            {
+                entity.Name = "StartWithTest_xxx";
+            }
+
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<Guid_PublisherEntity>().ConfigureAwait(false);
+
+            try
+            {
+                await database.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+                
+            }
+            catch (Exception ex)
+            {
+                _output.WriteLine(ex.Message);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                throw;
+            }
+
+            IEnumerable<Guid_PublisherEntity> entities = await database.RetrieveAsync<Guid_PublisherEntity>(t => t.Name.StartsWith("Star"), null);
+
+            Assert.True(entities.Count() > 0);
+
+            Assert.All(entities, t => t.Name.StartsWith("Star"));
+        }
+
+        [Fact]
+        public async Task Guid_Test_12_Binary_TestAsync()
+        {
+            IDatabase database = _mysql;
+            ITransaction transaction = _mysqlTransaction;
+
+            IList<Guid_PublisherEntity> publishers = Mocker.Guid_GetPublishers();
+
+            foreach (var entity in publishers)
+            {
+                entity.Name = "StartWithTest_xxx";
+            }
+
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<Guid_PublisherEntity>().ConfigureAwait(false);
+
+            try
+            {
+                await database.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+
+                await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                _output.WriteLine(ex.Message);
+                await transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                throw;
+            }
+
+            IEnumerable<Guid_PublisherEntity> entities = await database.RetrieveAsync<Guid_PublisherEntity>(
+                t => t.Name.StartsWith("Star") && publishers.Any(), null);
+
+            //IEnumerable<Guid_PublisherEntity> entities = await database.RetrieveAsync<Guid_PublisherEntity>(
+            //    t => ReturnGuid() == ReturnGuid(), null);
+
+            Assert.True(entities.Count() > 0);
+
+            Assert.All(entities, t => t.Name.StartsWith("Star"));
+        }
+
+        public Guid ReturnGuid()
+        {
+            return Guid.NewGuid();
+        }
+
+        
     }
 }

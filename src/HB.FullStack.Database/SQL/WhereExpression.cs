@@ -1,7 +1,9 @@
 #nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -110,7 +112,7 @@ namespace HB.FullStack.Database.SQL
         /// <exception cref="DatabaseException"></exception>
         public WhereExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
+            _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
 
             return this;
         }
@@ -147,7 +149,7 @@ namespace HB.FullStack.Database.SQL
         /// <returns></returns>
         //TODO:  �����������������һ��sql����ע�����
         /// <exception cref="DatabaseException"></exception>
-        private static string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
+        private string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
 
@@ -161,11 +163,37 @@ namespace HB.FullStack.Database.SQL
                 {
                     if (sqlParam is SQLInValues sqlInValues)
                     {
-                        escapedParams.Add(sqlInValues.ToSqlInString(engineType));
+                        if (sqlInValues.Count == 0)
+                        {
+                            escapedParams.Add("NULL");
+                        }
+                        else
+                        {
+                            StringBuilder sb = new StringBuilder();
+
+                            foreach (object value in sqlInValues.Values)
+                            {
+                                string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
+                                object paramValue = TypeConvert.TypeValueToDbValue(value, null, engineType);
+                                
+                                _expressionContext.AddParameter(paramPlaceholder, paramValue);
+
+                                sb.Append(paramPlaceholder);
+                                sb.Append(',');
+                            }
+
+                            sb.Remove(sb.Length - 1, 1);
+
+                            escapedParams.Add(sb.ToString());
+                        }
                     }
                     else
                     {
-                        escapedParams.Add(TypeConvert.TypeValueToDbValueStatement(sqlParam, quotedIfNeed: true, engineType));
+                        string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
+                        object paramValue = TypeConvert.TypeValueToDbValue(sqlParam, null, engineType);
+
+                        _expressionContext.AddParameter(paramPlaceholder, paramValue);
+                        escapedParams.Add(paramPlaceholder);
                     }
                 }
             }
@@ -201,7 +229,7 @@ namespace HB.FullStack.Database.SQL
         /// <exception cref="DatabaseException"></exception>
         public WhereExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
 
             if (_whereString.IsNullOrEmpty())
             {
@@ -240,7 +268,7 @@ namespace HB.FullStack.Database.SQL
         /// <exception cref="DatabaseException"></exception>
         public WhereExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
 
             if (_whereString.IsNullOrEmpty())
             {
@@ -314,7 +342,7 @@ namespace HB.FullStack.Database.SQL
         /// <exception cref="DatabaseException"></exception>
         public WhereExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
-            _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : WhereExpression<T>.SqlFormat(_engineType, sqlFilter, filterParams);
+            _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
 
             if (!string.IsNullOrEmpty(_havingString))
             {

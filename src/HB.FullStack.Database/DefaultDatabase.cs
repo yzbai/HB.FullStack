@@ -247,7 +247,7 @@ namespace HB.FullStack.Database
         private async Task ApplyMigration(string databaseName, TransactionContext transactionContext, Migration migration)
         {
             _logger.LogInformation(
-                "数据库Migration, {DatabaseName}, from {OldVersion}, to {NewVersion}, {Sql}", 
+                "数据库Migration, {DatabaseName}, from {OldVersion}, to {NewVersion}, {Sql}",
                 databaseName, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
 
             if (migration.SqlStatement.IsNotNullOrEmpty())
@@ -1120,6 +1120,11 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
+            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
+            {
+                throw Exceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
+            }
+
             ThrowIf.NotValid(items, nameof(items));
 
             if (!items.Any())
@@ -1220,6 +1225,11 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
+            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
+            {
+                throw Exceptions.TooManyForBatch("BatchUpdate超过批量操作的最大数目", items.Count(), lastUser);
+            }
+
             ThrowIf.NotValid(items, nameof(items));
 
             if (!items.Any())
@@ -1305,6 +1315,11 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
+            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
+            {
+                throw Exceptions.TooManyForBatch("BatchDelete超过批量操作的最大数目", items.Count(), lastUser);
+            }
+
             ThrowIf.NotValid(items, nameof(items));
 
             if (!items.Any())

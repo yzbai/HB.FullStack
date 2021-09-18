@@ -721,9 +721,9 @@ namespace HB.FullStack.DatabaseTests
             {
                 Assert.True(dict.ContainsKey(kv.Key));
 
-                Assert.True(TypeConvert.TypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+                Assert.True(TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
 
-                    TypeConvert.TypeValueToDbValueStatement(kv.Value, false, engineType));
+                    TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
             }
         }
 

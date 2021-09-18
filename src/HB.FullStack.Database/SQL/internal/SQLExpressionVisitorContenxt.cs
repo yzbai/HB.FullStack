@@ -16,8 +16,6 @@ namespace HB.FullStack.Database.SQL
 
         public string ParamPlaceHolderPrefix { get; set; } = "_";
 
-        public bool IsParameterized { get; set; } = true;
-
         public bool PrefixFieldWithTableName { get; set; } = true;
 
         public string? OrderByStatementBySQLUtilIn_QuotedColName { get; set; }

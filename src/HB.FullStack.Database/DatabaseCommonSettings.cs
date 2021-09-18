@@ -18,5 +18,7 @@ namespace HB.FullStack.Database
         public IList<string> AssembliesIncludeEntity { get; set; } = new List<string>();
 
         public IList<EntitySetting> EntitySettings { get; set; } = new List<EntitySetting>();
+
+        public int MaxBatchNumber { get; set; } = 500;
     }
 }

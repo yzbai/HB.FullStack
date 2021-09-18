@@ -151,8 +151,13 @@ namespace HB.FullStack.Database.Entities
             return GetDef(typeof(T));
         }
 
-        public static EntityDef? GetDef(Type entityType)
+        public static EntityDef? GetDef(Type? entityType)
         {
+            if(entityType == null)
+            {
+                return null;
+            }
+
             if (_defDict.TryGetValue(entityType, out EntityDef? entityDef))
             {
                 return entityDef;

@@ -152,7 +152,14 @@ namespace HB.FullStack.Database.Converter
             return ctor!.Invoke(new object?[] { typeValue });
         }
 
-        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, EngineType engineType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="typeValue"></param>
+        /// <param name="propertyDef">null，则不考虑这个属性自定义的TypeConverter</param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef? propertyDef, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -160,12 +167,12 @@ namespace HB.FullStack.Database.Converter
             }
 
             //查看当前Property的TypeConvert
-            if (propertyDef.TypeConverter != null)
+            if (propertyDef?.TypeConverter != null)
             {
                 return propertyDef.TypeConverter.TypeValueToDbValue(typeValue, propertyDef.Type);
             }
 
-            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+            Type trueType = propertyDef == null ? typeValue.GetType() : propertyDef.NullableUnderlyingType ?? propertyDef.Type;
 
             //查看全局TypeConvert
 
@@ -187,13 +194,14 @@ namespace HB.FullStack.Database.Converter
 
         /// <summary>
         /// 没有考虑属性自定义的TypeConvert
+        /// 有安全隐患
         /// </summary>
         /// <param name="typeValue"></param>
         /// <param name="quotedIfNeed"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
-        public static string TypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
+        public static string DoNotUseUnSafeTypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -260,7 +268,7 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName:(propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName:propertyDef.Name);
+            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         /// <summary>
