@@ -13,14 +13,14 @@ using Xunit.Abstractions;
 namespace HB.FullStack.DatabaseTests
 {
     //[TestCaseOrderer("HB.FullStack.Database.Test.TestCaseOrdererByTestName", "HB.FullStack.Database.Test")]
-    public class JoinTest_MySql : IClassFixture<ServiceFixture_MySql>
+    public class JoinTest_MySQL : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IDatabase _mysql;
         private readonly ITestOutputHelper _output;
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public JoinTest_MySql(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
+        public JoinTest_MySQL(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             _output = testOutputHelper;
 

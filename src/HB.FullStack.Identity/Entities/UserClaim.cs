@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class UserClaim : IdGenEntity
+    public class UserClaim : FlackIdEntity
     {
         [LongId]
         [ForeignKey(typeof(User))]

@@ -11,7 +11,7 @@ using HB.FullStack.Identity.Entities;
 
 namespace HB.FullStack.WebApi.UserActivityTrace
 {
-    public class UserActivity : IdGenEntity
+    public class UserActivity : FlackIdEntity
     {
         public const int MAX_ARGUMENTS_LENGTH = 2000;
         public const int MAX_RESULT_ERROR_LENGTH = 1000;

@@ -28,14 +28,14 @@ using Xunit.Abstractions;
 namespace HB.FullStack.DatabaseTests
 {
     //[TestCaseOrderer("HB.FullStack.Database.Test.TestCaseOrdererByTestName", "HB.FullStack.Database.Test")]
-    public class MySqlGuidEntityTest : IClassFixture<ServiceFixture_MySql>
+    public class BasicTest_MySQL_Guid : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IDatabase _mysql;
         private readonly ITransaction _mysqlTransaction;
         private readonly ITestOutputHelper _output;
         private readonly string _mysqlConnectionString;
 
-        public MySqlGuidEntityTest(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
+        public BasicTest_MySQL_Guid(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
 
@@ -54,7 +54,7 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-        public async Task Guid_Test_1_Batch_Add_PublisherEntityAsync()
+        public async Task Guid_Test_01_Batch_Add_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
@@ -84,7 +84,7 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-        public async Task Guid_Test_2_Batch_Update_PublisherEntityAsync()
+        public async Task Guid_Test_02_Batch_Update_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
@@ -98,7 +98,7 @@ namespace HB.FullStack.DatabaseTests
             {
                 IEnumerable<Guid_PublisherEntity> lst = await database.PageAsync<Guid_PublisherEntity>(1, count, transContext).ConfigureAwait(false);
 
-                for (int i = 0; i < lst.Count(); i ++)
+                for (int i = 0; i < lst.Count(); i++)
                 {
                     Guid_PublisherEntity entity = lst.ElementAt(i);
                     //entity.Guid = Guid.NewGuid().ToString();
@@ -136,7 +136,7 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-        public async Task Guid_Test_3_Batch_Delete_PublisherEntityAsync()
+        public async Task Guid_Test_03_Batch_Delete_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
@@ -169,7 +169,7 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-        public async Task Guid_Test_4_Add_PublisherEntityAsync()
+        public async Task Guid_Test_04_Add_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
@@ -190,7 +190,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await transaction.CommitAsync(tContext).ConfigureAwait(false);
 
-        
+
             }
             catch (Exception ex)
             {
@@ -209,7 +209,7 @@ namespace HB.FullStack.DatabaseTests
         [Fact]
 
 
-        public async Task Guid_Test_5_Update_PublisherEntityAsync()
+        public async Task Guid_Test_05_Update_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
@@ -253,7 +253,7 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-        public async Task Guid_Test_6_Delete_PublisherEntityAsync()
+        public async Task Guid_Test_06_Delete_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
@@ -328,9 +328,7 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
-
-
-        public async Task Guid_Test_8_LastTimeTestAsync()
+        public async Task Guid_Test_08_LastTimeTestAsync()
         {
             IDatabase database = _mysql;
 
@@ -401,53 +399,43 @@ namespace HB.FullStack.DatabaseTests
         /// <exception cref="DatabaseException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-        public async Task Test_9_UpdateLastTimeTestAsync()
+        public async Task Guid_Test_09_UpdateLastTimeTestAsync()
         {
             IDatabase database = _mysql;
 
             ITransaction transaction = _mysqlTransaction;
 
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
-            //TransactionContext? transactionContext = null;
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<Guid_PublisherEntity>().ConfigureAwait(false);
 
             try
             {
-
-                PublisherEntity item = Mocker.MockOnePublisherEntity();
-
+                Guid_PublisherEntity item = Mocker.Guid_MockOnePublisherEntity();
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-
-                //await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
-
-
-                await database.DeleteAsync(item, "xxx", transactionContext).ConfigureAwait(false);
-
-
-                IList<PublisherEntity> testEntities = (await database.PageAsync<PublisherEntity>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity> testEntities = (await database.PageAsync<Guid_PublisherEntity>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
                     throw new Exception("No Entity to update");
                 }
 
-                PublisherEntity entity = testEntities[0];
+                Guid_PublisherEntity entity = testEntities[0];
 
                 entity.Books.Add("New Book2");
                 //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Name = "Yuzhaobai" });
 
                 await database.UpdateAsync(entity, "lastUsre", transactionContext).ConfigureAwait(false);
 
-                PublisherEntity? stored = await database.ScalarAsync<PublisherEntity>(entity.Id, transactionContext).ConfigureAwait(false);
+                Guid_PublisherEntity? stored = await database.ScalarAsync<Guid_PublisherEntity>(entity.Id, transactionContext).ConfigureAwait(false);
 
 
 
-                item = Mocker.MockOnePublisherEntity();
+                item = Mocker.Guid_MockOnePublisherEntity();
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                var fetched = await database.ScalarAsync<PublisherEntity>(item.Id, transactionContext).ConfigureAwait(false);
+                var fetched = await database.ScalarAsync<Guid_PublisherEntity>(item.Id, transactionContext).ConfigureAwait(false);
 
                 Assert.Equal(item.LastTime, fetched!.LastTime);
 
@@ -465,317 +453,15 @@ namespace HB.FullStack.DatabaseTests
 
         }
 
-        /// <summary>
-        /// Test_EntityMapperAsync
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
-        public async Task Test_EntityMapperAsync()
-        {
-            GlobalSettings.Logger.LogInformation($"��ǰProcess,{Environment.ProcessId}");
-
-            IDatabase database = _mysql;
-
-            #region
-
-            var publisher3 = new PublisherEntity3();
-
-            await database.AddAsync(publisher3, "sss", null).ConfigureAwait(false);
-
-            var stored3 = await database.ScalarAsync<PublisherEntity3>(publisher3.Id, null).ConfigureAwait(false);
-
-            Assert.Equal(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
-
-            #endregion
-
-            #region 
-
-            var publishers2 = Mocker.GetPublishers2();
-
-
-            foreach (PublisherEntity2 publisher in publishers2)
-            {
-                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
-            }
-
-
-            PublisherEntity2? publisher2 = await database.ScalarAsync<PublisherEntity2>(publishers2[0].Id, null).ConfigureAwait(false);
-
-            Assert.Equal(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publishers2[0]));
-
-            #endregion
-
-            #region 
-
-            var publishers = Mocker.GetPublishers();
-
-
-            foreach (PublisherEntity publisher in publishers)
-            {
-                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
-            }
-
-
-            PublisherEntity? publisher1 = await database.ScalarAsync<PublisherEntity>(publishers[0].Id, null).ConfigureAwait(false);
-
-            Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
-            #endregion
-        }
-
-        /// <summary>
-        /// Test_EntityMapperPerformanceAsync
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        [Theory]
-        [InlineData(1)]
-        public async Task Test_EntityMapperPerformanceAsync(int index)
-        {
-            index++;
-            IDatabase database = _mysql;
-
-            var books = Mocker.GetBooks(5000);
-
-            var trans = await _mysqlTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
-
-            IEnumerable<BookEntity> re = await database.RetrieveAsync<BookEntity>(b => b.Deleted, trans).ConfigureAwait(false);
-
-            await database.AddAsync(Mocker.GetBooks(1)[0], "", trans).ConfigureAwait(false);
-
-            try
-            {
-
-                //await database.AddAsync<BookEntity>(books[0], "", trans);
-
-                await database.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
-                await _mysqlTransaction.CommitAsync(trans).ConfigureAwait(false);
-            }
-            catch
-            {
-                await _mysqlTransaction.RollbackAsync(trans).ConfigureAwait(false);
-            }
-
-
-            Stopwatch stopwatch = new Stopwatch();
-
-            using MySqlConnection mySqlConnection = new MySqlConnection(_mysqlConnectionString);
-
-            TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
-
-            //time = 0;
-            int loop = 100;
-
-            TimeSpan time0 = TimeSpan.Zero, time1 = TimeSpan.Zero, time2 = TimeSpan.Zero, time3 = TimeSpan.Zero;
-            for (int cur = 0; cur < loop; ++cur)
-            {
-
-                await mySqlConnection.OpenAsync().ConfigureAwait(false);
-
-
-                using MySqlCommand command0 = new MySqlCommand("select * from tb_bookentity limit 10000", mySqlConnection);
-
-                var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
-
-                List<BookEntity> list1 = new List<BookEntity>();
-                List<BookEntity> list2 = new List<BookEntity>();
-                List<BookEntity> list3 = new List<BookEntity>();
-
-                int len = reader0.FieldCount;
-                EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
-                MethodInfo[] setMethods = new MethodInfo[len];
-
-                EntityDef definition = EntityDefFactory.GetDef<BookEntity>()!;
-
-                for (int i = 0; i < len; ++i)
-                {
-                    propertyDefs[i] = definition.GetPropertyDef(reader0.GetName(i))!;
-                    setMethods[i] = propertyDefs[i].SetMethod;
-                }
-
-
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
-
-                //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
-                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
-
-
-
-                Stopwatch stopwatch1 = new Stopwatch();
-                Stopwatch stopwatch2 = new Stopwatch();
-                Stopwatch stopwatch3 = new Stopwatch();
-
-
-
-
-                while (reader0.Read())
-                {
-                    stopwatch1.Start();
-
-                    object obj1 = mapper1(reader0);
-
-                    list1.Add((BookEntity)obj1);
-                    stopwatch1.Stop();
-
-
-
-                    stopwatch2.Start();
-                    object obj2 = mapper2(reader0);
-
-                    list2.Add((BookEntity)obj2);
-                    stopwatch2.Stop();
-
-
-                    stopwatch3.Start();
-
-                    BookEntity item = new BookEntity();
-
-                    for (int i = 0; i < len; ++i)
-                    {
-                        EntityPropertyDef property = propertyDefs[i];
-
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.MySQL);
-
-                        if (value != null)
-                        {
-                            setMethods[i].Invoke(item, new object?[] { value });
-                        }
-
-                    }
-
-                    list3.Add(item);
-
-                    stopwatch3.Stop();
-
-
-                }
-
-                time1 += stopwatch1.Elapsed;
-                time2 += stopwatch2.Elapsed;
-                time3 += stopwatch3.Elapsed;
-
-                await reader0.DisposeAsync().ConfigureAwait(false);
-                command0.Dispose();
-
-                await mySqlConnection.CloseAsync().ConfigureAwait(false);
-
-            }
-
-            _output.WriteLine("Emit Coding : " + (time1.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
-            _output.WriteLine("Dapper : " + (time2.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
-            _output.WriteLine("Reflection : " + (time3.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
-
-        }
-
-        /// <summary>
-        /// EntityMapper_ToParameter_Test
-        /// </summary>
-        /// <param name="engineType"></param>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        [Theory]
-        [InlineData(EngineType.MySQL)]
-        [InlineData(EngineType.SQLite)]
-        public void EntityMapper_ToParameter_Test(EngineType engineType)
-        {
-            PublisherEntity publisherEntity = Mocker.MockOnePublisherEntity();
-
-            var emit_results = publisherEntity.ToParameters(EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
-
-            var reflect_results = publisherEntity.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
-
-            AssertEqual(emit_results, reflect_results, engineType);
-
-            //PublisherEntity2
-
-            PublisherEntity2 publisherEntity2 = new PublisherEntity2();
-
-            var emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
-
-            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
-
-            AssertEqual(emit_results2, reflect_results2, engineType);
-
-            //PublisherEntity3
-
-            PublisherEntity3 publisherEntity3 = new PublisherEntity3();
-
-            var emit_results3 = publisherEntity3.ToParameters(EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
-
-            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
-
-            AssertEqual(emit_results3, reflect_results3, engineType);
-
-        }
-
-        /// <summary>
-        /// AssertEqual
-        /// </summary>
-        /// <param name="emit_results"></param>
-        /// <param name="results"></param>
-        /// <param name="engineType"></param>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
-        {
-            var dict = results.ToDictionary(kv => kv.Key);
-
-            Assert.True(emit_results.Count() == dict.Count);
-
-            foreach (var kv in emit_results)
-            {
-                Assert.True(dict.ContainsKey(kv.Key));
-
-                Assert.True(TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
-
-                    TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
-            }
-        }
-
-        /// <summary>
-        /// EntityMapper_ToParameter_Performance_Test
-        /// </summary>
-        /// <param name="engineType"></param>
-        /// <exception cref="DatabaseException">Ignore.</exception>
-        [Theory]
-        [InlineData(EngineType.MySQL)]
-        [InlineData(EngineType.SQLite)]
-        public void EntityMapper_ToParameter_Performance_Test(EngineType engineType)
-        {
-            var entities = Mocker.GetPublishers(1000000);
-
-            var def = EntityDefFactory.GetDef<PublisherEntity>();
-
-            Stopwatch stopwatch = new Stopwatch();
-
-            stopwatch.Restart();
-            foreach (var entity in entities)
-            {
-                _ = entity.ToParameters(def!, engineType);
-            }
-            stopwatch.Stop();
-
-            _output.WriteLine($"Emit: {stopwatch.ElapsedMilliseconds}");
-
-            stopwatch.Restart();
-            foreach (var entity in entities)
-            {
-                _ = entity.ToParametersUsingReflection(def!, engineType);
-            }
-            stopwatch.Stop();
-
-            _output.WriteLine($"Reflection: {stopwatch.ElapsedMilliseconds}");
-        }
-
-        [Fact]
-        public async Task Test_10_Enum_TestAsync()
+        public async Task Guid_Test_10_Enum_TestAsync()
         {
             IDatabase database = _mysql;
             ITransaction transaction = _mysqlTransaction;
 
-            IList<PublisherEntity> publishers = Mocker.GetPublishers();
+            IList<Guid_PublisherEntity> publishers = Mocker.Guid_GetPublishers();
 
-            TransactionContext transactionContext = await transaction.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await transaction.BeginTransactionAsync<Guid_PublisherEntity>().ConfigureAwait(false);
 
             try
             {
@@ -790,7 +476,7 @@ namespace HB.FullStack.DatabaseTests
                 throw;
             }
 
-            IEnumerable<PublisherEntity> publisherEntities = await database.RetrieveAsync<PublisherEntity>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
+            IEnumerable<Guid_PublisherEntity> publisherEntities = await database.RetrieveAsync<Guid_PublisherEntity>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
 
             Assert.True(publisherEntities.Any() && publisherEntities.All(p => p.Type == PublisherType.Big));
         }
@@ -803,7 +489,7 @@ namespace HB.FullStack.DatabaseTests
 
             IList<Guid_PublisherEntity> publishers = Mocker.Guid_GetPublishers();
 
-            foreach(var entity in publishers)
+            foreach (var entity in publishers)
             {
                 entity.Name = "StartWithTest_xxx";
             }
@@ -815,7 +501,7 @@ namespace HB.FullStack.DatabaseTests
                 await database.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-                
+
             }
             catch (Exception ex)
             {
@@ -871,11 +557,296 @@ namespace HB.FullStack.DatabaseTests
             Assert.All(entities, t => t.Name.StartsWith("Star"));
         }
 
+        /// <summary>
+        /// Test_EntityMapperAsync
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        [Fact]
+        public async Task Guid_Test_13_Mapper_ToEntityAsync()
+        {
+            GlobalSettings.Logger.LogInformation($"��ǰProcess,{Environment.ProcessId}");
+
+            IDatabase database = _mysql;
+
+            #region Json验证1
+
+            var publisher3 = new Guid_PublisherEntity();
+
+            await database.AddAsync(publisher3, "sss", null).ConfigureAwait(false);
+
+            var stored3 = await database.ScalarAsync<Guid_PublisherEntity>(publisher3.Id, null).ConfigureAwait(false);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
+
+            #endregion
+
+            #region Json验证2
+
+            var publisher2s = Mocker.Guid_GetPublishers2();
+
+
+            foreach (Guid_PublisherEntity2 publisher in publisher2s)
+            {
+                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
+            }
+
+
+            Guid_PublisherEntity2? publisher2 = await database.ScalarAsync<Guid_PublisherEntity2>(publisher2s[0].Id, null).ConfigureAwait(false);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publisher2s[0]));
+
+            #endregion
+
+            #region Json验证3
+
+            var publishers = Mocker.Guid_GetPublishers();
+
+
+            foreach (Guid_PublisherEntity publisher in publishers)
+            {
+                await database.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
+            }
+
+
+            Guid_PublisherEntity? publisher1 = await database.ScalarAsync<Guid_PublisherEntity>(publishers[0].Id, null).ConfigureAwait(false);
+
+            Assert.Equal(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
+            #endregion
+        }
+
+        /// <summary>
+        /// Test_EntityMapperPerformanceAsync
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        [Fact]
+        public async Task Guid_Test_14_Mapper_ToEntity_PerformanceAsync()
+        {
+            IDatabase database = _mysql;
+
+            var books = Mocker.Guid_GetBooks(5000);
+
+            var trans = await _mysqlTransaction.BeginTransactionAsync<Guid_BookEntity>().ConfigureAwait(false);
+
+            try
+            {
+
+                await database.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await _mysqlTransaction.CommitAsync(trans).ConfigureAwait(false);
+            }
+            catch
+            {
+                await _mysqlTransaction.RollbackAsync(trans).ConfigureAwait(false);
+            }
+
+
+            Stopwatch stopwatch = new Stopwatch();
+
+            using MySqlConnection mySqlConnection = new MySqlConnection(_mysqlConnectionString);
+
+            TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
+            TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);
+
+            //time = 0;
+            int loop = 1;
+
+            TimeSpan time0 = TimeSpan.Zero, time1 = TimeSpan.Zero, time2 = TimeSpan.Zero, time3 = TimeSpan.Zero;
+            for (int cur = 0; cur < loop; ++cur)
+            {
+
+                await mySqlConnection.OpenAsync().ConfigureAwait(false);
+
+
+                using MySqlCommand command0 = new MySqlCommand("select * from tb_guid_bookentity limit 5000", mySqlConnection);
+
+                var reader = await command0.ExecuteReaderAsync().ConfigureAwait(false);
+
+                List<Guid_BookEntity> list1 = new List<Guid_BookEntity>();
+                List<Guid_BookEntity> list2 = new List<Guid_BookEntity>();
+                List<Guid_BookEntity> list3 = new List<Guid_BookEntity>();
+
+                int len = reader.FieldCount;
+                EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
+                MethodInfo[] setMethods = new MethodInfo[len];
+
+                EntityDef definition = EntityDefFactory.GetDef<Guid_BookEntity>()!;
+
+                for (int i = 0; i < len; ++i)
+                {
+                    propertyDefs[i] = definition.GetPropertyDef(reader.GetName(i))!;
+                    setMethods[i] = propertyDefs[i].SetMethod;
+                }
+
+                Func<IDataReader, object> fullStack_mapper = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
+
+                Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_BookEntity), reader);
+
+                Func<IDataReader, object> reflection_mapper = (r) =>
+                {
+                    Guid_BookEntity item = new Guid_BookEntity();
+
+                    for (int i = 0; i < len; ++i)
+                    {
+                        EntityPropertyDef property = propertyDefs[i];
+
+                        object? value = TypeConvert.DbValueToTypeValue(r[i], property, EngineType.MySQL);
+
+                        if (value != null)
+                        {
+                            setMethods[i].Invoke(item, new object?[] { value });
+                        }
+
+                    }
+
+                    return item;
+                };
+
+                Stopwatch stopwatch1 = new Stopwatch();
+                Stopwatch stopwatch2 = new Stopwatch();
+                Stopwatch stopwatch3 = new Stopwatch();
+
+                while (reader.Read())
+                {
+                    stopwatch1.Start();
+                    object obj1 = fullStack_mapper(reader);
+                    list1.Add((Guid_BookEntity)obj1);
+                    stopwatch1.Stop();
+
+                    stopwatch2.Start();
+                    object obj2 = dapper_mapper(reader);
+                    list2.Add((Guid_BookEntity)obj2);
+                    stopwatch2.Stop();
+
+                    stopwatch3.Start();
+                    object obj3 = reflection_mapper(reader);
+                    list3.Add((Guid_BookEntity)obj3);
+                    stopwatch3.Stop();
+                }
+
+                time1 += stopwatch1.Elapsed;
+                time2 += stopwatch2.Elapsed;
+                time3 += stopwatch3.Elapsed;
+
+                await reader.DisposeAsync().ConfigureAwait(false);
+                command0.Dispose();
+
+                await mySqlConnection.CloseAsync().ConfigureAwait(false);
+
+            }
+
+            _output.WriteLine("FullStack_Emit : " + (time1.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
+            _output.WriteLine("Dapper : " + (time2.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
+            _output.WriteLine("FullStack_Reflection : " + (time3.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>
+        /// EntityMapper_ToParameter_Test
+        /// </summary>
+        /// <param name="engineType"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        [Fact]
+        public void Guid_Test_15_Mapper_ToParameter()
+        {
+            Guid_PublisherEntity publisherEntity = Mocker.Guid_MockOnePublisherEntity();
+            publisherEntity.Version = 0;
+
+            var emit_results = publisherEntity.ToParameters(EntityDefFactory.GetDef<Guid_PublisherEntity>()!, EngineType.MySQL, 1);
+
+            var reflect_results = publisherEntity.ToParametersUsingReflection(EntityDefFactory.GetDef<Guid_PublisherEntity>()!, EngineType.MySQL, 1);
+
+            AssertEqual(emit_results, reflect_results, EngineType.MySQL);
+
+            //PublisherEntity2
+
+            Guid_PublisherEntity2 publisherEntity2 = new Guid_PublisherEntity2();
+            publisherEntity2.Version = 0;
+
+            var emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
+
+            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
+
+            AssertEqual(emit_results2, reflect_results2, EngineType.MySQL);
+
+            //PublisherEntity3
+
+            Guid_PublisherEntity3 publisherEntity3 = new Guid_PublisherEntity3();
+            publisherEntity3.Version = 0;
+
+            var emit_results3 = publisherEntity3.ToParameters(EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, 1);
+
+            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, 1);
+
+            AssertEqual(emit_results3, reflect_results3, EngineType.MySQL);
+
+        }
+
+        /// <summary>
+        /// EntityMapper_ToParameter_Performance_Test
+        /// </summary>
+        /// <param name="engineType"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        [Fact]
+        public void Guid_Test_16_Mapper_ToParameter_Performance()
+        {
+            var entities = Mocker.Guid_GetPublishers(1000000);
+
+            foreach (var entity in entities)
+            {
+                entity.Version = 0;
+            }
+
+            var def = EntityDefFactory.GetDef<Guid_PublisherEntity>();
+
+            Stopwatch stopwatch = new Stopwatch();
+
+            stopwatch.Restart();
+            foreach (var entity in entities)
+            {
+                _ = entity.ToParameters(def!, EngineType.MySQL);
+            }
+            stopwatch.Stop();
+
+            _output.WriteLine($"Emit: {stopwatch.ElapsedMilliseconds}");
+
+            stopwatch.Restart();
+            foreach (var entity in entities)
+            {
+                _ = entity.ToParametersUsingReflection(def!, EngineType.MySQL);
+            }
+            stopwatch.Stop();
+
+            _output.WriteLine($"Reflection: {stopwatch.ElapsedMilliseconds}");
+        }
+        /// <summary>
+        /// AssertEqual
+        /// </summary>
+        /// <param name="emit_results"></param>
+        /// <param name="results"></param>
+        /// <param name="engineType"></param>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+        /// <exception cref="DatabaseException">Ignore.</exception>
+
+        private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
+        {
+            var dict = results.ToDictionary(kv => kv.Key);
+
+            Assert.True(emit_results.Count() == dict.Count);
+
+            foreach (var kv in emit_results)
+            {
+                Assert.True(dict.ContainsKey(kv.Key));
+
+                Assert.True(TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+
+                    TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
+            }
+        }
+
         public Guid ReturnGuid()
         {
             return Guid.NewGuid();
         }
-
-        
     }
 }

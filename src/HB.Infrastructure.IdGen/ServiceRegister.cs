@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
             IdGenSettings settings = new IdGenSettings();
             configuration.Bind(settings);
 
-            IdGenDistributedId.Initialize(settings);
+            FlackIdGen.Initialize(settings);
             return services;
         }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
             IdGenSettings settings = new IdGenSettings();
             action(settings);
 
-            IdGenDistributedId.Initialize(settings);
+            FlackIdGen.Initialize(settings);
             return services;
         }
     }

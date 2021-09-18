@@ -58,6 +58,25 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
+        public static IList<Guid_BookEntity> Guid_GetBooks(int? count = null)
+        {
+            List<Guid_BookEntity> books = new List<Guid_BookEntity>();
+
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                books.Add(new Guid_BookEntity
+                {
+                    //Guid = SecurityUtil.CreateUniqueToken(),
+                    Name = "Book" + i.ToString(),
+                    Price = _random.NextDouble()
+                });
+            }
+
+            return books;
+        }
+
         public static IList<BookEntity_Client> GetBooks_Client(int? count = null)
         {
             List<BookEntity_Client> books = new List<BookEntity_Client>();
@@ -117,6 +136,24 @@ namespace HB.FullStack.DatabaseTests.Data
         public static PublisherEntity_Client MockOnePublisherEntity_Client()
         {
             PublisherEntity_Client entity = new PublisherEntity_Client
+            {
+                Type = PublisherType.Online,
+                Name = "中文名字",
+                Books = new List<string>() { "Cat", "Dog" },
+                BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                BookAuthors = new Dictionary<string, Author>()
+                {
+                    { "Cat", new Author() { Mobile="111", Name="BB" } },
+                    { "Dog", new Author() { Mobile="222", Name="sx" } }
+                }
+            };
+
+            return entity;
+        }
+
+        public static Guid_PublisherEntity_Client Guid_MockOnePublisherEntity_Client()
+        {
+            Guid_PublisherEntity_Client entity = new Guid_PublisherEntity_Client
             {
                 Type = PublisherType.Online,
                 Name = "中文名字",
@@ -198,6 +235,28 @@ namespace HB.FullStack.DatabaseTests.Data
             return publisherEntities;
         }
 
+        public static List<Guid_PublisherEntity_Client> Guid_GetPublishers_Client(int? count = null)
+        {
+            List<Guid_PublisherEntity_Client> publisherEntities = new List<Guid_PublisherEntity_Client>();
+
+            Random random = new Random();
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                publisherEntities.Add(new Guid_PublisherEntity_Client
+                {
+                    Books = new List<string> { "a", "v", "c" },
+                    Type = (PublisherType)random.Next(0, 3),
+                    Name = "Publisher" + i.ToString(),
+                    //BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } },
+                    BookAuthors = new Dictionary<string, Author> { { "a", new Author { Mobile = "xxxx", Name = "tttt" } }, { "xxx", new Author { Mobile = "gggg", Name = "safas" } } }
+                });
+            }
+
+            return publisherEntities;
+        }
+
         public static IList<PublisherEntity2> GetPublishers2(int? count = null)
         {
             List<PublisherEntity2> publisherEntities = new List<PublisherEntity2>();
@@ -208,6 +267,25 @@ namespace HB.FullStack.DatabaseTests.Data
             for (int i = 0; i < length; ++i)
             {
                 publisherEntities.Add(new PublisherEntity2
+                {
+                    Type = (PublisherType)random.Next(1, 3),
+                    Name = "Publisher" + i.ToString()
+                });
+            }
+
+            return publisherEntities;
+        }
+
+        public static IList<Guid_PublisherEntity2> Guid_GetPublishers2(int? count = null)
+        {
+            List<Guid_PublisherEntity2> publisherEntities = new List<Guid_PublisherEntity2>();
+
+            Random random = new Random();
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                publisherEntities.Add(new Guid_PublisherEntity2
                 {
                     Type = (PublisherType)random.Next(1, 3),
                     Name = "Publisher" + i.ToString()

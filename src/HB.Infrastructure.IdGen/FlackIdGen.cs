@@ -17,7 +17,7 @@ namespace HB.Infrastructure.IdGen
     /// <summary>
     /// warning: 不支持Web Garden
     /// </summary>
-    public class IdGenDistributedId : IDistributedIdGen
+    public class FlackIdGen : IDistributedIdGen
     {
         public static void Initialize(IdGenSettings settings)
         {
@@ -25,12 +25,12 @@ namespace HB.Infrastructure.IdGen
             var structure = new IdStructure(settings.TimestampBits, settings.GeneratorIdBits, settings.SequenceBits);
             var options = new IdGeneratorOptions(structure, new DefaultTimeSource(settings.Epoch));
 
-            StaticIdGen.IdGen = new IdGenDistributedId(settings.MachineId, options);
+            StaticIdGen.IdGen = new FlackIdGen(settings.MachineId, options);
         }
 
         private readonly IdGenerator _idGen;
 
-        public IdGenDistributedId(int generatorId, IdGeneratorOptions options)
+        public FlackIdGen(int generatorId, IdGeneratorOptions options)
         {
             _idGen = new IdGenerator(generatorId, options);
         }

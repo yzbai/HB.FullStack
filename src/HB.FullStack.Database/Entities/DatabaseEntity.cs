@@ -29,41 +29,23 @@ namespace HB.FullStack.Database.Entities
         public override long Id { get; set; } = -1;
     }
 
-    public abstract class IdGenEntity : IdDatabaseEntity
+    public abstract class FlackIdEntity : IdDatabaseEntity
     {
         [PrimaryKey]
         [EntityProperty(0)]
         [CacheKey]
         [LongId]
-        public override long Id
-        {
-            get; set;
-        } = StaticIdGen.GetId();
+        public override long Id { get; set; } = StaticIdGen.GetId();
     }
-
-    //public abstract class AutoIncrementIdGuidEntity : AutoIncrementIdEntity
-    //{
-    //    [Required]
-    //    [UniqueGuidEntityProperty(1)]
-    //    [CacheKey]
-    //    public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
-    //}
-
-    //public abstract class IdGenGuidEntity : IdGenEntity
-    //{
-    //    [Required]
-    //    [UniqueGuidEntityProperty(1)]
-    //    [CacheKey]
-    //    public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
-    //}
 
     public abstract class GuidEntity : DatabaseEntity
     {
-        //TODO: 思考换成Binary存储
         [Required]
         [PrimaryKey]
         [UniqueGuidString(0)]
         [CacheKey]
         public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
+
+        //TODO: 这里是按AsBinary来生成的，在不同的数据库需要不同的生成
     }
 }

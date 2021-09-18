@@ -5,7 +5,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class SignInToken : IdGenEntity
+    public class SignInToken : FlackIdEntity
     {
         [LongId]
         [ForeignKey(typeof(User))]

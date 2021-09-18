@@ -1175,7 +1175,7 @@ namespace HB.FullStack.Database
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((IdGenEntity)(object)item).Id);
+                        newIds.Add(((FlackIdEntity)(object)item).Id);
                     }
                 }
 

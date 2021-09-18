@@ -22,7 +22,7 @@ using Xunit.Abstractions;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public class SqliteBasicAsyncTest : IClassFixture<ServiceFixture_Sqlite>
+    public class BasicTest_Sqlite : IClassFixture<ServiceFixture_Sqlite>
     {
         private readonly IDatabase _sqlite;
         private readonly ITransaction _sqlIteTransaction;
@@ -39,7 +39,7 @@ namespace HB.FullStack.DatabaseTests
         /// <param name="serviceFixture"></param>
         /// <exception cref="DatabaseException">Ignore.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
-        public SqliteBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture_Sqlite serviceFixture)
+        public BasicTest_Sqlite(ITestOutputHelper testOutputHelper, ServiceFixture_Sqlite serviceFixture)
         {
             _output = testOutputHelper;
 
@@ -693,6 +693,45 @@ namespace HB.FullStack.DatabaseTests
             IEnumerable<PublisherEntity> publisherEntities = await database.RetrieveAsync<PublisherEntity>(p => p.Type == PublisherType.Big, null).ConfigureAwait(false);
 
             Assert.True(publisherEntities.All(p => p.Type == PublisherType.Big));
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
+        public void TestSQLite_Changes_Test()
+        {
+            string connectString = $"Data Source=sqlite_test2.db";
+            using SqliteConnection conn = new SqliteConnection(connectString);
+            conn.Open();
+
+            string guid = SecurityUtil.CreateUniqueToken();
+
+            string insertCommandText = $"insert into tb_publisher(`Name`, `LastTime`, `Guid`, `Version`) values('SSFS', 100, '{guid}', 1)";
+
+            using SqliteCommand insertCommand = new SqliteCommand(insertCommandText, conn);
+
+            insertCommand.ExecuteScalar();
+
+
+            string commandText = $"update `tb_publisher` set  `Name`='{new Random().NextDouble()}', `Version`=2 WHERE `Guid`='{guid}' ;";
+
+            using SqliteCommand mySqlCommand1 = new SqliteCommand(commandText, conn);
+
+            int rt1 = mySqlCommand1.ExecuteNonQuery();
+
+            using SqliteCommand rowCountCommand1 = new SqliteCommand("select changes()", conn);
+
+            long? rowCount1 = (long?)rowCountCommand1.ExecuteScalar();
+
+            using SqliteCommand mySqlCommand2 = new SqliteCommand(commandText, conn);
+
+            int rt2 = mySqlCommand1.ExecuteNonQuery();
+
+            using SqliteCommand rowCountCommand2 = new SqliteCommand("select changes()", conn);
+
+            long? rowCount2 = (long?)rowCountCommand2.ExecuteScalar();
+
+            Assert.Equal(rt1, rt2);
+            Assert.Equal(rowCount1, rowCount2);
         }
 
     }

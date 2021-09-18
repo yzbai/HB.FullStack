@@ -183,7 +183,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="entity"></param>
         /// <param name="entityDef"></param>
         /// <param name="engineType"></param>
-        /// <param name="number"></param>
+        /// <param name="number">属性名的后缀数字</param>
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()

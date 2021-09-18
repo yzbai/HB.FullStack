@@ -7,7 +7,7 @@ using HB.FullStack.Database.Entities;
 namespace HB.FullStack.DatabaseTests
 {
 
-    public class A : IdGenEntity
+    public class A : FlackIdEntity
     {
 
 
@@ -16,7 +16,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B : IdGenEntity
+    public class B : FlackIdEntity
     {
 
         [EntityProperty]
@@ -24,7 +24,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB : IdGenEntity
+    public class AB : FlackIdEntity
     {
 
         [EntityProperty]
@@ -35,7 +35,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C : IdGenEntity
+    public class C : FlackIdEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;
@@ -44,7 +44,7 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class A_Client : IdGenEntity
+    public class A_Client : FlackIdEntity
     {
 
         [EntityProperty]
@@ -52,7 +52,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B_Client : IdGenEntity
+    public class B_Client : FlackIdEntity
     {
 
         [EntityProperty]
@@ -60,7 +60,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB_Client : IdGenEntity
+    public class AB_Client : FlackIdEntity
     {
 
         [EntityProperty]
@@ -71,7 +71,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C_Client : IdGenEntity
+    public class C_Client : FlackIdEntity
     {
         [EntityProperty]
         public string Name { get; set; } = default!;

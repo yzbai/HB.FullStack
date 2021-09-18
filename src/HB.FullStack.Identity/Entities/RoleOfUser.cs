@@ -9,7 +9,7 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    public class RoleOfUser : IdGenEntity
+    public class RoleOfUser : FlackIdEntity
     {
         [LongId]
         [ForeignKey(typeof(User))]

@@ -28,14 +28,14 @@ using Xunit.Abstractions;
 namespace HB.FullStack.DatabaseTests
 {
     //[TestCaseOrderer("HB.FullStack.Database.Test.TestCaseOrdererByTestName", "HB.FullStack.Database.Test")]
-    public class MySQLBasicAsyncTest : IClassFixture<ServiceFixture_MySql>
+    public class BasicTest_MySQL : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IDatabase _mysql;
         private readonly ITransaction _mysqlTransaction;
         private readonly ITestOutputHelper _output;
         private readonly string _mysqlConnectionString;
 
-        public MySQLBasicAsyncTest(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
+        public BasicTest_MySQL(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
 
@@ -128,8 +128,6 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-
-
         public async Task Test_3_Batch_Delete_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
@@ -201,8 +199,6 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="Exception">Ignore.</exception>
         [Fact]
-
-
         public async Task Test_5_Update_PublisherEntityAsync()
         {
             IDatabase database = _mysql;
@@ -323,8 +319,6 @@ namespace HB.FullStack.DatabaseTests
         /// <returns></returns>
         /// <exception cref="DatabaseException">Ignore.</exception>
         [Fact]
-
-
         public async Task Test_8_LastTimeTestAsync()
         {
             IDatabase database = _mysql;
@@ -412,13 +406,6 @@ namespace HB.FullStack.DatabaseTests
 
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
-
-
-                //await database.AddOrUpdateAsync(item, "sfas", transactionContext).ConfigureAwait(false);
-
-
-                await database.DeleteAsync(item, "xxx", transactionContext).ConfigureAwait(false);
-
 
                 IList<PublisherEntity> testEntities = (await database.PageAsync<PublisherEntity>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
 
@@ -535,15 +522,8 @@ namespace HB.FullStack.DatabaseTests
 
             var trans = await _mysqlTransaction.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
 
-            IEnumerable<BookEntity> re = await database.RetrieveAsync<BookEntity>(b => b.Deleted, trans).ConfigureAwait(false);
-
-            await database.AddAsync(Mocker.GetBooks(1)[0], "", trans).ConfigureAwait(false);
-
             try
             {
-
-                //await database.AddAsync<BookEntity>(books[0], "", trans);
-
                 await database.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
                 await _mysqlTransaction.CommitAsync(trans).ConfigureAwait(false);
             }
@@ -558,6 +538,7 @@ namespace HB.FullStack.DatabaseTests
             using MySqlConnection mySqlConnection = new MySqlConnection(_mysqlConnectionString);
 
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
+            TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);
 
             //time = 0;
             int loop = 100;
@@ -788,6 +769,64 @@ namespace HB.FullStack.DatabaseTests
             IEnumerable<PublisherEntity> publisherEntities = await database.RetrieveAsync<PublisherEntity>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
 
             Assert.True(publisherEntities.Any() && publisherEntities.All(p => p.Type == PublisherType.Big));
+        }
+
+        /// <summary>
+        /// TestUseAffectedRow_When_True_Test
+        /// </summary>
+
+        [Theory]
+        [InlineData(true, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
+        [InlineData(false, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
+        [InlineData(null, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
+        public void TestMySQL_UseAffectedRow_Test(bool? UseAffectedRows, string connectString)
+        {
+            if (UseAffectedRows.HasValue)
+            {
+                connectString = connectString + $"UseAffectedRows={UseAffectedRows};";
+            }
+
+            using MySqlConnection mySqlConnection = new MySqlConnection(connectString);
+            mySqlConnection.Open();
+
+            string guid = SecurityUtil.CreateUniqueToken();
+
+            string insertCommandText = $"insert into tb_publisher(`Name`, `LastTime`, `Guid`) values('SSFS', 100, '{guid}')";
+
+            using MySqlCommand insertCommand = new MySqlCommand(insertCommandText, mySqlConnection);
+
+            insertCommand.ExecuteScalar();
+
+            string commandText = $"update `tb_publisher` set  `Name`='{new Random().NextDouble()}', `Version`=2 WHERE `Guid`='{guid}' ;";
+
+            using MySqlCommand mySqlCommand1 = new MySqlCommand(commandText, mySqlConnection);
+
+            int rt1 = mySqlCommand1.ExecuteNonQuery();
+
+            using MySqlCommand rowCountCommand1 = new MySqlCommand("select row_count()", mySqlConnection);
+
+            long? rowCount1 = (long?)rowCountCommand1.ExecuteScalar();
+
+            using MySqlCommand mySqlCommand2 = new MySqlCommand(commandText, mySqlConnection);
+
+            int rt2 = mySqlCommand1.ExecuteNonQuery();
+
+            using MySqlCommand rowCountCommand2 = new MySqlCommand("select row_count()", mySqlConnection);
+
+            long? rowCount2 = (long?)rowCountCommand2.ExecuteScalar();
+
+
+            if (UseAffectedRows.HasValue && UseAffectedRows.Value) //真正改变的行数
+            {
+                Assert.NotEqual(rt1, rt2);
+                Assert.NotEqual(rowCount1, rowCount2);
+            }
+            else //found_rows 找到的行数  by default in mysql
+            {
+                Assert.Equal(rt1, rt2);
+                Assert.Equal(rowCount1, rowCount2);
+            }
         }
     }
 }

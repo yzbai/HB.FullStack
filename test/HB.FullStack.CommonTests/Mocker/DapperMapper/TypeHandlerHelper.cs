@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using Newtonsoft.Json.Linq;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,6 +10,19 @@ using System.Text;
 
 namespace ClassLibrary1
 {
+
+    public class MySqlGuidTypeHandler : ITypeHandler
+    {
+        public object Parse(Type destinationType, object value)
+        {
+            return new Guid((byte[])value);
+        }
+
+        public void SetValue(IDbDataParameter parameter, object value)
+        {
+
+        }
+    }
 
     public class DateTimeOffsetTypeHandler : ITypeHandler
     {

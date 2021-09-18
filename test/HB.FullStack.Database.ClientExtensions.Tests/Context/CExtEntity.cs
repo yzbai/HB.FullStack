@@ -7,7 +7,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.ClientExtensions.Tests.Context
 {
-    public class CExtEntity : IdGenEntity
+    public class CExtEntity : FlackIdEntity
     {
         public string? Name { get; set; }
     }

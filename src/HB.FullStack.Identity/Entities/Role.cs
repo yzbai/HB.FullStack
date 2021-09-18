@@ -5,7 +5,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class Role : IdGenEntity
+    public class Role : FlackIdEntity
     {
         [EntityProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;
