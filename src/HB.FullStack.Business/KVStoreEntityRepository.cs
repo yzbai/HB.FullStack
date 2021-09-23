@@ -8,11 +8,11 @@ using HB.FullStack.KVStore.Entities;
 
 namespace HB.FullStack.Repository
 {
-    public abstract class KVStoreRepository<TEntity> where TEntity : KVStoreEntity, new()
+    public abstract class KVStoreEntityRepository<TEntity> where TEntity : KVStoreEntity, new()
     {
         protected IKVStore KVStore { get; }
 
-        protected KVStoreRepository(IKVStore kVStore)
+        protected KVStoreEntityRepository(IKVStore kVStore)
         {
             KVStore = kVStore;
         }

@@ -29,7 +29,7 @@ namespace System.Net.Http
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
         /// <exception cref="System.ApiException"></exception>
-        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : ApiResource where TResponse : class
+        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : ModelObject where TResponse : class
         {
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
@@ -127,7 +127,7 @@ namespace System.Net.Http
         }
 
         [Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        private static MultipartFormDataContent BuildMultipartContent<T>(FileUpdateRequest<T> fileRequest) where T : ApiResource
+        private static MultipartFormDataContent BuildMultipartContent<T>(FileUpdateRequest<T> fileRequest) where T : ModelObject
         {
             MultipartFormDataContent content = new MultipartFormDataContent();
 

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class UserLoginControl : KVStoreEntity
+    internal class LoginControlEntity : KVStoreEntity
     {
         [NoEmptyGuid]
         [KVStoreKey]

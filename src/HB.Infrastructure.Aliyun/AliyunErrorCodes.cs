@@ -82,11 +82,11 @@ namespace HB.Infrastructure.Aliyun
 
         }
 
-        internal static Exception StsError(long userId, string bucketname, string direcotry, bool readOnly, Exception ex)
+        internal static Exception StsError(Guid userId, string bucketname, string direcotry, bool readOnly, Exception ex)
         {
             SmsException exception = new SmsException(AliyunErrorCodes.StsError, ex);
 
-            exception.Data["UserId"] = userId;
+            exception.Data["UserId"] = userId.ToString();
             exception.Data["BucketName"] = bucketname;
             exception.Data["Directory"] = direcotry;
             exception.Data["ReadOnly"] = readOnly;

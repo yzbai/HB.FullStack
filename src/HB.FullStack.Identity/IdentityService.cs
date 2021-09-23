@@ -1,41 +1,620 @@
-﻿using HB.FullStack.Identity.Entities;
-using HB.FullStack.Database;
-using System.Threading.Tasks;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+
+using HB.FullStack.Database;
+using HB.FullStack.Identity.Entities;
+using HB.FullStack.Identity.ModelObjects;
+using HB.FullStack.Lock.Distributed;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HB.FullStack.Identity
 {
     internal class IdentityService : IIdentityService
     {
+        private readonly IdentityOptions _options;
+        private readonly ILogger _logger;
         private readonly ITransaction _transaction;
-        private readonly UserRepo _userRepo;
-        private readonly UserRoleRepo _userRoleRepo;
+        private readonly IDistributedLockManager _lockManager;
 
-        public IdentityService(ITransaction transaction, UserRepo userRepo, UserRoleRepo userRoleRepo)
+        private readonly UserEntityRepo _userRepo;
+        private readonly SignInTokenEntityRepo _signInTokenRepo;
+        private readonly UserRoleEntityRepo _roleOfUserRepo;
+        private readonly UserClaimEntityRepo _userClaimRepo;
+        private readonly LoginControlEntityRepo _userLoginControlRepo;
+        private readonly UserRoleEntityRepo _userRoleRepo;
+
+
+        //Jwt Signing
+        private string _jsonWebKeySetJson = null!;
+        private IEnumerable<SecurityKey> _issuerSigningKeys = null!;
+        private SigningCredentials _signingCredentials = null!;
+
+
+        //Jwt Content Encrypt
+        private EncryptingCredentials _encryptingCredentials = null!;
+        private SecurityKey _decryptionSecurityKey = null!;
+
+        /// <exception cref="IdentityException"></exception>
+        public IdentityService(
+            IOptions<IdentityOptions> options,
+            ILogger<IdentityService> logger,
+            ITransaction transaction,
+            IDistributedLockManager lockManager,
+            UserEntityRepo userRepo,
+            SignInTokenEntityRepo signInTokenRepo,
+            UserRoleEntityRepo roleOfUserRepo,
+            UserClaimEntityRepo userClaimRepo,
+            LoginControlEntityRepo userLoginControlRepo,
+            UserRoleEntityRepo userRoleRepo)
         {
-            _userRepo = userRepo;
-            _userRoleRepo = userRoleRepo;
+            _options = options.Value;
+            _logger = logger;
             _transaction = transaction;
+            _lockManager = lockManager;
+
+            _userRepo = userRepo;
+            _roleOfUserRepo = roleOfUserRepo;
+            _userClaimRepo = userClaimRepo;
+            _userLoginControlRepo = userLoginControlRepo;
+            _signInTokenRepo = signInTokenRepo;
+
+            _userRoleRepo = userRoleRepo;
+
+            InitializeCredencials();
         }
 
-        #region User
+        public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
         /// <summary>
-        /// CreateUserAsync
+        /// SignInAsync
         /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="email"></param>
-        /// <param name="loginName"></param>
-        /// <param name="password"></param>
-        /// <param name="mobileConfirmed"></param>
-        /// <param name="emailConfirmed"></param>
+        /// <param name="context"></param>
         /// <param name="lastUser"></param>
-        /// <param name="transactionContext"></param>
         /// <returns></returns>
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
+        /// <exception cref="KVStoreException"></exception>
+        /// <exception cref="CacheException"></exception>
+        public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
+        {
+            ThrowIf.NotValid(context, nameof(context));
+
+            switch (context.SignInType)
+            {
+                case SignInType.ByMobileAndPassword:
+                    ThrowIf.NullOrEmpty(context.Mobile, "SignInContext.Mobile");
+                    ThrowIf.NullOrEmpty(context.Password, "SignInContext.Password");
+                    break;
+                case SignInType.BySms:
+                    ThrowIf.NullOrEmpty(context.Mobile, "SignInContext.Mobile");
+                    break;
+                case SignInType.ByLoginNameAndPassword:
+                    ThrowIf.NullOrEmpty(context.LoginName, "SignInContext.LoginName");
+                    ThrowIf.NullOrEmpty(context.Password, "SignInContext.Password");
+                    break;
+                default:
+                    break;
+            }
+
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+
+            try
+            {
+                //查询用户
+                UserEntity? user = context.SignInType switch
+                {
+                    SignInType.ByLoginNameAndPassword => await _userRepo.GetByLoginNameAsync(context.LoginName!, transactionContext).ConfigureAwait(false),
+                    SignInType.BySms => await _userRepo.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
+                    SignInType.ByMobileAndPassword => await _userRepo.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
+                    _ => null
+                };
+
+                //不存在，则新建用户
+
+                if (user == null && context.SignInType == SignInType.BySms)
+                {
+                    user = await CreateUserAsync(context.Mobile!, null, context.LoginName, context.Password, true, false, lastUser, transactionContext).ConfigureAwait(false);
+                }
+
+                if (user == null)
+                {
+                    throw Exceptions.AuthorizationNotFound(signInContext: context);
+                }
+
+                LoginControlEntity userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
+
+                //密码检查
+                if (context.SignInType == SignInType.ByMobileAndPassword || context.SignInType == SignInType.ByLoginNameAndPassword)
+                {
+                    if (!PassowrdCheck(user, context.Password!))
+                    {
+                        await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
+
+                        throw Exceptions.AuthorizationPasswordWrong(signInContext: context);
+                    }
+                }
+
+                //其他检查
+                await PreSignInCheckAsync(user, userLoginControl, lastUser).ConfigureAwait(false);
+
+                //注销其他客户端
+                await DeleteSignInTokensAsync(user.Id, context.DeviceInfos.Idiom, context.LogOffType, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
+
+                //创建Token
+
+                SignInTokenEntity signInToken = new SignInTokenEntity
+                (
+                    userId: user.Id,
+                    refreshToken: SecurityUtil.CreateUniqueToken(),
+                    expireAt: TimeUtil.UtcNow + (context.RememberMe ? _options.SignInOptions.RefreshTokenLongExpireTimeSpan : _options.SignInOptions.RefreshTokenShortExpireTimeSpan),
+                    deviceId: context.DeviceId,
+                    deviceVersion: context.DeviceVersion,
+                    deviceIp: context.DeviceIp,
+
+                    deviceName: context.DeviceInfos.Name,
+                    deviceModel: context.DeviceInfos.Model,
+                    deviceOSVersion: context.DeviceInfos.OSVersion,
+                    devicePlatform: context.DeviceInfos.Platform,
+                    deviceIdiom: context.DeviceInfos.Idiom,
+                    deviceType: context.DeviceInfos.Type
+                );
+
+                await _signInTokenRepo.AddAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
+
+                //构造 Jwt
+                string jwt = await ConstructJwtAsync(user, signInToken, context.SignToWhere, transactionContext).ConfigureAwait(false);
+
+                UserAccessResult result = new UserAccessResult
+                (
+                    accessToken: jwt,
+                    refreshToken: signInToken.RefreshToken,
+                    currentUser: ToModelObject(user)
+                );
+
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+
+                return result;
+            }
+            catch
+            {
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                throw;
+            }
+        }
+
+
+
+        /// <summary>
+        /// RefreshAccessTokenAsync
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
+        public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
+        {
+            ThrowIf.NotValid(context, nameof(context));
+
+            //解决并发涌入
+            using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
+               nameof(RefreshAccessTokenAsync) + context.DeviceId,
+               _options.RefreshIntervalTimeSpan, notUnlockWhenDispose: true).ConfigureAwait(false);
+
+            if (!distributedLock.IsAcquired)
+            {
+                throw Exceptions.AuthorizationTooFrequent(context: context);
+            }
+
+            //AccessToken, Claims 验证
+
+            ClaimsPrincipal? claimsPrincipal = null;
+
+            try
+            {
+                claimsPrincipal = JwtHelper.ValidateTokenWithoutLifeCheck(context.AccessToken, _options.OpenIdConnectConfiguration.Issuer, _issuerSigningKeys, _decryptionSecurityKey);
+            }
+            catch (Exception ex)
+            {
+                throw Exceptions.AuthorizationInvalideAccessToken(context: context, innerException: ex);
+            }
+
+            //TODO: 这里缺DeviceId验证. 放在了StartupUtil.cs中
+
+            if (claimsPrincipal == null)
+            {
+                //TODO: Black concern SigninToken by RefreshToken
+                throw Exceptions.AuthorizationInvalideAccessToken(context: context);
+            }
+
+            if (claimsPrincipal.GetDeviceId() != context.DeviceId)
+            {
+                throw Exceptions.AuthorizationInvalideDeviceId(context: context);
+            }
+
+            Guid userId = claimsPrincipal.GetUserId().GetValueOrDefault();
+
+            if (userId.IsEmpty())
+            {
+                throw Exceptions.AuthorizationInvalideUserId(context: context);
+            }
+
+            //SignInToken 验证
+            UserEntity? user;
+            SignInTokenEntity? signInToken = null;
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+
+            try
+            {
+                signInToken = await _signInTokenRepo.GetByConditionAsync(
+                    claimsPrincipal.GetSignInTokenId().GetValueOrDefault(),
+                    context.RefreshToken,
+                    context.DeviceId,
+                    userId,
+                    transactionContext).ConfigureAwait(false);
+
+                if (signInToken == null || signInToken.Blacked)
+                {
+                    throw Exceptions.AuthorizationNoTokenInStore(cause: "Refresh token error. signInToken not saved in db. ");
+                }
+
+                //验证SignInToken过期问题
+
+                if (signInToken.ExpireAt < TimeUtil.UtcNow)
+                {
+                    throw Exceptions.AuthorizationRefreshTokenExpired();
+                }
+
+                // User 信息变动验证
+
+                user = await _userRepo.GetByIdAsync(userId, transactionContext).ConfigureAwait(false);
+
+                if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
+                {
+                    throw Exceptions.AuthorizationUserSecurityStampChanged(cause: "Refresh token error. User SecurityStamp Changed.");
+                }
+
+                // 更新SignInToken
+                signInToken.RefreshCount++;
+
+                await _signInTokenRepo.UpdateAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
+
+                // 发布新的AccessToken
+
+                string accessToken = await ConstructJwtAsync(user, signInToken, claimsPrincipal.GetAudience(), transactionContext).ConfigureAwait(false);
+
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+
+                return new UserAccessResult(accessToken, context.RefreshToken, ToModelObject(user));
+            }
+            catch
+            {
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+
+                if (signInToken != null)
+                {
+                    await _signInTokenRepo.DeleteAsync(signInToken, lastUser, null).ConfigureAwait(false);
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// SignOutAsync
+        /// </summary>
+        /// <param name="signInTokenId"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        public async Task SignOutAsync(Guid signInTokenId, string lastUser)
+        {
+            ThrowIf.Empty(ref signInTokenId, nameof(signInTokenId));
+
+            TransactionContext transContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+
+            try
+            {
+                SignInTokenEntity? signInToken = await _signInTokenRepo.GetByIdAsync(signInTokenId, transContext).ConfigureAwait(false);
+
+                if (signInToken != null)
+                {
+                    await _signInTokenRepo.DeleteAsync(signInToken, lastUser, transContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    _logger.LogWarning("尝试删除不存在的SignInToken. {SignInTokenId}", signInTokenId);
+                }
+
+                await transContext.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await transContext.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// SignOutAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="idiom"></param>
+        /// <param name="logOffType"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        public async Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
+        {
+            ThrowIf.Empty(ref userId, nameof(userId));
+
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+
+            try
+            {
+                await DeleteSignInTokensAsync(userId, idiom, logOffType, lastUser, transactionContext).ConfigureAwait(false);
+
+                await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// OnSignInFailedBySmsAsync
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <param name="lastUser"></param>
+        /// <returns></returns>
+        /// <exception cref="KVStoreException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
+        public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
+        {
+            UserEntity? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            LoginControlEntity userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
+
+            await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// DeleteSignInTokensAsync
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="idiom"></param>
+        /// <param name="logOffType"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        private async Task DeleteSignInTokensAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
+        {
+            IEnumerable<SignInTokenEntity> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+
+            IEnumerable<SignInTokenEntity> toDeletes = logOffType switch
+            {
+                LogOffType.LogOffAllOthers => resultList,
+                LogOffType.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web),
+                LogOffType.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == idiom),
+                _ => new List<SignInTokenEntity>()
+            };
+
+            await _signInTokenRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// ConstructJwtAsync
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="signInToken"></param>
+        /// <param name="signToWhere"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        /// <exception cref="CacheException"></exception>
+        private async Task<string> ConstructJwtAsync(UserEntity user, SignInTokenEntity signInToken, string? signToWhere, TransactionContext transactionContext)
+        {
+            IEnumerable<RoleEntity> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<UserClaimEntity> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+
+            IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
+
+            string jwt = JwtHelper.BuildJwt(
+                claims,
+                _options.OpenIdConnectConfiguration.Issuer,
+                _options.NeedAudienceToBeChecked ? signToWhere : null,
+                _options.SignInOptions.AccessTokenExpireTimeSpan,
+                _signingCredentials,
+                _encryptingCredentials);
+            return jwt;
+        }
+
+        /// <summary>
+        /// PreSignInCheck
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="userLoginControl"></param>
+        /// <param name="lastUser"></param>
+        /// <exception cref="IdentityException"></exception>
+        /// <exception cref="KVStoreException"></exception>
+        private async Task PreSignInCheckAsync(UserEntity user, LoginControlEntity userLoginControl, string lastUser)
+        {
+            ThrowIf.Null(user, nameof(user));
+
+            SignInOptions signInOptions = _options.SignInOptions;
+
+            //2, 手机验证
+            if (signInOptions.RequireMobileConfirmed && !user.MobileConfirmed)
+            {
+                throw Exceptions.AuthorizationMobileNotConfirmed(userId: user.Id);
+            }
+
+            //3, 邮件验证
+            if (signInOptions.RequireEmailConfirmed && !user.EmailConfirmed)
+            {
+                throw Exceptions.AuthorizationEmailNotConfirmed(userId: user.Id);
+            }
+
+            //4, Lockout 检查
+            if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
+            {
+                throw Exceptions.AuthorizationLockedOut(lockoutEndDate: userLoginControl.LockoutEndDate, userId: user.Id);
+            }
+
+            //5, 一段时间内,最大失败数检测
+            if (signInOptions.RequiredMaxFailedCountCheck && userLoginControl.LoginFailedLastTime.HasValue)
+            {
+                if (TimeUtil.UtcNow - userLoginControl.LoginFailedLastTime < TimeSpan.FromDays(signInOptions.AccessFailedRecoveryDays))
+                {
+                    if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
+                    {
+                        throw Exceptions.AuthorizationOverMaxFailedCount(userId: user.Id);
+                    }
+                }
+            }
+
+            //重置LoginControl
+            if (userLoginControl.LockoutEnabled || userLoginControl.LoginFailedCount != 0)
+            {
+                userLoginControl.LockoutEnabled = false;
+                userLoginControl.LoginFailedCount = 0;
+
+                await _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).ConfigureAwait(false);
+            }
+
+            if (signInOptions.RequireTwoFactorCheck && user.TwoFactorEnabled)
+            {
+                //TODO: 后续加上twofactor验证. 即登录后,再验证手机或者邮箱
+            }
+        }
+
+        /// <summary>
+        /// OnSignInFailed
+        /// </summary>
+        /// <param name="userLoginControl"></param>
+        /// <param name="lastUser"></param>
+        /// <exception cref="KVStoreException"></exception>
+        private async Task OnSignInFailedAsync(LoginControlEntity userLoginControl, string lastUser)
+        {
+            if (_options.SignInOptions.RequiredLockoutCheck)
+            {
+                if (userLoginControl.LoginFailedCount > _options.SignInOptions.LockoutAfterAccessFailedCount)
+                {
+                    userLoginControl.LockoutEnabled = true;
+                    userLoginControl.LockoutEndDate = TimeUtil.UtcNow + _options.SignInOptions.LockoutTimeSpan;
+
+                    _logger.LogWarning("有用户重复登陆失败，账户已锁定.{UserId}, {LastUser}", userLoginControl.UserId, lastUser);
+                }
+            }
+
+            if (_options.SignInOptions.RequiredMaxFailedCountCheck)
+            {
+                userLoginControl.LoginFailedCount++;
+            }
+
+            await _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// InitializeCredencials
+        /// </summary>
+        /// <exception cref="IdentityException"></exception>
+        private void InitializeCredencials()
+        {
+            //Initialize Jwt Signing Credentials
+            X509Certificate2? cert = CertificateUtil.GetCertificateFromSubjectOrFile(
+                _options.JwtSigningCertificateSubject,
+                _options.JwtSigningCertificateFileName,
+                _options.JwtSigningCertificateFilePassword);
+
+            _signingCredentials = CredentialHelper.GetSigningCredentials(cert, _options.SigningAlgorithm);
+            _jsonWebKeySetJson = CredentialHelper.CreateJsonWebKeySetJson(cert);
+            _issuerSigningKeys = CredentialHelper.GetIssuerSigningKeys(cert);
+
+            //Initialize Jwt Content Encrypt/Decrypt Credentials
+            X509Certificate2 encryptionCert = CertificateUtil.GetCertificateFromSubjectOrFile(
+                _options.JwtContentCertificateSubject,
+                _options.JwtContentCertificateFileName,
+                _options.JwtContentCertificateFilePassword);
+
+            _encryptingCredentials = CredentialHelper.GetEncryptingCredentials(encryptionCert);
+            _decryptionSecurityKey = CredentialHelper.GetSecurityKey(encryptionCert);
+        }
+
+        private static bool PassowrdCheck(UserEntity user, string password)
+        {
+            string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
+            return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
+        }
+
+        private static IEnumerable<Claim> ConstructClaims(UserEntity user, IEnumerable<RoleEntity> roles, IEnumerable<UserClaimEntity> userClaims, SignInTokenEntity signInToken)
+        {
+            IList<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString()),
+                new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
+                new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
+
+                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString()),
+                new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId),
+            };
+
+            foreach (UserClaimEntity item in userClaims)
+            {
+                if (item.AddToJwt)
+                {
+                    claims.Add(new Claim(item.ClaimType, item.ClaimValue));
+                }
+            }
+
+            foreach (RoleEntity item in roles)
+            {
+                claims.Add(new Claim(ClaimExtensionTypes.Role, item.Name));
+            }
+            return claims;
+        }
+
+        /// <summary>
+        /// GetOrCreateUserLoginControlAsync
+        /// </summary>
+        /// <param name="lastUser"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="KVStoreException"></exception>
+        private async Task<LoginControlEntity> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
+        {
+            LoginControlEntity? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
+
+            if (userLoginControl == null)
+            {
+                userLoginControl = new LoginControlEntity { UserId = userId };
+                await _userLoginControlRepo.AddAsync(userLoginControl, lastUser).ConfigureAwait(false);
+            }
+
+            return userLoginControl;
+        }
+
+        /// <exception cref="IdentityException"></exception>
+        /// <exception cref="DatabaseException"></exception>
+        private async Task<UserEntity> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
             ThrowIf.NotEmail(email, nameof(email), true);
@@ -54,7 +633,7 @@ namespace HB.FullStack.Identity
 
             bool ownTrans = transactionContext == null;
 
-            TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
+            TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<UserEntity>().ConfigureAwait(false);
 
             try
             {
@@ -65,7 +644,7 @@ namespace HB.FullStack.Identity
                     throw Exceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
                 }
 
-                User user = new User(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
+                UserEntity user = new UserEntity(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
 
                 await _userRepo.AddAsync(user, lastUser, transContext).ConfigureAwait(false);
 
@@ -87,8 +666,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        #endregion
-
         #region Role
 
         /// <summary>
@@ -105,7 +682,7 @@ namespace HB.FullStack.Identity
             ThrowIf.Empty(ref userId, nameof(userId));
             ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRoleEntity>().ConfigureAwait(false);
             try
             {
                 //查重
@@ -116,7 +693,7 @@ namespace HB.FullStack.Identity
                     throw Exceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
                 }
 
-                UserRole ru = new UserRole(userId, roleId);
+                UserRoleEntity ru = new UserRoleEntity(userId, roleId);
 
                 await _userRoleRepo.UpdateAsync(ru, lastUser, trans).ConfigureAwait(false);
 
@@ -143,11 +720,11 @@ namespace HB.FullStack.Identity
             ThrowIf.Empty(ref userId, nameof(userId));
             ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRoleEntity>().ConfigureAwait(false);
             try
             {
                 //查重
-                UserRole? stored = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+                UserRoleEntity? stored = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
 
                 if (stored == null)
                 {
@@ -166,5 +743,22 @@ namespace HB.FullStack.Identity
         }
 
         #endregion
+
+        public static User ToModelObject(UserEntity entity)
+        {
+            return new User
+            {
+                Id = entity.Id,
+                Version = entity.Version,
+
+                LoginName = entity.LoginName,
+                Mobile = entity.Mobile,
+                Email = entity.Email,
+
+                MobileConfirmed = entity.MobileConfirmed,
+                EmailConfirmed = entity.EmailConfirmed,
+                TwoFactorEnabled = entity.TwoFactorEnabled
+            };
+        }
     }
 }

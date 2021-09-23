@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Identity
 {
-    internal class RoleRepo : DatabaseRepository<Role>
+    internal class RoleEntityRepo : DbEntityRepository<RoleEntity>
     {
-        public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public RoleEntityRepo(ILogger<RoleEntityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
     }

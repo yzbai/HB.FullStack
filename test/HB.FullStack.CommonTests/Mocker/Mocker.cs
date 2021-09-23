@@ -133,7 +133,7 @@ namespace HB.FullStack.DatabaseTests.Data
             return entity;
         }
 
-        public static PublisherEntity_Client MockOnePublisherEntity_Client()
+        internal static PublisherEntity_Client MockOnePublisherEntity_Client()
         {
             PublisherEntity_Client entity = new PublisherEntity_Client
             {
@@ -213,7 +213,7 @@ namespace HB.FullStack.DatabaseTests.Data
             return publisherEntities;
         }
 
-        public static List<PublisherEntity_Client> GetPublishers_Client(int? count = null)
+        internal static List<PublisherEntity_Client> GetPublishers_Client(int? count = null)
         {
             List<PublisherEntity_Client> publisherEntities = new List<PublisherEntity_Client>();
 

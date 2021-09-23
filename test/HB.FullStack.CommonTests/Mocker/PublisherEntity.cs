@@ -320,7 +320,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     [CacheEntity]
-    public class PublisherEntity_Client : FlackIdEntity
+    internal class PublisherEntity_Client : FlackIdEntity
     {
 
         [EntityProperty]

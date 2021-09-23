@@ -40,15 +40,15 @@ namespace HB.Infrastructure.Aliyun.Sts
             }
         }
 
-        private static string GetRoleSessionName(long userId)
+        private static string GetRoleSessionName(Guid userId)
         {
-            return "User" + userId;
+            return "User" + userId.ToString();
         }
 
         /// <exception cref="AliyunException"></exception>
-        public AliyunStsToken? RequestOssStsToken(long userId, string bucketName, string directory, bool readOnly)
+        public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly)
         {
-            if (bucketName.IsNullOrEmpty() || userId < 0 || directory.IsNullOrEmpty())
+            if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())
             {
                 return null;
             }

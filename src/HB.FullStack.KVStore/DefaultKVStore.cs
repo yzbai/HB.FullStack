@@ -198,8 +198,8 @@ namespace HB.FullStack.KVStore
                 await _engine.EntityUpdateAsync(
                     entityDef.KVStoreName,
                     entityDef.EntityType.FullName!,
-                    items.Select(t => GetEntityKey(t, entityDef)),
-                    items.Select(t => SerializeUtil.ToJson(t)),
+                    items.Select(t => GetEntityKey(t, entityDef)).ToList(),
+                    items.Select(t => SerializeUtil.ToJson(t)).ToList(),
                     originalVersions).ConfigureAwait(false);
 
                 //反应Version变化

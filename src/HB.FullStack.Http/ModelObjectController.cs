@@ -12,9 +12,9 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace HB.FullStack.WebApi
 {
-    public class ResourceController<T> : BaseController where T : ApiResource
+    public class ModelObjectController<T> : BaseController where T : ModelObject
     {
-        protected OkObjectResult Resource(T? res)
+        protected OkObjectResult ModelObject(T? res)
         {
             if(res == null)
             {
@@ -24,7 +24,7 @@ namespace HB.FullStack.WebApi
             return base.Ok(new T[] { res });
         }
 
-        protected OkObjectResult Resource(IEnumerable<T> resources)
+        protected OkObjectResult ModelObject(IEnumerable<T> resources)
         {
             return base.Ok(resources);
         }

@@ -17,7 +17,7 @@ namespace HB.FullStack.Identity
     /// userid: Roles
     /// 关联实体：RoleOfUser
     /// </summary>
-    internal class CachedRolesByUserId : CachedItem<IEnumerable<Role>>
+    internal class CachedRolesByUserId : CachedItem<IEnumerable<RoleEntity>>
     {
         private CachedRolesByUserId(params string[] keys) : base(keys)
         {

@@ -19,18 +19,18 @@ namespace HB.FullStack.XamarinForms.Api
 #pragma warning restore CA1003 // Use generic event handler instances
 
         /// <exception cref="ApiException"></exception>
-        Task AddAsync<T>(AddRequest<T> request) where T : ApiResource;
+        Task AddAsync<T>(AddRequest<T> request) where T : ModelObject;
 
         /// <exception cref="ApiException"></exception>
-        Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource;
+        Task UpdateAsync<T>(UpdateRequest<T> request) where T : ModelObject;
 
         /// <exception cref="ApiException"></exception>
-        Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource;
+        Task DeleteAsync<T>(DeleteRequest<T> request) where T : ModelObject;
 
         /// <exception cref="ApiException"></exception>
-        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource;
+        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ModelObject;
 
-        Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource;
+        Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ModelObject;
         JwtEndpointSetting GetDefaultJwtEndpointSetting();
         Task<Stream> GetStreamAsync(ApiRequest request);
     }

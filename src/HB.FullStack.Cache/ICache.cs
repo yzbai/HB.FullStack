@@ -35,7 +35,7 @@ namespace HB.FullStack.Cache
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
             string dimensionKeyName = entityDef.KeyProperty.Name;
-            var dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e));
+            var dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e)).ToList();
 
             return GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token);
         }
@@ -90,8 +90,8 @@ namespace HB.FullStack.Cache
 
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
             string dimensionKeyName = entityDef.KeyProperty.Name;
-            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e)!.ToString()!);
-            IEnumerable<int> updatedVersions = entities.Select(e => e.Version);
+            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e)!.ToString()!).ToList();
+            IEnumerable<int> updatedVersions = entities.Select(e => e.Version).ToList();
 
             return RemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, updatedVersions, token);
         }

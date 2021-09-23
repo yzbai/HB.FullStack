@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Repository
 {
     /// <summary>
+    /// 每一个Repo对应一个Entity
     /// 参考https://blog.csdn.net/z50l2o08e2u4aftor9a/article/details/81008933
     /// Update时先操作数据库，再操作缓存。只在读取时，更新缓存
     /// 这里体现缓存的策略：
@@ -23,7 +24,7 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class DatabaseRepository<TEntity> where TEntity : DatabaseEntity, new()
+    public abstract class DbEntityRepository<TEntity> where TEntity : DatabaseEntity, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
         protected ILogger Logger { get; }
@@ -31,7 +32,7 @@ namespace HB.FullStack.Repository
         private IDatabase Database { get; }
         private IMemoryLockManager MemoryLockManager { get; }
 
-        protected DatabaseRepository(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        protected DbEntityRepository(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
         {
             Logger = logger;
             Cache = cache;
@@ -366,6 +367,8 @@ namespace HB.FullStack.Repository
 
         #region Cache Strategy
 
+        //TODO: 尝试提取IRetrieveStrategy
+  
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)

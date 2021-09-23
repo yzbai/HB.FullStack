@@ -39,3 +39,6 @@ It can help you maximising the gainings of using many same interface, like Entit
 ## Repository Pattern
 ## Xamarin.Forms Toolkit
 ## Many others
+
+Entity - Repo ：一对一关系，Repo中处理Cache问题，事件问题，对外提供好像内存操作的对象，隐藏数据存储设施的细节。
+Service : 使用多个Repo, 完成Entity 到 Model 的转换

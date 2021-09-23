@@ -40,10 +40,10 @@ namespace HB.FullStack.WebApi.UserActivityTrace
             ResultError = resultError;
         }
 
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(UserEntity))]
         public Guid? UserId { get; set; }
 
-        [ForeignKey(typeof(SignInToken))]
+        [ForeignKey(typeof(SignInTokenEntity))]
         public Guid? SignInTokenId { get; set; }
 
         

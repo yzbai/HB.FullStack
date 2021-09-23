@@ -34,7 +34,7 @@ namespace HB.FullStack.Database.Entities
         [PrimaryKey]
         [EntityProperty(0)]
         [CacheKey]
-        [LongId]
+        [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 

@@ -5,10 +5,10 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class SignInToken : GuidEntity
+    internal class SignInTokenEntity : GuidEntity
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(UserEntity))]
         public Guid UserId { get; set; }
 
         [Required]
@@ -68,9 +68,9 @@ namespace HB.FullStack.Identity.Entities
 
         #endregion
 
-        public SignInToken() { }
+        public SignInTokenEntity() { }
 
-        public SignInToken(
+        public SignInTokenEntity(
             Guid userId,
             string refreshToken,
             DateTimeOffset? expireAt,

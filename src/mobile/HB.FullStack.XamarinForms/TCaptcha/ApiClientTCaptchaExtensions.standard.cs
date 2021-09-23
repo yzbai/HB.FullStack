@@ -19,7 +19,7 @@ namespace HB.FullStack.XamarinForms.Api
         /// <param name="onSuccessDelegate"></param>
         /// <returns></returns>
         /// <exception cref="ApiException"></exception>
-        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest<T> request, Func<T?, Task>? onSuccessDelegate) where T : ApiResource
+        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest<T> request, Func<T?, Task>? onSuccessDelegate) where T : ModelObject
         {
             try
             {

@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.WebApi.UserActivityTrace
 {
-    public class UserActivityRepo : DatabaseRepository<UserActivity>
+    public class UserActivityRepo : DbEntityRepository<UserActivity>
     {
         public UserActivityRepo(ILogger<UserActivityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {

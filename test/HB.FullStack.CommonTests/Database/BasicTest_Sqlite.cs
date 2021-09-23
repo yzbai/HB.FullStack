@@ -213,8 +213,12 @@ namespace HB.FullStack.DatabaseTests
             ITransaction transaction = _sqlIteTransaction;
             TransactionContext tContext = await transaction.BeginTransactionAsync<PublisherEntity_Client>().ConfigureAwait(false);
 
+            IList<PublisherEntity_Client> publishers = Mocker.GetPublishers_Client();
+
             try
             {
+                await database.BatchAddAsync(publishers, "lastUsre", tContext).ConfigureAwait(false);
+
                 IList<PublisherEntity_Client> testEntities = (await database.PageAsync<PublisherEntity_Client>(1, 1, tContext).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)

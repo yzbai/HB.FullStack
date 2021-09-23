@@ -90,7 +90,8 @@ namespace HB.FullStack.Common
             {
                 IEnumerable<string> toRemoveKeys = _resourceExpiryInfoDict
                     .Where(kv => now - kv.Value.Timestamp >= kv.Value.ExpiryMilliseconds)
-                    .Select(kv => kv.Key);
+                    .Select(kv => kv.Key)
+                    .ToList();
 
                 foreach (string key in toRemoveKeys)
                 {

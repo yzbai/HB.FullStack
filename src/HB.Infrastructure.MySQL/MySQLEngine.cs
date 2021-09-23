@@ -51,7 +51,7 @@ namespace HB.Infrastructure.MySQL
             _options = options.Value;
             _logger = logger;
 
-            DatabaseNames = _options.Connections.Select(s => s.DatabaseName);
+            DatabaseNames = _options.Connections.Select(s => s.DatabaseName).ToList();
 
             SetConnectionStrings();
 

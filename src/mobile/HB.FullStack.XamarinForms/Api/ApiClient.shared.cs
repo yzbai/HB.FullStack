@@ -45,23 +45,23 @@ namespace HB.FullStack.XamarinForms.Api
         }
 
         /// <exception cref="ApiException"></exception>
-        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource
+        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ModelObject
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? Array.Empty<T>();
 
         /// <exception cref="ApiException"></exception>
-        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource
+        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ModelObject
             => (await GetAsync(request).ConfigureAwait(false)).FirstOrDefault();
 
         /// <exception cref="ApiException"></exception>
-        public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource
+        public Task AddAsync<T>(AddRequest<T> addRequest) where T : ModelObject
             => SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
 
         /// <exception cref="ApiException"></exception>
-        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource
+        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ModelObject
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
 
         /// <exception cref="ApiException"></exception>
-        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource
+        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ModelObject
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
         public async Task<Stream> GetStreamAsync(ApiRequest request)
@@ -110,7 +110,7 @@ namespace HB.FullStack.XamarinForms.Api
         }
 
         /// <exception cref="ApiException"></exception>
-        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ApiResource where TResponse : class
+        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ModelObject where TResponse : class
         {
             if (!request.IsValid())
             {

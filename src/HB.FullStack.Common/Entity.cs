@@ -14,11 +14,9 @@ namespace HB.FullStack.Common
 {
     public abstract class Entity : ValidatableObject
     {
-
-
         public int Version { get; set; } = -1;
 
-        public string LastUser { get; internal set; } = string.Empty;
+        public string LastUser { get; set; } = string.Empty;
 
         /// <summary>
         /// UTC 时间

@@ -115,14 +115,14 @@ namespace HB.FullStack.Database.SQL
 		{
 			StringBuilder args = new StringBuilder();
 
-			foreach (EntityPropertyDef propertyInfo in entityDef.PropertyDefs)
+			foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
 			{
-				if (propertyInfo.IsPrimaryKey)
+				if (propertyDef.IsPrimaryKey || propertyDef.Name == nameof(Entity.CreateTime))
 				{
 					continue;
 				}
 
-				args.Append($" {propertyInfo.DbReservedName}={propertyInfo.DbParameterizedName}_{number},");
+				args.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
 			}
 
 			args.RemoveLast();

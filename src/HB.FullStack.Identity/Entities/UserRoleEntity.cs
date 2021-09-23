@@ -10,20 +10,19 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    public class UserRole : GuidEntity
+    internal class UserRoleEntity : GuidEntity
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(UserEntity))]
         public Guid UserId { get; set; }
 
-
         [NoEmptyGuid]
-        [ForeignKey(typeof(Role))]
+        [ForeignKey(typeof(RoleEntity))]
         public Guid RoleId { get; set; }
 
-        public UserRole() { }
+        public UserRoleEntity() { }
 
-        public UserRole(Guid userId, Guid roleId)
+        public UserRoleEntity(Guid userId, Guid roleId)
         {
             UserId = userId;
             RoleId = roleId;

@@ -30,6 +30,7 @@ namespace HB.FullStack.Database
         public static ErrorCode SystemInfoError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 12, nameof(SystemInfoError), "");
         public static ErrorCode NotSupported { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 13, nameof(NotSupported), "");
         public static ErrorCode BatchError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 14, nameof(BatchError), "");
+        public static ErrorCode TypeConverterError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 15, nameof(TypeConverterError), "");
     }
 
     internal static class Exceptions
@@ -239,6 +240,15 @@ namespace HB.FullStack.Database
             exception.Data["Cause"] = cause;
             exception.Data["Count"] = count;
             exception.Data["LastUser"] = lastUser;
+
+            return exception;
+        }
+
+        internal static Exception TypeConverterError(string cause, string typeFullName)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.TypeConverterError);
+            exception.Data["Cause"] = cause;
+            exception.Data["Type"] = typeFullName;
 
             return exception;
         }

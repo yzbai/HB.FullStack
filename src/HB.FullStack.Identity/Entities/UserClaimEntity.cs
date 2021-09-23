@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class UserClaim : GuidEntity
+    internal class UserClaimEntity : GuidEntity
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(UserEntity))]
         public Guid UserId { get; set; }
 
         [EntityProperty(MaxLength = 65530, NotNull = true)]

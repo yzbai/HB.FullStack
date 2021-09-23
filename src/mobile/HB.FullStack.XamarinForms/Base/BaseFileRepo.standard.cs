@@ -9,7 +9,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.XamarinForms.Base
 {
-    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource
+    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ModelObject
     {
         private static TokenAutoRefreshedHttpClientHandler? _httpClientHandler;
         private static TokenAutoRefreshedHttpClientHandler HttpClientHandler

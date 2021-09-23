@@ -6,7 +6,7 @@ using System.Net.Http;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UpdateRequest<T> : ApiRequest<T> where T : ApiResource
+    public class UpdateRequest<T> : ApiRequest<T> where T : ModelObject
     {
         [IdBarrier]
         [CollectionNotEmpty]
