@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<RoleEntityRepo>();
             services.AddSingleton<LoginControlEntityRepo>();
             services.AddSingleton<SignInTokenEntityRepo>();
+            services.AddSingleton<UserActivityEntityRepo>();
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();

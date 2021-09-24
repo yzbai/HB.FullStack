@@ -8,6 +8,7 @@ using System;
 
 using HB.FullStack.Common.Api;
 using System.IO;
+using HB.FullStack.Common;
 
 namespace System.Net.Http
 {

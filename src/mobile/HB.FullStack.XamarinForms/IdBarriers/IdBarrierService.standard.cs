@@ -10,6 +10,7 @@ using HB.FullStack.XamarinForms.IdBarriers;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database;
+using HB.FullStack.Common;
 
 namespace HB.FullStack.XamarinForms.IdBarriers
 {

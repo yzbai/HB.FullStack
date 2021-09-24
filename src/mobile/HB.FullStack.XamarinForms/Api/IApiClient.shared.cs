@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.XamarinForms.Api

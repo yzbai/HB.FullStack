@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using HB.FullStack.WebApi;
 using HB.FullStack.WebApi.Filters;
 using HB.FullStack.WebApi.Security;
-using HB.FullStack.WebApi.UserActivityTrace;
 
 using Microsoft.Extensions.Configuration;
 namespace Microsoft.Extensions.DependencyInjection
@@ -30,8 +29,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IPublicResourceTokenService, PublicResourceTokenService>();
 
             //UserActivity
-            services.AddSingleton<UserActivityRepo>();
-            services.AddSingleton<IUserActivityService, UserActivityService>();
             services.AddScoped<UserActivityFilter>();
             
             

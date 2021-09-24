@@ -40,5 +40,11 @@ namespace HB.FullStack.Identity
         Task RemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
 
         #endregion
+
+        #region UserActivity
+
+        Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
+
+        #endregion
     }
 }

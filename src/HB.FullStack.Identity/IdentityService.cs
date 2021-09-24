@@ -30,6 +30,7 @@ namespace HB.FullStack.Identity
         private readonly UserClaimEntityRepo _userClaimRepo;
         private readonly LoginControlEntityRepo _userLoginControlRepo;
         private readonly UserRoleEntityRepo _userRoleRepo;
+        private readonly UserActivityEntityRepo _userActivityEntityRepo;
 
 
         //Jwt Signing
@@ -53,7 +54,8 @@ namespace HB.FullStack.Identity
             UserRoleEntityRepo roleOfUserRepo,
             UserClaimEntityRepo userClaimRepo,
             LoginControlEntityRepo userLoginControlRepo,
-            UserRoleEntityRepo userRoleRepo)
+            UserRoleEntityRepo userRoleRepo,
+            UserActivityEntityRepo userActivityEntityRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -67,6 +69,8 @@ namespace HB.FullStack.Identity
             _signInTokenRepo = signInTokenRepo;
 
             _userRoleRepo = userRoleRepo;
+
+            _userActivityEntityRepo = userActivityEntityRepo;
 
             InitializeCredencials();
         }
@@ -740,6 +744,52 @@ namespace HB.FullStack.Identity
                 await trans.RollbackAsync().ConfigureAwait(false);
                 throw;
             }
+        }
+
+        #endregion
+
+
+        #region UserActivity
+
+        public async Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
+        {
+            string? resultError = SerializeUtil.TryToJson(errorCode);
+
+            if (resultError != null && resultError.Length > UserActivityEntity.MAX_RESULT_ERROR_LENGTH)
+            {
+                _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
+
+                resultError = resultError.Substring(0, UserActivityEntity.MAX_RESULT_ERROR_LENGTH);
+            }
+
+            if (arguments != null && arguments.Length > UserActivityEntity.MAX_ARGUMENTS_LENGTH)
+            {
+                _logger.LogWarning("记录UserActivity时，Arguments过长，已截断, {Arguments}", arguments);
+
+                arguments = arguments.Substring(0, UserActivityEntity.MAX_ARGUMENTS_LENGTH);
+            }
+
+            if (url != null && url.Length > UserActivityEntity.MAX_URL_LENGTH)
+            {
+                _logger.LogWarning("记录UserActivity时，url过长，已截断, {Url}", url);
+
+                url = url.Substring(0, UserActivityEntity.MAX_URL_LENGTH);
+            }
+
+            UserActivityEntity entity = new UserActivityEntity
+            {
+                SignInTokenId = signInTokenId,
+                UserId = userId,
+                Ip = ip,
+                Url = url,
+                HttpMethod = httpMethod,
+                Arguments = arguments,
+                ResultStatusCode = resultStatusCode,
+                ResultType = resultType,
+                ResultError = resultError
+            };
+
+            await _userActivityEntityRepo.AddAsync(entity, "", null).ConfigureAwait(false);
         }
 
         #endregion

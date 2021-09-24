@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Identity;
 
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +13,17 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.WebApi.UserActivityTrace
+namespace HB.FullStack.WebApi.Filters
 {
     public class UserActivityFilter : IAsyncActionFilter
     {
         private readonly ILogger<UserActivityFilter> _logger;
-        private readonly IUserActivityService _userActivityService;
+        private readonly IIdentityService _identityService;
 
-        public UserActivityFilter(ILogger<UserActivityFilter> logger, IUserActivityService userActivityService)
+        public UserActivityFilter(ILogger<UserActivityFilter> logger, IIdentityService identityService)
         {
             _logger = logger;
-            _userActivityService = userActivityService;
+            _identityService = identityService;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -36,10 +37,7 @@ namespace HB.FullStack.WebApi.UserActivityTrace
                 string? httpMethod = context.HttpContext?.Request?.Method;
                 string? arguments = SerializeUtil.TryToJson(context.ActionArguments);
 
-                if (arguments != null && arguments.Length > UserActivity.MAX_ARGUMENTS_LENGTH)
-                {
-                    arguments = arguments.Substring(0, UserActivity.MAX_ARGUMENTS_LENGTH);
-                }
+                
 
                 ActionExecutedContext? resultContext = await next().ConfigureAwait(false);
 
@@ -66,7 +64,7 @@ namespace HB.FullStack.WebApi.UserActivityTrace
                     }
                 }
 
-                _userActivityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode).Fire();
+                _identityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode).Fire();
             }
             catch (Exception ex)
             {

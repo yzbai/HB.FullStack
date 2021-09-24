@@ -3,7 +3,7 @@ using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
 using HB.FullStack.WebApi;
-using HB.FullStack.WebApi.UserActivityTrace;
+using HB.FullStack.WebApi.Filters;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

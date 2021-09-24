@@ -52,6 +52,7 @@
 
   <ItemGroup>
     <Folder Include="Service\" />
+    <Folder Include="UserActivityTrace\" />
   </ItemGroup>
 
 </Project>
