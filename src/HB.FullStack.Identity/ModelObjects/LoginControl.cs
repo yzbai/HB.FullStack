@@ -11,7 +11,7 @@ using System.Text;
 
 namespace HB.FullStack.Identity.ModelObjects
 {
-    public class LoginControl : ModelObject
+    public class LoginControl : GuidModelObject
     {
         [NoEmptyGuid]
         public Guid UserId { get; set; }

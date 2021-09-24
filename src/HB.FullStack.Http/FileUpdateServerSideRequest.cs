@@ -9,7 +9,7 @@ namespace HB.FullStack.Common.Api
 {
 
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]
-    public class FileUpdateServerSideRequest<T> : UpdateRequest<T> where T : ModelObject
+    public class FileUpdateServerSideRequest<T> : UpdateRequest<T> where T : ModelObject2
     {
         [Required]
         public IEnumerable<IFormFile> Files { get; set; } = null!;

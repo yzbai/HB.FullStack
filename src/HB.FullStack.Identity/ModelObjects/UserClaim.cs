@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.ModelObjects
 {
-    public class UserClaim : ModelObject
+    public class UserClaim : GuidModelObject
     {
         [NoEmptyGuid]
         public Guid UserId { get; set; }

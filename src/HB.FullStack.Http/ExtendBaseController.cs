@@ -13,9 +13,9 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace HB.FullStack.WebApi
 {
-    public class ModelObjectController<T> : BaseController where T : ModelObject
+    public class ExtendBaseController<T> : BaseController where T : ModelObject2
     {
-        protected OkObjectResult ModelObject(T? res)
+        protected OkObjectResult Ok(T? res)
         {
             if(res == null)
             {
@@ -25,7 +25,7 @@ namespace HB.FullStack.WebApi
             return base.Ok(new T[] { res });
         }
 
-        protected OkObjectResult ModelObject(IEnumerable<T> resources)
+        protected OkObjectResult Ok(IEnumerable<T> resources)
         {
             return base.Ok(resources);
         }

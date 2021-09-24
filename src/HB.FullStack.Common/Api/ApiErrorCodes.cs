@@ -139,5 +139,10 @@ namespace HB.FullStack.Common.Api
         {
             throw new NotImplementedException();
         }
+
+        public static Exception ModelObjectTypeError(string cause)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

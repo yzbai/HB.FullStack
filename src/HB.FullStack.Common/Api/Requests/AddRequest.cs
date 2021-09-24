@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest<T> where T : ModelObject
+    public class AddRequest<T> : ApiRequest<T> where T : ModelObject2
     {
         [CollectionNotEmpty]
         [IdBarrier]

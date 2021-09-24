@@ -14,7 +14,24 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddOptions();
 
             services.Configure(optionsSetup);
+            AddIdentityCore(services);
 
+            return services;
+        }
+
+        public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddOptions();
+
+            services.Configure<IdentityOptions>(configuration);
+
+            AddIdentityCore(services);
+
+            return services;
+        }
+
+        private static void AddIdentityCore(IServiceCollection services)
+        {
             //internal
             services.AddSingleton<UserEntityRepo>();
             services.AddSingleton<UserRoleEntityRepo>();
@@ -26,8 +43,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();
-
-            return services;
         }
 
         public static IServiceCollection AddIdentity(this IServiceCollection services)

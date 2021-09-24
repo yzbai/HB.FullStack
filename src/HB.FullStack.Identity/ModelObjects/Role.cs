@@ -6,7 +6,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class Role : ModelObject
+    public class Role : GuidModelObject
     {
         public string Name { get; set; } = default!;
 

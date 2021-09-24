@@ -11,7 +11,7 @@ namespace HB.FullStack.Identity.ModelObjects
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    public class UserRole : ModelObject
+    public class UserRole : GuidModelObject
     {
         [NoEmptyGuid]
         public Guid UserId { get; set; }

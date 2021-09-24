@@ -5,12 +5,23 @@ using System.Text;
 
 namespace HB.FullStack.Common
 {
-    public abstract class ModelObject : ValidatableObject
+    public abstract class ModelObject2 : ValidatableObject
+    {
+        public int Version { get; set; } = -1;
+    }
+
+    public abstract class GuidModelObject : ModelObject2
     {
         [NoEmptyGuid]
         public Guid Id { get; set; }
 
-        public int Version { get; set; } = -1;
+        
+    }
+
+    public abstract class LongIdModelObject : ModelObject2
+    {
+        [LongId2]
+        public long Id { get; set; } = -1;
 
     }
 }

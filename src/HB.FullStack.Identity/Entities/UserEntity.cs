@@ -10,7 +10,7 @@ namespace HB.FullStack.Identity.Entities
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
     //[Serializable]
-    internal class UserEntity : GuidEntity
+    public class UserEntity : GuidEntity
     {
         [Required]
         [GuidString(NotNull = true)]

@@ -245,7 +245,7 @@ namespace HB.FullStack.Common.Api
     }
 #pragma warning restore CA1024 // Use properties where appropriate
 
-    public abstract class ApiRequest<T> : ApiRequest where T : ModelObject
+    public abstract class ApiRequest<T> : ApiRequest where T : ModelObject2
     {
         /// <summary>
         /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供

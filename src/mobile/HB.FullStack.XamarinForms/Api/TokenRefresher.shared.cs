@@ -127,7 +127,7 @@ namespace HB.FullStack.XamarinForms.Api
             UserPreferences.Logout();
         }
 
-        private class AccessTokenResource : ModelObject
+        private class AccessTokenResource : ModelObject2
         {
             public string AccessToken { get; set; } = null!;
         }

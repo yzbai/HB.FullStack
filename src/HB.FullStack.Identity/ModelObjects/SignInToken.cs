@@ -6,7 +6,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.ModelObjects
 {
-    public class SignInToken : ModelObject
+    public class SignInToken : GuidModelObject
     {
         [NoEmptyGuid]
         public Guid UserId { get; set; }

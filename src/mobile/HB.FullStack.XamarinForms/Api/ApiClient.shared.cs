@@ -45,23 +45,35 @@ namespace HB.FullStack.XamarinForms.Api
         }
 
         /// <exception cref="ApiException"></exception>
-        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ModelObject
+        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ModelObject2
             => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? Array.Empty<T>();
 
         /// <exception cref="ApiException"></exception>
-        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ModelObject
+        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ModelObject2
             => (await GetAsync(request).ConfigureAwait(false)).FirstOrDefault();
 
         /// <exception cref="ApiException"></exception>
-        public Task AddAsync<T>(AddRequest<T> addRequest) where T : ModelObject
-            => SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
+        public Task AddAsync<T>(AddRequest<T> addRequest) where T : ModelObject2
+        {
+            if(typeof(T) == typeof(LongIdModelObject))
+            {
+                return SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
+            }
+            else if (typeof(T) == typeof(GuidModelObject))
+            {
+                return SendAsync<T, EmptyResponse>(addRequest, ApiRequestType.Add);
+            }
+
+            return Task.CompletedTask;
+        }
+            
 
         /// <exception cref="ApiException"></exception>
-        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ModelObject
+        public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ModelObject2
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
 
         /// <exception cref="ApiException"></exception>
-        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ModelObject
+        public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ModelObject2
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
 
         public async Task<Stream> GetStreamAsync(ApiRequest request)
@@ -110,7 +122,7 @@ namespace HB.FullStack.XamarinForms.Api
         }
 
         /// <exception cref="ApiException"></exception>
-        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ModelObject where TResponse : class
+        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ModelObject2 where TResponse : class
         {
             if (!request.IsValid())
             {
