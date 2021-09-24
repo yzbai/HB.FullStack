@@ -11,17 +11,17 @@ using HB.FullStack.Identity.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    public class UserActivityEntity : GuidEntity
+    public class UserActivity : GuidEntity
     {
         public const int MAX_URL_LENGTH = 2000;
         public const int MAX_ARGUMENTS_LENGTH = 2000;
         public const int MAX_RESULT_ERROR_LENGTH = 2000;
 
 
-        [ForeignKey(typeof(UserEntity))]
+        [ForeignKey(typeof(User))]
         public Guid? UserId { get; set; }
 
-        [ForeignKey(typeof(SignInTokenEntity))]
+        [ForeignKey(typeof(SignInToken))]
         public Guid? SignInTokenId { get; set; }
         
         public string? Ip { get; set; }

@@ -1,5 +1,4 @@
 ﻿using HB.FullStack.Identity.Entities;
-using HB.FullStack.Identity.ModelObjects;
 
 namespace HB.FullStack.Identity
 {

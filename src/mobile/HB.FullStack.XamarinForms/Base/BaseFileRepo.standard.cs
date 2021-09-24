@@ -9,7 +9,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.XamarinForms.Base
 {
-    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ModelObject2
+    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource2
     {
         private static TokenAutoRefreshedHttpClientHandler? _httpClientHandler;
         private static TokenAutoRefreshedHttpClientHandler HttpClientHandler
@@ -46,8 +46,8 @@ namespace HB.FullStack.XamarinForms.Base
 
             var fileNames = resources switch
             {
-                IEnumerable<LongIdModelObject> longLst => longLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
-                IEnumerable<GuidModelObject> guidLst => guidLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
+                IEnumerable<LongIdResource> longLst => longLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
+                IEnumerable<GuidResource> guidLst => guidLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
                 _ => throw ApiExceptions.ModelObjectTypeError($"目前不能处理GuidModelObject或者LongIdModelObject之外的类。当前类型为 {typeof(TRes).FullName}")
             };
 

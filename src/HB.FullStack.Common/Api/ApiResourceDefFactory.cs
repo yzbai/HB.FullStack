@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         /// <returns></returns>
         /// <exception cref="ApiException"></exception>
-        public static ApiResourceDef Get<T>() where T : ModelObject2
+        public static ApiResourceDef Get<T>() where T : ApiResource2
         {
             Type type = typeof(T);
 

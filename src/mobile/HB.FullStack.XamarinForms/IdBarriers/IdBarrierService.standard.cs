@@ -148,7 +148,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 return;
             }
 
-            if (propertyInfo.Name == nameof(LongIdModelObject.Id) && requestType == ApiRequestType.Add && direction == ChangeDirection.ToServer)
+            if (propertyInfo.Name == nameof(LongIdResource.Id) && requestType == ApiRequestType.Add && direction == ChangeDirection.ToServer)
             {
                 _addRequestClientIdDict[requestId].Add(id);
 

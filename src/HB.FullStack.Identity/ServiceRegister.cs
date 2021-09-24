@@ -33,13 +33,13 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void AddIdentityCore(IServiceCollection services)
         {
             //internal
-            services.AddSingleton<UserEntityRepo>();
-            services.AddSingleton<UserRoleEntityRepo>();
-            services.AddSingleton<UserClaimEntityRepo>();
-            services.AddSingleton<RoleEntityRepo>();
-            services.AddSingleton<LoginControlEntityRepo>();
-            services.AddSingleton<SignInTokenEntityRepo>();
-            services.AddSingleton<UserActivityEntityRepo>();
+            services.AddSingleton<UserRepo>();
+            services.AddSingleton<UserRoleRepo>();
+            services.AddSingleton<UserClaimRepo>();
+            services.AddSingleton<RoleRepo>();
+            services.AddSingleton<LoginControlRepo>();
+            services.AddSingleton<SignInTokenRepo>();
+            services.AddSingleton<UserActivityRepo>();
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();

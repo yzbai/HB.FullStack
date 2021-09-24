@@ -10,7 +10,7 @@ namespace HB.FullStack.Identity.Entities
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
     //[Serializable]
-    public class UserEntity : GuidEntity
+    public class User : GuidEntity
     {
         [Required]
         [GuidString(NotNull = true)]
@@ -56,9 +56,9 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         public bool TwoFactorEnabled { get; set; }
 
-        public UserEntity() { }
+        public User() { }
 
-        public UserEntity(string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
+        public User(string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
         {
             SecurityStamp = SecurityUtil.CreateUniqueToken();
             LoginName = loginName;

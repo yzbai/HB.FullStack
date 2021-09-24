@@ -11,7 +11,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
-    internal class UserClaimEntityRepo : DbEntityRepository<UserClaimEntity>
+    internal class UserClaimRepo : DbEntityRepository<UserClaim>
     {
         /// <summary>
         /// ctor
@@ -21,12 +21,12 @@ namespace HB.FullStack.Identity
         /// <param name="cache"></param>
         /// <param name="memoryLockManager"></param>
         /// <exception cref="CacheException"></exception>
-        public UserClaimEntityRepo(ILogger<UserClaimEntityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             RegisterEntityChangedEvents(OnEntityChanged);
         }
 
-        private Task OnEntityChanged(UserClaimEntity sender, DatabaseWriteEventArgs args)
+        private Task OnEntityChanged(UserClaim sender, DatabaseWriteEventArgs args)
         {
             InvalidateCache(CachedUserClaimsByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks));
             return Task.CompletedTask;
@@ -40,11 +40,11 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public Task<IEnumerable<UserClaimEntity>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
+        public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return TryCacheAsideAsync(CachedUserClaimsByUserId.Key(userId), dbReader =>
             {
-                return dbReader.RetrieveAsync<UserClaimEntity>(uc => uc.UserId == userId, transContext);
+                return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
             })!;
         }
     }

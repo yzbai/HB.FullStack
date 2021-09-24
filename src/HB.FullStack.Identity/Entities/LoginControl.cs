@@ -1,6 +1,4 @@
 ﻿
-using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.KVStore;
 using HB.FullStack.KVStore.Entities;
@@ -9,11 +7,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace HB.FullStack.Identity.ModelObjects
+namespace HB.FullStack.Identity.Entities
 {
-    public class LoginControl : GuidModelObject
+    internal class LoginControl : KVStoreEntity
     {
         [NoEmptyGuid]
+        [KVStoreKey]
         public Guid UserId { get; set; }
 
 

@@ -7,7 +7,7 @@ using System.Net.Http;
 
 namespace HB.FullStack.Common.Api
 {
-    public class FileUpdateRequest<T> : UpdateRequest<T> where T : ModelObject2
+    public class FileUpdateRequest<T> : UpdateRequest<T> where T : ApiResource2
     {
         private readonly IEnumerable<byte[]> _files;
         private readonly IEnumerable<string> _fileNames;

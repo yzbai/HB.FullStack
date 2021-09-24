@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Database;
 using HB.FullStack.Identity.Entities;
-using HB.FullStack.Identity.ModelObjects;
 using HB.FullStack.Lock.Distributed;
 
 using Microsoft.Extensions.Logging;
@@ -24,13 +23,13 @@ namespace HB.FullStack.Identity
         private readonly ITransaction _transaction;
         private readonly IDistributedLockManager _lockManager;
 
-        private readonly UserEntityRepo _userRepo;
-        private readonly SignInTokenEntityRepo _signInTokenRepo;
-        private readonly UserRoleEntityRepo _roleOfUserRepo;
-        private readonly UserClaimEntityRepo _userClaimRepo;
-        private readonly LoginControlEntityRepo _userLoginControlRepo;
-        private readonly UserRoleEntityRepo _userRoleRepo;
-        private readonly UserActivityEntityRepo _userActivityEntityRepo;
+        private readonly UserRepo _userRepo;
+        private readonly SignInTokenRepo _signInTokenRepo;
+        private readonly UserRoleRepo _roleOfUserRepo;
+        private readonly UserClaimRepo _userClaimRepo;
+        private readonly LoginControlRepo _userLoginControlRepo;
+        private readonly UserRoleRepo _userRoleRepo;
+        private readonly UserActivityRepo _userActivityEntityRepo;
 
 
         //Jwt Signing
@@ -49,13 +48,13 @@ namespace HB.FullStack.Identity
             ILogger<IdentityService> logger,
             ITransaction transaction,
             IDistributedLockManager lockManager,
-            UserEntityRepo userRepo,
-            SignInTokenEntityRepo signInTokenRepo,
-            UserRoleEntityRepo roleOfUserRepo,
-            UserClaimEntityRepo userClaimRepo,
-            LoginControlEntityRepo userLoginControlRepo,
-            UserRoleEntityRepo userRoleRepo,
-            UserActivityEntityRepo userActivityEntityRepo)
+            UserRepo userRepo,
+            SignInTokenRepo signInTokenRepo,
+            UserRoleRepo roleOfUserRepo,
+            UserClaimRepo userClaimRepo,
+            LoginControlRepo userLoginControlRepo,
+            UserRoleRepo userRoleRepo,
+            UserActivityRepo userActivityEntityRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -108,12 +107,12 @@ namespace HB.FullStack.Identity
                     break;
             }
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
                 //查询用户
-                UserEntity? user = context.SignInType switch
+                User? user = context.SignInType switch
                 {
                     SignInType.ByLoginNameAndPassword => await _userRepo.GetByLoginNameAsync(context.LoginName!, transactionContext).ConfigureAwait(false),
                     SignInType.BySms => await _userRepo.GetByMobileAsync(context.Mobile!, transactionContext).ConfigureAwait(false),
@@ -133,7 +132,7 @@ namespace HB.FullStack.Identity
                     throw Exceptions.AuthorizationNotFound(signInContext: context);
                 }
 
-                LoginControlEntity userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
+                LoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
                 //密码检查
                 if (context.SignInType == SignInType.ByMobileAndPassword || context.SignInType == SignInType.ByLoginNameAndPassword)
@@ -154,7 +153,7 @@ namespace HB.FullStack.Identity
 
                 //创建Token
 
-                SignInTokenEntity signInToken = new SignInTokenEntity
+                SignInToken signInToken = new SignInToken
                 (
                     userId: user.Id,
                     refreshToken: SecurityUtil.CreateUniqueToken(),
@@ -253,9 +252,9 @@ namespace HB.FullStack.Identity
             }
 
             //SignInToken 验证
-            UserEntity? user;
-            SignInTokenEntity? signInToken = null;
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+            User? user;
+            SignInToken? signInToken = null;
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -324,11 +323,11 @@ namespace HB.FullStack.Identity
         {
             ThrowIf.Empty(ref signInTokenId, nameof(signInTokenId));
 
-            TransactionContext transContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+            TransactionContext transContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
-                SignInTokenEntity? signInToken = await _signInTokenRepo.GetByIdAsync(signInTokenId, transContext).ConfigureAwait(false);
+                SignInToken? signInToken = await _signInTokenRepo.GetByIdAsync(signInTokenId, transContext).ConfigureAwait(false);
 
                 if (signInToken != null)
                 {
@@ -361,7 +360,7 @@ namespace HB.FullStack.Identity
         {
             ThrowIf.Empty(ref userId, nameof(userId));
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInTokenEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInToken>().ConfigureAwait(false);
 
             try
             {
@@ -387,14 +386,14 @@ namespace HB.FullStack.Identity
         /// <exception cref="CacheException"></exception>
         public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
         {
-            UserEntity? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
+            User? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
 
             if (user == null)
             {
                 return;
             }
 
-            LoginControlEntity userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
+            LoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
             await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
         }
@@ -411,14 +410,14 @@ namespace HB.FullStack.Identity
         /// <exception cref="DatabaseException"></exception>
         private async Task DeleteSignInTokensAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
         {
-            IEnumerable<SignInTokenEntity> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+            IEnumerable<SignInToken> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
 
-            IEnumerable<SignInTokenEntity> toDeletes = logOffType switch
+            IEnumerable<SignInToken> toDeletes = logOffType switch
             {
                 LogOffType.LogOffAllOthers => resultList,
                 LogOffType.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web),
                 LogOffType.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == idiom),
-                _ => new List<SignInTokenEntity>()
+                _ => new List<SignInToken>()
             };
 
             await _signInTokenRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
@@ -434,10 +433,10 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         /// <exception cref="CacheException"></exception>
-        private async Task<string> ConstructJwtAsync(UserEntity user, SignInTokenEntity signInToken, string? signToWhere, TransactionContext transactionContext)
+        private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
-            IEnumerable<RoleEntity> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
-            IEnumerable<UserClaimEntity> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
 
             IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
 
@@ -459,7 +458,7 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="KVStoreException"></exception>
-        private async Task PreSignInCheckAsync(UserEntity user, LoginControlEntity userLoginControl, string lastUser)
+        private async Task PreSignInCheckAsync(User user, LoginControl userLoginControl, string lastUser)
         {
             ThrowIf.Null(user, nameof(user));
 
@@ -516,7 +515,7 @@ namespace HB.FullStack.Identity
         /// <param name="userLoginControl"></param>
         /// <param name="lastUser"></param>
         /// <exception cref="KVStoreException"></exception>
-        private async Task OnSignInFailedAsync(LoginControlEntity userLoginControl, string lastUser)
+        private async Task OnSignInFailedAsync(LoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
             {
@@ -563,13 +562,13 @@ namespace HB.FullStack.Identity
             _decryptionSecurityKey = CredentialHelper.GetSecurityKey(encryptionCert);
         }
 
-        private static bool PassowrdCheck(UserEntity user, string password)
+        private static bool PassowrdCheck(User user, string password)
         {
             string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
             return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
-        private static IEnumerable<Claim> ConstructClaims(UserEntity user, IEnumerable<RoleEntity> roles, IEnumerable<UserClaimEntity> userClaims, SignInTokenEntity signInToken)
+        private static IEnumerable<Claim> ConstructClaims(User user, IEnumerable<Role> roles, IEnumerable<UserClaim> userClaims, SignInToken signInToken)
         {
             IList<Claim> claims = new List<Claim>
             {
@@ -581,7 +580,7 @@ namespace HB.FullStack.Identity
                 new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId),
             };
 
-            foreach (UserClaimEntity item in userClaims)
+            foreach (UserClaim item in userClaims)
             {
                 if (item.AddToJwt)
                 {
@@ -589,7 +588,7 @@ namespace HB.FullStack.Identity
                 }
             }
 
-            foreach (RoleEntity item in roles)
+            foreach (Role item in roles)
             {
                 claims.Add(new Claim(ClaimExtensionTypes.Role, item.Name));
             }
@@ -603,13 +602,13 @@ namespace HB.FullStack.Identity
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="KVStoreException"></exception>
-        private async Task<LoginControlEntity> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
+        private async Task<LoginControl> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
         {
-            LoginControlEntity? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
+            LoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
 
             if (userLoginControl == null)
             {
-                userLoginControl = new LoginControlEntity { UserId = userId };
+                userLoginControl = new LoginControl { UserId = userId };
                 await _userLoginControlRepo.AddAsync(userLoginControl, lastUser).ConfigureAwait(false);
             }
 
@@ -618,7 +617,7 @@ namespace HB.FullStack.Identity
 
         /// <exception cref="IdentityException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        private async Task<UserEntity> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
+        private async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
             ThrowIf.NotEmail(email, nameof(email), true);
@@ -637,7 +636,7 @@ namespace HB.FullStack.Identity
 
             bool ownTrans = transactionContext == null;
 
-            TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<UserEntity>().ConfigureAwait(false);
+            TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
 
             try
             {
@@ -648,7 +647,7 @@ namespace HB.FullStack.Identity
                     throw Exceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
                 }
 
-                UserEntity user = new UserEntity(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
+                User user = new User(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
 
                 await _userRepo.AddAsync(user, lastUser, transContext).ConfigureAwait(false);
 
@@ -686,7 +685,7 @@ namespace HB.FullStack.Identity
             ThrowIf.Empty(ref userId, nameof(userId));
             ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRoleEntity>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
             try
             {
                 //查重
@@ -697,7 +696,7 @@ namespace HB.FullStack.Identity
                     throw Exceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
                 }
 
-                UserRoleEntity ru = new UserRoleEntity(userId, roleId);
+                UserRole ru = new UserRole(userId, roleId);
 
                 await _userRoleRepo.UpdateAsync(ru, lastUser, trans).ConfigureAwait(false);
 
@@ -724,11 +723,11 @@ namespace HB.FullStack.Identity
             ThrowIf.Empty(ref userId, nameof(userId));
             ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRoleEntity>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
             try
             {
                 //查重
-                UserRoleEntity? stored = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+                UserRole? stored = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
 
                 if (stored == null)
                 {
@@ -755,28 +754,28 @@ namespace HB.FullStack.Identity
         {
             string? resultError = SerializeUtil.TryToJson(errorCode);
 
-            if (resultError != null && resultError.Length > UserActivityEntity.MAX_RESULT_ERROR_LENGTH)
+            if (resultError != null && resultError.Length > UserActivity.MAX_RESULT_ERROR_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
 
-                resultError = resultError.Substring(0, UserActivityEntity.MAX_RESULT_ERROR_LENGTH);
+                resultError = resultError.Substring(0, UserActivity.MAX_RESULT_ERROR_LENGTH);
             }
 
-            if (arguments != null && arguments.Length > UserActivityEntity.MAX_ARGUMENTS_LENGTH)
+            if (arguments != null && arguments.Length > UserActivity.MAX_ARGUMENTS_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，Arguments过长，已截断, {Arguments}", arguments);
 
-                arguments = arguments.Substring(0, UserActivityEntity.MAX_ARGUMENTS_LENGTH);
+                arguments = arguments.Substring(0, UserActivity.MAX_ARGUMENTS_LENGTH);
             }
 
-            if (url != null && url.Length > UserActivityEntity.MAX_URL_LENGTH)
+            if (url != null && url.Length > UserActivity.MAX_URL_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，url过长，已截断, {Url}", url);
 
-                url = url.Substring(0, UserActivityEntity.MAX_URL_LENGTH);
+                url = url.Substring(0, UserActivity.MAX_URL_LENGTH);
             }
 
-            UserActivityEntity entity = new UserActivityEntity
+            UserActivity entity = new UserActivity
             {
                 SignInTokenId = signInTokenId,
                 UserId = userId,
@@ -794,7 +793,7 @@ namespace HB.FullStack.Identity
 
         #endregion
 
-        public static User ToModelObject(UserEntity entity)
+        public static User ToModelObject(User entity)
         {
             return new User
             {

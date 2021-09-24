@@ -21,11 +21,11 @@ namespace HB.FullStack.Identity
     /// <summary>
     /// 所有的User这个Entity的增删改查都要经过这里
     /// </summary>
-    internal class UserEntityRepo : DbEntityRepository<UserEntity>
+    internal class UserRepo : DbEntityRepository<User>
     {
         private readonly IDatabaseReader _databaseReader;
 
-        public UserEntityRepo(ILogger<UserEntityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
             _databaseReader = databaseReader;
@@ -47,14 +47,14 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<UserEntity?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
+        public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                dimensionKeyName: nameof(UserEntity.Id),
+                dimensionKeyName: nameof(User.Id),
                 dimensionKeyValue: userId.ToString(),
                 dbRetrieve: db =>
                 {
-                    return db.ScalarAsync<UserEntity>(userId, transContext);
+                    return db.ScalarAsync<User>(userId, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -66,14 +66,14 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<IEnumerable<UserEntity>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
+        public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                nameof(UserEntity.Id),
+                nameof(User.Id),
                 userIds,
                 db =>
                 {
-                    return db.RetrieveAsync<UserEntity>(u => SqlStatement.In(u.Id, true, userIds), transContext);
+                    return db.RetrieveAsync<User>(u => SqlStatement.In(u.Id, true, userIds), transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -85,14 +85,14 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<UserEntity?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
+        public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                nameof(UserEntity.Mobile),
+                nameof(User.Mobile),
                 mobile,
                 db =>
                 {
-                    return db.ScalarAsync<UserEntity>(u => u.Mobile == mobile, transContext);
+                    return db.ScalarAsync<User>(u => u.Mobile == mobile, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -104,14 +104,14 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<UserEntity?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
+        public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                nameof(UserEntity.LoginName),
+                nameof(User.LoginName),
                 loginName,
                 db =>
                 {
-                    return db.ScalarAsync<UserEntity>(u => u.LoginName == loginName, transContext);
+                    return db.ScalarAsync<User>(u => u.LoginName == loginName, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -123,14 +123,14 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        public async Task<UserEntity?> GetByEmailAsync(string email, TransactionContext? transContext = null)
+        public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
-                nameof(UserEntity.Email),
+                nameof(User.Email),
                 email,
                 db =>
                 {
-                    return db.ScalarAsync<UserEntity>(u => u.Email == email, transContext);
+                    return db.ScalarAsync<User>(u => u.Email == email, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -145,7 +145,7 @@ namespace HB.FullStack.Identity
         /// <exception cref="DatabaseException"></exception>
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            WhereExpression<UserEntity> where = _databaseReader.Where<UserEntity>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            WhereExpression<User> where = _databaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
             return _databaseReader.CountAsync(where, transContext);
         }
 

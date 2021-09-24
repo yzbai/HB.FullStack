@@ -81,9 +81,9 @@ namespace HB.FullStack.XamarinForms.Base
         }
     }
 
-    public delegate bool IfUseLocalData<TEntity, TRes>(ApiRequest<TRes> request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new() where TRes : ModelObject2;
+    public delegate bool IfUseLocalData<TEntity, TRes>(ApiRequest<TRes> request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new() where TRes : ApiResource2;
 
-    public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ModelObject2
+    public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
     {
         protected IDatabase Database { get;}
 

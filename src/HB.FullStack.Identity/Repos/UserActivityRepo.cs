@@ -14,9 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Identity
 {
-    public class UserActivityEntityRepo : DbEntityRepository<UserActivityEntity>
+    public class UserActivityRepo : DbEntityRepository<UserActivity>
     {
-        public UserActivityEntityRepo(ILogger<UserActivityEntityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public UserActivityRepo(ILogger<UserActivityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
 
         }

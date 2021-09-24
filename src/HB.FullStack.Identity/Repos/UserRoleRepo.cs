@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Identity
 {
-    internal class UserRoleEntityRepo : DbEntityRepository<UserRoleEntity>
+    internal class UserRoleRepo : DbEntityRepository<UserRole>
     {
         private readonly IDatabaseReader _databaseReader;
         /// <summary>
@@ -24,14 +24,14 @@ namespace HB.FullStack.Identity
         /// <param name="cache"></param>
         /// <param name="memoryLockManager"></param>
         /// <exception cref="CacheException"></exception>
-        public UserRoleEntityRepo(ILogger<UserRoleEntityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
             _databaseReader = databaseReader;
 
             RegisterEntityChangedEvents(OnEntityChanged);
         }
 
-        private Task OnEntityChanged(UserRoleEntity sender, DatabaseWriteEventArgs args)
+        private Task OnEntityChanged(UserRole sender, DatabaseWriteEventArgs args)
         {
             InvalidateCache(CachedRolesByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks));
             return Task.CompletedTask;
@@ -39,9 +39,9 @@ namespace HB.FullStack.Identity
 
         #region Read
 
-        public Task<UserRoleEntity?> GetByUserIdAndRoleIdAsync(Guid userId, Guid roleId, TransactionContext? transactionContext = null)
+        public Task<UserRole?> GetByUserIdAndRoleIdAsync(Guid userId, Guid roleId, TransactionContext? transactionContext = null)
         {
-            return _databaseReader.ScalarAsync<UserRoleEntity>(ru => ru.UserId == userId && ru.RoleId == roleId, transactionContext);
+            return _databaseReader.ScalarAsync<UserRole>(ru => ru.UserId == userId && ru.RoleId == roleId, transactionContext);
         }
 
         /// <summary>
@@ -52,12 +52,12 @@ namespace HB.FullStack.Identity
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         /// <exception cref="CacheException"></exception>
-        public Task<IEnumerable<RoleEntity>> GetRolesByUserIdAsync(Guid userId, TransactionContext? transContext = null)
+        public Task<IEnumerable<Role>> GetRolesByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return TryCacheAsideAsync(CachedRolesByUserId.Key(userId), dbReader =>
             {
-                var from = dbReader.From<RoleEntity>().RightJoin<UserRoleEntity>((r, ru) => r.Id == ru.RoleId);
-                var where = dbReader.Where<RoleEntity>().And<UserRoleEntity>(ru => ru.UserId == userId);
+                var from = dbReader.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
+                var where = dbReader.Where<Role>().And<UserRole>(ru => ru.UserId == userId);
 
                 return dbReader.RetrieveAsync(from, where, transContext);
             })!;
@@ -73,7 +73,7 @@ namespace HB.FullStack.Identity
         /// <exception cref="DatabaseException"></exception>
         public Task<long> CountByUserIdAndRoleIdAsync(Guid userId, Guid roleId, TransactionContext? transContext = null)
         {
-            return _databaseReader.CountAsync<UserRoleEntity>(ru => ru.UserId == userId && ru.RoleId == roleId, transContext);
+            return _databaseReader.CountAsync<UserRole>(ru => ru.UserId == userId && ru.RoleId == roleId, transContext);
         }
 
         #endregion
