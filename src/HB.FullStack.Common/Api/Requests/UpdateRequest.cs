@@ -9,7 +9,7 @@ namespace HB.FullStack.Common.Api
     public class UpdateRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [IdBarrier]
-        [CollectionNotEmpty]
+        //[CollectionNotEmpty]
         public IList<T> Resources { get; set; } = new List<T>();
 
         public UpdateRequest() : base(HttpMethod.Put, null) { }

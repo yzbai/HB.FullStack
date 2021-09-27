@@ -37,8 +37,6 @@ namespace System
                     return null;
                 }
 
-                GlobalSettings.Logger?.LogDebug2($"读取环境MachindId的字符串为:{str}");
-
                 return Convert.ToInt32(str, CultureInfo.InvariantCulture);
             }
         }
