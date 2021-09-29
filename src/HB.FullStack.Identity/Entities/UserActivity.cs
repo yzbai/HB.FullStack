@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HB.FullStack.Database.Entities;
 
-using HB.FullStack.Database;
-using HB.FullStack.Database.Entities;
-using HB.FullStack.Identity.Entities;
+using System;
 
 namespace HB.FullStack.Identity.Entities
 {
@@ -17,13 +10,12 @@ namespace HB.FullStack.Identity.Entities
         public const int MAX_ARGUMENTS_LENGTH = 2000;
         public const int MAX_RESULT_ERROR_LENGTH = 2000;
 
-
         [ForeignKey(typeof(User))]
         public Guid? UserId { get; set; }
 
         [ForeignKey(typeof(SignInToken))]
         public Guid? SignInTokenId { get; set; }
-        
+
         public string? Ip { get; set; }
 
         [EntityProperty(MaxLength = MAX_URL_LENGTH)]
@@ -36,9 +28,9 @@ namespace HB.FullStack.Identity.Entities
         public string? Arguments { get; set; }
 
         public int? ResultStatusCode { get; set; }
-        
+
         public string? ResultType { get; set; }
-        
+
         [EntityProperty(MaxLength = MAX_RESULT_ERROR_LENGTH)]
         public string? ResultError { get; set; }
     }

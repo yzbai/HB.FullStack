@@ -1,7 +1,7 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using HB.FullStack.Database.Entities;
 
-using HB.FullStack.Database.Entities;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
@@ -15,15 +15,11 @@ namespace HB.FullStack.Identity.Entities
         [EntityProperty(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
-        
         public DateTimeOffset? ExpireAt { get; set; }
 
-        
         public long RefreshCount { get; set; }
 
-        
         public bool Blacked { get; set; }
-
 
         #region Device
 
@@ -34,7 +30,6 @@ namespace HB.FullStack.Identity.Entities
         [EntityProperty(NotNull = true)]
         public string DeviceVersion { get; set; } = default!;
 
-
         [EntityProperty(NotNull = true)]
         public string DeviceIp { get; set; } = default!;
 
@@ -43,32 +38,28 @@ namespace HB.FullStack.Identity.Entities
         #region Device Infos
 
         [Required]
-        
         public string DeviceName { get; set; } = null!;
 
         [Required]
-        
         public string DeviceModel { get; set; } = null!;
 
         [Required]
-        
         public string DeviceOSVersion { get; set; } = null!;
 
         [Required]
-        
         public string DevicePlatform { get; set; } = null!;
 
         [Required]
-        
         public DeviceIdiom DeviceIdiom { get; set; } = DeviceIdiom.Unknown;
 
         [Required]
-        
         public string DeviceType { get; set; } = null!;
 
         #endregion
 
-        public SignInToken() { }
+        public SignInToken()
+        {
+        }
 
         public SignInToken(
             Guid userId,
@@ -100,5 +91,4 @@ namespace HB.FullStack.Identity.Entities
             DeviceType = deviceType;
         }
     }
-
 }

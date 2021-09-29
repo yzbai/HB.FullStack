@@ -1,9 +1,7 @@
-﻿
-using HB.FullStack.Database.Entities;
+﻿using HB.FullStack.Database.Entities;
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Identity.Entities
 {
@@ -20,7 +18,9 @@ namespace HB.FullStack.Identity.Entities
         [ForeignKey(typeof(Role))]
         public Guid RoleId { get; set; }
 
-        public UserRole() { }
+        public UserRole()
+        {
+        }
 
         public UserRole(Guid userId, Guid roleId)
         {

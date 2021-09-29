@@ -1,7 +1,5 @@
 ﻿using System;
 
-using HB.FullStack.Identity.Entities;
-
 namespace HB.FullStack.Identity
 {
     internal static class IdentityErrorCodes
@@ -27,7 +25,6 @@ namespace HB.FullStack.Identity
         public static ErrorCode IdentityMobileEmailLoginNameAllNull { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 18, nameof(IdentityMobileEmailLoginNameAllNull), "");
         public static ErrorCode IdentityAlreadyTaken { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 19, nameof(IdentityAlreadyTaken), "");
         public static ErrorCode ServiceRegisterError { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 20, nameof(ServiceRegisterError), "");
-
     }
 
     internal static class Exceptions
@@ -194,7 +191,6 @@ namespace HB.FullStack.Identity
             IdentityException exception = new IdentityException(IdentityErrorCodes.IdentityNothingConfirmed);
 
             return exception;
-
         }
     }
 }

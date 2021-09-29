@@ -1,6 +1,3 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-
 using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
@@ -13,7 +10,6 @@ namespace HB.FullStack.Identity.Entities
         [EntityProperty(MaxLength = 500, NotNull = true)]
         public string DisplayName { get; set; } = default!;
 
-        
         public bool IsActivated { get; set; }
 
         [EntityProperty(MaxLength = 1024)]
@@ -27,6 +23,4 @@ namespace HB.FullStack.Identity.Entities
             Comment = comment;
         }
     }
-
-
 }

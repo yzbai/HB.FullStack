@@ -1,5 +1,4 @@
-﻿
-using HB.FullStack.Database.Entities;
+﻿using HB.FullStack.Database.Entities;
 
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -26,19 +25,20 @@ namespace HB.FullStack.Identity.Entities
         [LoginName]
         [EntityProperty(MaxLength = 100, Unique = true)]
         public string? LoginName { get; set; }
+
         /// <summary>
         /// "手机号",
         /// 唯一
         /// </summary>
         [Mobile]
-        [EntityProperty(Unique = true, MaxLength = 14)]
+        [EntityProperty(MaxLength = 14, Unique = true)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [EntityProperty(Unique = true, MaxLength = 256)]
+        [EntityProperty(MaxLength = 256, Unique = true)]
         public string? Email { get; set; }
 
         /// <summary>
@@ -56,7 +56,9 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         public bool TwoFactorEnabled { get; set; }
 
-        public User() { }
+        public User()
+        {
+        }
 
         public User(string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
         {
