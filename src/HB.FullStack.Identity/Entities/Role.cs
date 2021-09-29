@@ -5,7 +5,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    internal class Role : GuidEntity
+    public class Role : GuidEntity
     {
         [EntityProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;

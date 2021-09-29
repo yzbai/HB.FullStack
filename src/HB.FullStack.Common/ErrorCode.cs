@@ -114,12 +114,8 @@ namespace System
 
         public ErrorCode AppendDetail(string? detail)
         {
-            ErrorCode newErrorCode = new ErrorCode(this)
-            {
-                Detail = detail
-            };
-
-            return newErrorCode;
+            Detail += detail;
+            return this;
         }
     }
 }

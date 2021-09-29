@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
-    internal class UserClaim : GuidEntity
+    public class UserClaim : GuidEntity
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User))]

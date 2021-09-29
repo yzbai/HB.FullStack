@@ -34,19 +34,19 @@ namespace HB.FullStack.Identity
             return _databaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
-        {
-            if (refreshToken.IsNullOrEmpty())
-            {
-                return Task.FromResult((SignInToken?)null);
-            }
+        //public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
+        //{
+        //    if (refreshToken.IsNullOrEmpty())
+        //    {
+        //        return Task.FromResult((SignInToken?)null);
+        //    }
 
-            return _databaseReader.ScalarAsync<SignInToken>(s =>
-                s.UserId == userId &&
-                s.Id == signInTokenId &&
-                s.RefreshToken == refreshToken &&
-                s.DeviceId == deviceId, transContext);
-        }
+        //    return _databaseReader.ScalarAsync<SignInToken>(s =>
+        //        s.RefreshToken == refreshToken &&
+        //        s.UserId == userId &&
+        //        s.Id == signInTokenId &&
+        //        s.DeviceId == deviceId, transContext);
+        //}
 
         #endregion
     }

@@ -1,7 +1,7 @@
 ﻿namespace HB.FullStack.Identity.Entities
 {
     //[DatabaseEntity]
-    //internal class ThirdPartyLogin : Entity
+    //public class ThirdPartyLogin : Entity
     //{
     //    [ForeignKey(typeof(User))]
     //    [GuidEntityProperty(NotNull = true)]

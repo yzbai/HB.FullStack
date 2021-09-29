@@ -28,7 +28,7 @@ namespace HB.FullStack.Common.Api
         public static ErrorCode FromExceptionController { get; set; } = new ErrorCode(8013, nameof(FromExceptionController), "");
         public static ErrorCode ApiCapthaError { get; set; } = new ErrorCode(8014, nameof(ApiCapthaError), "");
         public static ErrorCode ApiUploadFailed { get; set; } = new ErrorCode(8015, nameof(ApiUploadFailed), "");
-        public static ErrorCode ServerError { get; set; } = new ErrorCode(8016, nameof(ServerError), "");
+        public static ErrorCode UnKownServerError { get; set; } = new ErrorCode(8016, nameof(UnKownServerError), "");
         public static ErrorCode ClientError { get; set; } = new ErrorCode(8017, nameof(ClientError), "");
         public static ErrorCode NullReturn { get; set; } = new ErrorCode(8018, nameof(NullReturn), "");
         public static ErrorCode Timeout { get; set; } = new ErrorCode(8019, nameof(Timeout), "");

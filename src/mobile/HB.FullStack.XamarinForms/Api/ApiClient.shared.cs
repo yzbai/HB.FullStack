@@ -204,7 +204,7 @@ namespace HB.FullStack.XamarinForms.Api
         private static void AddDeviceInfo(ApiRequest request)
         {
             request.DeviceId = DevicePreferences.DeviceId;
-            request.DeviceInfos = DevicePreferences.DeviceInfos;
+            //request.DeviceInfos = DevicePreferences.DeviceInfos;
             request.DeviceVersion = DevicePreferences.DeviceVersion;
             //request.DeviceAddress = await _mobileGlobal.GetDeviceAddressAsync().ConfigureAwait(false);
         }

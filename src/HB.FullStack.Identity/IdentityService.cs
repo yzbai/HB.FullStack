@@ -258,14 +258,13 @@ namespace HB.FullStack.Identity
 
             try
             {
-                signInToken = await _signInTokenRepo.GetByConditionAsync(
-                    claimsPrincipal.GetSignInTokenId().GetValueOrDefault(),
-                    context.RefreshToken,
-                    context.DeviceId,
-                    userId,
-                    transactionContext).ConfigureAwait(false);
+                signInToken = await _signInTokenRepo.GetByIdAsync(claimsPrincipal.GetSignInTokenId().GetValueOrDefault(), transactionContext).ConfigureAwait(false);
 
-                if (signInToken == null || signInToken.Blacked)
+                if (signInToken == null || 
+                    signInToken.Blacked || 
+                    signInToken.RefreshToken != context.RefreshToken || 
+                    signInToken.DeviceId != context.DeviceId || 
+                    signInToken.UserId != userId)
                 {
                     throw Exceptions.AuthorizationNoTokenInStore(cause: "Refresh token error. signInToken not saved in db. ");
                 }
@@ -574,7 +573,7 @@ namespace HB.FullStack.Identity
             {
                 new Claim(ClaimExtensionTypes.UserId, user.Id.ToString()),
                 new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
-                new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
+                //new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
 
                 new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString()),
                 new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId),

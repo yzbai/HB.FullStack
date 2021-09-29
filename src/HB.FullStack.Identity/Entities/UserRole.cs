@@ -10,7 +10,7 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    internal class UserRole : GuidEntity
+    public class UserRole : GuidEntity
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User))]

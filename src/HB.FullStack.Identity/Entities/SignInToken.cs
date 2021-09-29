@@ -5,7 +5,7 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Identity.Entities
 {
-    internal class SignInToken : GuidEntity
+    public class SignInToken : GuidEntity
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User))]

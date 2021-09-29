@@ -25,7 +25,7 @@ namespace HB.FullStack.Common.Api
 
         public string DeviceId { get; set; } = null!;
 
-        public DeviceInfos DeviceInfos { get; set; } = null!;
+        //public DeviceInfos DeviceInfos { get; set; } = null!;
 
         public string DeviceVersion { get; set; } = null!;
 
@@ -192,7 +192,7 @@ namespace HB.FullStack.Common.Api
 
         public string GetLastUser()
         {
-            return DeviceInfos.Name;
+            return DeviceId;
         }
 
         public string GetUrl()
