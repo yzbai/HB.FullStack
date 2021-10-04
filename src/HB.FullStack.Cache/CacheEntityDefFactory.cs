@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -8,9 +9,9 @@ namespace HB.FullStack.Cache
 {
     public static class CacheEntityDefFactory
     {
-        private static readonly Dictionary<Type, CacheEntityDef> _defDict = new Dictionary<Type, CacheEntityDef>();
+        private static readonly ConcurrentDictionary<Type, CacheEntityDef> _defDict = new ConcurrentDictionary<Type, CacheEntityDef>();
 
-        private static readonly object _lockObj = new object();
+        //private static readonly object _lockObj = new object();
 
         /// <summary>
         /// Get
@@ -19,20 +20,22 @@ namespace HB.FullStack.Cache
         /// <exception cref="CacheException"></exception>
         public static CacheEntityDef Get<TEntity>() where TEntity : Entity, new()
         {
-            Type entityType = typeof(TEntity);
+            return _defDict.GetOrAdd(typeof(TEntity), type => CreateEntityDef(type));
+            
+            //Type entityType = typeof(TEntity);
 
-            if (!_defDict.ContainsKey(entityType))
-            {
-                lock (_lockObj)
-                {
-                    if (!_defDict.ContainsKey(entityType))
-                    {
-                        _defDict[entityType] = CreateEntityDef(entityType);
-                    }
-                }
-            }
+            //if (!_defDict.ContainsKey(entityType))
+            //{
+            //    lock (_lockObj)
+            //    {
+            //        if (!_defDict.ContainsKey(entityType))
+            //        {
+            //            _defDict[entityType] = CreateEntityDef(entityType);
+            //        }
+            //    }
+            //}
 
-            return _defDict[entityType];
+            //return _defDict[entityType];
 
         }
 

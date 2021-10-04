@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
@@ -16,6 +17,9 @@ namespace HB.FullStack.Database.Entities
     {
         public static int VarcharDefaultLength { get; set; }
 
+        /// <summary>
+        /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经WarmUpEntityDefs，后续只有read，没有write
+        /// </summary>
         private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
         /// <summary>
@@ -42,7 +46,7 @@ namespace HB.FullStack.Database.Entities
 
             IDictionary<string, EntitySetting> entitySchemaDict = ConstructeSchemaDict(databaseSettings, databaseEngine, allEntityTypes);
 
-            WarmUp(allEntityTypes, databaseEngine.EngineType, entitySchemaDict);
+            WarmUpEntityDefs(allEntityTypes, databaseEngine.EngineType, entitySchemaDict);
 
             static bool entityTypeCondition(Type t)
             {
@@ -57,7 +61,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="engineType"></param>
         /// <param name="entitySchemaDict"></param>
         /// <exception cref="DatabaseException"></exception>
-        private static void WarmUp(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private static void WarmUpEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             foreach (var t in allEntityTypes)
             {
@@ -299,7 +303,7 @@ namespace HB.FullStack.Database.Entities
                     propertyDef.IsAutoIncrementPrimaryKey = false;
                     propertyDef.IsForeignKey = true;
                     propertyDef.IsNullable = true;
-                    propertyDef.IsUnique = false;
+                    propertyDef.IsUnique = atts2.IsUnique;
                 }
             }
 

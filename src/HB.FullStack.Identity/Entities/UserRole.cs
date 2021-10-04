@@ -11,11 +11,11 @@ namespace HB.FullStack.Identity.Entities
     public class UserRole : GuidEntity
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [NoEmptyGuid]
-        [ForeignKey(typeof(Role))]
+        [ForeignKey(typeof(Role), false)]
         public Guid RoleId { get; set; }
 
         public UserRole()

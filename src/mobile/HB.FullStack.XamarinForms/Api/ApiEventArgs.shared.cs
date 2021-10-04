@@ -13,7 +13,7 @@ namespace HB.FullStack.XamarinForms.Api
         public ApiEventArgs(ApiRequestType requestType, ApiRequest apiRequest)
         {
             RequestType = requestType;
-            RequestId = apiRequest.GetRequestId();
+            RequestId = apiRequest.RequestId;
         }
 
     }

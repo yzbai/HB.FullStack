@@ -9,21 +9,22 @@ namespace HB.FullStack.Common.Api
     public class UpdateRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [IdBarrier]
-        //[CollectionNotEmpty]
+        [CollectionMemeberValidated]
+        [CollectionNotEmpty]
         public IList<T> Resources { get; set; } = new List<T>();
 
         public UpdateRequest() : base(HttpMethod.Put, null) { }
 
         public UpdateRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Put, null) { }
 
-        public UpdateRequest(IEnumerable<T> ress) : this()
+        public UpdateRequest(IEnumerable<T> res) : this()
         {
-            Resources.AddRange(ress);
+            Resources.AddRange(res);
         }
 
-        public UpdateRequest(string apiKeyName, IEnumerable<T> ress) : this(apiKeyName)
+        public UpdateRequest(string apiKeyName, IEnumerable<T> res) : this(apiKeyName)
         {
-            Resources.AddRange(ress);
+            Resources.AddRange(res);
         }
 
         public UpdateRequest(T res) : this()

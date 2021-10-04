@@ -17,6 +17,9 @@ namespace System
         public const int TENCENT = 9000;
         public const int WEB_API = 10000;
         public const int MOBILE = 11000;
+        public const int USER_DOMAIN = 12000;
+        public const int ROUTINE_DOMAIN = 12000;
+        public const int THEME_DOMAIN = 12000;
     }
 
     //TODO: 使用Record改写

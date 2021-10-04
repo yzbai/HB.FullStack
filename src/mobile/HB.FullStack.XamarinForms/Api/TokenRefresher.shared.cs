@@ -139,7 +139,7 @@ namespace HB.FullStack.XamarinForms.Api
             public string RefreshToken { get; set; } = null!;
 
             public RefreshAccessTokenRequest(string endpointName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken)
-                : base(httpMethod, ApiAuthType.None, endpointName, apiVersion, resourceName, "ByRefresh")
+                : base(httpMethod, ApiAuthType.None, endpointName, apiVersion, resourceName, "ByRefresh", null)
             {
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;

@@ -11,6 +11,8 @@ using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using Microsoft;
+using HB.FullStack.Common;
+using System.Linq;
 
 namespace HB.FullStack.Database
 {
@@ -18,9 +20,9 @@ namespace HB.FullStack.Database
     {
         private static readonly ConcurrentDictionary<string, string> _commandTextCache = new ConcurrentDictionary<string, string>();
 
-        private static string GetCachedSql(EngineType engineType, SqlType commandTextType, params EntityDef[] entityDefs)
+        private static string GetCachedSql(EngineType engineType, SqlType commandTextType, EntityDef[] entityDefs, IEnumerable<string>? propertyNames = null)
         {
-            string cacheKey = GetCommandTextCacheKey(commandTextType, entityDefs);
+            string cacheKey = GetCommandTextCacheKey(commandTextType, entityDefs, propertyNames);
 
             if (!_commandTextCache.TryGetValue(cacheKey, out string? commandText))
             {
@@ -28,6 +30,7 @@ namespace HB.FullStack.Database
                 {
                     SqlType.AddEntity => SqlHelper.CreateAddEntitySql(entityDefs[0], engineType, true),
                     SqlType.UpdateEntity => SqlHelper.CreateUpdateEntitySql(entityDefs[0]),
+                    SqlType.UpdateFields => SqlHelper.CreateUpdateFieldsSql(entityDefs[0], propertyNames!),
                     SqlType.DeleteEntity => SqlHelper.CreateDeleteEntitySql(entityDefs[0]),
                     SqlType.SelectEntity => SqlHelper.CreateSelectEntitySql(entityDefs),
                     SqlType.Delete => SqlHelper.CreateDeleteSql(entityDefs[0]),
@@ -40,13 +43,23 @@ namespace HB.FullStack.Database
 
             return commandText;
 
-            static string GetCommandTextCacheKey(SqlType textType, params EntityDef[] entityDefs)
+            static string GetCommandTextCacheKey(SqlType textType, EntityDef[] entityDefs, IEnumerable<string>? propertyNames)
             {
                 StringBuilder builder = new StringBuilder(entityDefs[0].DatabaseName);
 
                 foreach (EntityDef entityDef in entityDefs)
                 {
-                    builder.Append($"{entityDef.TableName}_");
+                    builder.Append(entityDef.TableName);
+                    builder.Append('_');
+                }
+
+                if (propertyNames != null)
+                {
+                    foreach (string propertyName in propertyNames)
+                    {
+                        builder.Append(propertyName);
+                        builder.Append('_');
+                    }
                 }
 
                 builder.Append(textType.ToString());
@@ -69,7 +82,7 @@ namespace HB.FullStack.Database
         public static EngineCommand CreateRetrieveCommand<T>(EngineType engineType, EntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : DatabaseEntity, new()
         {
-            return AssembleRetrieveCommand(GetCachedSql(engineType, SqlType.SelectEntity, entityDef), fromCondition, whereCondition, engineType);
+            return AssembleRetrieveCommand(GetCachedSql(engineType, SqlType.SelectEntity, new EntityDef[] { entityDef }), fromCondition, whereCondition, engineType);
         }
 
         /// <summary>
@@ -197,7 +210,7 @@ namespace HB.FullStack.Database
         public static EngineCommand CreateAddCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.AddEntity, entityDef),
+                GetCachedSql(engineType, SqlType.AddEntity, new EntityDef[] { entityDef }),
                 entity.ToParameters(entityDef, engineType));
         }
 
@@ -212,8 +225,22 @@ namespace HB.FullStack.Database
         public static EngineCommand CreateUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.UpdateEntity, entityDef),
+                GetCachedSql(engineType, SqlType.UpdateEntity, new EntityDef[] { entityDef }),
                 entity.ToParameters(entityDef, engineType));
+        }
+
+        public static EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, int version, string lastUser, IDictionary<string, object?> propertyValues2)
+        {
+            Dictionary<string, object?> propertyValues = new Dictionary<string, object?>(propertyValues2)
+            {
+                [nameof(IdDatabaseEntity.Id)] = id,
+                [nameof(Entity.Version)] = version,
+                [nameof(Entity.LastUser)] = lastUser
+            };
+
+            return new EngineCommand(
+                GetCachedSql(engineType, SqlType.UpdateFields, new EntityDef[] { entityDef }, propertyValues.Select(kv => kv.Key).ToList()),
+                EntityMapper.ToParameters(entityDef, engineType, propertyValues));
         }
 
         /// <summary>
@@ -227,7 +254,7 @@ namespace HB.FullStack.Database
         public static EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.DeleteEntity, entityDef),
+                GetCachedSql(engineType, SqlType.DeleteEntity, new EntityDef[] { entityDef }),
                 entity.ToParameters(entityDef, engineType));
         }
 
@@ -243,7 +270,7 @@ namespace HB.FullStack.Database
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
 
-            string sql = GetCachedSql(engineType, SqlType.Delete, entityDef) + whereExpression.ToStatement(engineType);
+            string sql = GetCachedSql(engineType, SqlType.Delete, new EntityDef[] { entityDef }) + whereExpression.ToStatement(engineType);
 
             return new EngineCommand(sql, whereExpression.GetParameters());
         }
@@ -285,7 +312,7 @@ namespace HB.FullStack.Database
 
             StringBuilder commandTextBuilder = new StringBuilder();
 
-            if(needTrans)
+            if (needTrans)
             {
                 commandTextBuilder.Append(SqlHelper.Transaction_Begin(engineType));
             }
@@ -301,7 +328,7 @@ namespace HB.FullStack.Database
 
             commandTextBuilder.Append(SqlHelper.TempTable_Drop(tempTableName, engineType));
 
-            if(needTrans)
+            if (needTrans)
             {
                 commandTextBuilder.Append(SqlHelper.Transaction_Commit(engineType));
             }
@@ -465,7 +492,7 @@ namespace HB.FullStack.Database
         public static EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.AddOrUpdateEntity, entityDef),
+                GetCachedSql(engineType, SqlType.AddOrUpdateEntity, new EntityDef[] { entityDef }),
                 entity.ToParameters(entityDef, engineType));
         }
 
@@ -501,7 +528,7 @@ namespace HB.FullStack.Database
 
             StringBuilder commandTextBuilder = new StringBuilder();
 
-            if(needTrans)
+            if (needTrans)
             {
                 commandTextBuilder.Append(SqlHelper.Transaction_Begin(engineType));
             }
@@ -511,7 +538,7 @@ namespace HB.FullStack.Database
             commandTextBuilder.Append(innerBuilder);
             //commandTextBuilder.Append($"{SqlHelper.TempTable_Drop(tempTableName, engineType)}");
 
-            if(needTrans)
+            if (needTrans)
             {
                 commandTextBuilder.Append(SqlHelper.Transaction_Commit(engineType));
             }

@@ -10,10 +10,10 @@ namespace HB.FullStack.Identity.Entities
         public const int MAX_ARGUMENTS_LENGTH = 2000;
         public const int MAX_RESULT_ERROR_LENGTH = 2000;
 
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(User), false)]
         public Guid? UserId { get; set; }
 
-        [ForeignKey(typeof(SignInToken))]
+        [ForeignKey(typeof(SignInToken), false)]
         public Guid? SignInTokenId { get; set; }
 
         public string? Ip { get; set; }

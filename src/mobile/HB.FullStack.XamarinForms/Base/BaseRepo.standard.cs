@@ -334,7 +334,7 @@ namespace HB.FullStack.XamarinForms.Base
 
         private static bool IsRequestRecently(ApiRequest<TRes> apiRequest)
         {
-            TimeSpan expiryTime = apiRequest.GetRateLimit() ?? Conventions.DefaultApiRequestRateLimit;
+            TimeSpan expiryTime = apiRequest.RateLimit ?? Conventions.DefaultApiRequestRateLimit;
 
             return !RequestLocker.NoWaitLock(
                 "request",

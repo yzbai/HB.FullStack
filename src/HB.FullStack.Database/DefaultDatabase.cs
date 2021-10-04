@@ -1064,7 +1064,7 @@ namespace HB.FullStack.Database
             {
                 PrepareItem(item, lastUser);
 
-                var command = DbCommandBuilder.CreateUpdateCommand(EngineType, entityDef, item);
+                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, entityDef, item);
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
@@ -1107,6 +1107,54 @@ namespace HB.FullStack.Database
             static void RestoreItem(T item)
             {
                 item.Version--;
+            }
+        }
+
+        public async Task UpdateFieldsAsync<T>(object id, int version, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        {
+            if (id is long longId && longId <= 0)
+            {
+                throw Exceptions.LongIdShouldBePositive(longId);
+            }
+
+            if (id is Guid guid && guid.IsEmpty())
+            {
+                throw Exceptions.GuidShouldNotEmpty();
+            }
+
+            if (version < 0)
+            {
+                throw Exceptions.VersionShouldBePositive(version);
+            }
+
+            if (propertyValues.Count <= 0)
+            {
+                throw Exceptions.UpdatePropertiesCountShouldBePositive();
+            }
+
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+
+            ThrowIfNotWriteable(entityDef);
+
+            try
+            {
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, version + 1, lastUser, propertyValues);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+
+                if (rows == 1)
+                {
+                    return;
+                }
+                else if (rows == 0)
+                {
+                    throw Exceptions.NotFound(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", "");
+                }
+
+                throw Exceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}");
+            }
+            catch (Exception ex) when (ex is not DatabaseException)
+            {
+                throw Exceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", ex);
             }
         }
 

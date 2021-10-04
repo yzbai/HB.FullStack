@@ -8,7 +8,7 @@ namespace HB.FullStack.Identity.Entities
     public class SignInToken : GuidEntity
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [Required]

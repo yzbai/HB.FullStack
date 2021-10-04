@@ -5,6 +5,7 @@ using HB.FullStack.XamarinForms.Api;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -32,8 +33,8 @@ namespace HB.FullStack.XamarinForms.Controls
 
         static readonly Xamarin.Forms.Internals.IIsolatedStorageFile Store = Device.PlatformServices.GetUserStoreForApplication();
 
-        static readonly object s_syncHandle = new object();
-        static readonly Dictionary<string, LockingSemaphore> s_semaphores = new Dictionary<string, LockingSemaphore>();
+        //static readonly object s_syncHandle = new object();
+        static readonly ConcurrentDictionary<string, LockingSemaphore> s_semaphores = new ConcurrentDictionary<string, LockingSemaphore>();
 
         TimeSpan _cacheValidity = TimeSpan.FromDays(1);
 
@@ -258,14 +259,14 @@ namespace HB.FullStack.XamarinForms.Controls
         async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
             string key = GetCacheKey(uri);
-            LockingSemaphore sem;
-            lock (s_syncHandle)
-            {
-                if (s_semaphores.ContainsKey(key))
-                    sem = s_semaphores[key];
-                else
-                    s_semaphores.Add(key, sem = new LockingSemaphore(1));
-            }
+            LockingSemaphore sem = s_semaphores.GetOrAdd(key, _=>new LockingSemaphore(1));
+            //lock (s_syncHandle)
+            //{
+            //    if (s_semaphores.ContainsKey(key))
+            //        sem = s_semaphores[key];
+            //    else
+            //        s_semaphores.Add(key, sem = new LockingSemaphore(1));
+            //}
 
             try
             {
@@ -334,7 +335,7 @@ namespace HB.FullStack.XamarinForms.Controls
         {
             get
             {
-                if(_apiClient == null)
+                if (_apiClient == null)
                 {
                     _apiClient = DependencyService.Resolve<IApiClient>();
                 }
@@ -348,7 +349,7 @@ namespace HB.FullStack.XamarinForms.Controls
     {
         private readonly string _uri;
 
-        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null)
+        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null,null)
         {
             _uri = uri;
         }

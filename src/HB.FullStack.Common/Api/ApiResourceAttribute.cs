@@ -10,11 +10,17 @@ namespace HB.FullStack.Common.Api
         public string EndPointName { get; }
 
         public string Version { get; }
+        
+        /// <summary>
+        /// 有效时间，即多久请求一次即可
+        /// </summary>
+        public TimeSpan RateLimit { get; }
 
-        public ApiResourceAttribute(string endPointName, string version)
+        public ApiResourceAttribute(string endPointName, string version, int rateLimitMilliseconds)
         {
             EndPointName = endPointName;
             Version = version;
+            RateLimit = TimeSpan.FromMilliseconds(rateLimitMilliseconds);
         }
     }
 }

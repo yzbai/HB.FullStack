@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace HB.FullStack.Common.Api
@@ -8,5 +9,7 @@ namespace HB.FullStack.Common.Api
         public string EndpointName { get; internal set; } = null!;
         public string ApiVersion { get; internal set; } = null!;
         public string Name { get; internal set; } = null!;
+
+        public TimeSpan? RateLimit { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace HB.FullStack.Common.Api
@@ -8,7 +9,7 @@ namespace HB.FullStack.Common.Api
     {
         private static readonly ConcurrentDictionary<Type, ApiResourceDef> _defDict = new ConcurrentDictionary<Type, ApiResourceDef>();
 
-        private static readonly object _defDictLocker = new object();
+        //private static readonly object _defDictLocker = new object();
 
         /// <summary>
         /// Get
@@ -17,26 +18,28 @@ namespace HB.FullStack.Common.Api
         /// <exception cref="ApiException"></exception>
         public static ApiResourceDef Get<T>() where T : ApiResource2
         {
-            Type type = typeof(T);
+            return _defDict.GetOrAdd(typeof(T), t => CreateResourceDef(t));
 
-            if (_defDict.TryGetValue(type, out ApiResourceDef? def))
-            {
-                return def;
-            }
+            //Type type = typeof(T);
 
-            lock (_defDictLocker)
-            {
-                if (_defDict.TryGetValue(type, out def))
-                {
-                    return def;
-                }
+            //if (_defDict.TryGetValue(type, out ApiResourceDef? def))
+            //{
+            //    return def;
+            //}
 
-                def = CreateResourceDef(type);
+            //lock (_defDictLocker)
+            //{
+            //    if (_defDict.TryGetValue(type, out def))
+            //    {
+            //        return def;
+            //    }
 
-                _defDict[type] = def;
-            }
+            //    def = CreateResourceDef(type);
 
-            return _defDict[type];
+            //    _defDict[type] = def;
+
+            //    return def;
+            //}
         }
 
         /// <summary>
@@ -51,11 +54,12 @@ namespace HB.FullStack.Common.Api
 
             if (attr == null)
             {
-                throw ApiExceptions.NotApiResourceEntity(type:type.FullName);
+                throw ApiExceptions.NotApiResourceEntity(type: type.FullName);
             }
 
             return new ApiResourceDef
             {
+                RateLimit = attr.RateLimit,
                 ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
                 Name = type.Name

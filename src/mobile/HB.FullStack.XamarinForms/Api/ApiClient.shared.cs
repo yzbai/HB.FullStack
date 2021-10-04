@@ -55,7 +55,7 @@ namespace HB.FullStack.XamarinForms.Api
         /// <exception cref="ApiException"></exception>
         public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource2
         {
-            if(typeof(T) == typeof(LongIdResource))
+            if (typeof(T) == typeof(LongIdResource))
             {
                 return SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
             }
@@ -66,10 +66,13 @@ namespace HB.FullStack.XamarinForms.Api
 
             return Task.CompletedTask;
         }
-            
+
 
         /// <exception cref="ApiException"></exception>
         public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource2
+            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
+
+        public Task UpdateFields<T>(UpdateFieldsRequest<T> request) where T : ApiResource2
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
 
         /// <exception cref="ApiException"></exception>
@@ -80,7 +83,7 @@ namespace HB.FullStack.XamarinForms.Api
         {
             if (!request.IsValid())
             {
-                throw ApiExceptions.ModelValidationError(cause:request.GetValidateErrorMessage());
+                throw ApiExceptions.ModelValidationError(cause: request.GetValidateErrorMessage());
             }
 
             EndpointSettings? endpoint = GetEndpoint(request);
@@ -103,7 +106,7 @@ namespace HB.FullStack.XamarinForms.Api
             }
             catch (ApiException ex)
             {
-                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (request.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint).ConfigureAwait(false);
 
@@ -117,7 +120,7 @@ namespace HB.FullStack.XamarinForms.Api
             }
             catch (Exception ex)
             {
-                throw ApiExceptions.ClientError( cause: "ApiClient.SendAsync Failed.Type : Get Stream", innerException: ex);
+                throw ApiExceptions.ClientError(cause: "ApiClient.SendAsync Failed.Type : Get Stream", innerException: ex);
             }
         }
 
@@ -148,7 +151,7 @@ namespace HB.FullStack.XamarinForms.Api
             }
             catch (ApiException ex)
             {
-                if (request.GetApiAuthType() == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (request.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint).ConfigureAwait(false);
 
@@ -162,7 +165,7 @@ namespace HB.FullStack.XamarinForms.Api
             }
             catch (Exception ex)
             {
-                throw ApiExceptions.ClientError(cause:$"ApiClient.SendAsync Failed.Type : {typeof(T)}", innerException: ex);
+                throw ApiExceptions.ClientError(cause: $"ApiClient.SendAsync Failed.Type : {typeof(T)}", innerException: ex);
             }
         }
 
@@ -179,12 +182,12 @@ namespace HB.FullStack.XamarinForms.Api
         private EndpointSettings? GetEndpoint(ApiRequest request)
         {
             return _options.Endpoints.FirstOrDefault(e =>
-                e.Name == request.GetEndpointName()
+                e.Name == request.EndpointName
                     &&
                 (
-                    e.Version == request.GetApiVersion()
+                    e.Version == request.ApiVersion
                         ||
-                    (request.GetApiVersion().IsNullOrEmpty() && e.Version.IsNullOrEmpty())
+                    (request.ApiVersion.IsNullOrEmpty() && e.Version.IsNullOrEmpty())
                 ));
         }
 
@@ -212,7 +215,7 @@ namespace HB.FullStack.XamarinForms.Api
         /// <exception cref="ApiException"></exception>
         private void AddAuthInfo(ApiRequest request)
         {
-            switch (request.GetApiAuthType())
+            switch (request.ApiAuthType)
             {
                 case ApiAuthType.None:
                     break;
@@ -248,7 +251,7 @@ namespace HB.FullStack.XamarinForms.Api
 
         private bool TrySetApiKey(ApiRequest apiRequest)
         {
-            if (_options.TryGetApiKey(apiRequest.GetApiKeyName(), out string? key))
+            if (_options.TryGetApiKey(apiRequest.ApiKeyName, out string? key))
             {
                 apiRequest.SetApiKey(key);
                 return true;

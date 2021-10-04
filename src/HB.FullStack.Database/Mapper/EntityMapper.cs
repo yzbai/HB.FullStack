@@ -18,7 +18,7 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly ConcurrentDictionary<string, Func<IDataReader, object?>> _toEntityFuncDict = new ConcurrentDictionary<string, Func<IDataReader, object?>>();
 
-        private static readonly object _toEntityFuncDictLocker = new object();
+        //private static readonly object _toEntityFuncDictLocker = new object();
 
         /// <summary>
         /// ToEntities
@@ -122,18 +122,20 @@ namespace HB.FullStack.Database.Mapper
         {
             string key = GetKey(entityDef, startIndex, length, returnNullIfFirstNull, engineType);
 
-            if (!_toEntityFuncDict.ContainsKey(key))
-            {
-                lock (_toEntityFuncDictLocker)
-                {
-                    if (!_toEntityFuncDict.ContainsKey(key))
-                    {
-                        _toEntityFuncDict[key] = EntityMapperDelegateCreator.CreateToEntityDelegate(entityDef, reader, startIndex, length, returnNullIfFirstNull, engineType);
-                    }
-                }
-            }
+            return _toEntityFuncDict.GetOrAdd(key, _ => EntityMapperDelegateCreator.CreateToEntityDelegate(entityDef, reader, startIndex, length, returnNullIfFirstNull, engineType));
+            
+            //if (!_toEntityFuncDict.ContainsKey(key))
+            //{
+            //    lock (_toEntityFuncDictLocker)
+            //    {
+            //        if (!_toEntityFuncDict.ContainsKey(key))
+            //        {
+            //            _toEntityFuncDict[key] = EntityMapperDelegateCreator.CreateToEntityDelegate(entityDef, reader, startIndex, length, returnNullIfFirstNull, engineType);
+            //        }
+            //    }
+            //}
 
-            return _toEntityFuncDict[key];
+            //return _toEntityFuncDict[key];
 
             static string GetKey(EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
             {
@@ -147,7 +149,7 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly ConcurrentDictionary<string, Func<object, int, KeyValuePair<string, object>[]>> _toParametersFuncDict = new ConcurrentDictionary<string, Func<object, int, KeyValuePair<string, object>[]>>();
 
-        private static readonly object _toParameterFuncDictLocker = new object();
+        //private static readonly object _toParameterFuncDictLocker = new object();
 
         /// <summary>
         /// ToParametersUsingReflection
@@ -162,7 +164,7 @@ namespace HB.FullStack.Database.Mapper
         {
             if (entity.Version < 0)
             {
-                throw Exceptions.EntityVersionError(type:entityDef.EntityFullName,version: entity.Version, cause:"DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw Exceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
@@ -172,6 +174,27 @@ namespace HB.FullStack.Database.Mapper
                 parameters.Add(new KeyValuePair<string, object>(
                     $"{propertyDef.DbParameterizedName!}_{number}",
                     TypeConvert.TypeValueToDbValue(propertyDef.GetValueFrom(entity), propertyDef, engineType)));
+            }
+
+            return parameters;
+        }
+
+        public static IList<KeyValuePair<string, object>> ToParameters(EntityDef entityDef, EngineType engineType, Dictionary<string, object?> propertyValues, int number = 0)
+        {
+            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(propertyValues.Count);
+
+            foreach (KeyValuePair<string, object?> kv in propertyValues)
+            {
+                EntityPropertyDef? propertyDef = entityDef.GetPropertyDef(kv.Key);
+
+                if (propertyDef == null)
+                {
+                    throw Exceptions.PropertyNotFound(entityDef.EntityFullName, kv.Key);
+                }
+
+                parameters.Add(new KeyValuePair<string, object>(
+                    $"{propertyDef.DbParameterizedName}_{number}",
+                    TypeConvert.TypeValueToDbValue(kv.Value, propertyDef, engineType)));
             }
 
             return parameters;
@@ -202,18 +225,20 @@ namespace HB.FullStack.Database.Mapper
         {
             string key = GetKey(entityDef, engineType);
 
-            if (!_toParametersFuncDict.ContainsKey(key))
-            {
-                lock (_toParameterFuncDictLocker)
-                {
-                    if (!_toParametersFuncDict.ContainsKey(key))
-                    {
-                        _toParametersFuncDict[key] = EntityMapperDelegateCreator.CreateToParametersDelegate(entityDef, engineType);
-                    }
-                }
-            }
+            return _toParametersFuncDict.GetOrAdd(key, _ => EntityMapperDelegateCreator.CreateToParametersDelegate(entityDef, engineType));
 
-            return _toParametersFuncDict[key];
+            //if (!_toParametersFuncDict.ContainsKey(key))
+            //{
+            //    lock (_toParameterFuncDictLocker)
+            //    {
+            //        if (!_toParametersFuncDict.ContainsKey(key))
+            //        {
+            //            _toParametersFuncDict[key] = EntityMapperDelegateCreator.CreateToParametersDelegate(entityDef, engineType);
+            //        }
+            //    }
+            //}
+
+            //return _toParametersFuncDict[key];
 
             static string GetKey(EntityDef entityDef, EngineType engineType)
             {

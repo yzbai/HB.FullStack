@@ -17,7 +17,7 @@ namespace HB.FullStack.Tests.Mocker
 
     public class UserProfile : GuidEntity
     {
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(User), true)]
         public Guid UserId { get; set; }
 
         public int Age { get; set; }

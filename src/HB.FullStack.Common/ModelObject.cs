@@ -7,6 +7,7 @@ namespace HB.FullStack.Common
 {
     public abstract class ApiResource2 : ValidatableObject
     {
+        [Range(0, int.MaxValue)]
         public int Version { get; set; } = -1;
     }
 
@@ -15,7 +16,7 @@ namespace HB.FullStack.Common
         [NoEmptyGuid]
         public Guid Id { get; set; }
 
-        
+
     }
 
     public abstract class LongIdResource : ApiResource2

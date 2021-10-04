@@ -14,6 +14,8 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new();
 
+        Task UpdateFieldsAsync<T>(object id, int version, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new();
+
         /// <exception cref="DatabaseException"></exception>
         Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new();
 

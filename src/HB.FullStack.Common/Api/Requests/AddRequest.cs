@@ -8,6 +8,7 @@ namespace HB.FullStack.Common.Api
     public class AddRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [CollectionNotEmpty]
+        [CollectionMemeberValidated]
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 

@@ -8,7 +8,7 @@ namespace HB.FullStack.Identity.Entities
     public class UserClaim : GuidEntity
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User))]
+        [ForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [EntityProperty(MaxLength = 65530, NotNull = true)]

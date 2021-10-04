@@ -10,7 +10,6 @@ namespace HB.FullStack.KVStore.Entities
 {
     internal static class EntityDefFactory
     {
-        private static readonly object _lockObj = new object();
         private static IDictionary<string, KVStoreEntitySchema> _typeSchemaDict = null!;
         private static readonly ConcurrentDictionary<Type, KVStoreEntityDef> _defDict = new ConcurrentDictionary<Type, KVStoreEntityDef>();
         private static KVStoreSettings _settings = null!;
@@ -98,18 +97,7 @@ namespace HB.FullStack.KVStore.Entities
         /// <exception cref="KVStoreException"></exception>
         public static KVStoreEntityDef GetDef(Type type)
         {
-            if (!_defDict.ContainsKey(type))
-            {
-                lock (_lockObj)
-                {
-                    if (!_defDict.ContainsKey(type))
-                    {
-                        _defDict[type] = CreateEntityDef(type);
-                    }
-                }
-            }
-
-            return _defDict[type];
+            return _defDict.GetOrAdd(type, t => CreateEntityDef(t));
         }
 
         /// <summary>

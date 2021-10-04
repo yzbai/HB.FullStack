@@ -50,7 +50,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
         {
             if (args.RequestType == ApiRequestType.Add)
             {
-                _addRequestClientIdDict[request.GetRequestId()] = new List<long>();
+                _addRequestClientIdDict[request.RequestId] = new List<long>();
             }
 
             await ChangeIdAsync(request, args.RequestId, ChangeDirection.ToServer, args.RequestType).ConfigureAwait(false);

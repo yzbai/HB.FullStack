@@ -106,17 +106,17 @@ namespace System.Net.Http
 
         private static HttpRequestMessage ToHttpRequestMessage(this ApiRequest request)
         {
-            HttpMethod httpMethod = request.GetHttpMethod();
+            HttpMethod httpMethod = request.HttpMethod;
 
-            if (request.GetNeedHttpMethodOveride() && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
+            if (request.NeedHttpMethodOveride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
             {
-                request.SetHeader("X-HTTP-Method-Override", httpMethod.Method);
+                request.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
                 httpMethod = HttpMethod.Post;
             }
 
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.GetUrl());
 
-            foreach (var kv in request.GetHeaders())
+            foreach (var kv in request.Headers)
             {
                 httpRequest.Headers.Add(kv.Key, kv.Value);
             }
