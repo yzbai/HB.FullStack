@@ -8,9 +8,21 @@ namespace HB.FullStack.Database.Entities
     /// </summary>
     internal class EntityDef
     {
+        /// <summary>
+        /// 是否是GuidEntity
+        /// </summary>
+        public bool IsIdGuid { get; set; }
+
+        /// <summary>
+        /// 是否是IdLongEntity
+        /// </summary>
+        public bool IsIdLong { get; set; }
+
+        /// <summary>
+        /// 是否是AutoincrementIdEntity
+        /// </summary>
         public bool IsIdAutoIncrement { get; set; }
 
-        public bool IsIdGuid { get; set; }
         /// <summary>
         /// 实体名
         /// </summary>

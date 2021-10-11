@@ -14,14 +14,15 @@ namespace HB.FullStack.Database.Entities
 {
     public abstract class DatabaseEntity : Entity
     {
+        public override string LastUser { get; set; } = string.Empty;
     }
 
-    public abstract class IdDatabaseEntity : DatabaseEntity
+    public abstract class LongIdEntity : DatabaseEntity
     {
         public abstract long Id { get; set; }
     }
 
-    public abstract class AutoIncrementIdEntity : IdDatabaseEntity
+    public abstract class AutoIncrementIdEntity : LongIdEntity
     {
         [AutoIncrementPrimaryKey]
         [EntityProperty(0)]
@@ -29,7 +30,7 @@ namespace HB.FullStack.Database.Entities
         public override long Id { get; set; } = -1;
     }
 
-    public abstract class FlackIdEntity : IdDatabaseEntity
+    public abstract class FlackIdEntity : LongIdEntity
     {
         [PrimaryKey]
         [EntityProperty(0)]
@@ -42,7 +43,6 @@ namespace HB.FullStack.Database.Entities
     {
         [NoEmptyGuid]
         [PrimaryKey]
-        [UniqueGuidString(0)]
         [CacheKey]
         public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
 

@@ -233,7 +233,7 @@ namespace HB.FullStack.Database
         {
             Dictionary<string, object?> propertyValues = new Dictionary<string, object?>(propertyValues2)
             {
-                [nameof(IdDatabaseEntity.Id)] = id,
+                [nameof(LongIdEntity.Id)] = id,
                 [nameof(Entity.Version)] = version,
                 [nameof(Entity.LastUser)] = lastUser
             };

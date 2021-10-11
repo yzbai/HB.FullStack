@@ -14,6 +14,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
+using static HB.FullStack.Identity.LengthConventions;
+
 namespace HB.FullStack.Identity
 {
     internal class IdentityService : IIdentityService
@@ -179,7 +181,7 @@ namespace HB.FullStack.Identity
                 (
                     accessToken: jwt,
                     refreshToken: signInToken.RefreshToken,
-                    currentUser: ToModelObject(user)
+                    currentUser: user
                 );
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
@@ -192,8 +194,6 @@ namespace HB.FullStack.Identity
                 throw;
             }
         }
-
-
 
         /// <summary>
         /// RefreshAccessTokenAsync
@@ -296,7 +296,7 @@ namespace HB.FullStack.Identity
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new UserAccessResult(accessToken, context.RefreshToken, ToModelObject(user));
+                return new UserAccessResult(accessToken, context.RefreshToken, user);
             }
             catch
             {
@@ -753,25 +753,25 @@ namespace HB.FullStack.Identity
         {
             string? resultError = SerializeUtil.TryToJson(errorCode);
 
-            if (resultError != null && resultError.Length > UserActivity.MAX_RESULT_ERROR_LENGTH)
+            if (resultError != null && resultError.Length > MAX_RESULT_ERROR_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
 
-                resultError = resultError.Substring(0, UserActivity.MAX_RESULT_ERROR_LENGTH);
+                resultError = resultError.Substring(0, MAX_RESULT_ERROR_LENGTH);
             }
 
-            if (arguments != null && arguments.Length > UserActivity.MAX_ARGUMENTS_LENGTH)
+            if (arguments != null && arguments.Length > MAX_ARGUMENTS_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，Arguments过长，已截断, {Arguments}", arguments);
 
-                arguments = arguments.Substring(0, UserActivity.MAX_ARGUMENTS_LENGTH);
+                arguments = arguments.Substring(0, MAX_ARGUMENTS_LENGTH);
             }
 
-            if (url != null && url.Length > UserActivity.MAX_URL_LENGTH)
+            if (url != null && url.Length > MAX_URL_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，url过长，已截断, {Url}", url);
 
-                url = url.Substring(0, UserActivity.MAX_URL_LENGTH);
+                url = url.Substring(0, MAX_URL_LENGTH);
             }
 
             UserActivity entity = new UserActivity
@@ -791,22 +791,5 @@ namespace HB.FullStack.Identity
         }
 
         #endregion
-
-        public static User ToModelObject(User entity)
-        {
-            return new User
-            {
-                Id = entity.Id,
-                Version = entity.Version,
-
-                LoginName = entity.LoginName,
-                Mobile = entity.Mobile,
-                Email = entity.Email,
-
-                MobileConfirmed = entity.MobileConfirmed,
-                EmailConfirmed = entity.EmailConfirmed,
-                TwoFactorEnabled = entity.TwoFactorEnabled
-            };
-        }
     }
 }

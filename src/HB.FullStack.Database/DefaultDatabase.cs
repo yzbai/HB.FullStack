@@ -624,9 +624,9 @@ namespace HB.FullStack.Database
         /// <returns></returns>
         /// <exception cref="DatabaseException"></exception>
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : IdDatabaseEntity, new()
+            where T : LongIdEntity, new()
         {
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(IdDatabaseEntity.Id), EngineType)}={{0}}", id);
+            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(LongIdEntity.Id), EngineType)}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
@@ -934,6 +934,8 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(entityDef);
 
+            TruncateLastUser(ref lastUser, item, entityDef);
+
             try
             {
                 PrepareItem(item, lastUser);
@@ -944,7 +946,7 @@ namespace HB.FullStack.Database
 
                 if (entityDef.IsIdAutoIncrement)
                 {
-                    ((AutoIncrementIdEntity)(object)item).Id = Convert.ToInt64(rt, GlobalSettings.Culture);
+                    ((AutoIncrementIdEntity)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
             }
             catch (DatabaseException ex)
@@ -990,6 +992,8 @@ namespace HB.FullStack.Database
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(entityDef);
+
+            TruncateLastUser(ref lastUser, item, entityDef);
 
             try
             {
@@ -1059,6 +1063,8 @@ namespace HB.FullStack.Database
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(entityDef);
+
+            TruncateLastUser(ref lastUser, item, entityDef);
 
             try
             {
@@ -1136,6 +1142,8 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(entityDef);
 
+            TruncateLastUser(ref lastUser, id);
+
             try
             {
                 EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, version + 1, lastUser, propertyValues);
@@ -1184,6 +1192,8 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(entityDef);
 
+            TruncateLastUser(ref lastUser, items, entityDef);
+
             try
             {
                 PrepareItems(items, lastUser);
@@ -1219,11 +1229,11 @@ namespace HB.FullStack.Database
                         newIds.Add(((GuidEntity)(object)item).Id);
                     }
                 }
-                else
+                else if (entityDef.IsIdLong)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((FlackIdEntity)(object)item).Id);
+                        newIds.Add(((LongIdEntity)(object)item).Id);
                     }
                 }
 
@@ -1288,6 +1298,8 @@ namespace HB.FullStack.Database
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(entityDef);
+
+            TruncateLastUser(ref lastUser, items, entityDef);
 
             try
             {
@@ -1379,6 +1391,8 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(entityDef);
 
+            TruncateLastUser(ref lastUser, items, entityDef);
+
             try
             {
                 PrepareItems(items, lastUser);
@@ -1463,6 +1477,35 @@ namespace HB.FullStack.Database
             if (!entityDef.DatabaseWriteable)
             {
                 throw Exceptions.NotWriteable(type: entityDef.EntityFullName, database: entityDef.DatabaseName);
+            }
+        }
+
+        private void TruncateLastUser<T>(ref string lastUser, T item, EntityDef entityDef) where T : DatabaseEntity, new()
+        {
+            if (lastUser.Length > LengthConvention.MAX_LAST_USER_LENGTH)
+            {
+                object id = entityDef.IsIdLong ? ((LongIdEntity)(object)(item)).Id : entityDef.IsIdGuid ? ((GuidEntity)(object)item).Id : "None";
+                _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
+
+                lastUser = lastUser.Substring(0, LengthConvention.MAX_LAST_USER_LENGTH);
+            }
+        }
+
+        private void TruncateLastUser(ref string lastUser, object id)
+        {
+            if (lastUser.Length > LengthConvention.MAX_LAST_USER_LENGTH)
+            {
+                _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
+
+                lastUser = lastUser.Substring(0, LengthConvention.MAX_LAST_USER_LENGTH);
+            }
+        }
+
+        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, EntityDef entityDef) where T:DatabaseEntity, new()
+        {
+            foreach (T item in items)
+            {
+                TruncateLastUser(ref lastUser, item, entityDef);
             }
         }
     }

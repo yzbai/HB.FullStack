@@ -74,7 +74,7 @@ namespace HB.FullStack.Database
         Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : DatabaseEntity, new();
 
         /// <exception cref="DatabaseException"></exception>
-        Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext) where T : IdDatabaseEntity, new();
+        Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext) where T : LongIdEntity, new();
 
         /// <exception cref="DatabaseException"></exception>
         Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext) where T : GuidEntity, new();

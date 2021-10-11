@@ -191,6 +191,7 @@ namespace HB.FullStack.Database.Entities
             {
                 IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIncrementIdEntity)),
                 IsIdGuid = entityType.IsSubclassOf(typeof(GuidEntity)),
+                IsIdLong = entityType.IsSubclassOf(typeof(LongIdEntity)),
                 EntityType = entityType,
                 EntityFullName = entityType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
@@ -221,7 +222,7 @@ namespace HB.FullStack.Database.Entities
 
                     if (info.Name == nameof(Entity.LastUser))
                     {
-                        entityPropertyAttribute.MaxLength = LengthConvention.LAST_USER_MAX_LENGTH;
+                        entityPropertyAttribute.MaxLength = LengthConvention.MAX_LAST_USER_LENGTH;
                     }
                 }
 

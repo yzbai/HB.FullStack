@@ -2,6 +2,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using static HB.FullStack.Identity.LengthConventions;
 
 namespace HB.FullStack.Identity.Entities
 {
@@ -12,7 +13,7 @@ namespace HB.FullStack.Identity.Entities
     public class User : GuidEntity
     {
         [Required]
-        [GuidString(NotNull = true)]
+        [Guid32String(NotNull = true)]
         public string SecurityStamp { get; set; } = default!;
 
         [Password]
@@ -23,7 +24,7 @@ namespace HB.FullStack.Identity.Entities
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [EntityProperty(MaxLength = 100, Unique = true)]
+        [EntityProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -31,14 +32,14 @@ namespace HB.FullStack.Identity.Entities
         /// 唯一
         /// </summary>
         [Mobile]
-        [EntityProperty(MaxLength = 14, Unique = true)]
+        [EntityProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [EntityProperty(MaxLength = 256, Unique = true)]
+        [EntityProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
         public string? Email { get; set; }
 
         /// <summary>

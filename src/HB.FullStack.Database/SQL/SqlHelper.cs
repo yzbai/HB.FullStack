@@ -145,7 +145,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                if (propertyName == nameof(Entity.CreateTime) || propertyName == nameof(IdDatabaseEntity.Id))
+                if (propertyName == nameof(Entity.CreateTime) || propertyName == nameof(LongIdEntity.Id))
                 {
                     continue;
                 }

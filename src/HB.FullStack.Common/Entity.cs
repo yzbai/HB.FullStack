@@ -16,7 +16,7 @@ namespace HB.FullStack.Common
     {
         public int Version { get; set; } = -1;
 
-        public string LastUser { get; set; } = string.Empty;
+        public abstract string LastUser { get; set; }
 
         /// <summary>
         /// UTC 时间

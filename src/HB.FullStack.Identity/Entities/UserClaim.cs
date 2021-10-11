@@ -11,10 +11,10 @@ namespace HB.FullStack.Identity.Entities
         [ForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
-        [EntityProperty(MaxLength = 65530, NotNull = true)]
+        [EntityProperty(NotNull = true)]
         public string ClaimType { get; set; } = default!;
 
-        [EntityProperty(MaxLength = 65530, NotNull = true)]
+        [EntityProperty(MaxLength = LengthConventions.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
         public string ClaimValue { get; set; } = default!;
 
         public bool AddToJwt { get; set; }

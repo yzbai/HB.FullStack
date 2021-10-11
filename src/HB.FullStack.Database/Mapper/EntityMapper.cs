@@ -145,7 +145,7 @@ namespace HB.FullStack.Database.Mapper
 
         #endregion
 
-        #region ToParameters
+        #region ToParameters(ToDb)
 
         private static readonly ConcurrentDictionary<string, Func<object, int, KeyValuePair<string, object>[]>> _toParametersFuncDict = new ConcurrentDictionary<string, Func<object, int, KeyValuePair<string, object>[]>>();
 
