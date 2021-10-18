@@ -146,9 +146,9 @@ namespace System
 
         #region Random String
 
-        private const string _charCollection = "0,1,2,3,4,5,6,7,8,9,a,s,d,f,g,h,z,c,v,b,n,m,k,q,w,e,r,t,y,u,p,A,S,D,F,G,H,Z,C,V,B,N,M,K,Q,W,E,R,T,Y,U,P"; //定义验证码字符及出现频次 ,避免出现0 o j i l 1 x;
-        private static readonly string[] _charArray = _charCollection.Split(',');
-        private static readonly string[] _numbericCharArray = _charCollection.Substring(0, 20).Split(',');
+        private const string CHAR_COLLECTION = "0,1,2,3,4,5,6,7,8,9,a,s,d,f,g,h,z,c,v,b,n,m,k,q,w,e,r,t,y,u,p,A,S,D,F,G,H,Z,C,V,B,N,M,K,Q,W,E,R,T,Y,U,P"; //定义验证码字符及出现频次 ,避免出现0 o j i l 1 x;
+        private static readonly string[] _charArray = CHAR_COLLECTION.Split(',');
+        private static readonly string[] _numbericCharArray = CHAR_COLLECTION.Substring(0, 20).Split(',');
         private static readonly RandomNumberGenerator _randomNumberGenerator = RandomNumberGenerator.Create();
         public static string CreateRandomString(int length)
         {
@@ -162,7 +162,7 @@ namespace System
 
         private static string CreateRandomString(int length, string[] charArray)
         {
-            Random random = new Random(Guid.NewGuid().GetHashCode());
+            //Random random = new Random(Guid.NewGuid().GetHashCode());
             int arrayLength = charArray.Length - 1;
             string randomString = "";
 

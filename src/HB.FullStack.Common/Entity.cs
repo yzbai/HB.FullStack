@@ -21,7 +21,7 @@ namespace HB.FullStack.Common
         /// <summary>
         /// UTC 时间
         /// </summary>
-        public DateTimeOffset LastTime { get; internal set; } = TimeUtil.UtcNow;
+        public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
 
         public DateTimeOffset CreateTime { get; internal set; } = TimeUtil.UtcNow;
 

@@ -223,7 +223,7 @@ return data[3]";
                     new RedisValue[]
                     {
                         utcTicks.Ticks,
-                        _invalidationVersionExpirySeconds
+                        INVALIDATION_VERSION_EXPIRY_SECONDS
                     }).ConfigureAwait(false);
 
                 return (int)redisResult == 1;

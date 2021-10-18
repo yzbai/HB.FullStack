@@ -9,7 +9,7 @@ namespace HB.Infrastructure.Tencent
 {
     public class TCapthaOptions : IOptions<TCapthaOptions>
     {
-        public const string EndpointName = "Tecent_Captha";
+        public const string ENDPOINT_NAME = "Tecent_Captha";
 
         public TCapthaOptions Value
         {

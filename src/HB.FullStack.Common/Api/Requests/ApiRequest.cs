@@ -107,9 +107,10 @@ namespace HB.FullStack.Common.Api
 
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
-                { ClientNames.RandomStr, RandomStr },
-                { ClientNames.Timestamp, Timestamp.ToString(CultureInfo.InvariantCulture)},
-                { ClientNames.DeviceId, DeviceId }
+                { ClientNames.RANDOM_STR, RandomStr },
+                { ClientNames.TIMESTAMP, Timestamp.ToString(CultureInfo.InvariantCulture)}
+                
+                //{ ClientNames.DEVICE_ID, DeviceId }
                 //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
             };
 

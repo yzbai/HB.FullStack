@@ -43,6 +43,13 @@ namespace System
         }
 
         //[Obsolete("无法处理JsonHttpContent")]
+        /// <summary>
+        /// 无法处理JsonHttpContent
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="key"></param>
+        /// <param name="includeCookie"></param>
+        /// <returns></returns>
         public static string GetValue(this HttpRequest request, string key, bool includeCookie = false)
         {
             ThrowIf.Empty(key, nameof(key));

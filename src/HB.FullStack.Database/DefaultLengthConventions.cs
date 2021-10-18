@@ -4,9 +4,9 @@ using System.Text;
 
 namespace HB.FullStack.Database
 {
-    public static class LengthConvention
+    public static class DefaultLengthConventions
     {
-        public const int MAX_LAST_USER_LENGTH = 20;
+        public const int MAX_LAST_USER_LENGTH = 100;
 
         public const int MAX_VARCHAR_LENGTH = 16379;
 

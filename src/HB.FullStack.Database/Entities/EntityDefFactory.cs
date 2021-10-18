@@ -31,7 +31,7 @@ namespace HB.FullStack.Database.Entities
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
-            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
+            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -222,7 +222,7 @@ namespace HB.FullStack.Database.Entities
 
                     if (info.Name == nameof(Entity.LastUser))
                     {
-                        entityPropertyAttribute.MaxLength = LengthConvention.MAX_LAST_USER_LENGTH;
+                        entityPropertyAttribute.MaxLength = DefaultLengthConventions.MAX_LAST_USER_LENGTH;
                     }
                 }
 

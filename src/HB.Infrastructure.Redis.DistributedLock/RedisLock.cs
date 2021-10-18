@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 {
     public class RedisLock : IDistributedLock
     {
-        private const string _prefix = "HBRL_";
+        private const string PREFIX = "HBRL_";
 
         private readonly ILogger _logger;
 
@@ -47,7 +47,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
             foreach (string item in resources)
             {
-                keyResources.Add(_prefix + Options.ApplicationName + item);
+                keyResources.Add(PREFIX + Options.ApplicationName + item);
             }
 
             Resources = keyResources;
@@ -85,9 +85,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
             {
                 if (disposing)
                 {
-#pragma warning disable UnhandledExceptions // Unhandled exception(s)
                     SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
-#pragma warning restore UnhandledExceptions // Unhandled exception(s)
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

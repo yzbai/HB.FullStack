@@ -23,7 +23,7 @@ namespace HB.FullStack.Database
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.DatabaseName, out string? value))
+                if (_sysDict.TryGetValue(SystemInfoNames.DATABASE_NAME, out string? value))
                 {
                     return value;
                 }
@@ -32,7 +32,7 @@ namespace HB.FullStack.Database
             }
             private set
             {
-                _sysDict[SystemInfoNames.DatabaseName] = value;
+                _sysDict[SystemInfoNames.DATABASE_NAME] = value;
             }
         }
 
@@ -44,7 +44,7 @@ namespace HB.FullStack.Database
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.Version, out string? value))
+                if (_sysDict.TryGetValue(SystemInfoNames.VERSION, out string? value))
                 {
                     return Convert.ToInt32(value, GlobalSettings.Culture);
                 }
@@ -53,7 +53,7 @@ namespace HB.FullStack.Database
             }
             set
             {
-                _sysDict[SystemInfoNames.Version] = value.ToString(GlobalSettings.Culture);
+                _sysDict[SystemInfoNames.VERSION] = value.ToString(GlobalSettings.Culture);
             }
         }
 

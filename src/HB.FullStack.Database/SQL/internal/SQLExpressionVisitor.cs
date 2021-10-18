@@ -803,7 +803,7 @@ namespace HB.FullStack.Database.SQL
             //#endif
             //#if NETSTANDARD2_0
 #pragma warning disable CA1307 // Specify StringComparison for clarity
-            string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "");
+            string name = quotedExp.ToString()!.Replace(SqlHelper.QUOTED_CHAR, "");
 #pragma warning restore CA1307 // Specify StringComparison for clarity
             //#endif
 

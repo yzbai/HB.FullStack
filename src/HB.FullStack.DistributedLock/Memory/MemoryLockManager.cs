@@ -56,9 +56,7 @@ namespace HB.FullStack.Lock.Memory
 
                             if (!memoryLock.IsAcquired)
                             {
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
                                 Task.Delay(_options.DefaultRetryIntervalMilliseconds, cancellationToken).Wait(cancellationToken);
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
                             }
                         }
 

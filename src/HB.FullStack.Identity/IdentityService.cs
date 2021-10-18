@@ -571,12 +571,12 @@ namespace HB.FullStack.Identity
         {
             IList<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimExtensionTypes.UserId, user.Id.ToString()),
-                new Claim(ClaimExtensionTypes.SecurityStamp, user.SecurityStamp),
+                new Claim(ClaimExtensionTypes.USER_ID, user.Id.ToString()),
+                new Claim(ClaimExtensionTypes.SECURITY_STAMP, user.SecurityStamp),
                 //new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
 
-                new Claim(ClaimExtensionTypes.SignInTokenId, signInToken.Id.ToString()),
-                new Claim(ClaimExtensionTypes.DeviceId, signInToken.DeviceId),
+                new Claim(ClaimExtensionTypes.SIGN_IN_TOKEN_ID, signInToken.Id.ToString()),
+                new Claim(ClaimExtensionTypes.DEVICE_ID, signInToken.DeviceId),
             };
 
             foreach (UserClaim item in userClaims)
@@ -589,7 +589,7 @@ namespace HB.FullStack.Identity
 
             foreach (Role item in roles)
             {
-                claims.Add(new Claim(ClaimExtensionTypes.Role, item.Name));
+                claims.Add(new Claim(ClaimExtensionTypes.ROLE, item.Name));
             }
             return claims;
         }

@@ -38,7 +38,7 @@ namespace HB.FullStack.Database.SQL
 
             _expressionContext = new SQLExpressionVisitorContenxt(engineType)
             {
-                ParamPlaceHolderPrefix = SqlHelper.ParameterizedChar + "w__"
+                ParamPlaceHolderPrefix = SqlHelper.PARAMETERIZED_CHAR + "w__"
             };
         }
 

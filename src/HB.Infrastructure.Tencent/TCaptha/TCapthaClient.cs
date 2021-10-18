@@ -54,7 +54,7 @@ namespace HB.Infrastructure.Tencent
             string requestUrl = _options.Endpoint.RemoveSuffix("/") + "?" + query;
 
             using HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-            using HttpClient httpClient = _httpClientFactory.CreateClient(TCapthaOptions.EndpointName);
+            using HttpClient httpClient = _httpClientFactory.CreateClient(TCapthaOptions.ENDPOINT_NAME);
 
             string content;
 

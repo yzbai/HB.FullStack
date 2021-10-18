@@ -100,7 +100,7 @@ namespace HB.FullStack.XamarinForms.Api
 
             // 因为Jwt要验证DeviceId与token中的是否一致，所以在url的query中加上DeviceId
 
-            request.RequestUri = new Uri( UrlUtil.AddQuerys(request.RequestUri.ToString(), new Dictionary<string, string?> { { ClientNames.DeviceId, deviceId } }));
+            request.RequestUri = new Uri( UrlUtil.AddQuerys(request.RequestUri.ToString(), new Dictionary<string, string?> { { ClientNames.DEVICE_ID, deviceId } }));
 
             //DeviceWrapper deviceWrapper = new()
             //{

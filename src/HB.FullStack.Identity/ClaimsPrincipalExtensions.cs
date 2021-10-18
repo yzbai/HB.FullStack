@@ -20,7 +20,7 @@ namespace System
 
         public static Guid? GetUserId(this ClaimsPrincipal principal)
         {
-            string? strUserId = principal.GetClaimValue(ClaimExtensionTypes.UserId);
+            string? strUserId = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
 
             if (strUserId.IsNullOrEmpty())
             {
@@ -32,24 +32,32 @@ namespace System
 
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.SecurityStamp);
+            return principal.GetClaimValue(ClaimExtensionTypes.SECURITY_STAMP);
         }
 
         public static string? GetAudience(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.Audience);
+            return principal.GetClaimValue(ClaimExtensionTypes.AUDIENCE);
         }
 
         public static Guid? GetSignInTokenId(this ClaimsPrincipal principal)
         {
-            string? str = principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId);
+            string? str = principal.GetClaimValue(ClaimExtensionTypes.SIGN_IN_TOKEN_ID);
 
             return str.IsNullOrEmpty() ? null : new Guid(str);
         }
 
         public static string? GetDeviceId(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.DeviceId);
+            return principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
+        }
+
+        public static string? GetLastUser(this ClaimsPrincipal principal)
+        {
+            string? userIdStr = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
+            string? deviceId = principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
+
+            return $"{userIdStr}-{deviceId}";
         }
 
         //public static string GetAuthtoken(this ClaimsPrincipal principal)

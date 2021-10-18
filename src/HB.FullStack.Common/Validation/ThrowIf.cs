@@ -202,9 +202,7 @@ namespace System
                 throw new ArgumentNullException($"Parameter:{ paramName}");
             }
 
-#pragma warning disable CS8777 // 因为 .net standard 2.0
             return o!;
-#pragma warning restore CS8777 // Parameter must have a non-null value when exiting.
         }
 
         /// <summary>
@@ -392,9 +390,7 @@ namespace System
                 throw new ArgumentNullException($"Parameter:{ paramName}");
             }
 
-#pragma warning disable CS8777 // 因为.net standard 2.0
             return o!;
-#pragma warning restore CS8777 // Parameter must have a non-null value when exiting.
         }
 
         /// <summary>

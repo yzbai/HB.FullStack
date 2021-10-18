@@ -159,7 +159,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -205,7 +205,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -332,7 +332,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]
@@ -379,7 +379,7 @@ namespace HB.FullStack.DatabaseTests.Data
         [EntityProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [EntityProperty(MaxLength = LengthConvention.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [EntityProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [EntityProperty]

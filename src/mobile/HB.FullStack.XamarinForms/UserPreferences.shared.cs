@@ -16,7 +16,7 @@ namespace HB.FullStack.XamarinForms
 {
     public static class UserPreferences
     {
-        private static long? _userId;
+        private static Guid? _userId;
         private static bool _userIdFirstRead = true;
         private static DateTimeOffset? _userCreateTime;
         private static bool _userCreateTimeFirstRead = true;
@@ -45,7 +45,7 @@ namespace HB.FullStack.XamarinForms
             }
         }
 
-        public static long? UserId
+        public static Guid? UserId
         {
             get
             {
@@ -54,7 +54,7 @@ namespace HB.FullStack.XamarinForms
                     _userIdFirstRead = false;
 
                     string? storedValue = PreferenceHelper.Get(Conventions.Preference_Name_UserId);
-                    _userId = storedValue == null ? null : Convert.ToInt64(storedValue, CultureInfo.InvariantCulture);
+                    _userId = storedValue == null ? null : Guid.Parse(storedValue);
                 }
 
                 return _userId;
@@ -65,7 +65,7 @@ namespace HB.FullStack.XamarinForms
 
                 if (_userId.HasValue)
                 {
-                    PreferenceHelper.Set(Conventions.Preference_Name_UserId, _userId.Value.ToString(CultureInfo.InvariantCulture));
+                    PreferenceHelper.Set(Conventions.Preference_Name_UserId, _userId.Value.ToString());
                 }
             }
         }
@@ -209,7 +209,7 @@ namespace HB.FullStack.XamarinForms
 
         public static bool IsLogined => AccessToken.IsNotNullOrEmpty();
 
-        public static void Login(long userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string? accessToken, string? refreshToken)
+        public static void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string? accessToken, string? refreshToken)
         {
             UserId = userId;
             UserCreateTime = userCreateTime;

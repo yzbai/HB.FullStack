@@ -44,7 +44,7 @@ namespace HB.FullStack.WebApi.ApiKeyAuthentication
             }
 
 
-            List<Claim> claims = new List<Claim> { new Claim(ClaimExtensionTypes.ApiKeyName, apiKeyName) };
+            List<Claim> claims = new List<Claim> { new Claim(ClaimExtensionTypes.API_KEY_NAME, apiKeyName) };
 
             ClaimsIdentity identity = new ClaimsIdentity(claims, Options.Scheme);
             List<ClaimsIdentity> identities = new List<ClaimsIdentity> { identity };

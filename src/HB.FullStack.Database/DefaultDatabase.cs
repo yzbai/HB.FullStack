@@ -319,7 +319,7 @@ namespace HB.FullStack.Database
         /// <exception cref="DatabaseException"></exception>
         public async Task<SystemInfo> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
         {
-            bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SystemInfoTableName, transaction).ConfigureAwait(false);
+            bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SYSTEM_INFO_TABLE_NAME, transaction).ConfigureAwait(false);
 
             if (!isExisted)
             {
@@ -1482,22 +1482,22 @@ namespace HB.FullStack.Database
 
         private void TruncateLastUser<T>(ref string lastUser, T item, EntityDef entityDef) where T : DatabaseEntity, new()
         {
-            if (lastUser.Length > LengthConvention.MAX_LAST_USER_LENGTH)
+            if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
                 object id = entityDef.IsIdLong ? ((LongIdEntity)(object)(item)).Id : entityDef.IsIdGuid ? ((GuidEntity)(object)item).Id : "None";
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
-                lastUser = lastUser.Substring(0, LengthConvention.MAX_LAST_USER_LENGTH);
+                lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
             }
         }
 
         private void TruncateLastUser(ref string lastUser, object id)
         {
-            if (lastUser.Length > LengthConvention.MAX_LAST_USER_LENGTH)
+            if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
-                lastUser = lastUser.Substring(0, LengthConvention.MAX_LAST_USER_LENGTH);
+                lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
             }
         }
 

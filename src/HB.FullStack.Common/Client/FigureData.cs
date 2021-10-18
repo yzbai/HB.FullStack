@@ -11,7 +11,7 @@ namespace HB.FullStack.Common
 
         public bool Equals(FigureData? other)
         {
-            if(ReferenceEquals(other, null))
+            if(other is null)
             {
                 return false;
             }
@@ -26,7 +26,7 @@ namespace HB.FullStack.Common
                 return true;
             }
 
-            if (ReferenceEquals(d1, null) || ReferenceEquals(d2, null))
+            if (d1 is null || d2 is null)
             {
                 return false;
             }

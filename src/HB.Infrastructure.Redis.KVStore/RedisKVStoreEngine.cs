@@ -21,7 +21,7 @@ namespace HB.Infrastructure.Redis.KVStore
         /// keys:entityNameKey, entityVersionKey
         /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
         /// </summary>
-        private const string _luaBatchAdd = @"
+        private const string LUA_BATCH_ADD = @"
 local count = tonumber(ARGV[1])
 for i = 1, count do
     if (redis.call('hexists', KEYS[1], ARGV[i+1]) == 1) then
@@ -39,7 +39,7 @@ return 1";
         /// keys:entityNameKey, entityVersionKey
         /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value, entity1_version, entity2_version, entity3_version
         /// </summary>
-        private const string _luaBatchUpdate = @"
+        private const string LUA_BATCH_UPDATE = @"
 local count = tonumber(ARGV[1])
 for i =1,count do
     if redis.call('HGET',KEYS[2],ARGV[i+1])~=ARGV[count + count + i + 1] then return 7 end
@@ -56,7 +56,7 @@ return 1";
         /// keys:entityNameKey, entityVersionKey
         /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_version, entity2_version, entity3_version
         /// </summary>
-        private const string _luaBatchDelete = @"
+        private const string LUA_BATCH_DELETE = @"
 local count=tonumber(ARGV[1])
 for i = 1, count do
     if redis.call('HGET',KEYS[2],ARGV[i+1])~=ARGV[count+i+1] then
@@ -77,7 +77,7 @@ return 1
         /// keys:entityNameKey, entityVersionKey
         /// argv:entity1_key, entity2_key, entity3_key
         /// </summary>
-        private const string _luaBatchGet = @"
+        private const string LUA_BATCH_GET = @"
 local array={{}} 
 array[1]=redis.call('HMGET',KEYS[1],unpack(ARGV)) 
 array[2]=redis.call('HMGET',KEYS[2],unpack(ARGV)) 
@@ -87,7 +87,7 @@ return array
         /// <summary>
         /// keys:entityNameKey, entityVersionKey
         /// </summary>
-        private const string _luaGetAll = @"
+        private const string LUA_GET_ALL = @"
 local array={{}} 
 array[1]=redis.call('HGETALL',KEYS[1]) 
 array[2]=redis.call('HGETALL',KEYS[2]) 
@@ -121,11 +121,11 @@ return array";
                 IServer server = RedisInstanceManager.GetServer(setting, _logger);
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
-                    LoadedBatchAddLua = server.ScriptLoad(_luaBatchAdd),
-                    LoadedBatchUpdateLua = server.ScriptLoad(_luaBatchUpdate),
-                    LoadedBatchDeleteLua = server.ScriptLoad(_luaBatchDelete),
-                    LoadedBatchGetLua = server.ScriptLoad(_luaBatchGet),
-                    LoadedGetAllLua = server.ScriptLoad(_luaGetAll)
+                    LoadedBatchAddLua = server.ScriptLoad(LUA_BATCH_ADD),
+                    LoadedBatchUpdateLua = server.ScriptLoad(LUA_BATCH_UPDATE),
+                    LoadedBatchDeleteLua = server.ScriptLoad(LUA_BATCH_DELETE),
+                    LoadedBatchGetLua = server.ScriptLoad(LUA_BATCH_GET),
+                    LoadedGetAllLua = server.ScriptLoad(LUA_GET_ALL)
                 };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;

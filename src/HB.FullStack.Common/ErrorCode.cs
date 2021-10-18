@@ -82,7 +82,7 @@ namespace System
 
         public bool Equals(ErrorCode? other)
         {
-            if(ReferenceEquals(other,null))
+            if(other is null)
             {
                 return false;
             }

@@ -9,14 +9,16 @@ namespace HB.FullStack.Common
     {
         [Range(0, int.MaxValue)]
         public int Version { get; set; } = -1;
+
+        public string LastUser { get; set; } = string.Empty;
+
+        public DateTimeOffset LastTime { get; set; }
     }
 
     public abstract class GuidResource : ApiResource2
     {
         [NoEmptyGuid]
         public Guid Id { get; set; }
-
-
     }
 
     public abstract class LongIdResource : ApiResource2

@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <exception cref="InvalidOperationException">Ignore.</exception>
         private static void AddTCapthaCore(IServiceCollection services)
         {
-            services.AddHttpClient(TCapthaOptions.EndpointName, httpClient =>
+            services.AddHttpClient(TCapthaOptions.ENDPOINT_NAME, httpClient =>
             {
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                 httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ITCapthaClient).FullName);

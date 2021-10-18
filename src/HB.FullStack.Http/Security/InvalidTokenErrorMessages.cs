@@ -9,14 +9,14 @@ namespace HB.FullStack.WebApi.Security
 {
     public static class InvalidTokenErrorMessages
     {
-        private const string _errorMessage_AUDIENCE_INVALID = "ErrorMessage_AUDIENCE_INVALID";
-        private const string _errorMessage_EXPIRED = "ACCESSTOKEN_EXPIRED";
-        private const string _errorMessage_ISSUER_INVALID = "ErrorMessage_ISSUER_INVALID";
-        private const string _errorMessage_LIFETIME_INVALID = "ErrorMessage_LIFETIME_INVALID";
-        private const string _errorMessage_NO_EXPIRATION = "ErrorMessage_NO_EXPIRATION";
-        private const string _errorMessage_NOT_VALID_YET = "ErrorMessage_NOT_VALID_YET";
-        private const string _errorMessage_SIGNATURE_INVALID = "ErrorMessage_SIGNATURE_INVALID";
-        private const string _errorMessage_SIGNATURE_KEY_NOT_FOUND = "ErrorMessage_SIGNATURE_KEY_NOT_FOUND";
+        private const string ERRORMESSAGE_AUDIENCE_INVALID = "ErrorMessage_AUDIENCE_INVALID";
+        private const string ERRORMESSAGE_EXPIRED = "ACCESSTOKEN_EXPIRED";
+        private const string ERRORMESSAGE_ISSUER_INVALID = "ErrorMessage_ISSUER_INVALID";
+        private const string ERRORMESSAGE_LIFETIME_INVALID = "ErrorMessage_LIFETIME_INVALID";
+        private const string ERRORMESSAGE_NO_EXPIRATION = "ErrorMessage_NO_EXPIRATION";
+        private const string ERRORMESSAGE_NOT_VALID_YET = "ErrorMessage_NOT_VALID_YET";
+        private const string ERRORMESSAGE_SIGNATURE_INVALID = "ErrorMessage_SIGNATURE_INVALID";
+        private const string ERRORMESSAGE_SIGNATURE_KEY_NOT_FOUND = "ErrorMessage_SIGNATURE_KEY_NOT_FOUND";
 
         public static string GetErrorMessage(Exception authFailure)
         {
@@ -49,35 +49,35 @@ namespace HB.FullStack.WebApi.Security
             // and we want to display the most specific message possible.
             if (ex is SecurityTokenInvalidAudienceException)
             {
-                message = _errorMessage_AUDIENCE_INVALID;
+                message = ERRORMESSAGE_AUDIENCE_INVALID;
             }
             else if (ex is SecurityTokenInvalidIssuerException)
             {
-                message = _errorMessage_ISSUER_INVALID;
+                message = ERRORMESSAGE_ISSUER_INVALID;
             }
             else if (ex is SecurityTokenNoExpirationException)
             {
-                message = _errorMessage_NO_EXPIRATION;
+                message = ERRORMESSAGE_NO_EXPIRATION;
             }
             else if (ex is SecurityTokenInvalidLifetimeException)
             {
-                message = _errorMessage_LIFETIME_INVALID;
+                message = ERRORMESSAGE_LIFETIME_INVALID;
             }
             else if (ex is SecurityTokenNotYetValidException)
             {
-                message = _errorMessage_NOT_VALID_YET;
+                message = ERRORMESSAGE_NOT_VALID_YET;
             }
             else if (ex is SecurityTokenExpiredException)
             {
-                message = _errorMessage_EXPIRED;
+                message = ERRORMESSAGE_EXPIRED;
             }
             else if (ex is SecurityTokenSignatureKeyNotFoundException)
             {
-                message = _errorMessage_SIGNATURE_KEY_NOT_FOUND;
+                message = ERRORMESSAGE_SIGNATURE_KEY_NOT_FOUND;
             }
             else if (ex is SecurityTokenInvalidSignatureException)
             {
-                message = _errorMessage_SIGNATURE_INVALID;
+                message = ERRORMESSAGE_SIGNATURE_INVALID;
             }
 
             if (string.IsNullOrEmpty(message))

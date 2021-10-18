@@ -519,7 +519,7 @@ end
             /// argv: 3(entity_count), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
 
             redisValues.Add(redisKeys.Count);
-            redisValues.Add(_invalidationVersionExpirySeconds);
+            redisValues.Add(INVALIDATION_VERSION_EXPIRY_SECONDS);
 
             foreach (int updatedVersion in updatedVersions)
             {

@@ -2,21 +2,21 @@
 {
     public static class ClaimExtensionTypes
     {
-        public const string Role = ClaimsIdentity.DefaultRoleClaimType;
+        public const string ROLE = ClaimsIdentity.DefaultRoleClaimType;
 
-        public const string SignInTokenId = "HB.SignInTokenId";
-
-
-        public const string SecurityStamp = "HB.SecurityStamp";
-
-        public const string Audience = "aud";
-
-        public const string UserId = "HB.UserId";
+        public const string SIGN_IN_TOKEN_ID = "HB.SignInTokenId";
 
 
-        public const string DeviceId = "HB.DeviceId";
+        public const string SECURITY_STAMP = "HB.SecurityStamp";
 
-        public const string ApiKeyName = "HB.ApiKeyName";
+        public const string AUDIENCE = "aud";
+
+        public const string USER_ID = "HB.UserId";
+
+
+        public const string DEVICE_ID = "HB.DeviceId";
+
+        public const string API_KEY_NAME = "HB.ApiKeyName";
 
         //public const string Name = ClaimsIdentity.DefaultNameClaimType;
 

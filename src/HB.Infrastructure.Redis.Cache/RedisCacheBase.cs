@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Redis.Cache
 {
     internal class RedisCacheBase
     {
-        protected const int _invalidationVersionExpirySeconds = 60;
+        protected const int INVALIDATION_VERSION_EXPIRY_SECONDS = 60;
 
         private readonly RedisCacheOptions _options;
         protected readonly ILogger _logger;

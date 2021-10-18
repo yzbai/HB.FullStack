@@ -20,10 +20,7 @@ namespace HB.FullStack.Common.Api
 
 		public WrappedStream(Stream wrapped, IDisposable? additionalDisposable)
 		{
-			if (wrapped == null)
-				throw new ArgumentNullException(nameof(wrapped));
-
-			_wrapped = wrapped;
+            _wrapped = wrapped ?? throw new ArgumentNullException(nameof(wrapped));
 			_additionalDisposable = additionalDisposable;
 		}
 
