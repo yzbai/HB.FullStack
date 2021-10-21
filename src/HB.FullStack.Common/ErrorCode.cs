@@ -1,11 +1,14 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+
+using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace System
 {
-    public static class ErrorCodeStartIds
+    public static partial class ErrorCodeStartIds
     {
+        public const int COMMON = 0;
         public const int DATABASE = 1000;
         public const int CACHE = 2000;
         public const int EVENT_BUS = 3000;
@@ -17,62 +20,22 @@ namespace System
         public const int TENCENT = 9000;
         public const int WEB_API = 10000;
         public const int MOBILE = 11000;
-        public const int USER_DOMAIN = 12000;
-        public const int ROUTINE_DOMAIN = 12000;
-        public const int THEME_DOMAIN = 12000;
+        public const int API = 12000;
     }
 
-    //TODO: 使用Record改写
     public class ErrorCode : IEquatable<ErrorCode>
     {
-        public static readonly ErrorCode Empty = new ErrorCode(0);
+        public int Id { get; } = -1;
 
-        public int Id { get; }
+        public string Name { get; } = null!;
 
-        public string? Name { get; }
+        public string Message { get; } = null!;
 
-        public string? Message { get; private set; }
-
-        public string? Detail { get; set; }
-
-
-        public static implicit operator ErrorCode(int i)
-        {
-            return new ErrorCode(i);
-        }
-
-        public static bool operator ==(ErrorCode? left, ErrorCode? right)
-        {
-            if (left is null && right is null)
-            {
-                return true;
-            }
-
-            if (left is null || right is null)
-            {
-                return false;
-            }
-
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(ErrorCode? left, ErrorCode? right)
-        {
-            return !(left == right);
-        }
-
-        public ErrorCode(int id, string? name = null, string? message = null)
+        public ErrorCode(int id, string name, string message)
         {
             Id = id;
             Name = name;
             Message = message;
-        }
-
-        public ErrorCode(ErrorCode other)
-        {
-            Id = other.Id;
-            Name = other.Name;
-            Message = other.Message;
         }
 
         public override string ToString()
@@ -105,20 +68,34 @@ namespace System
             return Id;
         }
 
-        public static ErrorCode FromInt32(int code)
+        public EventId ToEventId()
         {
-            return new ErrorCode(code);
+            return new EventId(Id, Name);
         }
 
-        public Microsoft.Extensions.Logging.EventId ToEventId()
+        public static bool operator ==(ErrorCode? left, ErrorCode? right)
         {
-            return new Microsoft.Extensions.Logging.EventId(Id, Name);
+            if (left is null && right is null)
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
         }
 
-        public ErrorCode AppendDetail(string? detail)
+        public static bool operator !=(ErrorCode? left, ErrorCode? right)
         {
-            Detail += detail;
-            return this;
+            return !(left == right);
         }
+
+        //public static explicit operator EventId(ErrorCode errorCode)
+        //{
+        //    return errorCode.ToEventId();
+        //}
     }
 }

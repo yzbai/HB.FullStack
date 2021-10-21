@@ -1,13 +1,13 @@
 ﻿namespace System
 {
-    public class ErrorCodeException : Exception
+    public sealed class ErrorCode2Exception : Exception
     {
-        public ErrorCodeException(ErrorCode errorCode) : base(errorCode.Message)
+        public ErrorCode2Exception(ErrorCode errorCode) : base(errorCode.Message)
         {
             ErrorCode = errorCode;
         }
 
-        public ErrorCodeException(ErrorCode errorCode, Exception? innerException) : base(errorCode.Message, innerException)
+        public ErrorCode2Exception(ErrorCode errorCode, Exception? innerException) : base(errorCode.Message, innerException)
         {
             ErrorCode = errorCode;
         }

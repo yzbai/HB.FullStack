@@ -9,13 +9,6 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public enum ApiAuthType
-    {
-        None,
-        Jwt,
-        ApiKey
-    }
-
     public abstract class ApiRequest : ValidatableObject
     {
         /// <summary>

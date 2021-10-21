@@ -95,7 +95,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger?.LogError(ex, $"IsFileSignatureMatched Error.extension: {extension}");
+                GlobalSettings.Logger.LogError(ex, $"IsFileSignatureMatched Error.extension: {extension}");
                 return false;
             }
         }

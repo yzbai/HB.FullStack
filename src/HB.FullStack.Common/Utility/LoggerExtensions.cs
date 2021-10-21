@@ -8,7 +8,7 @@ using HB.FullStack.Common.Api;
 
 namespace Microsoft.Extensions.Logging
 {
-    public static class LoggerExtensions
+    public static partial class LoggerExtensions
     {
         public static void LogTrace2(
             this ILogger logger,

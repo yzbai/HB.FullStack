@@ -45,7 +45,7 @@ namespace HB.FullStack.Common.Api
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger?.LogWarning(ex, $"FileUpdateServerSideRequestModelBinder出错.{valueProviderResult.FirstValue}");
+                GlobalSettings.Logger.LogWarning(ex, $"FileUpdateServerSideRequestModelBinder出错.{valueProviderResult.FirstValue}");
 
                 bindingContext.ModelState.AddModelError("Request", "Request modelbinding throw.");
                 bindingContext.Result = ModelBindingResult.Failed();

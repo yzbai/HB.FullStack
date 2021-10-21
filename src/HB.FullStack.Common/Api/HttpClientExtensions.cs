@@ -12,19 +12,6 @@ using HB.FullStack.Common;
 
 namespace System.Net.Http
 {
-    [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1052:Static holder types should be Static or NotInheritable", Justification = "<Pending>")]
-    public class EmptyResponse
-    {
-        public static EmptyResponse Value { get; }
-
-        static EmptyResponse()
-        {
-            Value = new EmptyResponse();
-        }
-
-        private EmptyResponse() { }
-    }
-
     public static class HttpClientApiExtensions
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
@@ -67,40 +54,25 @@ namespace System.Net.Http
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
         }
 
-        /// <exception cref="ApiException"></exception>
         private static async Task<HttpResponseMessage> SendCoreAsync(this HttpClient httpClient, HttpRequestMessage requestMessage, ApiRequest request)
         {
             try
             {
                 return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             }
-            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+
+            //https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.sendasync?view=netstandard-2.1
+            catch (InvalidOperationException ex)
             {
-                // Handle timeout.
-                throw ApiExceptions.ClientTimeout(request: request, innerException: ex);
-            }
-            catch (TaskCanceledException ex) when (ex.InnerException is SocketException)
-            {
-                throw ApiExceptions.ApiNotAvailable(request: request, innerException: ex);
+                throw Exceptions.RequestAlreadyUsed(request: request, innerException: ex);
             }
             catch (TaskCanceledException ex)
             {
-                // Handle cancellation.
-                throw ApiExceptions.RequestCanceled(request: request, innerException: ex);
+                throw Exceptions.RequestTimeout(request: request, innerException: ex);
             }
-            //TODO: when using .net 5
-            //catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-            //{
-            //    // Handle 404
-            //    Console.WriteLine("Not found: " + ex.Message);
-            //}
-            catch (OperationCanceledException ex)
+            catch (HttpRequestException ex)
             {
-                throw ApiExceptions.ApiNotAvailable(request, ex);
-            }
-            catch (Exception ex)
-            {
-                throw ApiExceptions.ClientUnkownError(request: request, innerException: ex);
+                throw Exceptions.RequestUnderlyingIssue(request: request, innerException: ex);
             }
         }
 
@@ -171,11 +143,12 @@ namespace System.Net.Http
 
             if (errorCode == null)
             {
-                throw ApiExceptions.ServerUnkownError(response: responseMessage);
+                string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                throw Exceptions.ServerUnkownError(response: responseString);
             }
             else
             {
-                throw ApiExceptions.ServerReturnError(errorCode);
+                throw Exceptions.ServerReturnError(errorCode);
             }
 
         }

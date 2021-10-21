@@ -153,7 +153,7 @@ namespace HB.FullStack.XamarinForms.Base
                 return locals;
             }
 
-            return await NetworkBoundGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
+            return await SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             return new ObservableTask<IEnumerable<TEntity>>(
                 locals,
-                () => NetworkBoundGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
+                () => SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
                 BaseApplication.ExceptionHandler);
         }
 
@@ -230,13 +230,13 @@ namespace HB.FullStack.XamarinForms.Base
 
             return new ObservableTask<TEntity?>(
                 locals.FirstOrDefault(),
-                async () => (await NetworkBoundGetAsync(locals, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
+                async () => (await SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
                 BaseApplication.ExceptionHandler);
         }
 
         /// <exception cref="ApiException"></exception>
         /// <exception cref="DatabaseException"></exception>
-        private async Task<IEnumerable<TEntity>> NetworkBoundGetAsync(IEnumerable<TEntity> locals, ApiRequest<TRes> request, TransactionContext? transactionContext, RepoGetMode getMode, IfUseLocalData<TEntity, TRes> ifUseLocalData)
+        private async Task<IEnumerable<TEntity>> SyncGetAsync(IEnumerable<TEntity> locals, ApiRequest<TRes> request, TransactionContext? transactionContext, RepoGetMode getMode, IfUseLocalData<TEntity, TRes> ifUseLocalData)
         {
             //如果不强制远程，并且满足使用本地数据条件
             if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(request, locals))
