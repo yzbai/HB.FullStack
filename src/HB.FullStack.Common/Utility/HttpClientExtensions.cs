@@ -8,7 +8,13 @@ namespace System.Net.Http
 {
     public static class HttpClientExtensions
     {
-        public static async Task<T?> DeSerializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
+        /// <summary>
+        /// 尝试解析Json，不成功返回null
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="responseMessage"></param>
+        /// <returns></returns>
+        public static async Task<T?> TryDeSerializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
         {
             string? mediaType = responseMessage.Content.Headers.ContentType?.MediaType;
 
@@ -25,8 +31,11 @@ namespace System.Net.Http
 
                 return data;
             }
-            catch
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
+                GlobalSettings.Logger?.LogHttpResponseDeSerializeJsonError(jsonString, ((int)responseMessage.StatusCode), responseMessage.ReasonPhrase, responseMessage.RequestMessage.RequestUri, ex);
                 return null;
             }
         }

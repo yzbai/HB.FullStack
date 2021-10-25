@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public sealed class ErrorCode2Exception : Exception
+    public class ErrorCode2Exception : Exception
     {
         public ErrorCode2Exception(ErrorCode errorCode) : base(errorCode.Message)
         {
@@ -22,6 +22,18 @@
             {
                 Data[nameof(ErrorCode)] = value;
             }
+        }
+
+        public ErrorCode2Exception()
+        {
+        }
+
+        public ErrorCode2Exception(string message) : base(message)
+        {
+        }
+
+        public ErrorCode2Exception(string message, Exception innerException) : base(message, innerException)
+        {
         }
     }
 }

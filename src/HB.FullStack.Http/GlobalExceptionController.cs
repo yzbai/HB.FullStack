@@ -7,8 +7,10 @@ using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HB.FullStack.WebApi
 {
@@ -24,24 +26,39 @@ namespace HB.FullStack.WebApi
 
         [AllowAnonymous]
         [Route("GlobalException")]
-        public IActionResult Exception()
+        [HttpGet]
+        public async Task<IActionResult> ExceptionAsync()
         {
             IExceptionHandlerPathFeature? exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
 
             if (exceptionHandlerPathFeature == null)
             {
-                _logger.LogError("发生未知错误, GlobalExceptionController未记录Exception.");
+                _logger.LogError("IExceptionHandlerPathFeature = null");
 
-                return new BadRequestObjectResult(ApiErrorCodes.UnKownServerError.AppendDetail("GlobalExceptionController未记录Exception"));
+                return new BadRequestObjectResult(WebApiErrorCodes.ExceptionHandlerPathFeatureNull);
+            }
+            
+            string path = exceptionHandlerPathFeature.Path;
+            //TODO: wait for .net 6
+            //var routeValues = exceptionHandlerPathFeature.RouteValues;
+
+            string? queryString = HttpContext.Request.QueryString.ToString();
+            string? content = null;
+
+            using (StreamReader bodyStream = new StreamReader(HttpContext.Request.Body))
+            {
+                bodyStream.BaseStream.Seek(0, SeekOrigin.Begin);
+                content = await bodyStream.ReadToEndAsync().ConfigureAwait(false);
             }
 
-            _logger.LogError(exceptionHandlerPathFeature.Error, "Error From ExceptionController");
+            ErrorCode errorCode = WebApiErrorCodes.ServerUnKownNonErrorCodeError;
 
-            ErrorCode errorCode = exceptionHandlerPathFeature.Error switch
+            if(exceptionHandlerPathFeature.Error is ErrorCode2Exception errorCodeException)
             {
-                ErrorCodeException errorCodeException => errorCodeException.ErrorCode,
-                Exception ex =>ApiErrorCodes.UnKownServerError.AppendDetail(ex.Message)
-            };
+                errorCode = errorCodeException.ErrorCode;
+            }
+
+            _logger.LogGlobalException(path, null, queryString, content, errorCode, exceptionHandlerPathFeature.Error);
 
             return new BadRequestObjectResult(errorCode)
             {

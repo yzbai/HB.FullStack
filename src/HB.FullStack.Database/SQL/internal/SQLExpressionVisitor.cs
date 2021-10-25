@@ -27,71 +27,55 @@ namespace HB.FullStack.Database.SQL
         {
             if (exp == null) return string.Empty;
 
-            switch (exp.NodeType)
+            return exp.NodeType switch
             {
-                case ExpressionType.Lambda:
-                    return VisitLambda((LambdaExpression)exp, context);
+                ExpressionType.Lambda => VisitLambda((LambdaExpression)exp, context),
+                ExpressionType.MemberAccess => VisitMemberAccess((MemberExpression)exp, context),
+                ExpressionType.Constant => VisitConstant((ConstantExpression)exp),
+                
+                ExpressionType.Add 
+                    or ExpressionType.AddChecked 
+                    or ExpressionType.Subtract 
+                    or ExpressionType.SubtractChecked 
+                    or ExpressionType.Multiply 
+                    or ExpressionType.MultiplyChecked 
+                    or ExpressionType.Divide 
+                    or ExpressionType.Modulo 
+                    or ExpressionType.And 
+                    or ExpressionType.AndAlso 
+                    or ExpressionType.Or 
+                    or ExpressionType.OrElse 
+                    or ExpressionType.LessThan 
+                    or ExpressionType.LessThanOrEqual 
+                    or ExpressionType.GreaterThan 
+                    or ExpressionType.GreaterThanOrEqual 
+                    or ExpressionType.Equal 
+                    or ExpressionType.NotEqual 
+                    or ExpressionType.Coalesce 
+                    or ExpressionType.ArrayIndex 
+                    or ExpressionType.RightShift 
+                    or ExpressionType.LeftShift 
+                    or ExpressionType.ExclusiveOr 
+                    => VisitBinary((BinaryExpression)exp, context),
 
-                case ExpressionType.MemberAccess:
-                    return VisitMemberAccess((MemberExpression)exp, context);
+                ExpressionType.Negate 
+                    or ExpressionType.NegateChecked 
+                    or ExpressionType.Not 
+                    or ExpressionType.Convert 
+                    or ExpressionType.ConvertChecked 
+                    or ExpressionType.ArrayLength 
+                    or ExpressionType.Quote 
+                    or ExpressionType.TypeAs 
+                    => VisitUnary((UnaryExpression)exp, context),
 
-                case ExpressionType.Constant:
-                    return VisitConstant((ConstantExpression)exp);
-
-                case ExpressionType.Add:
-                case ExpressionType.AddChecked:
-                case ExpressionType.Subtract:
-                case ExpressionType.SubtractChecked:
-                case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked:
-                case ExpressionType.Divide:
-                case ExpressionType.Modulo:
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
-                case ExpressionType.Equal:
-                case ExpressionType.NotEqual:
-                case ExpressionType.Coalesce:
-                case ExpressionType.ArrayIndex:
-                case ExpressionType.RightShift:
-                case ExpressionType.LeftShift:
-                case ExpressionType.ExclusiveOr:
-                    return VisitBinary((BinaryExpression)exp, context);
-
-                case ExpressionType.Negate:
-                case ExpressionType.NegateChecked:
-                case ExpressionType.Not:
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.ArrayLength:
-                case ExpressionType.Quote:
-                case ExpressionType.TypeAs:
-                    return VisitUnary((UnaryExpression)exp, context);
-
-                case ExpressionType.Parameter:
-                    return VisitParameter((ParameterExpression)exp);
-
-                case ExpressionType.Call:
-                    return VisitMethodCall((MethodCallExpression)exp, context);
-
-                case ExpressionType.New:
-                    return VisitNew((NewExpression)exp, context);
-
-                case ExpressionType.NewArrayInit:
-                case ExpressionType.NewArrayBounds:
-                    return VisitNewArray((NewArrayExpression)exp, context);
-
-                case ExpressionType.MemberInit:
-                    return VisitMemberInit((MemberInitExpression)exp);
-
-                default:
-                    return exp.ToString();
-            }
+                ExpressionType.Parameter => VisitParameter((ParameterExpression)exp),
+                ExpressionType.Call => VisitMethodCall((MethodCallExpression)exp, context),
+                ExpressionType.New => VisitNew((NewExpression)exp, context),
+                ExpressionType.NewArrayInit or ExpressionType.NewArrayBounds => VisitNewArray((NewArrayExpression)exp, context),
+                ExpressionType.MemberInit => VisitMemberInit((MemberInitExpression)exp),
+                
+                _ => exp.ToString(),
+            };
         }
 
         /// <summary>
@@ -111,7 +95,7 @@ namespace HB.FullStack.Database.SQL
                 {
                     object r = VisitMemberAccess(m, context);
 
-                    if (!(r is PartialSqlString))
+                    if (r is not PartialSqlString)
                     {
                         return r;
                     }
@@ -282,7 +266,7 @@ namespace HB.FullStack.Database.SQL
 
                 EntityDef entityDef = EntityDefFactory.GetDef(entityType)!;
                 EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
-                    ?? throw Exceptions.EntityError(entityDef.EntityFullName, m.Member.Name, "Lack property definition");
+                    ?? throw DatabaseExceptions.EntityError(entityDef.EntityFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
 
@@ -382,7 +366,7 @@ namespace HB.FullStack.Database.SQL
                     object o = Visit(u.Operand, context);
 
                     if (o as PartialSqlString == null)
-                        return !((bool)o);
+                        return !(bool)o;
 
                     if (IsTableField(u.Type, o))
                         o += "=1";
@@ -668,7 +652,7 @@ namespace HB.FullStack.Database.SQL
                 //TODO: Mysql,其他数据库可能需要重写
                 if (context.EngineType != Engine.EngineType.MySQL)
                 {
-                    throw Exceptions.NotSupportYet("目前仅支持StarWith的MySql数据库版本", context.EngineType);
+                    throw DatabaseExceptions.NotSupportYet("目前仅支持StarWith的MySql数据库版本", context.EngineType);
                 }
 
                 List<object> args0 = VisitExpressionList(m.Arguments, context);
@@ -689,7 +673,7 @@ namespace HB.FullStack.Database.SQL
                     paramPlaceholder));
             }
 
-            throw Exceptions.NotSupportYet("暂时还不支持其他操作", context.EngineType);
+            throw DatabaseExceptions.NotSupportYet("暂时还不支持其他操作", context.EngineType);
 
             //List<object> args = VisitExpressionList(m.Arguments, context);
             //object quotedColName = Visit(m.Object, context);

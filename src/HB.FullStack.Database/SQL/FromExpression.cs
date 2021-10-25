@@ -56,7 +56,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.INNER)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.INNER;
@@ -76,7 +76,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.INNER)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.INNER;
@@ -94,7 +94,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.LEFT)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.LEFT;
@@ -114,7 +114,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.LEFT)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.LEFT;
@@ -132,7 +132,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.RIGHT)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.RIGHT;
@@ -152,7 +152,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.RIGHT)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.RIGHT;
@@ -170,7 +170,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.FULL)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.FULL;
@@ -190,7 +190,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.FULL)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.FULL;
@@ -208,7 +208,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.CROSS)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.CROSS;
@@ -228,7 +228,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (JoinType != null && JoinType != SqlJoinType.CROSS)
             {
-                throw Exceptions.SqlJoinTypeMixedError();
+                throw DatabaseExceptions.SqlJoinTypeMixedError();
             }
 
             JoinType = SqlJoinType.CROSS;

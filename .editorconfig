@@ -1,52 +1,17 @@
 ﻿[*.cs]
 
-# 影响上锁的double check
-dotnet_diagnostic.CA1508.severity = none
-
-dotnet_diagnostic.CA1014.severity = none
-
-dotnet_diagnostic.CA1824.severity = none
-
-dotnet_diagnostic.CA1024.severity = none
-
-dotnet_diagnostic.CA1055.severity = none
-dotnet_diagnostic.CA1054.severity = none
-dotnet_diagnostic.CA1056.severity = none
-
-# Avoid uninstantiated internal classe
-dotnet_diagnostic.CA1812.severity = none
-
-#  Identifiers should not contain type names - Visual ...
-dotnet_diagnostic.CA1720.severity = none
-dotnet_diagnostic.CA1707.severity = none
-dotnet_diagnostic.CA1019.severity = none
-dotnet_diagnostic.CA1813.severity = none
-
-# 临时关闭 Do not pass literals as localized parameters
-dotnet_diagnostic.CA1303.severity = none
-
 # Validate arguments of public methods 因为开启了Nullable，确保所有调用被调用项目全是NRT
 dotnet_diagnostic.CA1062.severity = none
 
-#在适用处使用事件
-dotnet_diagnostic.CA1030.severity = none
-
-dotnet_diagnostic.CA2211.severity = none
-dotnet_diagnostic.CA1711.severity = none
-
-# 这条规则目前有bug，只在IList上触发，而对于IEnumerable没反应，且应为BindableProperty的特殊写法，故此先禁用 2020.5.29
+# # 这条规则目前有bug，只在IList上触发，而对于IEnumerable没反应，且应为BindableProperty的特殊写法，故此先禁用 2020.5.29
+# https://github.com/dotnet/runtime/issues/30258
 dotnet_diagnostic.CA2227.severity = none
 
-
-#CA1031：不要捕捉一般异常类型
-dotnet_diagnostic.CA1031.severity = none
-
-
-#CA1032: Implement standard exception constructors
-dotnet_diagnostic.CA1032.severity = none
-
-#CA1716
-dotnet_diagnostic.CA1716.severity = none
+# 标识符不应包含下划线
+dotnet_diagnostic.CA1707.severity = none
 
 # IDE0090: Use 'new(...)'
 dotnet_diagnostic.IDE0090.severity = none
+
+# CA1720: Identifier contains type name
+dotnet_diagnostic.CA1720.severity = none

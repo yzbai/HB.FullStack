@@ -5,9 +5,9 @@ using System.Runtime.CompilerServices;
 
 namespace HB.FullStack.Database.Entities
 {
-    public class Guid32StringAttribute : EntityPropertyAttribute
+    public sealed class Guid32StringAttribute : EntityPropertyAttribute
     {
-        public Guid32StringAttribute([CallerLineNumber] int number = 0) : base(number)
+        public Guid32StringAttribute([CallerLineNumber] int propertyOrder = 0) : base(propertyOrder)
         {
             FixedLength = true;
             MaxLength = 32;

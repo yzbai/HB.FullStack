@@ -14,7 +14,7 @@ namespace HB.FullStack.Common
                 return false;
             }
 
-            return EqualsImpl(other);
+            return EqualsCore(other);
         }
 
         public static bool operator ==(FigureDrawInfo? d1, FigureDrawInfo? d2)
@@ -49,14 +49,14 @@ namespace HB.FullStack.Common
 
         public override int GetHashCode()
         {
-            HashCode hashCode = GetHashCodeImpl();
+            HashCode hashCode = GetHashCodeCore();
 
             return hashCode.ToHashCode();
         }
 
-        protected abstract bool EqualsImpl(FigureDrawInfo other);
+        protected abstract bool EqualsCore(FigureDrawInfo other);
 
-        protected abstract HashCode GetHashCodeImpl();
+        protected abstract HashCode GetHashCodeCore();
 
     }
 }

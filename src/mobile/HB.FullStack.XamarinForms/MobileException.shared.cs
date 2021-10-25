@@ -4,7 +4,7 @@ using System.Text;
 
 namespace System
 {
-    public class MobileException : ErrorCodeException
+    public class MobileException : ErrorCode2Exception
     {
         public MobileException(ErrorCode errorCode) : base(errorCode)
         {

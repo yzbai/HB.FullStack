@@ -151,9 +151,10 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// </summary>
         /// <returns></returns>
         /// <exception cref="LockException">Ignore.</exception>
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return DisposeAsync(true);
+            await DisposeAsync(true).ConfigureAwait(false);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

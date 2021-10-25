@@ -20,7 +20,7 @@ namespace HB.Infrastructure.Aliyun
         public static ErrorCode SmsCacheError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 6, nameof(SmsCacheError), "");
     }
 
-    internal static class Exceptions
+    internal static class AliyunExceptions
     {
         internal static Exception OssError(string bucket, string cause)
         {

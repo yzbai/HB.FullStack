@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw Exceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
             }
 
             try
@@ -41,9 +41,9 @@ namespace HB.FullStack.Database
                 await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
 
             }
-            catch (Exception ex) when (!(ex is DatabaseException))
+            catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(entityDef.EntityFullName, whereExpr.ToString(), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, whereExpr.ToString(), ex);
             }
         }
 
@@ -63,7 +63,7 @@ namespace HB.FullStack.Database
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw Exceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
             }
 
             try
@@ -87,9 +87,9 @@ namespace HB.FullStack.Database
                 item.Version = newItem.Version;
                 item.LastUser = newItem.LastUser;
             }
-            catch (Exception ex) when (!(ex is DatabaseException))
+            catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
         }
 

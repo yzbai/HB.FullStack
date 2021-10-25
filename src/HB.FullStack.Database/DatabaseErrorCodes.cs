@@ -34,11 +34,11 @@ namespace HB.FullStack.Database
         public static ErrorCode TypeConverterError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 15, nameof(TypeConverterError), "");
         public static ErrorCode EmptyGuid { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 16, nameof(EmptyGuid), "");
         public static ErrorCode UpdatePropertiesCountShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 17, nameof(UpdatePropertiesCountShouldBePositive), "");
-        public static ErrorCode LongIdShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 18, nameof(LongIdShouldBePositive));
-        public static ErrorCode PropertyNotFound { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 19, nameof(PropertyNotFound));
+        public static ErrorCode LongIdShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 18, nameof(LongIdShouldBePositive), "");
+        public static ErrorCode PropertyNotFound { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 19, nameof(PropertyNotFound),"");
     }
 
-    internal static class Exceptions
+    internal static class DatabaseExceptions
     {
         internal static Exception VersionShouldBePositive(int wrongVersion)
         {

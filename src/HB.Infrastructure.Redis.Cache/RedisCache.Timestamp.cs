@@ -122,7 +122,7 @@ return data[3]";
                     _logger.LogError(ex2, "在因为Get异常而删除中出错，Key:{key} ", key);
                 }
 
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, ex);
             }
         }
 
@@ -190,9 +190,9 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
+                _logger.LogError(ex, "分析这个SetAsync");
 
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, ex);
             }
         }
 
@@ -238,9 +238,9 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
+                _logger.LogError(ex, "分析这个 RemoveAsync");
 
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, ex);
             }
         }
     }

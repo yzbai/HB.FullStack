@@ -55,7 +55,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw Exceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
+                throw DatabaseExceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
             }
 
             try
@@ -101,7 +101,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw Exceptions.TransactionError("AlreadyFinished",callerMemberName, callerLineNumber);
+                throw DatabaseExceptions.TransactionError("AlreadyFinished",callerMemberName, callerLineNumber);
             }
 
             try

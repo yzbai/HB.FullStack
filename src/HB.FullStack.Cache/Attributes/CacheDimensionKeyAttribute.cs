@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace System
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class CacheDimensionKeyAttribute : Attribute
+    public sealed class CacheDimensionKeyAttribute : Attribute
     {
 
     }

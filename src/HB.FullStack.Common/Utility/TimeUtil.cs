@@ -4,8 +4,8 @@ namespace System
 {
     public struct UtcNowTicks : IEquatable<UtcNowTicks>
     {
-        public static UtcNowTicks Empty => new UtcNowTicks { Ticks = -1 };
-        public static UtcNowTicks Instance => new UtcNowTicks { Ticks = DateTimeOffset.UtcNow.Ticks };
+        public static UtcNowTicks Empty => new UtcNowTicks(-1);
+        public static UtcNowTicks Instance => new UtcNowTicks(DateTimeOffset.UtcNow.Ticks);
 
         private UtcNowTicks(long ticks)
         {

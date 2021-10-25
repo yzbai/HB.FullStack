@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.WebApi
 {
-    public class WebApiException : ErrorCodeException
+    public class WebApiException : ErrorCode2Exception
     {
         public WebApiException(ErrorCode errorCode) : base(errorCode)
         {

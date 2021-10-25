@@ -12,23 +12,12 @@ namespace HB.FullStack.Cache
 {
     public static class ICacheExtensions
     {
-        /// <summary>
-        /// SetIntAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="utcTicks"></param>
-        /// <param name="options"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public static Task SetIntAsync(this ICache cache, string key, int value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             return cache.SetStringAsync(key, value.ToString(GlobalSettings.Culture), utcTicks, options, token);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         public static async Task<int?> GetIntAsync(this ICache cache, string key, CancellationToken token = default)
         {
             try
@@ -44,25 +33,14 @@ namespace HB.FullStack.Cache
             }
             catch (FormatException ex)
             {
-                throw Exceptions.ConvertError(key:key, innerException: ex);
+                throw CacheExceptions.ConvertError(key:key, innerException: ex);
             }
             catch(OverflowException ex)
             {
-                throw Exceptions.ConvertError(key:key, innerException: ex);
+                throw CacheExceptions.ConvertError(key:key, innerException: ex);
             }
         }
-
-        /// <summary>
-        /// SetStringAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="utcTicks"></param>
-        /// <param name="options"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public static async Task SetStringAsync(this ICache cache, string key, string value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             try
@@ -71,20 +49,12 @@ namespace HB.FullStack.Cache
 
                 await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not CacheException)
+            catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw Exceptions.Unkown(key:key, value:value, innerException: ex);
+                throw CacheExceptions.Unkown(key:key, value:value, innerException: ex);
             }
         }
-
-        /// <summary>
-        /// GetStringAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public static async Task<string?> GetStringAsync(this ICache cache, string key, CancellationToken token = default)
         {
             try
@@ -93,23 +63,12 @@ namespace HB.FullStack.Cache
 
                 return await SerializeUtil.UnPackAsync<string>(bytes).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not CacheException)
+            catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, ex);
             }
         }
-
-        /// <summary>
-        /// SetAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="utcTicks"></param>
-        /// <param name="options"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+       
         public static async Task SetAsync<T>(this ICache cache, string key, T value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
         {
             try
@@ -118,20 +77,12 @@ namespace HB.FullStack.Cache
 
                 await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not CacheException)
+            catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw Exceptions.Unkown(key, value, ex);
+                throw CacheExceptions.Unkown(key, value, ex);
             }
         }
-
-        /// <summary>
-        /// GetAsync
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public static async Task<T?> GetAsync<T>(this ICache cache, string key, CancellationToken token = default) where T : class
         {
             try
@@ -140,9 +91,9 @@ namespace HB.FullStack.Cache
 
                 return await SerializeUtil.UnPackAsync<T>(bytes).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not CacheException)
+            catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, ex);
             }
         }
     }

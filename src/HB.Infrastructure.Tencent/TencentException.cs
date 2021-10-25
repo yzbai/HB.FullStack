@@ -6,7 +6,7 @@ using HB.Infrastructure.Tencent;
 
 namespace System
 {
-    public class TencentException : ErrorCodeException
+    public class TencentException : ErrorCode2Exception
     {
         public TencentException(ErrorCode errorCode) : base(errorCode)
         {

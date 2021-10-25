@@ -30,14 +30,12 @@ namespace HB.FullStack.Repository
 
                 if (allExists)
                 {
-                    logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
                     return cachedEntities!;
                 }
             }
             catch(Exception ex)
             {
-                //有可能实体定义发生改变，导致缓存读取出错
-                logger.LogError2(ex, $"读取缓存出错，缓存可能已经被删除，继续读取数据库，dimensionKeyName:{dimensionKeyName}, dimensionKeyValues:{SerializeUtil.ToJson(dimensionKeyValues)}");
+                logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
             }
 
             //常规做法是先获取锁（参看历史）。
@@ -67,14 +65,12 @@ namespace HB.FullStack.Repository
 
                     if (allExists)
                     {
-                        logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
                         return cachedEntities!;
                     }
                 }
                 catch (Exception ex)
                 {
-                    //有可能实体定义发生改变，导致缓存读取出错
-                    logger.LogError2(ex, $"！！！这里是读取缓存的DoubleCheck，这里不应该出现，缓存可能已经被删除，继续读取数据库，dimensionKeyName:{dimensionKeyName}, dimensionKeyValues:{SerializeUtil.ToJson(dimensionKeyValues)}");
+                    logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
                 }
 
                 IEnumerable<TEntity> entities = await dbRetrieve(database).ConfigureAwait(false);
@@ -83,18 +79,18 @@ namespace HB.FullStack.Repository
                 {
                     UpdateCache(entities, cache);
 
-                    logger.LogInformation($"缓存 Missed. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                    logger.LogCacheMissed(typeof(TEntity).Name, dimensionKeyName, dimensionKeyValues);
                 }
                 else
                 {
-                    logger.LogInformation($"查询到空值. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                    logger.LogCacheGetEmpty(typeof(TEntity).Name, dimensionKeyName, dimensionKeyValues);
                 }
 
                 return entities;
             }
             else
             {
-                logger.LogError($"锁未能占用. Entity:{typeof(TEntity).Name}, dimensionKeyName:{dimensionKeyName},dimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}, Lock Status:{@lock.Status}");
+                logger.LogCacheLockAcquireFailed(typeof(TEntity).Name, dimensionKeyName, dimensionKeyValues, @lock.Status.ToString());
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }

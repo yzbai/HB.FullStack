@@ -29,7 +29,7 @@ namespace HB.Infrastructure.MySQL
             dbCommand.Transaction = mySqlTransaction;
 
             return await ExecuteCommandReaderAsync(
-                mySqlTransaction.Connection ?? throw Exceptions.TransactionConnectionIsNull(commandText:dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(commandText:dbCommand.CommandText),
                 false,
                 dbCommand).ConfigureAwait(false);
         }
@@ -43,8 +43,9 @@ namespace HB.Infrastructure.MySQL
         /// <exception cref="DatabaseException"></exception>
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
         {
-            //这里无法用Using，因为reader要用
+#pragma warning disable CA2000 // 这里无法用Using，因为reader要用
             MySqlConnection conn = new MySqlConnection(connectString);
+#pragma warning restore CA2000 // Dispose objects before losing scope
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
@@ -93,7 +94,7 @@ namespace HB.Infrastructure.MySQL
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                throw Exceptions.ExecuterError(commandText:command.CommandText, innerException: ex);
+                throw DatabaseExceptions.ExecuterError(commandText:command.CommandText, innerException: ex);
             }
         }
 
@@ -125,7 +126,7 @@ namespace HB.Infrastructure.MySQL
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandScalarAsync(
-                mySqlTransaction.Connection ?? throw Exceptions.TransactionConnectionIsNull(dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
                 dbCommand).ConfigureAwait(false);
         }
 
@@ -151,7 +152,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                throw Exceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
+                throw DatabaseExceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
             }
         }
 
@@ -184,7 +185,7 @@ namespace HB.Infrastructure.MySQL
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandNonQueryAsync(
-                mySqlTransaction.Connection ?? throw Exceptions.TransactionConnectionIsNull(dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
                 dbCommand).ConfigureAwait(false);
         }
 
@@ -210,7 +211,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                throw Exceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
+                throw DatabaseExceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
             }
         }
 

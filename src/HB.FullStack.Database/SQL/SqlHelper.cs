@@ -154,7 +154,7 @@ namespace HB.FullStack.Database.SQL
 
 				if (propertyDef == null)
 				{
-					throw Exceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
+					throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
 				}
 
 				args.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
@@ -496,7 +496,7 @@ namespace HB.FullStack.Database.SQL
 
 				if (length >= DefaultLengthConventions.MAX_MEDIUM_TEXT_LENGTH)
 				{
-					throw Exceptions.EntityError(propertyDef.EntityDef.EntityFullName, propertyDef.Name, "字段长度太长");
+					throw DatabaseExceptions.EntityError(propertyDef.EntityDef.EntityFullName, propertyDef.Name, "字段长度太长");
 				}
 
 				//if (propertyDef.IsLengthFixed )
@@ -520,7 +520,7 @@ namespace HB.FullStack.Database.SQL
 
 			if (primaryKeyPropertyDef == null)
 			{
-				throw Exceptions.EntityError(entityDef.EntityFullName, "", "no primary key");
+				throw DatabaseExceptions.EntityError(entityDef.EntityFullName, "", "no primary key");
 			}
 
 			string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;

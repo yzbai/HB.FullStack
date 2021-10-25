@@ -63,7 +63,7 @@ namespace HB.FullStack.Database
 
             if (_databaseSettings.Version < 0)
             {
-                throw Exceptions.VersionShouldBePositive(_databaseSettings.Version);
+                throw DatabaseExceptions.VersionShouldBePositive(_databaseSettings.Version);
             }
         }
 
@@ -127,7 +127,7 @@ namespace HB.FullStack.Database
                         if (_databaseSettings.Version != 1)
                         {
                             await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                            throw Exceptions.TableCreateError(_databaseSettings.Version, databaseName, "Database does not exists, database Version must be 1");
+                            throw DatabaseExceptions.TableCreateError(_databaseSettings.Version, databaseName, "Database does not exists, database Version must be 1");
                         }
 
                         await CreateTablesByDatabaseAsync(databaseName, transactionContext).ConfigureAwait(false);
@@ -141,7 +141,7 @@ namespace HB.FullStack.Database
                         {
                             if (curInitMigrations.Count() > 1)
                             {
-                                throw Exceptions.MigrateError(databaseName, "Database have more than one Initialize Migrations");
+                                throw DatabaseExceptions.MigrateError(databaseName, "Database have more than one Initialize Migrations");
                             }
 
                             await ApplyMigration(databaseName, transactionContext, curInitMigrations.First()).ConfigureAwait(false);
@@ -159,7 +159,7 @@ namespace HB.FullStack.Database
                 {
                     await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
-                    throw Exceptions.TableCreateError(_databaseSettings.Version, databaseName, "Unkown", ex);
+                    throw DatabaseExceptions.TableCreateError(_databaseSettings.Version, databaseName, "Unkown", ex);
                 }
             }
         }
@@ -188,7 +188,7 @@ namespace HB.FullStack.Database
         {
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
             {
-                throw Exceptions.MigrateError("", "Migraion NewVersion <= OldVersion");
+                throw DatabaseExceptions.MigrateError("", "Migraion NewVersion <= OldVersion");
             }
 
             foreach (string databaseName in _databaseEngine.DatabaseNames)
@@ -203,7 +203,7 @@ namespace HB.FullStack.Database
                     {
                         if (migrations == null)
                         {
-                            throw Exceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
+                            throw DatabaseExceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
                         }
 
                         IEnumerable<Migration> curOrderedMigrations = migrations
@@ -212,12 +212,12 @@ namespace HB.FullStack.Database
 
                         if (curOrderedMigrations == null)
                         {
-                            throw Exceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
+                            throw DatabaseExceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
                         }
 
                         if (!CheckMigrations(sys.Version, _databaseSettings.Version, curOrderedMigrations!))
                         {
-                            throw Exceptions.MigrateError(sys.DatabaseName, "Migrations not sufficient.");
+                            throw DatabaseExceptions.MigrateError(sys.DatabaseName, "Migrations not sufficient.");
                         }
 
                         foreach (Migration migration in curOrderedMigrations!)
@@ -239,7 +239,7 @@ namespace HB.FullStack.Database
                 {
                     await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
-                    throw Exceptions.MigrateError(databaseName, "", ex);
+                    throw DatabaseExceptions.MigrateError(databaseName, "", ex);
                 }
             }
         }
@@ -404,7 +404,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw Exceptions.FoundTooMuch(type: typeof(T).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw DatabaseExceptions.FoundTooMuch(type: typeof(T).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -444,7 +444,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(type: selectDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: selectDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -477,7 +477,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -532,7 +532,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -766,7 +766,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -805,7 +805,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw Exceptions.FoundTooMuch(typeof(TSource).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw DatabaseExceptions.FoundTooMuch(typeof(TSource).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -871,7 +871,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -912,7 +912,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw Exceptions.FoundTooMuch(typeof(TSource).FullName, fromCondition.ToStatement(), whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw DatabaseExceptions.FoundTooMuch(typeof(TSource).FullName, fromCondition.ToStatement(), whereCondition?.ToStatement(_databaseEngine.EngineType));
             }
 
             return lst.ElementAt(0);
@@ -965,7 +965,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw Exceptions.UnKown(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -1009,11 +1009,11 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw Exceptions.NotFound(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
+                    throw DatabaseExceptions.NotFound(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
                 }
                 else
                 {
-                    throw Exceptions.FoundTooMuch(entityDef.EntityFullName, item: SerializeUtil.ToJson(item));
+                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, item: SerializeUtil.ToJson(item));
                 }
             }
             catch (DatabaseException ex)
@@ -1032,7 +1032,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -1079,10 +1079,10 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(item), "");
+                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(item), "");
                 }
 
-                throw Exceptions.FoundTooMuch(entityDef.EntityFullName, SerializeUtil.ToJson(item));
+                throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, SerializeUtil.ToJson(item));
             }
             catch (DatabaseException ex)
             {
@@ -1100,7 +1100,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -1120,22 +1120,22 @@ namespace HB.FullStack.Database
         {
             if (id is long longId && longId <= 0)
             {
-                throw Exceptions.LongIdShouldBePositive(longId);
+                throw DatabaseExceptions.LongIdShouldBePositive(longId);
             }
 
             if (id is Guid guid && guid.IsEmpty())
             {
-                throw Exceptions.GuidShouldNotEmpty();
+                throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
             if (version < 0)
             {
-                throw Exceptions.VersionShouldBePositive(version);
+                throw DatabaseExceptions.VersionShouldBePositive(version);
             }
 
             if (propertyValues.Count <= 0)
             {
-                throw Exceptions.UpdatePropertiesCountShouldBePositive();
+                throw DatabaseExceptions.UpdatePropertiesCountShouldBePositive();
             }
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -1155,14 +1155,14 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw Exceptions.NotFound(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", "");
+                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", "");
                 }
 
-                throw Exceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}");
+                throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}");
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", ex);
             }
         }
 
@@ -1178,7 +1178,7 @@ namespace HB.FullStack.Database
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
-                throw Exceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
+                throw DatabaseExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
             }
 
             ThrowIf.NotValid(items, nameof(items));
@@ -1255,7 +1255,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1285,7 +1285,7 @@ namespace HB.FullStack.Database
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
-                throw Exceptions.TooManyForBatch("BatchUpdate超过批量操作的最大数目", items.Count(), lastUser);
+                throw DatabaseExceptions.TooManyForBatch("BatchUpdate超过批量操作的最大数目", items.Count(), lastUser);
             }
 
             ThrowIf.NotValid(items, nameof(items));
@@ -1320,7 +1320,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                        throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "BatchUpdate");
                     }
 
                     count++;
@@ -1328,7 +1328,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1347,7 +1347,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1377,7 +1377,7 @@ namespace HB.FullStack.Database
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
-                throw Exceptions.TooManyForBatch("BatchDelete超过批量操作的最大数目", items.Count(), lastUser);
+                throw DatabaseExceptions.TooManyForBatch("BatchDelete超过批量操作的最大数目", items.Count(), lastUser);
             }
 
             ThrowIf.NotValid(items, nameof(items));
@@ -1412,7 +1412,7 @@ namespace HB.FullStack.Database
 
                     if (affected != 1)
                     {
-                        throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
+                        throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
                     }
 
                     count++;
@@ -1420,7 +1420,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw Exceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1439,7 +1439,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1476,7 +1476,7 @@ namespace HB.FullStack.Database
         {
             if (!entityDef.DatabaseWriteable)
             {
-                throw Exceptions.NotWriteable(type: entityDef.EntityFullName, database: entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(type: entityDef.EntityFullName, database: entityDef.DatabaseName);
             }
         }
 
@@ -1484,10 +1484,10 @@ namespace HB.FullStack.Database
         {
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
-                object id = entityDef.IsIdLong ? ((LongIdEntity)(object)(item)).Id : entityDef.IsIdGuid ? ((GuidEntity)(object)item).Id : "None";
+                object id = entityDef.IsIdLong ? ((LongIdEntity)(object)item).Id : entityDef.IsIdGuid ? ((GuidEntity)(object)item).Id : "None";
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
-                lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
+                lastUser = lastUser[..DefaultLengthConventions.MAX_LAST_USER_LENGTH];
             }
         }
 
@@ -1497,7 +1497,7 @@ namespace HB.FullStack.Database
             {
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
-                lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
+                lastUser = lastUser[..DefaultLengthConventions.MAX_LAST_USER_LENGTH];
             }
         }
 

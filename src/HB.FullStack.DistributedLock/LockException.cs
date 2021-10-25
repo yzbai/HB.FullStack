@@ -8,7 +8,7 @@ using HB.FullStack.Lock;
 
 namespace System
 {
-    public class LockException : ErrorCodeException
+    public class LockException : ErrorCode2Exception
     {
         public LockException(ErrorCode errorCode) : base(errorCode)
         {

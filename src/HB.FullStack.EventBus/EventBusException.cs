@@ -6,7 +6,7 @@ using HB.FullStack.EventBus;
 
 namespace System
 {
-    public class EventBusException : ErrorCodeException
+    public class EventBusException : ErrorCode2Exception
     {
         public EventBusException(ErrorCode errorCode) : base(errorCode)
         {

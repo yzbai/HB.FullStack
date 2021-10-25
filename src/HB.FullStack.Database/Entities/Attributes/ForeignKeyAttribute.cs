@@ -15,10 +15,10 @@ namespace HB.FullStack.Database.Entities
         /// </summary>
         /// <param name="desc"></param>
         /// <param name="baseType">引用表的类类型</param>
-        public ForeignKeyAttribute(Type baseType, bool unique)
+        public ForeignKeyAttribute(Type baseType, bool isUnique)
         {
             BaseType = baseType;
-            IsUnique = unique;
+            IsUnique = isUnique;
         }
 
         public Type BaseType { get; }

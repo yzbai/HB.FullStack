@@ -336,7 +336,7 @@ end
                     _logger.LogError(ex2, "在强制删除中出错，{TEntity}, dimKey:{dimensionKeyname} ", typeof(TEntity).Name, dimensionKeyName);
                 }
 
-                throw Exceptions.UnkownButDeleted(cause: "缓存中取值时，未知错误, 删除此项缓存", innerException: ex);
+                throw CacheExceptions.UnkownButDeleted(cause: "缓存中取值时，未知错误, 删除此项缓存", innerException: ex);
             }
         }
 
@@ -403,7 +403,7 @@ end
             {
                 _logger.LogError(ex, "分析这个");
 
-                throw Exceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.Unkown(redisKeys, redisValues, ex);
             }
         }
 
@@ -445,7 +445,7 @@ end
             {
                 _logger.LogError(ex, "分析这个RemoveEntitiesAsync");
 
-                throw Exceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.Unkown(redisKeys, redisValues, ex);
             }
         }
 
@@ -478,7 +478,7 @@ end
             {
                 _logger.LogError(ex, "分析这个ForcedRemoveEntitiesAsync");
 
-                throw Exceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.Unkown(redisKeys, redisValues, ex);
             }
         }
 

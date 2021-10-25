@@ -13,11 +13,6 @@ namespace HB.FullStack.Cache
 
         //private static readonly object _lockObj = new object();
 
-        /// <summary>
-        /// Get
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public static CacheEntityDef Get<TEntity>() where TEntity : Entity, new()
         {
             return _defDict.GetOrAdd(typeof(TEntity), type => CreateEntityDef(type));
@@ -38,13 +33,7 @@ namespace HB.FullStack.Cache
             //return _defDict[entityType];
 
         }
-
-        /// <summary>
-        /// CreateEntityDef
-        /// </summary>
-        /// <param name="entityType"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         private static CacheEntityDef CreateEntityDef(Type entityType)
         {
             CacheEntityDef def = new()
@@ -71,7 +60,7 @@ namespace HB.FullStack.Cache
 
             if (def.SlidingTime > def.AbsoluteTimeRelativeToNow)
             {
-                throw Exceptions.CacheSlidingTimeBiggerThanMaxAlive(type: def.Name);
+                throw CacheExceptions.CacheSlidingTimeBiggerThanMaxAlive(type: def.Name);
             }
 
             bool foundkeyAttribute = false;
@@ -101,7 +90,7 @@ namespace HB.FullStack.Cache
 
             if (def.KeyProperty == null)
             {
-                throw Exceptions.CacheEntityNotHaveKeyAttribute(type: entityType.FullName);
+                throw CacheExceptions.CacheEntityNotHaveKeyAttribute(type: entityType.FullName);
             }
 
             return def;

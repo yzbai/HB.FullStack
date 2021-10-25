@@ -140,13 +140,13 @@ return 1";
 
 				while (!redisLock.IsAcquired && stopwatch.Elapsed <= redisLock.WaitTime)
 				{
-					logger.LogDebug($"锁在等待... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug($"锁在等待... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
 					redisLock.Status = await AcquireResourceAsync(redisLock, logger).ConfigureAwait(false);
 
 					if (!redisLock.IsAcquired)
 					{
-						logger.LogDebug($"锁继续等待... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+						logger.LogDebug($"锁继续等待... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 						if (redisLock.CancellationToken == null)
 						{
 							await Task.Delay((int)redisLock.RetryTime.TotalMilliseconds).ConfigureAwait(false);
@@ -160,7 +160,7 @@ return 1";
 
 				if (!redisLock.IsAcquired)
 				{
-					logger.LogDebug($"锁等待超时... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug($"锁等待超时... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 					redisLock.Status = DistributedLockStatus.Expired;
 				}
 
@@ -174,12 +174,12 @@ return 1";
 
 			if (redisLock.IsAcquired)
 			{
-				logger.LogDebug($"锁获取成功... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"锁获取成功... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				StartAutoExtendTimer(redisLock, logger);
 			}
 			else
 			{
-				logger.LogDebug($"锁获取失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"锁获取失败... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 			}
 		}
 
@@ -234,11 +234,11 @@ return 1";
 		{
 			if (redisLock.Status != DistributedLockStatus.Acquired)
 			{
-				logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+				logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
 				return;
 			}
 
-			logger.LogDebug($"锁在自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+			logger.LogDebug($"锁在自动延期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
 			List<RedisKey> redisKeys = new List<RedisKey>();
 			List<RedisValue> redisValues = new List<RedisValue>();
@@ -305,7 +305,7 @@ return 1";
 
 			if (redisLock.NotUnlockWhenDispose)
 			{
-				logger.LogDebug($"自动延期停止,但锁等他自己过期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"自动延期停止,但锁等他自己过期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				return;
 			}
 
@@ -327,11 +327,11 @@ return 1";
 
 				if (rt == 1)
 				{
-					logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug($"锁已经解锁... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				}
 				else
 				{
-					throw Exceptions.DistributedLockUnLockFailed(threadId: Thread.CurrentThread.ManagedThreadId, resources: redisLock.Resources);
+					throw LockExceptions.DistributedLockUnLockFailed(threadId: Environment.CurrentManagedThreadId, resources: redisLock.Resources);
 				}
 			}
 			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -342,9 +342,9 @@ return 1";
 			}
 			catch(Exception ex) when (ex is not LockException)
 			{
-				logger.LogDebug(ex, "锁解锁失败... {ThreadID}, {Resources}", Thread.CurrentThread.ManagedThreadId, redisLock.Resources);
+				logger.LogDebug(ex, "锁解锁失败... {ThreadID}, {Resources}", Environment.CurrentManagedThreadId, redisLock.Resources);
 
-				throw Exceptions.DistributedLockUnLockFailed(threadId: Thread.CurrentThread.ManagedThreadId, resources:redisLock.Resources, innerException: ex);
+				throw LockExceptions.DistributedLockUnLockFailed(threadId: Environment.CurrentManagedThreadId, resources:redisLock.Resources, innerException: ex);
 			}
 		}
 

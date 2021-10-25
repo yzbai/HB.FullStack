@@ -6,6 +6,7 @@ using HB.FullStack.Common.Api;
 using Xamarin.Forms;
 using System.Net.Http;
 using HB.FullStack.Common;
+using System;
 
 namespace HB.FullStack.XamarinForms.Base
 {

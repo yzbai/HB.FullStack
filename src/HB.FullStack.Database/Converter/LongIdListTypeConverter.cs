@@ -33,7 +33,7 @@ namespace HB.FullStack.Database.Converter
                 return ids.ToJoinedString(",");
             }
 
-            throw Exceptions.TypeConverterError("使用LongIdListTypeConverter的，必须可赋值为IEnumerable<long>", propertyType.FullName);
+            throw DatabaseExceptions.TypeConverterError("使用LongIdListTypeConverter的，必须可赋值为IEnumerable<long>", propertyType.FullName);
         }
     }
 }

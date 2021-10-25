@@ -185,7 +185,7 @@ namespace System
                 {
                     apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
                     {
-                        return new BadRequestObjectResult(ApiErrorCodes.ModelValidationError.AppendDetail(actionContext.ModelState.GetErrors()))
+                        return new BadRequestObjectResult(ApiErrorCodes.ModelValidationError)
                         {
                             ContentTypes = { "application/problem+json" }
                         };

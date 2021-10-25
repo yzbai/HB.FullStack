@@ -3,58 +3,58 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
-
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
     public class FileUpdateRequest<T> : UpdateRequest<T> where T : ApiResource2
     {
-        private readonly IEnumerable<byte[]> _files;
-        private readonly IEnumerable<string> _fileNames;
-
         public FileUpdateRequest(IEnumerable<byte[]> files, IEnumerable<string> fileNames, IEnumerable<T> resources) : base(resources)
         {
             ThrowOnCountNotEven(files, fileNames);
 
-            _files = files;
-            _fileNames = fileNames;
+            Files = files;
+            FileNames = fileNames;
         }
 
         public FileUpdateRequest(string apiKeyName, IEnumerable<byte[]> files, IEnumerable<string> fileNames, IEnumerable<T> resouces) : base(apiKeyName, resouces)
         {
             ThrowOnCountNotEven(files, fileNames);
 
-            _files = files;
-            _fileNames = fileNames;
+            Files = files;
+            FileNames = fileNames;
         }
 
         public FileUpdateRequest(IEnumerable<byte[]> files, IEnumerable<string> fileNames, T resource) : base(resource)
         {
             ThrowOnCountNotEven(files, fileNames);
 
-            _files = files;
-            _fileNames = fileNames;
+            Files = files;
+            FileNames = fileNames;
         }
 
         public FileUpdateRequest(string apiKeyName, IEnumerable<byte[]> files, IEnumerable<string> fileNames, T resouce) : base(apiKeyName, resouce)
         {
             ThrowOnCountNotEven(files, fileNames);
 
-            _files = files;
-            _fileNames = fileNames;
+            Files = files;
+            FileNames = fileNames;
         }
 
-        public IEnumerable<byte[]> GetBytess() => _files;
+        [JsonIgnore]
+        public IEnumerable<byte[]> Files { get; private set; }
 
-        public string GetBytesPropertyName() => "Files";
+        [JsonIgnore]
+        public string BytesPropertyName { get; } = "Files";
 
-        public IEnumerable<string> GetFileNames() => _fileNames;
+        [JsonIgnore]
+        public IEnumerable<string> FileNames { get; private set; } = null!;
 
         private static void ThrowOnCountNotEven(IEnumerable<byte[]> files, IEnumerable<string> fileNames)
         {
             if (files.Count() != fileNames.Count())
             {
-                throw Exceptions.FileUpdateRequestCountNotEven();
+                throw ApiExceptions.FileUpdateRequestCountNotEven();
             }
         }
     }

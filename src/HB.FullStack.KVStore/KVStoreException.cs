@@ -8,7 +8,7 @@ using HB.FullStack.KVStore;
 
 namespace System
 {
-    public class KVStoreException : ErrorCodeException
+    public class KVStoreException : ErrorCode2Exception
     {
         public KVStoreException(ErrorCode errorCode) : base(errorCode)
         {

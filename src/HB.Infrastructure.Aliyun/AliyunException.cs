@@ -8,7 +8,7 @@ using HB.Infrastructure.Aliyun;
 
 namespace System
 {
-    public class AliyunException : ErrorCodeException
+    public class AliyunException : ErrorCode2Exception
     {
         public AliyunException(ErrorCode errorCode) : base(errorCode)
         {

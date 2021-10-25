@@ -39,8 +39,10 @@ namespace HB.FullStack.Identity
         {
             TokenValidationParameters parameters = new TokenValidationParameters
             {
-                ValidateAudience = false,
+                ValidateAudience = true,
+#pragma warning disable CA5404 // 这里是为了刷新token而验证
                 ValidateLifetime = false,
+#pragma warning restore CA5404 // Do not disable token validation checks
                 ValidIssuer = issuer,
                 IssuerSigningKeys = issuerSigningKeys,
                 TokenDecryptionKey = decryptionSecurityKey

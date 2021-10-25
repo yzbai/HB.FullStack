@@ -74,24 +74,24 @@ namespace HB.Infrastructure.Aliyun.Sms
                 else
                 {
                     string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
-                    throw Exceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message:sendResult?.Message);
+                    throw AliyunExceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message:sendResult?.Message);
                 }
             }
             catch(CacheException ex)
             {
-                throw Exceptions.SmsCacheError("", ex);
+                throw AliyunExceptions.SmsCacheError("", ex);
             }
             catch(AliyunException ex)
             {
-                throw Exceptions.SmsServerError("", ex);
+                throw AliyunExceptions.SmsServerError("", ex);
             }
             catch (JsonException ex)
             {
-                throw Exceptions.SmsFormatError( "阿里云短信服务，格式返回错误", ex);
+                throw AliyunExceptions.SmsFormatError( "阿里云短信服务，格式返回错误", ex);
             }
             catch (ClientException ex)
             {
-                throw Exceptions.SmsClientError("AliyunSmsServiceDownErrorMessage", ex);
+                throw AliyunExceptions.SmsClientError("AliyunSmsServiceDownErrorMessage", ex);
             }
         }
 
@@ -111,7 +111,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (CacheException ex)
             {
-                throw Exceptions.SmsCacheError( "", ex);
+                throw AliyunExceptions.SmsCacheError( "", ex);
             }
         }
 #endif
@@ -138,7 +138,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (CacheException ex)
             {
-                throw Exceptions.SmsCacheError( "", ex);
+                throw AliyunExceptions.SmsCacheError( "", ex);
             }
         }
 

@@ -226,7 +226,7 @@ namespace HB.FullStack.Database.Converter
                 //null => "null",
                 //Enum e => e.ToString(),
                 DBNull _ => "null",
-                DateTime _ => throw Exceptions.UseDateTimeOffsetOnly(),
+                DateTime _ => throw DatabaseExceptions.UseDateTimeOffsetOnly(),
                 DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", GlobalSettings.Culture),
                 bool b => b ? "1" : "0",
                 _ => dbValue.ToString()!
@@ -271,7 +271,7 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace HB.FullStack.Database.Converter
             {
                 return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
             }
-            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)

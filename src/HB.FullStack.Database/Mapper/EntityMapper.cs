@@ -164,7 +164,7 @@ namespace HB.FullStack.Database.Mapper
         {
             if (entity.Version < 0)
             {
-                throw Exceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DatabaseExceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(entityDef.FieldCount);
@@ -189,7 +189,7 @@ namespace HB.FullStack.Database.Mapper
 
                 if (propertyDef == null)
                 {
-                    throw Exceptions.PropertyNotFound(entityDef.EntityFullName, kv.Key);
+                    throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, kv.Key);
                 }
 
                 parameters.Add(new KeyValuePair<string, object>(
@@ -213,7 +213,7 @@ namespace HB.FullStack.Database.Mapper
         {
             if (entity.Version < 0)
             {
-                throw Exceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DatabaseExceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             Func<object, int, KeyValuePair<string, object>[]> func = GetCachedToParametersFunc(entityDef, engineType);

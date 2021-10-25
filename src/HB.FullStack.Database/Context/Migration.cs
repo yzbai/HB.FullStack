@@ -32,17 +32,17 @@ namespace HB.FullStack.Database
         {
             if (databaseName.IsNullOrEmpty())
             {
-                throw new ArgumentNullException(nameof(databaseName));
+                throw DatabaseExceptions.MigrateError(databaseName, "databaseName is Empty");
             }
 
             if (oldVersion < 0)
             {
-                throw Exceptions.MigrateError(databaseName, "oldVersion < 0");
+                throw DatabaseExceptions.MigrateError(databaseName, "oldVersion < 0");
             }
 
             if (newVersion != oldVersion + 1)
             {
-                throw Exceptions.MigrateError(databaseName, "newVersion != oldVersoin + 1 ");
+                throw DatabaseExceptions.MigrateError(databaseName, "newVersion != oldVersoin + 1 ");
             }
 
             DatabaseName = databaseName;

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
+    [SuppressMessage("Design", "CA1055:URI-like return values should not be strings", Justification = "<Pending>")]
     public abstract class ApiRequest : ValidatableObject
     {
         /// <summary>
@@ -101,13 +103,13 @@ namespace HB.FullStack.Common.Api
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
                 { ClientNames.RANDOM_STR, RandomStr },
-                { ClientNames.TIMESTAMP, Timestamp.ToString(CultureInfo.InvariantCulture)}
+                { ClientNames.TIMESTAMP, Timestamp.ToString(CultureInfo.InvariantCulture)},
                 
-                //{ ClientNames.DEVICE_ID, DeviceId }
                 //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
+                { ClientNames.DEVICE_ID, DeviceId }
             };
 
-            return UrlUtil.AddQuerys(uri, parameters);
+            return UriUtil.AddQuerys(uri, parameters);
         }
 
         protected virtual string BuildUrl()
@@ -117,7 +119,7 @@ namespace HB.FullStack.Common.Api
 
         private static string BuildDefaultUrl(ApiRequest request)
         {
-            StringBuilder requestUrlBuilder = new StringBuilder();
+            StringBuilder requestUrlBuilder = new();
 
             if (!request.ApiVersion.IsNullOrEmpty())
             {
@@ -141,7 +143,6 @@ namespace HB.FullStack.Common.Api
 
         public abstract string ToDebugInfo();
     }
-
 
     public abstract class ApiRequest<T> : ApiRequest where T : ApiResource2
     {

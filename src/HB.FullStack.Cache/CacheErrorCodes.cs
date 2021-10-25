@@ -5,13 +5,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("HB.Infrastructure.Redis.Cache")]
-namespace HB.FullStack.Cache
+namespace System
 {
-    /// <summary>
-    /// from 2000~2999
-    /// </summary>
-    internal static class CacheErrorCodes
+    public static class CacheErrorCodes
     {
         public static ErrorCode SlidingTimeBiggerThanMaxAlive { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 0, nameof(SlidingTimeBiggerThanMaxAlive), "");
         public static ErrorCode EntityNotHaveKeyAttribute { get;  } = new ErrorCode(ErrorCodeStartIds.CACHE + 1, nameof(EntityNotHaveKeyAttribute), "");
@@ -26,9 +22,9 @@ namespace HB.FullStack.Cache
 
     }
 
-    internal static class Exceptions
+    public static class CacheExceptions
     {
-        internal static Exception CacheSlidingTimeBiggerThanMaxAlive(string type)
+        public static CacheException CacheSlidingTimeBiggerThanMaxAlive(string type)
         {
             CacheException exception = new CacheException(CacheErrorCodes.SlidingTimeBiggerThanMaxAlive);
 
@@ -37,7 +33,7 @@ namespace HB.FullStack.Cache
             return exception;
         }
 
-        internal static Exception CacheEntityNotHaveKeyAttribute(string type)
+        public static CacheException CacheEntityNotHaveKeyAttribute(string type)
         {
             CacheException exception = new CacheException(CacheErrorCodes.EntityNotHaveKeyAttribute);
 
@@ -46,7 +42,7 @@ namespace HB.FullStack.Cache
             return exception;
         }
 
-        internal static Exception ConvertError(string key, Exception innerException)
+        public static CacheException ConvertError(string key, Exception innerException)
         {
             CacheException exception = new CacheException(CacheErrorCodes.ConvertError, innerException);
 
@@ -55,7 +51,7 @@ namespace HB.FullStack.Cache
             return exception;
         }
 
-        internal static Exception Unkown(object key, object? value, Exception innerException)
+        public static CacheException Unkown(object key, object? value, Exception innerException)
         {
             CacheException exception = new CacheException(CacheErrorCodes.Unkown, innerException);
 
@@ -65,27 +61,27 @@ namespace HB.FullStack.Cache
             return exception;
         }
 
-        internal static Exception UnkownButDeleted(string cause, Exception innerException)
+        public static CacheException UnkownButDeleted(string cause, Exception innerException)
         {
             throw new NotImplementedException();
         }
 
-        internal static Exception CacheLoadedLuaNotFound(string instanceName)
+        public static CacheException CacheLoadedLuaNotFound(string instanceName)
         {
             throw new NotImplementedException();
         }
 
-        internal static Exception InstanceNotFound(string instanceName)
+        public static CacheException InstanceNotFound(string instanceName)
         {
             throw new NotImplementedException();
         }
 
-        internal static Exception NoSuchDimensionKey(string type, string dimensionKeyName)
+        public static CacheException NoSuchDimensionKey(string type, string dimensionKeyName)
         {
             throw new NotImplementedException();
         }
 
-        internal static Exception NotEnabledForEntity(string type)
+        public static CacheException NotEnabledForEntity(string type)
         {
             throw new NotImplementedException();
         }

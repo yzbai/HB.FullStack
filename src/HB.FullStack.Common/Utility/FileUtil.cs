@@ -63,6 +63,7 @@ namespace System
             return true;
         }
 
+        [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public static async Task<bool> IsFileSignatureMatchedAsync(string extension, Stream? stream)
         {
             if (extension.IsNullOrEmpty() || stream == null)
@@ -95,7 +96,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger.LogError(ex, $"IsFileSignatureMatched Error.extension: {extension}");
+                GlobalSettings.Logger?.LogIsFileSignatureMatchedError(extension, ex);
                 return false;
             }
         }
@@ -114,6 +115,7 @@ namespace System
             }
         }
 
+        [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public static async Task<bool> TrySaveFileAsync(Stream stream, string fullPath, bool @override = true, bool createDirectoryIfNotExist = true)
         {
             FileMode fileMode = @override ? FileMode.Create : FileMode.CreateNew;
@@ -137,11 +139,12 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger.LogError(ex, $"保存文件stream出错, fullPath:{fullPath}, override:{@override}, createDirectoryIfNotExist:{createDirectoryIfNotExist}");
+                GlobalSettings.Logger?.LogSaveFileError(fullPath, @override, createDirectoryIfNotExist, ex);
                 return false;
             }
         }
 
+        [Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public static async Task<bool> TrySaveFileAsync(byte[] data, string fullPath, bool @override = true, bool createDirectoryIfNotExist = true)
         {
             FileMode fileMode = @override ? FileMode.Create : FileMode.CreateNew;
@@ -165,7 +168,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger.LogError(ex, $"保存文件data出错, fullPath:{fullPath}, override:{@override}, createDirectoryIfNotExist:{createDirectoryIfNotExist}");
+                GlobalSettings.Logger?.LogSaveFileError(fullPath, @override, createDirectoryIfNotExist, ex);
                 return false;
             }
         }
@@ -187,9 +190,11 @@ namespace System
 
                 return memoryStream.ToArray();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger.LogError(ex, $"读取文件出错，FullPath: {fullPath}");
+                GlobalSettings.Logger?.LogReadFileError(fullPath, ex);
                 return null;
             }
         }
@@ -218,7 +223,9 @@ namespace System
                 catch (IOException ex)
                 {
                     //-2147024864意思是 另一个程序正在使用此文件,进程无法访问
+#pragma warning disable CA1508 // 系统判断不对
                     if (runCount == 3 || ex.HResult != -2147024864)
+#pragma warning restore CA1508 // Avoid dead conditional code
                     {
                         throw;
                     }

@@ -16,7 +16,7 @@ namespace HB.FullStack.Common
                 return false;
             }
 
-            return State == other.State && EqualsImpl(other);
+            return State == other.State && EqualsCore(other);
         }
 
         public static bool operator ==(FigureData? d1, FigureData? d2)
@@ -51,15 +51,15 @@ namespace HB.FullStack.Common
 
         public override int GetHashCode()
         {
-            HashCode hashCode = GetHashCodeImpl();
+            HashCode hashCode = GetHashCodeCore();
             hashCode.Add(State);
 
             return hashCode.ToHashCode();
         }
 
-        protected abstract bool EqualsImpl(FigureData other);
+        protected abstract bool EqualsCore(FigureData other);
 
-        protected abstract HashCode GetHashCodeImpl();
+        protected abstract HashCode GetHashCodeCore();
 
     }
 }

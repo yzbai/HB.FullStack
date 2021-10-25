@@ -9,9 +9,10 @@ namespace HB.FullStack.Database.Entities
     /// 对TableDomain中的属性的数据库表字段描述
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1813:Avoid unsealed attributes", Justification = "<Pending>")]
     public class EntityPropertyAttribute : Attribute
     {
-        public int PropertyOrder { get; set; }
+        public int PropertyOrder { get; internal set; }
 
         public bool FixedLength { get; set; }
 

@@ -21,7 +21,7 @@ namespace System
 
                 if (certificate2 == null)
                 {
-                    throw Exceptions.CertNotFound(subject, fullPath);
+                    throw CommonExceptions.CertNotFound(subject, fullPath);
                 }
             }
 

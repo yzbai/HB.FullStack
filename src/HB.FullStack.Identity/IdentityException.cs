@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class IdentityException : ErrorCodeException
+    public class IdentityException : ErrorCode2Exception
     {
         public IdentityException(ErrorCode errorCode) : base(errorCode)
         {

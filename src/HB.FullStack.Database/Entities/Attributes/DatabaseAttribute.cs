@@ -7,7 +7,7 @@ namespace HB.FullStack.Database.Entities
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class DatabaseAttribute : Attribute
     {
-        public string? DatabaseName { get; set; }
+        public string? DatabaseName { get; internal set; }
 
         public string? TableName { get; set; }
 

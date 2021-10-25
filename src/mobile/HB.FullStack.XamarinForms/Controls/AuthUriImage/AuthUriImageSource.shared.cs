@@ -227,18 +227,26 @@ namespace HB.FullStack.XamarinForms.Controls
 
             if (stream == null || !stream.CanRead)
             {
-                stream?.Dispose();
+                if (stream != null)
+                {
+                    await stream.DisposeAsync().ConfigureAwait(false);
+                }
+
                 return null;
             }
 
             try
             {
                 Stream writeStream = await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
+                
                 await stream.CopyToAsync(writeStream, 16384, cancellationToken).ConfigureAwait(false);
+                
                 if (writeStream != null)
-                    writeStream.Dispose();
+                {
+                    await writeStream.DisposeAsync().ConfigureAwait(false);
+                }
 
-                stream.Dispose();
+                await stream.DisposeAsync().ConfigureAwait(false);
 
                 return await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
             }
@@ -259,7 +267,7 @@ namespace HB.FullStack.XamarinForms.Controls
         async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
             string key = GetCacheKey(uri);
-            LockingSemaphore sem = s_semaphores.GetOrAdd(key, _=>new LockingSemaphore(1));
+            LockingSemaphore sem = s_semaphores.GetOrAdd(key, _ => new LockingSemaphore(1));
             //lock (s_syncHandle)
             //{
             //    if (s_semaphores.ContainsKey(key))
@@ -349,7 +357,7 @@ namespace HB.FullStack.XamarinForms.Controls
     {
         private readonly string _uri;
 
-        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null,null)
+        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null, null)
         {
             _uri = uri;
         }

@@ -36,7 +36,7 @@ namespace System.Net.Http
             }
             else
             {
-                TResponse? response = await responseMessage.DeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
+                TResponse? response = await responseMessage.TryDeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
 
                 return response;
             }
@@ -64,15 +64,15 @@ namespace System.Net.Http
             //https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.sendasync?view=netstandard-2.1
             catch (InvalidOperationException ex)
             {
-                throw Exceptions.RequestAlreadyUsed(request: request, innerException: ex);
+                throw ApiExceptions.RequestAlreadyUsed(request: request, innerException: ex);
             }
             catch (TaskCanceledException ex)
             {
-                throw Exceptions.RequestTimeout(request: request, innerException: ex);
+                throw ApiExceptions.RequestTimeout(request: request, innerException: ex);
             }
             catch (HttpRequestException ex)
             {
-                throw Exceptions.RequestUnderlyingIssue(request: request, innerException: ex);
+                throw ApiExceptions.RequestUnderlyingIssue(request: request, innerException: ex);
             }
         }
 
@@ -104,9 +104,9 @@ namespace System.Net.Http
         {
             MultipartFormDataContent content = new MultipartFormDataContent();
 
-            string byteArrayContentName = fileRequest.GetBytesPropertyName();
-            IEnumerable<byte[]> bytess = fileRequest.GetBytess();
-            IEnumerable<string> fileNames = fileRequest.GetFileNames();
+            string byteArrayContentName = fileRequest.BytesPropertyName;
+            IEnumerable<byte[]> bytess = fileRequest.Files;
+            IEnumerable<string> fileNames = fileRequest.FileNames;
 
             int num = 0;
 
@@ -137,18 +137,18 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
-            ErrorCode? errorCode = await responseMessage.DeSerializeJsonAsync<ErrorCode>().ConfigureAwait(false);
+            ErrorCode? errorCode = await responseMessage.TryDeSerializeJsonAsync<ErrorCode>().ConfigureAwait(false);
 
             responseMessage.Dispose();
 
             if (errorCode == null)
             {
                 string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw Exceptions.ServerUnkownError(response: responseString);
+                throw ApiExceptions.ServerUnkownError(response: responseString);
             }
             else
             {
-                throw Exceptions.ServerReturnError(errorCode);
+                throw ApiExceptions.ServerReturnError(errorCode);
             }
 
         }

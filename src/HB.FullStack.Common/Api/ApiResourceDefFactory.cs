@@ -20,12 +20,12 @@ namespace HB.FullStack.Common.Api
 
             if (attr == null)
             {
-                throw Exceptions.LackApiResourceAttribute(type: type.FullName);
+                throw ApiExceptions.LackApiResourceAttribute(type: type.FullName);
             }
 
             return new ApiResourceDef
             {
-                RateLimit = attr.RateLimit,
+                RateLimit = TimeSpan.FromMilliseconds(attr.RateLimitMilliseconds),
                 ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
                 Name = type.Name

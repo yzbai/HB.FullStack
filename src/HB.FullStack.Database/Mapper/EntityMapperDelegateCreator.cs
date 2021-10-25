@@ -51,7 +51,7 @@ namespace HB.FullStack.Database.Mapper
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
                     propertyDefs.Add(def.GetPropertyDef(reader.GetName(i)) 
-                        ?? throw Exceptions.EntityError(def.EntityFullName, reader.GetName(i), "Lack PropertyDef"));
+                        ?? throw DatabaseExceptions.EntityError(def.EntityFullName, reader.GetName(i), "Lack PropertyDef"));
                 }
 
                 LocalBuilder returnValueLocal = il.DeclareLocal(def.EntityType);
@@ -62,7 +62,7 @@ namespace HB.FullStack.Database.Mapper
                 System.Reflection.Emit.Label allFinished = il.DefineLabel();
 
                 ConstructorInfo ctor = def.EntityType.GetDefaultConstructor() 
-                    ?? throw Exceptions.EntityError(def.EntityFullName,"", "实体没有默认构造函数");
+                    ?? throw DatabaseExceptions.EntityError(def.EntityFullName,"", "实体没有默认构造函数");
 
                 il.Emit(OpCodes.Ldtoken, def.EntityType);
                 il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
@@ -309,7 +309,7 @@ namespace HB.FullStack.Database.Mapper
             catch (Exception ex)
             {
                 //string info = ex.GetDebugInfo();
-                throw Exceptions.MapperError(innerException:ex);
+                throw DatabaseExceptions.MapperError(innerException:ex);
             }
         }
 

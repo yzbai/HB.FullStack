@@ -11,36 +11,105 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public static partial class ErrorCodes
+    public static partial class CommonErrorCodes
     {
         public static readonly ErrorCode CertNotInPackage = new ErrorCode(ErrorCodeStartIds.COMMON + 1, nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
-        public static readonly ErrorCode CertNotFound = new ErrorCode(ErrorCodeStartIds.COMMON + 2, nameof(CertNotFound),"没有找到证书");
+        public static readonly ErrorCode CertNotFound = new ErrorCode(ErrorCodeStartIds.COMMON + 2, nameof(CertNotFound), "没有找到证书");
+        public static readonly ErrorCode IsFileSignatureMatchedError = new ErrorCode(ErrorCodeStartIds.COMMON + 3, nameof(IsFileSignatureMatchedError), "");
+        public static readonly ErrorCode SaveFileError = new ErrorCode(ErrorCodeStartIds.COMMON + 4, nameof(SaveFileError), "");
+        public static readonly ErrorCode ReadFileError = new ErrorCode(ErrorCodeStartIds.COMMON + 5, nameof(ReadFileError), "");
+
+        public static readonly ErrorCode HttpResponseDeSerializeJsonError = new ErrorCode(ErrorCodeStartIds.COMMON + 6, nameof(HttpResponseDeSerializeJsonError), "");
+
+        public static readonly ErrorCode SerializeLogError = new ErrorCode(ErrorCodeStartIds.COMMON + 7, nameof(SerializeLogError), "");
+
+        public static readonly ErrorCode PerformValidateError = new ErrorCode(ErrorCodeStartIds.COMMON + 8, nameof(PerformValidateError), "");
     }
 
     public static partial class LoggerExtensions
     {
         private static readonly Action<ILogger, string?, Exception?> _logCerNotInPackage = LoggerMessage.Define<string?>(
             LogLevel.Warning,
-            ErrorCodes.CertNotInPackage.ToEventId(), 
+            CommonErrorCodes.CertNotInPackage.ToEventId(),
             "证书 {FullPath} 没有打包，将试图在服务器中寻找");
 
         public static void LogCertNotInPackage(this ILogger logger, string? fullPath)
         {
             _logCerNotInPackage(logger, fullPath, null);
         }
-    }
-    
-    public static partial class Exceptions
-    {
-        public static ErrorCodeException CertNotFound(string? subject, string? fullPath)
+
+        private static readonly Action<ILogger, string, Exception> _logIsFileSignatureMatchedError = LoggerMessage.Define<string>(
+            LogLevel.Error,
+            CommonErrorCodes.IsFileSignatureMatchedError.ToEventId(),
+            "文件开头字节和FileExtension不一致，有可能篡改了文件格式. FileExtension = {FileExtension}");
+
+        public static void LogIsFileSignatureMatchedError(this ILogger logger, string fileExtension, Exception ex)
         {
-            ErrorCodeException ex = new ErrorCodeException(ErrorCodes.CertNotFound);
+            _logIsFileSignatureMatchedError(logger, fileExtension, ex);
+        }
+
+        private static readonly Action<ILogger, string?, bool, bool, Exception?> _logSaveFileError = LoggerMessage.Define<string?, bool, bool>(
+            LogLevel.Error,
+            CommonErrorCodes.SaveFileError.ToEventId(),
+            "文件保存出错，FullPath={FullPath}, CanOverride = {CanOverride}, CreateDirectoryIfNotExist={CreateDirectoryIfNotExist}");
+
+        public static void LogSaveFileError(this ILogger logger, string fullPath, bool isOverride, bool createDirectoryIfNotExist, Exception ex)
+        {
+            _logSaveFileError(logger, fullPath, isOverride, createDirectoryIfNotExist, ex);
+        }
+
+        private static readonly Action<ILogger, string, Exception> _logReadFileError = LoggerMessage.Define<string>(
+            LogLevel.Error,
+            CommonErrorCodes.ReadFileError.ToEventId(),
+            "文件读取出错，FullPath={FullPath}");
+
+        public static void LogReadFileError(this ILogger logger, string fullPath, Exception ex)
+        {
+            _logReadFileError(logger, fullPath, ex);
+        }
+
+        private static readonly Action<ILogger, string?, int, string?, Uri, Exception> _logHttpResponseDeSerializeJsonError = LoggerMessage.Define<string?, int, string?, Uri>(
+            LogLevel.Error,
+            CommonErrorCodes.HttpResponseDeSerializeJsonError.ToEventId(),
+            "解析HttpResponse的Json内容出错. Content={Content}, StatusCode={StatusCode}, ReasonPhrase={ReasonPhrase}, Uri={Uri}");
+
+        public static void LogHttpResponseDeSerializeJsonError(this ILogger logger, string content, int statusCode, string reasonPhrase, Uri uri, Exception ex)
+        {
+            _logHttpResponseDeSerializeJsonError(logger, content, statusCode, reasonPhrase, uri, ex);
+        }
+
+        private static readonly Action<ILogger, string?, Exception> _logSerializeLogError = LoggerMessage.Define<string?>(
+            LogLevel.Error,
+            CommonErrorCodes.SerializeLogError.ToEventId(),
+            "序列化Json出错. TypeName={TypeName}");
+
+        public static void LogSerializeLogError(this ILogger logger, string? typeName, Exception ex)
+        {
+            _logSerializeLogError(logger, typeName, ex);
+        }
+
+        private static readonly Action<ILogger, string?, Exception> _logPerformValidateError = LoggerMessage.Define<string?>(
+            LogLevel.Error,
+            CommonErrorCodes.PerformValidateError.ToEventId(),
+            "执行属性Validation出错。PropertyName={PropertyName}");
+
+        public static void LogPerformValidateError(this ILogger logger, string? propertyName, Exception ex)
+        {
+            _logPerformValidateError(logger, propertyName, ex);
+        }
+    }
+
+    public static partial class CommonExceptions
+    {
+        public static ErrorCode2Exception CertNotFound(string? subject, string? fullPath)
+        {
+            ErrorCode2Exception ex = new ErrorCode2Exception(CommonErrorCodes.CertNotFound);
             ex.Data["Subject"] = subject;
             ex.Data["FullPath"] = fullPath;
 
             return ex;
         }
 
-        
+
     }
 }

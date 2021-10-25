@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public class RepositoryException : ErrorCodeException
+    public class RepositoryException : ErrorCode2Exception
     {
         public RepositoryException(ErrorCode errorCode) : base(errorCode)
         {

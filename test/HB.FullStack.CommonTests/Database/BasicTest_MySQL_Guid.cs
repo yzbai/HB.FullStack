@@ -565,7 +565,7 @@ namespace HB.FullStack.DatabaseTests
         [Fact]
         public async Task Guid_Test_13_Mapper_ToEntityAsync()
         {
-            GlobalSettings.Logger.LogInformation($"��ǰProcess,{Environment.ProcessId}");
+            GlobalSettings.Logger.LogDebug($"��ǰProcess,{Environment.ProcessId}");
 
             IDatabase database = _mysql;
 

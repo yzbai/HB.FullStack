@@ -231,7 +231,7 @@ namespace System
         public static string RemoveSuffix(this string str, string suffix)
         {
             return str.EndsWith(suffix, GlobalSettings.Comparison)
-                ? str.Substring(0, str.Length - suffix.Length)
+                ? str[..^suffix.Length]
                 : str;
         }
 

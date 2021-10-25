@@ -25,6 +25,8 @@ namespace System
 
     public class ErrorCode : IEquatable<ErrorCode>
     {
+        public static readonly ErrorCode Empty = new ErrorCode(0, nameof(Empty), "");
+
         public int Id { get; } = -1;
 
         public string Name { get; } = null!;
@@ -45,7 +47,7 @@ namespace System
 
         public bool Equals(ErrorCode? other)
         {
-            if(other is null)
+            if (other is null)
             {
                 return false;
             }

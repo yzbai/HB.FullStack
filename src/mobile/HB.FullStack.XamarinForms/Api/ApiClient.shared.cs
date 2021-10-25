@@ -104,7 +104,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                 return stream;
             }
-            catch (ApiException ex)
+            catch (ErrorCode2Exception ex)
             {
                 if (request.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
@@ -149,7 +149,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                 return rt;
             }
-            catch (ApiException ex)
+            catch (ErrorCode2Exception ex)
             {
                 if (request.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {

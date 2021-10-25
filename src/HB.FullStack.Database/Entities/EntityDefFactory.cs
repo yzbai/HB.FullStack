@@ -96,7 +96,7 @@ namespace HB.FullStack.Database.Entities
 
                         if (type.Name.EndsWith(attribute.SuffixToRemove, GlobalSettings.Comparison))
                         {
-                            entitySchema.TableName += type.Name.Substring(0, type.Name.Length - attribute.SuffixToRemove.Length).ToLower(GlobalSettings.Culture);
+                            entitySchema.TableName += type.Name[..^attribute.SuffixToRemove.Length].ToLower(GlobalSettings.Culture);
                         }
                         else
                         {
@@ -184,7 +184,7 @@ namespace HB.FullStack.Database.Entities
 
             if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw Exceptions.EntityError(type:entityType.FullName,"", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
+                throw DatabaseExceptions.EntityError(type:entityType.FullName,"", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
             }
 
             EntityDef entityDef = new EntityDef
@@ -262,10 +262,10 @@ namespace HB.FullStack.Database.Entities
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw Exceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause:"实体属性缺少Set方法. ");
+                ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause:"实体属性缺少Set方法. ");
 
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw Exceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
+                ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
 
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;

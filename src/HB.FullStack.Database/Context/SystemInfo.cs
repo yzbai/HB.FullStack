@@ -28,7 +28,7 @@ namespace HB.FullStack.Database
                     return value;
                 }
 
-                throw Exceptions.SystemInfoError(cause:"no DatabaseName key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause:"no DatabaseName key in SystemInfoTable");
             }
             private set
             {
@@ -49,7 +49,7 @@ namespace HB.FullStack.Database
                     return Convert.ToInt32(value, GlobalSettings.Culture);
                 }
 
-                throw Exceptions.SystemInfoError(cause:"no Version key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause:"no Version key in SystemInfoTable");
             }
             set
             {

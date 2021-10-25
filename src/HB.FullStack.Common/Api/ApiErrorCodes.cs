@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public static partial class ErrorCodes
+
+    public static partial class ApiErrorCodes
     {
         public static ErrorCode NoAuthority { get; } = new ErrorCode(ErrorCodeStartIds.API + 0, nameof(NoAuthority), "");
         public static ErrorCode AccessTokenExpired { get; } = new ErrorCode(ErrorCodeStartIds.API + 1, nameof(AccessTokenExpired), "");
@@ -50,14 +51,16 @@ namespace System
         /// The request failed due to an underlying issue such as network connectivity, DNS failure, server certificate validation or timeout.
         /// </summary>
         public static ErrorCode RequestUnderlyingIssue { get;  } = new ErrorCode(ErrorCodeStartIds.API + 31, nameof(RequestUnderlyingIssue), "");
+        
+        
     }
 
-    public static partial class Exceptions
+    public static partial class ApiExceptions
     {
 
         internal static Exception RequestUnderlyingIssue(ApiRequest request, HttpRequestException innerException)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.RequestUnderlyingIssue, innerException);
+            ApiException ex = new(ApiErrorCodes.RequestUnderlyingIssue, innerException);
             ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
@@ -65,7 +68,7 @@ namespace System
 
         internal static Exception RequestAlreadyUsed(ApiRequest request, Exception innerException)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.RequestAlreadyUsed, innerException);
+            ApiException ex = new(ApiErrorCodes.RequestAlreadyUsed, innerException);
             ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
@@ -74,7 +77,7 @@ namespace System
 
         public static Exception RequestCanceled(ApiRequest request, Exception innerException)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.RequestCanceled, innerException);
+            ApiException ex = new(ApiErrorCodes.RequestCanceled, innerException);
             ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
@@ -82,7 +85,7 @@ namespace System
 
         public static Exception RequestTimeout(ApiRequest request, Exception innerException)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.RequestTimeout, innerException);
+            ApiException ex = new ApiException(ApiErrorCodes.RequestTimeout, innerException);
 
             ex.Data["Request"] = request.ToDebugInfo();
 
@@ -96,7 +99,7 @@ namespace System
 
         public static Exception ServerUnkownError(string response)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.ServerUnKownError);
+            ApiException ex = new ApiException(ApiErrorCodes.ServerUnKownError);
             ex.Data["Response"] = response;
             return ex;
         }
@@ -108,7 +111,7 @@ namespace System
 
         public static Exception ServerReturnError(ErrorCode errorCode)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(errorCode);
+            ApiException ex = new ApiException(errorCode);
             return ex;
         }
 
@@ -174,13 +177,13 @@ namespace System
 
         internal static Exception FileUpdateRequestCountNotEven()
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.FileUpdateRequestCountNotEven);
+            ApiException ex = new ApiException(ApiErrorCodes.FileUpdateRequestCountNotEven);
             return ex;
         }
 
         internal static Exception LackApiResourceAttribute(string type)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(ErrorCodes.LackApiResourceAttribute);
+            ApiException ex = new ApiException(ApiErrorCodes.LackApiResourceAttribute);
             ex.Data["Type"] = type;
             
             return ex;

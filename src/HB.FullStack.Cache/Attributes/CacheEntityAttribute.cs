@@ -5,7 +5,7 @@ using System.Text;
 namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class CacheEntityAttribute : Attribute
+    public sealed class CacheEntityAttribute : Attribute
     {
         public string? CacheInstanceName { get; set; }
 

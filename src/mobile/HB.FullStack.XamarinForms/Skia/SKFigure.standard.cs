@@ -770,24 +770,24 @@ namespace HB.FullStack.XamarinForms.Skia
 
     public class EmptyDrawInfo : FigureDrawInfo
     {
-        protected override bool EqualsImpl(FigureDrawInfo other)
+        protected override bool EqualsCore(FigureDrawInfo other)
         {
             return other is EmptyDrawInfo;
         }
 
-        protected override HashCode GetHashCodeImpl()
+        protected override HashCode GetHashCodeCore()
         {
             return new HashCode();
         }
     }
     public class EmptyData : FigureData
     {
-        protected override bool EqualsImpl(FigureData other)
+        protected override bool EqualsCore(FigureData other)
         {
             return other is EmptyData;
         }
 
-        protected override HashCode GetHashCodeImpl()
+        protected override HashCode GetHashCodeCore()
         {
             return new HashCode();
         }
