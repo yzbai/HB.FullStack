@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.2.62" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.79" />
   </ItemGroup>
 
   <ItemGroup>
