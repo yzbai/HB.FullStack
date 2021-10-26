@@ -17,5 +17,17 @@ namespace System
         public LockException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
         }
+
+        public LockException()
+        {
+        }
+
+        public LockException(string message) : base(message)
+        {
+        }
+
+        public LockException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

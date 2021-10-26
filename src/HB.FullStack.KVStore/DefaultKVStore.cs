@@ -75,7 +75,7 @@ namespace HB.FullStack.KVStore
 
                 return MapTupleToEntity<T>(tuples);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: keys, innerException: ex);
             }
@@ -96,7 +96,7 @@ namespace HB.FullStack.KVStore
 
                 return MapTupleToEntity<T>(tuples);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: null, innerException: ex);
             }
@@ -107,7 +107,7 @@ namespace HB.FullStack.KVStore
         /// </summary>
         public Task AddAsync<T>(T item, string lastUser) where T : KVStoreEntity, new()
         {
-            return AddAsync<T>(new T[] { item }, lastUser);
+            return AddAsync(new T[] { item }, lastUser);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace HB.FullStack.KVStore
                     t.Version = 0;
                 }
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
             }
@@ -162,7 +162,7 @@ namespace HB.FullStack.KVStore
         /// </summary>
         public Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreEntity, new()
         {
-            return UpdateAsync<T>(new T[] { item }, lastUser);
+            return UpdateAsync(new T[] { item }, lastUser);
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace HB.FullStack.KVStore
                 }
             }
 
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
             }
@@ -232,7 +232,7 @@ namespace HB.FullStack.KVStore
                    entityDef.EntityType.FullName!
                    ).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, null, ex);
             }
@@ -271,7 +271,7 @@ namespace HB.FullStack.KVStore
                     versions
                     ).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, keys: keys, values: versions, innerException: ex);
             }

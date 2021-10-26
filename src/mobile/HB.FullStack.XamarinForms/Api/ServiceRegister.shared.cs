@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
             //添加各站点的HttpClient
             foreach (var endpoint in options.Endpoints)
             {
-                services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
+                services.AddHttpClient(endpoint.HttpClientName, httpClient =>
                 {
                     httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");

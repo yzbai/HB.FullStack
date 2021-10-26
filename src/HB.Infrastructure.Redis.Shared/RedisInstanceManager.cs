@@ -63,7 +63,9 @@ namespace HB.Infrastructure.Redis.Shared
 
                 return connection;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 _connectionLock.Release();
 
@@ -133,7 +135,9 @@ namespace HB.Infrastructure.Redis.Shared
 
                 return connection;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 _connectionLock.Release();
 

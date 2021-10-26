@@ -17,5 +17,17 @@ namespace System
         public AliyunException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
         }
+
+        public AliyunException()
+        {
+        }
+
+        public AliyunException(string message) : base(message)
+        {
+        }
+
+        public AliyunException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

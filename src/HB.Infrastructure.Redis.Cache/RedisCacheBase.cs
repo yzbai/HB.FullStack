@@ -59,7 +59,7 @@ namespace HB.Infrastructure.Redis.Cache
                 {
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
                     LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP),
-                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH),
+                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
 
                     LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH),
                     LoadedEntitiesGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH_BY_DIMENSION),
@@ -101,7 +101,7 @@ namespace HB.Infrastructure.Redis.Cache
                 return loadedLuas2;
             }
 
-            throw CacheExceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
+            throw CacheExceptions.CacheLoadedLuaNotFound(cacheInstanceName: instanceName);
         }
 
         /// <exception cref="CacheException"></exception>
@@ -114,7 +114,7 @@ namespace HB.Infrastructure.Redis.Cache
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw CacheExceptions.InstanceNotFound(instanceName: instanceName);
+            throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
         /// <exception cref="CacheException"></exception>
@@ -157,7 +157,7 @@ namespace HB.Infrastructure.Redis.Cache
         {
             if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                throw CacheExceptions.NoSuchDimensionKey(type:entityDef.Name, dimensionKeyName:dimensionKeyName);
+                throw CacheExceptions.NoSuchDimensionKey(typeName:entityDef.Name, dimensionKeyName:dimensionKeyName);
             }
         }
 
@@ -170,7 +170,7 @@ namespace HB.Infrastructure.Redis.Cache
         {
             if (!entityDef.IsCacheable)
             {
-                throw CacheExceptions.NotEnabledForEntity(type:entityDef.Name);
+                throw CacheExceptions.NotEnabledForEntity(entityDef.Name);
             }
         }
 

@@ -14,7 +14,7 @@ namespace HB.FullStack.XamarinForms.Files
     /// </summary>
     public static class LocalFileServiceHelper
     {
-        public static string PathRoot = FileSystem.AppDataDirectory;
+        public static string PathRoot { get; } = FileSystem.AppDataDirectory;
 
         [return:NotNullIfNotNull("fileName")]
         public static string? GetFullPath(string directory, string fileName)

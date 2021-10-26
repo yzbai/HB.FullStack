@@ -3,19 +3,19 @@
 namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class LocalDataAttribute : Attribute
+    public sealed class LocalDataAttribute : Attribute
     {
-        public TimeSpan ExpiryTime { get; set; }
+        public int ExpiryMinutes { get; }
 
-        public bool AllowOfflineWrite { get; set; }
+        public bool AllowOfflineWrite { get; }
 
-        public bool AllowOfflineRead { get; set; }
-        
-        public bool NeedLogined { get; set; }
+        public bool AllowOfflineRead { get; }
+
+        public bool NeedLogined { get; }
 
         public LocalDataAttribute(int expiryMinutes, bool needLogined, bool allowOfflineRead, bool allowOfflineWrite)
         {
-            ExpiryTime = TimeSpan.FromMinutes(expiryMinutes);
+            ExpiryMinutes = expiryMinutes;
 
             NeedLogined = needLogined;
             AllowOfflineRead = allowOfflineRead;

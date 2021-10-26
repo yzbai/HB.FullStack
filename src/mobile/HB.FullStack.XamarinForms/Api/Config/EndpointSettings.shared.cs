@@ -1,6 +1,7 @@
 ﻿using HB.FullStack.Common;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.XamarinForms.Api
 {
@@ -29,9 +30,7 @@ namespace HB.FullStack.XamarinForms.Api
         public JwtEndpointSetting JwtEndpoint { get; set; } = new JwtEndpointSetting();
 
 
-        public string GetHttpClientName()
-        {
-            return Name + "_" + Version;
-        }
+        [JsonIgnore]
+        public string HttpClientName => $"{Name}_{Version}";
     }
 }

@@ -171,7 +171,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 {
                     _logger.LogError(ex, "Scan History 中出现Redis超时问题. {EventType}", _eventType);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.LogCritical(ex, "Scan History 出现未知问题. {EventType}", _eventType);
                 }
@@ -244,7 +246,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     bool? isExist = await IsAcksExistedAsync(database, AcksSetName, entity.Guid).ConfigureAwait(false);
 
+#pragma warning disable CA1508 // CA1508的bug，应该是无法适应NRT
                     if (isExist == null || isExist.Value)
+#pragma warning restore CA1508 // Avoid dead conditional code
                     {
                         _logger.LogInformation("有EventMessage重复，{eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
 
@@ -258,7 +262,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         await _eventHandler.HandleAsync(entity.JsonData, cancellationToken).ConfigureAwait(false);
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                     {
                         _logger.LogCritical(ex, "处理消息出错, {_eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
                     }
@@ -277,7 +283,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 {
                     _logger.LogError(ex, "Consume 中出现Redis超时问题. {eventType}", _eventType);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.LogCritical(ex, "Consume 出现未知问题. {eventType}", _eventType);
                 }

@@ -43,7 +43,9 @@ namespace HB.FullStack.Common.Api
 
                 return Task.CompletedTask;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 GlobalSettings.Logger.LogWarning(ex, $"FileUpdateServerSideRequestModelBinder出错.{valueProviderResult.FirstValue}");
 

@@ -15,5 +15,17 @@ namespace System
         public TencentException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
         }
+
+        public TencentException()
+        {
+        }
+
+        public TencentException(string message) : base(message)
+        {
+        }
+
+        public TencentException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

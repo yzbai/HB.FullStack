@@ -57,7 +57,7 @@ return redis.call('del', KEYS[1])
         /// keys:key
         /// argv:utcTicks
         /// </summary>
-        public const string LUA_GET_AND_REFRESH = @"
+        public const string LUA_GET_AND_REFRESH_WITH_TIMESTAMP = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
 
 if (not data[3]) then
@@ -79,6 +79,7 @@ end
 
 return data[3]";
 
+
         /// <summary>
         /// GetAsync
         /// </summary>
@@ -86,6 +87,7 @@ return data[3]";
         /// <param name="token"></param>
         /// <returns></returns>
         /// <exception cref="CacheException"></exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
@@ -103,7 +105,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(null, null, nameof(GetAsync));
 
                 InitLoadedLuas();
 
@@ -111,7 +113,9 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个GetAsync");
+                _logger.LogCacheGetError(key, ex);
+
+                AggregateException? aggregateException = null;
 
                 try
                 {
@@ -119,10 +123,10 @@ return data[3]";
                 }
                 catch (Exception ex2)
                 {
-                    _logger.LogError(ex2, "在因为Get异常而删除中出错，Key:{key} ", key);
+                    aggregateException = new AggregateException(ex, ex2);
                 }
 
-                throw CacheExceptions.Unkown(key, null, ex);
+                throw (Exception?)aggregateException ?? CacheExceptions.GetErrorButDeleted(key, ex);
             }
         }
 
@@ -170,11 +174,11 @@ return data[3]";
                 }
                 else if (rt == 8)
                 {
-                    _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {key}, {Timestamp}", key, utcTicks);
+                    _logger.LogCacheInvalidationConcurrency(key, utcTicks, options);
                 }
                 else if (rt == 9)
                 {
-                    _logger.LogWarning("检测到，Cache Update Concurrency冲突，已被阻止. {key}, {Timestamp}", key, utcTicks);
+                    _logger.LogCacheUpdateTimestampConcurrency(key, utcTicks, options);
                 }
 
                 return false;
@@ -182,7 +186,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(null, null, nameof(SetAsync));
 
                 InitLoadedLuas();
 
@@ -190,9 +194,7 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个SetAsync");
-
-                throw CacheExceptions.Unkown(key, null, ex);
+                throw CacheExceptions.SetError(key, utcTicks, options, ex);
             }
         }
 
@@ -230,7 +232,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
 
                 InitLoadedLuas();
 
@@ -238,9 +240,7 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个 RemoveAsync");
-
-                throw CacheExceptions.Unkown(key, null, ex);
+                throw CacheExceptions.RemoveError(key, utcTicks, ex);
             }
         }
     }

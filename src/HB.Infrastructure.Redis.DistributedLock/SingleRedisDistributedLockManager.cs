@@ -280,7 +280,9 @@ return 1";
 			{
 				lock (redisLock.StopKeepAliveTimerLockObj)
 				{
+#pragma warning disable CA1508 // CA1508在Double Check时会误判
 					if (redisLock.KeepAliveTimer != null)
+#pragma warning restore CA1508 // Avoid dead conditional code
 					{
 						redisLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
 						redisLock.KeepAliveTimer.Dispose();

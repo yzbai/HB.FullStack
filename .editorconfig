@@ -15,3 +15,20 @@ dotnet_diagnostic.IDE0090.severity = none
 
 # CA1720: Identifier contains type name
 dotnet_diagnostic.CA1720.severity = none
+
+#CA1812:避免未实例化的内部类
+# 当使用DI的时候，实现类是internal，对外是public
+dotnet_diagnostic.CA1812.severity = none
+
+# CA1716:标识符不应与关键字冲突
+dotnet_diagnostic.CA1716.severity = none
+
+# CA1054:URI 参数不应为字符串
+dotnet_diagnostic.CA1054.severity = none
+dotnet_diagnostic.CA1056.severity = none
+
+# CA2211:非常量字段不应是可见的  xamarin 的 BindableProperty全是字段
+dotnet_diagnostic.CA2211.severity = none
+
+# CA1024:在适用处使用属性 让人烦躁
+dotnet_diagnostic.CA1024.severity = none

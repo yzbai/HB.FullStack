@@ -51,7 +51,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw CacheExceptions.Unkown(key:key, value:value, innerException: ex);
+                throw CacheExceptions.Unkown(key:key, value:value, nameof(SetStringAsync), innerException: ex);
             }
         }
         
@@ -65,7 +65,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw CacheExceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, nameof(GetStringAsync), ex);
             }
         }
        
@@ -79,7 +79,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw CacheExceptions.Unkown(key, value, ex);
+                throw CacheExceptions.Unkown(key, value, nameof(SetAsync), ex);
             }
         }
         
@@ -93,7 +93,7 @@ namespace HB.FullStack.Cache
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw CacheExceptions.Unkown(key, null, ex);
+                throw CacheExceptions.Unkown(key, null, nameof(GetAsync), ex);
             }
         }
     }

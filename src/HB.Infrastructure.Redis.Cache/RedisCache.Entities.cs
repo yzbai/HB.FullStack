@@ -317,7 +317,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(GetEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -325,18 +325,22 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个GetEntitiesAsync.情况1，程序中实体改了");
+                _logger.LogGetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+
+                AggregateException? aggregateException = null;
 
                 try
                 {
                     await ForcedRemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex2)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    _logger.LogError(ex2, "在强制删除中出错，{TEntity}, dimKey:{dimensionKeyname} ", typeof(TEntity).Name, dimensionKeyName);
+                    aggregateException = new AggregateException(ex, ex2);
                 }
 
-                throw CacheExceptions.UnkownButDeleted(cause: "缓存中取值时，未知错误, 删除此项缓存", innerException: ex);
+                throw (Exception?)aggregateException ?? CacheExceptions.GetEntitiesErrorButDeleted(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
 
@@ -353,7 +357,6 @@ end
 
             ThrowIfNotCacheEnabled(entityDef);
             ThrowIf.NullOrEmpty(entities, nameof(entities));
-
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -381,11 +384,11 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {Entity}, {Id}", entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
+                        _logger.LogCacheInvalidationConcurrency(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                     else if (rt == 9)
                     {
-                        _logger.LogWarning("检测到，Cache Update Concurrency冲突，已被阻止. {Entity}, {Id}", entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
+                        _logger.LogCacheUpdateVersionConcurrency(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                 }
 
@@ -393,7 +396,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(SetEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -401,9 +404,7 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
-
-                throw CacheExceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.SetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, entities, ex);
             }
         }
 
@@ -435,7 +436,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(RemoveEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -443,9 +444,7 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个RemoveEntitiesAsync");
-
-                throw CacheExceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.RemoveEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, updatedVersions, ex);
             }
         }
 
@@ -468,7 +467,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(ForcedRemoveEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -476,9 +475,7 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个ForcedRemoveEntitiesAsync");
-
-                throw CacheExceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.ForcedRemoveEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
 

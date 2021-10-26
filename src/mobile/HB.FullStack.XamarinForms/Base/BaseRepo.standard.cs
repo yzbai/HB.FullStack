@@ -115,7 +115,7 @@ namespace HB.FullStack.XamarinForms.Base
             }
             else
             {
-                LocalDataExpiryTime = localDataAttribute.ExpiryTime;
+                LocalDataExpiryTime = TimeSpan.FromMinutes(localDataAttribute.ExpiryMinutes);
                 NeedLogined = localDataAttribute.NeedLogined;
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead;
                 AllowOfflineWrite = localDataAttribute.AllowOfflineWrite;
@@ -249,7 +249,7 @@ namespace HB.FullStack.XamarinForms.Base
             if (!EnsureInternet(!AllowOfflineRead))
             {
                 _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TEntity).Name);
-                
+
                 OnOfflineDataRead();
 
                 return locals;
@@ -261,7 +261,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TEntity).Name);
 
-            
+
             //检查同步. 比如：离线创建的数据，现在联线，本地数据反而是新的。
             //多客户端：version相同，但lastuser不同。根据时间合并
 

@@ -18,15 +18,13 @@ namespace HB.Infrastructure.Aliyun.Sts
         private const string OSS_READ_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
 
         private readonly AliyunStsOptions _options;
-        private readonly ILogger _logger;
         private readonly IAcsClient _acsClient;
         private readonly Dictionary<string, AssumedRole> _resourceAssumedRoleDict = new Dictionary<string, AssumedRole>();
 
 
-        public AliyunStsService(IOptions<AliyunStsOptions> options, ILogger<AliyunStsService> logger)
+        public AliyunStsService(IOptions<AliyunStsOptions> options)
         {
             _options = options.Value;
-            _logger = logger;
 
             AliyunUtil.AddEndpoint(AliyunProductNames.STS, "", _options.Endpoint);
             _acsClient = AliyunUtil.CreateAcsClient("", _options.AccessKeyId, _options.AccessKeySecret);

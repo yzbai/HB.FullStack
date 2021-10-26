@@ -17,5 +17,17 @@ namespace System
         public KVStoreException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
         {
         }
+
+        public KVStoreException()
+        {
+        }
+
+        public KVStoreException(string message) : base(message)
+        {
+        }
+
+        public KVStoreException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

@@ -60,7 +60,9 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 await next().ConfigureAwait(false);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                 _logger.LogError(ex, "TCaptcha 验证执行失败");

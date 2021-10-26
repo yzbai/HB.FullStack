@@ -63,7 +63,9 @@ namespace HB.FullStack.XamarinForms
             {
                 // Handle permission exception
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 // Unable to get location
             }

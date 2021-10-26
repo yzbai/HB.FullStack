@@ -195,7 +195,7 @@ namespace HB.FullStack.XamarinForms.Api
 
         private HttpClient GetHttpClient(EndpointSettings? endpoint)
         {
-            string httpClientName = endpoint == null ? NO_BASEURL_HTTPCLIENT_NAME : endpoint.GetHttpClientName();
+            string httpClientName = endpoint == null ? NO_BASEURL_HTTPCLIENT_NAME : endpoint.HttpClientName;
 
             HttpClient httpClient = _httpClientFactory.CreateClient(httpClientName);
 

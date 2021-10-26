@@ -168,7 +168,9 @@ namespace HB.FullStack.XamarinForms.Controls
                 {
                     stream = await GetStreamCoreAsync(uri, cancellationToken).ConfigureAwait(false);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     Xamarin.Forms.Internals.Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
                     stream = null;
@@ -216,21 +218,24 @@ namespace HB.FullStack.XamarinForms.Controls
             try
             {
                 stream = await GetStreamCoreAsync(uri, cancellationToken).ConfigureAwait(false);
+
                 if (stream == null)
+                {
                     return null;
+                }
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
                 return null;
             }
 
-            if (stream == null || !stream.CanRead)
+
+            if (!stream.CanRead)
             {
-                if (stream != null)
-                {
-                    await stream.DisposeAsync().ConfigureAwait(false);
-                }
+                await stream.DisposeAsync().ConfigureAwait(false);
 
                 return null;
             }
@@ -238,9 +243,9 @@ namespace HB.FullStack.XamarinForms.Controls
             try
             {
                 Stream writeStream = await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
-                
+
                 await stream.CopyToAsync(writeStream, 16384, cancellationToken).ConfigureAwait(false);
-                
+
                 if (writeStream != null)
                 {
                     await writeStream.DisposeAsync().ConfigureAwait(false);
@@ -250,7 +255,9 @@ namespace HB.FullStack.XamarinForms.Controls
 
                 return await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
                 return null;

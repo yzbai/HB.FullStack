@@ -33,7 +33,9 @@ namespace HB.FullStack.Repository
                     return cachedEntities!;
                 }
             }
-            catch(Exception ex)
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
             }
@@ -68,7 +70,9 @@ namespace HB.FullStack.Repository
                         return cachedEntities!;
                     }
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
                 }

@@ -43,9 +43,7 @@ namespace HB.Infrastructure.MySQL
         /// <exception cref="DatabaseException"></exception>
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
         {
-#pragma warning disable CA2000 // 这里无法用Using，因为reader要用
             MySqlConnection conn = new MySqlConnection(connectString);
-#pragma warning restore CA2000 // Dispose objects before losing scope
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 

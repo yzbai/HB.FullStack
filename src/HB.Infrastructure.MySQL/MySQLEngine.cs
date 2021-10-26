@@ -34,7 +34,6 @@ namespace HB.Infrastructure.MySQL
 
         public IEnumerable<string> DatabaseNames { get; private set; }
 
-        [SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory, ILogger<MySQLEngine> logger)
         {
             try
@@ -94,7 +93,7 @@ namespace HB.Infrastructure.MySQL
         }
 
 
-#endregion 自身 & 构建
+        #endregion 自身 & 构建
 
 
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
@@ -119,7 +118,7 @@ namespace HB.Infrastructure.MySQL
         }
 
 
-#region Command 能力
+        #region Command 能力
 
         /// <summary>
         /// ExecuteCommandNonQueryAsync
@@ -189,11 +188,11 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-#endregion Command 能力
+        #endregion Command 能力
 
-#region 事务
+        #region 事务
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
+        [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
@@ -240,6 +239,6 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-#endregion 事务
+        #endregion 事务
     }
 }

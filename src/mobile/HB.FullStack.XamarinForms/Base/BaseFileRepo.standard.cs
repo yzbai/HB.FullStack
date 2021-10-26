@@ -33,7 +33,7 @@ namespace HB.FullStack.XamarinForms.Base
             ApiClient = apiClient;
         }
 
-        protected HttpClient GetHttpClient()
+        protected HttpClient CreateHttpClient()
         {
             return new HttpClient(HttpClientHandler);
         }

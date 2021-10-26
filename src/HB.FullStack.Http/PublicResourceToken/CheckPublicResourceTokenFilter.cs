@@ -66,7 +66,9 @@ namespace HB.FullStack.WebApi.Filters
                 OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
                 _logger.LogError(ex, "PublicResourceToken 验证失败");
