@@ -18,8 +18,6 @@ namespace HB.FullStack.DatabaseTests
         private readonly IDatabase _mysql;
         private readonly ITestOutputHelper _output;
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         public JoinTest_MySQL_Guid(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
             _output = testOutputHelper;

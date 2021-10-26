@@ -20,9 +20,8 @@ namespace HB.FullStack.CommonTests
             SimpleCls simpleCls = new SimpleCls("xx", "tt", 12);
 
             string json =  SerializeUtil.ToJson(simpleCls);
+            _ = SerializeUtil.FromJson<SimpleCls>(json);
 
-            SimpleCls? backSimpleCls = SerializeUtil.FromJson<SimpleCls>(json);
-            
 
         }
 
@@ -51,8 +50,7 @@ namespace HB.FullStack.CommonTests
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             IOptions<SimpleAppOptions>? options = serviceProvider.GetRequiredService<IOptions<SimpleAppOptions>>();
-
-            SimpleAppOptions simpleAppOptions = options.Value;
+            _ = options.Value;
         }
     }
 }

@@ -296,7 +296,7 @@ namespace ClassLibrary1
 
             while (true)
             {
-                var arity = int.Parse(currentValueTupleType.Name.Substring("ValueTuple`".Length), GlobalSettings.Culture);
+                var arity = int.Parse(currentValueTupleType.Name["ValueTuple`".Length..], GlobalSettings.Culture);
                 var constructorParameterTypes = new Type[arity];
                 var restField = (FieldInfo)null;
 
@@ -308,7 +308,7 @@ namespace ClassLibrary1
                     }
                     else if (field.Name.StartsWith("Item", StringComparison.Ordinal))
                     {
-                        var elementNumber = int.Parse(field.Name.Substring("Item".Length), GlobalSettings.Culture);
+                        var elementNumber = int.Parse(field.Name["Item".Length..], GlobalSettings.Culture);
                         constructorParameterTypes[elementNumber - 1] = field.FieldType;
                     }
                 }
@@ -323,7 +323,7 @@ namespace ClassLibrary1
 
                 if (restField != null)
                 {
-                    constructorParameterTypes[constructorParameterTypes.Length - 1] = restField.FieldType;
+                    constructorParameterTypes[^1] = restField.FieldType;
                 }
 
                 constructors.Add(currentValueTupleType.GetConstructor(constructorParameterTypes));

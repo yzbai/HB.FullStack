@@ -37,10 +37,8 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (IDistributedLock redisLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30), null, null).ConfigureAwait(false))
-            {
-                Assert.True(redisLock.IsAcquired);
-            }
+            using IDistributedLock redisLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30), null, null).ConfigureAwait(false);
+            Assert.True(redisLock.IsAcquired);
         }
 
         [Fact]
@@ -48,15 +46,11 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false))
-            {
-                Assert.True(firstLock.IsAcquired);
+            using var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            Assert.True(firstLock.IsAcquired);
 
-                using (var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false))
-                {
-                    Assert.False(secondLock.IsAcquired);
-                }
-            }
+            using var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            Assert.False(secondLock.IsAcquired);
         }
 
         [Fact]
@@ -81,21 +75,19 @@ namespace HB.FullStack.DistributedLock.Test
 
         async Task LockWorkAsync(IEnumerable<string> resources, ConcurrentBag<int> locksAcquired)
         {
-            using (IDistributedLock redisLock = await _lockManager.LockAsync(
+            using IDistributedLock redisLock = await _lockManager.LockAsync(
                     resources,
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(60),
-                    TimeSpan.FromSeconds(0.5)).ConfigureAwait(false))
+                    TimeSpan.FromSeconds(0.5)).ConfigureAwait(false);
+            _logger.LogInformation("Entering lock");
+            if (redisLock.IsAcquired)
             {
-                _logger.LogInformation("Entering lock");
-                if (redisLock.IsAcquired)
-                {
-                    locksAcquired.Add(1);
-                }
-                await Task.Delay(4000).ConfigureAwait(false);
-
-                _logger.LogInformation("Leaving lock");
+                locksAcquired.Add(1);
             }
+            await Task.Delay(4000).ConfigureAwait(false);
+
+            _logger.LogInformation("Leaving lock");
         }
 
         [Fact]
@@ -111,12 +103,10 @@ namespace HB.FullStack.DistributedLock.Test
                 Assert.True(firstLock.IsAcquired);
             }
 
-            using (var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false))
-            {
-                _logger.LogInformation("TestSequentialLocks  :  Second Enter");
+            using var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            _logger.LogInformation("TestSequentialLocks  :  Second Enter");
 
-                Assert.True(secondLock.IsAcquired);
-            }
+            Assert.True(secondLock.IsAcquired);
         }
 
         [Fact]
@@ -145,22 +135,18 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)).ConfigureAwait(false))
-            {
-                Assert.True(firstLock.IsAcquired);
+            using var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            Assert.True(firstLock.IsAcquired);
 
-                Thread.Sleep(550); // should cause keep alive timer to fire once
-                //((RedisLock)firstLock).StopKeepAliveTimer(); // stop the keep alive timer to simulate process crash
+            Thread.Sleep(550); // should cause keep alive timer to fire once
+                               //((RedisLock)firstLock).StopKeepAliveTimer(); // stop the keep alive timer to simulate process crash
 
-                firstLock.Dispose();
+            firstLock.Dispose();
 
-                Thread.Sleep(1200); // wait until the key expires from redis
+            Thread.Sleep(1200); // wait until the key expires from redis
 
-                using (var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)).ConfigureAwait(false))
-                {
-                    Assert.True(secondLock.IsAcquired); // Eventually the outer lock should timeout
-                }
-            }
+            using var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            Assert.True(secondLock.IsAcquired); // Eventually the outer lock should timeout
         }
 
 
@@ -170,31 +156,29 @@ namespace HB.FullStack.DistributedLock.Test
             using var cts = new CancellationTokenSource();
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var firstLock = await _lockManager.LockAsync(
+            using var firstLock = await _lockManager.LockAsync(
                 resources,
                 TimeSpan.FromSeconds(300),
                 TimeSpan.FromSeconds(2),
-                TimeSpan.FromSeconds(1)).ConfigureAwait(false))
+                TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            Assert.True(firstLock.IsAcquired);
+
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
+
+
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {
-                Assert.True(firstLock.IsAcquired);
-
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
-
-
-
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
-                {
-                    using var secondLock = await _lockManager.LockAsync(
-                        resources,
-                        TimeSpan.FromSeconds(30),
-                        TimeSpan.FromSeconds(100),
-                        TimeSpan.FromSeconds(1),
-                        false,
-                        cts.Token).ConfigureAwait(false);
+                using var secondLock = await _lockManager.LockAsync(
+                    resources,
+                    TimeSpan.FromSeconds(30),
+                    TimeSpan.FromSeconds(100),
+                    TimeSpan.FromSeconds(1),
+                    false,
+                    cts.Token).ConfigureAwait(false);
                     // should never get here
                     Assert.True(false);
-                }).ConfigureAwait(false);
-            }
+            }).ConfigureAwait(false);
 
         }
     }

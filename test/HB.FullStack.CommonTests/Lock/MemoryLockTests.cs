@@ -32,10 +32,8 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var @lock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30)))
-            {
-                Assert.True(@lock.IsAcquired);
-            }
+            using var @lock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30));
+            Assert.True(@lock.IsAcquired);
         }
 
         [Fact]
@@ -43,15 +41,11 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var firstLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30)))
-            {
-                Assert.True(firstLock.IsAcquired);
+            using var firstLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30));
+            Assert.True(firstLock.IsAcquired);
 
-                using (var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30)))
-                {
-                    Assert.False(secondLock.IsAcquired);
-                }
-            }
+            using var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30));
+            Assert.False(secondLock.IsAcquired);
         }
 
         [Fact]
@@ -76,21 +70,19 @@ namespace HB.FullStack.DistributedLock.Test
 
         async Task LockWorkAsync(IEnumerable<string> resources, ConcurrentBag<int> locksAcquired)
         {
-            using (var @lock = _lockManager.Lock(
+            using var @lock = _lockManager.Lock(
                 "Test",
                     resources,
                     TimeSpan.FromSeconds(2),
-                    TimeSpan.FromSeconds(60)))
+                    TimeSpan.FromSeconds(60));
+            _logger.LogInformation("Entering lock");
+            if (@lock.IsAcquired)
             {
-                _logger.LogInformation("Entering lock");
-                if (@lock.IsAcquired)
-                {
-                    locksAcquired.Add(1);
-                }
-                await Task.Delay(4000).ConfigureAwait(false);
-
-                _logger.LogInformation("Leaving lock");
+                locksAcquired.Add(1);
             }
+            await Task.Delay(4000).ConfigureAwait(false);
+
+            _logger.LogInformation("Leaving lock");
         }
 
         [Fact]
@@ -106,12 +98,10 @@ namespace HB.FullStack.DistributedLock.Test
                 Assert.True(firstLock.IsAcquired);
             }
 
-            using (var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30)))
-            {
-                _logger.LogInformation("TestSequentialLocks  :  Second Enter");
+            using var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30));
+            _logger.LogInformation("TestSequentialLocks  :  Second Enter");
 
-                Assert.True(secondLock.IsAcquired);
-            }
+            Assert.True(secondLock.IsAcquired);
         }
 
         [Fact]
@@ -122,7 +112,7 @@ namespace HB.FullStack.DistributedLock.Test
 
             int extendCount;
 
-            using (var @lock = _lockManager.Lock("Test", resources, TimeSpan.FromMilliseconds(100)))
+            using (IMemoryLock? @lock = _lockManager.Lock("Test", resources, TimeSpan.FromMilliseconds(100)))
             {
                 Assert.True(@lock.IsAcquired);
 
@@ -140,19 +130,15 @@ namespace HB.FullStack.DistributedLock.Test
         {
             var resources = Mocker.MockResourcesWithThree();
 
-            using (var firstLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(1)))
-            {
-                Assert.True(firstLock.IsAcquired);
+            using var firstLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(1));
+            Assert.True(firstLock.IsAcquired);
 
-                Thread.Sleep(550); // should cause keep alive timer to fire once
-                ((MemoryLock)firstLock).StopKeepAliveTimer(); // stop the keep alive timer to simulate process crash
-                Thread.Sleep(1200); // wait until the key expires from redis
+            Thread.Sleep(550); // should cause keep alive timer to fire once
+            ((MemoryLock)firstLock).StopKeepAliveTimer(); // stop the keep alive timer to simulate process crash
+            Thread.Sleep(1200); // wait until the key expires from redis
 
-                using (var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(1)))
-                {
-                    Assert.True(secondLock.IsAcquired); // Eventually the outer lock should timeout
-                }
-            }
+            using var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(1));
+            Assert.True(secondLock.IsAcquired); // Eventually the outer lock should timeout
         }
     }
 }

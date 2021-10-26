@@ -18,7 +18,6 @@ namespace HB.FullStack.DatabaseTests
         private readonly IDatabase _sqlite;
         private readonly ITestOutputHelper _output;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         public JoinTest_Sqlite_Guid(ITestOutputHelper testOutputHelper, ServiceFixture_Sqlite serviceFixture)
         {
             _output = testOutputHelper;

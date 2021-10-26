@@ -32,8 +32,7 @@ namespace HB.FullStack
         /// ctor
         /// </summary>
         /// <exception cref="DatabaseException">Ignore.</exception>
-        /// <exception cref="HB.FullStack.Lock.LockException"></exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
+        /// <exception cref="Lock.LockException"></exception>
         public ServiceFixture_MySql()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");

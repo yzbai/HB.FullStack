@@ -19,17 +19,17 @@ namespace HB.FullStack.Cache.Test
     public class UpdateInvalidationConcurrencyTests : IClassFixture<ServiceFixture_MySql>
     {
         private readonly ICache _cache;
-        private readonly ConnectionMultiplexer _redisConnection;
-        private readonly int _databaseNumber;
+        //private readonly ConnectionMultiplexer _redisConnection;
+        //private readonly int _databaseNumber;
         private readonly ITestOutputHelper _outputHelper;
-        private readonly string _applicationName;
+        //private readonly string _applicationName;
 
         public UpdateInvalidationConcurrencyTests(ServiceFixture_MySql serviceFixture, ITestOutputHelper outputHelper)
         {
             _cache = serviceFixture.ServiceProvider.GetRequiredService<ICache>();
-            _redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
-            _databaseNumber = Convert.ToInt32(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
-            _applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
+            //_redisConnection = ConnectionMultiplexer.Connect(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
+            //_databaseNumber = Convert.ToInt32(serviceFixture.Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
+            //_applicationName = serviceFixture.Configuration["RedisCache:ApplicationName"];
 
             _outputHelper = outputHelper;
         }
@@ -46,9 +46,11 @@ namespace HB.FullStack.Cache.Test
         [InlineData(null, null)]
         public async Task Timestamp_Multiple_Update_Concurrency_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
-            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions();
-            entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
-            entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
+            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value),
+                SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
+            };
 
             Random random = new Random(DateTime.Now.Millisecond);
             string key = "Timestamp_Multiple_Update_Concurrency_Test";
@@ -94,7 +96,7 @@ namespace HB.FullStack.Cache.Test
             Assert.True(predicateResult == result);
         }
 
-        private Dictionary<int, (long, string)> _multipleUpdates = new Dictionary<int, (long, string)>();
+        private readonly Dictionary<int, (long, string)> _multipleUpdates = new Dictionary<int, (long, string)>();
 
         /// <summary>
         /// UpdateTimestampCacheAsync
@@ -143,9 +145,11 @@ namespace HB.FullStack.Cache.Test
         [InlineData(null, null)]
         public async Task Timestamp_Update_Invalidation_Concurrency_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
-            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions();
-            entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
-            entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
+            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value),
+                SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
+            };
 
             DatabaseMocker databaseMocker = new DatabaseMocker();
 

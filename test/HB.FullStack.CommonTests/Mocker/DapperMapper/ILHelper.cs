@@ -26,9 +26,7 @@ namespace ClassLibrary1
 
         internal static void SetHandler(ITypeHandler handler)
         {
-#pragma warning disable 618
             TypeHandlerCache<T>.handler = handler;
-#pragma warning restore 618
         }
 
         private static ITypeHandler handler;
@@ -55,7 +53,7 @@ namespace ClassLibrary1
     public static class ILHelper
     {
 
-        public const string LinqBinary = "System.Data.Linq.Binary";
+        public const string LINQ_BINARY = "System.Data.Linq.Binary";
         public static LocalBuilder GetTempLocal(ILGenerator il, ref Dictionary<Type, LocalBuilder> locals, Type type, bool initAndLoad)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
@@ -303,7 +301,7 @@ namespace ClassLibrary1
                         il.Emit(OpCodes.Newobj, memberType.GetConstructor(new[] { nullUnderlyingType })); // stack is now [...][typed-value]
                     }
                 }
-                else if (memberType.FullName == LinqBinary)
+                else if (memberType.FullName == LINQ_BINARY)
                 {
                     il.Emit(OpCodes.Unbox_Any, typeof(byte[])); // stack is now [...][byte-array]
                     il.Emit(OpCodes.Newobj, memberType.GetConstructor(new Type[] { typeof(byte[]) }));// stack is now [...][binary]
@@ -317,9 +315,7 @@ namespace ClassLibrary1
                     {
                         if (hasTypeHandler)
                         {
-#pragma warning disable 618
                             il.EmitCall(OpCodes.Call, typeof(TypeHandlerCache<>).MakeGenericType(unboxType).GetMethod(nameof(TypeHandlerCache<int>.Parse)), null); // stack is now [...][typed-value]
-#pragma warning restore 618
                         }
                         else
                         {

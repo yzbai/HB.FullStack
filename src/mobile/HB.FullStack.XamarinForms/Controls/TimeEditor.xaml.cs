@@ -92,14 +92,12 @@ namespace HB.FullStack.XamarinForms.Controls
 
         public override IList<IBaseContentView?>? GetAllCustomerControls() => null;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         private void OnIsDisplay24HourFormatChanged(bool oldValue, object newValue)
         {
 
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         private void OnTimeChanged(Time24Hour oldValue, Time24Hour newValue)
         {
             OnPropertyChanged(nameof(Hour));

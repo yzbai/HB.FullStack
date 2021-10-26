@@ -11,8 +11,8 @@ namespace HB.FullStack.CommonTests
 {
     public class WeakAsyncEventManagerTest
     {
-        private WeakAsyncEventManager _weakAsyncEventManager = new WeakAsyncEventManager();
-        private ITestOutputHelper _outputHelper;
+        private readonly WeakAsyncEventManager _weakAsyncEventManager = new WeakAsyncEventManager();
+        private readonly ITestOutputHelper _outputHelper;
 
         public WeakAsyncEventManagerTest(ITestOutputHelper outputHelper)
         {

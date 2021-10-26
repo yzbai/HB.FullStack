@@ -21,7 +21,6 @@ namespace HB.FullStack
         /// ctor
         /// </summary>
         /// <exception cref="DatabaseException">Ignore.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         public ServiceFixture_Sqlite()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");

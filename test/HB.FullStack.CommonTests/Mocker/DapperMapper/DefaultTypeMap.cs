@@ -8,7 +8,7 @@ namespace ClassLibrary1
 {
     public sealed class DefaultTypeMap : ITypeMap
     {
-        public const string LinqBinary = "System.Data.Linq.Binary";
+        public const string LINQ_BINARY = "System.Data.Linq.Binary";
 
         private readonly List<FieldInfo> _fields;
         private readonly Type _type;
@@ -76,7 +76,7 @@ namespace ClassLibrary1
                 {
                     if (!string.Equals(ctorParameters[i].Name, names[i], StringComparison.OrdinalIgnoreCase))
                         break;
-                    if (types[i] == typeof(byte[]) && ctorParameters[i].ParameterType.FullName == LinqBinary)
+                    if (types[i] == typeof(byte[]) && ctorParameters[i].ParameterType.FullName == LINQ_BINARY)
                         continue;
                     var unboxedType = Nullable.GetUnderlyingType(ctorParameters[i].ParameterType) ?? ctorParameters[i].ParameterType;
                     if ((unboxedType != types[i] && !TypeHandlerHelper.HasTypeHandler(unboxedType))

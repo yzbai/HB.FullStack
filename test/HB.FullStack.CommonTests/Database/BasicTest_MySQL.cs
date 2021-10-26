@@ -37,7 +37,7 @@ namespace HB.FullStack.DatabaseTests
 
         public BasicTest_MySQL(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
-            TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
+            //TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
 
             _output = testOutputHelper;
 
@@ -571,7 +571,7 @@ namespace HB.FullStack.DatabaseTests
                 }
 
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
+                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
@@ -611,7 +611,7 @@ namespace HB.FullStack.DatabaseTests
                     {
                         EntityPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.MySQL);
+                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, EngineType.MySQL);
 
                         if (value != null)
                         {
@@ -779,12 +779,11 @@ namespace HB.FullStack.DatabaseTests
         [InlineData(true, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(false, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
         [InlineData(null, "server=127.0.0.1;port=3306;user=admin;password=_admin;database=test_db;SslMode=None;")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
         public void TestMySQL_UseAffectedRow_Test(bool? UseAffectedRows, string connectString)
         {
             if (UseAffectedRows.HasValue)
             {
-                connectString = connectString + $"UseAffectedRows={UseAffectedRows};";
+                connectString += $"UseAffectedRows={UseAffectedRows};";
             }
 
             using MySqlConnection mySqlConnection = new MySqlConnection(connectString);

@@ -55,9 +55,11 @@ namespace HB.FullStack.Cache.Test
         [InlineData(null, null)]
         public async Task CacheTimestamp_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
-            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions();
-            entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
-            entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
+            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value),
+                SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
+            };
 
             IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
@@ -67,7 +69,7 @@ namespace HB.FullStack.Cache.Test
 
             string key = "BooksBy" + SecurityUtil.CreateUniqueToken();
 
-            await _cache.SetAsync<List<Book>>(key, books, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
+            await _cache.SetAsync(key, books, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
             List<Book>? cached2 = await _cache.GetAsync<List<Book>>(key).ConfigureAwait(false);
 
             Assert.True(cached2 != null);
@@ -91,9 +93,11 @@ namespace HB.FullStack.Cache.Test
         [InlineData(19, 15)]
         public async Task CacheTimestamp_Abs_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
-            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions();
-            entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
-            entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
+            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value),
+                SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
+            };
 
             IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 
@@ -144,9 +148,11 @@ namespace HB.FullStack.Cache.Test
         [InlineData(null, null)]
         public async Task CacheTimestamp_Timestamp_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
-            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions();
-            entryOptions.AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
-            entryOptions.SlidingExpiration = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
+            DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value),
+                SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
+            };
 
             IDatabase database = _redisConnection.GetDatabase(_databaseNumber);
 

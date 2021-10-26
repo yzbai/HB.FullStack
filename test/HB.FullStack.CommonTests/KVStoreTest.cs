@@ -59,7 +59,7 @@ namespace HB.Infrastructure.Redis.Test
     public class KVStoreTest : IClassFixture<ServiceFixture_MySql>
     {
         private readonly IKVStore _kvStore;
-        private readonly ITestOutputHelper _output;
+        //private readonly ITestOutputHelper _output;
 
         private readonly UserEntity _userEntity1 = new UserEntity()
         {
@@ -75,9 +75,9 @@ namespace HB.Infrastructure.Redis.Test
             Type = UserType.Customer
         };
 
-        public KVStoreTest(ITestOutputHelper output, ServiceFixture_MySql fixture)
+        public KVStoreTest(/*ITestOutputHelper output, */ServiceFixture_MySql fixture)
         {
-            _output = output;
+            //_output = output;
             _kvStore = fixture.ServiceProvider.GetRequiredService<IKVStore>();
         }
 
@@ -97,7 +97,7 @@ namespace HB.Infrastructure.Redis.Test
 
             UserEntity? fetchedAgain = await _kvStore.GetAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
 
-            Assert.Equal<UserEntity>(_userEntity1, fetchedAgain!, new UserEntityComparer());
+            Assert.Equal(_userEntity1, fetchedAgain!, new UserEntityComparer());
         }
 
         /// <summary>

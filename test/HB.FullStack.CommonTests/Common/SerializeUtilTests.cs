@@ -65,8 +65,7 @@ namespace System.Tests
             _outputHelper.WriteLine(newtonJson);
 
             Assert.Equal(json, newtonJson);
-
-            IList<Student>? fromJson = SerializeUtil.FromJson<IList<Student>>(json);
+            _ = SerializeUtil.FromJson<IList<Student>>(json);
 
 
         }

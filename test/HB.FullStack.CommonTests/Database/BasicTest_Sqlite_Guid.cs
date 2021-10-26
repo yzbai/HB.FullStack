@@ -27,6 +27,7 @@ namespace HB.FullStack.DatabaseTests
         private readonly IDatabase _sqlite;
         private readonly ITransaction _sqlIteTransaction;
         private readonly ITestOutputHelper _output;
+
         //private readonly IsolationLevel  = IsolationLevel.RepeatableRead;
 
 
@@ -38,7 +39,6 @@ namespace HB.FullStack.DatabaseTests
         /// <param name="testOutputHelper"></param>
         /// <param name="serviceFixture"></param>
         /// <exception cref="DatabaseException">Ignore.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>")]
         public BasicTest_Sqlite_Guid(ITestOutputHelper testOutputHelper, ServiceFixture_Sqlite serviceFixture)
         {
             _output = testOutputHelper;
@@ -112,7 +112,7 @@ namespace HB.FullStack.DatabaseTests
                 };
                 }
 
-                await database.BatchUpdateAsync<Guid_PublisherEntity_Client>(lst, "lastUsre", transContext).ConfigureAwait(false);
+                await database.BatchUpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
 
                 await transaction.CommitAsync(transContext).ConfigureAwait(false);
 
@@ -144,7 +144,7 @@ namespace HB.FullStack.DatabaseTests
 
                 if (lst.Count != 0)
                 {
-                    await database.BatchDeleteAsync<Guid_PublisherEntity_Client>(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                    await database.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 }
 
@@ -364,20 +364,20 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                await database.BatchAddAsync<Guid_PublisherEntity_Client>(items, "xx", trans).ConfigureAwait(false);
+                await database.BatchAddAsync(items, "xx", trans).ConfigureAwait(false);
 
 
                 IEnumerable<Guid_PublisherEntity_Client>? results = await database.RetrieveAsync<Guid_PublisherEntity_Client>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await database.BatchUpdateAsync<Guid_PublisherEntity_Client>(items, "xx", trans).ConfigureAwait(false);
+                await database.BatchUpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
                 List<Guid_PublisherEntity_Client>? items2 = Mocker.Guid_GetPublishers_Client();
 
-                await database.BatchAddAsync<Guid_PublisherEntity_Client>(items2, "xx", trans).ConfigureAwait(false);
+                await database.BatchAddAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 results = await database.RetrieveAsync<Guid_PublisherEntity_Client>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await database.BatchUpdateAsync<Guid_PublisherEntity_Client>(items2, "xx", trans).ConfigureAwait(false);
+                await database.BatchUpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
 
                 await transaction.CommitAsync(trans).ConfigureAwait(false);
@@ -542,7 +542,7 @@ namespace HB.FullStack.DatabaseTests
 
             IEnumerable<BookEntity_Client> re = await database.RetrieveAsync<BookEntity_Client>(b => b.Deleted, trans).ConfigureAwait(false);
 
-            await database.AddAsync<BookEntity_Client>(Mocker.GetBooks_Client(1)[0], "", trans).ConfigureAwait(false);
+            await database.AddAsync(Mocker.GetBooks_Client(1)[0], "", trans).ConfigureAwait(false);
 
             try
             {
@@ -696,7 +696,6 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [Fact]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "<Pending>")]
         public void TestSQLite_Changes_Test()
         {
             string connectString = $"Data Source=sqlite_test2.db";

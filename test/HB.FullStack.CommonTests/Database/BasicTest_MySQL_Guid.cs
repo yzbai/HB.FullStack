@@ -37,7 +37,7 @@ namespace HB.FullStack.DatabaseTests
 
         public BasicTest_MySQL_Guid(ITestOutputHelper testOutputHelper, ServiceFixture_MySql serviceFixture)
         {
-            TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
+            //TestCls testCls = serviceFixture.ServiceProvider.GetRequiredService<TestCls>();
 
             _output = testOutputHelper;
 
@@ -512,7 +512,7 @@ namespace HB.FullStack.DatabaseTests
 
             IEnumerable<Guid_PublisherEntity> entities = await database.RetrieveAsync<Guid_PublisherEntity>(t => t.Name.StartsWith("Star"), null);
 
-            Assert.True(entities.Count() > 0);
+            Assert.True(entities.Any());
 
             Assert.All(entities, t => t.Name.StartsWith("Star"));
         }
@@ -552,7 +552,7 @@ namespace HB.FullStack.DatabaseTests
             //IEnumerable<Guid_PublisherEntity> entities = await database.RetrieveAsync<Guid_PublisherEntity>(
             //    t => ReturnGuid() == ReturnGuid(), null);
 
-            Assert.True(entities.Count() > 0);
+            Assert.True(entities.Any());
 
             Assert.All(entities, t => t.Name.StartsWith("Star"));
         }
@@ -679,7 +679,7 @@ namespace HB.FullStack.DatabaseTests
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDataReader, object> fullStack_mapper = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader, 0, definition.FieldCount, false, Database.Engine.EngineType.MySQL);
+                Func<IDataReader, object> fullStack_mapper = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_BookEntity), reader);
 
@@ -760,10 +760,12 @@ namespace HB.FullStack.DatabaseTests
 
             //PublisherEntity2
 
-            Guid_PublisherEntity2 publisherEntity2 = new Guid_PublisherEntity2();
-            publisherEntity2.Version = 0;
+            Guid_PublisherEntity2 publisherEntity2 = new Guid_PublisherEntity2
+            {
+                Version = 0
+            };
 
-            var emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
+            IList<KeyValuePair<string, object>>? emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
 
             var reflect_results2 = publisherEntity2.ToParametersUsingReflection(EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
 
@@ -771,8 +773,10 @@ namespace HB.FullStack.DatabaseTests
 
             //PublisherEntity3
 
-            Guid_PublisherEntity3 publisherEntity3 = new Guid_PublisherEntity3();
-            publisherEntity3.Version = 0;
+            Guid_PublisherEntity3 publisherEntity3 = new Guid_PublisherEntity3
+            {
+                Version = 0
+            };
 
             var emit_results3 = publisherEntity3.ToParameters(EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, 1);
 
@@ -844,7 +848,7 @@ namespace HB.FullStack.DatabaseTests
             }
         }
 
-        public Guid ReturnGuid()
+        public static Guid ReturnGuid()
         {
             return Guid.NewGuid();
         }
