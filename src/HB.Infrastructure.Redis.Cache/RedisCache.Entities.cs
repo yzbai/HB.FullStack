@@ -384,7 +384,7 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogCacheInvalidationConcurrency(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
+                        _logger.LogCacheInvalidationConcurrencyWithEntities(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                     else if (rt == 9)
                     {

@@ -126,7 +126,7 @@ return data[3]";
                     aggregateException = new AggregateException(ex, ex2);
                 }
 
-                throw (Exception?)aggregateException ?? CacheExceptions.GetErrorButDeleted(key, ex);
+                throw (Exception?)aggregateException ?? CacheExceptions.GetError(key, ex);
             }
         }
 
@@ -174,7 +174,7 @@ return data[3]";
                 }
                 else if (rt == 8)
                 {
-                    _logger.LogCacheInvalidationConcurrency(key, utcTicks, options);
+                    _logger.LogCacheInvalidationConcurrencyWithTimestamp(key, utcTicks, options);
                 }
                 else if (rt == 9)
                 {

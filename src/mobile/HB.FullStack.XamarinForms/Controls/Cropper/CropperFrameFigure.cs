@@ -209,8 +209,8 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
                         if (IsSquare)
                         {
                             float offset = Math.Min(Math.Abs(newRight - _cropRect.Right), Math.Abs(newBottom - _cropRect.Bottom));
-                            _cropRect.Right = _cropRect.Right + offset * Math.Sign(xOffset);
-                            _cropRect.Bottom = _cropRect.Bottom + offset * Math.Sign(yOffset);
+                            _cropRect.Right += offset * Math.Sign(xOffset);
+                            _cropRect.Bottom += offset * Math.Sign(yOffset);
                         }
                         else
                         {
@@ -231,8 +231,8 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
                         if (IsSquare)
                         {
                             float offset = Math.Min(Math.Abs(newLeft - _cropRect.Left), Math.Abs(newBottom - _cropRect.Bottom));
-                            _cropRect.Left = _cropRect.Left + offset * Math.Sign(xOffset);
-                            _cropRect.Bottom = _cropRect.Bottom + offset * Math.Sign(yOffset);
+                            _cropRect.Left += offset * Math.Sign(xOffset);
+                            _cropRect.Bottom += offset * Math.Sign(yOffset);
                         }
                         else
                         {
@@ -252,8 +252,8 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
                         if (IsSquare)
                         {
                             float offset = Math.Min(Math.Abs(newLeft - _cropRect.Left), Math.Abs(newTop - _cropRect.Top));
-                            _cropRect.Left = _cropRect.Left + offset * Math.Sign(xOffset);
-                            _cropRect.Top = _cropRect.Top + offset * Math.Sign(yOffset);
+                            _cropRect.Left += offset * Math.Sign(xOffset);
+                            _cropRect.Top += offset * Math.Sign(yOffset);
                         }
                         else
                         {
@@ -273,8 +273,8 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
                         if (IsSquare)
                         {
                             float offset = Math.Min(Math.Abs(newRight - _cropRect.Right), Math.Abs(newTop - _cropRect.Top));
-                            _cropRect.Right = _cropRect.Right + offset * Math.Sign(xOffset);
-                            _cropRect.Top = _cropRect.Top + offset * Math.Sign(yOffset);
+                            _cropRect.Right += offset * Math.Sign(xOffset);
+                            _cropRect.Top += offset * Math.Sign(yOffset);
                         }
                         else
                         {

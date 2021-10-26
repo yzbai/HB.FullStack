@@ -55,8 +55,8 @@ namespace HB.FullStack.XamarinForms.Controls
         public Color BorderUnSelectedColor { get => (Color)GetValue(BorderUnSelectedColorProperty); set => SetValue(BorderUnSelectedColorProperty, value); }
 
         private readonly List<Frame> _frames = new List<Frame>();
-        private FlexLayout _pinLayout;
-        private Entry _inputEntry;
+        private readonly FlexLayout _pinLayout;
+        private readonly Entry _inputEntry;
 
         public SmsCodeEntry()
         {

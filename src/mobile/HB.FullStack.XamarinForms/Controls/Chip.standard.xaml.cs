@@ -220,7 +220,7 @@ namespace HB.FullStack.XamarinForms.Controls
                 ((Chip)bindable).RefreshVisualState();
         }
 
-        private Frame _frame;
+        private readonly Frame _frame;
         public Chip()
         {
             Content = new Frame

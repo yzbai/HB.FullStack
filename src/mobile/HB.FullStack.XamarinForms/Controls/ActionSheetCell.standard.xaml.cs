@@ -66,9 +66,7 @@ namespace HB.FullStack.XamarinForms.Controls
             null,
             BindingMode.OneWay);
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<ActionSheetCellOptionItem> Options
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (IList<ActionSheetCellOptionItem>)GetValue(OptionsProperty); }
             set { SetValue(OptionsProperty, value); }

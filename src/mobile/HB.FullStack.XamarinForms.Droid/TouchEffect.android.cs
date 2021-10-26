@@ -74,10 +74,9 @@ namespace HB.FullStack.XamarinForms.Droid.Effects
             GlobalSettings.Logger.LogDebug($"在安卓中， sender: {sender.GetType().Name}");
 
             // Two object common to all the events
-            Android.Views.View? senderView = sender as Android.Views.View;
             MotionEvent? motionEvent = args.Event;
 
-            if (senderView == null || motionEvent == null)
+            if (!(sender is Android.Views.View senderView) || motionEvent == null)
             {
                 return;
             }

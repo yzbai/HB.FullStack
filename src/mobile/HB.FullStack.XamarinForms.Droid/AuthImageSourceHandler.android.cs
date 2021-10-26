@@ -30,15 +30,15 @@ namespace HB.FullStack.XamarinForms.Droid
 		/// <returns></returns>
 		/// <exception cref="OperationCanceledException"></exception>
 		/// <exception cref="Exception"></exception>
-		public async Task<Bitmap?> LoadImageAsync(ImageSource imagesource, Context context, CancellationToken cancelationToken = default(CancellationToken))
+		public async Task<Bitmap?> LoadImageAsync(ImageSource imagesource, Context context, CancellationToken cancelationToken = default)
 		{
 			var imageLoader = imagesource as AuthUriImageSource;
 			Bitmap? bitmap = null;
 			if (imageLoader?.Uri != null)
 			{
-				using (Stream imageStream = await imageLoader.GetStreamAsync(cancelationToken).ConfigureAwait(false))
-					bitmap = await BitmapFactory.DecodeStreamAsync(imageStream).ConfigureAwait(false);
-			}
+                using Stream imageStream = await imageLoader.GetStreamAsync(cancelationToken).ConfigureAwait(false);
+                bitmap = await BitmapFactory.DecodeStreamAsync(imageStream).ConfigureAwait(false);
+            }
 
 			if (bitmap == null)
 			{

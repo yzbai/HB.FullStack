@@ -144,14 +144,15 @@ namespace HB.FullStack.XamarinForms.Base
 
         public static void ExceptionHandler(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {
-            if (ex is ApiException apiEx)
+            //TODO: ExceptionHandler
+            if (ex is ApiException _)
             {
             }
-            else if (ex is MobileException mobileException)
+            else if (ex is MobileException _)
             {
 
             }
-            else if (ex is DatabaseException dbException)
+            else if (ex is DatabaseException _)
             {
 
             }

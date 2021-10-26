@@ -11,7 +11,6 @@ namespace HB.FullStack.XamarinForms.Platforms
 
 
 
-        [SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "<Pending>")]
         void Error(string message);
 
 
@@ -20,7 +19,6 @@ namespace HB.FullStack.XamarinForms.Platforms
 
 
 
-        [SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "<Pending>")]
         void Error(Exception exception);
 
 

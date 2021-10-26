@@ -8,46 +8,46 @@ namespace HB.FullStack.XamarinForms.Droid.Platforms
 {
     public class LoggerImpl : ILoggerImpl
     {
-        private const string _tag = "HB.FullStack";
+        private const string TAG = "HB.FullStack";
 
         public void Wtf(string message)
         {
-            Log.Wtf(_tag, message);
+            Log.Wtf(TAG, message);
         }
 
         public void Error(string message)
         {
-            Log.Error(_tag, message);
+            Log.Error(TAG, message);
         }
 
         public void Wtf(Exception exception)
         {
-            Log.Wtf(_tag, exception.ToString());
+            Log.Wtf(TAG, exception.ToString());
         }
 
         public void Error(Exception exception)
         {
-            Log.Error(_tag, exception.ToString());
+            Log.Error(TAG, exception.ToString());
         }
 
         public void Warn(string message)
         {
-            Log.Warn(_tag, message);
+            Log.Warn(TAG, message);
         }
 
         public void Info(string message)
         {
-            Log.Info(_tag, message);
+            Log.Info(TAG, message);
         }
 
         public void Debug(string message)
         {
-            Log.Debug(_tag, message);
+            Log.Debug(TAG, message);
         }
 
         public void Trace(string message)
         {
-            Log.Verbose(_tag, message);
+            Log.Verbose(TAG, message);
         }
     }
 }

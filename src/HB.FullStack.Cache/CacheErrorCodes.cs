@@ -32,15 +32,18 @@ namespace System
 
         public static readonly ErrorCode GetEntitiesError = new ErrorCode(ErrorCodeStartIds.CACHE + 14, nameof(GetEntitiesError), "");
 
-        public static readonly ErrorCode CacheInvalidationConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 15, nameof(CacheInvalidationConcurrency), "");
+        public static readonly ErrorCode CacheInvalidationConcurrencyWithEntities = new ErrorCode(ErrorCodeStartIds.CACHE + 15, nameof(CacheInvalidationConcurrencyWithEntities), "");
+        public static readonly ErrorCode CacheInvalidationConcurrencyWithTimestamp = new ErrorCode(ErrorCodeStartIds.CACHE + 16, nameof(CacheInvalidationConcurrencyWithTimestamp), "");
 
-        public static readonly ErrorCode CacheUpdateVersionConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 16, nameof(CacheUpdateVersionConcurrency), "");
+        public static readonly ErrorCode CacheUpdateVersionConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 17, nameof(CacheUpdateVersionConcurrency), "");
 
-        public static readonly ErrorCode GetErrorButDeleted = new ErrorCode(ErrorCodeStartIds.CACHE + 17, nameof(GetErrorButDeleted), "");
 
         public static readonly ErrorCode SetError = new ErrorCode(ErrorCodeStartIds.CACHE + 18, nameof(SetError), "");
 
         public static readonly ErrorCode RemoveError = new ErrorCode(ErrorCodeStartIds.CACHE + 19, nameof(RemoveError), "");
+        public static readonly ErrorCode GetError = new ErrorCode(ErrorCodeStartIds.CACHE + 20, nameof(GetError), "");
+
+        public static readonly ErrorCode CacheUpdateTimestampConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 21, nameof(CacheUpdateTimestampConcurrency), "");
     }
 
     public static class CacheExceptions
@@ -95,9 +98,9 @@ namespace System
             return exception;
         }
 
-        public static CacheException GetErrorButDeleted(string key, Exception ex)
+        public static CacheException GetError(string key, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.GetErrorButDeleted, ex);
+            CacheException exception = new CacheException(CacheErrorCodes.GetError, ex);
 
             exception.Data["Key"] = key;
 

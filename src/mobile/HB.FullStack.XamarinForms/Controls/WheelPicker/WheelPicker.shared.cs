@@ -14,9 +14,7 @@ namespace HB.FullStack.XamarinForms.Controls
             typeof(WheelPicker),
             new ObservableCollection<IList<string>>());
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public ObservableCollection<IList<string>> ItemsSource
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (ObservableCollection<IList<string>>)GetValue(ItemsSourceProperty); }
             set { SetValue(ItemsSourceProperty, value); }
@@ -28,9 +26,7 @@ namespace HB.FullStack.XamarinForms.Controls
             typeof(WheelPicker),
             null);
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<bool> WrapSelectorWheels
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (IList<bool>)GetValue(WrapSelectorWheelsProperty); }
             set { SetValue(WrapSelectorWheelsProperty, value); }

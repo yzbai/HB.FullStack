@@ -15,7 +15,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
 {
     public class TCaptchaDialog : BaseContentPage
     {
-        private const string _html = @"
+        private const string HTML = @"
                 <html>
                 <head>
                     <script src=""https://ssl.captcha.qq.com/TCaptcha.js""></script>
@@ -38,7 +38,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
         //持有的话，就要记得放弃. 不过由于这个Dialog一般生命周期很短，所以也无大碍
         public Func<string?, Task>? PoppedDelegate { get; set; }
 
-        private HybridWebView _webView;
+        private readonly HybridWebView _webView;
 
         public TCaptchaDialog(Func<string?, Task>? poppedDelegate)
         {
@@ -50,7 +50,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
 
             PoppedDelegate = poppedDelegate;
 
-            _webView.Source = new HtmlWebViewSource { Html = _html };
+            _webView.Source = new HtmlWebViewSource { Html = HTML };
             _webView.Loaded += WebView_Loaded;
         }
 

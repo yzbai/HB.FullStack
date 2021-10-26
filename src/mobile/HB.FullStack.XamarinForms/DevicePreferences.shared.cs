@@ -13,7 +13,7 @@ namespace HB.FullStack.XamarinForms
 {
     public static class DevicePreferences
     {
-        private const int Address_Request_Interval_Seconds = 60;
+        private const int ADDRESS_REQUEST_INTERVAL_SECONDS = 60;
 
         private static string? _deviceId;
         private static string? _deviceVersion;
@@ -28,12 +28,12 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceId.IsNullOrEmpty())
                 {
-                    string? stored = PreferenceHelper.Get(Conventions.Preference_Name_DeviceId);
+                    string? stored = PreferenceHelper.Get(Conventions.PREFERENCE_NAME_DEVICEID);
 
                     if (stored.IsNullOrEmpty())
                     {
                         stored = ClientUtils.CreateNewDeviceId();
-                        PreferenceHelper.Set(Conventions.Preference_Name_DeviceId, stored);
+                        PreferenceHelper.Set(Conventions.PREFERENCE_NAME_DEVICEID, stored);
                     }
 
                     _deviceId = stored;
@@ -71,7 +71,7 @@ namespace HB.FullStack.XamarinForms
 
         public static async Task<string> GetDeviceAddressAsync()
         {
-            if (_deviceAddress.IsNullOrEmpty() || RequestLocker.NoWaitLock(nameof(DevicePreferences), nameof(GetDeviceAddressAsync), TimeSpan.FromSeconds(Address_Request_Interval_Seconds)))
+            if (_deviceAddress.IsNullOrEmpty() || RequestLocker.NoWaitLock(nameof(DevicePreferences), nameof(GetDeviceAddressAsync), TimeSpan.FromSeconds(ADDRESS_REQUEST_INTERVAL_SECONDS)))
             {
                 _deviceAddress = await ClientUtils.GetDeviceAddressAsync().ConfigureAwait(false);
             }

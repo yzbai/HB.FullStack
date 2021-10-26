@@ -12,9 +12,6 @@ namespace HB.FullStack.XamarinForms.Droid.Effects
     {
         Android.Graphics.Color _originalBackgroundColor = new Android.Graphics.Color(0, 0, 0, 0);
         Android.Graphics.Color _backgroundColor;
-        /// <summary>
-        /// OnAttached
-        /// </summary>
         
         protected override void OnAttached()
         {

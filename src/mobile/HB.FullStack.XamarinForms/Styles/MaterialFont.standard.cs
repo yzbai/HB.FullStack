@@ -4,6 +4,7 @@ using System.Text;
 
 namespace HB.FullStack.XamarinForms.Styles
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
     public static class MaterialFont
     {
         public const string VectorSquare = "\uf001";

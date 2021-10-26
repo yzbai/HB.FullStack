@@ -406,7 +406,6 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public void ProcessUnTouchAction(long fingerId, SKPoint location)
         {
             OnHitFailed();
@@ -427,7 +426,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             return Task.Run(async () =>
             {
-                await Task.Delay(Conventions.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
+                await Task.Delay(Conventions.LONG_TAP_MIN_DURATION_IN_MILLISECONDS).ConfigureAwait(false);
 
                 if (cancellationToken.IsCancellationRequested)
                 {

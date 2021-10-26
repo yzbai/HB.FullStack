@@ -35,7 +35,7 @@ namespace HB.FullStack.WebApi
             return base.Ok(ids);
         }
 
-        public new OkObjectResult Ok([ActionResultObjectValue] object value)
+        public new OkObjectResult Ok([ActionResultObjectValue] object _)
         {
             throw new NotSupportedException("使用Resource或者NewlyAdded");
         }

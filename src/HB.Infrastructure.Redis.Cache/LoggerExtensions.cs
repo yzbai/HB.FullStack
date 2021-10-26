@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,14 +45,14 @@ namespace HB.Infrastructure.Redis.Cache
             _logForcedRemoveError(logger, cacheInstance, entityName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrency = LoggerMessage.Define<string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithEntities = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.CacheInvalidationConcurrency.ToEventId(),
+            CacheErrorCodes.CacheInvalidationConcurrencyWithEntities.ToEventId(),
             "检测到，Cache Invalidation Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, EntityName={EntityName}, Object={Object}");
 
-        public static void LogCacheInvalidationConcurrency(this ILogger logger, string? cacheInstance, string? entityName, object? obj)
+        public static void LogCacheInvalidationConcurrencyWithEntities(this ILogger logger, string? cacheInstance, string? entityName, object? obj)
         {
-            _logCacheInvalidationConcurrency(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
+            _logCacheInvalidationConcurrencyWithEntities(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
         }
 
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateVersionConcurrency = LoggerMessage.Define<string?, string?, string?>(
@@ -64,18 +65,33 @@ namespace HB.Infrastructure.Redis.Cache
             _logCacheUpdateVersionConcurrency(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
         }
 
+        private static readonly Action<ILogger, string?, Exception?> _logCacheGetError = LoggerMessage.Define<string?>(
+            LogLevel.Error,
+            CacheErrorCodes.GetError.ToEventId(),
+            "缓存读取错误。Key={Key}");
+
         public static void LogCacheGetError(this ILogger logger, string? key, Exception? innerException)
         {
-
+            _logCacheGetError(logger, key, innerException);
         }
 
-        public static void LogCacheInvalidationConcurrency(this ILogger logger, string? key, UtcNowTicks utcNowTicks, DistributedCacheEntryOptions options)
+        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithTimestamp = LoggerMessage.Define<string?, string?, string?>(
+            LogLevel.Error,
+            CacheErrorCodes.CacheInvalidationConcurrencyWithTimestamp.ToEventId(),
+            "检测到，Cache Invalidation Concurrency冲突，已被阻止. Key={Key}, UtcNowTicks={UtcNowTicks}, Options={Options}");
+
+        public static void LogCacheInvalidationConcurrencyWithTimestamp(this ILogger logger, string? key, UtcNowTicks utcNowTicks, DistributedCacheEntryOptions options)
         {
-
+            _logCacheInvalidationConcurrencyWithTimestamp(logger, key, utcNowTicks.Ticks.ToString(CultureInfo.InvariantCulture), SerializeUtil.ToJson(options), null);
         }
+
+        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateTimestampConcurrency = LoggerMessage.Define<string?, string?, string?>(
+            LogLevel.Error,
+            CacheErrorCodes.CacheUpdateTimestampConcurrency.ToEventId(),
+            "检测到，Cache Update Concurrency冲突，已被阻止. Key={Key}, UtcNowTicks={UtcNowTicks}, Options={Options}");
         public static void LogCacheUpdateTimestampConcurrency(this ILogger logger, string? key, UtcNowTicks utcNowTicks, DistributedCacheEntryOptions options)
         {
-
+            _logCacheUpdateTimestampConcurrency(logger, key, utcNowTicks.Ticks.ToString(CultureInfo.InvariantCulture), SerializeUtil.ToJson(options), null);
         }
     }
 }

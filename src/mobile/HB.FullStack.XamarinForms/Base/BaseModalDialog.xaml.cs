@@ -16,7 +16,7 @@ namespace HB.FullStack.XamarinForms.Base
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class BaseModalDialog : BaseContentPage
     {
-        private Frame? _dialogFrame;
+        //private Frame? _dialogFrame;
 
         private ICommand DismissCommand { get; set; }
 
@@ -44,7 +44,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             base.OnApplyTemplate();
 
-            _dialogFrame = (Frame)GetTemplateChild("ModalDialogFrame");
+            //_dialogFrame = (Frame)GetTemplateChild("ModalDialogFrame");
 
             StackLayout modalDialogContainer = (StackLayout)GetTemplateChild("ModalDialogContainer");
 

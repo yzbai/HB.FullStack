@@ -9,6 +9,7 @@ using System;
 using HB.FullStack.Common.Api;
 using System.IO;
 using HB.FullStack.Common;
+using System.Threading;
 
 namespace System.Net.Http
 {
@@ -17,7 +18,7 @@ namespace System.Net.Http
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
         /// <exception cref="System.ApiException"></exception>
-        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request) where TResource : ApiResource2 where TResponse : class
+        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request, CancellationToken cancellationToken) where TResource : ApiResource2 where TResponse : class
         {
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
@@ -26,7 +27,7 @@ namespace System.Net.Http
                 requestMessage.Content = BuildMultipartContent(fileUpdateRequest);
             }
 
-            using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request).ConfigureAwait(false);
+            using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
@@ -42,23 +43,23 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
             //这里不Dispose
-            HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request).ConfigureAwait(false);
+            HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
         }
 
-        private static async Task<HttpResponseMessage> SendCoreAsync(this HttpClient httpClient, HttpRequestMessage requestMessage, ApiRequest request)
+        private static async Task<HttpResponseMessage> SendCoreAsync(this HttpClient httpClient, HttpRequestMessage requestMessage, ApiRequest request, CancellationToken cancellationToken)
         {
             try
             {
-                return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             }
 
             //https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.sendasync?view=netstandard-2.1

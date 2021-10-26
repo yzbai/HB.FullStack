@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.XamarinForms.Api
@@ -44,42 +45,57 @@ namespace HB.FullStack.XamarinForms.Api
             return _options.DefaultJwtEndpoint;
         }
 
-        /// <exception cref="ApiException"></exception>
-        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource2
-            => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get).ConfigureAwait(false) ?? Array.Empty<T>();
+        public Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource2
+            => GetAsync(request, CancellationToken.None);
 
-        /// <exception cref="ApiException"></exception>
-        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource2
-            => (await GetAsync(request).ConfigureAwait(false)).FirstOrDefault();
+        public async Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
+            => await SendAsync<T, IEnumerable<T>>(request, ApiRequestType.Get, cancellationToken).ConfigureAwait(false) ?? Array.Empty<T>();
 
-        /// <exception cref="ApiException"></exception>
+        public Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource2
+            => GetFirstOrDefaultAsync(request, CancellationToken.None);
+
+        public async Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
+            => (await GetAsync(request, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+
         public Task AddAsync<T>(AddRequest<T> addRequest) where T : ApiResource2
+            => AddAsync(addRequest, CancellationToken.None);
+
+        public Task AddAsync<T>(AddRequest<T> addRequest, CancellationToken cancellationToken) where T : ApiResource2
         {
             if (typeof(T) == typeof(LongIdResource))
             {
-                return SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add);
+                return SendAsync<T, IEnumerable<long>>(addRequest, ApiRequestType.Add, cancellationToken);
             }
             else if (typeof(T) == typeof(GuidResource))
             {
-                return SendAsync<T, EmptyResponse>(addRequest, ApiRequestType.Add);
+                return SendAsync<T, EmptyResponse>(addRequest, ApiRequestType.Add, cancellationToken);
             }
 
             return Task.CompletedTask;
         }
 
-
-        /// <exception cref="ApiException"></exception>
         public Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource2
-            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
+            => UpdateAsync(request, CancellationToken.None);
+
+        public Task UpdateAsync<T>(UpdateRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
+            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update, cancellationToken);
 
         public Task UpdateFields<T>(UpdateFieldsRequest<T> request) where T : ApiResource2
-            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update);
+            =>UpdateFields(request, CancellationToken.None);
 
-        /// <exception cref="ApiException"></exception>
+        public Task UpdateFields<T>(UpdateFieldsRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
+            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update, cancellationToken);
+
         public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource2
-            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete);
+            => DeleteAsync(request, CancellationToken.None);   
 
-        public async Task<Stream> GetStreamAsync(ApiRequest request)
+        public Task DeleteAsync<T>(DeleteRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
+            => SendAsync<T, EmptyResponse>(request, ApiRequestType.Delete, cancellationToken);
+
+        public Task<Stream> GetStreamAsync(ApiRequest request)
+            => GetStreamAsync(request, CancellationToken.None);
+
+        public async Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken)
         {
             if (!request.IsValid())
             {
@@ -98,7 +114,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                 await OnRequestingAsync(request, new ApiEventArgs(ApiRequestType.Stream, request)).ConfigureAwait(false);
 
-                Stream stream = await httpClient.GetStreamAsync(request).ConfigureAwait(false);
+                Stream stream = await httpClient.GetStreamAsync(request, cancellationToken).ConfigureAwait(false);
 
                 await OnResponsedAsync(stream, new ApiEventArgs(ApiRequestType.Stream, request)).ConfigureAwait(false);
 
@@ -112,7 +128,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                     if (refreshSuccessed)
                     {
-                        return await GetStreamAsync(request).ConfigureAwait(false);
+                        return await GetStreamAsync(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
 
@@ -124,8 +140,7 @@ namespace HB.FullStack.XamarinForms.Api
             }
         }
 
-        /// <exception cref="ApiException"></exception>
-        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType) where T : ApiResource2 where TResponse : class
+        private async Task<TResponse?> SendAsync<T, TResponse>(ApiRequest<T> request, ApiRequestType requestType, CancellationToken cancellationToken) where T : ApiResource2 where TResponse : class
         {
             if (!request.IsValid())
             {
@@ -143,7 +158,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                 await OnRequestingAsync(request, new ApiEventArgs(requestType, request)).ConfigureAwait(false);
 
-                TResponse? rt = await httpClient.SendAsync<T, TResponse>(request).ConfigureAwait(false);
+                TResponse? rt = await httpClient.SendAsync<T, TResponse>(request, cancellationToken).ConfigureAwait(false);
 
                 await OnResponsedAsync(rt, new ApiEventArgs(requestType, request)).ConfigureAwait(false);
 
@@ -157,7 +172,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                     if (refreshSuccessed)
                     {
-                        return await SendAsync<T, TResponse>(request, requestType).ConfigureAwait(false);
+                        return await SendAsync<T, TResponse>(request, requestType, cancellationToken).ConfigureAwait(false);
                     }
                 }
 

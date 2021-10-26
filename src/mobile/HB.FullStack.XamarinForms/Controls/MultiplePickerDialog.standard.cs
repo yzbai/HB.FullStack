@@ -51,7 +51,7 @@ namespace HB.FullStack.XamarinForms.Controls
         //    set { SetValue(ConfirmCommandParameterProperty, value); }
         //}
 
-        private MultipleListPicker _multipleListPicker;
+        private readonly MultipleListPicker _multipleListPicker;
 
         public MultiplePickerDialog()
         {

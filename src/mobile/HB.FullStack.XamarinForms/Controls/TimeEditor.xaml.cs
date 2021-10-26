@@ -53,12 +53,9 @@ namespace HB.FullStack.XamarinForms.Controls
 
         public TimeEditor()
         {
-
-
             AmPmChangedCommand = new Command<object>(OnAmPmChanged);
             HourChangedCommand = new Command<object>(OnHourChanged);
             MinuteChangedCommand = new Command<object>(OnMinuteChanged);
-
 
             TestCommand = new Command(() =>
             {

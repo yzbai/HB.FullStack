@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
@@ -757,21 +756,21 @@ namespace HB.FullStack.Identity
             {
                 _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
 
-                resultError = resultError.Substring(0, MAX_RESULT_ERROR_LENGTH);
+                resultError = resultError[..MAX_RESULT_ERROR_LENGTH];
             }
 
             if (arguments != null && arguments.Length > MAX_ARGUMENTS_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，Arguments过长，已截断, {Arguments}", arguments);
 
-                arguments = arguments.Substring(0, MAX_ARGUMENTS_LENGTH);
+                arguments = arguments[..MAX_ARGUMENTS_LENGTH];
             }
 
             if (url != null && url.Length > MAX_URL_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，url过长，已截断, {Url}", url);
 
-                url = url.Substring(0, MAX_URL_LENGTH);
+                url = url[..MAX_URL_LENGTH];
             }
 
             UserActivity entity = new UserActivity

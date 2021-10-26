@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
@@ -21,19 +22,27 @@ namespace HB.FullStack.XamarinForms.Api
 
         /// <exception cref="ApiException"></exception>
         Task AddAsync<T>(AddRequest<T> request) where T : ApiResource2;
+        Task AddAsync<T>(AddRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
 
 
         /// <exception cref="ApiException"></exception>
         Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource2;
+        Task UpdateAsync<T>(UpdateRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
 
         /// <exception cref="ApiException"></exception>
         Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource2;
+        Task DeleteAsync<T>(DeleteRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
 
         /// <exception cref="ApiException"></exception>
         Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource2;
+        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
 
         Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource2;
+        Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
+
         JwtEndpointSetting GetDefaultJwtEndpointSetting();
+
         Task<Stream> GetStreamAsync(ApiRequest request);
+        Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken);
     }
 }
