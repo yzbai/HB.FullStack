@@ -11,7 +11,7 @@ using Xamarin.Essentials;
 
 namespace HB.FullStack.XamarinForms
 {
-    public static class ClientUtils
+    public static class MobileUtils
     {
         public static DeviceInfos GetDeviceInfos()
         {

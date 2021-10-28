@@ -2,9 +2,11 @@
 
 using System.Buffers;
 using System.Buffers.Text;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Encodings.Web;
@@ -19,6 +21,9 @@ namespace System
     public static class SerializeUtil
     {
         #region Json
+
+        //TODO: 使用source generator
+        //https://devblogs.microsoft.com/dotnet/try-the-new-system-text-json-source-generator/
 
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
 
@@ -94,6 +99,78 @@ namespace System
             }
 
             return null;
+        }
+
+        private static readonly Type _collectionType = typeof(IEnumerable);
+
+        public static bool TryFromJsonWithCollectionCheck<T>(string jsonString, out T? target) where T : class
+        {
+            //if json begine with '[', and T is a array or can be assignable to IEnumerable<T> ,ok
+            //if json begin with '[', and T is not array or can be assignable to IEnumerable<T>, but only one ok, not only one null
+            //if json not begin with '[', T is array or ..., ok
+            //if json not begin with '[', T is not array or ...., ok
+
+            Type targetType = typeof(T);
+
+            try
+            {
+                if (_collectionType.IsAssignableFrom(targetType))
+                {
+                    //target is collection
+                    if (jsonString.StartsWith('['))
+                    {
+                        target = FromJson<T>(jsonString);
+                        return true;
+                    }
+                    else
+                    {
+                        Type argumentType = targetType.GetGenericArguments()[0];
+
+                        IList lst = (IList)(typeof(List<>).MakeGenericType(argumentType).GetConstructor(Array.Empty<Type>())?.Invoke(Array.Empty<Type>())!);
+
+                        object? result = FromJson(argumentType, jsonString);
+
+                        lst.Add(result);
+
+                        target = (T)lst;
+
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (jsonString.StartsWith('['))
+                    {
+                        Type genericType = typeof(IEnumerable<>).MakeGenericType(targetType);
+
+                        IEnumerable<T>? lst = FromJson<IEnumerable<T>>(jsonString);
+
+                        if (lst != null && lst.Count() == 1)
+                        {
+                            target = lst.ElementAt(0);
+                            return true;
+                        }
+                        else
+                        {
+                            target = null;
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        target = FromJson<T>(jsonString);
+                        return true;
+                    }
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                GlobalSettings.Logger?.LogTryDeserializeWithCollectionCheckError(jsonString, targetType.FullName, ex);
+                target = null;
+                return false;
+            }
         }
 
         #endregion Json

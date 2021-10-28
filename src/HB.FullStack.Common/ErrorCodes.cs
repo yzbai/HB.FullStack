@@ -24,6 +24,8 @@ namespace System
         public static readonly ErrorCode SerializeLogError = new ErrorCode(ErrorCodeStartIds.COMMON + 7, nameof(SerializeLogError), "");
 
         public static readonly ErrorCode PerformValidateError = new ErrorCode(ErrorCodeStartIds.COMMON + 8, nameof(PerformValidateError), "");
+
+        public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode(ErrorCodeStartIds.COMMON + 9, nameof(TryFromJsonWithCollectionCheckError), "");
     }
 
     public static partial class LoggerExtensions
@@ -96,6 +98,16 @@ namespace System
         public static void LogPerformValidateError(this ILogger logger, string? propertyName, Exception ex)
         {
             _logPerformValidateError(logger, propertyName, ex);
+        }
+
+        private static readonly Action<ILogger, string?, string?, Exception?> _logTryDeserializeWithCollectionCheckError = LoggerMessage.Define<string?, string?>(
+            LogLevel.Error,
+            CommonErrorCodes.TryFromJsonWithCollectionCheckError.ToEventId(),
+            "解析json到可能是集合或者个体的时候出错。JsonString={JsonString}, TypeName={TypeName}");
+
+        public static void LogTryDeserializeWithCollectionCheckError(this ILogger logger, string? jsonString, string? typeName, Exception? innerException)
+        {
+            _logTryDeserializeWithCollectionCheckError(logger, jsonString, typeName, innerException);
         }
     }
 

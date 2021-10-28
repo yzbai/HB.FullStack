@@ -7,19 +7,20 @@ using HB.FullStack.CommonTests;
 using System.Text.Json;
 using System.Buffers.Text;
 using System.Buffers;
+using HB.FullStack.Tests.Mocker;
 
-namespace System.Tests
+namespace HB.FullStack.Tests.Common
 {
-    public class SerializeUtilTests
+    public class SerializeUtil2Tests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        public SerializeUtilTests(ITestOutputHelper testOutputHelper)
+        public SerializeUtil2Tests(ITestOutputHelper testOutputHelper)
         {
             _outputHelper = testOutputHelper;
         }
 
-        [Fact()]
+        [Fact]
         public void ToJsonTest()
         {
             var student = StudentMocker.MockOneStudent();
@@ -30,7 +31,7 @@ namespace System.Tests
             Assert.Equal(json, newtonJson);
         }
 
-        [Fact()]
+        [Fact]
         public void ToJsonTest_ChineseSymbol()
         {
             object jsonObject = new { chinese_symbol = @"~·@#￥%……&*（）—-+=｛｝【】；：“”‘’《》，。？、" };
@@ -40,7 +41,7 @@ namespace System.Tests
             Assert.Equal(expected: json, actual: newtonJson);
         }
 
-        [Fact()]
+        [Fact]
         public void FromJsonTest_Number()
         {
             string json = "{\"Number\": \"123\", \"Price\": \"12.123456789\"}";
@@ -69,6 +70,8 @@ namespace System.Tests
 
 
         }
+
+        
     }
 
    

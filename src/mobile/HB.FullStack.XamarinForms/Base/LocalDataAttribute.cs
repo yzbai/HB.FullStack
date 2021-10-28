@@ -5,7 +5,7 @@ namespace System
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class LocalDataAttribute : Attribute
     {
-        public int ExpiryMinutes { get; }
+        public int ExpirySeconds { get; }
 
         public bool AllowOfflineWrite { get; }
 
@@ -13,9 +13,9 @@ namespace System
 
         public bool NeedLogined { get; }
 
-        public LocalDataAttribute(int expiryMinutes, bool needLogined, bool allowOfflineRead, bool allowOfflineWrite)
+        public LocalDataAttribute(int expirySeconds, bool needLogined, bool allowOfflineRead, bool allowOfflineWrite)
         {
-            ExpiryMinutes = expiryMinutes;
+            ExpirySeconds = expirySeconds;
 
             NeedLogined = needLogined;
             AllowOfflineRead = allowOfflineRead;

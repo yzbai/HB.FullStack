@@ -46,7 +46,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (_configuration == null)
                 {
-                    _configuration = ClientUtils.GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
+                    _configuration = MobileUtils.GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
                 }
 
                 return _configuration;

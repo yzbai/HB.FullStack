@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Database.Clien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.XamarinForms.Droid", "src\mobile\HB.FullStack.XamarinForms.Droid\HB.FullStack.XamarinForms.Droid.csproj", "{2C1A549F-2759-48C3-83E9-D527A09301B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.CommonTests", "src\HB.FullStack.CommonTests\HB.FullStack.CommonTests.csproj", "{1B627032-68E2-44F0-9321-0DBCB529DEB4}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{05d89622-f591-4330-affc-2ca4987addef}*SharedItemsImports = 13
@@ -174,6 +176,10 @@ Global
 		{2C1A549F-2759-48C3-83E9-D527A09301B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C1A549F-2759-48C3-83E9-D527A09301B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C1A549F-2759-48C3-83E9-D527A09301B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B627032-68E2-44F0-9321-0DBCB529DEB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B627032-68E2-44F0-9321-0DBCB529DEB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B627032-68E2-44F0-9321-0DBCB529DEB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B627032-68E2-44F0-9321-0DBCB529DEB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -203,6 +209,7 @@ Global
 		{4C7ACA9C-26A5-4E30-B4A4-A904D2ED5016} = {D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}
 		{46D7CDE3-184F-44B6-8E2C-04270437E538} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 		{2C1A549F-2759-48C3-83E9-D527A09301B8} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
+		{1B627032-68E2-44F0-9321-0DBCB529DEB4} = {D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

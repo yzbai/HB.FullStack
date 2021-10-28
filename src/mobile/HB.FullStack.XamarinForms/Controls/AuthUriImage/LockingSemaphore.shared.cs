@@ -7,7 +7,7 @@ namespace HB.FullStack.XamarinForms.Controls
 {
 	internal class LockingSemaphore
 	{
-		static readonly Task Completed = Task.FromResult(true);
+		static readonly Task _completed = Task.FromResult(true);
 		readonly Queue<TaskCompletionSource<bool>> _waiters = new Queue<TaskCompletionSource<bool>>();
 		int _currentCount;
 
@@ -39,7 +39,7 @@ namespace HB.FullStack.XamarinForms.Controls
 				if (_currentCount > 0)
 				{
 					--_currentCount;
-					return Completed;
+					return _completed;
 				}
 				var waiter = new TaskCompletionSource<bool>();
 				_waiters.Enqueue(waiter);

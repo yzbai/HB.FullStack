@@ -37,7 +37,7 @@ namespace System.Net.Http
             }
             else
             {
-                TResponse? response = await responseMessage.TryDeSerializeJsonAsync<TResponse>().ConfigureAwait(false);
+                TResponse? response = await responseMessage.TryDeserializeJsonAsync<TResponse>().ConfigureAwait(false);
 
                 return response;
             }
@@ -138,7 +138,7 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
-            ErrorCode? errorCode = await responseMessage.TryDeSerializeJsonAsync<ErrorCode>().ConfigureAwait(false);
+            ErrorCode? errorCode = await responseMessage.TryDeserializeJsonAsync<ErrorCode>().ConfigureAwait(false);
 
             responseMessage.Dispose();
 

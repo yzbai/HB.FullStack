@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace System.Net.Http
         /// <typeparam name="T"></typeparam>
         /// <param name="responseMessage"></param>
         /// <returns></returns>
-        public static async Task<T?> TryDeSerializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
+        public static async Task<T?> TryDeserializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
         {
             string? mediaType = responseMessage.Content.Headers.ContentType?.MediaType;
 

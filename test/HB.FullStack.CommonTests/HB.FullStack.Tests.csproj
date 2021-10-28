@@ -50,6 +50,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\HB.FullStack.Common\HB.FullStack.Common.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
     <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />

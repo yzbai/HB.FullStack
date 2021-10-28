@@ -32,7 +32,7 @@ namespace HB.FullStack.XamarinForms
 
                     if (stored.IsNullOrEmpty())
                     {
-                        stored = ClientUtils.CreateNewDeviceId();
+                        stored = MobileUtils.CreateNewDeviceId();
                         PreferenceHelper.Set(Conventions.PREFERENCE_NAME_DEVICEID, stored);
                     }
 
@@ -49,7 +49,7 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceInfos == null)
                 {
-                    _deviceInfos = ClientUtils.GetDeviceInfos();
+                    _deviceInfos = MobileUtils.GetDeviceInfos();
                 }
 
                 return _deviceInfos!;
@@ -62,7 +62,7 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceVersion.IsNullOrEmpty())
                 {
-                    _deviceVersion = ClientUtils.GetDeviceVersion();
+                    _deviceVersion = MobileUtils.GetDeviceVersion();
                 }
 
                 return _deviceVersion!;
@@ -73,7 +73,7 @@ namespace HB.FullStack.XamarinForms
         {
             if (_deviceAddress.IsNullOrEmpty() || RequestLocker.NoWaitLock(nameof(DevicePreferences), nameof(GetDeviceAddressAsync), TimeSpan.FromSeconds(ADDRESS_REQUEST_INTERVAL_SECONDS)))
             {
-                _deviceAddress = await ClientUtils.GetDeviceAddressAsync().ConfigureAwait(false);
+                _deviceAddress = await MobileUtils.GetDeviceAddressAsync().ConfigureAwait(false);
             }
 
             return _deviceAddress;

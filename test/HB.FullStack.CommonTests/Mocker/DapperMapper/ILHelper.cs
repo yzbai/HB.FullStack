@@ -15,21 +15,21 @@ namespace ClassLibrary1
         /// Not intended for direct usage.
         /// </summary>
         /// <param name="value">The object to parse.</param>
-        public static T Parse(object value) => (T)handler.Parse(typeof(T), value);
+        public static T Parse(object value) => (T)_handler.Parse(typeof(T), value);
 
         /// <summary>
         /// Not intended for direct usage.
         /// </summary>
         /// <param name="parameter">The parameter to set a value for.</param>
         /// <param name="value">The value to set.</param>
-        public static void SetValue(IDbDataParameter parameter, object value) => handler.SetValue(parameter, value);
+        public static void SetValue(IDbDataParameter parameter, object value) => _handler.SetValue(parameter, value);
 
         internal static void SetHandler(ITypeHandler handler)
         {
-            TypeHandlerCache<T>.handler = handler;
+            TypeHandlerCache<T>._handler = handler;
         }
 
-        private static ITypeHandler handler;
+        private static ITypeHandler _handler;
     }
 
     public interface ITypeHandler

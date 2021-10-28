@@ -479,7 +479,7 @@ namespace HB.FullStack.Database.SQL
 				if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains("("))
 #endif
 				{
-					if ((propertyDef.DbMaxLength == null || propertyDef.DbMaxLength == 0))
+					if (propertyDef.DbMaxLength == null || propertyDef.DbMaxLength == 0)
 					{
 						length = varcharDefaultLength;
 					}

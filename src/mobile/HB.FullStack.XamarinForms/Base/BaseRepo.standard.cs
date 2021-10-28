@@ -115,16 +115,16 @@ namespace HB.FullStack.XamarinForms.Base
             }
             else
             {
-                LocalDataExpiryTime = TimeSpan.FromMinutes(localDataAttribute.ExpiryMinutes);
+                LocalDataExpiryTime = TimeSpan.FromSeconds(localDataAttribute.ExpirySeconds);
                 NeedLogined = localDataAttribute.NeedLogined;
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead;
                 AllowOfflineWrite = localDataAttribute.AllowOfflineWrite;
             }
         }
 
-        protected abstract IEnumerable<TEntity> ToEntities(TRes res);
+        protected abstract TEntity ToEntity(TRes res);
 
-        protected abstract IEnumerable<TRes> ToResources(TEntity entity);
+        protected abstract TRes ToResource(TEntity entity);
 
         #region 查询
 
@@ -257,7 +257,8 @@ namespace HB.FullStack.XamarinForms.Base
 
             //获取远程
             IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
-            IEnumerable<TEntity> remotes = ress.SelectMany(res => ToEntities(res)).ToList();
+
+            IEnumerable<TEntity> remotes = ress.Select(r => ToEntity(r)).ToList();
 
             _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TEntity).Name);
 
@@ -296,7 +297,7 @@ namespace HB.FullStack.XamarinForms.Base
             if (EnsureInternet(!AllowOfflineWrite))
             {
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.SelectMany(k => ToResources(k)).ToList());
+                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
 
                 await ApiClient.AddAsync(addRequest).ConfigureAwait(false);
 
@@ -318,7 +319,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             if (EnsureInternet(!AllowOfflineWrite))
             {
-                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResources(entity));
+                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 
                 await ApiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
 

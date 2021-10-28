@@ -80,10 +80,10 @@ namespace HB.FullStack.XamarinForms.Api
         public Task UpdateAsync<T>(UpdateRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update, cancellationToken);
 
-        public Task UpdateFields<T>(UpdateFieldsRequest<T> request) where T : ApiResource2
-            =>UpdateFields(request, CancellationToken.None);
+        public Task PatchAsync<T>(PatchRequest<T> request) where T : ApiResource2
+            =>PatchAsync(request, CancellationToken.None);
 
-        public Task UpdateFields<T>(UpdateFieldsRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
+        public Task PatchAsync<T>(PatchRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2
             => SendAsync<T, EmptyResponse>(request, ApiRequestType.Update, cancellationToken);
 
         public Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource2

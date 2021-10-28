@@ -31,10 +31,10 @@ namespace HB.FullStack.XamarinForms.Controls
         public static readonly BindableProperty UriProperty = BindableProperty.Create(nameof(Uri), typeof(Uri), typeof(AuthUriImageSource), default(Uri),
             propertyChanged: (bindable, oldvalue, newvalue) => ((AuthUriImageSource)bindable).OnUriChanged(), validateValue: (bindable, value) => value == null || ((Uri)value).IsAbsoluteUri);
 
-        static readonly IIsolatedStorageFile Store = Device.PlatformServices.GetUserStoreForApplication();
+        static readonly IIsolatedStorageFile _store = Device.PlatformServices.GetUserStoreForApplication();
 
         //static readonly object s_syncHandle = new object();
-        static readonly ConcurrentDictionary<string, LockingSemaphore> s_semaphores = new ConcurrentDictionary<string, LockingSemaphore>();
+        static readonly ConcurrentDictionary<string, LockingSemaphore> _semaphores = new ConcurrentDictionary<string, LockingSemaphore>();
 
         TimeSpan _cacheValidity = TimeSpan.FromDays(1);
 
@@ -42,8 +42,8 @@ namespace HB.FullStack.XamarinForms.Controls
 
         static AuthUriImageSource()
         {
-            if (!Store.GetDirectoryExistsAsync(CACHE_NAME).Result)
-                Store.CreateDirectoryAsync(CACHE_NAME).Wait();
+            if (!_store.GetDirectoryExistsAsync(CACHE_NAME).Result)
+                _store.CreateDirectoryAsync(CACHE_NAME).Wait();
         }
 
         public override bool IsEmpty => Uri == null;
@@ -138,10 +138,10 @@ namespace HB.FullStack.XamarinForms.Controls
         static async Task<DateTime?> GetLastWriteTimeUtcAsync(string key)
         {
             string path = IOPath.Combine(CACHE_NAME, key);
-            if (!await Store.GetFileExistsAsync(path).ConfigureAwait(false))
+            if (!await _store.GetFileExistsAsync(path).ConfigureAwait(false))
                 return null;
 
-            return (await Store.GetLastWriteTimeAsync(path).ConfigureAwait(false)).UtcDateTime;
+            return (await _store.GetLastWriteTimeAsync(path).ConfigureAwait(false)).UtcDateTime;
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace HB.FullStack.XamarinForms.Controls
                     int backoff;
                     try
                     {
-                        Stream result = await Store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
+                        Stream result = await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
                         return result;
                     }
                     catch (IOException)
@@ -240,7 +240,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
             try
             {
-                Stream writeStream = await Store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
+                Stream writeStream = await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
 
                 await stream.CopyToAsync(writeStream, 16384, cancellationToken).ConfigureAwait(false);
 
@@ -251,7 +251,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
                 await stream.DisposeAsync().ConfigureAwait(false);
 
-                return await Store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
+                return await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -272,7 +272,7 @@ namespace HB.FullStack.XamarinForms.Controls
         async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
             string key = GetCacheKey(uri);
-            LockingSemaphore sem = s_semaphores.GetOrAdd(key, _ => new LockingSemaphore(1));
+            LockingSemaphore sem = _semaphores.GetOrAdd(key, _ => new LockingSemaphore(1));
             //lock (s_syncHandle)
             //{
             //    if (s_semaphores.ContainsKey(key))
