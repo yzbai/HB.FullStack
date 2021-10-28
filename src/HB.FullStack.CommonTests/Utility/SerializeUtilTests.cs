@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace System.Tests
 {
@@ -17,8 +18,35 @@ namespace System.Tests
     [TestClass()]
     public class SerializeUtilTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void TryFromJsonWithCollectionCheckTest()
+        {
+            string? nullStr = null;
+            string emptyStr = string.Empty;
+            string emptyCollectionStr = "[]";
+
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out TestEntity? entity));
+            Assert.IsNull(entity);
+
+            SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out IEnumerable<TestEntity>? entities);
+            Assert.IsTrue(entities!=null && !entities.Any());
+
+
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out TestEntity? entity1));
+            Assert.IsNull(entity1);
+
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out IEnumerable<TestEntity>? entities1));
+            Assert.IsTrue(entities1 != null && !entities1.Any());
+
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out TestEntity? entity2));
+            Assert.IsNull(entity2);
+
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out IEnumerable<TestEntity>? entities2));
+            Assert.IsTrue(entities2 != null && !entities2.Any());
+        }
+
+        [TestMethod()]
+        public void TryFromJsonWithCollectionCheckTest1()
         {
             TestEntity testEntity1 = new TestEntity { Name = "123", Values = new List<string> { "1", "2" } };
             TestEntity testEntity2 = new TestEntity { Name = "123", Values = new List<string> { "1", "2" } };

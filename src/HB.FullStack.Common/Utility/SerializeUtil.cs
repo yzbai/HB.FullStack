@@ -103,7 +103,15 @@ namespace System
 
         private static readonly Type _collectionType = typeof(IEnumerable);
 
-        public static bool TryFromJsonWithCollectionCheck<T>(string jsonString, out T? target) where T : class
+        /// <summary>
+        /// 返回是否成功解析，
+        /// 有可能成功解析，但结果是null
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="jsonString"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static bool TryFromJsonWithCollectionCheck<T>(string? jsonString, out T? target) where T : class
         {
             //if json begine with '[', and T is a array or can be assignable to IEnumerable<T> ,ok
             //if json begin with '[', and T is not array or can be assignable to IEnumerable<T>, but only one ok, not only one null
@@ -117,7 +125,7 @@ namespace System
                 if (_collectionType.IsAssignableFrom(targetType))
                 {
                     //target is collection
-                    if (jsonString.StartsWith('['))
+                    if (jsonString != null && jsonString.StartsWith('['))
                     {
                         target = FromJson<T>(jsonString);
                         return true;
@@ -130,7 +138,10 @@ namespace System
 
                         object? result = FromJson(argumentType, jsonString);
 
-                        lst.Add(result);
+                        if (result != null)
+                        {
+                            lst.Add(result);
+                        }
 
                         target = (T)lst;
 
@@ -139,7 +150,7 @@ namespace System
                 }
                 else
                 {
-                    if (jsonString.StartsWith('['))
+                    if (jsonString != null && jsonString.StartsWith('['))
                     {
                         Type genericType = typeof(IEnumerable<>).MakeGenericType(targetType);
 
@@ -148,6 +159,11 @@ namespace System
                         if (lst != null && lst.Count() == 1)
                         {
                             target = lst.ElementAt(0);
+                            return true;
+                        }
+                        else if (lst != null && !lst.Any())
+                        {
+                            target = null;
                             return true;
                         }
                         else
