@@ -28,9 +28,15 @@ namespace System.Net.Http
 
             try
             {
-                T? data = SerializeUtil.FromJson<T>(jsonString);
-
-                return data;
+                //T? data = SerializeUtil.FromJson<T>(jsonString);
+                if (SerializeUtil.TryFromJsonWithCollectionCheck<T>(jsonString, out T? data))
+                {
+                    return data;
+                }
+                else
+                {
+                    return null;
+                }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
