@@ -11,11 +11,14 @@ namespace HB.FullStack.XamarinForms.Api
         [Required]
         public string? EndpointName { get; set; }
 
+        [Required]
+        public string? ResourceName { get; set; }
+
         /// <summary>
         /// 刷新token的站点资源名
         /// </summary>
         [Required]
-        public string? ResourceName { get; set; }
+        public string? ResourceCollectionName { get; set; }
 
         /// <summary>
         /// 刷新token的站点版本

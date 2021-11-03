@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -12,37 +13,36 @@ namespace HB.FullStack.XamarinForms.Api
 {
     public interface IApiClient
     {
-#pragma warning disable CA1003 // Use generic event handler instances
-
         event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting;
-
         event AsyncEventHandler<object, ApiEventArgs> Responsed;
-
-#pragma warning restore CA1003 // Use generic event handler instances
-
-        /// <exception cref="ApiException"></exception>
-        Task AddAsync<T>(AddRequest<T> request) where T : ApiResource2;
-        Task AddAsync<T>(AddRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
-
-
-        /// <exception cref="ApiException"></exception>
-        Task UpdateAsync<T>(UpdateRequest<T> request) where T : ApiResource2;
-        Task UpdateAsync<T>(UpdateRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
-
-        /// <exception cref="ApiException"></exception>
-        Task DeleteAsync<T>(DeleteRequest<T> request) where T : ApiResource2;
-        Task DeleteAsync<T>(DeleteRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
-
-        /// <exception cref="ApiException"></exception>
-        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request) where T : ApiResource2;
-        Task<IEnumerable<T>> GetAsync<T>(ApiRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
-
-        Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request) where T : ApiResource2;
-        Task<T?> GetFirstOrDefaultAsync<T>(ApiRequest<T> request, CancellationToken cancellationToken) where T : ApiResource2;
 
         JwtEndpointSetting GetDefaultJwtEndpointSetting();
 
+        Task AddAsync<TRes>(AddRequest<TRes> request) where TRes : ApiResource2;
+        Task AddAsync<TRes>(AddRequest<TRes> request, CancellationToken cancellationToken) where TRes : ApiResource2;
+
+        Task UpdateAsync<TRes>(UpdateRequest<TRes> request) where TRes : ApiResource2;
+        Task UpdateAsync<TRes>(UpdateRequest<TRes> request, CancellationToken cancellationToken) where TRes : ApiResource2;
+
+        Task UpdateFieldsAsync<TRes>(UpdateFieldsRequest<TRes> request) where TRes : ApiResource2;
+        Task UpdateFieldsAsync<TRes>(UpdateFieldsRequest<TRes> request, CancellationToken cancellationToken) where TRes : ApiResource2;
+
+        Task DeleteAsync<TRes>(DeleteRequest<TRes> request) where TRes : ApiResource2;
+        Task DeleteAsync<TRes>(DeleteRequest<TRes> request, CancellationToken cancellationToken) where TRes : ApiResource2;
+
+        Task<TResponse?> GetAsync<TResponse>(ApiRequest request) where TResponse : class;
+        Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class;
+
+        Task<TRes?> GetByIdAsync<TRes>(Guid id) where TRes : ApiResource2;
+        Task<TRes?> GetByIdAsync<TRes>(Guid id, CancellationToken cancellationToken) where TRes : ApiResource2;
+
+        Task<IEnumerable<TRes>> GetAllAsync<TRes>() where TRes : ApiResource2;
+        Task<IEnumerable<TRes>> GetAllAsync<TRes>(CancellationToken cancellationToken) where TRes : ApiResource2;
+
         Task<Stream> GetStreamAsync(ApiRequest request);
         Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken);
+
+        Task UploadAsync(UploadRequest request);
+        Task UploadAsync(UploadRequest request, CancellationToken cancellationToken);
     }
 }

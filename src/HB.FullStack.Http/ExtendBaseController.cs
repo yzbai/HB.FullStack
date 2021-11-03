@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace HB.FullStack.WebApi
 {
-    public class ExtendBaseController<T> : BaseController where T : ApiResource2
+    public class ExtendBaseController : BaseController
     {
         //protected OkObjectResult Ok(T? res)
         //{

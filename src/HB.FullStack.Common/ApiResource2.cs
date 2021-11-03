@@ -13,6 +13,8 @@ namespace HB.FullStack.Common
         public string LastUser { get; set; } = string.Empty;
 
         public DateTimeOffset LastTime { get; set; }
+
+        public abstract override int GetHashCode();
     }
 
     public abstract class GuidResource : ApiResource2

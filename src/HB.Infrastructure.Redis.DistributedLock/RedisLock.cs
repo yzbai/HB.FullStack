@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 {
     public class RedisLock : IDistributedLock
     {
-        private const string PREFIX = "HBRL_";
+        private const string _pREFIX = "HBRL_";
 
         private readonly ILogger _logger;
 
@@ -47,7 +47,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
             foreach (string item in resources)
             {
-                keyResources.Add(PREFIX + Options.ApplicationName + item);
+                keyResources.Add(_pREFIX + Options.ApplicationName + item);
             }
 
             Resources = keyResources;

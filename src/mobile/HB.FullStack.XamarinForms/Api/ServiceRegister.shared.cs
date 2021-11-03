@@ -62,7 +62,7 @@ namespace Microsoft.Extensions.DependencyInjection
             ;
 
             //添加各站点的HttpClient
-            foreach (var endpoint in options.Endpoints)
+            foreach (EndpointSettings endpoint in options.Endpoints)
             {
                 services.AddHttpClient(endpoint.HttpClientName, httpClient =>
                 {

@@ -26,7 +26,7 @@ namespace HB.FullStack.XamarinForms.Controls
     /// </summary>
     public sealed class AuthUriImageSource : ImageSource
     {
-        internal const string CACHE_NAME = "ImageLoaderCache";
+        internal const string _cACHE_NAME = "ImageLoaderCache";
 
         public static readonly BindableProperty UriProperty = BindableProperty.Create(nameof(Uri), typeof(Uri), typeof(AuthUriImageSource), default(Uri),
             propertyChanged: (bindable, oldvalue, newvalue) => ((AuthUriImageSource)bindable).OnUriChanged(), validateValue: (bindable, value) => value == null || ((Uri)value).IsAbsoluteUri);
@@ -42,8 +42,8 @@ namespace HB.FullStack.XamarinForms.Controls
 
         static AuthUriImageSource()
         {
-            if (!_store.GetDirectoryExistsAsync(CACHE_NAME).Result)
-                _store.CreateDirectoryAsync(CACHE_NAME).Wait();
+            if (!_store.GetDirectoryExistsAsync(_cACHE_NAME).Result)
+                _store.CreateDirectoryAsync(_cACHE_NAME).Wait();
         }
 
         public override bool IsEmpty => Uri == null;
@@ -137,7 +137,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
         static async Task<DateTime?> GetLastWriteTimeUtcAsync(string key)
         {
-            string path = IOPath.Combine(CACHE_NAME, key);
+            string path = IOPath.Combine(_cACHE_NAME, key);
             if (!await _store.GetFileExistsAsync(path).ConfigureAwait(false))
                 return null;
 
@@ -188,7 +188,7 @@ namespace HB.FullStack.XamarinForms.Controls
                     int backoff;
                     try
                     {
-                        Stream result = await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
+                        Stream result = await _store.OpenFileAsync(IOPath.Combine(_cACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
                         return result;
                     }
                     catch (IOException)
@@ -240,7 +240,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
             try
             {
-                Stream writeStream = await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
+                Stream writeStream = await _store.OpenFileAsync(IOPath.Combine(_cACHE_NAME, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
 
                 await stream.CopyToAsync(writeStream, 16384, cancellationToken).ConfigureAwait(false);
 
@@ -251,7 +251,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
                 await stream.DisposeAsync().ConfigureAwait(false);
 
-                return await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
+                return await _store.OpenFileAsync(IOPath.Combine(_cACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -361,7 +361,7 @@ namespace HB.FullStack.XamarinForms.Controls
     {
         private readonly string _uri;
 
-        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null, null)
+        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null, null, null)
         {
             _uri = uri;
         }
@@ -371,9 +371,19 @@ namespace HB.FullStack.XamarinForms.Controls
             return $"ImageUrlRequest Uri:{_uri}";
         }
 
-        protected override string BuildUrl()
+        protected override string GetUrlCore()
         {
             return _uri;
+        }
+
+        protected override HashCode GetChildHashCode()
+        {
+            HashCode hashCode = new HashCode();
+
+            hashCode.Add(nameof(ImageUrlRequest));
+            hashCode.Add(_uri);
+
+            return hashCode;
         }
     }
 }

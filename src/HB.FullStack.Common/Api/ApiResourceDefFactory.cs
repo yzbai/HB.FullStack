@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace HB.FullStack.Common.Api
 {
+    //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取
     public static class ApiResourceDefFactory
     {
         private static readonly ConcurrentDictionary<Type, ApiResourceDef> _defDict = new ConcurrentDictionary<Type, ApiResourceDef>();
@@ -28,8 +29,10 @@ namespace HB.FullStack.Common.Api
                 RateLimit = TimeSpan.FromMilliseconds(attr.RateLimitMilliseconds),
                 ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
-                Name = type.Name
+                ResourceName = attr.ResourceName ?? type.Name,
+                ResourceCollectionName = attr.ResourceCollectionName ?? type.Name + "s",
             };
         }
     }
+
 }

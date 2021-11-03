@@ -18,16 +18,17 @@ namespace System.Net.Http
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
         /// <exception cref="System.ApiException"></exception>
-        public static async Task<TResponse?> SendAsync<TResource, TResponse>(this HttpClient httpClient, ApiRequest<TResource> request, CancellationToken cancellationToken) where TResource : ApiResource2 where TResponse : class
+        public static async Task<TResponse?> GetResponseAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
         {
+            //HttpClient不再 在接受response后主动dispose request content。 所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
-            if (request is FileUpdateRequest<TResource> fileUpdateRequest)
+            if (request is UploadRequest fileUpdateRequest)
             {
                 requestMessage.Content = BuildMultipartContent(fileUpdateRequest);
             }
 
-            using HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
+            using HttpResponseMessage responseMessage = await httpClient.GetResponseCoreAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
@@ -37,7 +38,14 @@ namespace System.Net.Http
             }
             else
             {
-                TResponse? response = await responseMessage.TryDeserializeJsonAsync<TResponse>().ConfigureAwait(false);
+                (bool success, TResponse? response) = await responseMessage.TryDeserializeJsonAsync<TResponse>().ConfigureAwait(false);
+
+                if (!success)
+                {
+                    string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    
+                    throw ApiExceptions.HttpResponseDeserializeError(request, responseString);
+                }
 
                 return response;
             }
@@ -47,15 +55,15 @@ namespace System.Net.Http
         {
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
-            //这里不Dispose
-            HttpResponseMessage responseMessage = await httpClient.SendCoreAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
+            //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
+            HttpResponseMessage responseMessage = await httpClient.GetResponseCoreAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
         }
 
-        private static async Task<HttpResponseMessage> SendCoreAsync(this HttpClient httpClient, HttpRequestMessage requestMessage, ApiRequest request, CancellationToken cancellationToken)
+        private static async Task<HttpResponseMessage> GetResponseCoreAsync(this HttpClient httpClient, HttpRequestMessage requestMessage, ApiRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -100,8 +108,8 @@ namespace System.Net.Http
             return httpRequest;
         }
 
-        [Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        private static MultipartFormDataContent BuildMultipartContent<T>(FileUpdateRequest<T> fileRequest) where T : ApiResource2
+        [Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "关于Dispose：MultipartFormDataContent Dipose的时候，会把子content Dipose掉。 而HttpRequestMessage Dispose的时候，会把他的Content Dispose掉")]
+        private static MultipartFormDataContent BuildMultipartContent(UploadRequest fileRequest)
         {
             MultipartFormDataContent content = new MultipartFormDataContent();
 
@@ -119,11 +127,6 @@ namespace System.Net.Http
                 content.Add(byteArrayContent, byteArrayContentName, fileName);
             }
 
-            //request.GetParameters().ForEach(kv =>
-            //{
-            //    content.Add(new StringContent(kv.Value), kv.Key);
-            //});
-
             content.Add(new StringContent(SerializeUtil.ToJson(fileRequest), Encoding.UTF8, "application/json"));
 
             return content;
@@ -138,7 +141,7 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
-            ErrorCode? errorCode = await responseMessage.TryDeserializeJsonAsync<ErrorCode>().ConfigureAwait(false);
+            (_, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonAsync<ErrorCode>().ConfigureAwait(false);
 
             responseMessage.Dispose();
 

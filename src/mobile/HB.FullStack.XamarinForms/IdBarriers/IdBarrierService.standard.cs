@@ -74,11 +74,9 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                     }
 
                     break;
-                case ApiRequestType.Update:
-                    break;
-                case ApiRequestType.Delete:
-                    break;
                 case ApiRequestType.Get:
+                case ApiRequestType.GetById:
+                case ApiRequestType.GetAll:
                     if (sender is IEnumerable enumerable)
                     {
                         foreach (object obj in enumerable)
@@ -86,9 +84,10 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                             await ChangeIdAsync(obj, args.RequestId, ChangeDirection.FromServer, args.RequestType).ConfigureAwait(false);
                         }
                     }
-                    break;
-                case ApiRequestType.GetSingle:
-                    await ChangeIdAsync(sender, args.RequestId, ChangeDirection.FromServer, args.RequestType).ConfigureAwait(false);
+                    else
+                    {
+                        await ChangeIdAsync(sender, args.RequestId, ChangeDirection.FromServer, args.RequestType).ConfigureAwait(false);
+                    }
                     break;
                 default:
                     break;
@@ -135,7 +134,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 }
                 else
                 {
-                    throw MobileExceptions.IdBarrierError(cause:"Id Barrier碰到无法解析的类型");
+                    throw MobileExceptions.IdBarrierError(cause: "Id Barrier碰到无法解析的类型");
                 }
             }
         }
@@ -164,10 +163,10 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 _ => -1,
             };
 
-            if (direction == ChangeDirection.FromServer 
-                && changedId < 0 
-                && id > 0 
-                &&(requestType == ApiRequestType.Get || requestType == ApiRequestType.GetSingle))
+            if (direction == ChangeDirection.FromServer
+                && changedId < 0
+                && id > 0
+                && (requestType == ApiRequestType.Get || requestType == ApiRequestType.GetAll || requestType == ApiRequestType.GetById))
             {
                 changedId = StaticIdGen.GetId();
                 await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);

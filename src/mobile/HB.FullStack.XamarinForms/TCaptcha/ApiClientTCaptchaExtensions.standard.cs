@@ -20,11 +20,11 @@ namespace HB.FullStack.XamarinForms.Api
         /// <param name="onSuccessDelegate"></param>
         /// <returns></returns>
         /// <exception cref="ApiException"></exception>
-        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest<T> request, Func<T?, Task>? onSuccessDelegate) where T : ApiResource2
+        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest request, Func<T?, Task>? onSuccessDelegate) where T : ApiResource2
         {
             try
             {
-                T? resource = await apiClient.GetFirstOrDefaultAsync(request).ConfigureAwait(false);
+                T? resource = await apiClient.GetAsync<T>(request).ConfigureAwait(false);
 
                 if (onSuccessDelegate != null)
                 {
@@ -43,7 +43,7 @@ namespace HB.FullStack.XamarinForms.Api
 
                     request.PublicResourceToken = result;
 
-                    T? resource = await apiClient.GetFirstOrDefaultAsync(request).ConfigureAwait(false);
+                    T? resource = await apiClient.GetAsync<T>(request).ConfigureAwait(false);
 
                     if (onSuccessDelegate != null)
                     {

@@ -1,4 +1,5 @@
-﻿using HB.FullStack.Common.Api;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Api;
 
 using System;
 using System.Collections.Generic;
@@ -50,9 +51,16 @@ namespace System
         /// <summary>
         /// The request failed due to an underlying issue such as network connectivity, DNS failure, server certificate validation or timeout.
         /// </summary>
-        public static ErrorCode RequestUnderlyingIssue { get;  } = new ErrorCode(ErrorCodeStartIds.API + 31, nameof(RequestUnderlyingIssue), "");
-        
-        
+        public static ErrorCode RequestUnderlyingIssue { get; } = new ErrorCode(ErrorCodeStartIds.API + 31, nameof(RequestUnderlyingIssue), "");
+        public static ErrorCode HttpResponseDeserializeError { get; } = new ErrorCode(ErrorCodeStartIds.API + 32, nameof(HttpResponseDeserializeError), "");
+        public static ErrorCode ApiClientSendUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 33, nameof(ApiClientSendUnkownError), "");
+        public static ErrorCode ApiClientGetStreamUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 34, nameof(ApiClientGetStreamUnkownError), "");
+        public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.API + 35, nameof(UploadError), "");
+        public static ErrorCode ApiRequestInvalidateError { get; } = new ErrorCode(ErrorCodeStartIds.API + 36, nameof(ApiRequestInvalidateError), "");
+        public static ErrorCode ApiRequestSetJwtError { get; } = new ErrorCode(ErrorCodeStartIds.API + 37, nameof(ApiRequestSetJwtError), "");
+        public static ErrorCode ApiRequestSetApiKeyError { get; } = new ErrorCode(ErrorCodeStartIds.API + 38, nameof(ApiRequestSetApiKeyError), "");
+        public static ErrorCode ApiClientUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 39, nameof(ApiClientUnkownError), "");
+        public static ErrorCode ServerNullReturn { get; } = new ErrorCode(ErrorCodeStartIds.API + 40, nameof(ServerNullReturn), "");
     }
 
     public static partial class ApiExceptions
@@ -83,6 +91,25 @@ namespace System
             return ex;
         }
 
+        public static Exception ApiClientGetStreamUnkownError(ApiRequest request, Exception innerException)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.ApiClientGetStreamUnkownError, innerException);
+
+            ex.Data["Request"] = request.ToDebugInfo();
+
+            return ex;
+        }
+
+        public static Exception ApiRequestInvalidateError(ApiRequest request, string validationErrorMessage)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.ApiRequestInvalidateError);
+
+            ex.Data["Request"] = request.ToDebugInfo();
+            ex.Data["ValidationError"] = validationErrorMessage;
+
+            return ex;
+        }
+
         public static Exception RequestTimeout(ApiRequest request, Exception innerException)
         {
             ApiException ex = new ApiException(ApiErrorCodes.RequestTimeout, innerException);
@@ -92,9 +119,14 @@ namespace System
             return ex;
         }
 
-        public static Exception ClientUnkownError(ApiRequest request, Exception innerException)
+        public static Exception ApiClientUnkownError(string cause, ApiRequest request, Exception innerException)
         {
-            throw new NotImplementedException();
+            ApiException ex = new ApiException(ApiErrorCodes.ApiClientUnkownError, innerException);
+
+            ex.Data["Cause"] = cause;
+            ex.Data["Request"] = request.ToDebugInfo();
+
+            return ex;
         }
 
         public static Exception ServerUnkownError(string response)
@@ -104,9 +136,13 @@ namespace System
             return ex;
         }
 
-        public static Exception ClientError(string cause, Exception innerException)
+        public static Exception ApiClientSendUnkownError(ApiRequest request, Exception innerException)
         {
-            throw new NotImplementedException();
+            ApiException ex = new ApiException(ApiErrorCodes.ApiClientSendUnkownError, innerException);
+
+            ex.Data["Request"] = request.ToDebugInfo();
+
+            return ex;
         }
 
         public static Exception ServerReturnError(ErrorCode errorCode)
@@ -115,65 +151,6 @@ namespace System
             return ex;
         }
 
-        public static Exception AliyunOssPutObjectError()
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ApiUploadEmptyFile()
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ApiUploadOverSize()
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ApiUploadWrongType()
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ServerUnkownError(string fileName, Exception innerException)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ModelValidationError(string cause)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception NoAuthority()
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception TokenRefreshError(string cause)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception NoInternet(string cause)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ServerNullReturn(string parameter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception AliyunStsTokenReturnNull()
-        {
-            throw new NotImplementedException();
-        }
-
-        public static Exception ModelObjectTypeError(string cause)
-        {
-            throw new NotImplementedException();
-        }
 
         internal static Exception FileUpdateRequestCountNotEven()
         {
@@ -185,7 +162,62 @@ namespace System
         {
             ApiException ex = new ApiException(ApiErrorCodes.LackApiResourceAttribute);
             ex.Data["Type"] = type;
-            
+
+            return ex;
+        }
+
+        internal static Exception HttpResponseDeserializeError(ApiRequest request, string? responseString)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.HttpResponseDeserializeError);
+            ex.Data["Request"] = SerializeUtil.ToJson(request);
+            ex.Data["ResponseString"] = responseString;
+
+            return ex;
+        }
+
+        public static Exception UploadError(string cause, string? fileName, Exception? innerException)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.UploadError);
+
+            ex.Data["Cause"] = cause;
+            ex.Data["FileName"] = fileName;
+
+            return ex;
+        }
+
+        public static Exception ApiRequestSetJwtError(ApiRequest request)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetJwtError);
+
+            ex.Data["Request"] = request.ToDebugInfo();
+
+            return ex;
+        }
+
+        public static Exception ApiRequestSetApiKeyError(ApiRequest request)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetApiKeyError);
+
+            ex.Data["Request"] = request.ToDebugInfo();
+
+            return ex;
+        }
+
+        public static Exception TokenRefreshError(string cause)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.TokenRefreshError);
+
+            ex.Data["Cause"] = cause;
+
+            return ex;
+        }
+
+        public static Exception ServerNullReturn(string parameter)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.ServerNullReturn);
+
+            ex.Data["Parameter"] = parameter;
+
             return ex;
         }
     }

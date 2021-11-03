@@ -13,43 +13,37 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        public DeleteRequest() : base(HttpMethod.Delete, null) { }
-
-        public DeleteRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Delete, null) { }
-
-        public DeleteRequest(IEnumerable<T> ress) : this()
+        public DeleteRequest(IEnumerable<T> ress) : base(HttpMethod.Delete, null)
         {
             Resources.AddRange(ress);
         }
 
-        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : this(apiKeyName)
+        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethod.Delete, null)
         {
             Resources.AddRange(ress);
         }
 
-        public DeleteRequest(T res) : this()
-        {
-            Resources.Add(res);
-        }
+        public DeleteRequest(T res) : this(new T[] { res }) { }
 
-        public DeleteRequest(string apiKeyName, T res) : this(apiKeyName)
-        {
-            Resources.Add(res);
-        }
-
-        public void AddResource(params T[] ress)
-        {
-            Resources.AddRange(ress);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(GetType().Name, Resources);
-        }
+        public DeleteRequest(string apiKeyName, T res) : this(apiKeyName, new T[] { res }) { }
 
         public override string ToDebugInfo()
         {
             return $"DeleteRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
+        }
+
+        protected override HashCode GetChildHashCode()
+        {
+            HashCode hash = new HashCode();
+
+            hash.Add(typeof(DeleteRequest<T>).FullName);
+
+            foreach (T item in Resources)
+            {
+                hash.Add(item);
+            }
+
+            return hash;
         }
     }
 }

@@ -8,9 +8,9 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 {
     public class CropperFrameFigure : SKFigure
     {
-        private const double CORNER_LENGTH_DP = 10;
-        private const double CORNER_TOUCH_RADIUS_DP = 20;
-        private const float CROP_RECT_MINIMUM_LENGTH_DP = 40;
+        private const double _cORNER_LENGTH_DP = 10;
+        private const double _cORNER_TOUCH_RADIUS_DP = 20;
+        private const float _cROP_RECT_MINIMUM_LENGTH_DP = 40;
 
         private readonly float _initCropperWidthRatio;
         private readonly float _initCropperHeightRatio;
@@ -44,9 +44,9 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
         /// <param name="outterHeightRatio">最大外围</param>
         public CropperFrameFigure(float initCroperWidthRatio, float initCropperHeightRatio, float outterWidthRatio, float outterHeightRatio)
         {
-            _cornerLength = (float)SKUtil.ToPx(CORNER_LENGTH_DP);
-            _cornerTouchRadius = (float)SKUtil.ToPx(CORNER_TOUCH_RADIUS_DP);
-            _cropRectMinimumLength = (float)SKUtil.ToPx(CROP_RECT_MINIMUM_LENGTH_DP);
+            _cornerLength = (float)SKUtil.ToPx(_cORNER_LENGTH_DP);
+            _cornerTouchRadius = (float)SKUtil.ToPx(_cORNER_TOUCH_RADIUS_DP);
+            _cropRectMinimumLength = (float)SKUtil.ToPx(_cROP_RECT_MINIMUM_LENGTH_DP);
 
             _initCropperWidthRatio = initCroperWidthRatio;
             _initCropperHeightRatio = initCropperHeightRatio;

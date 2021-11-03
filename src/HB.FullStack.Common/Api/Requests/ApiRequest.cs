@@ -10,7 +10,6 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    [SuppressMessage("Design", "CA1055:URI-like return values should not be strings", Justification = "<Pending>")]
     public abstract class ApiRequest : ValidatableObject
     {
         /// <summary>
@@ -47,6 +46,9 @@ namespace HB.FullStack.Common.Api
         public string? ResourceName { get; set; }
 
         [JsonIgnore]
+        public string? ResourceCollectionName { get; set; }
+
+        [JsonIgnore]
         public string? Condition { get; set; }
 
         [JsonIgnore]
@@ -72,13 +74,22 @@ namespace HB.FullStack.Common.Api
 
         #endregion
 
-        protected ApiRequest(HttpMethod httpMethod, ApiAuthType apiAuthType, string? endPointName, string? apiVersion, string? resourceName, string? condition, TimeSpan? rateLimit)
+        protected ApiRequest(
+            HttpMethod httpMethod, 
+            ApiAuthType apiAuthType, 
+            string? endPointName, 
+            string? apiVersion, 
+            string? resourceName, 
+            string? resourceCollectionName, 
+            string? condition, 
+            TimeSpan? rateLimit)
         {
             ApiAuthType = apiAuthType;
             EndpointName = endPointName;
             ApiVersion = apiVersion;
             HttpMethod = httpMethod;
             ResourceName = resourceName;
+            ResourceCollectionName = resourceCollectionName;
             Condition = condition;
             RateLimit = rateLimit;
         }
@@ -93,12 +104,9 @@ namespace HB.FullStack.Common.Api
             Headers["X-Api-Key"] = apiKey;
         }
 
-        /// <summary>
-        /// 样式: /[Version]/[Resource]/[Condition]?RandomStr=[RandomStr]&Timestamp=[Timestamp]&DeviceId=[DeviceId]
-        /// </summary>
         public string GetUrl()
         {
-            string uri = BuildUrl();
+            string uri = GetUrlCore();
 
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
@@ -112,36 +120,59 @@ namespace HB.FullStack.Common.Api
             return UriUtil.AddQuerys(uri, parameters);
         }
 
-        protected virtual string BuildUrl()
+        protected virtual string GetUrlCore()
         {
-            return BuildDefaultUrl(this);
+            return CreateDefaultUrl();
         }
 
-        private static string BuildDefaultUrl(ApiRequest request)
+        /// <summary>
+        /// 样式: /[Version]/[ResourceCollection]/[Condition]
+        /// </summary>
+        protected string CreateDefaultUrl()
         {
             StringBuilder requestUrlBuilder = new();
 
-            if (!request.ApiVersion.IsNullOrEmpty())
+            if (!ApiVersion.IsNullOrEmpty())
             {
-                requestUrlBuilder.Append(request.ApiVersion);
+                requestUrlBuilder.Append(ApiVersion);
             }
 
-            if (!request.ResourceName.IsNullOrEmpty())
+            if (!ResourceName.IsNullOrEmpty())
             {
                 requestUrlBuilder.Append('/');
-                requestUrlBuilder.Append(request.ResourceName);
+                requestUrlBuilder.Append(ResourceCollectionName);
             }
 
-            if (!request.Condition.IsNullOrEmpty())
+            if (!Condition.IsNullOrEmpty())
             {
                 requestUrlBuilder.Append('/');
-                requestUrlBuilder.Append(request.Condition);
+                requestUrlBuilder.Append(Condition);
             }
 
             return requestUrlBuilder.ToString();
         }
 
         public abstract string ToDebugInfo();
+
+        public sealed override int GetHashCode()
+        {
+            HashCode childHashCode = GetChildHashCode();
+
+            childHashCode.Add(DeviceId);
+            childHashCode.Add(DeviceVersion);
+            childHashCode.Add(PublicResourceToken);
+            childHashCode.Add(EndpointName);
+            childHashCode.Add(ApiVersion);
+            childHashCode.Add(ApiAuthType);
+            childHashCode.Add(ApiKeyName);
+            childHashCode.Add(Condition);
+            childHashCode.Add(ResourceName);
+            childHashCode.Add(ResourceCollectionName);
+
+            return childHashCode.ToHashCode();
+        }
+
+        protected abstract HashCode GetChildHashCode();
     }
 
     public abstract class ApiRequest<T> : ApiRequest where T : ApiResource2
@@ -160,20 +191,15 @@ namespace HB.FullStack.Common.Api
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition, null)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, null, condition, null)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
-            ResourceName = def.Name;
+            ResourceName = def.ResourceName;
+            ResourceCollectionName = def.ResourceCollectionName;
             RateLimit = def.RateLimit;
         }
-
-        protected ApiRequest(HttpMethod httpMethod, ApiAuthType apiAuthType, string? endPointName, string? apiVersion, string? resourceName, string? condition, TimeSpan? rateLimit)
-            : base(httpMethod, apiAuthType, endPointName, apiVersion, resourceName, condition, rateLimit)
-        { }
-
-        public abstract override int GetHashCode();
     }
 }

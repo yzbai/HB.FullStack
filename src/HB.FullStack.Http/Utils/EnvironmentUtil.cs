@@ -9,7 +9,7 @@ namespace System
 {
     public static class EnvironmentUtil
     {
-        private const string HB_FULLSTACK_MACHINE_ID = "HB_FULLSTACK_MACHINE_ID";
+        private const string _hB_FULLSTACK_MACHINE_ID = "HB_FULLSTACK_MACHINE_ID";
 
         private static string? _aspnetcore_environment;
 
@@ -30,7 +30,7 @@ namespace System
         {
             get
             {
-                string? str = Environment.GetEnvironmentVariable(HB_FULLSTACK_MACHINE_ID);
+                string? str = Environment.GetEnvironmentVariable(_hB_FULLSTACK_MACHINE_ID);
 
                 if (str.IsNullOrEmpty())
                 {

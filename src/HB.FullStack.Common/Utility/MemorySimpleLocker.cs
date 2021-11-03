@@ -19,7 +19,7 @@ namespace HB.FullStack.Common
     /// </summary>
     public class MemorySimpleLocker : ISimpleLocker
     {
-        private const int MAX_ITEMS = 100;
+        private const int _maxItems = 100;
 
         /// <summary>
         /// resource : time info
@@ -86,7 +86,7 @@ namespace HB.FullStack.Common
 
         private void Clear(long now)
         {
-            if (_resourceCount > MAX_ITEMS)
+            if (_resourceCount > _maxItems)
             {
                 IEnumerable<string> toRemoveKeys = _resourceExpiryInfoDict
                     .Where(kv => now - kv.Value.Timestamp >= kv.Value.ExpiryMilliseconds)

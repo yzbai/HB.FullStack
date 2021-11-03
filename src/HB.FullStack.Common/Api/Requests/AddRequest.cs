@@ -10,45 +10,39 @@ namespace HB.FullStack.Common.Api
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
         [IdBarrier]
-        public IList<T> Resources { get; set; } = new List<T>();
+        public IList<T> Resources { get; } = new List<T>();
 
-        public AddRequest() : base(HttpMethod.Post, null) { }
-
-        public AddRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Post, null) { }
-
-        public AddRequest(IEnumerable<T> ress) : this()
+        public AddRequest(IEnumerable<T> ress) : base(HttpMethod.Post, null)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(string apiKeyName, IEnumerable<T> ress) : this(apiKeyName)
+        public AddRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethod.Post, null)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(T res) : this()
-        {
-            Resources.Add(res);
-        }
+        public AddRequest(T res) : this(new T[] { res }) { }
 
-        public AddRequest(string apiKeyName, T res) : this(apiKeyName)
-        {
-            Resources.Add(res);
-        }
-
-        public void AddResource(params T[] ress)
-        {
-            Resources.AddRange(ress);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(GetType().Name, Resources);
-        }
+        public AddRequest(string apiKeyName, T res) : this(apiKeyName, new T[] { res }) { }
 
         public override string ToDebugInfo()
         {
             return $"AddRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
+        }
+
+        protected override HashCode GetChildHashCode()
+        {
+            HashCode hash = new HashCode();
+
+            hash.Add(typeof(AddRequest<T>).FullName);
+
+            foreach (T item in Resources)
+            {
+                hash.Add(item);
+            }
+
+            return hash;
         }
     }
 

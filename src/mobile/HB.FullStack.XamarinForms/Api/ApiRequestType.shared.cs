@@ -3,10 +3,18 @@
     public enum ApiRequestType
     {
         Add,
+
         Update,
+        UpdateFields,
+
         Delete,
+
         Get,
-        GetSingle,
-        Stream
+        GetById,
+        GetAll,
+
+        GetStream,
+
+        Upload
     }
 }

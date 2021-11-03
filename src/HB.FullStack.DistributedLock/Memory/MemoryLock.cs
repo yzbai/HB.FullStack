@@ -7,7 +7,7 @@ namespace HB.FullStack.Lock.Memory
 {
     public class MemoryLock : IMemoryLock
     {
-        private const string PREFIX = "_ml_";
+        private const string _prefix = "_ml_";
 
         public MemoryLock(MemoryLockManager lockManager, string resourceType, IEnumerable<string> resources, TimeSpan expiryTime)
         {
@@ -16,7 +16,7 @@ namespace HB.FullStack.Lock.Memory
             ExpiryTime = expiryTime;
             Status = MemoryLockStatus.Waiting;
 
-            ResourceKeys = resources.Select(r => PREFIX + resourceType + r).ToList();
+            ResourceKeys = resources.Select(r => _prefix + resourceType + r).ToList();
 
             ResourceValues = new List<string>(ResourceKeys.Count);
 

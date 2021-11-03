@@ -15,7 +15,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
 {
     public class TCaptchaDialog : BaseContentPage
     {
-        private const string HTML = @"
+        private const string _hTML = @"
                 <html>
                 <head>
                     <script src=""https://ssl.captcha.qq.com/TCaptcha.js""></script>
@@ -50,7 +50,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
 
             PoppedDelegate = poppedDelegate;
 
-            _webView.Source = new HtmlWebViewSource { Html = HTML };
+            _webView.Source = new HtmlWebViewSource { Html = _hTML };
             _webView.Loaded += WebView_Loaded;
         }
 

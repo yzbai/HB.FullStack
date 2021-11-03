@@ -49,12 +49,12 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 IEnumerable<LongIdResource> longLst => longLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
                 IEnumerable<GuidResource> guidLst => guidLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
-                _ => throw ApiExceptions.ModelObjectTypeError($"目前不能处理GuidModelObject或者LongIdModelObject之外的类。当前类型为 {typeof(TRes).FullName}")
+                _ => throw MobileExceptions.UploadError($"目前不能处理GuidModelObject或者LongIdModelObject之外的类。当前类型为 {typeof(TRes).FullName}")
             };
 
-            FileUpdateRequest<TRes> request = new FileUpdateRequest<TRes>(fileDatas, fileNames, resources);
+            UploadRequest<TRes> request = new UploadRequest<TRes>(fileDatas, fileNames, resources);
 
-            return ApiClient.UpdateAsync(request);
+            return ApiClient.UploadAsync(request);
         }
     }
 }

@@ -562,8 +562,8 @@ namespace HB.FullStack.Database.SQL
 		{
 			return engineType switch
 			{
-				EngineType.MySQL => MYSQL_ISTABLEEXISTSSTATEMENT,
-				EngineType.SQLite => SQLITE_ISTABLEEXISTSSTATEMENT,
+				EngineType.MySQL => _mySqlIsTableExistsStatement,
+				EngineType.SQLite => _sqliteIsTableExistsStatement,
 				_ => throw new NotSupportedException()
 			};
 		}
@@ -572,8 +572,8 @@ namespace HB.FullStack.Database.SQL
 		{
 			return engineType switch
 			{
-				EngineType.MySQL => MYSQL_TBSYSINFORETRIEVE,
-				EngineType.SQLite => SQLITE_TBSYSINFORETRIEVE,
+				EngineType.MySQL => _mySqlTbSysInfoRetrieve,
+				EngineType.SQLite => _sqliteTbSysinfoRetrieve,
 				_ => string.Empty
 			};
 		}
@@ -582,8 +582,8 @@ namespace HB.FullStack.Database.SQL
 		{
 			return engineType switch
 			{
-				EngineType.MySQL => MYSQL_TBSYSINFOUPDATEVERSION,
-				EngineType.SQLite => SQLITE_TBSYSINFOUPDATEVERSION,
+				EngineType.MySQL => _mySqlTbSysInfoUpdateVersion,
+				EngineType.SQLite => _sqliteTbSysinfoUpdateVersion,
 				_ => string.Empty
 			};
 		}
@@ -592,13 +592,13 @@ namespace HB.FullStack.Database.SQL
 		{
 			return engineType switch
 			{
-				EngineType.MySQL => MYSQL_TBSYSINFOCREATE,
-				EngineType.SQLite => SQLITE_TBSYSINFOCREATE,
+				EngineType.MySQL => _mySqlTbSysinfoCreate,
+				EngineType.SQLite => _sqliteTbSysinfoCreate,
 				_ => string.Empty
 			};
 		}
 
-		private const string MYSQL_TBSYSINFOCREATE =
+		private const string _mySqlTbSysinfoCreate =
 		@"CREATE TABLE `tb_sys_info` (
 	`Id` int (11) NOT NULL AUTO_INCREMENT,
 	`Name` varchar(100) DEFAULT NULL,
@@ -609,13 +609,13 @@ namespace HB.FullStack.Database.SQL
 INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('Version', '1');
 INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', @databaseName);";
 
-		private const string MYSQL_TBSYSINFOUPDATEVERSION = @"UPDATE `tb_sys_info` SET `Value` = @Value WHERE `Name` = 'Version';";
+		private const string _mySqlTbSysInfoUpdateVersion = @"UPDATE `tb_sys_info` SET `Value` = @Value WHERE `Name` = 'Version';";
 
-		private const string MYSQL_TBSYSINFORETRIEVE = @"SELECT * FROM `tb_sys_info`;";
+		private const string _mySqlTbSysInfoRetrieve = @"SELECT * FROM `tb_sys_info`;";
 
-		private const string MYSQL_ISTABLEEXISTSSTATEMENT = "SELECT count(1) FROM information_schema.TABLES WHERE table_name =@tableName and table_schema=@databaseName;";
+		private const string _mySqlIsTableExistsStatement = "SELECT count(1) FROM information_schema.TABLES WHERE table_name =@tableName and table_schema=@databaseName;";
 
-		private const string SQLITE_TBSYSINFOCREATE =
+		private const string _sqliteTbSysinfoCreate =
 		@"CREATE TABLE ""tb_sys_info"" (
 	""Id"" INTEGER PRIMARY KEY AUTOINCREMENT,
 	""Name"" TEXT UNIQUE,
@@ -624,10 +624,10 @@ INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', @databaseName)
 INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('Version', '1');
 INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', @databaseName);";
 
-		private const string SQLITE_TBSYSINFOUPDATEVERSION = @"UPDATE ""tb_sys_info"" SET ""Value"" = @Value WHERE ""Name"" = 'Version';";
+		private const string _sqliteTbSysinfoUpdateVersion = @"UPDATE ""tb_sys_info"" SET ""Value"" = @Value WHERE ""Name"" = 'Version';";
 
-		private const string SQLITE_TBSYSINFORETRIEVE = @"SELECT * FROM ""tb_sys_info"";";
+		private const string _sqliteTbSysinfoRetrieve = @"SELECT * FROM ""tb_sys_info"";";
 
-		private const string SQLITE_ISTABLEEXISTSSTATEMENT = "SELECT count(1) FROM sqlite_master where type='table' and name=@tableName;";
+		private const string _sqliteIsTableExistsStatement = "SELECT count(1) FROM sqlite_master where type='table' and name=@tableName;";
 	}
 }

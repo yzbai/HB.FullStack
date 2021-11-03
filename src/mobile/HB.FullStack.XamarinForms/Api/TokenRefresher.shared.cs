@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Requests;
 using HB.FullStack.XamarinForms.Base;
 
 namespace HB.FullStack.XamarinForms.Api
@@ -42,10 +43,10 @@ namespace HB.FullStack.XamarinForms.Api
             if (!_requestLimiter.NoWaitLock(nameof(RefreshAccessTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(jwtEndpoint.RefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
-                if(!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
+                if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
                 {
                     //等待失败
-                    BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause:"AccessToken 有人刷新过，等待获取结果失败。"));
+                    BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，等待获取结果失败。"));
                     return false;
                 }
 
@@ -56,7 +57,7 @@ namespace HB.FullStack.XamarinForms.Api
                         return lastRefreshResult;
                     }
 
-                    BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause:"AccessToken 有人刷新过，但结果获取为空。"));
+                    BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，但结果获取为空。"));
                     return false;
                 }
                 finally
@@ -72,15 +73,16 @@ namespace HB.FullStack.XamarinForms.Api
             {
                 if (UserPreferences.RefreshToken.IsNotNullOrEmpty())
                 {
-                    RefreshAccessTokenRequest refreshRequest = new RefreshAccessTokenRequest(
+                    RefreshUserTokenRequest refreshRequest = new RefreshUserTokenRequest(
                         jwtEndpoint.EndpointName!,
                         jwtEndpoint.Version!,
-                        HttpMethod.Get,
                         jwtEndpoint.ResourceName!,
+                        jwtEndpoint.ResourceCollectionName!,
+                        null,
                         UserPreferences.AccessToken,
                         UserPreferences.RefreshToken);
 
-                    AccessTokenResource? resource = await apiClient.GetFirstOrDefaultAsync(refreshRequest).ConfigureAwait(false);
+                    AccessTokenResource? resource = await apiClient.GetAsync<AccessTokenResource>(refreshRequest).ConfigureAwait(false);
 
                     if (resource != null)
                     {
@@ -130,29 +132,55 @@ namespace HB.FullStack.XamarinForms.Api
         private class AccessTokenResource : ApiResource2
         {
             public string AccessToken { get; set; } = null!;
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(nameof(AccessTokenResource), AccessToken);
+            }
         }
 
-        private class RefreshAccessTokenRequest : ApiRequest<AccessTokenResource>
+        private class RefreshUserTokenRequest : ApiRequest
         {
             public string AccessToken { get; set; } = null!;
 
             public string RefreshToken { get; set; } = null!;
 
-            public RefreshAccessTokenRequest(string endpointName, string apiVersion, HttpMethod httpMethod, string resourceName, string accessToken, string refreshToken)
-                : base(httpMethod, ApiAuthType.None, endpointName, apiVersion, resourceName, "ByRefresh", null)
+            public RefreshUserTokenRequest(
+                string? endPointName,
+                string? apiVersion,
+                string? resourceName,
+                string? resourceCollectionName,
+                TimeSpan? rateLimit,
+                string accessToken,
+                string refreshToken)
+                : base(
+                      HttpMethod.Get,
+                      ApiAuthType.None,
+                      endPointName,
+                      apiVersion,
+                      resourceName,
+                      resourceCollectionName,
+                      "ByRefresh",
+                      rateLimit)
             {
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;
             }
 
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(AccessToken, RefreshToken);
-            }
-
             public override string ToDebugInfo()
             {
-                return "RefreshAccessTokenRequest";
+                return "RefreshUserTokenRequest";
+            }
+
+            protected override HashCode GetChildHashCode()
+            {
+                HashCode hashCode = new HashCode();
+
+                hashCode.Add(nameof(RefreshUserTokenRequest));
+                hashCode.Add(AccessToken);
+                hashCode.Add(RefreshToken);
+
+                return hashCode;
             }
         }
     }

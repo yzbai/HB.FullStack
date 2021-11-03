@@ -15,13 +15,13 @@ namespace System.Net.Http
         /// <typeparam name="T"></typeparam>
         /// <param name="responseMessage"></param>
         /// <returns></returns>
-        public static async Task<T?> TryDeserializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
+        public static async Task<(bool, T?)> TryDeserializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
         {
             string? mediaType = responseMessage.Content.Headers.ContentType?.MediaType;
 
             if ("application/json" != mediaType && "application/problem+json" != mediaType)
             {
-                return null;
+                return (false, null);
             }
 
             string jsonString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -31,11 +31,11 @@ namespace System.Net.Http
                 //T? data = SerializeUtil.FromJson<T>(jsonString);
                 if (SerializeUtil.TryFromJsonWithCollectionCheck<T>(jsonString, out T? data))
                 {
-                    return data;
+                    return (true, data);
                 }
                 else
                 {
-                    return null;
+                    return (false, null);
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -43,7 +43,7 @@ namespace System.Net.Http
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 GlobalSettings.Logger?.LogHttpResponseDeSerializeJsonError(jsonString, ((int)responseMessage.StatusCode), responseMessage.ReasonPhrase, responseMessage.RequestMessage.RequestUri, ex);
-                return null;
+                return (false, null);
             }
         }
 

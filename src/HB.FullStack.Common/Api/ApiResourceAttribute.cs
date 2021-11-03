@@ -16,19 +16,19 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public int RateLimitMilliseconds { get; }
 
-        ///// <summary>
-        ///// 有效时间，即多久请求一次即可
-        ///// </summary>
-        //public TimeSpan RateLimit { get; }
+        public string ResourceName { get; }
 
-        public ApiResourceAttribute(string endPointName, string version, int rateLimitMilliseconds)
+        public string ResourceCollectionName { get; }
+
+        public ApiResourceAttribute(string endPointName, string version, int rateLimitMilliseconds, string resourceName, string resourceCollectionName)
         {
             EndPointName = endPointName;
             Version = version;
-            //RateLimit = TimeSpan.FromMilliseconds(rateLimitMilliseconds);
             RateLimitMilliseconds = rateLimitMilliseconds;
+            ResourceName = resourceName;
+            ResourceCollectionName = resourceCollectionName;
         }
 
-        
+
     }
 }

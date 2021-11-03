@@ -150,7 +150,7 @@ namespace HB.FullStack.XamarinForms.Controls
             }
             else if (SelectedIndex > ItemsSource!.Count - 1)
             {
-                throw MobileExceptions.OutOfRange(selectedIndex: SelectedIndex, cause:"ImageOptions SelectedIndex Out of Range.");
+                throw MobileExceptions.ImageOptionsOutOfRange(selectedIndex: SelectedIndex, cause:"ImageOptions SelectedIndex Out of Range.");
             }
 
             SelectedItem = ItemsSource[SelectedIndex];

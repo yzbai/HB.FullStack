@@ -18,14 +18,14 @@ namespace HB.Infrastructure.Redis.EventBus
 {
     internal class ConsumeTaskManager : IDisposable
     {
-        private const int CONSUME_INTERVAL_SECONDS = 5;
+        private const int _cONSUME_INTERVAL_SECONDS = 5;
 
 
         /// <summary>
         ///  -- keys = {history_queue, acks_sortedset, queue}
         ///  -- argvs={currentTimestampSeconds, waitSecondsToBeHistory
         /// </summary>
-        private const string HISTORY_REDIS_SCRIPT = @"
+        private const string _hISTORY_REDIS_SCRIPT = @"
 local rawEvent = redis.call('rpop', KEYS[1]) 
 
 --还没有数据
@@ -99,7 +99,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         {
             IServer server = RedisInstanceManager.GetServer(_instanceSetting, _logger);
 
-            _loadedHistoryLua = server.ScriptLoad(HISTORY_REDIS_SCRIPT);
+            _loadedHistoryLua = server.ScriptLoad(_hISTORY_REDIS_SCRIPT);
         }
 
         private async Task ScanHistoryAsync(CancellationToken cancellationToken)
@@ -204,7 +204,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         _logger.LogTrace("ConsumeTask Sleep, {InstanceName}, {eventType}", _instanceSetting.InstanceName, _eventType);
 
-                        await Task.Delay(CONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
+                        await Task.Delay(_cONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
 
                         continue;
                     }

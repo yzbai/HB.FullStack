@@ -46,7 +46,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             if (!UserPreferences.IsLogined)
             {
-                throw ApiExceptions.NoAuthority();
+                throw MobileExceptions.NotLogined();
             }
         }
 
@@ -57,7 +57,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (throwIfNot)
                 {
-                    throw ApiExceptions.NoInternet(cause: "没有联网，且不允许离线");
+                    throw MobileExceptions.NoInternet(cause: "没有联网，且不允许离线");
                 }
 
                 return false;
@@ -256,9 +256,9 @@ namespace HB.FullStack.XamarinForms.Base
             }
 
             //获取远程
-            IEnumerable<TRes> ress = await ApiClient.GetAsync(request).ConfigureAwait(false);
+            IEnumerable<TRes>? ress = await ApiClient.GetAsync<IEnumerable<TRes>>(request).ConfigureAwait(false);
 
-            IEnumerable<TEntity> remotes = ress.Select(r => ToEntity(r)).ToList();
+            IEnumerable<TEntity> remotes = ress!.Select(r => ToEntity(r)).ToList();
 
             _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TEntity).Name);
 
