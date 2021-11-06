@@ -4,11 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace HB.FullStack.XamarinForms.Api
+namespace HB.FullStack.Common.ApiClient
 {
     public class ApiClientOptions : IOptions<ApiClientOptions>
     {
+        public const string NO_BASEURL_HTTPCLIENT_NAME = nameof(NO_BASEURL_HTTPCLIENT_NAME);
+
         private IDictionary<string, string>? _apiKeysDict;
 
         public ApiClientOptions Value => this;
@@ -20,6 +23,8 @@ namespace HB.FullStack.XamarinForms.Api
         public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
         public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(20);
+
+        //public AsyncEventHandler<ApiRequest, ApiEventArgs>? OnRequestingAsync { get; set; }
 
         public void AddEndpoint(EndpointSettings endpointSettings)
         {

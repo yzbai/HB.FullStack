@@ -1,7 +1,7 @@
 ﻿using HB.FullStack.Common;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.XamarinForms.Api
+namespace HB.FullStack.Common.ApiClient
 {
     public class JwtEndpointSetting : ValidatableObject
     {

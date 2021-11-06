@@ -31,19 +31,62 @@ namespace HB.FullStack.Common.Api
             return $"AddRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
         }
 
-        protected override HashCode GetChildHashCode()
+        public override int GetHashCode()
         {
             HashCode hash = new HashCode();
 
-            hash.Add(typeof(AddRequest<T>).FullName);
+            hash.Add(base.GetHashCode());
 
             foreach (T item in Resources)
             {
                 hash.Add(item);
             }
 
-            return hash;
+            return hash.ToHashCode();
         }
+    }
+
+    public class AddRequest<T, TSub> : ApiRequest<T, TSub> where T : ApiResource2 where TSub : ApiResource2
+    {
+        [CollectionNotEmpty]
+        [CollectionMemeberValidated]
+        [IdBarrier]
+        public IList<TSub> SubResources { get; } = new List<TSub>();
+
+        public AddRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethod.Post, null)
+        {
+            SubResources.AddRange(ress);
+        }
+
+        public AddRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethod.Post, null)
+        {
+            SubResources.AddRange(ress);
+        }
+
+        public AddRequest(Guid id, TSub res) : this(id, new TSub[] { res }) { }
+
+        public AddRequest(string apiKeyName, Guid id, TSub res) : this(apiKeyName, id, new TSub[] { res }) { }
+
+        public override string ToDebugInfo()
+        {
+            return $"AddRequest, ApiResourceType:{typeof(T).Name}, SubResourceType:{typeof(TSub).Name},  Resources:{SerializeUtil.ToJson(SubResources)}";
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new HashCode();
+
+            hash.Add(base.GetHashCode());
+
+            foreach (TSub item in SubResources)
+            {
+                hash.Add(item);
+            }
+
+            return hash.ToHashCode();
+        }
+        //TODO: 核查各个Hashcode
+
     }
 
 }

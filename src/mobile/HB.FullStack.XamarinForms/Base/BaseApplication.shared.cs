@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Api;
 using HB.FullStack.XamarinForms.Controls;
 using HB.FullStack.XamarinForms.Files;
@@ -108,6 +109,8 @@ namespace HB.FullStack.XamarinForms.Base
                     builder.SetMinimumLevel(MinimumLogLevel);
                     builder.AddProvider(new LoggerProvider(MinimumLogLevel));
                 });
+
+                services.AddSingleton<IApiTokenProvider, ApiTokenProvider>();
 
                 RegisterServices(services);
 

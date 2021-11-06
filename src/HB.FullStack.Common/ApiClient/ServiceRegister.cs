@@ -1,13 +1,10 @@
-﻿using HB.FullStack.XamarinForms.Api;
-
+﻿
 using Microsoft.Extensions.Configuration;
-
-using Polly;
 
 using System;
 using System.Net.Http;
-
-using Xamarin.Essentials;
+using System.Linq;
+using HB.FullStack.Common.ApiClient;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -40,9 +37,9 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
             //添加默认HttpClient
-            services.AddHttpClient(ApiClient.NO_BASEURL_HTTPCLIENT_NAME, httpClient =>
+            services.AddHttpClient(ApiClientOptions.NO_BASEURL_HTTPCLIENT_NAME, httpClient =>
             {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
             })
 #if DEBUG
             .ConfigurePrimaryHttpMessageHandler(() =>
@@ -68,7 +65,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ApiClient).FullName);
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
                 })
 
                 //TODO: 调查这个
@@ -95,7 +92,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 ;
             }
 
-            services.AddSingleton<IApiClient, ApiClient>();
+            services.AddSingleton<IApiClient, DefaultApiClient>();
 
             //HttpClientHandler会随着HttpClient Dispose 而Dispose
             services.AddTransient<TokenAutoRefreshedHttpClientHandler>();

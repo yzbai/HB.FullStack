@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Base;
 using HB.FullStack.XamarinForms.TCaptcha;
 

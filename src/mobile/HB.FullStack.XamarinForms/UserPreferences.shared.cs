@@ -34,12 +34,12 @@ namespace HB.FullStack.XamarinForms
 
         public static bool IsIntroducedYet
         {
-            get 
+            get
             {
                 string? storedValue = PreferenceHelper.Get(Conventions.PREFERENCE_NAME_INTRODUCEDYET);
                 return storedValue != null && Convert.ToBoolean(storedValue, CultureInfo.InvariantCulture);
             }
-            set 
+            set
             {
                 PreferenceHelper.Set(Conventions.PREFERENCE_NAME_INTRODUCEDYET, value.ToString(CultureInfo.InvariantCulture));
             }
@@ -199,7 +199,7 @@ namespace HB.FullStack.XamarinForms
 
                 return _refreshToken;
             }
-            private set
+            internal set
             {
                 _refreshToken = value;
 

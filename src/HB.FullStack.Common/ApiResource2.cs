@@ -21,6 +21,13 @@ namespace HB.FullStack.Common
     {
         [NoEmptyGuid]
         public Guid Id { get; set; }
+
+        public sealed override int GetHashCode()
+        {
+            return HashCode.Combine(GetChildHashCode(), Id, LastTime, Version, LastUser);
+        }
+
+        protected abstract int GetChildHashCode();
     }
 
     public abstract class LongIdResource : ApiResource2
@@ -28,5 +35,11 @@ namespace HB.FullStack.Common
         [LongId2]
         public long Id { get; set; } = -1;
 
+        public sealed override int GetHashCode()
+        {
+            return HashCode.Combine(GetChildHashCode(), Id, LastTime, Version, LastUser);
+        }
+
+        protected abstract int GetChildHashCode();
     }
 }

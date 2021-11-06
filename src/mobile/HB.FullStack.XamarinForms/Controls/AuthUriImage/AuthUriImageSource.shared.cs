@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Api;
 
 using Microsoft.Extensions.Logging;
@@ -376,14 +377,9 @@ namespace HB.FullStack.XamarinForms.Controls
             return _uri;
         }
 
-        protected override HashCode GetChildHashCode()
+        public override int GetHashCode()
         {
-            HashCode hashCode = new HashCode();
-
-            hashCode.Add(nameof(ImageUrlRequest));
-            hashCode.Add(_uri);
-
-            return hashCode;
+            return HashCode.Combine(base.GetHashCode(), _uri);
         }
     }
 }

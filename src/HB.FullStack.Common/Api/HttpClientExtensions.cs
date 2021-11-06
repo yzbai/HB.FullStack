@@ -23,7 +23,7 @@ namespace System.Net.Http
             //HttpClient不再 在接受response后主动dispose request content。 所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
-            if (request is UploadRequest fileUpdateRequest)
+            if (request is IUploadRequest fileUpdateRequest)
             {
                 requestMessage.Content = BuildMultipartContent(fileUpdateRequest);
             }
@@ -43,7 +43,7 @@ namespace System.Net.Http
                 if (!success)
                 {
                     string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    
+
                     throw ApiExceptions.HttpResponseDeserializeError(request, responseString);
                 }
 
@@ -109,23 +109,16 @@ namespace System.Net.Http
         }
 
         [Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "关于Dispose：MultipartFormDataContent Dipose的时候，会把子content Dipose掉。 而HttpRequestMessage Dispose的时候，会把他的Content Dispose掉")]
-        private static MultipartFormDataContent BuildMultipartContent(UploadRequest fileRequest)
+        private static MultipartFormDataContent BuildMultipartContent(IUploadRequest fileRequest)
         {
             MultipartFormDataContent content = new MultipartFormDataContent();
 
-            string byteArrayContentName = fileRequest.BytesPropertyName;
-            IEnumerable<byte[]> bytess = fileRequest.Files;
-            IEnumerable<string> fileNames = fileRequest.FileNames;
+            string httpContentName = fileRequest.HttpContentName;
+            byte[] file = fileRequest.GetFile();
+            string fileName = fileRequest.FileName;
 
-            int num = 0;
-
-            foreach (string fileName in fileNames)
-            {
-                byte[] bytes = bytess.ElementAt(num++);
-
-                ByteArrayContent byteArrayContent = new ByteArrayContent(bytes);
-                content.Add(byteArrayContent, byteArrayContentName, fileName);
-            }
+            ByteArrayContent byteArrayContent = new ByteArrayContent(file);
+            content.Add(byteArrayContent, httpContentName, fileName);
 
             content.Add(new StringContent(SerializeUtil.ToJson(fileRequest), Encoding.UTF8, "application/json"));
 

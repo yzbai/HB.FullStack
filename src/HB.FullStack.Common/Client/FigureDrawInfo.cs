@@ -47,16 +47,9 @@ namespace HB.FullStack.Common
             return false;
         }
 
-        public override int GetHashCode()
-        {
-            HashCode hashCode = GetHashCodeCore();
-
-            return hashCode.ToHashCode();
-        }
+        public abstract override int GetHashCode();
 
         protected abstract bool EqualsCore(FigureDrawInfo other);
-
-        protected abstract HashCode GetHashCodeCore();
 
     }
 }

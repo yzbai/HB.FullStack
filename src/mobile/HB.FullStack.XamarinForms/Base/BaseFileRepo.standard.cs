@@ -7,6 +7,7 @@ using Xamarin.Forms;
 using System.Net.Http;
 using HB.FullStack.Common;
 using System;
+using HB.FullStack.Common.ApiClient;
 
 namespace HB.FullStack.XamarinForms.Base
 {
@@ -39,22 +40,22 @@ namespace HB.FullStack.XamarinForms.Base
         }
 
         /// <exception cref="System.ApiException"></exception>
-        public Task UploadAsync(string fileSuffix, IEnumerable<byte[]> fileDatas, IEnumerable<TRes> resources)
-        {
-            EnsureInternet();
+        //public Task UploadAsync(string fileSuffix, byte[] file)
+        //{
+        //    EnsureInternet();
 
-            string suffix = fileSuffix.StartsWith(".", System.StringComparison.InvariantCulture) ? fileSuffix : "." + fileSuffix;
+        //    string suffix = fileSuffix.StartsWith(".", System.StringComparison.InvariantCulture) ? fileSuffix : "." + fileSuffix;
 
-            var fileNames = resources switch
-            {
-                IEnumerable<LongIdResource> longLst => longLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
-                IEnumerable<GuidResource> guidLst => guidLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
-                _ => throw MobileExceptions.UploadError($"目前不能处理GuidModelObject或者LongIdModelObject之外的类。当前类型为 {typeof(TRes).FullName}")
-            };
+        //    var fileNames = resources switch
+        //    {
+        //        IEnumerable<LongIdResource> longLst => longLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
+        //        IEnumerable<GuidResource> guidLst => guidLst.Select(r => $"{r.Id}{fileSuffix}").ToList(),
+        //        _ => throw MobileExceptions.UploadError($"目前不能处理GuidModelObject或者LongIdModelObject之外的类。当前类型为 {typeof(TRes).FullName}")
+        //    };
 
-            UploadRequest<TRes> request = new UploadRequest<TRes>(fileDatas, fileNames, resources);
+        //    UploadRequest<TRes> request = new UploadRequest<TRes>(fileDatas, fileNames, resources);
 
-            return ApiClient.UploadAsync(request);
-        }
+        //    return ApiClient.UploadAsync(request);
+        //}
     }
 }

@@ -18,6 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Database.Entities;
 using Microsoft.VisualStudio.Threading;
+using HB.FullStack.Common.ApiClient;
 
 namespace HB.FullStack.XamarinForms.Base
 {
@@ -299,7 +300,7 @@ namespace HB.FullStack.XamarinForms.Base
                 //Remote
                 AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
 
-                await ApiClient.AddAsync(addRequest).ConfigureAwait(false);
+                await ApiClient.SendAsync(addRequest).ConfigureAwait(false);
 
                 //Local
                 await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
@@ -321,7 +322,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 
-                await ApiClient.UpdateAsync(updateRequest).ConfigureAwait(false);
+                await ApiClient.SendAsync(updateRequest).ConfigureAwait(false);
 
                 await Database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
             }

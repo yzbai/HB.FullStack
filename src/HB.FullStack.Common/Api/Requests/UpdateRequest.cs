@@ -36,20 +36,61 @@ namespace HB.FullStack.Common.Api
             return $"UpdateRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
         }
 
-        protected override HashCode GetChildHashCode()
+        public override int GetHashCode()
         {
             HashCode hash = new HashCode();
 
-            hash.Add(typeof(UpdateRequest<T>).FullName);
+            hash.Add(base.GetHashCode());
 
             foreach (T item in Resources)
             {
                 hash.Add(item);
             }
 
-            return hash;
+            return hash.ToHashCode();
         }
     }
 
-    //TODO: 考虑Sub资源  UpdateRequest<T,TSub>
+    public class UpdateRequest<T, TSub> : ApiRequest<T, TSub> where T : ApiResource2 where TSub : ApiResource2
+    {
+        [CollectionNotEmpty]
+        [CollectionMemeberValidated]
+        [IdBarrier]
+        public IList<TSub> SubResources { get; } = new List<TSub>();
+
+        public UpdateRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethod.Put, null)
+        {
+            SubResources.AddRange(ress);
+        }
+
+        public UpdateRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethod.Put, null)
+        {
+            SubResources.AddRange(ress);
+        }
+
+        public UpdateRequest(Guid id, TSub res) : this(id, new TSub[] { res }) { }
+
+        public UpdateRequest(string apiKeyName, Guid id, TSub res) : this(apiKeyName, id, new TSub[] { res }) { }
+
+        public override string ToDebugInfo()
+        {
+            return $"UpdateRequest, ApiResourceType:{typeof(T).Name}, SubResourceType:{typeof(TSub).Name},  Resources:{SerializeUtil.ToJson(SubResources)}";
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new HashCode();
+
+            hash.Add(base.GetHashCode());
+
+            foreach (TSub item in SubResources)
+            {
+                hash.Add(item);
+            }
+
+            return hash.ToHashCode();
+        }
+        //TODO: 核查各个Hashcode
+
+    }
 }

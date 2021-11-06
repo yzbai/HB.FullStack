@@ -51,15 +51,12 @@ namespace HB.FullStack.Common
 
         public override int GetHashCode()
         {
-            HashCode hashCode = GetHashCodeCore();
-            hashCode.Add(State);
-
-            return hashCode.ToHashCode();
+            return HashCode.Combine(GetHashCodeCore(), State);
         }
 
         protected abstract bool EqualsCore(FigureData other);
 
-        protected abstract HashCode GetHashCodeCore();
+        protected abstract int GetHashCodeCore();
 
     }
 }

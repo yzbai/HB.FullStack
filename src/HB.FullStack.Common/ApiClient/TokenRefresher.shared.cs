@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Api.Requests;
-using HB.FullStack.XamarinForms.Base;
 
-namespace HB.FullStack.XamarinForms.Api
+namespace HB.FullStack.Common.ApiClient
 {
+
     public static class TokenRefresher
     {
         private static readonly MemorySimpleLocker _requestLimiter = new MemorySimpleLocker();
@@ -28,16 +28,16 @@ namespace HB.FullStack.XamarinForms.Api
         /// <param name="endpointSettings"></param>
         /// <returns></returns>
         /// <exception cref="ApiException"></exception>
-        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings)
+        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IApiTokenProvider userTokenProvider)
         {
-            if (UserPreferences.AccessToken.IsNullOrEmpty())
+            if (userTokenProvider.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
             JwtEndpointSetting jwtEndpoint = endpointSettings == null ? apiClient.GetDefaultJwtEndpointSetting() : endpointSettings.JwtEndpoint;
 
-            string accessTokenHashKey = SecurityUtil.GetHash(UserPreferences.AccessToken);
+            string accessTokenHashKey = SecurityUtil.GetHash(userTokenProvider.AccessToken);
 
             //这个AccessToken不久前刷新过
             if (!_requestLimiter.NoWaitLock(nameof(RefreshAccessTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(jwtEndpoint.RefreshIntervalSeconds)))
@@ -46,7 +46,7 @@ namespace HB.FullStack.XamarinForms.Api
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
                 {
                     //等待失败
-                    BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，等待获取结果失败。"));
+                    //BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，等待获取结果失败。"));
                     return false;
                 }
 
@@ -57,7 +57,7 @@ namespace HB.FullStack.XamarinForms.Api
                         return lastRefreshResult;
                     }
 
-                    BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，但结果获取为空。"));
+                    //BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，但结果获取为空。"));
                     return false;
                 }
                 finally
@@ -71,7 +71,7 @@ namespace HB.FullStack.XamarinForms.Api
 
             try
             {
-                if (UserPreferences.RefreshToken.IsNotNullOrEmpty())
+                if (userTokenProvider.RefreshToken.IsNotNullOrEmpty())
                 {
                     RefreshUserTokenRequest refreshRequest = new RefreshUserTokenRequest(
                         jwtEndpoint.EndpointName!,
@@ -79,8 +79,8 @@ namespace HB.FullStack.XamarinForms.Api
                         jwtEndpoint.ResourceName!,
                         jwtEndpoint.ResourceCollectionName!,
                         null,
-                        UserPreferences.AccessToken,
-                        UserPreferences.RefreshToken);
+                        userTokenProvider.AccessToken,
+                        userTokenProvider.RefreshToken);
 
                     AccessTokenResource? resource = await apiClient.GetAsync<AccessTokenResource>(refreshRequest).ConfigureAwait(false);
 
@@ -89,7 +89,7 @@ namespace HB.FullStack.XamarinForms.Api
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        OnRefreshSucceed(resource);
+                        OnRefreshSucceed(resource, userTokenProvider);
 
                         return true;
                     }
@@ -99,7 +99,7 @@ namespace HB.FullStack.XamarinForms.Api
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed();
+                OnRefreshFailed(userTokenProvider);
 
                 return false;
             }
@@ -109,7 +109,7 @@ namespace HB.FullStack.XamarinForms.Api
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed();
+                OnRefreshFailed(userTokenProvider);
 
                 throw;
             }
@@ -119,14 +119,14 @@ namespace HB.FullStack.XamarinForms.Api
             }
         }
 
-        private static void OnRefreshSucceed(AccessTokenResource resource)
+        private static void OnRefreshSucceed(AccessTokenResource resource, IApiTokenProvider userTokenProvider)
         {
-            UserPreferences.AccessToken = resource.AccessToken;
+            userTokenProvider.AccessToken = resource.AccessToken;
         }
 
-        private static void OnRefreshFailed()
+        private static void OnRefreshFailed(IApiTokenProvider userTokenProvider)
         {
-            UserPreferences.Logout();
+            userTokenProvider.OnTokenRefreshFailed();
         }
 
         private class AccessTokenResource : ApiResource2
@@ -172,15 +172,9 @@ namespace HB.FullStack.XamarinForms.Api
                 return "RefreshUserTokenRequest";
             }
 
-            protected override HashCode GetChildHashCode()
+            public override int GetHashCode()
             {
-                HashCode hashCode = new HashCode();
-
-                hashCode.Add(nameof(RefreshUserTokenRequest));
-                hashCode.Add(AccessToken);
-                hashCode.Add(RefreshToken);
-
-                return hashCode;
+                return HashCode.Combine( base.GetHashCode(), AccessToken, RefreshToken);
             }
         }
     }

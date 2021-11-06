@@ -774,9 +774,9 @@ namespace HB.FullStack.XamarinForms.Skia
             return other is EmptyDrawInfo;
         }
 
-        protected override HashCode GetHashCodeCore()
+        public override int GetHashCode()
         {
-            return new HashCode();
+            return HashCode.Combine(nameof(EmptyDrawInfo));
         }
     }
     public class EmptyData : FigureData
@@ -786,9 +786,9 @@ namespace HB.FullStack.XamarinForms.Skia
             return other is EmptyData;
         }
 
-        protected override HashCode GetHashCodeCore()
+        protected override int GetHashCodeCore()
         {
-            return new HashCode();
+            return HashCode.Combine(nameof(EmptyData));
         }
     }
 }

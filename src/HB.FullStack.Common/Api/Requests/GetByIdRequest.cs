@@ -34,19 +34,50 @@ namespace HB.FullStack.Common.Api.Requests
             return $"GetByIdRequest. Resource:{typeof(T).FullName}, Id:{Id}";
         }
 
-        protected override string CreateUrl()
+        protected override string GetUrlCore()
         {
-            return $"{CreateDefaultUrl()}/{Id}";
+            string url = $"{ApiVersion}/{ResourceCollectionName}/{Id}";
+
+            return AddCommonQueryToUrl(url);
         }
 
-        protected override HashCode GetHashCodeCore()
+        public override int GetHashCode()
         {
-            HashCode hashCode = new HashCode();
+            return HashCode.Combine(base.GetHashCode(), Id);
+        }
+    }
 
-            hashCode.Add(typeof(GetByIdRequest<T>).FullName);
-            hashCode.Add(Id);
+    public class GetByIdRequest<T, TSub> : GetRequest<T,TSub> where T : ApiResource2 where TSub:ApiResource2
+    {
+        [JsonIgnore]
+        [NoEmptyGuid]
+        public Guid SubId { get; private set; }
 
-            return hashCode;
+        public GetByIdRequest(Guid id, Guid subId):base(id, null)
+        {
+            SubId = subId;
+        }
+
+        public GetByIdRequest(string apiKeyName, Guid id, Guid subId) : base(id, apiKeyName, null)
+        {
+            SubId=subId;
+        }
+
+        public override string ToDebugInfo()
+        {
+            return $"GetByIdRequest. Resource:{typeof(T).FullName}, Id:{Id}. SubResource:{typeof(TSub).FullName}, SubId:{SubId}";
+        }
+
+        protected override string GetUrlCore()
+        {
+            string url = $"{ApiVersion}/{ResourceCollectionName}/{Id}/{SubResourceCollectionName}/{SubId}";
+
+            return AddCommonQueryToUrl(url);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), SubId);
         }
     }
 }

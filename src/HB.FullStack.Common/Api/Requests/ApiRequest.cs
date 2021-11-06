@@ -66,22 +66,19 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public TimeSpan? RateLimit { get; set; }
 
-        [JsonIgnore]
-        public string RandomStr { get; } = SecurityUtil.CreateRandomString(6);
-
-        [JsonIgnore]
-        public long Timestamp { get; } = TimeUtil.UtcNowUnixTimeMilliseconds;
+        //[JsonIgnore]
+        //public string RandomStr { get; } = SecurityUtil.CreateRandomString(6);
 
         #endregion
 
         protected ApiRequest(
-            HttpMethod httpMethod, 
-            ApiAuthType apiAuthType, 
-            string? endPointName, 
-            string? apiVersion, 
-            string? resourceName, 
-            string? resourceCollectionName, 
-            string? condition, 
+            HttpMethod httpMethod,
+            ApiAuthType apiAuthType,
+            string? endPointName,
+            string? apiVersion,
+            string? resourceName,
+            string? resourceCollectionName,
+            string? condition,
             TimeSpan? rateLimit)
         {
             ApiAuthType = apiAuthType;
@@ -110,8 +107,8 @@ namespace HB.FullStack.Common.Api
 
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
-                { ClientNames.RANDOM_STR, RandomStr },
-                { ClientNames.TIMESTAMP, Timestamp.ToString(CultureInfo.InvariantCulture)},
+                { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
+                { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)},
                 
                 //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
                 { ClientNames.DEVICE_ID, DeviceId }
@@ -122,57 +119,28 @@ namespace HB.FullStack.Common.Api
 
         protected virtual string GetUrlCore()
         {
-            return CreateDefaultUrl();
-        }
-
-        /// <summary>
-        /// 样式: /[Version]/[ResourceCollection]/[Condition]
-        /// </summary>
-        protected string CreateDefaultUrl()
-        {
-            StringBuilder requestUrlBuilder = new();
-
-            if (!ApiVersion.IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append(ApiVersion);
-            }
-
-            if (!ResourceName.IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append('/');
-                requestUrlBuilder.Append(ResourceCollectionName);
-            }
-
-            if (!Condition.IsNullOrEmpty())
-            {
-                requestUrlBuilder.Append('/');
-                requestUrlBuilder.Append(Condition);
-            }
-
-            return requestUrlBuilder.ToString();
+            return $"{ApiVersion}/{ResourceCollectionName}/{Condition}";
         }
 
         public abstract string ToDebugInfo();
 
-        public sealed override int GetHashCode()
+        public override int GetHashCode()
         {
-            HashCode childHashCode = GetChildHashCode();
+            HashCode hashCode = new HashCode();
 
-            childHashCode.Add(DeviceId);
-            childHashCode.Add(DeviceVersion);
-            childHashCode.Add(PublicResourceToken);
-            childHashCode.Add(EndpointName);
-            childHashCode.Add(ApiVersion);
-            childHashCode.Add(ApiAuthType);
-            childHashCode.Add(ApiKeyName);
-            childHashCode.Add(Condition);
-            childHashCode.Add(ResourceName);
-            childHashCode.Add(ResourceCollectionName);
+            hashCode.Add(DeviceId);
+            hashCode.Add(DeviceVersion);
+            hashCode.Add(PublicResourceToken);
+            hashCode.Add(EndpointName);
+            hashCode.Add(ApiVersion);
+            hashCode.Add(ApiAuthType);
+            hashCode.Add(ApiKeyName);
+            hashCode.Add(Condition);
+            hashCode.Add(ResourceName);
+            hashCode.Add(ResourceCollectionName);
 
-            return childHashCode.ToHashCode();
+            return hashCode.ToHashCode();
         }
-
-        protected abstract HashCode GetChildHashCode();
     }
 
     public abstract class ApiRequest<T> : ApiRequest where T : ApiResource2
@@ -200,6 +168,63 @@ namespace HB.FullStack.Common.Api
             ResourceName = def.ResourceName;
             ResourceCollectionName = def.ResourceCollectionName;
             RateLimit = def.RateLimit;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+    }
+
+    public abstract class ApiRequest<T, TSub> : ApiRequest where T : ApiResource2 where TSub : ApiResource2
+    {
+        /// <summary>
+        /// 主要Resource 的ID
+        /// </summary>
+        [JsonIgnore]
+        public Guid Id { get; set; }
+
+        [JsonIgnore]
+        public string SubResourceName { get; set; } = null!;
+
+        [JsonIgnore]
+        public string SubResourceCollectionName { get; set; } = null!;
+
+        protected ApiRequest(Guid id, HttpMethod httpMethod, string? condition) : this(id, ApiAuthType.Jwt, httpMethod, condition)
+        {
+        }
+
+        protected ApiRequest(Guid id, string apiKeyName, HttpMethod httpMethod, string? condition) : this(id, ApiAuthType.ApiKey, httpMethod, condition)
+        {
+            ApiKeyName = apiKeyName;
+        }
+
+        protected ApiRequest(Guid id, ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, null, condition, null)
+        {
+            Id = id;
+
+            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
+
+            EndpointName = def.EndpointName;
+            ApiVersion = def.ApiVersion;
+            ResourceName = def.ResourceName;
+            ResourceCollectionName = def.ResourceCollectionName;
+            RateLimit = def.RateLimit;
+
+            ApiResourceDef subDef = ApiResourceDefFactory.Get<TSub>();
+
+            SubResourceName = subDef.ResourceName;
+            SubResourceCollectionName = subDef.ResourceCollectionName;
+        }
+
+        protected override string GetUrlCore()
+        {
+            return $"{ApiVersion}/{ResourceCollectionName}/{Id}/{SubResourceCollectionName}/{Condition}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(SubResourceName, SubResourceCollectionName, Id, base.GetHashCode());
         }
     }
 }

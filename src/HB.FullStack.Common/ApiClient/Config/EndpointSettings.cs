@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace HB.FullStack.XamarinForms.Api
+namespace HB.FullStack.Common.ApiClient
 {
     public class EndpointSettings : ValidatableObject
     {
