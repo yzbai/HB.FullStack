@@ -12,13 +12,7 @@ namespace HB.FullStack.Common.ApiClient
         public string? EndpointName { get; set; }
 
         [Required]
-        public string? ResourceName { get; set; }
-
-        /// <summary>
-        /// 刷新token的站点资源名
-        /// </summary>
-        [Required]
-        public string? ResourceCollectionName { get; set; }
+        public string? ResName { get; set; }
 
         /// <summary>
         /// 刷新token的站点版本

@@ -76,8 +76,7 @@ namespace HB.FullStack.Common.ApiClient
                     RefreshUserTokenRequest refreshRequest = new RefreshUserTokenRequest(
                         jwtEndpoint.EndpointName!,
                         jwtEndpoint.Version!,
-                        jwtEndpoint.ResourceName!,
-                        jwtEndpoint.ResourceCollectionName!,
+                        jwtEndpoint.ResName!,
                         null,
                         userTokenProvider.AccessToken,
                         userTokenProvider.RefreshToken);
@@ -148,8 +147,7 @@ namespace HB.FullStack.Common.ApiClient
             public RefreshUserTokenRequest(
                 string? endPointName,
                 string? apiVersion,
-                string? resourceName,
-                string? resourceCollectionName,
+                string? resName,
                 TimeSpan? rateLimit,
                 string accessToken,
                 string refreshToken)
@@ -158,8 +156,7 @@ namespace HB.FullStack.Common.ApiClient
                       ApiAuthType.None,
                       endPointName,
                       apiVersion,
-                      resourceName,
-                      resourceCollectionName,
+                      resName,
                       "ByRefresh",
                       rateLimit)
             {

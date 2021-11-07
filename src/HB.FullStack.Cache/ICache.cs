@@ -137,7 +137,6 @@ namespace HB.FullStack.Cache
         #endregion
 
         #region Timestamp Cache
-
         
         Task<byte[]?> GetAsync(string key, CancellationToken token = default);
 

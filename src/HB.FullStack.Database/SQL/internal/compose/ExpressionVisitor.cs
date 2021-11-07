@@ -54,13 +54,13 @@ namespace HB.FullStack.Database.SQL
                     or ExpressionType.ExclusiveOr 
                     => VisitBinary((BinaryExpression)exp),
 
+                ExpressionType.Lambda => VisitLambda((LambdaExpression)exp),
                 ExpressionType.TypeIs => VisitTypeIs((TypeBinaryExpression)exp),
                 ExpressionType.Conditional => VisitConditional((ConditionalExpression)exp),
                 ExpressionType.Constant => VisitConstant((ConstantExpression)exp),
                 ExpressionType.Parameter => VisitParameter((ParameterExpression)exp),
                 ExpressionType.MemberAccess => VisitMemberAccess((MemberExpression)exp),
                 ExpressionType.Call => VisitMethodCall((MethodCallExpression)exp),
-                ExpressionType.Lambda => VisitLambda((LambdaExpression)exp),
                 ExpressionType.New => VisitNew((NewExpression)exp),
                 ExpressionType.NewArrayInit or ExpressionType.NewArrayBounds => VisitNewArray((NewArrayExpression)exp),
                 ExpressionType.Invoke => VisitInvocation((InvocationExpression)exp),

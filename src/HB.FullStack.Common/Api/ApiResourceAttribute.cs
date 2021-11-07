@@ -16,17 +16,21 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public int RateLimitMilliseconds { get; }
 
-        public string ResourceName { get; }
+        public string ResName { get; }
 
-        public string ResourceCollectionName { get; }
-
-        public ApiResourceAttribute(string endPointName, string version, int rateLimitMilliseconds, string resourceName, string resourceCollectionName)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="endPointName"></param>
+        /// <param name="version"></param>
+        /// <param name="rateLimitMilliseconds"></param>
+        /// <param name="resName">一般是复数形式</param>
+        public ApiResourceAttribute(string endPointName, string version, int rateLimitMilliseconds, string resName)
         {
             EndPointName = endPointName;
             Version = version;
             RateLimitMilliseconds = rateLimitMilliseconds;
-            ResourceName = resourceName;
-            ResourceCollectionName = resourceCollectionName;
+            ResName = resName;
         }
 
 

@@ -18,7 +18,7 @@ namespace System
         public static ErrorCode CacheLockAcquireFailed { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 6, nameof(CacheLockAcquireFailed), "");
     }
 
-    internal static class Exceptions
+    internal static class RepositoryExceptions
     {
         internal static Exception UtcTicksNotSet(string resourceType, string cacheKey, object? cacheValue)
         {
@@ -41,7 +41,7 @@ namespace System
             return exception;
         }
 
-        internal static Exception CacheKeyNotSet(string resourceType)
+        internal static Exception CacheKeyNotSet(string? resourceType)
         {
             RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CacheKeyNotSet);
 

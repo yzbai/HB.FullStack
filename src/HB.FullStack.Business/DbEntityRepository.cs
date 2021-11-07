@@ -3,6 +3,7 @@ using HB.FullStack.Common;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Lock.Memory;
+
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -30,6 +31,9 @@ namespace HB.FullStack.Repository
         protected ILogger Logger { get; }
         protected ICache Cache { get; }
         private IDatabase Database { get; }
+
+        protected IDatabaseReader DatabaseReader => Database;
+
         private IMemoryLockManager MemoryLockManager { get; }
 
         protected DbEntityRepository(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
@@ -42,6 +46,10 @@ namespace HB.FullStack.Repository
             Database = (IDatabase)databaseReader;
 
             Logger.LogInformation($"{GetType().Name} 初始化完成");
+
+            //在Changed后Delete Cache，而不是Changing时Delete Cache
+            //https://zongwb.medium.com/how-to-invalidate-or-update-cache-correctly-5dce2db9dde5
+            RegisterEntityChangedEvents(InvalidateCacheItemsOnChanged);
         }
 
         public void RegisterEntityChangedEvents(AsyncEventHandler<TEntity, DatabaseWriteEventArgs> OnEntityChanged)
@@ -52,6 +60,8 @@ namespace HB.FullStack.Repository
 
             EntityDeleted += OnEntityChanged;
         }
+
+        protected abstract Task InvalidateCacheItemsOnChanged(TEntity sender, DatabaseWriteEventArgs args);
 
         #region Events
 
@@ -368,7 +378,7 @@ namespace HB.FullStack.Repository
         #region Cache Strategy
 
         //TODO: 尝试提取IRetrieveStrategy
-  
+
         /// <exception cref="CacheException"></exception>
         /// <exception cref="DatabaseException"></exception>
         protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
@@ -425,7 +435,7 @@ namespace HB.FullStack.Repository
         }
 
         /// <exception cref="CacheException"></exception>
-        public void InvalidateCache<TResult>(CachedItem<TResult> cachedItem) where TResult : class
+        public void InvalidateCache(CachedItem cachedItem)
         {
             CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
         }

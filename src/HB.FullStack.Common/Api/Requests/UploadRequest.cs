@@ -88,7 +88,7 @@ namespace HB.FullStack.Common.Api
 
         protected override string GetUrlCore()
         {
-            return $"{ApiVersion}/{ResourceCollectionName}/{Id}/{Condition}";
+            return $"{ApiVersion}/{ResName}/{Id}/{Condition}";
         }
 
         public override int GetHashCode()
@@ -109,7 +109,7 @@ namespace HB.FullStack.Common.Api
 
         protected override string GetUrlCore()
         {
-            return $"{ApiVersion}/{ResourceCollectionName}/{Id}/{SubResourceCollectionName}/{SubId}/{Condition}";
+            return $"{ApiVersion}/{ResName}/{Id}/{SubResName}/{SubId}/{Condition}";
         }
 
         public override int GetHashCode()

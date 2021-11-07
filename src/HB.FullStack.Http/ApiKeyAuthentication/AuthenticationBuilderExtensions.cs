@@ -9,12 +9,12 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static AuthenticationBuilder AddApiKeyAuthentication(this AuthenticationBuilder authenticationBuilder, Action<ApiKeyOptions> options)
         {
-            return authenticationBuilder.AddScheme<ApiKeyOptions, ApiKeyAuthenticationHandler>(ApiKeyOptions.DEFAULT_SCHEME, options);
+            return authenticationBuilder.AddScheme<ApiKeyOptions, ApiKeyAuthenticationHandler>(ApiKeyOptions.DefaultScheme, options);
         }
 
         public static AuthenticationBuilder AddApiKeyAuthentication(this AuthenticationBuilder authenticationBuilder, IConfiguration configuration)
         {
-            return authenticationBuilder.AddScheme<ApiKeyOptions, ApiKeyAuthenticationHandler>(ApiKeyOptions.DEFAULT_SCHEME, options =>
+            return authenticationBuilder.AddScheme<ApiKeyOptions, ApiKeyAuthenticationHandler>(ApiKeyOptions.DefaultScheme, options =>
             {
 
                 configuration.Bind(options);

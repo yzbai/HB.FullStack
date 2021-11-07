@@ -21,14 +21,15 @@ namespace HB.FullStack.Identity
         /// <param name="cache"></param>
         /// <param name="memoryLockManager"></param>
         /// <exception cref="CacheException"></exception>
-        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
-        {
-            RegisterEntityChangedEvents(OnEntityChanged);
-        }
+        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+            : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        private Task OnEntityChanged(UserClaim sender, DatabaseWriteEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(UserClaim sender, DatabaseWriteEventArgs args)
         {
-            InvalidateCache(CachedUserClaimsByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks));
+            Parallel.Invoke(
+                () => InvalidateCache(CachedUserClaimsByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks))
+            );
+
             return Task.CompletedTask;
         }
 

@@ -30,7 +30,7 @@ namespace HB.FullStack.Repository
             where TResult : class
         {
             //Cache First
-            TResult? result = await cacheItem.GetFromAsync(cache).ConfigureAwait(false);
+            TResult? result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
 
             if (result != null)
             {
@@ -42,7 +42,7 @@ namespace HB.FullStack.Repository
             if (@lock.IsAcquired)
             {
                 //Double Check
-                result = await cacheItem.GetFromAsync(cache).ConfigureAwait(false);
+                result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
 
                 if (result != null)
                 {
@@ -78,23 +78,23 @@ namespace HB.FullStack.Repository
         /// <summary>
         /// InvalidateCache
         /// </summary>
-        /// <param name="cacheItem"></param>
+        /// <param name="cachedItem"></param>
         /// <param name="cache"></param>
         /// <exception cref="CacheException">Ignore.</exception>
-        public static void InvalidateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
+        public static void InvalidateCache(CachedItem cachedItem, ICache cache)
         {
-            cacheItem.RemoveFromAsync(cache).Fire();
+            cache.RemoveAsync(cachedItem).Fire();
         }
 
         /// <summary>
         /// UpdateCache
         /// </summary>
-        /// <param name="cacheItem"></param>
+        /// <param name="cachedItem"></param>
         /// <param name="cache"></param>
         /// <exception cref="CacheException"></exception>
-        private static void UpdateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
+        private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
         {
-            cacheItem.SetToAsync(cache).Fire();
+            cache.SetAsync(cachedItem).Fire();
         }
     }
 }

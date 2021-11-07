@@ -100,7 +100,6 @@ namespace HB.FullStack.Database.SQL
             return sql.ToString();
         }
 
-
         #region Where
 
         /// <summary>

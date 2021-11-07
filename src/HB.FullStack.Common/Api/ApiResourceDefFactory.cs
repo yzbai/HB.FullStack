@@ -29,8 +29,7 @@ namespace HB.FullStack.Common.Api
                 RateLimit = TimeSpan.FromMilliseconds(attr.RateLimitMilliseconds),
                 ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
-                ResourceName = attr.ResourceName ?? type.Name,
-                ResourceCollectionName = attr.ResourceCollectionName ?? type.Name + "s",
+                ResName = attr.ResName ?? type.Name,
             };
         }
     }

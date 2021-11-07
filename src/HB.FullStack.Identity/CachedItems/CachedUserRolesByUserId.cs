@@ -17,9 +17,9 @@ namespace HB.FullStack.Identity
     /// userid: Roles
     /// 关联实体：RoleOfUser
     /// </summary>
-    internal class CachedRolesByUserId : CachedItem<IEnumerable<Role>>
+    internal class CachedUserRolesByUserId : CachedItem<IEnumerable<Role>>
     {
-        private CachedRolesByUserId(params string[] keys) : base(keys)
+        private CachedUserRolesByUserId(params string[] keys) : base(keys)
         {
         }
 
@@ -28,9 +28,9 @@ namespace HB.FullStack.Identity
         public override TimeSpan? SlidingExpiration => null;
 
 
-        public static CachedRolesByUserId Key(Guid userId)
+        public static CachedUserRolesByUserId Key(Guid userId)
         {
-            return new CachedRolesByUserId(userId.ToString());
+            return new CachedUserRolesByUserId(userId.ToString());
         }
     }
 }

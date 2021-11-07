@@ -36,7 +36,7 @@ namespace HB.FullStack.Common.Api.Requests
 
         protected override string GetUrlCore()
         {
-            string url = $"{ApiVersion}/{ResourceCollectionName}/{Id}";
+            string url = $"{ApiVersion}/{ResName}/{Id}";
 
             return AddCommonQueryToUrl(url);
         }
@@ -70,7 +70,7 @@ namespace HB.FullStack.Common.Api.Requests
 
         protected override string GetUrlCore()
         {
-            string url = $"{ApiVersion}/{ResourceCollectionName}/{Id}/{SubResourceCollectionName}/{SubId}";
+            string url = $"{ApiVersion}/{ResName}/{Id}/{SubResName}/{SubId}";
 
             return AddCommonQueryToUrl(url);
         }

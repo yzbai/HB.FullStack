@@ -15,24 +15,22 @@ namespace HB.FullStack.Identity
 {
     internal class SignInTokenRepo : DbEntityRepository<SignInToken>
     {
-        private readonly IDatabaseReader _databaseReader;
-
-        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
-        {
-            _databaseReader = databaseReader;
-        }
+        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+            : base(logger, databaseReader, cache, memoryLockManager) { }
 
         #region Read
 
         public Task<IEnumerable<SignInToken>> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext)
         {
-            return _databaseReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
+            return DatabaseReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
         }
 
         public Task<SignInToken?> GetByIdAsync(Guid signInTokenId, TransactionContext? transactionContext)
         {
-            return _databaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
+            return DatabaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
+
+        protected override Task InvalidateCacheItemsOnChanged(SignInToken sender, DatabaseWriteEventArgs args) => Task.CompletedTask;
 
         //public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
         //{

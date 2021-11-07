@@ -10,9 +10,9 @@ namespace HB.FullStack.WebApi.ApiKeyAuthentication
     {
         private IDictionary<string, string>? _apiKeysDict;
 
-        public const string DEFAULT_SCHEME = "ApiKey";
+        public const string DefaultScheme = "ApiKey";
 
-        public string Scheme { get; set; } = DEFAULT_SCHEME;
+        public string Scheme { get; set; } = DefaultScheme;
 
         public IList<ApiKey> ApiKeys { get; private set; } = new List<ApiKey>();
 

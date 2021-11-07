@@ -23,19 +23,17 @@ namespace HB.FullStack.Identity
     /// </summary>
     internal class UserRepo : DbEntityRepository<User>
     {
-        private readonly IDatabaseReader _databaseReader;
-
         public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
-            _databaseReader = databaseReader;
-
             EntityUpdating += (sender, args) =>
             {
                 sender.SecurityStamp = SecurityUtil.CreateUniqueToken();
                 return Task.CompletedTask;
             };
         }
+
+        protected override Task InvalidateCacheItemsOnChanged(User sender, DatabaseWriteEventArgs args) => Task.CompletedTask;
 
         #region Read 所有的查询都要经过这里
 
@@ -145,8 +143,8 @@ namespace HB.FullStack.Identity
         /// <exception cref="DatabaseException"></exception>
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            WhereExpression<User> where = _databaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
-            return _databaseReader.CountAsync(where, transContext);
+            WhereExpression<User> where = DatabaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            return DatabaseReader.CountAsync(where, transContext);
         }
 
         #endregion

@@ -42,11 +42,14 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string? ApiVersion { get; set; }
 
-        [JsonIgnore]
-        public string? ResourceName { get; set; }
+        //[JsonIgnore]
+        //public string? ResourceName { get; set; }
+
+        //[JsonIgnore]
+        //public string? ResourceCollectionName { get; set; }
 
         [JsonIgnore]
-        public string? ResourceCollectionName { get; set; }
+        public string? ResName { get; set; }
 
         [JsonIgnore]
         public string? Condition { get; set; }
@@ -76,8 +79,7 @@ namespace HB.FullStack.Common.Api
             ApiAuthType apiAuthType,
             string? endPointName,
             string? apiVersion,
-            string? resourceName,
-            string? resourceCollectionName,
+            string? resName,
             string? condition,
             TimeSpan? rateLimit)
         {
@@ -85,8 +87,7 @@ namespace HB.FullStack.Common.Api
             EndpointName = endPointName;
             ApiVersion = apiVersion;
             HttpMethod = httpMethod;
-            ResourceName = resourceName;
-            ResourceCollectionName = resourceCollectionName;
+            ResName = resName;
             Condition = condition;
             RateLimit = rateLimit;
         }
@@ -119,7 +120,7 @@ namespace HB.FullStack.Common.Api
 
         protected virtual string GetUrlCore()
         {
-            return $"{ApiVersion}/{ResourceCollectionName}/{Condition}";
+            return $"{ApiVersion}/{ResName}/{Condition}";
         }
 
         public abstract string ToDebugInfo();
@@ -136,8 +137,7 @@ namespace HB.FullStack.Common.Api
             hashCode.Add(ApiAuthType);
             hashCode.Add(ApiKeyName);
             hashCode.Add(Condition);
-            hashCode.Add(ResourceName);
-            hashCode.Add(ResourceCollectionName);
+            hashCode.Add(ResName);
 
             return hashCode.ToHashCode();
         }
@@ -159,14 +159,13 @@ namespace HB.FullStack.Common.Api
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, null, condition, null)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition, null)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
-            ResourceName = def.ResourceName;
-            ResourceCollectionName = def.ResourceCollectionName;
+            ResName = def.ResName;
             RateLimit = def.RateLimit;
         }
 
@@ -185,10 +184,7 @@ namespace HB.FullStack.Common.Api
         public Guid Id { get; set; }
 
         [JsonIgnore]
-        public string SubResourceName { get; set; } = null!;
-
-        [JsonIgnore]
-        public string SubResourceCollectionName { get; set; } = null!;
+        public string SubResName { get; set; } = null!;
 
         protected ApiRequest(Guid id, HttpMethod httpMethod, string? condition) : this(id, ApiAuthType.Jwt, httpMethod, condition)
         {
@@ -199,7 +195,7 @@ namespace HB.FullStack.Common.Api
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(Guid id, ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, null, condition, null)
+        protected ApiRequest(Guid id, ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition, null)
         {
             Id = id;
 
@@ -207,24 +203,22 @@ namespace HB.FullStack.Common.Api
 
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
-            ResourceName = def.ResourceName;
-            ResourceCollectionName = def.ResourceCollectionName;
+            ResName = def.ResName;
             RateLimit = def.RateLimit;
 
             ApiResourceDef subDef = ApiResourceDefFactory.Get<TSub>();
 
-            SubResourceName = subDef.ResourceName;
-            SubResourceCollectionName = subDef.ResourceCollectionName;
+            SubResName = subDef.ResName;
         }
 
         protected override string GetUrlCore()
         {
-            return $"{ApiVersion}/{ResourceCollectionName}/{Id}/{SubResourceCollectionName}/{Condition}";
+            return $"{ApiVersion}/{ResName}/{Id}/{SubResName}/{Condition}";
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(SubResourceName, SubResourceCollectionName, Id, base.GetHashCode());
+            return HashCode.Combine(base.GetHashCode(), SubResName, Id);
         }
     }
 }
