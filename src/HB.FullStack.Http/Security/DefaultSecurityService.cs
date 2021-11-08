@@ -52,7 +52,7 @@ namespace HB.FullStack.WebApi.Security
         /// <param name="permittedFileSuffixes"></param>
         /// <param name="sizeLimit"></param>
         /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
+        
         public async Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedFileSuffixes, long sizeLimit)
         {
             // Check the file length. This check doesn't catch files that only have 

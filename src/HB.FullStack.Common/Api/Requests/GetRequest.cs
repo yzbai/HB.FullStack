@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -19,7 +20,7 @@ namespace HB.FullStack.Common.Api.Requests
         public int? PerPage { get; set; }
 
         [JsonIgnore]
-        public string? OrderBy { get; set; }
+        public IEnumerable<Expression<Func<T, object>>> OrderBys { get; } = new List<Expression<Func<T, object>>>();
 
         #endregion
 
@@ -38,7 +39,7 @@ namespace HB.FullStack.Common.Api.Requests
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Page, PerPage, OrderBy);
+            return HashCode.Combine(base.GetHashCode(), Page, PerPage, OrderBys);
         }
 
         protected string AddCommonQueryToUrl(string url)
@@ -47,13 +48,24 @@ namespace HB.FullStack.Common.Api.Requests
 
             if (Page.HasValue && PerPage.HasValue)
             {
-                parameters.Add(ClientNames.PAGE, Page.Value.ToString(CultureInfo.InvariantCulture));
-                parameters.Add(ClientNames.PER_PAGE, PerPage.Value.ToString(CultureInfo.InvariantCulture));
+                parameters.Add(ClientNames.Page, Page.Value.ToString(CultureInfo.InvariantCulture));
+                parameters.Add(ClientNames.PerPage, PerPage.Value.ToString(CultureInfo.InvariantCulture));
             }
 
-            if (OrderBy.IsNotNullOrEmpty())
+            if (OrderBys.IsNotNullOrEmpty())
             {
-                parameters.Add(ClientNames.ORDER_BY, OrderBy);
+                StringBuilder orderByBuilder = new StringBuilder();
+
+                foreach (Expression<Func<T, object>> orderBy in OrderBys)
+                {
+                    string orderByName = ((MemberExpression)orderBy.Body).Member.Name;
+                    orderByBuilder.Append(orderByName);
+                    orderByBuilder.Append(',');
+                }
+
+                orderByBuilder.RemoveLast();
+
+                parameters.Add(ClientNames.OrderBy, orderByBuilder.ToString());
             }
 
             return parameters.Any() ? UriUtil.AddQuerys(url, parameters) : url;
@@ -106,13 +118,13 @@ namespace HB.FullStack.Common.Api.Requests
 
             if (Page.HasValue && PerPage.HasValue)
             {
-                parameters.Add(ClientNames.PAGE, Page.Value.ToString(CultureInfo.InvariantCulture));
-                parameters.Add(ClientNames.PER_PAGE, PerPage.Value.ToString(CultureInfo.InvariantCulture));
+                parameters.Add(ClientNames.Page, Page.Value.ToString(CultureInfo.InvariantCulture));
+                parameters.Add(ClientNames.PerPage, PerPage.Value.ToString(CultureInfo.InvariantCulture));
             }
 
             if (OrderBy.IsNotNullOrEmpty())
             {
-                parameters.Add(ClientNames.ORDER_BY, OrderBy);
+                parameters.Add(ClientNames.OrderBy, OrderBy);
             }
 
             return parameters.Any() ? UriUtil.AddQuerys(url, parameters) : url;

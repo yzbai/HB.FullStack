@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -52,6 +53,16 @@ return 1";
 redis.call('set', '_minTS'..KEYS[1], ARGV[1], 'EX', ARGV[2])
 return redis.call('del', KEYS[1])
 ";
+        /// <summary>
+        /// keys: key1, key2, key3
+        /// argv: key_count, utcTicks, invalidationKey_expire_seconds
+        /// </summary>
+        public const string LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP = @"
+local number=tonumber(ARGV[1])
+for i=1,number do
+    redis.call('set', '_minTS'..KEYS[i], ARGV[2], 'EX', ARGV[3])
+end
+return redis.call('del', unpack(KEYS))";
 
         /// <summary>
         /// keys:key
@@ -86,7 +97,7 @@ return data[3]";
         /// <param name="key"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
@@ -139,7 +150,7 @@ return data[3]";
         /// <param name="options"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
@@ -205,7 +216,7 @@ return data[3]";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default)
         {
             if (key == null)
@@ -242,6 +253,87 @@ return data[3]";
             {
                 throw CacheExceptions.RemoveError(key, utcTicks, ex);
             }
+        }
+
+        public async Task<bool> RemoveAsync(string[] keys, UtcNowTicks utcTicks, CancellationToken token = default)
+        {
+            //TODO: 测试这个
+            if (keys.IsNullOrEmpty())
+            {
+                return true;
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            //划分组 100个一组
+            int groupLength = 100;
+
+            IList<string[]> groups = PartitionToGroup(keys, groupLength);
+
+            IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
+
+            int deletedSum = 0;
+
+            try
+            {
+                foreach (string[] group in groups)
+                {
+                    RedisResult redisResult = await database.ScriptEvaluateAsync(
+                        GetDefaultLoadLuas().LoadedRemoveMultipleWithTimestampLua,
+                        group.Select(key=>(RedisKey)GetRealKey("",key)).ToArray(),
+                        new RedisValue[]
+                        {
+                            group.Length,
+                            utcTicks.Ticks,
+                            INVALIDATION_VERSION_EXPIRY_SECONDS
+                        }).ConfigureAwait(false);
+
+                    deletedSum += (int)redisResult;
+                }
+
+                return deletedSum == keys.Length;
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                _logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
+
+                InitLoadedLuas();
+
+                return await RemoveAsync(keys, utcTicks, token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw CacheExceptions.RemoveMultipleError(keys, utcTicks, ex);
+            }
+        }
+
+        private static IList<string[]> PartitionToGroup(string[] keys, int groupLength)
+        {
+            IList<string[]> groups = new List<string[]>();
+            int start = 0;
+
+            while (start < keys.Length)
+            {
+                if (start + groupLength - 1 < keys.Length)
+                {
+                    groups.Add(keys[start..(start + groupLength)]);
+                }
+                else
+                {
+                    groups.Add(keys[start..]);
+                    break;
+                }
+
+                start += groupLength;
+            }
+
+
+            return groups;
+        }
+
+        public Task RemoveByKeyPrefixAsync(string keyPrefix, UtcNowTicks utcTikcs, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

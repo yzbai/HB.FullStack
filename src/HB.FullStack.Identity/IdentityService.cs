@@ -26,12 +26,11 @@ namespace HB.FullStack.Identity
 
         private readonly UserRepo _userRepo;
         private readonly SignInTokenRepo _signInTokenRepo;
-        private readonly UserRoleRepo _roleOfUserRepo;
         private readonly UserClaimRepo _userClaimRepo;
         private readonly LoginControlRepo _userLoginControlRepo;
-        private readonly UserRoleRepo _userRoleRepo;
+        private readonly RoleRepo _roleRepo;
         private readonly UserActivityRepo _userActivityEntityRepo;
-
+        private readonly UserRoleRepo _userRoleRepo;
 
         //Jwt Signing
         private string _jsonWebKeySetJson = null!;
@@ -43,7 +42,7 @@ namespace HB.FullStack.Identity
         private EncryptingCredentials _encryptingCredentials = null!;
         private SecurityKey _decryptionSecurityKey = null!;
 
-        /// <exception cref="IdentityException"></exception>
+        
         public IdentityService(
             IOptions<IdentityOptions> options,
             ILogger<IdentityService> logger,
@@ -51,9 +50,9 @@ namespace HB.FullStack.Identity
             IDistributedLockManager lockManager,
             UserRepo userRepo,
             SignInTokenRepo signInTokenRepo,
-            UserRoleRepo roleOfUserRepo,
             UserClaimRepo userClaimRepo,
             LoginControlRepo userLoginControlRepo,
+            RoleRepo roleRepo,
             UserRoleRepo userRoleRepo,
             UserActivityRepo userActivityEntityRepo)
         {
@@ -63,11 +62,11 @@ namespace HB.FullStack.Identity
             _lockManager = lockManager;
 
             _userRepo = userRepo;
-            _roleOfUserRepo = roleOfUserRepo;
             _userClaimRepo = userClaimRepo;
             _userLoginControlRepo = userLoginControlRepo;
             _signInTokenRepo = signInTokenRepo;
 
+            _roleRepo = roleRepo;
             _userRoleRepo = userRoleRepo;
 
             _userActivityEntityRepo = userActivityEntityRepo;
@@ -83,10 +82,10 @@ namespace HB.FullStack.Identity
         /// <param name="context"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="KVStoreException"></exception>
-        /// <exception cref="CacheException"></exception>
+        
+        
+        
+        
         public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -130,7 +129,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null)
                 {
-                    throw Exceptions.AuthorizationNotFound(signInContext: context);
+                    throw IdentityExceptions.AuthorizationNotFound(signInContext: context);
                 }
 
                 LoginControl userLoginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
@@ -142,7 +141,7 @@ namespace HB.FullStack.Identity
                     {
                         await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
 
-                        throw Exceptions.AuthorizationPasswordWrong(signInContext: context);
+                        throw IdentityExceptions.AuthorizationPasswordWrong(signInContext: context);
                     }
                 }
 
@@ -200,9 +199,9 @@ namespace HB.FullStack.Identity
         /// <param name="context"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="CacheException"></exception>
+        
+        
+        
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -214,7 +213,7 @@ namespace HB.FullStack.Identity
 
             if (!distributedLock.IsAcquired)
             {
-                throw Exceptions.AuthorizationTooFrequent(context: context);
+                throw IdentityExceptions.AuthorizationTooFrequent(context: context);
             }
 
             //AccessToken, Claims 验证
@@ -227,7 +226,7 @@ namespace HB.FullStack.Identity
             }
             catch (Exception ex)
             {
-                throw Exceptions.AuthorizationInvalideAccessToken(context: context, innerException: ex);
+                throw IdentityExceptions.AuthorizationInvalideAccessToken(context: context, innerException: ex);
             }
 
             //TODO: 这里缺DeviceId验证. 放在了StartupUtil.cs中
@@ -235,19 +234,19 @@ namespace HB.FullStack.Identity
             if (claimsPrincipal == null)
             {
                 //TODO: Black concern SigninToken by RefreshToken
-                throw Exceptions.AuthorizationInvalideAccessToken(context: context);
+                throw IdentityExceptions.AuthorizationInvalideAccessToken(context: context);
             }
 
             if (claimsPrincipal.GetDeviceId() != context.DeviceId)
             {
-                throw Exceptions.AuthorizationInvalideDeviceId(context: context);
+                throw IdentityExceptions.AuthorizationInvalideDeviceId(context: context);
             }
 
             Guid userId = claimsPrincipal.GetUserId().GetValueOrDefault();
 
             if (userId.IsEmpty())
             {
-                throw Exceptions.AuthorizationInvalideUserId(context: context);
+                throw IdentityExceptions.AuthorizationInvalideUserId(context: context);
             }
 
             //SignInToken 验证
@@ -259,20 +258,20 @@ namespace HB.FullStack.Identity
             {
                 signInToken = await _signInTokenRepo.GetByIdAsync(claimsPrincipal.GetSignInTokenId().GetValueOrDefault(), transactionContext).ConfigureAwait(false);
 
-                if (signInToken == null || 
-                    signInToken.Blacked || 
-                    signInToken.RefreshToken != context.RefreshToken || 
-                    signInToken.DeviceId != context.DeviceId || 
+                if (signInToken == null ||
+                    signInToken.Blacked ||
+                    signInToken.RefreshToken != context.RefreshToken ||
+                    signInToken.DeviceId != context.DeviceId ||
                     signInToken.UserId != userId)
                 {
-                    throw Exceptions.AuthorizationNoTokenInStore(cause: "Refresh token error. signInToken not saved in db. ");
+                    throw IdentityExceptions.AuthorizationNoTokenInStore(cause: "Refresh token error. signInToken not saved in db. ");
                 }
 
                 //验证SignInToken过期问题
 
                 if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
-                    throw Exceptions.AuthorizationRefreshTokenExpired();
+                    throw IdentityExceptions.AuthorizationRefreshTokenExpired();
                 }
 
                 // User 信息变动验证
@@ -281,7 +280,7 @@ namespace HB.FullStack.Identity
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
-                    throw Exceptions.AuthorizationUserSecurityStampChanged(cause: "Refresh token error. User SecurityStamp Changed.");
+                    throw IdentityExceptions.AuthorizationUserSecurityStampChanged(cause: "Refresh token error. User SecurityStamp Changed.");
                 }
 
                 // 更新SignInToken
@@ -316,7 +315,7 @@ namespace HB.FullStack.Identity
         /// <param name="signInTokenId"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task SignOutAsync(Guid signInTokenId, string lastUser)
         {
             ThrowIf.Empty(ref signInTokenId, nameof(signInTokenId));
@@ -353,7 +352,7 @@ namespace HB.FullStack.Identity
         /// <param name="logOffType"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
             ThrowIf.Empty(ref userId, nameof(userId));
@@ -379,9 +378,9 @@ namespace HB.FullStack.Identity
         /// <param name="mobile"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="CacheException"></exception>
+        
+        
+        
         public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
         {
             User? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
@@ -405,7 +404,7 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <param name="transactionContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private async Task DeleteSignInTokensAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
         {
             IEnumerable<SignInToken> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
@@ -429,11 +428,11 @@ namespace HB.FullStack.Identity
         /// <param name="signToWhere"></param>
         /// <param name="transactionContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="CacheException"></exception>
+        
+        
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
-            IEnumerable<Role> roles = await _roleOfUserRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _roleRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
             IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
 
             IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
@@ -454,8 +453,8 @@ namespace HB.FullStack.Identity
         /// <param name="user"></param>
         /// <param name="userLoginControl"></param>
         /// <param name="lastUser"></param>
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="KVStoreException"></exception>
+        
+        
         private async Task PreSignInCheckAsync(User user, LoginControl userLoginControl, string lastUser)
         {
             ThrowIf.Null(user, nameof(user));
@@ -465,19 +464,19 @@ namespace HB.FullStack.Identity
             //2, 手机验证
             if (signInOptions.RequireMobileConfirmed && !user.MobileConfirmed)
             {
-                throw Exceptions.AuthorizationMobileNotConfirmed(userId: user.Id);
+                throw IdentityExceptions.AuthorizationMobileNotConfirmed(userId: user.Id);
             }
 
             //3, 邮件验证
             if (signInOptions.RequireEmailConfirmed && !user.EmailConfirmed)
             {
-                throw Exceptions.AuthorizationEmailNotConfirmed(userId: user.Id);
+                throw IdentityExceptions.AuthorizationEmailNotConfirmed(userId: user.Id);
             }
 
             //4, Lockout 检查
             if (signInOptions.RequiredLockoutCheck && userLoginControl.LockoutEnabled && userLoginControl.LockoutEndDate > TimeUtil.UtcNow)
             {
-                throw Exceptions.AuthorizationLockedOut(lockoutEndDate: userLoginControl.LockoutEndDate, userId: user.Id);
+                throw IdentityExceptions.AuthorizationLockedOut(lockoutEndDate: userLoginControl.LockoutEndDate, userId: user.Id);
             }
 
             //5, 一段时间内,最大失败数检测
@@ -487,7 +486,7 @@ namespace HB.FullStack.Identity
                 {
                     if (userLoginControl.LoginFailedCount > signInOptions.MaxFailedCount)
                     {
-                        throw Exceptions.AuthorizationOverMaxFailedCount(userId: user.Id);
+                        throw IdentityExceptions.AuthorizationOverMaxFailedCount(userId: user.Id);
                     }
                 }
             }
@@ -512,7 +511,7 @@ namespace HB.FullStack.Identity
         /// </summary>
         /// <param name="userLoginControl"></param>
         /// <param name="lastUser"></param>
-        /// <exception cref="KVStoreException"></exception>
+        
         private async Task OnSignInFailedAsync(LoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
@@ -537,7 +536,7 @@ namespace HB.FullStack.Identity
         /// <summary>
         /// InitializeCredencials
         /// </summary>
-        /// <exception cref="IdentityException"></exception>
+        
         private void InitializeCredencials()
         {
             //Initialize Jwt Signing Credentials
@@ -588,7 +587,7 @@ namespace HB.FullStack.Identity
 
             foreach (Role item in roles)
             {
-                claims.Add(new Claim(ClaimExtensionTypes.ROLE, item.Name));
+                claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, item.Name));
             }
             return claims;
         }
@@ -599,7 +598,7 @@ namespace HB.FullStack.Identity
         /// <param name="lastUser"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         private async Task<LoginControl> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
         {
             LoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
@@ -613,8 +612,8 @@ namespace HB.FullStack.Identity
             return userLoginControl;
         }
 
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         private async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
@@ -624,12 +623,12 @@ namespace HB.FullStack.Identity
 
             if (mobile == null && email == null && loginName == null)
             {
-                throw Exceptions.IdentityMobileEmailLoginNameAllNull();
+                throw IdentityExceptions.IdentityMobileEmailLoginNameAllNull();
             }
 
             if (!mobileConfirmed && !emailConfirmed && password == null)
             {
-                throw Exceptions.IdentityNothingConfirmed();
+                throw IdentityExceptions.IdentityNothingConfirmed();
             }
 
             bool ownTrans = transactionContext == null;
@@ -642,7 +641,7 @@ namespace HB.FullStack.Identity
 
                 if (count != 0)
                 {
-                    throw Exceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
+                    throw IdentityExceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
                 }
 
                 User user = new User(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
@@ -676,10 +675,12 @@ namespace HB.FullStack.Identity
         /// <param name="roleId"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
         {
+            //TODO: 需要重新构建 jwt
+
             ThrowIf.Empty(ref userId, nameof(userId));
             ThrowIf.Empty(ref roleId, nameof(roleId));
 
@@ -687,16 +688,16 @@ namespace HB.FullStack.Identity
             try
             {
                 //查重
-                long count = await _userRoleRepo.CountByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
-                if (count != 0)
+                if (storeds.Any(ur => ur.Id == roleId))
                 {
-                    throw Exceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
+                    throw IdentityExceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
                 }
 
                 UserRole ru = new UserRole(userId, roleId);
 
-                await _userRoleRepo.UpdateAsync(ru, lastUser, trans).ConfigureAwait(false);
+                await _userRoleRepo.AddAsync(ru, lastUser, trans).ConfigureAwait(false);
 
                 await trans.CommitAsync().ConfigureAwait(false);
             }
@@ -707,39 +708,41 @@ namespace HB.FullStack.Identity
             }
         }
 
-        /// <summary>
-        /// RemoveRoleFromUserAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="roleId"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        public async Task RemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
+        public async Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
         {
-            ThrowIf.Empty(ref userId, nameof(userId));
-            ThrowIf.Empty(ref roleId, nameof(roleId));
+            //需要重新构建 jwt
 
             TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+
             try
             {
                 //查重
-                UserRole? stored = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+
+                Role? stored = storeds.SingleOrDefault(ur => ur.Id == roleId);
 
                 if (stored == null)
                 {
-                    throw Exceptions.NotFound(userId: userId, roleId: roleId, cause: "没有找到这样的角色");
+                    return false;
                 }
 
-                await _userRoleRepo.DeleteAsync(stored, lastUser, trans).ConfigureAwait(false);
+                UserRole? userRole = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+
+                await _userRoleRepo.DeleteAsync(userRole!, lastUser, trans).ConfigureAwait(false);
 
                 await trans.CommitAsync().ConfigureAwait(false);
+
+                return true;
             }
-            catch
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 await trans.RollbackAsync().ConfigureAwait(false);
-                throw;
+
+                _logger.LogTryRemoveRoleFromUserError(userId, roleId, lastUser, ex);
+
+                return false;
             }
         }
 

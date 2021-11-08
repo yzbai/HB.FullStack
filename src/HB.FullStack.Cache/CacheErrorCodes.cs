@@ -44,6 +44,8 @@ namespace System
         public static readonly ErrorCode GetError = new ErrorCode(ErrorCodeStartIds.CACHE + 20, nameof(GetError), "");
 
         public static readonly ErrorCode CacheUpdateTimestampConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 21, nameof(CacheUpdateTimestampConcurrency), "");
+
+        public static readonly ErrorCode RemoveMultipleError = new ErrorCode(ErrorCodeStartIds.CACHE + 19, nameof(RemoveMultipleError), "");
     }
 
     public static class CacheExceptions
@@ -196,6 +198,16 @@ namespace System
             CacheException exception = new CacheException(CacheErrorCodes.RemoveError, ex);
 
             exception.Data["Key"] = key;
+            exception.Data["UtcNowTicks"] = utcTicks.Ticks;
+
+            return exception;
+        }
+
+        public static Exception RemoveMultipleError(string[] keys, UtcNowTicks utcTicks, Exception ex)
+        {
+            CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
+
+            exception.Data["Keys"] = keys.ToJoinedString(",");
             exception.Data["UtcNowTicks"] = utcTicks.Ticks;
 
             return exception;

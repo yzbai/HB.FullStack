@@ -199,8 +199,8 @@ namespace System
             }
         }
 
-        /// <exception cref="FileLoadException"></exception>
-        /// <exception cref="IOException"></exception>
+        
+        
         public static byte[] ComputeFileHash(string filePath)
         {
             int runCount = 1;

@@ -23,7 +23,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="mySqlTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
@@ -40,7 +40,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
         {
             MySqlConnection conn = new MySqlConnection(connectString);
@@ -55,7 +55,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="isOwnedConnection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlConnection connection, bool isOwnedConnection, MySqlCommand command)
         {
             MySqlDataReader? reader = null;
@@ -106,7 +106,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);
@@ -119,7 +119,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="mySqlTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<object?> ExecuteCommandScalarAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
@@ -134,7 +134,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="connection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<object?> ExecuteCommandScalarAsync(MySqlConnection connection, MySqlCommand command)
         {
             try
@@ -164,7 +164,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);
@@ -178,7 +178,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="mySqlTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<int> ExecuteCommandNonQueryAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
@@ -193,7 +193,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="conn"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<int> ExecuteCommandNonQueryAsync(MySqlConnection conn, MySqlCommand command)
         {
             try

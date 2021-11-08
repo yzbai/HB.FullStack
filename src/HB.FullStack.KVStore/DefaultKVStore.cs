@@ -61,7 +61,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
@@ -84,7 +84,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
@@ -117,7 +117,7 @@ namespace HB.FullStack.KVStore
         /// <param name="items"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreEntity, new()
         {
             if (!items.Any())
@@ -172,7 +172,7 @@ namespace HB.FullStack.KVStore
         /// <param name="items"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreEntity, new()
         {
             if (!items.Any())
@@ -219,7 +219,7 @@ namespace HB.FullStack.KVStore
         /// DeleteAllAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task DeleteAllAsync<T>() where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
@@ -249,7 +249,7 @@ namespace HB.FullStack.KVStore
         /// <param name="keys"></param>
         /// <param name="versions"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
             ThrowIf.NullOrEmpty(versions, nameof(versions));

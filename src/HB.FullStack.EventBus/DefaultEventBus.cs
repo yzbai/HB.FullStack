@@ -26,7 +26,7 @@ namespace HB.FullStack.EventBus
         /// </summary>
         /// <param name="eventMessage"></param>
         /// <returns></returns>
-        /// <exception cref="EventBusException"></exception>
+        
         public async Task PublishAsync(string eventName, string jsonData)
         {
             await _engine.PublishAsync(GetBrokerName(eventName), eventName, jsonData).ConfigureAwait(false);
@@ -36,7 +36,7 @@ namespace HB.FullStack.EventBus
         /// StartHandle
         /// </summary>
         /// <param name="eventType"></param>
-        /// <exception cref="EventBusException"></exception>
+        
         public void StartHandle(string eventType)
         {
             _engine.StartHandle(eventType);
@@ -47,7 +47,7 @@ namespace HB.FullStack.EventBus
         /// </summary>
         /// <param name="eventType"></param>
         /// <param name="handler"></param>
-        /// <exception cref="EventBusException"></exception>
+        
         public void Subscribe(string eventType, IEventHandler handler)
         {
             _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventName: eventType, eventHandler: handler);
@@ -57,7 +57,7 @@ namespace HB.FullStack.EventBus
         /// UnSubscribe
         /// </summary>
         /// <param name="eventType"></param>
-        /// <exception cref="EventBusException"></exception>
+        
         public async Task UnSubscribeAsync(string eventType)
         {
             await _engine.UnSubscribeHandlerAsync(eventyName: eventType).ConfigureAwait(false);
@@ -68,7 +68,7 @@ namespace HB.FullStack.EventBus
         /// </summary>
         /// <param name="eventName"></param>
         /// <returns></returns>
-        /// <exception cref="EventBusException"></exception>
+        
         private string GetBrokerName(string eventName)
         {
             if (_eventSchemaDict.TryGetValue(eventName, out EventSchema? eventSchema))

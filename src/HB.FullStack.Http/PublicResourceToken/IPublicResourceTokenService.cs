@@ -8,10 +8,10 @@ namespace HB.FullStack.WebApi
     /// </summary>
     public interface IPublicResourceTokenService
     {
-        /// <exception cref="CacheException"></exception>
+        
         Task<string> GetNewTokenAsync(int expiredSeconds = 60);
 
-        /// <exception cref="CacheException"></exception>
+        
         Task<bool> CheckTokenAsync(string? token);
     }
 }

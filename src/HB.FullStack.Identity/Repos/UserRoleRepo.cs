@@ -21,55 +21,14 @@ namespace HB.FullStack.Identity
 
         protected override Task InvalidateCacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)
         {
-            Parallel.Invoke(
-                            () => InvalidateCache(CachedUserRolesByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks))
-                        );
+            InvalidateCache(CachedRolesByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks));
             return Task.CompletedTask;
         }
 
-        #region Read
-
-        public Task<UserRole?> GetByUserIdAndRoleIdAsync(Guid userId, Guid roleId, TransactionContext? transactionContext = null)
+        internal async Task<UserRole?> GetByUserIdAndRoleIdAsync(Guid userId, Guid roleId, TransactionContext? transactionContext)
         {
-            return DatabaseReader.ScalarAsync<UserRole>(ru => ru.UserId == userId && ru.RoleId == roleId, transactionContext);
+            UserRole? userRole = await DbReader.ScalarAsync<UserRole>(ur => ur.UserId == userId && ur.RoleId == roleId, transactionContext).ConfigureAwait(false);
+            return userRole;
         }
-
-        /// <summary>
-        /// GetRolesByUserIdAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="CacheException"></exception>
-        public Task<IEnumerable<Role>> GetRolesByUserIdAsync(Guid userId, TransactionContext? transContext = null)
-        {
-            return TryCacheAsideAsync(CachedUserRolesByUserId.Key(userId), dbReader =>
-            {
-                var from = dbReader.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
-                var where = dbReader.Where<Role>().And<UserRole>(ru => ru.UserId == userId);
-
-                return dbReader.RetrieveAsync(from, where, transContext);
-            })!;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="roleId"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public Task<long> CountByUserIdAndRoleIdAsync(Guid userId, Guid roleId, TransactionContext? transContext = null)
-        {
-            return DatabaseReader.CountAsync<UserRole>(ru => ru.UserId == userId && ru.RoleId == roleId, transContext);
-        }
-
-        #endregion
-
-
-
-
     }
 }

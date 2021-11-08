@@ -43,7 +43,7 @@ namespace HB.FullStack.Common.ApiClient
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <exception cref="ApiException">Ignore.</exception>
+        
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);

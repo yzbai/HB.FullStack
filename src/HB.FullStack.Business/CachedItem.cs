@@ -6,7 +6,7 @@ namespace HB.FullStack.Repository
 {
     public abstract class CachedItem
     {
-        public string ResourceType => GetType().FullName;
+        public string CachedType => GetType().Name;
 
         public abstract TimeSpan? AbsoluteExpirationRelativeToNow { get; }
 
@@ -15,17 +15,20 @@ namespace HB.FullStack.Repository
         public string CacheKey { get; protected set; } = null!;
 
         public UtcNowTicks UtcTikcs { get; protected set; } = UtcNowTicks.Empty;
-
-        
     }
 
     public abstract class CachedItem<TResult> : CachedItem where TResult : class
     {
         public TResult? CacheValue { get; private set; }
 
-        protected CachedItem(params string[] keys)
+        protected CachedItem(params object[] keys)
         {
-            CacheKey = ResourceType + keys.ToJoinedString("_");
+            CacheKey = CachedType + keys.ToJoinedString("_");
+        }
+
+        protected CachedItem(Guid guid)
+        {
+            CacheKey = CachedType + guid.ToString();
         }
 
         public CachedItem<TResult> Value(TResult result)

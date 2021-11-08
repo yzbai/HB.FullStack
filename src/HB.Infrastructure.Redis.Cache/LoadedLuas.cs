@@ -19,5 +19,7 @@
 
         public byte[] LoadedSetWithTimestampLua { get; internal set; } = null!;
         public byte[] LoadedRemoveWithTimestampLua { get; internal set; } = null!;
+
+        public byte[] LoadedRemoveMultipleWithTimestampLua { get; internal set; } = null!;
     }
 }

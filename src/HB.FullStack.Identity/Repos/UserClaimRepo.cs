@@ -20,7 +20,7 @@ namespace HB.FullStack.Identity
         /// <param name="databaseReader"></param>
         /// <param name="cache"></param>
         /// <param name="memoryLockManager"></param>
-        /// <exception cref="CacheException"></exception>
+        
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
@@ -39,8 +39,8 @@ namespace HB.FullStack.Identity
         /// <param name="userId"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return TryCacheAsideAsync(CachedUserClaimsByUserId.Key(userId), dbReader =>

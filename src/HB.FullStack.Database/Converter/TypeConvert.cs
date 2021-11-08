@@ -203,7 +203,7 @@ namespace HB.FullStack.Database.Converter
         /// <param name="quotedIfNeed"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static string DoNotUseUnSafeTypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)
@@ -246,7 +246,7 @@ namespace HB.FullStack.Database.Converter
         /// <param name="propertyDef"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static DbType TypeToDbType(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
@@ -280,7 +280,7 @@ namespace HB.FullStack.Database.Converter
         /// <param name="propertyDef"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义

@@ -33,7 +33,7 @@ namespace HB.FullStack.WebApi
         /// </summary>
         /// <param name="expiredSeconds"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task<string> GetNewTokenAsync(int expiredSeconds)
         {
             string token = _prefix + Guid.NewGuid().ToString();
@@ -52,7 +52,7 @@ namespace HB.FullStack.WebApi
         /// </summary>
         /// <param name="protectedToken"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task<bool> CheckTokenAsync(string? protectedToken)
         {
             if (protectedToken.IsNullOrEmpty())

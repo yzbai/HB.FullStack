@@ -106,7 +106,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// </summary>
         /// <param name="disposing"></param>
         /// <returns></returns>
-        /// <exception cref="LockException"></exception>
+        
         protected virtual async ValueTask DisposeAsync(bool disposing)
         {
             _logger.LogDebug("锁开始Dispose，{Resources}", Resources);
@@ -150,7 +150,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// DisposeAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="LockException">Ignore.</exception>
+        
         public async ValueTask DisposeAsync()
         {
             await DisposeAsync(true).ConfigureAwait(false);

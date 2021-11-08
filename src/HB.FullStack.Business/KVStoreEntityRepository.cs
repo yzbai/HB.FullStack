@@ -28,7 +28,7 @@ namespace HB.FullStack.Repository
         /// <param name="entity"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public Task AddAsync(TEntity entity, string lastUser)
         {
             return KVStore.AddAsync(entity, lastUser);
@@ -40,7 +40,7 @@ namespace HB.FullStack.Repository
         /// <param name="entity"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public Task UpdateAsync(TEntity entity, string lastUser)
         {
             return KVStore.UpdateAsync(entity, lastUser);

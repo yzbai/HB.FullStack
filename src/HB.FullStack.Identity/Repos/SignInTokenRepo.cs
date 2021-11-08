@@ -22,12 +22,12 @@ namespace HB.FullStack.Identity
 
         public Task<IEnumerable<SignInToken>> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext)
         {
-            return DatabaseReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
+            return DbReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
         }
 
         public Task<SignInToken?> GetByIdAsync(Guid signInTokenId, TransactionContext? transactionContext)
         {
-            return DatabaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
+            return DbReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
         protected override Task InvalidateCacheItemsOnChanged(SignInToken sender, DatabaseWriteEventArgs args) => Task.CompletedTask;

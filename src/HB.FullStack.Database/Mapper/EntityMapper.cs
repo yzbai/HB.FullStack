@@ -27,7 +27,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="engineType"></param>
         /// <param name="entityDef"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static IList<T> ToEntities<T>(this IDataReader reader, EngineType engineType, EntityDef entityDef)
             where T : DatabaseEntity, new()
         {
@@ -53,7 +53,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="sourceEntityDef"></param>
         /// <param name="targetEntityDef"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static IList<Tuple<TSource, TTarget?>> ToEntities<TSource, TTarget>(this IDataReader reader, EngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
@@ -83,7 +83,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="targetEntityDef1"></param>
         /// <param name="targetEntityDef2"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToEntities<TSource, TTarget2, TTarget3>(this IDataReader reader, EngineType engineType, EntityDef sourceEntityDef, EntityDef targetEntityDef1, EntityDef targetEntityDef2)
             where TSource : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
@@ -117,7 +117,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="returnNullIfFirstNull"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static Func<IDataReader, object?> GetCachedToEntityFunc(IDataReader reader, EntityDef entityDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             string key = GetKey(entityDef, startIndex, length, returnNullIfFirstNull, engineType);
@@ -159,7 +159,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="engineType"></param>
         /// <param name="number"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             if (entity.Version < 0)
@@ -208,7 +208,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="engineType"></param>
         /// <param name="number">属性名的后缀数字</param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             if (entity.Version < 0)

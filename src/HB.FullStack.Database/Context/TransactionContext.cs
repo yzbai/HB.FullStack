@@ -24,7 +24,7 @@ namespace HB.FullStack.Database
         /// CommitAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="System.DatabaseException"></exception>
+        
         public Task CommitAsync()
         {
             return _transactionManager.CommitAsync(this);
@@ -34,7 +34,7 @@ namespace HB.FullStack.Database
         /// RollbackAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="System.DatabaseException">Ignore.</exception>
+        
         public Task RollbackAsync()
         {
             return _transactionManager.RollbackAsync(this);

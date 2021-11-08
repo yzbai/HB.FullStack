@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        /// <exception cref="LockException"></exception>
+        
         public static IServiceCollection AddMemoryLock(this IServiceCollection services, IConfiguration configuration)
         {
             if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        /// <exception cref="LockException"></exception>
+        
         public static IServiceCollection AddMemoryLock(this IServiceCollection services, Action<MemoryLockOptions> action)
         {
             if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        /// <exception cref="LockException"></exception>
+        
         public static IServiceCollection AddMemoryLock(this IServiceCollection services)
         {
             return services.AddMemoryLock(options => { });

@@ -40,7 +40,7 @@ namespace HB.FullStack.Database
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task CommitAsync(TransactionContext context, [CallerMemberName]string? callerMemberName = null, [CallerLineNumber]int callerLineNumber = 0 )
         {
             //if (context == null || context.Transaction == null)
@@ -86,7 +86,7 @@ namespace HB.FullStack.Database
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
+        
         public async Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
         {
             //if (context == null || context.Transaction == null)

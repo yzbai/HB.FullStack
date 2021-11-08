@@ -2,6 +2,7 @@
 using HB.FullStack.Common;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.SQL;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,10 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.Repository
@@ -32,7 +36,7 @@ namespace HB.FullStack.Repository
         protected ICache Cache { get; }
         private IDatabase Database { get; }
 
-        protected IDatabaseReader DatabaseReader => Database;
+        protected IDatabaseReader DbReader => Database;
 
         private IMemoryLockManager MemoryLockManager { get; }
 
@@ -61,6 +65,12 @@ namespace HB.FullStack.Repository
             EntityDeleted += OnEntityChanged;
         }
 
+        /// <summary>
+        /// 多个CachedItem的时候，使用Parrell来并行
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         protected abstract Task InvalidateCacheItemsOnChanged(TEntity sender, DatabaseWriteEventArgs args);
 
         #region Events
@@ -175,6 +185,83 @@ namespace HB.FullStack.Repository
 
         #endregion
 
+        #region Cache Strategy
+
+        //TODO: 尝试提取IRetrieveStrategy
+
+        
+        
+        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
+        {
+            IEnumerable<TEntity>? results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
+                dimensionKeyName,
+                new object[] { dimensionKeyValue },
+                async dbReader =>
+                {
+                    TEntity? single = await dbRetrieve(dbReader).ConfigureAwait(false);
+
+                    if (single == null)
+                    {
+                        return Array.Empty<TEntity>();
+                    }
+
+                    return new TEntity[] { single };
+                },
+                Database,
+                Cache,
+                MemoryLockManager,
+                Logger).ConfigureAwait(false);
+
+            if (results.IsNullOrEmpty())
+            {
+                Logger.LogDebug("Repo中没有找到 {EntityType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TEntity).Name, dimensionKeyName, dimensionKeyValue);
+                return null;
+            }
+
+            Logger.LogDebug("Repo中 找到 {EntityType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TEntity).Name, dimensionKeyName, dimensionKeyValue);
+
+            return results.ElementAt(0);
+        }
+
+        
+        
+        protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
+        {
+            return EntityCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
+        }
+
+        
+        
+        protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
+        {
+            return CachedItemCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
+        }
+
+        
+        
+        protected Task<IEnumerable<TResult>> TryCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        {
+            return CachedItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+        }
+
+        
+        public void InvalidateCache(CachedItem cachedItem)
+        {
+            CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
+        }
+
+        public void InvalidateCacheByCacheType(CachedItem cachedItem)
+        {
+            CachedItemCacheStrategy.InvalidateCacheByCacheType(cachedItem, Cache);
+        }
+
+        public void InvalidateCaches(IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
+        {
+            CachedItemCacheStrategy.InvalidateCaches(cachedItems, utcNowTicks, Cache);
+        }
+
+        #endregion
+
         #region Database Write Wrapper
 
         /// <summary>
@@ -184,7 +271,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityUpdatingAsync(entity).ConfigureAwait(false);
@@ -212,7 +299,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task AddAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityAddingAsync(entity).ConfigureAwait(false);
@@ -237,7 +324,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task DeleteAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityDeletingAsync(entity).ConfigureAwait(false);
@@ -265,7 +352,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task<IEnumerable<object>> AddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
@@ -304,7 +391,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task UpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
@@ -342,7 +429,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public async Task DeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
@@ -373,72 +460,26 @@ namespace HB.FullStack.Repository
             }
         }
 
-        #endregion
+        //public Task<IEnumerable<TEntity>> GetByForeignKeyAsync(
+        //    Expression<Func<TEntity, object>> foreignKeyExp, 
+        //    object foreignKeyValue, 
+        //    TransactionContext? transactionContext, 
+        //    int? page, 
+        //    int? perPage, 
+        //    string? orderBy)
+        //{
+        //    return Database.RetrieveByForeignKeyAsync(foreignKeyExp, foreignKeyValue, transactionContext, page, perPage, orderBy);
+        //}
 
-        #region Cache Strategy
+        //public Task<IEnumerable<T>> GetAsync<T>(int? page, int? perPage, string? orderBy) where T : DatabaseEntity
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        //TODO: 尝试提取IRetrieveStrategy
-
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
-        {
-            IEnumerable<TEntity>? results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
-                dimensionKeyName,
-                new object[] { dimensionKeyValue },
-                async dbReader =>
-                {
-                    TEntity? single = await dbRetrieve(dbReader).ConfigureAwait(false);
-
-                    if (single == null)
-                    {
-                        return Array.Empty<TEntity>();
-                    }
-
-                    return new TEntity[] { single };
-                },
-                Database,
-                Cache,
-                MemoryLockManager,
-                Logger).ConfigureAwait(false);
-
-            if (results.IsNullOrEmpty())
-            {
-                Logger.LogDebug("Repo中没有找到 {EntityType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TEntity).Name, dimensionKeyName, dimensionKeyValue);
-                return null;
-            }
-
-            Logger.LogDebug("Repo中 找到 {EntityType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TEntity).Name, dimensionKeyName, dimensionKeyValue);
-
-            return results.ElementAt(0);
-        }
-
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
-        {
-            return EntityCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
-        }
-
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
-        {
-            return CachedItemCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
-        }
-
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        protected Task<IEnumerable<TResult>> TryCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
-        {
-            return CachedItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
-        }
-
-        /// <exception cref="CacheException"></exception>
-        public void InvalidateCache(CachedItem cachedItem)
-        {
-            CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
-        }
+        //public Task<T> GetById<T>(object id) where T : DatabaseEntity
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         #endregion
     }

@@ -16,10 +16,10 @@ namespace HB.FullStack.Database
 
         Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity;
 
-        /// <exception cref="System.DatabaseException">Ignore.</exception>
+        
         Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
 
-        /// <exception cref="DatabaseException"></exception>
+        
         Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
     }
 

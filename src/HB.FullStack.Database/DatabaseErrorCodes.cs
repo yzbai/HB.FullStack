@@ -35,7 +35,11 @@ namespace HB.FullStack.Database
         public static ErrorCode EmptyGuid { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 16, nameof(EmptyGuid), "");
         public static ErrorCode UpdatePropertiesCountShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 17, nameof(UpdatePropertiesCountShouldBePositive), "");
         public static ErrorCode LongIdShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 18, nameof(LongIdShouldBePositive), "");
-        public static ErrorCode PropertyNotFound { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 19, nameof(PropertyNotFound),"");
+        public static ErrorCode PropertyNotFound { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 19, nameof(PropertyNotFound), "");
+        public static ErrorCode NoSuchForeignKey { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 20, nameof(NoSuchForeignKey), "");
+
+        public static ErrorCode NoSuchProperty { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 21, nameof(NoSuchProperty), "");
+        public static ErrorCode KeyValueNotLongOrGuid { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 22, nameof(KeyValueNotLongOrGuid), "");
     }
 
     internal static class DatabaseExceptions
@@ -285,6 +289,34 @@ namespace HB.FullStack.Database
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.LongIdShouldBePositive);
             exception.Data["Id"] = id;
+
+            return exception;
+        }
+
+        internal static Exception NoSuchForeignKey(string entityFullName, string foreignKeyName)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NoSuchForeignKey);
+            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ForeignKeyName"] = foreignKeyName;
+
+            return exception;
+        }
+
+        internal static Exception NoSuchProperty(string entityFullName, string propertyName)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NoSuchProperty);
+            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["PropertyName"] = propertyName;
+            return exception;
+        }
+
+        internal static Exception KeyValueNotLongOrGuid(string entityFullName, string foreignKeyName, object? foreignKeyValue, string foreignKeyType)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.KeyValueNotLongOrGuid);
+            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ForeignKeyName"] = foreignKeyName;
+            exception.Data["ForeignKeyValue"] = foreignKeyValue?.ToString();
+            exception.Data["ForeignKeyType"] = foreignKeyType;
 
             return exception;
         }

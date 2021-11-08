@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,8 +19,8 @@ namespace HB.FullStack.Repository
             return cache.GetAsync<TResult>(cachedItem.CacheKey, cancellationToken);
         }
 
-        /// <exception cref="RepositoryException"></exception>
-        /// <exception cref="CacheException"></exception>
+        
+        
         public static Task SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
@@ -37,8 +39,8 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="RepositoryException"></exception>
+        
+        
         public static Task<bool> RemoveAsync(this ICache cache, CachedItem cachedItem)
         {
             ThrowOnEmptyCacheKey(cachedItem);
@@ -47,11 +49,16 @@ namespace HB.FullStack.Repository
             return cache.RemoveAsync(cachedItem.CacheKey, cachedItem.UtcTikcs);
         }
 
+        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks)
+        {
+            return cache.RemoveAsync(cachedItems.Select(item => item.CacheKey).ToArray(), utcNowTicks);
+        }
+
         private static void ThrowOnEmptyCacheKey(CachedItem cachedItem)
         {
             if (string.IsNullOrEmpty(cachedItem?.CacheKey))
             {
-                throw RepositoryExceptions.CacheKeyNotSet(resourceType: cachedItem?.ResourceType);
+                throw RepositoryExceptions.CacheKeyNotSet(resourceType: cachedItem?.CachedType);
             }
         }
 
@@ -59,7 +66,7 @@ namespace HB.FullStack.Repository
         {
             if (cachedItem.CacheValue == null)
             {
-                throw RepositoryExceptions.CacheValueNotSet(resourceType: cachedItem.ResourceType, cacheKey: cachedItem.CacheKey);
+                throw RepositoryExceptions.CacheValueNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey);
             }
         }
 
@@ -67,7 +74,7 @@ namespace HB.FullStack.Repository
         {
             if (cachedItem.UtcTikcs.IsEmpty())
             {
-                throw RepositoryExceptions.UtcTicksNotSet(resourceType: cachedItem.ResourceType, cacheKey: cachedItem.CacheKey, null);
+                throw RepositoryExceptions.UtcTicksNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey, null);
             }
         }
     }

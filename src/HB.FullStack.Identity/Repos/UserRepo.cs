@@ -43,8 +43,8 @@ namespace HB.FullStack.Identity
         /// <param name="userId"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -62,8 +62,8 @@ namespace HB.FullStack.Identity
         /// <param name="userIds"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -81,8 +81,8 @@ namespace HB.FullStack.Identity
         /// <param name="mobile"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -100,8 +100,8 @@ namespace HB.FullStack.Identity
         /// <param name="loginName"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -119,8 +119,8 @@ namespace HB.FullStack.Identity
         /// <param name="email"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
             return await TryCacheAsideAsync(
@@ -140,11 +140,11 @@ namespace HB.FullStack.Identity
         /// <param name="email"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            WhereExpression<User> where = DatabaseReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
-            return DatabaseReader.CountAsync(where, transContext);
+            WhereExpression<User> where = DbReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            return DbReader.CountAsync(where, transContext);
         }
 
         #endregion

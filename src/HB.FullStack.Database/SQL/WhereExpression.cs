@@ -52,7 +52,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public string ToStatement(EngineType engineType)
         {
             StringBuilder sql = new StringBuilder();
@@ -108,7 +108,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="sqlFilter">ex: A={0} and B={1} and C in ({2})</param>
         /// <param name="filterParams">ex: ["name",12, new SqlInValues(new int[]{1,2,3})]</param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
             _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
@@ -147,7 +147,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="sqlParams"></param>
         /// <returns></returns>
         //TODO:  �����������������һ��sql����ע�����
-        /// <exception cref="DatabaseException"></exception>
+        
         private string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
@@ -225,7 +225,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="sqlFilter"></param>
         /// <param name="filterParams"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> And(string sqlFilter, params object[] filterParams)
         {
             string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
@@ -264,7 +264,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="sqlFilter"></param>
         /// <param name="filterParams"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
             string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
@@ -301,7 +301,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="keySelector"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> GroupBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             //TODO: �������
@@ -326,7 +326,7 @@ namespace HB.FullStack.Database.SQL
         /// Having
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Having()
         {
             return Having(string.Empty);
@@ -338,7 +338,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="sqlFilter"></param>
         /// <param name="filterParams"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
             _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
@@ -356,7 +356,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Having(Expression<Func<T, bool>> predicate)
         {
             if (predicate != null)
@@ -400,7 +400,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="keySelector"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             string oldSeparator = _expressionContext.Seperator;
@@ -424,7 +424,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="keySelector"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> OrderBy<TTarget, TKey>(Expression<Func<TTarget, TKey>> keySelector)
         {
             string oldSeparator = _expressionContext.Seperator;
@@ -448,7 +448,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="keySelector"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             string oldSeparator = _expressionContext.Seperator;
@@ -470,7 +470,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="keySelector"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             string oldSeparator = _expressionContext.Seperator;
@@ -491,7 +491,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="keySelector"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             string oldSeparator = _expressionContext.Seperator;
@@ -582,7 +582,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="appendType"></param>
         /// <param name="predicate"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         protected void AppendToWhereString(string appendType, Expression predicate)
         {
             if (predicate == null)
@@ -604,7 +604,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> And<TSource>(Expression<Func<TSource, bool>> predicate)
         {
             AppendToWhereString("AND", predicate);
@@ -617,7 +617,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> And<TSource, TTarget>(Expression<Func<TSource, TTarget, bool>> predicate)
         {
             AppendToWhereString("AND", predicate);
@@ -630,7 +630,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Or<TSource>(Expression<Func<TSource, bool>> predicate)
         {
             AppendToWhereString("OR", predicate);
@@ -643,7 +643,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public WhereExpression<T> Or<TSource, TTarget>(Expression<Func<TSource, TTarget, bool>> predicate)
         {
             AppendToWhereString("OR", predicate);

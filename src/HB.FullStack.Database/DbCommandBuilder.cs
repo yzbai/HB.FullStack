@@ -78,7 +78,7 @@ namespace HB.FullStack.Database
         /// <param name="fromCondition"></param>
         /// <param name="whereCondition"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateRetrieveCommand<T>(EngineType engineType, EntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : DatabaseEntity, new()
         {
@@ -92,7 +92,7 @@ namespace HB.FullStack.Database
         /// <param name="fromCondition"></param>
         /// <param name="whereCondition"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : DatabaseEntity, new()
         {
@@ -107,7 +107,7 @@ namespace HB.FullStack.Database
         /// <param name="whereCondition"></param>
         /// <param name="returnEntityDefs"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
             where T1 : DatabaseEntity, new()
             where T2 : DatabaseEntity, new()
@@ -127,7 +127,7 @@ namespace HB.FullStack.Database
         /// <param name="whereCondition"></param>
         /// <param name="returnEntityDefs"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateRetrieveCommand<T1, T2, T3>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
             where T1 : DatabaseEntity, new()
             where T2 : DatabaseEntity, new()
@@ -148,7 +148,7 @@ namespace HB.FullStack.Database
         /// <param name="whereCondition"></param>
         /// <param name="returnEntityDefs"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType engineType, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params EntityDef[] returnEntityDefs)
             where TSelect : DatabaseEntity, new()
             where TFrom : DatabaseEntity, new()
@@ -169,7 +169,7 @@ namespace HB.FullStack.Database
         /// <param name="whereCondition"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static EngineCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectText, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, EngineType engineType)
             where TFrom : DatabaseEntity, new()
             where TWhere : DatabaseEntity, new()
@@ -206,7 +206,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateAddCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
@@ -221,7 +221,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
@@ -250,7 +250,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
@@ -265,7 +265,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, WhereExpression<T> whereExpression) where T : DatabaseEntity, new()
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
@@ -282,7 +282,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateBatchAddCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
@@ -343,7 +343,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
@@ -385,7 +385,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));
@@ -431,7 +431,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="addDropStatement"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateTableCreateCommand(EngineType engineType, EntityDef entityDef, bool addDropStatement)
         {
             string sql = SqlHelper.GetTableCreateSql(entityDef, addDropStatement, EntityDefFactory.VarcharDefaultLength, engineType);
@@ -488,7 +488,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
@@ -504,7 +504,7 @@ namespace HB.FullStack.Database
         /// <param name="entityDef"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
         {
             ThrowIf.Empty(entities, nameof(entities));

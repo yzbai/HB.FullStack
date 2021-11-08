@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.Mapper
         /// <summary>
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static Func<IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IDataReader) }, true);
@@ -41,7 +41,7 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="returnNullIfFirstNull"></param>
         /// <param name="engineType"></param>
         /// <param name="il"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
         {
             try

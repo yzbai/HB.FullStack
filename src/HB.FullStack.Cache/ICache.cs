@@ -116,7 +116,7 @@ namespace HB.FullStack.Cache
         /// <param name="entities"></param>
         /// <param name="token"></param>
         /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
-        
+
         Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new();
 
         /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
@@ -151,6 +151,17 @@ namespace HB.FullStack.Cache
         /// utcTicks是指数据刚刚从数据库中取出来后的时间
         /// </summary>       
         Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default);
+
+        Task<bool> RemoveAsync(string[] keys, UtcNowTicks utcTicks, CancellationToken token = default);
+
+        /// <summary>
+        /// 删除以keyPrefix开头的key
+        /// </summary>
+        /// <param name="keyPrefix"></param>
+        /// <param name="utcTikcs"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        Task RemoveByKeyPrefixAsync(string keyPrefix, UtcNowTicks utcTikcs, CancellationToken token = default);
 
         #endregion
     }

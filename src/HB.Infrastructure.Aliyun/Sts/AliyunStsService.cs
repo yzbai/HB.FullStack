@@ -43,7 +43,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             return "User" + userId.ToString();
         }
 
-        /// <exception cref="AliyunException"></exception>
+        
         public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly)
         {
             if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())

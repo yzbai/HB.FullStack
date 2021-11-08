@@ -26,7 +26,7 @@ namespace HB.FullStack.Database.Entities
         /// Initialize
         /// </summary>
         /// <param name="databaseEngine"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static void Initialize(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
@@ -60,7 +60,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="allEntityTypes"></param>
         /// <param name="engineType"></param>
         /// <param name="entitySchemaDict"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static void WarmUpEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             foreach (var t in allEntityTypes)
@@ -177,7 +177,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="engineType"></param>
         /// <param name="entitySchemaDict"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
@@ -250,7 +250,7 @@ namespace HB.FullStack.Database.Entities
         /// <param name="propertyAttribute"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, EngineType engineType)
         {
             EntityPropertyDef propertyDef = new EntityPropertyDef

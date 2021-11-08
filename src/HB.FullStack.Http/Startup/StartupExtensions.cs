@@ -45,7 +45,7 @@ namespace System
         /// <param name="services"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        /// <exception cref="WebApiException"></exception>
+        
         public static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
             DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
@@ -94,7 +94,7 @@ namespace System
         /// <param name="audience">我是谁，即jwt是颁发给谁的</param>
         /// <param name="authority">当局。我该去向谁核实，即是谁颁发了这个jwt</param>
         /// <returns></returns>
-        /// <exception cref="WebApiException"></exception>
+        
         public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration,
             Func<JwtBearerChallengeContext, Task> onChallenge,
             Func<TokenValidatedContext, Task> onTokenValidated,
@@ -204,7 +204,7 @@ namespace System
         /// <param name="database"></param>
         /// <param name="lockManager"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
             GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
@@ -235,7 +235,7 @@ namespace System
         /// ThrowIfDatabaseInitLockNotGet
         /// </summary>
         /// <param name="databaseNames"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
         {
             throw WebApiExceptions.DatabaseInitLockError(databases:databaseNames);

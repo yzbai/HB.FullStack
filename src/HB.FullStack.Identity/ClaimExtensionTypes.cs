@@ -2,7 +2,7 @@
 {
     public static class ClaimExtensionTypes
     {
-        public const string ROLE = ClaimsIdentity.DefaultRoleClaimType;
+        //public const string ROLE = ClaimsIdentity.DefaultRoleClaimType;
 
         public const string SIGN_IN_TOKEN_ID = "HB.SignInTokenId";
 

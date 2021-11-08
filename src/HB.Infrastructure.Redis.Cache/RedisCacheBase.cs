@@ -59,6 +59,7 @@ namespace HB.Infrastructure.Redis.Cache
                 {
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
                     LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP),
+                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP),
                     LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
 
                     LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH),
@@ -75,13 +76,13 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected LoadedLuas GetDefaultLoadLuas()
         {
             return GetLoadedLuas(DefaultInstanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected LoadedLuas GetLoadedLuas(string? instanceName)
         {
             if (string.IsNullOrEmpty(instanceName))
@@ -104,7 +105,7 @@ namespace HB.Infrastructure.Redis.Cache
             throw CacheExceptions.CacheLoadedLuaNotFound(cacheInstanceName: instanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected async Task<IDatabase> GetDatabaseAsync(string? instanceName)
         {
             instanceName ??= DefaultInstanceName;
@@ -117,13 +118,13 @@ namespace HB.Infrastructure.Redis.Cache
             throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected Task<IDatabase> GetDefaultDatabaseAsync()
         {
             return GetDatabaseAsync(DefaultInstanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected IDatabase GetDatabase(string? instanceName)
         {
             instanceName ??= DefaultInstanceName;
@@ -136,7 +137,7 @@ namespace HB.Infrastructure.Redis.Cache
             throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected IDatabase GetDefaultDatabase()
         {
             return GetDatabase(DefaultInstanceName);
@@ -152,7 +153,7 @@ namespace HB.Infrastructure.Redis.Cache
             return GetRealKey(entityName, dimensionKeyName + dimensionKeyValue);
         }
 
-        /// <exception cref="CacheException"></exception>
+        
         protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
         {
             if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
@@ -165,7 +166,7 @@ namespace HB.Infrastructure.Redis.Cache
         /// ThrowIfNotCacheEnabled
         /// </summary>
         /// <param name="entityDef"></param>
-        /// <exception cref="CacheException"></exception>
+        
         protected static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
         {
             if (!entityDef.IsCacheable)

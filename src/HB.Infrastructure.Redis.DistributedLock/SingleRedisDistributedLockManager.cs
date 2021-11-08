@@ -300,7 +300,7 @@ return 1";
 		/// <param name="redisLock"></param>
 		/// <param name="logger"></param>
 		/// <returns></returns>
-		/// <exception cref="LockException"></exception>
+		
 		internal static async Task ReleaseResourceAsync(RedisLock redisLock, ILogger logger)
 		{
 			StopKeepAliveTimer(redisLock, logger);

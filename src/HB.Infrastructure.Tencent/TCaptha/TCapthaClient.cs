@@ -35,7 +35,7 @@ namespace HB.Infrastructure.Tencent
         /// <param name="randstr"></param>
         /// <param name="userIp"></param>
         /// <returns></returns>
-        /// <exception cref="TencentException"></exception>
+        
         public async Task<bool> VerifyTicketAsync(string appid, string ticket, string randstr, string userIp)
         {
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting? apiKeySetting))

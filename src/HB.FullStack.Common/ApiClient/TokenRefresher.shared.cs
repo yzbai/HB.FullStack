@@ -27,7 +27,7 @@ namespace HB.FullStack.Common.ApiClient
         /// <param name="apiClient"></param>
         /// <param name="endpointSettings"></param>
         /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
+        
         public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IApiTokenProvider userTokenProvider)
         {
             if (userTokenProvider.AccessToken.IsNullOrEmpty())

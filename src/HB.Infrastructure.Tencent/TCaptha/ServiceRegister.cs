@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// AddTCapthaCore
         /// </summary>
         /// <param name="services"></param>
-        /// <exception cref="InvalidOperationException">Ignore.</exception>
+        
         private static void AddTCapthaCore(IServiceCollection services)
         {
             services.AddHttpClient(TCapthaOptions.ENDPOINT_NAME, httpClient =>

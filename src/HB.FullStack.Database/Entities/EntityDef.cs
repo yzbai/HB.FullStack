@@ -81,5 +81,10 @@ namespace HB.FullStack.Database.Entities
 
             return null;
         }
+
+        public bool ContainsProperty(string propertyName)
+        {
+            return PropertyDict.ContainsKey(propertyName);
+        }
     }
 }

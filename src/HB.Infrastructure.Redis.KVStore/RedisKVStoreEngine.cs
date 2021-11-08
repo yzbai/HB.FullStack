@@ -137,7 +137,7 @@ return array";
         /// </summary>
         /// <param name="instanceName"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         private LoadedLuas GetLoadedLuas(string instanceName)
         {
             if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas? loadedLuas))
@@ -162,7 +162,7 @@ return array";
         /// <param name="entityName"></param>
         /// <param name="entityKeys"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
         {
             if (!entityKeys.Any())
@@ -228,7 +228,7 @@ return array";
         /// <param name="storeName"></param>
         /// <param name="entityName"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName)
         {
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
@@ -282,7 +282,7 @@ return array";
         /// <param name="entityKeys"></param>
         /// <param name="entityJsons"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
@@ -359,7 +359,7 @@ return array";
         /// <param name="entityJsons"></param>
         /// <param name="entityVersions"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
@@ -441,7 +441,7 @@ return array";
         /// <param name="entityKeys"></param>
         /// <param name="entityVersions"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;
@@ -516,7 +516,7 @@ return array";
         /// <param name="storeName"></param>
         /// <param name="entityName"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         public async Task<bool> EntityDeleteAllAsync(string storeName, string entityName)
         {
             try
@@ -552,7 +552,7 @@ return array";
         /// </summary>
         /// <param name="instanceName"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+        
         private async Task<IDatabase> GetDatabaseAsync(string instanceName)
         {
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))

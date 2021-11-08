@@ -291,7 +291,7 @@ end
         /// <param name="dimensionKeyValues"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -350,7 +350,7 @@ end
         /// <param name="entities"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -416,7 +416,7 @@ end
         /// <param name="updatedVersions"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         public async Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -489,7 +489,7 @@ end
         /// <param name="redisKeys"></param>
         /// <param name="redisValues"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         private byte[] AddRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             byte[] loadedScript;
@@ -566,7 +566,7 @@ end
         /// <param name="redisKeys"></param>
         /// <param name="redisValues"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         private byte[] AddGetEntitiesRedisInfo(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
             byte[] loadedScript;

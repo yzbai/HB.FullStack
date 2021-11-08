@@ -37,7 +37,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// </summary>
         /// <param name="mobile"></param>
         /// <returns></returns>
-        /// <exception cref="SmsException"></exception>
+        
         public void SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
@@ -102,7 +102,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// <param name="mobile"></param>
         /// <param name="smsCode"></param>
         /// <param name="expiryMinutes"></param>
-        /// <exception cref="SmsException"></exception>
+        
         public void SendValidationCode(string mobile, string smsCode, int expiryMinutes)
         {
             try
@@ -122,7 +122,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// <param name="mobile"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        /// <exception cref="SmsException"></exception>
+        
         public async Task<bool> ValidateAsync(string mobile, string code)
         {
             if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsAllNumber(code))
@@ -148,7 +148,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// <param name="mobile"></param>
         /// <param name="cachedSmsCode"></param>
         /// <param name="expireMinutes"></param>
-        /// <exception cref="CacheException"></exception>
+        
         private void SetSmsCodeToCache(string mobile, string cachedSmsCode, int expireMinutes)
         {
             _cache.SetStringAsync(
@@ -166,7 +166,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         /// </summary>
         /// <param name="mobile"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+        
         private Task<string?> GetSmsCodeFromCacheAsync(string mobile)
         {
             return _cache.GetStringAsync(GetCachedKey(mobile));

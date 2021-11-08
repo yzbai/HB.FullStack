@@ -22,8 +22,8 @@ namespace HB.FullStack.Repository
         /// <param name="database"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="RepositoryException"></exception>
+        
+        
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
@@ -37,7 +37,7 @@ namespace HB.FullStack.Repository
                 return result;
             }
 
-            using var @lock = memoryLockManager.Lock(cacheItem.ResourceType, cacheItem.CacheKey, Consts.OccupiedTime, Consts.PatienceTime);
+            using var @lock = memoryLockManager.Lock(cacheItem.CachedType, cacheItem.CacheKey, Consts.OccupiedTime, Consts.PatienceTime);
 
             if (@lock.IsAcquired)
             {
@@ -80,7 +80,7 @@ namespace HB.FullStack.Repository
         /// </summary>
         /// <param name="cachedItem"></param>
         /// <param name="cache"></param>
-        /// <exception cref="CacheException">Ignore.</exception>
+        
         public static void InvalidateCache(CachedItem cachedItem, ICache cache)
         {
             cache.RemoveAsync(cachedItem).Fire();
@@ -91,10 +91,26 @@ namespace HB.FullStack.Repository
         /// </summary>
         /// <param name="cachedItem"></param>
         /// <param name="cache"></param>
-        /// <exception cref="CacheException"></exception>
+        
         private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
         {
             cache.SetAsync(cachedItem).Fire();
+        }
+
+        /// <summary>
+        /// 删除所有CacheType相同的
+        /// </summary>
+        /// <param name="cachedItem"></param>
+        /// <param name="cache"></param>
+        
+        internal static void InvalidateCacheByCacheType(CachedItem cachedItem, ICache cache)
+        {
+            cache.RemoveByKeyPrefixAsync(cachedItem.CachedType, cachedItem.UtcTikcs).Fire();
+        }
+
+        internal static void InvalidateCaches(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, ICache cache)
+        {
+            cache.RemoveAsync(cachedItems, utcNowTicks).Fire();
         }
     }
 }

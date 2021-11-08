@@ -27,7 +27,7 @@ namespace HB.FullStack.Database
         /// <param name="oldVersion"></param>
         /// <param name="newVersion"></param>
         /// <param name="sql"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         public Migration(string databaseName, int oldVersion, int newVersion)
         {
             if (databaseName.IsNullOrEmpty())
@@ -50,7 +50,7 @@ namespace HB.FullStack.Database
             NewVersion = newVersion;
         }
 
-        /// <exception cref="DatabaseException"></exception>
+        
         public Migration(string targetSchema, int oldVersion, int newVersion, string sql) : this(targetSchema, oldVersion, newVersion)
         {
             SqlStatement = sql;

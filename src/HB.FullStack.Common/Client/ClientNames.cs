@@ -16,11 +16,11 @@ namespace System
 
         public const string TIMESTAMP = "Timestamp";
 
-        public const string PAGE = "Page";
+        public const string Page = "Page";
 
-        public const string PER_PAGE = "PerPage";
+        public const string PerPage = "PerPage";
 
-        public const string ORDER_BY = "OrderBy";
+        public const string OrderBy = "OrderBy";
 
         //public const string PUBLIC_RESOURCE_TOKEN = "PublicResourceToken";
 

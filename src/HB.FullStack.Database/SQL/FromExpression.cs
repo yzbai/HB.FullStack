@@ -51,7 +51,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> InnerJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.INNER)
@@ -69,7 +69,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> InnerJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
             where TLeft : DatabaseEntity, new()
             where TRight : DatabaseEntity, new()
@@ -89,7 +89,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> LeftJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.LEFT)
@@ -107,7 +107,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
             where TLeft : DatabaseEntity, new()
             where TRight : DatabaseEntity, new()
@@ -127,7 +127,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> RightJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.RIGHT)
@@ -145,7 +145,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
             where TLeft : DatabaseEntity, new()
             where TRight : DatabaseEntity, new()
@@ -165,7 +165,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> FullJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.FULL)
@@ -183,7 +183,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
             where TLeft : DatabaseEntity, new()
             where TRight : DatabaseEntity, new()
@@ -203,7 +203,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public FromExpression<T> CrossJoin<TTarget>(Expression<Func<T, TTarget, bool>> joinExpr) where TTarget : DatabaseEntity, new()
         {
             if (JoinType != null && JoinType != SqlJoinType.CROSS)
@@ -221,7 +221,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
+        
         public FromExpression<T> CrossJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> joinExpr)
             where TLeft : DatabaseEntity, new()
             where TRight : DatabaseEntity, new()
@@ -242,7 +242,7 @@ namespace HB.FullStack.Database.SQL
         /// <param name="joinType"></param>
         /// <param name="joinExpr"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private FromExpression<T> InternalJoin<Target>(string joinType, Expression joinExpr) where Target : DatabaseEntity
         {
             EntityDef targetDef = EntityDefFactory.GetDef<Target>()!;

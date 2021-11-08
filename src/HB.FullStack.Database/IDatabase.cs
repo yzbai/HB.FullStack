@@ -16,7 +16,7 @@ namespace HB.FullStack.Database
         /// </summary>
         /// <param name="migrations"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         Task InitializeAsync(IEnumerable<Migration>? migrations = null);
 
         EngineType EngineType { get; }

@@ -1,4 +1,11 @@
 ﻿#nullable enable
+using HB.FullStack.Common;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.SQL;
+
+using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
@@ -6,18 +13,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common;
-using HB.FullStack.Database.Entities;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Mapper;
-
-using HB.FullStack.Database.SQL;
-
-using Microsoft.Extensions.Logging;
-
 namespace HB.FullStack.Database
 {
     /// <summary>
@@ -38,13 +34,6 @@ namespace HB.FullStack.Database
 
         private readonly string _deletedPropertyReservedName;
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="databaseEngine"></param>
-        /// <param name="transaction"></param>
-        /// <param name="logger"></param>
-        /// <exception cref="DatabaseException"></exception>
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
             ITransaction transaction,
@@ -69,7 +58,6 @@ namespace HB.FullStack.Database
 
         public EngineType EngineType { get; }
 
-
         IDatabaseEngine IDatabase.DatabaseEngine => _databaseEngine;
 
         public IEnumerable<string> DatabaseNames => _databaseEngine.DatabaseNames;
@@ -80,8 +68,7 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// </summary>
         /// <param name="migrations"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        /// <returns></returns>  
         public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
@@ -105,11 +92,6 @@ namespace HB.FullStack.Database
             _logger.LogInformation("数据初始化成功！");
         }
 
-        /// <summary>
-        /// AutoCreateTablesIfBrandNewAsync
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         private async Task AutoCreateTablesIfBrandNewAsync(IEnumerable<Migration>? initializeMigrations)
         {
             foreach (string databaseName in _databaseEngine.DatabaseNames)
@@ -164,7 +146,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <exception cref="DatabaseException"></exception>
         private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext)
         {
             var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, false);
@@ -174,7 +155,6 @@ namespace HB.FullStack.Database
             return _databaseEngine.ExecuteCommandNonQueryAsync(transContext.Transaction, def.DatabaseName!, command);
         }
 
-        /// <exception cref="DatabaseException"></exception>
         private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext)
         {
             foreach (EntityDef entityDef in EntityDefFactory.GetAllDefsByDatabase(databaseName))
@@ -183,7 +163,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <exception cref="DatabaseException"></exception>
         private async Task MigarateAsync(IEnumerable<Migration> migrations)
         {
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
@@ -293,14 +272,6 @@ namespace HB.FullStack.Database
 
         #region SystemInfo
 
-        /// <summary>
-        /// IsTableExistsAsync
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="tableName"></param>
-        /// <param name="transaction"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         private async Task<bool> IsTableExistsAsync(string databaseName, string tableName, IDbTransaction transaction)
         {
             var command = DbCommandBuilder.CreateIsTableExistCommand(EngineType, databaseName, tableName);
@@ -310,13 +281,6 @@ namespace HB.FullStack.Database
             return Convert.ToBoolean(result, GlobalSettings.Culture);
         }
 
-        /// <summary>
-        /// GetSystemInfoAsync
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="transaction"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<SystemInfo> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
         {
             bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SYSTEM_INFO_TABLE_NAME, transaction).ConfigureAwait(false);
@@ -340,14 +304,6 @@ namespace HB.FullStack.Database
             return systemInfo;
         }
 
-        /// <summary>
-        /// UpdateSystemVersionAsync
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="version"></param>
-        /// <param name="transaction"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task UpdateSystemVersionAsync(string databaseName, int version, IDbTransaction transaction)
         {
             var command = DbCommandBuilder.CreateSystemVersionUpdateCommand(EngineType, databaseName, version);
@@ -369,13 +325,6 @@ namespace HB.FullStack.Database
             return new WhereExpression<T>(EngineType);
         }
 
-        /// <summary>
-        /// Where
-        /// </summary>
-        /// <param name="sqlFilter"></param>
-        /// <param name="filterParams"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new()
         {
             return new WhereExpression<T>(EngineType).Where(sqlFilter, filterParams);
@@ -390,8 +339,6 @@ namespace HB.FullStack.Database
 
         #region 单表查询 From, Where
 
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
@@ -410,14 +357,6 @@ namespace HB.FullStack.Database
             return lst.ElementAt(0);
         }
 
-        /// <summary>
-        /// RetrieveAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, TransactionContext? transContext = null)
             where TSelect : DatabaseEntity, new()
             where TFrom : DatabaseEntity, new()
@@ -448,14 +387,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// RetrieveAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
@@ -481,37 +412,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// PageAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="pageNumber"></param>
-        /// <param name="perPageCount"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public Task<IEnumerable<T>> PageAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
-        {
-            if (whereCondition == null)
-            {
-                whereCondition = new WhereExpression<T>(EngineType);
-            }
-
-            whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
-
-            return RetrieveAsync(fromCondition, whereCondition, transContext);
-        }
-
-        /// <summary>
-        /// CountAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
@@ -540,66 +440,26 @@ namespace HB.FullStack.Database
 
         #region 单表查询, Where
 
-        public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext)
+        public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
             where T : DatabaseEntity, new()
         {
-            return RetrieveAsync<T>(null, null, transContext);
+            WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
+
+            return RetrieveAsync<T>(null, where, transContext);
         }
 
-        /// <summary>
-        /// ScalarAsync
-        /// </summary>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
-        /// <summary>
-        /// RetrieveAsync
-        /// </summary>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
-        /// <summary>
-        /// PageAsync
-        /// </summary>
-        /// <param name="whereCondition"></param>
-        /// <param name="pageNumber"></param>
-        /// <param name="perPageCount"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public Task<IEnumerable<T>> PageAsync<T>(WhereExpression<T>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
-        {
-            return PageAsync(null, whereCondition, pageNumber, perPageCount, transContext);
-        }
-
-        public Task<IEnumerable<T>> PageAsync<T>(long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
-        {
-            return PageAsync<T>(null, null, pageNumber, perPageCount, transContext);
-        }
-
-        /// <summary>
-        /// CountAsync
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
@@ -616,13 +476,6 @@ namespace HB.FullStack.Database
 
         #region 单表查询, Expression Where
 
-        /// <summary>
-        /// ScalarAsync
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
             where T : LongIdEntity, new()
         {
@@ -631,13 +484,6 @@ namespace HB.FullStack.Database
             return ScalarAsync(where, transContext);
         }
 
-        /// <summary>
-        /// ScalarAsync
-        /// </summary>
-        /// <param name="guid"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
             where T : GuidEntity, new()
         {
@@ -647,13 +493,6 @@ namespace HB.FullStack.Database
             return ScalarAsync(where, transContext);
         }
 
-        /// <summary>
-        /// ScalarAsync
-        /// </summary>
-        /// <param name="whereExpr"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
@@ -661,45 +500,14 @@ namespace HB.FullStack.Database
             return ScalarAsync(null, whereCondition, transContext);
         }
 
-        /// <summary>
-        /// RetrieveAsync
-        /// </summary>
-        /// <param name="whereExpr"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
+        public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
             where T : DatabaseEntity, new()
         {
-            WhereExpression<T> whereCondition = Where(whereExpr);
+            WhereExpression<T> whereCondition = Where(whereExpr).AddOrderAndLimits(page, perPage, orderBy);
 
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
-        /// <summary>
-        /// PageAsync
-        /// </summary>
-        /// <param name="whereExpr"></param>
-        /// <param name="pageNumber"></param>
-        /// <param name="perPageCount"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public Task<IEnumerable<T>> PageAsync<T>(Expression<Func<T, bool>> whereExpr, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
-        {
-            WhereExpression<T> whereCondition = new WhereExpression<T>(EngineType);
-
-            return PageAsync(null, whereCondition, pageNumber, perPageCount, transContext);
-        }
-
-        /// <summary>
-        /// CountAsync
-        /// </summary>
-        /// <param name="whereExpr"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
@@ -708,18 +516,43 @@ namespace HB.FullStack.Database
             return CountAsync(null, whereCondition, transContext);
         }
 
+        //TODO: orderby 添加对 desc的支持
+        /// <summary>
+        /// 根据给出的外键值获取 page从0开始
+        /// </summary>
+        public async Task<IEnumerable<T>> RetrieveByForeignKeyAsync<T>(Expression<Func<T, object>> foreignKeyExp, object foreignKeyValue, TransactionContext? transactionContext, int? page, int? perPage, string? orderBy)
+            where T : DatabaseEntity, new()
+        {
+            string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
+
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+
+            EntityPropertyDef? foreignKeyProperty = entityDef.GetPropertyDef(foreignKeyName);
+
+            if (foreignKeyProperty == null || !foreignKeyProperty.IsForeignKey)
+            {
+                throw DatabaseExceptions.NoSuchForeignKey(entityDef.EntityFullName, foreignKeyName);
+            }
+
+            Type foreignKeyValueType = foreignKeyValue.GetType();
+
+            if (foreignKeyValueType != typeof(long) && foreignKeyValueType != typeof(Guid))
+            {
+                throw DatabaseExceptions.KeyValueNotLongOrGuid(entityDef.EntityFullName, foreignKeyName, foreignKeyValue, foreignKeyValueType.FullName);
+            }
+
+            WhereExpression<T> where = Where<T>($"{foreignKeyName}={{0}}", foreignKeyValue)
+                .AddOrderAndLimits(page, perPage, orderBy);
+
+            return await RetrieveAsync(where, transactionContext).ConfigureAwait(false);
+        }
+
         #endregion
 
         #region 双表查询
 
-        /// <summary>
-        /// RetrieveAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+
+
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
@@ -770,28 +603,8 @@ namespace HB.FullStack.Database
             }
         }
 
-        public Task<IEnumerable<Tuple<TSource, TTarget?>>> PageAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget : DatabaseEntity, new()
-        {
-            if (whereCondition == null)
-            {
-                whereCondition = new WhereExpression<TSource>(EngineType);
-            }
 
-            whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
 
-            return RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext);
-        }
-
-        /// <summary>
-        /// ScalarAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
@@ -815,14 +628,8 @@ namespace HB.FullStack.Database
 
         #region 三表查询
 
-        /// <summary>
-        /// RetrieveAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+
+
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
@@ -875,29 +682,8 @@ namespace HB.FullStack.Database
             }
         }
 
-        public Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> PageAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, long pageNumber, long perPageCount, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget1 : DatabaseEntity, new()
-            where TTarget2 : DatabaseEntity, new()
-        {
-            if (whereCondition == null)
-            {
-                whereCondition = new WhereExpression<TSource>(EngineType);
-            }
 
-            whereCondition.Limit((pageNumber - 1) * perPageCount, perPageCount);
 
-            return RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext);
-        }
-
-        /// <summary>
-        /// ScalarAsync
-        /// </summary>
-        /// <param name="fromCondition"></param>
-        /// <param name="whereCondition"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
@@ -925,7 +711,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -984,7 +770,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -1055,7 +841,7 @@ namespace HB.FullStack.Database
         ///  版本控制，如果item中Version未赋值，会无法更改
         ///  反应Version变化
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -1173,7 +959,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1280,7 +1066,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1372,7 +1158,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1466,12 +1252,8 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        /// <summary>
-        /// ThrowIfNotWriteable
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="entityDef"></param>
-        /// <exception cref="DatabaseException"></exception>
+
+
         private static void ThrowIfNotWriteable(EntityDef entityDef)
         {
             if (!entityDef.DatabaseWriteable)
@@ -1501,7 +1283,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, EntityDef entityDef) where T:DatabaseEntity, new()
+        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, EntityDef entityDef) where T : DatabaseEntity, new()
         {
             foreach (T item in items)
             {

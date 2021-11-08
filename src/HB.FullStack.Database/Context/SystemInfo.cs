@@ -17,7 +17,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// DatabaseName
         /// </summary>
-        /// <exception cref="DatabaseException">Get.</exception>
+        
         [NotNull, DisallowNull]
         public string DatabaseName
         {
@@ -39,7 +39,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version
         /// </summary>
-        /// <exception cref="DatabaseException">Get.</exception>
+        
         public int Version
         {
             get
