@@ -51,7 +51,7 @@ namespace HB.FullStack.WebApi
                 content = await bodyStream.ReadToEndAsync().ConfigureAwait(false);
             }
 
-            ErrorCode errorCode = WebApiErrorCodes.ServerUnKownNonErrorCodeError;
+            ErrorCode? errorCode = WebApiErrorCodes.ServerUnKownNonErrorCodeError;
 
             if(exceptionHandlerPathFeature.Error is ErrorCode2Exception errorCodeException)
             {

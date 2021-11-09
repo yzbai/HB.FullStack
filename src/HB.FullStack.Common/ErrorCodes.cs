@@ -70,12 +70,12 @@ namespace System
             _logReadFileError(logger, fullPath, ex);
         }
 
-        private static readonly Action<ILogger, string?, int, string?, Uri, Exception> _logHttpResponseDeSerializeJsonError = LoggerMessage.Define<string?, int, string?, Uri>(
+        private static readonly Action<ILogger, string?, int, string?, Uri?, Exception> _logHttpResponseDeSerializeJsonError = LoggerMessage.Define<string?, int, string?, Uri?>(
             LogLevel.Error,
             CommonErrorCodes.HttpResponseDeSerializeJsonError.ToEventId(),
             "解析HttpResponse的Json内容出错. Content={Content}, StatusCode={StatusCode}, ReasonPhrase={ReasonPhrase}, Uri={Uri}");
 
-        public static void LogHttpResponseDeSerializeJsonError(this ILogger logger, string content, int statusCode, string reasonPhrase, Uri uri, Exception ex)
+        public static void LogHttpResponseDeSerializeJsonError(this ILogger logger, string? content, int statusCode, string? reasonPhrase, Uri? uri, Exception ex)
         {
             _logHttpResponseDeSerializeJsonError(logger, content, statusCode, reasonPhrase, uri, ex);
         }

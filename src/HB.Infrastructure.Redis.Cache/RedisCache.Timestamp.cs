@@ -268,7 +268,7 @@ return data[3]";
             //划分组 100个一组
             int groupLength = 100;
 
-            IList<string[]> groups = PartitionToGroup(keys, groupLength);
+            IEnumerable<string[]> groups = keys.Chunk(groupLength);//PartitionToGroup(keys, groupLength);
 
             IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
 
@@ -305,30 +305,6 @@ return data[3]";
             {
                 throw CacheExceptions.RemoveMultipleError(keys, utcTicks, ex);
             }
-        }
-
-        private static IList<string[]> PartitionToGroup(string[] keys, int groupLength)
-        {
-            IList<string[]> groups = new List<string[]>();
-            int start = 0;
-
-            while (start < keys.Length)
-            {
-                if (start + groupLength - 1 < keys.Length)
-                {
-                    groups.Add(keys[start..(start + groupLength)]);
-                }
-                else
-                {
-                    groups.Add(keys[start..]);
-                    break;
-                }
-
-                start += groupLength;
-            }
-
-
-            return groups;
         }
 
         public Task RemoveByKeyPrefixAsync(string keyPrefix, UtcNowTicks utcTikcs, CancellationToken token = default)

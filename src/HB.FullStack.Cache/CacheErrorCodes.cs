@@ -59,7 +59,7 @@ namespace System
             return exception;
         }
 
-        public static CacheException CacheEntityNotHaveKeyAttribute(string type)
+        public static CacheException CacheEntityNotHaveKeyAttribute(string? type)
         {
             CacheException exception = new CacheException(CacheErrorCodes.EntityNotHaveKeyAttribute);
 

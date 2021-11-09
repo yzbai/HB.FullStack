@@ -158,7 +158,7 @@ namespace System
             return ex;
         }
 
-        internal static Exception LackApiResourceAttribute(string type)
+        internal static Exception LackApiResourceAttribute(string? type)
         {
             ApiException ex = new ApiException(ApiErrorCodes.LackApiResourceAttribute);
             ex.Data["Type"] = type;

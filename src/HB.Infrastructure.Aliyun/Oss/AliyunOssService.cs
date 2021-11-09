@@ -55,7 +55,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         
         public string GetOssEndpoint(string bucket)
         {
-            if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
+            if (_bucketSettings.TryGetValue(bucket, out BucketSettings? bucketSettings))
             {
                 return bucketSettings.Endpoint;
             }
@@ -71,7 +71,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         
         public string GetRegionId(string bucket)
         {
-            if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
+            if (_bucketSettings.TryGetValue(bucket, out BucketSettings? bucketSettings))
             {
                 return bucketSettings.RegionId;
             }
@@ -90,7 +90,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         private string GetUserDirectory(string bucket, string userGuid)
         {
-            if (_bucketSettings.TryGetValue(bucket, out BucketSettings bucketSettings))
+            if (_bucketSettings.TryGetValue(bucket, out BucketSettings? bucketSettings))
             {
                 string seprator = bucketSettings.BucketUserDirectory.EndsWith("/", GlobalSettings.Comparison) ? "" : "/";
                 return bucketSettings.BucketUserDirectory + seprator + userGuid;

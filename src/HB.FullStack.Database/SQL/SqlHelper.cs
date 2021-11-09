@@ -5,10 +5,14 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 
+using Microsoft.Extensions.Primitives;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+
+using static System.FormattableString;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -30,7 +34,7 @@ namespace HB.FullStack.Database.SQL
 			{
 				if (returnId)
 				{
-					selectArgs.Append($"{propertyDef.DbReservedName},");
+					selectArgs.Append(Invariant($"{propertyDef.DbReservedName},"));
 				}
 
 				if (propertyDef.IsAutoIncrementPrimaryKey)
@@ -38,8 +42,8 @@ namespace HB.FullStack.Database.SQL
 					continue;
 				}
 
-				addArgs.Append($"{propertyDef.DbReservedName},");
-				addValues.Append($"{propertyDef.DbParameterizedName}_{number},");
+				addArgs.Append(Invariant($"{propertyDef.DbReservedName},"));
+				addValues.Append(Invariant($"{propertyDef.DbParameterizedName}_{number},"));
 
 				if (propertyDef.IsPrimaryKey)
 				{
@@ -51,12 +55,12 @@ namespace HB.FullStack.Database.SQL
 					continue;
 				}
 
-				updatePairs.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
+				updatePairs.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
 			}
 
 			EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
-			updatePairs.Append($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1");
+			updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1"));
 
 			if (returnId)
 			{
@@ -97,9 +101,9 @@ namespace HB.FullStack.Database.SQL
 					continue;
 				}
 
-				args.Append($"{propertyDef.DbReservedName},");
+				args.Append(Invariant($"{propertyDef.DbReservedName},"));
 
-				values.Append($"{propertyDef.DbParameterizedName}_{number},");
+				values.Append(Invariant($"{propertyDef.DbParameterizedName}_{number},"));
 			}
 
 			args.RemoveLast();
@@ -121,7 +125,7 @@ namespace HB.FullStack.Database.SQL
 					continue;
 				}
 
-				args.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
+				args.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
 			}
 
 			args.RemoveLast();
@@ -132,9 +136,9 @@ namespace HB.FullStack.Database.SQL
 			EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
 			EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
-			where.Append($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND ");
-			where.Append($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND ");
-			where.Append($"{deletedProperty.DbReservedName}=0");
+			where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
+			where.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND "));
+			where.Append(Invariant($"{deletedProperty.DbReservedName}=0"));
 
 			return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where};";
 		}
@@ -157,7 +161,7 @@ namespace HB.FullStack.Database.SQL
 					throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
 				}
 
-				args.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
+				args.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
 			}
 
 			args.RemoveLast();
@@ -168,9 +172,9 @@ namespace HB.FullStack.Database.SQL
 			EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
 			EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
-			where.Append($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND ");
-			where.Append($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND ");
-			where.Append($"{deletedProperty.DbReservedName}=0");
+			where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
+			where.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND "));
+			where.Append(Invariant($"{deletedProperty.DbReservedName}=0"));
 
 			return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}";
 		}
@@ -190,7 +194,7 @@ namespace HB.FullStack.Database.SQL
 
 				foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
 				{
-					builder.Append($"{DbTableReservedName}.{propertyDef.DbReservedName},");
+					builder.Append(Invariant($"{DbTableReservedName}.{propertyDef.DbReservedName},"));
 				}
 			}
 
@@ -232,12 +236,7 @@ namespace HB.FullStack.Database.SQL
 
 		public static string GetQuoted(string name)
 		{
-#if NETSTANDARD2_1
 			return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR, GlobalSettings.Comparison) + QUOTED_CHAR;
-#endif
-#if NETSTANDARD2_0
-			return QuotedChar + name.Replace(QuotedChar, QuotedChar + QuotedChar) + QuotedChar;
-#endif
 		}
 
 		public static string GetParameterized(string name)
@@ -390,7 +389,7 @@ namespace HB.FullStack.Database.SQL
 
 				for (int i = 0; i < ins.Length; ++i)
 				{
-					orderCaseBuilder.Append($" when {ins[i]} THEN {i} ");
+					orderCaseBuilder.Append(Invariant($" when {ins[i]} THEN {i} "));
 				}
 
 				orderCaseBuilder.Append(" END ");
@@ -428,12 +427,12 @@ namespace HB.FullStack.Database.SQL
 					primaryStatement += " AUTOINCREMENT ";
 				}
 
-				propertyInfoSql.Append($" {propertyDef.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} ,");
+				propertyInfoSql.Append(Invariant($" {propertyDef.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} ,"));
 
 				//索引
 				if (!propertyDef.IsUnique && !propertyDef.IsAutoIncrementPrimaryKey && (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded))
 				{
-					indexSqlBuilder.Append($" create index {entityDef.TableName}_{propertyDef.Name}_index on {entityDef.DbTableReservedName} ({propertyDef.DbReservedName}); ");
+					indexSqlBuilder.Append(Invariant($" create index {entityDef.TableName}_{propertyDef.Name}_index on {entityDef.DbTableReservedName} ({propertyDef.DbReservedName}); "));
 				}
 			}
 
@@ -509,12 +508,12 @@ namespace HB.FullStack.Database.SQL
 				string autoIncrementStatement = propertyDef.IsAutoIncrementPrimaryKey ? "AUTO_INCREMENT" : "";
 				string uniqueStatement = !propertyDef.IsPrimaryKey && !propertyDef.IsForeignKey && propertyDef.IsUnique ? " UNIQUE " : "";
 
-				propertySqlBuilder.Append($" {propertyDef.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {uniqueStatement},");
+				propertySqlBuilder.Append(Invariant($" {propertyDef.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {uniqueStatement},"));
 
 				//判断索引
 				if (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded)
 				{
-					indexSqlBuilder.Append($" INDEX {propertyDef.Name}_index ({propertyDef.DbReservedName}), ");
+					indexSqlBuilder.Append(Invariant($" INDEX {propertyDef.Name}_index ({propertyDef.DbReservedName}), "));
 				}
 			}
 

@@ -87,7 +87,6 @@ namespace HB.FullStack.Common.Api
 			base.Dispose(disposing);
 		}
 
-
 		public static async Task<Stream?> GetStreamAsync(HttpClient client, Uri uri, CancellationToken cancellationToken)
 		{
 			HttpResponseMessage response = await client.GetAsync(uri, cancellationToken).ConfigureAwait(false);
@@ -99,7 +98,12 @@ namespace HB.FullStack.Common.Api
 
 			// the HttpResponseMessage needs to be disposed of after the calling code is done with the stream
 			// otherwise the stream may get disposed before the caller can use it
+
+#if NET6_0
+			return new WrappedStream(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), response);
+#elif NETSTANDARD2_1
 			return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
+#endif
 		}
 	}
 }

@@ -195,13 +195,13 @@ namespace System
 
             return (int)((long)Math.Floor(GetRandomDouble() * range) + minValue);
 #endif
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET6_0
             return RandomNumberGenerator.GetInt32(minValue, maxValue + 1);
 #endif
         }
 
 
-        #endregion Random String
+#endregion Random String
 
 
         public static byte[] HexToByteArray(string hexString)

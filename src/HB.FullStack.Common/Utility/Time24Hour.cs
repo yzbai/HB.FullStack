@@ -174,7 +174,7 @@ namespace HB.FullStack.Common
             return new Time24Hour(newhour, newMinute, newDay);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Time24Hour time)
             {

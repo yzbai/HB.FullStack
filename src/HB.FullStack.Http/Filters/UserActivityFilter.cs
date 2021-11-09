@@ -35,7 +35,8 @@ namespace HB.FullStack.WebApi.Filters
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
                 string? httpMethod = context.HttpContext?.Request?.Method;
-                string? arguments = SerializeUtil.TryToJson(context.ActionArguments);
+                
+                SerializeUtil.TryToJson(context.ActionArguments, out string? arguments);
 
                 
 

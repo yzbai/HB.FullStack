@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,20 +28,12 @@ namespace HB.Infrastructure.Tencent
             _apiKeySettings = _options.ApiKeySettings.ToDictionary(s => s.AppId);
         }
 
-        /// <summary>
-        /// VerifyTicket
-        /// </summary>
-        /// <param name="appid"></param>
-        /// <param name="ticket"></param>
-        /// <param name="randstr"></param>
-        /// <param name="userIp"></param>
-        /// <returns></returns>
-        
+        //TODO: 使用ApiClient
         public async Task<bool> VerifyTicketAsync(string appid, string ticket, string randstr, string userIp)
         {
             if (!_apiKeySettings.TryGetValue(appid, out ApiKeySetting? apiKeySetting))
             {
-                throw Exceptions.CapthaError(appId:appid, cause:"lack ApiKeySettings for AppId");
+                throw Exceptions.CapthaError(appId: appid, cause: "lack ApiKeySettings for AppId");
             }
 
             string query = new Dictionary<string, string?> {
@@ -71,7 +64,7 @@ namespace HB.Infrastructure.Tencent
             }
             try
             {
-                int result = Convert.ToInt32(SerializeUtil.FromJson(content, "response"), GlobalSettings.Culture);
+                int? result = SerializeUtil.FromJsonForProperty<int>(content, "response");
 
                 if (result == 1)
                 {

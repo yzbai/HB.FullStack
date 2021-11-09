@@ -753,13 +753,14 @@ namespace HB.FullStack.Identity
 
         public async Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
         {
-            string? resultError = SerializeUtil.TryToJson(errorCode);
-
-            if (resultError != null && resultError.Length > MAX_RESULT_ERROR_LENGTH)
+            if (SerializeUtil.TryToJson(errorCode, out string? resultError))
             {
-                _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
+                if (resultError?.Length > MAX_RESULT_ERROR_LENGTH)
+                {
+                    _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
 
-                resultError = resultError[..MAX_RESULT_ERROR_LENGTH];
+                    resultError = resultError[..MAX_RESULT_ERROR_LENGTH];
+                }
             }
 
             if (arguments != null && arguments.Length > MAX_ARGUMENTS_LENGTH)

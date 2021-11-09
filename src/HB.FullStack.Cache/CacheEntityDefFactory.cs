@@ -65,7 +65,7 @@ namespace HB.FullStack.Cache
 
             bool foundkeyAttribute = false;
 
-            foreach (var propertyInfo in entityType.GetProperties())
+            foreach (PropertyInfo propertyInfo in entityType.GetProperties())
             {
                 if (!foundkeyAttribute)
                 {

@@ -75,14 +75,14 @@ namespace HB.FullStack.DistributedLock.Test
                     resources,
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(60));
-            _logger.LogInformation("Entering lock");
+            _logger?.LogInformation("Entering lock");
             if (@lock.IsAcquired)
             {
                 locksAcquired.Add(1);
             }
             await Task.Delay(4000).ConfigureAwait(false);
 
-            _logger.LogInformation("Leaving lock");
+            _logger?.LogInformation("Leaving lock");
         }
 
         [Fact]
@@ -93,13 +93,13 @@ namespace HB.FullStack.DistributedLock.Test
 
             using (var firstLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30)))
             {
-                _logger.LogInformation("TestSequentialLocks  :  First Enter");
+                _logger?.LogInformation("TestSequentialLocks  :  First Enter");
 
                 Assert.True(firstLock.IsAcquired);
             }
 
             using var secondLock = _lockManager.Lock("Test", resources, TimeSpan.FromSeconds(30));
-            _logger.LogInformation("TestSequentialLocks  :  Second Enter");
+            _logger?.LogInformation("TestSequentialLocks  :  Second Enter");
 
             Assert.True(secondLock.IsAcquired);
         }

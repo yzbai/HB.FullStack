@@ -140,7 +140,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<PublisherEntity_Client> lst = (await database.PageAsync<PublisherEntity_Client>(2, 100, transactionContext).ConfigureAwait(false)).ToList();
+                IList<PublisherEntity_Client> lst = (await database.RetrieveAllAsync<PublisherEntity_Client>(transactionContext, 1, 100).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
@@ -219,7 +219,7 @@ namespace HB.FullStack.DatabaseTests
             {
                 await database.BatchAddAsync(publishers, "lastUsre", tContext).ConfigureAwait(false);
 
-                IList<PublisherEntity_Client> testEntities = (await database.PageAsync<PublisherEntity_Client>(1, 1, tContext).ConfigureAwait(false)).ToList();
+                IList<PublisherEntity_Client> testEntities = (await database.RetrieveAllAsync<PublisherEntity_Client>(tContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
@@ -428,7 +428,7 @@ namespace HB.FullStack.DatabaseTests
                 await database.DeleteAsync(item, "xxx", transactionContext).ConfigureAwait(false);
 
 
-                IList<PublisherEntity_Client> testEntities = (await database.PageAsync<PublisherEntity_Client>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
+                IList<PublisherEntity_Client> testEntities = (await database.RetrieveAllAsync<PublisherEntity_Client>(transactionContext, 0 , 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {

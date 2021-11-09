@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -37,6 +38,7 @@ namespace System
             jsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
             jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            //jsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         }
 
         [return: NotNullIfNotNull("entity")]
@@ -57,14 +59,14 @@ namespace System
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 GlobalSettings.Logger?.LogSerializeLogError(entity?.GetType().FullName, ex);
-                
+
                 json = null;
                 return false;
             }
         }
 
         [return: MaybeNull]
-        public static T FromJson<T>(string? jsonString)
+        public static T? FromJson<T>(string? jsonString)
         {
             return jsonString.IsNullOrEmpty() ? default : JsonSerializer.Deserialize<T>(jsonString, _jsonSerializerOptions);
         }
@@ -90,19 +92,23 @@ namespace System
             return JsonSerializer.Deserialize(jsonString, type, _jsonSerializerOptions);
         }
 
-        public static string? FromJson(string jsonString, string name)
+        public static T? FromJsonForProperty<T>(string jsonString, string propertyName)
         {
-            //TODO: 使用JsonNode改写
-            JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
+            JsonNode? node = JsonNode.Parse(jsonString)?[propertyName];
 
-            JsonElement rootElement = jsonDocument.RootElement;
+            return node == null ? default : node.GetValue<T>();
 
-            if (rootElement.TryGetProperty(name, out JsonElement jsonElement))
-            {
-                return jsonElement.GetString();
-            }
+            ////TODO: 使用JsonNode改写
+            //JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
 
-            return null;
+            //JsonElement rootElement = jsonDocument.RootElement;
+
+            //if (rootElement.TryGetProperty(name, out JsonElement jsonElement))
+            //{
+            //    return jsonElement.GetString();
+            //}
+
+            //return null;
         }
 
         private static readonly Type _collectionType = typeof(IEnumerable);

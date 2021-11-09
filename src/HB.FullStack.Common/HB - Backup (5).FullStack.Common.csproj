@@ -3,7 +3,7 @@
 	<Import Project="..\..\common.props" />
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>

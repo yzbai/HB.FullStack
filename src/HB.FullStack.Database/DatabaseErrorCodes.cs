@@ -103,7 +103,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception FoundTooMuch(string type, string? from, string? where)
+        internal static Exception FoundTooMuch(string? type, string? from, string? where)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.FoundTooMuch);
 
@@ -114,7 +114,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception FoundTooMuch(string type, string item)
+        internal static Exception FoundTooMuch(string? type, string item)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.FoundTooMuch);
 
@@ -124,7 +124,7 @@ namespace HB.FullStack.Database
             return exception; ;
         }
 
-        internal static Exception PropertyNotFound(string type, string property)
+        internal static Exception PropertyNotFound(string? type, string property)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.PropertyNotFound);
             exception.Data["Type"] = type;
@@ -194,7 +194,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception EntityHasNotSupportedPropertyType(string type, string propertyTypeName, string propertyName)
+        internal static Exception EntityHasNotSupportedPropertyType(string type, string? propertyTypeName, string propertyName)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
 
@@ -205,7 +205,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception EntityError(string type, string propertyName, string cause)
+        internal static Exception EntityError(string? type, string propertyName, string cause)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
 
@@ -262,7 +262,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception TypeConverterError(string cause, string typeFullName)
+        internal static Exception TypeConverterError(string cause, string? typeFullName)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.TypeConverterError);
             exception.Data["Cause"] = cause;
@@ -310,7 +310,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception KeyValueNotLongOrGuid(string entityFullName, string foreignKeyName, object? foreignKeyValue, string foreignKeyType)
+        internal static Exception KeyValueNotLongOrGuid(string entityFullName, string foreignKeyName, object? foreignKeyValue, string? foreignKeyType)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.KeyValueNotLongOrGuid);
             exception.Data["EntityFullName"] = entityFullName;

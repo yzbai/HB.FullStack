@@ -10,6 +10,8 @@ using System.Text;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 
+using static System.FormattableString;
+
 namespace HB.FullStack.Database.SQL
 {
     /// <summary>
@@ -67,7 +69,7 @@ namespace HB.FullStack.Database.SQL
 
             if (hasStringWhere)
             {
-                sql.Append($" ({_whereString}) ");
+                sql.Append(Invariant($" ({_whereString}) "));
             }
 
             if (hasLamdaWhere)
@@ -77,10 +79,10 @@ namespace HB.FullStack.Database.SQL
                     sql.Append(" AND ");
                 }
 
-                sql.Append($" ({_whereExpression!.ToStatement(_expressionContext)}) ");
+                sql.Append(Invariant($" ({_whereExpression!.ToStatement(_expressionContext)}) "));
             }
 
-            sql.Append($" {_groupByString} {_havingString} ");
+            sql.Append(Invariant($" {_groupByString} {_havingString} "));
 
             if (!_orderByString.IsNullOrEmpty())
             {
@@ -95,7 +97,7 @@ namespace HB.FullStack.Database.SQL
                     ));
             }
 
-            sql.Append($" {_limitString} ");
+            sql.Append(Invariant($" {_limitString} "));
 
             return sql.ToString();
         }

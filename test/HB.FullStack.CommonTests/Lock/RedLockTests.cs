@@ -80,14 +80,14 @@ namespace HB.FullStack.DistributedLock.Test
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(60),
                     TimeSpan.FromSeconds(0.5)).ConfigureAwait(false);
-            _logger.LogInformation("Entering lock");
+            _logger?.LogInformation("Entering lock");
             if (redisLock.IsAcquired)
             {
                 locksAcquired.Add(1);
             }
             await Task.Delay(4000).ConfigureAwait(false);
 
-            _logger.LogInformation("Leaving lock");
+            _logger?.LogInformation("Leaving lock");
         }
 
         [Fact]
@@ -98,13 +98,13 @@ namespace HB.FullStack.DistributedLock.Test
 
             using (var firstLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false))
             {
-                _logger.LogInformation("TestSequentialLocks  :  First Enter");
+                _logger?.LogInformation("TestSequentialLocks  :  First Enter");
 
                 Assert.True(firstLock.IsAcquired);
             }
 
             using var secondLock = await _lockManager.LockAsync(resources, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-            _logger.LogInformation("TestSequentialLocks  :  Second Enter");
+            _logger?.LogInformation("TestSequentialLocks  :  Second Enter");
 
             Assert.True(secondLock.IsAcquired);
         }

@@ -95,7 +95,7 @@ namespace HB.FullStack.Common.ApiClient
                 { ClientNames.DEVICE_ID, tokenProvider.DeviceId }
             };
 
-            request.RequestUri = new Uri(UriUtil.AddQuerys(request.RequestUri.ToString(), parameters));
+            request.RequestUri = new Uri(UriUtil.AddQuerys(request.RequestUri?.ToString(), parameters));
         }
 
         private EndpointSettings? GetEndpointByUri(Uri? requestUri)

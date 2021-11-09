@@ -362,7 +362,7 @@ namespace HB.FullStack.XamarinForms.Controls
     {
         private readonly string _uri;
 
-        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null, null, null)
+        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null, null)
         {
             _uri = uri;
         }

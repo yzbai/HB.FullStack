@@ -122,7 +122,7 @@ namespace System
 
             try
             {
-                string directory = Path.GetDirectoryName(fullPath);
+                string directory = Path.GetDirectoryName(fullPath)!;
 
                 if (createDirectoryIfNotExist)
                 {
@@ -151,7 +151,7 @@ namespace System
 
             try
             {
-                string directory = Path.GetDirectoryName(fullPath);
+                string directory = Path.GetDirectoryName(fullPath)!;
 
                 if (createDirectoryIfNotExist)
                 {

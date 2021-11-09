@@ -180,7 +180,7 @@ namespace HB.FullStack.Database.SQL
                 if (left is EnumMemberAccess enumMemberAccess)
                 {
                     //将right转为enum对应的字符串
-                    right = Enum.ToObject(enumMemberAccess.EnumType, right).ToString();
+                    right = Enum.ToObject(enumMemberAccess.EnumType, right).ToString()!;
                 }
 
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
@@ -820,7 +820,7 @@ namespace HB.FullStack.Database.SQL
 
         private static EntityPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
         {
-            return EntityDefFactory.GetDef(memberExpression?.Expression.Type)?.GetPropertyDef(memberExpression!.Member.Name);
+            return EntityDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetPropertyDef(memberExpression!.Member.Name);
         }
 
         private static EntityPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)

@@ -16,7 +16,7 @@
         {
             get
             {
-                return (ErrorCode)Data[nameof(ErrorCode)];
+                return (ErrorCode?)Data[nameof(ErrorCode)]!;
             }
             private set
             {
@@ -28,11 +28,11 @@
         {
         }
 
-        public ErrorCode2Exception(string message) : base(message)
+        public ErrorCode2Exception(string? message) : base(message)
         {
         }
 
-        public ErrorCode2Exception(string message, Exception innerException) : base(message, innerException)
+        public ErrorCode2Exception(string? message, Exception innerException) : base(message, innerException)
         {
         }
     }

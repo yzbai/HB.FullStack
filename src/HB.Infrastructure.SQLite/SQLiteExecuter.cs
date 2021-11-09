@@ -26,7 +26,7 @@ namespace HB.Infrastructure.SQLite
         public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return await ExecuteCommandReaderAsync(sqliteTransaction.Connection, false, dbCommand).ConfigureAwait(false);
+            return await ExecuteCommandReaderAsync(sqliteTransaction.Connection!, false, dbCommand).ConfigureAwait(false);
         }
 
         /// <returns></returns>
@@ -113,7 +113,7 @@ namespace HB.Infrastructure.SQLite
         public static async Task<object?> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return await ExecuteCommandScalarAsync(sqliteTransaction.Connection, dbCommand).ConfigureAwait(false);
+            return await ExecuteCommandScalarAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace HB.Infrastructure.SQLite
         public static async Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
-            return await ExecuteCommandNonQueryAsync(sqliteTransaction.Connection, dbCommand).ConfigureAwait(false);
+            return await ExecuteCommandNonQueryAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
 
 

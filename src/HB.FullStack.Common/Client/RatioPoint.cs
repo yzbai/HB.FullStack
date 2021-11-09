@@ -31,7 +31,7 @@ namespace HB.FullStack.Common
             YRatio = yRatio;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is RatioPoint point)
             {

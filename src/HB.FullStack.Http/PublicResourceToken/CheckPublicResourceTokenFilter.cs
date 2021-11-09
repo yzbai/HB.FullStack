@@ -33,7 +33,7 @@ namespace HB.FullStack.WebApi.Filters
         {
             try
             {
-                KeyValuePair<string, object>? firstArgument = context?.ActionArguments?.FirstOrDefault();
+                KeyValuePair<string, object?>? firstArgument = context?.ActionArguments?.FirstOrDefault();
                 object? firstArgumentValue = firstArgument.HasValue ? firstArgument.Value.Value : null;
 
                 if (firstArgumentValue is ApiRequest apiRequest)

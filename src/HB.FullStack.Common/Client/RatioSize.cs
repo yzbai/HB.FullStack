@@ -19,7 +19,7 @@ namespace HB.FullStack.Common
 
 
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is RatioSize ratioSize)
             {

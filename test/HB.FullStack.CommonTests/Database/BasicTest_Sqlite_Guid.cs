@@ -6,15 +6,19 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using ClassLibrary1;
+
 using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
+
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+
 using MySqlConnector;
 
 using Xunit;
@@ -140,7 +144,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<Guid_PublisherEntity_Client> lst = (await database.PageAsync<Guid_PublisherEntity_Client>(2, 100, transactionContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity_Client> lst = (await database.RetrieveAllAsync<Guid_PublisherEntity_Client>(transactionContext, 1, 100).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
@@ -215,11 +219,11 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<Guid_PublisherEntity_Client> testEntities = (await database.PageAsync<Guid_PublisherEntity_Client>(1, 1, tContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity_Client> testEntities = (await database.RetrieveAllAsync<Guid_PublisherEntity_Client>(tContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
-                    throw new Exception( "No Entity to update");
+                    throw new Exception("No Entity to update");
                 }
 
                 Guid_PublisherEntity_Client entity = testEntities[0];
@@ -424,11 +428,11 @@ namespace HB.FullStack.DatabaseTests
                 await database.DeleteAsync(item, "xxx", transactionContext).ConfigureAwait(false);
 
 
-                IList<Guid_PublisherEntity_Client> testEntities = (await database.PageAsync<Guid_PublisherEntity_Client>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity_Client> testEntities = (await database.RetrieveAllAsync<Guid_PublisherEntity_Client>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
-                    throw new  Exception("No Entity to update");
+                    throw new Exception("No Entity to update");
                 }
 
                 Guid_PublisherEntity_Client entity = testEntities[0];

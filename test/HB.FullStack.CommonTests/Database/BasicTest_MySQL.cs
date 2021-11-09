@@ -136,7 +136,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<PublisherEntity> lst = (await database.PageAsync<PublisherEntity>(2, 100, transactionContext).ConfigureAwait(false)).ToList();
+                IList<PublisherEntity> lst = (await database.RetrieveAllAsync<PublisherEntity>(transactionContext, 1, 100).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
@@ -207,7 +207,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<PublisherEntity> testEntities = (await database.PageAsync<PublisherEntity>(1, 1, tContext).ConfigureAwait(false)).ToList();
+                IList<PublisherEntity> testEntities = (await database.RetrieveAllAsync<PublisherEntity>(tContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
@@ -407,7 +407,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                IList<PublisherEntity> testEntities = (await database.PageAsync<PublisherEntity>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
+                IList<PublisherEntity> testEntities = (await database.RetrieveAllAsync<PublisherEntity>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {

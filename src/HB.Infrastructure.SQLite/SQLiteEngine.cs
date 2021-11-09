@@ -189,7 +189,7 @@ namespace HB.Infrastructure.SQLite
         {
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
-            SqliteConnection connection = sqliteTransaction.Connection;
+            SqliteConnection connection = sqliteTransaction.Connection!;
 
             try
             {
@@ -205,7 +205,7 @@ namespace HB.Infrastructure.SQLite
         {
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
-            SqliteConnection connection = sqliteTransaction.Connection;
+            SqliteConnection connection = sqliteTransaction.Connection!;
 
             try
             {

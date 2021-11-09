@@ -26,7 +26,7 @@ namespace HB.FullStack.KVStore
 
     internal static class Exceptions
     {
-        internal static Exception NoEntitySchemaFound(string type)
+        internal static Exception NoEntitySchemaFound(string? type)
         {
             KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoEntitySchemaFound);
 
@@ -35,7 +35,7 @@ namespace HB.FullStack.KVStore
             return exception;
         }
 
-        internal static Exception LackKVStoreKeyAttributeError(string type)
+        internal static Exception LackKVStoreKeyAttributeError(string? type)
         {
             KVStoreException exception = new KVStoreException(KVStoreErrorCodes.LackKVStoreKeyAttributeError);
 
@@ -44,7 +44,7 @@ namespace HB.FullStack.KVStore
             return exception;
         }
 
-        internal static Exception Unkown(string type, string storeName, object? key, Exception innerException)
+        internal static Exception Unkown(string? type, string storeName, object? key, Exception innerException)
         {
             KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, innerException);
 
@@ -62,7 +62,7 @@ namespace HB.FullStack.KVStore
             return exception;
         }
 
-        internal static Exception Unkown(string type, string storeName, object? keys, object? values, Exception innerException)
+        internal static Exception Unkown(string? type, string storeName, object? keys, object? values, Exception innerException)
         {
             KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, innerException);
 

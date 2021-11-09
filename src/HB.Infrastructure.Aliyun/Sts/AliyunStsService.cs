@@ -55,7 +55,7 @@ namespace HB.Infrastructure.Aliyun.Sts
 
             string ossResourceName = $"acs:oss:*:*:{bucketName}";
 
-            if (!_resourceAssumedRoleDict.TryGetValue(ossResourceName, out AssumedRole assumedRole))
+            if (!_resourceAssumedRoleDict.TryGetValue(ossResourceName, out AssumedRole? assumedRole))
             {
                 return null;
             }

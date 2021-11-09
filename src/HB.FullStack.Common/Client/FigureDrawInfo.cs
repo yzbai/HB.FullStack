@@ -37,7 +37,7 @@ namespace HB.FullStack.Common
             return !(d1 == d2);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is FigureDrawInfo data)
             {

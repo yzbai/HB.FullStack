@@ -96,7 +96,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IEnumerable<Guid_PublisherEntity> lst = await database.PageAsync<Guid_PublisherEntity>(1, count, transContext).ConfigureAwait(false);
+                IEnumerable<Guid_PublisherEntity> lst = await database.RetrieveAllAsync<Guid_PublisherEntity>(transContext, 0, count).ConfigureAwait(false);
 
                 for (int i = 0; i < lst.Count(); i++)
                 {
@@ -116,7 +116,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await transaction.CommitAsync(transContext).ConfigureAwait(false);
 
-                lst = await database.PageAsync<Guid_PublisherEntity>(1, count, null);
+                lst = await database.RetrieveAllAsync<Guid_PublisherEntity>(null, 0, count );
 
                 Assert.True(lst.All(t => t.Name == updatedName));
 
@@ -144,7 +144,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<Guid_PublisherEntity> lst = (await database.PageAsync<Guid_PublisherEntity>(2, 5, transactionContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity> lst = (await database.RetrieveAllAsync<Guid_PublisherEntity>(transactionContext, 1, 5).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
@@ -217,7 +217,7 @@ namespace HB.FullStack.DatabaseTests
 
             try
             {
-                IList<Guid_PublisherEntity> testEntities = (await database.PageAsync<Guid_PublisherEntity>(2, 1, tContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity> testEntities = (await database.RetrieveAllAsync<Guid_PublisherEntity>(tContext, 1, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
@@ -413,7 +413,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await database.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                IList<Guid_PublisherEntity> testEntities = (await database.PageAsync<Guid_PublisherEntity>(1, 1, transactionContext).ConfigureAwait(false)).ToList();
+                IList<Guid_PublisherEntity> testEntities = (await database.RetrieveAllAsync<Guid_PublisherEntity>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testEntities.Count == 0)
                 {
