@@ -45,18 +45,21 @@ namespace System
             return JsonSerializer.Serialize(entity, _jsonSerializerOptions);
         }
 
-        public static string? TryToJson(object? entity)
+        public static bool TryToJson(object? entity, out string? json)
         {
             try
             {
-                return ToJson(entity);
+                json = ToJson(entity);
+                return true;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 GlobalSettings.Logger?.LogSerializeLogError(entity?.GetType().FullName, ex);
-                return null;
+                
+                json = null;
+                return false;
             }
         }
 
@@ -89,6 +92,7 @@ namespace System
 
         public static string? FromJson(string jsonString, string name)
         {
+            //TODO: 使用JsonNode改写
             JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
 
             JsonElement rootElement = jsonDocument.RootElement;
