@@ -203,7 +203,18 @@ namespace System
             return exception;
         }
 
-        public static Exception RemoveMultipleError(string[] keys, UtcNowTicks utcTicks, Exception ex)
+        public static Exception RemoveMultipleError(string collectionKey, IEnumerable<string> keys, UtcNowTicks utcTicks, Exception ex)
+        {
+            CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
+
+            exception.Data["CollectionKey"] = collectionKey;
+            exception.Data["Keys"] = keys.ToJoinedString(",");
+            exception.Data["UtcNowTicks"] = utcTicks.Ticks;
+
+            return exception;
+        }
+
+        public static Exception RemoveMultipleError(IEnumerable<string> keys, UtcNowTicks utcTicks, Exception ex)
         {
             CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
 

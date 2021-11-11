@@ -57,6 +57,10 @@ namespace HB.Infrastructure.Redis.Cache
                 IServer server = RedisInstanceManager.GetServer(setting, _logger);
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
+                    LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP),
+                    LoadedCollectionRemoveItemWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_REMOVE_ITEM_WITH_TIMESTAMP),
+                    LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP),
+
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
                     LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP),
                     LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP),

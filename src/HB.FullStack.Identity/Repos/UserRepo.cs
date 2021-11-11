@@ -47,7 +47,7 @@ namespace HB.FullStack.Identity
         
         public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
-            return await TryCacheAsideAsync(
+            return await CacheAsideAsync(
                 dimensionKeyName: nameof(User.Id),
                 dimensionKeyValue: userId.ToString(),
                 dbRetrieve: db =>
@@ -66,7 +66,7 @@ namespace HB.FullStack.Identity
         
         public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
-            return await TryCacheAsideAsync(
+            return await CacheAsideAsync(
                 nameof(User.Id),
                 userIds,
                 db =>
@@ -85,7 +85,7 @@ namespace HB.FullStack.Identity
         
         public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
-            return await TryCacheAsideAsync(
+            return await CacheAsideAsync(
                 nameof(User.Mobile),
                 mobile,
                 db =>
@@ -104,7 +104,7 @@ namespace HB.FullStack.Identity
         
         public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
-            return await TryCacheAsideAsync(
+            return await CacheAsideAsync(
                 nameof(User.LoginName),
                 loginName,
                 db =>
@@ -123,7 +123,7 @@ namespace HB.FullStack.Identity
         
         public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
-            return await TryCacheAsideAsync(
+            return await CacheAsideAsync(
                 nameof(User.Email),
                 email,
                 db =>

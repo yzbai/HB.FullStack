@@ -18,9 +18,9 @@ namespace HB.FullStack.Common
     /// </summary>
     public class ValidatableObject : ISupportValidate
     {
-        #region Validation
-
+        [MessagePack.IgnoreMember]
         private IList<ValidationResult>? _validateResults;
+        [MessagePack.IgnoreMember]
         private ValidationContext? _validationContext;
 
         public bool IsValid()
@@ -91,8 +91,6 @@ namespace HB.FullStack.Common
                 return false;
             }
         }
-
-        #endregion Validation
     }
 }
 

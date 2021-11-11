@@ -10,14 +10,13 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Cache
 {
-    public static class ICacheExtensions
+    public static class ICacheTimestampExtensions
     {
         public static Task SetIntAsync(this ICache cache, string key, int value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             return cache.SetStringAsync(key, value.ToString(GlobalSettings.Culture), utcTicks, options, token);
         }
 
-        
         public static async Task<int?> GetIntAsync(this ICache cache, string key, CancellationToken token = default)
         {
             try
@@ -45,7 +44,7 @@ namespace HB.FullStack.Cache
         {
             try
             {
-                byte[] bytes = await SerializeUtil.PackAsync(value).ConfigureAwait(false);
+                byte[] bytes = SerializeUtil.Serialize(value);
 
                 await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
@@ -61,7 +60,7 @@ namespace HB.FullStack.Cache
             {
                 byte[]? bytes = await cache.GetAsync(key, token).ConfigureAwait(false);
 
-                return await SerializeUtil.UnPackAsync<string>(bytes).ConfigureAwait(false);
+                return SerializeUtil.Deserialize<string?>(bytes);
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
@@ -73,7 +72,7 @@ namespace HB.FullStack.Cache
         {
             try
             {
-                byte[] bytes = await SerializeUtil.PackAsync(value).ConfigureAwait(false);
+                byte[] bytes = SerializeUtil.Serialize(value);
 
                 await cache.SetAsync(key, bytes, utcTicks, options, token).ConfigureAwait(false);
             }
@@ -89,7 +88,7 @@ namespace HB.FullStack.Cache
             {
                 byte[]? bytes = await cache.GetAsync(key, token).ConfigureAwait(false);
 
-                return await SerializeUtil.UnPackAsync<T>(bytes).ConfigureAwait(false);
+                return SerializeUtil.Deserialize<T>(bytes);
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {

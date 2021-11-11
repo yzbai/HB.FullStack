@@ -19,8 +19,6 @@ namespace HB.FullStack.Repository
             return cache.GetAsync<TResult>(cachedItem.CacheKey, cancellationToken);
         }
 
-        
-        
         public static Task SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
@@ -30,7 +28,7 @@ namespace HB.FullStack.Repository
             return cache.SetAsync(
                 cachedItem.CacheKey,
                 cachedItem.CacheValue!,
-                cachedItem.UtcTikcs,
+                cachedItem.UtcTicks,
                 new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = cachedItem.AbsoluteExpirationRelativeToNow,
@@ -39,17 +37,15 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        
-        
         public static Task<bool> RemoveAsync(this ICache cache, CachedItem cachedItem)
         {
             ThrowOnEmptyCacheKey(cachedItem);
             ThrowOnEmptyUtcTicks(cachedItem);
 
-            return cache.RemoveAsync(cachedItem.CacheKey, cachedItem.UtcTikcs);
+            return cache.RemoveAsync(cachedItem.CacheKey, cachedItem.UtcTicks);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks)
+        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
         {
             return cache.RemoveAsync(cachedItems.Select(item => item.CacheKey).ToArray(), utcNowTicks);
         }
@@ -72,7 +68,7 @@ namespace HB.FullStack.Repository
 
         private static void ThrowOnEmptyUtcTicks(CachedItem cachedItem)
         {
-            if (cachedItem.UtcTikcs.IsEmpty())
+            if (cachedItem.UtcTicks.IsEmpty())
             {
                 throw RepositoryExceptions.UtcTicksNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey, null);
             }

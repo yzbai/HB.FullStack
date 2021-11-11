@@ -27,13 +27,13 @@ namespace HB.FullStack.Identity
             //解决方案2：找到相关的UserId，删除
             //问题：可能会有很多cache条目
             IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(ur => ur.RoleId == sender.Id, null).ConfigureAwait(false);
-            
-            InvalidateCaches(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList(), args.UtcNowTicks);                        
+
+            InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList(), args.UtcNowTicks);
         }
 
         public Task<IEnumerable<Role>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
-            return TryCacheAsideAsync(CachedRolesByUserId.Key(userId), dbReader =>
+            return CacheAsideAsync(new CachedRolesByUserId(userId), dbReader =>
             {
                 var from = dbReader.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
                 var where = dbReader.Where<Role>().And<UserRole>(ru => ru.UserId == userId);

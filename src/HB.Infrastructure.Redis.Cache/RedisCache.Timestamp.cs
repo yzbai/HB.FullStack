@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.Cache
 {
+    /// <summary>
+    /// key-value的Timestamp构型
+    /// </summary>
     internal partial class RedisCache
     {
         // KEYS[1] = = key

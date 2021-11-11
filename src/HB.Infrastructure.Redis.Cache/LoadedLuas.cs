@@ -21,5 +21,12 @@
         public byte[] LoadedRemoveWithTimestampLua { get; internal set; } = null!;
 
         public byte[] LoadedRemoveMultipleWithTimestampLua { get; internal set; } = null!;
+
+        public byte[] LoadedCollectionSetWithTimestampLua { get; internal set; } = null!;
+        public byte[] LoadedCollectionRemoveItemWithTimestampLua { get; internal set; } = null!;
+        
+        public byte[] LoadedCollectionGetAndRefreshWithTimestampLua { get; internal set; } = null!;
+
+
     }
 }

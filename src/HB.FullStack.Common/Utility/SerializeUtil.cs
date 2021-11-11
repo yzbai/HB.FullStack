@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+using MessagePack;
+
 using System.Buffers;
 using System.Buffers.Text;
 using System.Collections;
@@ -15,7 +17,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-using MsgPack.Serialization;
 
 namespace System
 {
@@ -209,25 +210,36 @@ namespace System
 
         #region MsgPack Serialize
 
-        public static async Task<byte[]> PackAsync<T>(T? t) where T : class
+        public static byte[] Serialize<T>(T? t)
         {
-            MessagePackSerializer<T> serializer = MessagePackSerializer.Get<T>();
-
-#pragma warning disable CS8604 // Possible null reference argument.
-            return await serializer.PackSingleObjectAsync(t).ConfigureAwait(false);
-#pragma warning restore CS8604 // Possible null reference argument.
+            //MessagePack可以处理null
+            return MessagePackSerializer.Serialize<T>(t!);
         }
 
-        public static async Task<T?> UnPackAsync<T>(byte[]? bytes) where T : class
+        public static IEnumerable<byte[]> Serialize<T>(IEnumerable<T?> ts)
+        {
+            foreach (T? t in ts)
+            {
+                yield return MessagePackSerializer.Serialize<T>(t!);
+            }
+        }
+
+        public static T? Deserialize<T>(byte[]? bytes)
         {
             if (bytes.IsNullOrEmpty())
             {
-                return null;
+                return default;
             }
 
-            MessagePackSerializer<T> serializer = MessagePackSerializer.Get<T>();
+            return MessagePackSerializer.Deserialize<T>(bytes);
+        }
 
-            return await serializer.UnpackSingleObjectAsync(bytes).ConfigureAwait(false);
+        public static IEnumerable<T?> Deserialize<T>(IEnumerable<byte[]?> bytess)
+        {
+            foreach (byte[]? bytes in bytess)
+            {
+                yield return Deserialize<T>(bytes);
+            }
         }
 
         #endregion MsgPack Serialize

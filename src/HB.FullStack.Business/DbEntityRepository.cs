@@ -29,6 +29,7 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1003:Use generic event handler instances", Justification = "<Pending>")]
     public abstract class DbEntityRepository<TEntity> where TEntity : DatabaseEntity, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
@@ -75,7 +76,6 @@ namespace HB.FullStack.Repository
 
         #region Events
 
-#pragma warning disable CA1003 // Use generic event handler instances
         public event AsyncEventHandler<TEntity, DatabaseWriteEventArgs> EntityUpdating
         {
             add => AsyncEventManager.Add(value);
@@ -129,7 +129,6 @@ namespace HB.FullStack.Repository
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
-#pragma warning restore CA1003 // Use generic event handler instances
 
         protected virtual Task OnEntityUpdatingAsync(TEntity entity)
         {
@@ -185,13 +184,11 @@ namespace HB.FullStack.Repository
 
         #endregion
 
-        #region Cache Strategy
+        #region Entity Cache Strategy
 
         //TODO: 尝试提取IRetrieveStrategy
 
-        
-        
-        protected async Task<TEntity?> TryCacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
+        protected async Task<TEntity?> CacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TEntity?>> dbRetrieve)
         {
             IEnumerable<TEntity>? results = await EntityCacheStrategy.CacheAsideAsync<TEntity>(
                 dimensionKeyName,
@@ -223,42 +220,64 @@ namespace HB.FullStack.Repository
             return results.ElementAt(0);
         }
 
-        
-        
-        protected Task<IEnumerable<TEntity>> TryCacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
+        protected Task<IEnumerable<TEntity>> CacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve)
         {
             return EntityCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
 
-        
-        
-        protected Task<TResult?> TryCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
+        #endregion
+
+        #region Timestamp Cache Strategy
+
+        protected Task<TResult?> CacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
             return CachedItemCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        
-        
-        protected Task<IEnumerable<TResult>> TryCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
         {
             return CachedItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
-        
         public void InvalidateCache(CachedItem cachedItem)
         {
             CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
         }
 
-        public void InvalidateCacheByCacheType(CachedItem cachedItem)
+        public void InvalidateCache(IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
         {
-            CachedItemCacheStrategy.InvalidateCacheByCacheType(cachedItem, Cache);
+            CachedItemCacheStrategy.InvalidateCache(cachedItems, utcNowTicks, Cache);
         }
 
-        public void InvalidateCaches(IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
+        #endregion
+
+        #region Collection Cache Strategy
+
+        protected Task<TResult?> CacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
-            CachedItemCacheStrategy.InvalidateCaches(cachedItems, utcNowTicks, Cache);
+            return CachedCollectionItemCacheStrategy.CacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
+
+        protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        {
+            return CachedCollectionItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+        }
+
+        public void InvalidateCache(CachedCollectionItem cachedCollectionItem)
+        {
+            CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItem, Cache);
+        }
+
+        public void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, UtcNowTicks utcNowTicks)
+        {
+            CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItems, utcNowTicks, Cache);
+        }
+
+        public void InvalidateCacheCollection<T>() where T : CachedCollectionItem
+        {
+            CachedCollectionItemCacheStrategy.InvalidateCacheCollection(CachedCollectionItem.GetCollectionKey<T>(), Cache);
+        }
+
 
         #endregion
 
@@ -271,7 +290,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public async Task UpdateAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityUpdatingAsync(entity).ConfigureAwait(false);
@@ -299,7 +318,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public async Task AddAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityAddingAsync(entity).ConfigureAwait(false);
@@ -324,7 +343,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public async Task DeleteAsync(TEntity entity, string lastUser, TransactionContext? transContext)
         {
             await OnEntityDeletingAsync(entity).ConfigureAwait(false);
@@ -352,7 +371,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public async Task<IEnumerable<object>> AddAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
@@ -391,7 +410,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public async Task UpdateAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)
@@ -429,7 +448,7 @@ namespace HB.FullStack.Repository
         /// <param name="lastUser"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public async Task DeleteAsync(IEnumerable<TEntity> entities, string lastUser, TransactionContext? transContext)
         {
             foreach (TEntity entity in entities)

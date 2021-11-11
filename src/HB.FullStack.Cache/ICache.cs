@@ -7,6 +7,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -27,43 +28,14 @@ namespace HB.FullStack.Cache
 
         #region Entities
 
-        
+        static bool IsEntityEnabled<TEntity>() where TEntity : Entity, new()
+        {
+            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+
+            return entityDef.IsCacheable;
+        }
+
         Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
-
-        
-        Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            string dimensionKeyName = entityDef.KeyProperty.Name;
-            var dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e)).ToList();
-
-            return GetEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token);
-        }
-
-        
-        async Task<(TEntity?, bool)> GetEntityAsync<TEntity>(string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            (IEnumerable<TEntity>? results, bool exist) = await GetEntitiesAsync<TEntity>(dimensionKeyName, new object[] { dimensionKeyValue }, token).ConfigureAwait(false);
-
-            if (exist)
-            {
-                return (results!.ElementAt(0), true);
-            }
-
-            return (null, false);
-        }
-
-        
-        Task<(TEntity?, bool)> GetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            string dimensionKeyName = entityDef.KeyProperty.Name;
-            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity)!.ToString()!;
-
-            return GetEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, token);
-        }
-
 
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
@@ -71,68 +43,9 @@ namespace HB.FullStack.Cache
         Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new();
 
         /// <summary>
-        /// 只能放在数据库Updated之后，因为version需要update之后的version
-        /// </summary>      
-        Task RemoveEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            if (!entities.Any())
-            {
-                return Task.CompletedTask;
-            }
-
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-            string dimensionKeyName = entityDef.KeyProperty.Name;
-            IEnumerable<string> dimensionKeyValues = entities.Select(e => entityDef.KeyProperty.GetValue(e)!.ToString()!).ToList();
-            IEnumerable<int> updatedVersions = entities.Select(e => e.Version).ToList();
-
-            return RemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, updatedVersions, token);
-        }
-
-        /// <summary>
-        /// 只能放在数据库Updated之后，因为version需要update之后的version
+        /// 返回是否成功更新。false是数据版本小于缓存中的
         /// </summary>
-        Task RemoveEntityAsync<TEntity>(string dimensionKeyName, object dimensionKeyValue, int updatedVersion, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            return RemoveEntitiesAsync<TEntity>(dimensionKeyName, new object[] { dimensionKeyValue }, new int[] { updatedVersion }, token);
-        }
-
-        /// <summary>
-        /// 只能放在数据库Updated之后，因为version需要update之后的version
-        /// </summary>
-        Task RemoveEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            string dimensionKeyName = entityDef.KeyProperty.Name;
-            string dimensionKeyValue = entityDef.KeyProperty.GetValue(entity)!.ToString()!;
-
-            return RemoveEntityAsync<TEntity>(dimensionKeyName, dimensionKeyValue, entity.Version, token);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
-        /// <param name="entities"></param>
-        /// <param name="token"></param>
-        /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
-
         Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new();
-
-        /// <returns>是否成功更新。false是数据版本小于缓存中的</returns>
-        async Task<bool> SetEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : Entity, new()
-        {
-            IEnumerable<bool> results = await SetEntitiesAsync<TEntity>(new TEntity[] { entity }, token).ConfigureAwait(false);
-
-            return results.ElementAt(0);
-        }
-        
-        static bool IsEntityEnabled<TEntity>() where TEntity : Entity, new()
-        {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
-
-            return entityDef.IsCacheable;
-        }
 
         #endregion
 
@@ -154,14 +67,17 @@ namespace HB.FullStack.Cache
 
         Task<bool> RemoveAsync(string[] keys, UtcNowTicks utcTicks, CancellationToken token = default);
 
-        /// <summary>
-        /// 删除以keyPrefix开头的key
-        /// </summary>
-        /// <param name="keyPrefix"></param>
-        /// <param name="utcTikcs"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        Task RemoveByKeyPrefixAsync(string keyPrefix, UtcNowTicks utcTikcs, CancellationToken token = default);
+        #endregion
+
+        #region Collection
+
+        Task<byte[]?> GetFromCollectionAsync(string collectionKey, string itemKey, CancellationToken token = default);
+
+        Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default);
+
+        Task<bool> RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, UtcNowTicks utcTicks, CancellationToken token = default);
+
+        Task<bool> RemoveCollectionAsync(string collectionKey, CancellationToken token = default);
 
         #endregion
     }

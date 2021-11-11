@@ -7,15 +7,20 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 
+using MessagePack;
+
 namespace HB.FullStack.KVStore.Entities
 {
+    [MessagePackObject]
     public abstract class KVStoreEntity : Entity
     {
         [Required]
         [KVStoreBackupKey]
         [CacheKey]
+        [MessagePack.Key(5)]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
+        [MessagePack.Key(6)]
         public override string LastUser { get; set; } = string.Empty;
 
     }

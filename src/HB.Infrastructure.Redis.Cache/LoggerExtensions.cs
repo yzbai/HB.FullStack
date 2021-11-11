@@ -75,6 +75,16 @@ namespace HB.Infrastructure.Redis.Cache
             _logCacheGetError(logger, key, innerException);
         }
 
+        private static readonly Action<ILogger, string?, string?, Exception?> _logCacheCollectionGetError = LoggerMessage.Define<string?, string?>(
+            LogLevel.Error,
+            CacheErrorCodes.GetError.ToEventId(),
+            "缓存读取错误。CollectionKey={CollectionKey}, ItemKey={ItemKey}");
+
+        public static void LogCacheCollectionGetError(this ILogger logger, string? collectionKey,string? itemKey, Exception? innerException)
+        {
+            _logCacheCollectionGetError(logger, collectionKey, itemKey, innerException);
+        }
+
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithTimestamp = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
             CacheErrorCodes.CacheInvalidationConcurrencyWithTimestamp.ToEventId(),

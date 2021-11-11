@@ -60,10 +60,10 @@ namespace System
 
 
 
-        public static async Task<string> GetHashAsync<T>([DisallowNull] T item) where T : class
+        public static string GetHash<T>([DisallowNull] T item) where T : class
         {
             using SHA256 sha256Obj = SHA256.Create();
-            byte[] result = sha256Obj.ComputeHash(await SerializeUtil.PackAsync(item).ConfigureAwait(false));
+            byte[] result = sha256Obj.ComputeHash(SerializeUtil.Serialize(item));
 
             return Convert.ToBase64String(result);
         }

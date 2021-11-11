@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.Caching.Distributed
         public static async Task SetAsync<T>(this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
         {
 
-            byte[] bytes = await SerializeUtil.PackAsync(value).ConfigureAwait(false);
+            byte[] bytes = SerializeUtil.Serialize(value);
 
             await cache.SetAsync(key, bytes, options, token).ConfigureAwait(false);
 
@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.Caching.Distributed
 
             byte[]? bytes = await cache.GetAsync(key, token).ConfigureAwait(false);
 
-            return await SerializeUtil.UnPackAsync<T>(bytes).ConfigureAwait(false);
+            return SerializeUtil.Deserialize<T>(bytes);
         }
 
 

@@ -13,19 +13,12 @@ namespace HB.FullStack.Identity
     /// </summary>
     internal class CachedUserClaimsByUserId : CachedItem<IEnumerable<UserClaim>>
     {
-        private CachedUserClaimsByUserId(params string[] keys) : base(keys)
+        public CachedUserClaimsByUserId(Guid userId) : base(userId)
         {
         }
 
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => null;
-
-        public static CachedUserClaimsByUserId Key(Guid userId)
-        {
-            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString());
-
-            return item;
-        }
     }
 }

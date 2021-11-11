@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+
 using Microsoft;
 
 namespace System
@@ -85,7 +86,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNullIfNotNull("ts")]
-        public static string? ToJoinedString(this IEnumerable? ts, string seprator)
+        public static string? ToJoinedString(this IEnumerable? ts, string seprator, string? nullReplacement = null)
         {
             if (ts == null)
             {
@@ -99,6 +100,11 @@ namespace System
                 if (obj != null)
                 {
                     stringBuilder.Append(obj.ToString());
+                    stringBuilder.Append(seprator);
+                }
+                else if(nullReplacement != null)
+                {
+                    stringBuilder.Append(nullReplacement);
                     stringBuilder.Append(seprator);
                 }
             }

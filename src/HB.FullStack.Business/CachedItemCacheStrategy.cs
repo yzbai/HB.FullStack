@@ -97,18 +97,7 @@ namespace HB.FullStack.Repository
             cache.SetAsync(cachedItem).Fire();
         }
 
-        /// <summary>
-        /// 删除所有CacheType相同的
-        /// </summary>
-        /// <param name="cachedItem"></param>
-        /// <param name="cache"></param>
-        
-        internal static void InvalidateCacheByCacheType(CachedItem cachedItem, ICache cache)
-        {
-            cache.RemoveByKeyPrefixAsync(cachedItem.CachedType, cachedItem.UtcTikcs).Fire();
-        }
-
-        internal static void InvalidateCaches(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, ICache cache)
+        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, ICache cache)
         {
             cache.RemoveAsync(cachedItems, utcNowTicks).Fire();
         }

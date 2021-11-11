@@ -23,17 +23,10 @@ namespace HB.FullStack.Identity
     /// </summary>
     internal class CachedRolesByUserId : CachedItem<IEnumerable<Role>>
     {
-        public CachedRolesByUserId(params string[] keys) : base(keys) { }
-
-        public CachedRolesByUserId(Guid guid) : base(guid) { }
+        public CachedRolesByUserId(Guid userId) : base(userId) { }
 
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => TimeSpan.FromSeconds(30);
-
-        public static CachedRolesByUserId Key(Guid userId)
-        {
-            return new CachedRolesByUserId(userId.ToString());
-        }
     }
 }

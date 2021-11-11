@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.FullStack.Repository;
+
+using Microsoft.Extensions.Logging;
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace System
 {
@@ -16,6 +19,7 @@ namespace System
         public static ErrorCode CacheMissed { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 4, nameof(CacheMissed), "");
         public static ErrorCode CacheGetEmpty { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 5, nameof(CacheGetEmpty), "");
         public static ErrorCode CacheLockAcquireFailed { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 6, nameof(CacheLockAcquireFailed), "");
+        public static ErrorCode CacheCollectionKeyNotSame { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 7, name: nameof(CacheCollectionKeyNotSame), "");
     }
 
     internal static class RepositoryExceptions
@@ -49,6 +53,14 @@ namespace System
 
             return exception;
 
+        }
+
+        internal static Exception CacheCollectionKeyNotSame(IEnumerable<CachedCollectionItem> cachedCollectionItems)
+        {
+            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CacheCollectionKeyNotSame);
+            exception.Data["CachedCollectionItems"] = SerializeUtil.ToJson(cachedCollectionItems);
+
+            return exception;
         }
     }
 

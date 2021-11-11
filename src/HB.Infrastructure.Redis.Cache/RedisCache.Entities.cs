@@ -237,9 +237,7 @@ local entityNum = tonumber(ARGV[1])
 for j = 1, entityNum do
     local id = redis.call('get',KEYS[j])
 
-    if (id) then
-
-       
+    if (id) then  
 
         local data= redis.call('hget',id, 'dim') 
 
@@ -265,8 +263,6 @@ end
 local entityNum = tonumber(ARGV[1])
 for j=1, entityNum do
 
-    
-
     local data=redis.call('hget', KEYS[j], 'dim')
 
     redis.call('del', KEYS[j]) 
@@ -282,15 +278,7 @@ end
         public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
         {
             _logger.LogInformation($"RedisCache初始化完成");
-        }
-
-        /// <summary>
-        /// GetEntitiesAsync
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        }   
         
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new()
         {
@@ -313,7 +301,7 @@ end
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                return await MapGetEntitiesRedisResultAsync<TEntity>(result).ConfigureAwait(false);
+                return MapGetEntitiesRedisResult<TEntity>(result);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -343,14 +331,7 @@ end
                 throw (Exception?)aggregateException ?? CacheExceptions.GetEntitiesErrorButDeleted(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
-
-        /// <summary>
-        /// SetEntitiesAsync
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        
+     
         public async Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -361,7 +342,7 @@ end
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            await AddSetEntitiesRedisInfoAsync(entities, entityDef, redisKeys, redisValues).ConfigureAwait(false);
+            AddSetEntitiesRedisInfo(entities, entityDef, redisKeys, redisValues);
 
             IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
 
@@ -407,16 +388,7 @@ end
                 throw CacheExceptions.SetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, entities, ex);
             }
         }
-
-        /// <summary>
-        /// RemoveEntitiesAsync
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="updatedVersions"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        
+      
         public async Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -478,18 +450,7 @@ end
                 throw CacheExceptions.ForcedRemoveEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
-
-        /// <summary>
-        /// AddRemoveEntitiesRedisInfo
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="updatedVersions"></param>
-        /// <param name="entityDef"></param>
-        /// <param name="redisKeys"></param>
-        /// <param name="redisValues"></param>
-        /// <returns></returns>
-        
+     
         private byte[] AddRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             byte[] loadedScript;
@@ -555,17 +516,6 @@ end
 
             return loadedScript;
         }
-
-
-        /// <summary>
-        /// AddGetEntitiesRedisInfo
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="entityDef"></param>
-        /// <param name="redisKeys"></param>
-        /// <param name="redisValues"></param>
-        /// <returns></returns>
         
         private byte[] AddGetEntitiesRedisInfo(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
@@ -597,7 +547,7 @@ end
             return loadedScript;
         }
 
-        private async Task AddSetEntitiesRedisInfoAsync<TEntity>(IEnumerable<TEntity> entities, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
+        private void AddSetEntitiesRedisInfo<TEntity>(IEnumerable<TEntity> entities, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             /// keys: entity1_idKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_idKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
             /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
@@ -633,7 +583,7 @@ end
                     joinedDimensinKeyBuilder.Remove(joinedDimensinKeyBuilder.Length - 1, 1);
                 }
 
-                byte[] data = await SerializeUtil.PackAsync(entity).ConfigureAwait(false);
+                byte[] data = SerializeUtil.Serialize(entity);
 
                 redisValues.Add(data);
                 redisValues.Add(entity.Version);
@@ -641,7 +591,7 @@ end
             }
         }
 
-        private static async Task<(IEnumerable<TEntity>?, bool)> MapGetEntitiesRedisResultAsync<TEntity>(RedisResult result) where TEntity : Entity, new()
+        private static (IEnumerable<TEntity>?, bool) MapGetEntitiesRedisResult<TEntity>(RedisResult result) where TEntity : Entity, new()
         {
             if (result.IsNull)
             {
@@ -659,7 +609,7 @@ end
 
             foreach (RedisResult item in results)
             {
-                TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])item).ConfigureAwait(false);
+                TEntity? entity = SerializeUtil.Deserialize<TEntity>((byte[])item);
 
                 //因为lua中已经检查过全部存在，所以这里都不为null
                 entities.Add(entity!);

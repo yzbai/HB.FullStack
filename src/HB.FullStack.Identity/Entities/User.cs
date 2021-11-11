@@ -1,5 +1,7 @@
 ﻿using HB.FullStack.Database.Entities;
 
+using MessagePack;
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using static HB.FullStack.Identity.LengthConventions;
@@ -9,14 +11,16 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
-    //[Serializable]
+    [MessagePackObject]
     public class User : GuidEntity
     {
         [Required]
         [Guid32String(NotNull = true)]
+        [MessagePack.Key(7)]
         public string SecurityStamp { get; set; } = default!;
 
         [Password]
+        [MessagePack.Key(8)]
         public string? PasswordHash { get; set; }
 
         /// <summary>
@@ -25,6 +29,7 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [LoginName]
         [EntityProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
+        [MessagePack.Key(9)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -33,6 +38,7 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [Mobile]
         [EntityProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
+        [MessagePack.Key(10)]
         public string? Mobile { get; set; }
 
         /// <summary>
@@ -40,21 +46,25 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [EmailAddress]
         [EntityProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
+        [MessagePack.Key(11)]
         public string? Email { get; set; }
 
         /// <summary>
         /// "手机号码是否验证"
         /// </summary>
+        [MessagePack.Key(12)]
         public bool MobileConfirmed { get; set; }
 
         /// <summary>
         /// "邮箱是否验证"
         /// </summary>
+        [MessagePack.Key(13)]
         public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// "Two Factor"
         /// </summary>
+        [MessagePack.Key(14)]
         public bool TwoFactorEnabled { get; set; }
 
         public User()

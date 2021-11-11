@@ -27,7 +27,7 @@ namespace HB.FullStack.Identity
         protected override Task InvalidateCacheItemsOnChanged(UserClaim sender, DatabaseWriteEventArgs args)
         {
             Parallel.Invoke(
-                () => InvalidateCache(CachedUserClaimsByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks))
+                () => InvalidateCache(new CachedUserClaimsByUserId(sender.UserId).Timestamp(args.UtcNowTicks))
             );
 
             return Task.CompletedTask;
@@ -43,7 +43,7 @@ namespace HB.FullStack.Identity
         
         public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
-            return TryCacheAsideAsync(CachedUserClaimsByUserId.Key(userId), dbReader =>
+            return CacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>
             {
                 return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
             })!;

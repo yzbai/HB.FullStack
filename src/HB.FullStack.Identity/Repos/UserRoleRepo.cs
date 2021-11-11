@@ -21,7 +21,7 @@ namespace HB.FullStack.Identity
 
         protected override Task InvalidateCacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)
         {
-            InvalidateCache(CachedRolesByUserId.Key(sender.UserId).Timestamp(args.UtcNowTicks));
+            InvalidateCache(new CachedRolesByUserId(sender.UserId).Timestamp(args.UtcNowTicks));
             return Task.CompletedTask;
         }
 
