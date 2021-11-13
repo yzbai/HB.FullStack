@@ -1,77 +1,13 @@
 ﻿#nullable enable
 
+using System.Globalization;
+
 namespace System
 {
-    public struct UtcNowTicks : IEquatable<UtcNowTicks>
-    {
-        public static UtcNowTicks Empty => new UtcNowTicks(-1);
-        public static UtcNowTicks Instance => new UtcNowTicks(DateTimeOffset.UtcNow.Ticks);
-
-        private UtcNowTicks(long ticks)
-        {
-            Ticks = ticks;
-        }
-
-        public long Ticks { get; internal set; }
-
-        public bool IsEmpty()
-        {
-            return Ticks == -1;
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (obj is UtcNowTicks unt)
-            {
-                return unt.Ticks == Ticks;
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return Ticks.GetHashCode();
-        }
-
-        public static bool operator ==(UtcNowTicks left, UtcNowTicks right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(UtcNowTicks left, UtcNowTicks right)
-        {
-            return !(left == right);
-        }
-
-        public bool Equals(UtcNowTicks other)
-        {
-            return other.Ticks == Ticks;
-        }
-
-        //public static implicit operator long(UtcNowTicks unt)
-        //{
-        //    return unt.Ticks;
-        //}
-
-        //public static implicit operator UtcNowTicks(long ticks)
-        //{
-        //    return new UtcNowTicks { Ticks = ticks };
-        //}
-
-        //public long ToInt64()
-        //{
-        //    return Ticks;
-        //}
-
-        //public UtcNowTicks ToUtcNowTicks()
-        //{
-        //    return this;
-        //}
-    }
-
     public static class TimeUtil
     {
+        private static readonly ChineseLunisolarCalendar _cc = new ChineseLunisolarCalendar();
+
         public static UtcNowTicks UtcNowTicks => UtcNowTicks.Instance;
 
         public static long UtcNowUnixTimeSeconds => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -82,10 +18,43 @@ namespace System
 
         public static DateTime LocalNow => DateTime.Now;
 
-        public static DateTimeOffset CreateOnlyTime(int day, int hour, int minutes)
+        /// <summary>
+        /// 把公历转换为人们口中的农历
+        /// 机器农历里闰月是继续编下取的，可以有13个月
+        /// </summary>
+        public static (int nYear, int nMonth, int nDay, bool isMonthLeap) FromGongliToNongli(int year, int month, int day)
         {
-            //[0001/1/1 0:00:00 +00:00]
-            return new DateTimeOffset(1, 1, day, hour, minutes, 0, TimeSpan.Zero);
+            DateTime dt = new DateTime(year, month, day);
+
+            int nYear = _cc.GetYear(dt);
+            int nMonth = _cc.GetMonth(dt);
+            int nDay = _cc.GetDayOfMonth(dt);
+
+            int leapMonth = _cc.GetLeapMonth(nYear);
+
+            return (nYear, (leapMonth != 0 && nMonth >= leapMonth) ? nMonth - 1 : nMonth, nDay, nMonth == leapMonth ? true : false);
+        }
+
+        /// <summary>
+        /// 把人们口中的农历，转换为公历
+        /// </summary>
+        public static (int year, int month, int day) FromNongliToGongli(int nYear, int nMonth, int nDay, bool isMonthLeap)
+        {
+            int leapMonth = _cc.GetLeapMonth(nYear);
+
+            int realNMonth = nMonth;
+
+            if (leapMonth != 0)
+            {
+                if (nMonth == leapMonth && isMonthLeap || nMonth > leapMonth)
+                {
+                    realNMonth++;
+                }
+            }
+
+            DateTime dt = _cc.ToDateTime(nYear, realNMonth, nDay, 0, 0, 0, 0);
+
+            return (dt.Year, dt.Month, dt.Day);
         }
     }
 

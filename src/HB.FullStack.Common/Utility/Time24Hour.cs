@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common
 {
+
     /// <summary>
     /// 不存在24：00
     /// </summary>
