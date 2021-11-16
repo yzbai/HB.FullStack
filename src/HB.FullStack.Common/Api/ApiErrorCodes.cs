@@ -61,6 +61,7 @@ namespace System
         public static ErrorCode ApiRequestSetApiKeyError { get; } = new ErrorCode(ErrorCodeStartIds.API + 38, nameof(ApiRequestSetApiKeyError), "");
         public static ErrorCode ApiClientUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 39, nameof(ApiClientUnkownError), "");
         public static ErrorCode ServerNullReturn { get; } = new ErrorCode(ErrorCodeStartIds.API + 40, nameof(ServerNullReturn), "");
+        public static ErrorCode ArgumentIdsError { get; } = new ErrorCode(ErrorCodeStartIds.API + 41, nameof(ArgumentIdsError), "");
     }
 
     public static partial class ApiExceptions

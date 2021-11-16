@@ -116,5 +116,26 @@ namespace System
 
             return stringBuilder.ToString();
         }
+
+        public static bool TryToGuids(this string idsString, string seprator, out IList<Guid> guids)
+        {
+            string[] ids = idsString.Split(seprator, StringSplitOptions.RemoveEmptyEntries);
+
+            guids = new List<Guid>(ids.Length);
+
+            foreach (string id in ids)
+            {
+                if (Guid.TryParse(id, out Guid guid))
+                {
+                    guids.Add(guid);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
