@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Database.Engine;
 
-[assembly: InternalsVisibleTo("HB.FullStack.Tests")]
-[assembly: InternalsVisibleTo("HB.FullStack.Mobile")]
+[assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
+
 namespace HB.FullStack.Database
 {
     public interface IDatabase : IDatabaseWriter, IDatabaseReader

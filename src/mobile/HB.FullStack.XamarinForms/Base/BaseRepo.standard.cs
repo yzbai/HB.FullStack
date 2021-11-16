@@ -277,7 +277,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             foreach (TEntity entity in remotes)
             {
-                await Database.AddOrUpdateByIdAsync(entity, transactionContext).ConfigureAwait(false);
+                await Database.AddOrUpdateByIdAsync(entity, "", transactionContext).ConfigureAwait(false);
             }
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{type}", typeof(TEntity).Name);

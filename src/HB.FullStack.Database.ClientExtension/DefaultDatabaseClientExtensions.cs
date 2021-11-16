@@ -15,14 +15,6 @@ namespace HB.FullStack.Database
     /// </summary>
     public static class DatabaseClientExtensions
     {
-        /// <summary>
-        /// DeleteAsync
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="whereExpr"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity, new()
         {
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -47,15 +39,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// AddOrUpdateByIdAsync
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="item"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
+        public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, string lastUser, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -68,6 +52,7 @@ namespace HB.FullStack.Database
 
             try
             {
+                item.LastUser = lastUser;
                 item.LastTime = TimeUtil.UtcNow;
 
                 if (item.Version < 0)
@@ -85,7 +70,6 @@ namespace HB.FullStack.Database
 
                 item.CreateTime = newItem.CreateTime;
                 item.Version = newItem.Version;
-                item.LastUser = newItem.LastUser;
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {

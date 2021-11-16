@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace System.Tests
 {
-
     public class TestEntity
     {
         public string? Name { get; set; }
@@ -15,7 +14,7 @@ namespace System.Tests
         public IEnumerable<string> Values { get; init; } = new List<string>();
     }
 
-    [TestClass()]
+    [TestClass]
     public class SerializeUtilTests
     {
         [TestMethod]

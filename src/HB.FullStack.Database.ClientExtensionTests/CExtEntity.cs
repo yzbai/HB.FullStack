@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Database.Entities;
 
-namespace HB.FullStack.Database.ClientExtensions.Tests.Context
+namespace HB.FullStack.Database.Tests
 {
     public class CExtEntity : FlackIdEntity
     {
