@@ -31,7 +31,6 @@ namespace HB.FullStack.Database
                 var command = DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
 
                 await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
-
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -52,8 +51,10 @@ namespace HB.FullStack.Database
 
             try
             {
+                DateTimeOffset utcNow = TimeUtil.UtcNow;
                 item.LastUser = lastUser;
-                item.LastTime = TimeUtil.UtcNow;
+                item.LastTime = utcNow;
+                item.CreateTime = utcNow;
 
                 if (item.Version < 0)
                 {
@@ -119,6 +120,5 @@ namespace HB.FullStack.Database
         //        throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
         //    }
         //}
-
     }
 }

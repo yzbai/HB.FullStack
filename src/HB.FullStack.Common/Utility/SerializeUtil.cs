@@ -39,6 +39,7 @@ namespace System
             jsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
             jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            jsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
             //jsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         }
 

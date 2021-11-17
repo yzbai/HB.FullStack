@@ -17,7 +17,6 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
-
         public static async Task<TResponse?> GetResponseAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
         {
             //HttpClient不再 在接受response后主动dispose request content。 所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
@@ -42,7 +41,7 @@ namespace System.Net.Http
 
                 if (!success)
                 {
-#if NET6_0
+#if NET6_0_OR_GREATER
                     string responseString = await responseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 #elif NETSTANDARD2_1
                     string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -64,7 +63,7 @@ namespace System.Net.Http
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
 
-#if NET6_0
+#if NET6_0_OR_GREATER
 
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);
 #elif NETSTANDARD2_1
@@ -134,7 +133,6 @@ namespace System.Net.Http
             return content;
         }
 
-
         public static async Task ThrowIfNotSuccessedAsync(HttpResponseMessage responseMessage)
         {
             if (responseMessage.IsSuccessStatusCode)
@@ -156,7 +154,6 @@ namespace System.Net.Http
             {
                 throw ApiExceptions.ServerReturnError(errorCode);
             }
-
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using HB.FullStack.Common;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
@@ -14,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 namespace HB.FullStack.Database
 {
     /// <summary>
@@ -68,7 +70,7 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// </summary>
         /// <param name="migrations"></param>
-        /// <returns></returns>  
+        /// <returns></returns>
         public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
@@ -77,7 +79,7 @@ namespace HB.FullStack.Database
             {
                 IEnumerable<Migration>? initializeMigrations = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == 1);
 
-                await AutoCreateTablesIfBrandNewAsync(initializeMigrations).ConfigureAwait(false);
+                await AutoCreateTablesIfBrandNewAsync(_databaseSettings.AddDropStatementWhenCreateTable, initializeMigrations).ConfigureAwait(false);
 
                 _logger.LogInformation("Database Auto Create Tables Finished.");
             }
@@ -92,7 +94,7 @@ namespace HB.FullStack.Database
             _logger.LogInformation("数据初始化成功！");
         }
 
-        private async Task AutoCreateTablesIfBrandNewAsync(IEnumerable<Migration>? initializeMigrations)
+        private async Task AutoCreateTablesIfBrandNewAsync(bool addDropStatement, IEnumerable<Migration>? initializeMigrations)
         {
             foreach (string databaseName in _databaseEngine.DatabaseNames)
             {
@@ -112,7 +114,7 @@ namespace HB.FullStack.Database
                             throw DatabaseExceptions.TableCreateError(_databaseSettings.Version, databaseName, "Database does not exists, database Version must be 1");
                         }
 
-                        await CreateTablesByDatabaseAsync(databaseName, transactionContext).ConfigureAwait(false);
+                        await CreateTablesByDatabaseAsync(databaseName, transactionContext, addDropStatement).ConfigureAwait(false);
 
                         await UpdateSystemVersionAsync(databaseName, 1, transactionContext.Transaction).ConfigureAwait(false);
 
@@ -146,20 +148,20 @@ namespace HB.FullStack.Database
             }
         }
 
-        private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext)
+        private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext, bool addDropStatement)
         {
-            var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, false);
+            var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, addDropStatement);
 
             _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
 
             return _databaseEngine.ExecuteCommandNonQueryAsync(transContext.Transaction, def.DatabaseName!, command);
         }
 
-        private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext)
+        private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext, bool addDropStatement)
         {
             foreach (EntityDef entityDef in EntityDefFactory.GetAllDefsByDatabase(databaseName))
             {
-                await CreateTableAsync(entityDef, transactionContext).ConfigureAwait(false);
+                await CreateTableAsync(entityDef, transactionContext, addDropStatement).ConfigureAwait(false);
             }
         }
 
@@ -551,8 +553,6 @@ namespace HB.FullStack.Database
 
         #region 双表查询
 
-
-
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
@@ -603,8 +603,6 @@ namespace HB.FullStack.Database
             }
         }
 
-
-
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
@@ -627,8 +625,6 @@ namespace HB.FullStack.Database
         #endregion
 
         #region 三表查询
-
-
 
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
@@ -682,8 +678,6 @@ namespace HB.FullStack.Database
             }
         }
 
-
-
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DatabaseEntity, new()
             where TTarget1 : DatabaseEntity, new()
@@ -711,7 +705,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
         /// </summary>
-
         public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -756,9 +749,11 @@ namespace HB.FullStack.Database
 
             static void PrepareItem(T item, string lastUser)
             {
+                DateTimeOffset utcNow = TimeUtil.UtcNow;
                 item.Version = 0;
                 item.LastUser = lastUser;
-                item.LastTime = TimeUtil.UtcNow;
+                item.LastTime = utcNow;
+                item.CreateTime = utcNow;
             }
 
             static void RestoreItem(T item)
@@ -770,7 +765,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>
-
         public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -841,7 +835,6 @@ namespace HB.FullStack.Database
         ///  版本控制，如果item中Version未赋值，会无法更改
         ///  反应Version变化
         /// </summary>
-
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -959,7 +952,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-
         public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1046,11 +1038,14 @@ namespace HB.FullStack.Database
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
             {
+                DateTimeOffset utcNow = TimeUtil.UtcNow;
+
                 foreach (var item in items)
                 {
                     item.Version = 0;
                     item.LastUser = lastUser;
-                    item.LastTime = TimeUtil.UtcNow;
+                    item.LastTime = utcNow;
+                    item.CreateTime = utcNow;
                 }
             }
 
@@ -1066,7 +1061,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-
         public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1158,7 +1152,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
-
         public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1249,10 +1242,7 @@ namespace HB.FullStack.Database
             }
         }
 
-
         #endregion
-
-
 
         private static void ThrowIfNotWriteable(EntityDef entityDef)
         {

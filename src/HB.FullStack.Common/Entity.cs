@@ -30,9 +30,9 @@ namespace HB.FullStack.Common
         public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
 
         [Key(3)]
-        public DateTimeOffset CreateTime { get; internal set; } = TimeUtil.UtcNow;
+        public DateTimeOffset CreateTime { get; /*internal*/ set; } = TimeUtil.UtcNow;
 
         [Key(4)]
-        public bool Deleted { get; internal set; }
+        public bool Deleted { get; /*internal*/ set; }
     }
 }

@@ -20,5 +20,7 @@ namespace HB.FullStack.Database
         public IList<EntitySetting> EntitySettings { get; set; } = new List<EntitySetting>();
 
         public int MaxBatchNumber { get; set; } = 500;
+
+        public bool AddDropStatementWhenCreateTable { get; set; }
     }
 }

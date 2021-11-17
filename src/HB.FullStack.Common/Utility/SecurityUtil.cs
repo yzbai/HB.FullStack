@@ -13,6 +13,7 @@ namespace System
         AsString = 0,
         AsBinary = 1
     }
+
     public static class SecurityUtil
     {
         //public static string GetSHA1(string str)
@@ -42,7 +43,6 @@ namespace System
         /// <param name="item"></param>
         /// <returns></returns>
 
-
         public static string GetHash(string item)
         {
             using SHA256 sha256Obj = SHA256.Create();
@@ -56,9 +56,6 @@ namespace System
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-
-
-
 
         public static string GetHash<T>([DisallowNull] T item) where T : class
         {
@@ -75,7 +72,6 @@ namespace System
         /// <param name="salt"></param>
         /// <returns></returns>
 
-
         public static string EncryptPwdWithSalt(string pwd, string salt)
         {
             return GetHash(pwd + salt);
@@ -85,8 +81,6 @@ namespace System
         {
             return Guid.NewGuid().ToString("N", GlobalSettings.Culture);
         }
-
-        
 
         /// <summary>
         /// Not for SQL Server
@@ -150,6 +144,7 @@ namespace System
         private static readonly string[] _charArray = _charCollection.Split(',');
         private static readonly string[] _numbericCharArray = _charCollection[..20].Split(',');
         private static readonly RandomNumberGenerator _randomNumberGenerator = RandomNumberGenerator.Create();
+
         public static string CreateRandomString(int length)
         {
             return CreateRandomString(length, _charArray);
@@ -174,7 +169,6 @@ namespace System
             return randomString;
         }
 
-
         /// <summary>
         /// [0.0, 1.0]
         /// </summary>
@@ -194,15 +188,12 @@ namespace System
             long range = (long)maxValue - minValue;
 
             return (int)((long)Math.Floor(GetRandomDouble() * range) + minValue);
-#endif
-#if NETSTANDARD2_1 || NET6_0
+#else
             return RandomNumberGenerator.GetInt32(minValue, maxValue + 1);
 #endif
         }
 
-
-#endregion Random String
-
+        #endregion Random String
 
         public static byte[] HexToByteArray(string hexString)
         {

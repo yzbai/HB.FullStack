@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using HB.FullStack.Database.Engine;
 
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
+[assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.MySQL")]
+[assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.SQLite")]
 
 namespace HB.FullStack.Database
 {
@@ -16,7 +18,7 @@ namespace HB.FullStack.Database
         /// </summary>
         /// <param name="migrations"></param>
         /// <returns></returns>
-        
+
         Task InitializeAsync(IEnumerable<Migration>? migrations = null);
 
         EngineType EngineType { get; }

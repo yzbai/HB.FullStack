@@ -270,7 +270,7 @@ namespace HB.FullStack.Database.SQL
 		/// <param name="propertyDef"></param>
 		/// <param name="engineType"></param>
 		/// <returns></returns>
-		
+
 		public static bool IsDbFieldNeedLength(EntityPropertyDef propertyDef, EngineType engineType)
 		{
 			DbType dbType = TypeConvert.TypeToDbType(propertyDef, engineType);
@@ -400,13 +400,6 @@ namespace HB.FullStack.Database.SQL
 			throw new NotSupportedException();
 		}
 
-		/// <summary>
-		/// SQLite_Table_Create_Statement
-		/// </summary>
-		/// <param name="entityDef"></param>
-		/// <param name="addDropStatement"></param>
-		/// <returns></returns>
-		
 		public static string SQLite_Table_Create_Statement(EntityDef entityDef, bool addDropStatement)
 		{
 			StringBuilder propertyInfoSql = new StringBuilder();
@@ -445,14 +438,6 @@ namespace HB.FullStack.Database.SQL
 			return tableCreateSql;
 		}
 
-		/// <summary>
-		/// MySQL_Table_Create_Statement
-		/// </summary>
-		/// <param name="entityDef"></param>
-		/// <param name="addDropStatement"></param>
-		/// <param name="varcharDefaultLength"></param>
-		/// <returns></returns>
-		
 		public static string MySQL_Table_Create_Statement(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength)
 		{
 			StringBuilder propertySqlBuilder = new StringBuilder();
@@ -471,7 +456,7 @@ namespace HB.FullStack.Database.SQL
 
 				int length = 0;
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET6_0_OR_GREATER
 				if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains('(', StringComparison.InvariantCulture))
 #endif
 #if NETSTANDARD2_0
@@ -527,16 +512,6 @@ namespace HB.FullStack.Database.SQL
 			return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
 		}
 
-		/// <summary>
-		/// GetTableCreateSql
-		/// </summary>
-		/// <param name="entityDef"></param>
-		/// <param name="addDropStatement"></param>
-		/// <param name="varcharDefaultLength"></param>
-		/// <param name="engineType"></param>
-		/// <returns></returns>
-		
-		
 		public static string GetTableCreateSql(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)
 		{
 			return engineType switch

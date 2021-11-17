@@ -95,7 +95,6 @@ namespace HB.Infrastructure.MySQL
 
         #endregion 自身 & 构建
 
-
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         private static MySqlCommand CreateTextCommand(EngineCommand engineCommand)
         {
@@ -116,7 +115,6 @@ namespace HB.Infrastructure.MySQL
 
             return command;
         }
-
 
         #region Command 能力
 

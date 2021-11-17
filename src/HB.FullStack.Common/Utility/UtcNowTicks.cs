@@ -1,5 +1,9 @@
 ﻿#nullable enable
 
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("HB.FullStack.CacheTests")]
+
 namespace System
 {
     public struct UtcNowTicks : IEquatable<UtcNowTicks>
@@ -69,5 +73,4 @@ namespace System
         //    return this;
         //}
     }
-
 }
