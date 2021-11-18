@@ -17,7 +17,7 @@ using static HB.FullStack.Identity.LengthConventions;
 
 namespace HB.FullStack.Identity
 {
-    internal class IdentityService : IIdentityService
+    public class IdentityService : IIdentityService
     {
         private readonly IdentityOptions _options;
         private readonly ILogger _logger;
@@ -34,15 +34,15 @@ namespace HB.FullStack.Identity
 
         //Jwt Signing
         private string _jsonWebKeySetJson = null!;
+
         private IEnumerable<SecurityKey> _issuerSigningKeys = null!;
         private SigningCredentials _signingCredentials = null!;
 
-
         //Jwt Content Encrypt
         private EncryptingCredentials _encryptingCredentials = null!;
+
         private SecurityKey _decryptionSecurityKey = null!;
 
-        
         public IdentityService(
             IOptions<IdentityOptions> options,
             ILogger<IdentityService> logger,
@@ -76,16 +76,6 @@ namespace HB.FullStack.Identity
 
         public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
-        /// <summary>
-        /// SignInAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
-        
-        
-        
         public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -96,13 +86,16 @@ namespace HB.FullStack.Identity
                     ThrowIf.NullOrEmpty(context.Mobile, "SignInContext.Mobile");
                     ThrowIf.NullOrEmpty(context.Password, "SignInContext.Password");
                     break;
+
                 case SignInType.BySms:
                     ThrowIf.NullOrEmpty(context.Mobile, "SignInContext.Mobile");
                     break;
+
                 case SignInType.ByLoginNameAndPassword:
                     ThrowIf.NullOrEmpty(context.LoginName, "SignInContext.LoginName");
                     ThrowIf.NullOrEmpty(context.Password, "SignInContext.Password");
                     break;
+
                 default:
                     break;
             }
@@ -193,15 +186,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        /// <summary>
-        /// RefreshAccessTokenAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
-        
-        
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -309,13 +293,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        /// <summary>
-        /// SignOutAsync
-        /// </summary>
-        /// <param name="signInTokenId"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
         public async Task SignOutAsync(Guid signInTokenId, string lastUser)
         {
             ThrowIf.Empty(ref signInTokenId, nameof(signInTokenId));
@@ -344,15 +321,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        /// <summary>
-        /// SignOutAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="idiom"></param>
-        /// <param name="logOffType"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
         public async Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser)
         {
             ThrowIf.Empty(ref userId, nameof(userId));
@@ -372,15 +340,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        /// <summary>
-        /// OnSignInFailedBySmsAsync
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
-        
-        
         public async Task OnSignInFailedBySmsAsync(string mobile, string lastUser)
         {
             User? user = await _userRepo.GetByMobileAsync(mobile).ConfigureAwait(false);
@@ -395,16 +354,6 @@ namespace HB.FullStack.Identity
             await OnSignInFailedAsync(userLoginControl, lastUser).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// DeleteSignInTokensAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="idiom"></param>
-        /// <param name="logOffType"></param>
-        /// <param name="lastUser"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
-        
         private async Task DeleteSignInTokensAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser, TransactionContext transactionContext)
         {
             IEnumerable<SignInToken> resultList = await _signInTokenRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
@@ -420,16 +369,6 @@ namespace HB.FullStack.Identity
             await _signInTokenRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ConstructJwtAsync
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="signInToken"></param>
-        /// <param name="signToWhere"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
-        
-        
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
         {
             IEnumerable<Role> roles = await _roleRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
@@ -447,14 +386,6 @@ namespace HB.FullStack.Identity
             return jwt;
         }
 
-        /// <summary>
-        /// PreSignInCheck
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="userLoginControl"></param>
-        /// <param name="lastUser"></param>
-        
-        
         private async Task PreSignInCheckAsync(User user, LoginControl userLoginControl, string lastUser)
         {
             ThrowIf.Null(user, nameof(user));
@@ -506,12 +437,6 @@ namespace HB.FullStack.Identity
             }
         }
 
-        /// <summary>
-        /// OnSignInFailed
-        /// </summary>
-        /// <param name="userLoginControl"></param>
-        /// <param name="lastUser"></param>
-        
         private async Task OnSignInFailedAsync(LoginControl userLoginControl, string lastUser)
         {
             if (_options.SignInOptions.RequiredLockoutCheck)
@@ -533,10 +458,6 @@ namespace HB.FullStack.Identity
             await _userLoginControlRepo.UpdateAsync(userLoginControl, lastUser).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// InitializeCredencials
-        /// </summary>
-        
         private void InitializeCredencials()
         {
             //Initialize Jwt Signing Credentials
@@ -592,13 +513,6 @@ namespace HB.FullStack.Identity
             return claims;
         }
 
-        /// <summary>
-        /// GetOrCreateUserLoginControlAsync
-        /// </summary>
-        /// <param name="lastUser"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        
         private async Task<LoginControl> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
         {
             LoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
@@ -612,8 +526,6 @@ namespace HB.FullStack.Identity
             return userLoginControl;
         }
 
-        
-        
         private async Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
@@ -668,15 +580,6 @@ namespace HB.FullStack.Identity
 
         #region Role
 
-        /// <summary>
-        /// AddRolesToUserAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="roleId"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
-        
         public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
         {
             //TODO: 需要重新构建 jwt
@@ -747,7 +650,6 @@ namespace HB.FullStack.Identity
         }
 
         #endregion
-
 
         #region UserActivity
 

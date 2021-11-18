@@ -2,15 +2,17 @@
 using Aliyun.Acs.Core.Auth.Sts;
 using Aliyun.Acs.Core.Exceptions;
 using Aliyun.Acs.Core.Http;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HB.Infrastructure.Aliyun.Oss
 {
-    internal class AliyunOssService : IAliyunOssService
+    public class AliyunOssService : IAliyunOssService
     {
 #pragma warning disable CA1823 // Avoid unused private fields
 #pragma warning disable IDE0051 // Remove unused private members
@@ -24,9 +26,11 @@ namespace HB.Infrastructure.Aliyun.Oss
         private readonly IDictionary<string, IAcsClient> _acsClients;
         private readonly IDictionary<string, BucketSettings> _bucketSettings;
 
-        public string UserBucketName { get { return _options.UserBucketName; } }
+        public string UserBucketName
+        { get { return _options.UserBucketName; } }
 
-        public string PublicBucketName { get { return _options.PublicBucketName; } }
+        public string PublicBucketName
+        { get { return _options.PublicBucketName; } }
 
         public AliyunOssService(IOptions<AliyunOssOptions> options)
         {
@@ -36,7 +40,6 @@ namespace HB.Infrastructure.Aliyun.Oss
             foreach (BucketSettings settings in _options.Buckets)
             {
                 AliyunUtil.AddEndpoint(AliyunProductNames.OSS, settings.RegionId, settings.Endpoint);
-               
 
                 _acsClients.Add(settings.BucketName, AliyunUtil.CreateAcsClient(settings.RegionId, settings.AccessKeyId, settings.AccessKeySecret));
             }
@@ -44,15 +47,12 @@ namespace HB.Infrastructure.Aliyun.Oss
             _bucketSettings = _options.Buckets.ToDictionary(b => b.BucketName);
         }
 
- 
-
-         
         /// <summary>
         /// GetOssEndpoint
         /// </summary>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        
+
         public string GetOssEndpoint(string bucket)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings? bucketSettings))
@@ -60,7 +60,7 @@ namespace HB.Infrastructure.Aliyun.Oss
                 return bucketSettings.Endpoint;
             }
 
-            throw AliyunExceptions.OssError(bucket:bucket, cause:"No Such Bucket");
+            throw AliyunExceptions.OssError(bucket: bucket, cause: "No Such Bucket");
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         /// </summary>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        
+
         public string GetRegionId(string bucket)
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings? bucketSettings))
@@ -79,14 +79,13 @@ namespace HB.Infrastructure.Aliyun.Oss
             throw AliyunExceptions.OssError(bucket: bucket, cause: "No Such Bucket");
         }
 
-
         /// <summary>
         /// GetUserDirectory
         /// </summary>
         /// <param name="bucket"></param>
         /// <param name="userGuid"></param>
         /// <returns></returns>
-        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         private string GetUserDirectory(string bucket, string userGuid)
         {
@@ -100,6 +99,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         }
 
 #pragma warning disable IDE0051 // Remove unused private members
+
         private static string GetRoleSessionName(string userGuid)
 #pragma warning restore IDE0051 // Remove unused private members
         {
@@ -107,4 +107,3 @@ namespace HB.Infrastructure.Aliyun.Oss
         }
     }
 }
-

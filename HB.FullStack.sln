@@ -69,21 +69,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Database.Clien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DatabaseTests", "test\HB.FullStack.DatabaseTests\HB.FullStack.DatabaseTests.csproj", "{5A9937A9-7169-4EAE-8029-868EF45445B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.DatabaseTests.MySQL", "test\HB.FullStack.DatabaseTests.MySQL\HB.FullStack.DatabaseTests.MySQL.csproj", "{EC3C561C-76A1-4948-B8FB-0CBFE0F6B2E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DatabaseTests.MySQL", "test\HB.FullStack.DatabaseTests.MySQL\HB.FullStack.DatabaseTests.MySQL.csproj", "{EC3C561C-76A1-4948-B8FB-0CBFE0F6B2E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.DatabaseTests.SQLite", "test\HB.FullStack.DatabaseTests.SQLite\HB.FullStack.DatabaseTests.SQLite.csproj", "{D1847869-FBA4-4FCC-B626-DE008A35B887}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.DatabaseTests.SQLite", "test\HB.FullStack.DatabaseTests.SQLite\HB.FullStack.DatabaseTests.SQLite.csproj", "{D1847869-FBA4-4FCC-B626-DE008A35B887}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.CacheTests", "test\HB.FullStack.CacheTests\HB.FullStack.CacheTests.csproj", "{747B06BD-D07D-4D12-BF08-1BE1EDB3CEB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.CacheTests", "test\HB.FullStack.CacheTests\HB.FullStack.CacheTests.csproj", "{747B06BD-D07D-4D12-BF08-1BE1EDB3CEB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.IdGenTests", "test\HB.FullStack.IdGenTests\HB.FullStack.IdGenTests.csproj", "{AE3BB64D-1F09-4AEF-8A5E-CC9ECD3C25E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.IdGenTests", "test\HB.FullStack.IdGenTests\HB.FullStack.IdGenTests.csproj", "{AE3BB64D-1F09-4AEF-8A5E-CC9ECD3C25E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.KVStoreTests", "test\HB.FullStack.KVStoreTests\HB.FullStack.KVStoreTests.csproj", "{FD90F70F-8E71-44FA-8824-87232CF71E60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.KVStoreTests", "test\HB.FullStack.KVStoreTests\HB.FullStack.KVStoreTests.csproj", "{FD90F70F-8E71-44FA-8824-87232CF71E60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.EventBusTests", "test\HB.FullStack.EventBusTests\HB.FullStack.EventBusTests.csproj", "{5BEA014E-3C20-4E04-AA1C-971954CF6EC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.EventBusTests", "test\HB.FullStack.EventBusTests\HB.FullStack.EventBusTests.csproj", "{5BEA014E-3C20-4E04-AA1C-971954CF6EC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.LockTests", "test\HB.FullStack.LockTests\HB.FullStack.LockTests.csproj", "{9BDCE13B-171A-433D-8B8F-818BAD1B27CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.LockTests", "test\HB.FullStack.LockTests\HB.FullStack.LockTests.csproj", "{9BDCE13B-171A-433D-8B8F-818BAD1B27CA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.CommonTests", "test\HB.FullStack.CommonTests\HB.FullStack.CommonTests.csproj", "{56BCAA41-D636-45CC-830D-C94FFB039C11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.IdentityTests", "src\HB.FullStack.IdentityTests\HB.FullStack.IdentityTests.csproj", "{73B4CA4A-7FEE-43A2-BCFD-05A39E3ABF3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.WebApiTests", "src\HB.FullStack.WebApiTests\HB.FullStack.WebApiTests.csproj", "{A5CA9EC7-08B3-485C-940F-17A97216A3FF}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -222,6 +226,14 @@ Global
 		{56BCAA41-D636-45CC-830D-C94FFB039C11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56BCAA41-D636-45CC-830D-C94FFB039C11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56BCAA41-D636-45CC-830D-C94FFB039C11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73B4CA4A-7FEE-43A2-BCFD-05A39E3ABF3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73B4CA4A-7FEE-43A2-BCFD-05A39E3ABF3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73B4CA4A-7FEE-43A2-BCFD-05A39E3ABF3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73B4CA4A-7FEE-43A2-BCFD-05A39E3ABF3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5CA9EC7-08B3-485C-940F-17A97216A3FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5CA9EC7-08B3-485C-940F-17A97216A3FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5CA9EC7-08B3-485C-940F-17A97216A3FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5CA9EC7-08B3-485C-940F-17A97216A3FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

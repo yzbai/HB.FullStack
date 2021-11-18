@@ -3,14 +3,12 @@ using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
-
 namespace HB.FullStack.Database
 {
-    internal class DefaultTransaction : ITransaction
+    public class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
 
@@ -35,13 +33,7 @@ namespace HB.FullStack.Database
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }
 
-        /// <summary>
-        /// CommitAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        
-        public async Task CommitAsync(TransactionContext context, [CallerMemberName]string? callerMemberName = null, [CallerLineNumber]int callerLineNumber = 0 )
+        public async Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
         {
             //if (context == null || context.Transaction == null)
             //{
@@ -81,12 +73,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// RollbackAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        
         public async Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
         {
             //if (context == null || context.Transaction == null)
@@ -101,7 +87,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw DatabaseExceptions.TransactionError("AlreadyFinished",callerMemberName, callerLineNumber);
+                throw DatabaseExceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
             }
 
             try

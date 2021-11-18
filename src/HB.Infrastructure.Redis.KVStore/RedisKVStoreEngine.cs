@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.KVStore
 {
-    internal class RedisKVStoreEngine : IKVStoreEngine
+    public class RedisKVStoreEngine : IKVStoreEngine
     {
         /// <summary>
         /// keys:entityNameKey, entityVersionKey
@@ -46,7 +46,7 @@ for i =1,count do
 end
 
 for i = 1, count do
-    redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1]) 
+    redis.call('HSET',KEYS[1],ARGV[i+1],ARGV[count+i+1])
     redis.call('HINCRBY',KEYS[2],ARGV[i+1],1)
 end
 
@@ -60,27 +60,26 @@ return 1";
 local count=tonumber(ARGV[1])
 for i = 1, count do
     if redis.call('HGET',KEYS[2],ARGV[i+1])~=ARGV[count+i+1] then
-        return 7 
+        return 7
     end
 end
 
 for i=1,count do
-    redis.call('HDEL',KEYS[1],ARGV[i+1]) 
-    redis.call('HDEL',KEYS[2],ARGV[i+1]) 
+    redis.call('HDEL',KEYS[1],ARGV[i+1])
+    redis.call('HDEL',KEYS[2],ARGV[i+1])
 end
 
 return 1
 ";
-
 
         /// <summary>
         /// keys:entityNameKey, entityVersionKey
         /// argv:entity1_key, entity2_key, entity3_key
         /// </summary>
         private const string _lUA_BATCH_GET = @"
-local array={{}} 
-array[1]=redis.call('HMGET',KEYS[1],unpack(ARGV)) 
-array[2]=redis.call('HMGET',KEYS[2],unpack(ARGV)) 
+local array={{}}
+array[1]=redis.call('HMGET',KEYS[1],unpack(ARGV))
+array[2]=redis.call('HMGET',KEYS[2],unpack(ARGV))
 return array
 ";
 
@@ -88,9 +87,9 @@ return array
         /// keys:entityNameKey, entityVersionKey
         /// </summary>
         private const string _lUA_GET_ALL = @"
-local array={{}} 
-array[1]=redis.call('HGETALL',KEYS[1]) 
-array[2]=redis.call('HGETALL',KEYS[2]) 
+local array={{}}
+array[1]=redis.call('HGETALL',KEYS[1])
+array[2]=redis.call('HGETALL',KEYS[2])
 return array";
 
         private readonly RedisKVStoreOptions _options;
@@ -99,9 +98,11 @@ return array";
         private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
         private readonly IDictionary<string, LoadedLuas> _loadedLuaDict = new Dictionary<string, LoadedLuas>();
 
-        public KVStoreSettings Settings { get { return _options.KVStoreSettings; } }
+        public KVStoreSettings Settings
+        { get { return _options.KVStoreSettings; } }
 
-        public string FirstDefaultInstanceName { get { return _options.ConnectionSettings[0].InstanceName; } }
+        public string FirstDefaultInstanceName
+        { get { return _options.ConnectionSettings[0].InstanceName; } }
 
         public RedisKVStoreEngine(IOptions<RedisKVStoreOptions> options, ILogger<RedisKVStoreEngine> logger)
         {
@@ -137,7 +138,7 @@ return array";
         /// </summary>
         /// <param name="instanceName"></param>
         /// <returns></returns>
-        
+
         private LoadedLuas GetLoadedLuas(string instanceName)
         {
             if (_loadedLuaDict.TryGetValue(instanceName, out LoadedLuas? loadedLuas))
@@ -162,7 +163,7 @@ return array";
         /// <param name="entityName"></param>
         /// <param name="entityKeys"></param>
         /// <returns></returns>
-        
+
         public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
         {
             if (!entityKeys.Any())
@@ -174,7 +175,6 @@ return array";
             List<RedisValue> redisValues = new List<RedisValue>();
 
             PrepareEntityGetRedisInfo(entityName, entityKeys, redisKeys, redisValues);
-
 
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchGetLua;
@@ -215,7 +215,6 @@ return array";
             redisKeys.Add(EntityNameKey(entityName));
             redisKeys.Add(EntityVersionNameKey(entityName));
 
-
             foreach (string entityKey in entityKeys)
             {
                 redisValues.Add(entityKey);
@@ -228,7 +227,7 @@ return array";
         /// <param name="storeName"></param>
         /// <param name="entityName"></param>
         /// <returns></returns>
-        
+
         public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName)
         {
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
@@ -282,7 +281,7 @@ return array";
         /// <param name="entityKeys"></param>
         /// <param name="entityJsons"></param>
         /// <returns></returns>
-        
+
         public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
@@ -304,7 +303,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: entityName, storeName:storeName, keys:entityKeys, values:entityJsons, errorCode:error);
+                    throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityJsons, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -359,7 +358,7 @@ return array";
         /// <param name="entityJsons"></param>
         /// <param name="entityVersions"></param>
         /// <returns></returns>
-        
+
         public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
@@ -441,7 +440,7 @@ return array";
         /// <param name="entityKeys"></param>
         /// <param name="entityVersions"></param>
         /// <returns></returns>
-        
+
         public async Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;
@@ -493,7 +492,7 @@ return array";
         {
             /// keys:entityNameKey, entityVersionKey
             /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_version, entity2_version, entity3_version
-            /// 
+            ///
             redisKeys.Add(EntityNameKey(entityName));
             redisKeys.Add(EntityVersionNameKey(entityName));
 
@@ -516,7 +515,7 @@ return array";
         /// <param name="storeName"></param>
         /// <param name="entityName"></param>
         /// <returns></returns>
-        
+
         public async Task<bool> EntityDeleteAllAsync(string storeName, string entityName)
         {
             try
@@ -552,7 +551,7 @@ return array";
         /// </summary>
         /// <param name="instanceName"></param>
         /// <returns></returns>
-        
+
         private async Task<IDatabase> GetDatabaseAsync(string instanceName)
         {
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
@@ -560,7 +559,7 @@ return array";
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw Exceptions.NoSuchInstance(instanceName:instanceName);
+            throw Exceptions.NoSuchInstance(instanceName: instanceName);
         }
 
         private string EntityNameKey(string entityName)

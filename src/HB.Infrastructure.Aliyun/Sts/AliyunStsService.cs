@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace HB.Infrastructure.Aliyun.Sts
 {
-    internal class AliyunStsService : IAliyunStsService
+    public class AliyunStsService : IAliyunStsService
     {
         private const string _oSS_WRITE_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\", \"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
         private const string _oSS_READ_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
@@ -20,7 +20,6 @@ namespace HB.Infrastructure.Aliyun.Sts
         private readonly AliyunStsOptions _options;
         private readonly IAcsClient _acsClient;
         private readonly Dictionary<string, AssumedRole> _resourceAssumedRoleDict = new Dictionary<string, AssumedRole>();
-
 
         public AliyunStsService(IOptions<AliyunStsOptions> options)
         {
@@ -43,7 +42,6 @@ namespace HB.Infrastructure.Aliyun.Sts
             return "User" + userId.ToString();
         }
 
-        
         public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly)
         {
             if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())
@@ -92,9 +90,8 @@ namespace HB.Infrastructure.Aliyun.Sts
             catch (Exception ex)
             {
                 //TODO: 处理报错
-                throw AliyunExceptions.StsError(userId:userId, bucketname:bucketName, direcotry:directory, readOnly:readOnly, ex);
+                throw AliyunExceptions.StsError(userId: userId, bucketname: bucketName, direcotry: directory, readOnly: readOnly, ex);
             }
         }
     }
 }
-

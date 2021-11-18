@@ -1,5 +1,4 @@
-﻿
-using HB.FullStack.Identity.Entities;
+﻿using HB.FullStack.Identity.Entities;
 using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -21,7 +20,7 @@ namespace HB.FullStack.Identity
     /// <summary>
     /// 所有的User这个Entity的增删改查都要经过这里
     /// </summary>
-    internal class UserRepo : DbEntityRepository<User>
+    public class UserRepo : DbEntityRepository<User>
     {
         public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
@@ -43,8 +42,7 @@ namespace HB.FullStack.Identity
         /// <param name="userId"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
-        
+
         public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return await CacheAsideAsync(
@@ -62,8 +60,7 @@ namespace HB.FullStack.Identity
         /// <param name="userIds"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
-        
+
         public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await CacheAsideAsync(
@@ -81,8 +78,7 @@ namespace HB.FullStack.Identity
         /// <param name="mobile"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
-        
+
         public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
             return await CacheAsideAsync(
@@ -100,8 +96,7 @@ namespace HB.FullStack.Identity
         /// <param name="loginName"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
-        
+
         public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await CacheAsideAsync(
@@ -119,8 +114,7 @@ namespace HB.FullStack.Identity
         /// <param name="email"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
-        
+
         public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
             return await CacheAsideAsync(
@@ -140,7 +134,7 @@ namespace HB.FullStack.Identity
         /// <param name="email"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
+
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
             WhereExpression<User> where = DbReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);

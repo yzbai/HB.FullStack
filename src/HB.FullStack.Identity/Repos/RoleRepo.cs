@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Identity
 {
-    internal class RoleRepo : DbEntityRepository<Role>
+    public class RoleRepo : DbEntityRepository<Role>
     {
         public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }

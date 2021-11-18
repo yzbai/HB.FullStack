@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Redis.Cache
     /// 一个Collection里，可以放各种条目，但没有自己的过期时间。
     /// 过期时间是整个Collection的。
     /// </summary>
-    internal partial class RedisCache
+    public partial class RedisCache
     {
         // KEYS = Collectionkey, key1, key2, key3
 
@@ -33,7 +33,7 @@ namespace HB.Infrastructure.Redis.Cache
         // this order should not change LUA script depends on it
         public const string LUA_COLLECTION_SET_WITH_TIMESTAMP = @"
 if(redis.call('exists', KEYS[1]) ~= 1) then
-    redis.call('hmset', KEYS[1], '__absexp__', ARGV[1],'__sldexp__',ARGV[2]) 
+    redis.call('hmset', KEYS[1], '__absexp__', ARGV[1],'__sldexp__',ARGV[2])
     if(ARGV[3] ~='-1') then
         redis.call('expire', KEYS[1], ARGV[3])
     end
@@ -45,7 +45,7 @@ local errorSum = 0
 local dataNum = tonumber(ARGV[5])
 for j=1, dataNum do
     local minTimestamp = redis.call('get', minTS..KEYS[j+1])
-    
+
     if(minTimestamp and tonumber(minTimestamp)>tonumber(ARGV[4])) then
         error = 8
     end
@@ -86,14 +86,14 @@ return delSum";
         /// argv:utcTicks
         /// </summary>
         public const string LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP = @"
-local data= redis.call('hmget',KEYS[1], '__absexp__', '__sldexp__',KEYS[2]) 
+local data= redis.call('hmget',KEYS[1], '__absexp__', '__sldexp__',KEYS[2])
 
 if (not data[3]) then
     return nil
 end
 
 if(data[1]~='-1') then
-    local now = tonumber(ARGV[1]) 
+    local now = tonumber(ARGV[1])
     local absexp = tonumber(data[1])
     if(now>=absexp) then
         redis.call('del', KEYS[1])
@@ -218,7 +218,6 @@ return data[3]";
                 }
 
                 return false;
-
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {

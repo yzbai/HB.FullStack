@@ -13,7 +13,7 @@ using HB.FullStack.Lock.Memory;
 
 namespace HB.FullStack.Identity
 {
-    internal class SignInTokenRepo : DbEntityRepository<SignInToken>
+    public class SignInTokenRepo : DbEntityRepository<SignInToken>
     {
         public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }

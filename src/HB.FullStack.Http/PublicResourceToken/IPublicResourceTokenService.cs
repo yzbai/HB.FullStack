@@ -8,10 +8,8 @@ namespace HB.FullStack.WebApi
     /// </summary>
     public interface IPublicResourceTokenService
     {
-        
         Task<string> GetNewTokenAsync(int expiredSeconds = 60);
 
-        
-        Task<bool> CheckTokenAsync(string? token);
+        Task<bool> CheckTokenAsync(string? protectedToken);
     }
 }

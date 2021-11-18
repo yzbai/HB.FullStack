@@ -27,7 +27,7 @@ namespace HB.FullStack.Database
     /// 乐观锁用在写操作上，交由各个数据库执行者实施，Version方式。
     /// 批量操作，采用事务方式，也交由各个数据库执行者实施。
     /// </summary>
-    internal class DefaultDatabase : IDatabase
+    public sealed class DefaultDatabase : IDatabase
     {
         private readonly DatabaseCommonSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
@@ -69,8 +69,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// </summary>
-        /// <param name="migrations"></param>
-        /// <returns></returns>
         public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
@@ -283,7 +281,7 @@ namespace HB.FullStack.Database
             return Convert.ToBoolean(result, GlobalSettings.Culture);
         }
 
-        public async Task<SystemInfo> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
+        internal async Task<SystemInfo> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
         {
             bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SYSTEM_INFO_TABLE_NAME, transaction).ConfigureAwait(false);
 

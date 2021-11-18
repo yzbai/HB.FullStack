@@ -13,7 +13,7 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Cache
 {
-    internal class RedisCacheBase
+    public class RedisCacheBase
     {
         protected const int INVALIDATION_VERSION_EXPIRY_SECONDS = 60;
 
@@ -80,13 +80,11 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
-        
         protected LoadedLuas GetDefaultLoadLuas()
         {
             return GetLoadedLuas(DefaultInstanceName);
         }
 
-        
         protected LoadedLuas GetLoadedLuas(string? instanceName)
         {
             if (string.IsNullOrEmpty(instanceName))
@@ -109,7 +107,6 @@ namespace HB.Infrastructure.Redis.Cache
             throw CacheExceptions.CacheLoadedLuaNotFound(cacheInstanceName: instanceName);
         }
 
-        
         protected async Task<IDatabase> GetDatabaseAsync(string? instanceName)
         {
             instanceName ??= DefaultInstanceName;
@@ -122,13 +119,11 @@ namespace HB.Infrastructure.Redis.Cache
             throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
-        
         protected Task<IDatabase> GetDefaultDatabaseAsync()
         {
             return GetDatabaseAsync(DefaultInstanceName);
         }
 
-        
         protected IDatabase GetDatabase(string? instanceName)
         {
             instanceName ??= DefaultInstanceName;
@@ -141,7 +136,6 @@ namespace HB.Infrastructure.Redis.Cache
             throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
-        
         protected IDatabase GetDefaultDatabase()
         {
             return GetDatabase(DefaultInstanceName);
@@ -157,12 +151,11 @@ namespace HB.Infrastructure.Redis.Cache
             return GetRealKey(entityName, dimensionKeyName + dimensionKeyValue);
         }
 
-        
         protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
         {
             if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                throw CacheExceptions.NoSuchDimensionKey(typeName:entityDef.Name, dimensionKeyName:dimensionKeyName);
+                throw CacheExceptions.NoSuchDimensionKey(typeName: entityDef.Name, dimensionKeyName: dimensionKeyName);
             }
         }
 
@@ -170,7 +163,7 @@ namespace HB.Infrastructure.Redis.Cache
         /// ThrowIfNotCacheEnabled
         /// </summary>
         /// <param name="entityDef"></param>
-        
+
         protected static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
         {
             if (!entityDef.IsCacheable)

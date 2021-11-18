@@ -17,7 +17,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// DatabaseName
         /// </summary>
-        
+
         [NotNull, DisallowNull]
         public string DatabaseName
         {
@@ -28,7 +28,7 @@ namespace HB.FullStack.Database
                     return value;
                 }
 
-                throw DatabaseExceptions.SystemInfoError(cause:"no DatabaseName key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause: "no DatabaseName key in SystemInfoTable");
             }
             private set
             {
@@ -39,7 +39,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version
         /// </summary>
-        
+
         public int Version
         {
             get
@@ -49,7 +49,7 @@ namespace HB.FullStack.Database
                     return Convert.ToInt32(value, GlobalSettings.Culture);
                 }
 
-                throw DatabaseExceptions.SystemInfoError(cause:"no Version key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause: "no Version key in SystemInfoTable");
             }
             set
             {

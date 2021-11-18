@@ -14,7 +14,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
-    internal class UserRoleRepo : DbEntityRepository<UserRole>
+    public class UserRoleRepo : DbEntityRepository<UserRole>
     {
         public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Tencent
 {
-    internal class TCapthaClient : ITCapthaClient
+    public class TCapthaClient : ITCapthaClient
     {
         private readonly ILogger _logger;
         private readonly TCapthaOptions _options;
@@ -84,4 +84,3 @@ namespace HB.Infrastructure.Tencent
         }
     }
 }
-

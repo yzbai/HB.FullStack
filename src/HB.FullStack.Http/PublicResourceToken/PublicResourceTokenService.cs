@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.WebApi
 {
-    internal class PublicResourceTokenService : IPublicResourceTokenService
+    public class PublicResourceTokenService : IPublicResourceTokenService
     {
         private const string _prefix = "PRT_";
         private readonly int _tokenlength = 36 + _prefix.Length;
@@ -27,13 +27,6 @@ namespace HB.FullStack.WebApi
             _dataProtector = dataProtectionProvider.CreateProtector(nameof(PublicResourceTokenService));
         }
 
-
-        /// <summary>
-        /// GetNewTokenAsync
-        /// </summary>
-        /// <param name="expiredSeconds"></param>
-        /// <returns></returns>
-        
         public async Task<string> GetNewTokenAsync(int expiredSeconds)
         {
             string token = _prefix + Guid.NewGuid().ToString();
@@ -47,12 +40,6 @@ namespace HB.FullStack.WebApi
             return _dataProtector.Protect(token);
         }
 
-        /// <summary>
-        /// CheckTokenAsync
-        /// </summary>
-        /// <param name="protectedToken"></param>
-        /// <returns></returns>
-        
         public async Task<bool> CheckTokenAsync(string? protectedToken)
         {
             if (protectedToken.IsNullOrEmpty())
@@ -60,13 +47,13 @@ namespace HB.FullStack.WebApi
                 return false;
             }
 
-            string token;
+            string unProtectedToken;
 
             try
             {
-                token = _dataProtector.Unprotect(protectedToken);
+                unProtectedToken = _dataProtector.Unprotect(protectedToken);
 
-                if (token.IsNullOrEmpty() || token.Length != _tokenlength || !token.StartsWith(_prefix, GlobalSettings.Comparison))
+                if (unProtectedToken.IsNullOrEmpty() || unProtectedToken.Length != _tokenlength || !unProtectedToken.StartsWith(_prefix, GlobalSettings.Comparison))
                 {
                     _logger.LogWarning("UnProtected Failed. May has an attack. {protectedToken}.", protectedToken);
                     return false;
@@ -83,8 +70,7 @@ namespace HB.FullStack.WebApi
                 return false;
             }
 
-
-            return await _cache.RemoveAsync(token, TimeUtil.UtcNowTicks).ConfigureAwait(false);
+            return await _cache.RemoveAsync(unProtectedToken, TimeUtil.UtcNowTicks).ConfigureAwait(false);
         }
     }
 }

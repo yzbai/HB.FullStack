@@ -19,7 +19,7 @@ namespace HB.Infrastructure.Redis.Cache
     /// <summary>
     /// key-value的Timestamp构型
     /// </summary>
-    internal partial class RedisCache
+    public partial class RedisCache
     {
         // KEYS[1] = = key
         // ARGV[1] = absolute-expiration - unix time seconds as long (null for none)
@@ -40,10 +40,10 @@ if(cachedTimestamp and tonumber(cachedTimestamp)>tonumber(ARGV[5])) then
     return 9
 end
 
-redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4], 'timestamp', ARGV[5]) 
+redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4], 'timestamp', ARGV[5])
 
-if(ARGV[3]~='-1') then 
-    redis.call('expire',KEYS[1], ARGV[3]) 
+if(ARGV[3]~='-1') then
+    redis.call('expire',KEYS[1], ARGV[3])
 end
 
 return 1";
@@ -56,6 +56,7 @@ return 1";
 redis.call('set', '_minTS'..KEYS[1], ARGV[1], 'EX', ARGV[2])
 return redis.call('del', KEYS[1])
 ";
+
         /// <summary>
         /// keys: key1, key2, key3
         /// argv: key_count, utcTicks, invalidationKey_expire_seconds
@@ -72,14 +73,14 @@ return redis.call('del', unpack(KEYS))";
         /// argv:utcTicks
         /// </summary>
         public const string LUA_GET_AND_REFRESH_WITH_TIMESTAMP = @"
-local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
+local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data')
 
 if (not data[3]) then
     return nil
 end
 
 if(data[1]~='-1') then
-    local now = tonumber(ARGV[1]) 
+    local now = tonumber(ARGV[1])
     local absexp = tonumber(data[1])
     if(now>=absexp) then
         redis.call('del', KEYS[1])
@@ -93,14 +94,13 @@ end
 
 return data[3]";
 
-
         /// <summary>
         /// GetAsync
         /// </summary>
         /// <param name="key"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
@@ -153,7 +153,7 @@ return data[3]";
         /// <param name="options"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        
+
         public async Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
@@ -196,7 +196,6 @@ return data[3]";
                 }
 
                 return false;
-
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
@@ -219,7 +218,7 @@ return data[3]";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        
+
         public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default)
         {
             if (key == null)
@@ -283,7 +282,7 @@ return data[3]";
                 {
                     RedisResult redisResult = await database.ScriptEvaluateAsync(
                         GetDefaultLoadLuas().LoadedRemoveMultipleWithTimestampLua,
-                        group.Select(key=>(RedisKey)GetRealKey("",key)).ToArray(),
+                        group.Select(key => (RedisKey)GetRealKey("", key)).ToArray(),
                         new RedisValue[]
                         {
                             group.Length,

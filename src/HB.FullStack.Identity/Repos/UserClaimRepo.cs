@@ -11,7 +11,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
-    internal class UserClaimRepo : DbEntityRepository<UserClaim>
+    public class UserClaimRepo : DbEntityRepository<UserClaim>
     {
         /// <summary>
         /// ctor
@@ -20,7 +20,7 @@ namespace HB.FullStack.Identity
         /// <param name="databaseReader"></param>
         /// <param name="cache"></param>
         /// <param name="memoryLockManager"></param>
-        
+
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
@@ -39,8 +39,7 @@ namespace HB.FullStack.Identity
         /// <param name="userId"></param>
         /// <param name="transContext"></param>
         /// <returns></returns>
-        
-        
+
         public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return CacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>

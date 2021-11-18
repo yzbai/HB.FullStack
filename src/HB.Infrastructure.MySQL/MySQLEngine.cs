@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
 {
-    internal class MySQLEngine : IDatabaseEngine
+    public class MySQLEngine : IDatabaseEngine
     {
         #region 自身 & 构建
 
@@ -92,7 +92,6 @@ namespace HB.Infrastructure.MySQL
             return _connectionStringDict[dbName + "_0"];
         }
 
-
         #endregion 自身 & 构建
 
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
@@ -125,7 +124,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <returns></returns>
-        
+
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -148,7 +147,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="engineCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        
+
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -171,7 +170,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="engineCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        
+
         public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
