@@ -12,14 +12,8 @@ using System.Linq;
 namespace HB.FullStack.Database.Tests
 {
     [TestClass()]
-    public class DatabaseClientExtensionsTests
+    public class DatabaseClientExtensionsTests : BaseTestClass
     {
-        public TestContext TestContext { get; set; } = null!;
-
-        public IDatabase Db => ((IServiceProvider)TestContext.Properties["ServiceProvider"]!).GetRequiredService<IDatabase>();
-
-        public ITransaction Trans =>((IServiceProvider)TestContext.Properties["ServiceProvider"]!).GetRequiredService<ITransaction>();
-
         [TestMethod()]
         public async Task AddOrUpdateByIdAsyncTestAsync()
         {
@@ -53,7 +47,6 @@ namespace HB.FullStack.Database.Tests
                 await trans.RollbackAsync().ConfigureAwait(false);
                 throw;
             }
-
 
             await Db.DeleteAsync<CExtEntity>(e => SqlStatement.In(e.Id, false, lst.Select(e => (object)e.Id).ToArray())).ConfigureAwait(false);
 

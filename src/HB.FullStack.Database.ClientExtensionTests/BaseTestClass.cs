@@ -6,16 +6,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.Data.Sqlite;
+using System.Threading.Tasks;
 
 namespace HB.FullStack.Database.Tests
 {
     [TestClass]
-    public class ServiceInitialize
+    public class BaseTestClass
     {
-        private static string? _dbName;
+        public static IDatabase Db { get; set; } = null!;
+
+        public static ITransaction Trans { get; set; } = null!;
+
+        public static string DbName { get; set; } = null!;
 
         [AssemblyInitialize]
-        public static void Initialize(TestContext testContext)
+        public static async Task Initialize(TestContext _)
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
@@ -29,7 +34,7 @@ namespace HB.FullStack.Database.Tests
 
             IServiceCollection services = new ServiceCollection();
 
-            _dbName = $"test{TimeUtil.UtcNow.Ticks}.db";
+            DbName = $"test{TimeUtil.UtcNow.Ticks}.db";
 
             services
                 .AddIdGen(Configuration.GetSection("IdGen"))
@@ -45,28 +50,27 @@ namespace HB.FullStack.Database.Tests
 
                     options.Connections.Add(new DatabaseConnectionSettings
                     {
-                        DatabaseName = _dbName,
-                        ConnectionString = $"Data Source={_dbName}",
+                        DatabaseName = DbName,
+                        ConnectionString = $"Data Source={DbName}",
                         IsMaster = true
                     });
                 });
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<ServiceInitialize>>();
-            serviceProvider.GetRequiredService<IDatabase>().InitializeAsync().Wait();
-             
-            testContext.Properties.Add("ServiceProvider", serviceProvider);
+            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+
+            Db = serviceProvider.GetRequiredService<IDatabase>();
+            Trans = serviceProvider.GetRequiredService<ITransaction>();
+
+            await Db.InitializeAsync();
         }
 
         [AssemblyCleanup]
         public static void Cleanup()
         {
-            if (_dbName.IsNotNullOrEmpty())
-            {
-                SqliteConnection.ClearAllPools();
-                File.Delete(_dbName);
-            }
+            SqliteConnection.ClearAllPools();
+            File.Delete(DbName);
         }
     }
 }
