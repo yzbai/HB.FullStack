@@ -9,6 +9,7 @@ using System.Reflection;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Database.Converter
 {
@@ -67,15 +68,27 @@ namespace HB.FullStack.Database.Converter
 
         static TypeConvert()
         {
+            #region MySQL
+
             //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
             RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetTypeConverter(), EngineType.MySQL);
 
             //解决MySql存储Guid的问题，存储为Binary(16)
             RegisterGlobalTypeConverter(typeof(Guid), new MySqlGuidTypeConverter(), EngineType.MySQL);
 
+            RegisterGlobalTypeConverter(typeof(SimpleDate), new SimpleDateTypeConverter(), EngineType.MySQL);
+            RegisterGlobalTypeConverter(typeof(Time24Hour), new Time24HourTypeConverter(), EngineType.MySQL);
+
+            #endregion
+
+            #region SQLite
 
             RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetTypeConverter(), EngineType.SQLite);
             RegisterGlobalTypeConverter(typeof(Guid), new SqliteGuidTypeConverter(), EngineType.SQLite);
+            RegisterGlobalTypeConverter(typeof(SimpleDate), new SimpleDateTypeConverter(), EngineType.SQLite);
+            RegisterGlobalTypeConverter(typeof(Time24Hour), new Time24HourTypeConverter(), EngineType.SQLite);
+
+            #endregion
         }
 
         public static void RegisterGlobalTypeConverter(Type type, ITypeConverter typeConverter, EngineType engineType)
@@ -155,12 +168,8 @@ namespace HB.FullStack.Database.Converter
         }
 
         /// <summary>
-        /// 
+        /// propertyDef为null，则不考虑这个属性自定义的TypeConverter
         /// </summary>
-        /// <param name="typeValue"></param>
-        /// <param name="propertyDef">null，则不考虑这个属性自定义的TypeConverter</param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
         public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef? propertyDef, EngineType engineType)
         {
             if (typeValue == null)
@@ -197,13 +206,8 @@ namespace HB.FullStack.Database.Converter
         /// <summary>
         /// 没有考虑属性自定义的TypeConvert
         /// 有安全隐患,
-        /// 
         /// </summary>
-        /// <param name="typeValue"></param>
-        /// <param name="quotedIfNeed"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        
+
         public static string DoNotUseUnSafeTypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)
@@ -240,13 +244,6 @@ namespace HB.FullStack.Database.Converter
             return SqlHelper.GetQuoted(statement);
         }
 
-        /// <summary>
-        /// TypeToDbType
-        /// </summary>
-        /// <param name="propertyDef"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        
         public static DbType TypeToDbType(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
@@ -274,13 +271,6 @@ namespace HB.FullStack.Database.Converter
             throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
-        /// <summary>
-        /// TypeToDbTypeStatement
-        /// </summary>
-        /// <param name="propertyDef"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        
         public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义

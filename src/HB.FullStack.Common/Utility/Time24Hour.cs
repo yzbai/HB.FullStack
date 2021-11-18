@@ -4,13 +4,14 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common
 {
-
     /// <summary>
     /// 不存在24：00
     /// </summary>
     public struct Time24Hour : IEquatable<Time24Hour>, IComparable<Time24Hour>
     {
         private int _day;
+        private int _hour;
+        private int _minute;
 
         /// <summary>
         /// 为了应对跨天的时间块
@@ -22,8 +23,6 @@ namespace HB.FullStack.Common
             get => _day;
             set => _day = value;
         }
-
-        private int _hour;
 
         public int Hour
         {
@@ -49,11 +48,6 @@ namespace HB.FullStack.Common
             }
         }
 
-        [JsonIgnore]
-        public int HourIn12 => (!IsAm && Hour != 12) ? Hour - 12 : Hour;
-
-        private int _minute;
-
         public int Minute
         {
             get { return _minute; }
@@ -71,7 +65,11 @@ namespace HB.FullStack.Common
         }
 
         [JsonIgnore]
+        public int HourIn12 => (!IsAm && Hour != 12) ? Hour - 12 : Hour;
+
+        [JsonIgnore]
         public bool IsAm { get => Hour < 12; }
+
         public static Time24Hour LocalNow
         {
             get
@@ -96,8 +94,6 @@ namespace HB.FullStack.Common
         /// <summary>
         /// {day}:{hour}:{minute}
         /// </summary>
-        /// <param name="timeString"></param>
-        /// <returns></returns>
         public Time24Hour(string timeString)
         {
             if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(':', GlobalSettings.Comparison))
@@ -266,6 +262,5 @@ namespace HB.FullStack.Common
 
             return TimeSpan.FromMinutes(minutes1 - minutes2);
         }
-
     }
 }

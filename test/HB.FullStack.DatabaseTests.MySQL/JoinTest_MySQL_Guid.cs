@@ -14,7 +14,7 @@ namespace HB.FullStack.DatabaseTests
     public class JoinTest_MySQL_Guid : BaseTestClass
     {
         [ClassInitialize]
-        public static void ClassInitialize(TestContext testContext)
+        public static void ClassInitialize(TestContext _)
         {
             Guid_AddSomeDataAsync(Db).Wait();
         }

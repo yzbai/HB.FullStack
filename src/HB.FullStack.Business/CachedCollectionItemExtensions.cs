@@ -25,7 +25,6 @@ namespace HB.FullStack.Repository
             ThrowOnNullCacheValue(cachedCollectionItem);
             ThrowOnEmptyUtcTicks(cachedCollectionItem);
 
-
             return cache.SetToCollectionAsync(
                 cachedCollectionItem.CollectionKey,
                 cachedCollectionItem.ItemKey,
@@ -47,11 +46,17 @@ namespace HB.FullStack.Repository
             return cache.RemoveFromCollectionAsync(cachedCollectionItem.CollectionKey, cachedCollectionItem.ItemKey, cachedCollectionItem.UtcTicks, cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, UtcNowTicks utcNowTicks, CancellationToken cancellationToken = default)
+        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
         {
             if (!cachedCollectionItems.Any())
             {
                 return Task.FromResult(true);
+            }
+
+            foreach (CachedCollectionItem cachedCollectionItem in cachedCollectionItems)
+            {
+                ThrowOnEmptyCacheKey(cachedCollectionItem);
+                ThrowOnEmptyUtcTicks(cachedCollectionItem);
             }
 
             string collectionKey = cachedCollectionItems.First().CollectionKey;
@@ -100,4 +105,3 @@ namespace HB.FullStack.Repository
         }
     }
 }
-

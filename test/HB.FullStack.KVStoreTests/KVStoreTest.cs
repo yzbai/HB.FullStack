@@ -68,7 +68,7 @@ namespace HB.FullStack.KVStoreTests
             await KVStore.DeleteAsync<UserEntity>(_userEntity2.Guid, fetchedAgain.Version).ConfigureAwait(false);
         }
 
-        public bool Equals([AllowNull] UserEntity x, [AllowNull] UserEntity y)
+        public static bool Equals([AllowNull] UserEntity x, [AllowNull] UserEntity y)
         {
             if (x == null && y == null) { return true; }
             if (x == null && y != null) { return false; }

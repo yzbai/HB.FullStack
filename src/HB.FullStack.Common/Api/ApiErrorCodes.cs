@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace System
 {
-
     public static partial class ApiErrorCodes
     {
         public static ErrorCode NoAuthority { get; } = new ErrorCode(ErrorCodeStartIds.API + 0, nameof(NoAuthority), "");
@@ -52,6 +51,7 @@ namespace System
         /// The request failed due to an underlying issue such as network connectivity, DNS failure, server certificate validation or timeout.
         /// </summary>
         public static ErrorCode RequestUnderlyingIssue { get; } = new ErrorCode(ErrorCodeStartIds.API + 31, nameof(RequestUnderlyingIssue), "");
+
         public static ErrorCode HttpResponseDeserializeError { get; } = new ErrorCode(ErrorCodeStartIds.API + 32, nameof(HttpResponseDeserializeError), "");
         public static ErrorCode ApiClientSendUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 33, nameof(ApiClientSendUnkownError), "");
         public static ErrorCode ApiClientGetStreamUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 34, nameof(ApiClientGetStreamUnkownError), "");
@@ -66,7 +66,6 @@ namespace System
 
     public static partial class ApiExceptions
     {
-
         internal static Exception RequestUnderlyingIssue(ApiRequest request, HttpRequestException innerException)
         {
             ApiException ex = new(ApiErrorCodes.RequestUnderlyingIssue, innerException);
@@ -82,7 +81,6 @@ namespace System
 
             return ex;
         }
-
 
         public static Exception RequestCanceled(ApiRequest request, Exception innerException)
         {
@@ -152,7 +150,6 @@ namespace System
             return ex;
         }
 
-
         internal static Exception FileUpdateRequestCountNotEven()
         {
             ApiException ex = new ApiException(ApiErrorCodes.FileUpdateRequestCountNotEven);
@@ -178,7 +175,7 @@ namespace System
 
         public static Exception UploadError(string cause, string? fileName, Exception? innerException)
         {
-            ApiException ex = new ApiException(ApiErrorCodes.UploadError);
+            ApiException ex = new ApiException(ApiErrorCodes.UploadError, innerException);
 
             ex.Data["Cause"] = cause;
             ex.Data["FileName"] = fileName;

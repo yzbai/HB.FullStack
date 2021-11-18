@@ -18,6 +18,9 @@ namespace HB.FullStack.Repository
 
         public string CacheKey { get; protected set; } = null!;
 
+        /// <summary>
+        /// 刚从数据库取出的时间，越贴近数据库取出时间，越好
+        /// </summary>
         public UtcNowTicks UtcTicks { get; protected set; } = UtcNowTicks.Empty;
     }
 
@@ -49,4 +52,3 @@ namespace HB.FullStack.Repository
         }
     }
 }
-

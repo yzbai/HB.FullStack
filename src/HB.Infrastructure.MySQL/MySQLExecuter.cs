@@ -158,12 +158,7 @@ namespace HB.Infrastructure.MySQL
 
         #region Comand NonQuery
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
+ 
         
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, MySqlCommand dbCommand)
         {
@@ -172,12 +167,7 @@ namespace HB.Infrastructure.MySQL
             return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="mySqlTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
+ 
         
         public static async Task<int> ExecuteCommandNonQueryAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
@@ -187,12 +177,7 @@ namespace HB.Infrastructure.MySQL
                 dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
+ 
         
         private static async Task<int> ExecuteCommandNonQueryAsync(MySqlConnection conn, MySqlCommand command)
         {

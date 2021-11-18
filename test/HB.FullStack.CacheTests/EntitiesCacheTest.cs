@@ -194,7 +194,7 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(oks2.Count(b => b) == 1);
         }
 
-        private async Task AddToDatabaeAsync(IEnumerable<Book> books)
+        private static async Task AddToDatabaeAsync(IEnumerable<Book> books)
         {
             await Db.BatchAddAsync(books, "", GetFakeTransactionContext()).ConfigureAwait(false);
         }

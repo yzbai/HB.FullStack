@@ -55,7 +55,7 @@ namespace HB.FullStack.LockTests
             Assert.IsTrue(locksAcquired.Count == 6);
         }
 
-        private async Task LockWorkAsync(IEnumerable<string> resources, ConcurrentBag<int> locksAcquired)
+        private static async Task LockWorkAsync(IEnumerable<string> resources, ConcurrentBag<int> locksAcquired)
         {
             using var @lock = MemoryLockManager.Lock(
                 "Test",

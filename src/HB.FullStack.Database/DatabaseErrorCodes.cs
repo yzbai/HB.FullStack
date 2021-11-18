@@ -9,6 +9,7 @@ using HB.FullStack.Database.SQL;
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
 [assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
+
 namespace HB.FullStack.Database
 {
     /// <summary>
@@ -40,6 +41,10 @@ namespace HB.FullStack.Database
 
         public static ErrorCode NoSuchProperty { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 21, nameof(NoSuchProperty), "");
         public static ErrorCode KeyValueNotLongOrGuid { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 22, nameof(KeyValueNotLongOrGuid), "");
+
+        public static ErrorCode EntityHasNotSupportedPropertyType { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 23, nameof(EntityHasNotSupportedPropertyType), "");
+
+        public static ErrorCode EntityVersionError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 24, nameof(EntityVersionError), "");
     }
 
     internal static class DatabaseExceptions
@@ -165,8 +170,6 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-
-
         internal static Exception NotWriteable(string type, string database)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.DatabaseNotWriteable);
@@ -190,13 +193,12 @@ namespace HB.FullStack.Database
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UseDateTimeOffsetOnly);
 
-
             return exception;
         }
 
         internal static Exception EntityHasNotSupportedPropertyType(string type, string? propertyTypeName, string propertyName)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityHasNotSupportedPropertyType);
 
             exception.Data["Type"] = type;
             exception.Data["PropertyTypeName"] = propertyTypeName;
@@ -218,7 +220,7 @@ namespace HB.FullStack.Database
 
         internal static Exception EntityVersionError(string type, int version, string cause)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityVersionError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = "Version Error. - " + cause;

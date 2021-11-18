@@ -1,6 +1,8 @@
 ﻿namespace HB.Infrastructure.Redis.Cache
 {
-    internal class LoadedLuas
+#pragma warning disable CA1819 // Properties should not return arrays
+
+    public class LoadedLuas
     {
         public byte[] LoadedGetAndRefreshLua { get; set; } = null!;
         public byte[] LoadedEntityGetAndRefreshByDimensionLua { get; set; } = null!;
@@ -24,9 +26,9 @@
 
         public byte[] LoadedCollectionSetWithTimestampLua { get; internal set; } = null!;
         public byte[] LoadedCollectionRemoveItemWithTimestampLua { get; internal set; } = null!;
-        
+
         public byte[] LoadedCollectionGetAndRefreshWithTimestampLua { get; internal set; } = null!;
-
-
     }
+
+#pragma warning restore CA1819 // Properties should not return arrays
 }

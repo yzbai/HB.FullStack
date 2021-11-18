@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    internal class DefaultApiClient : IApiClient
+    public class DefaultApiClient : IApiClient
     {
         private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
 
@@ -193,6 +193,7 @@ namespace HB.FullStack.Common.ApiClient
 
                     request.SetJwt(_tokenProvider.AccessToken);
                     break;
+
                 default:
                     break;
             }

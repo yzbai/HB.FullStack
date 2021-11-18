@@ -279,7 +279,7 @@ end
 
         public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
         {
-            _logger.LogInformation($"RedisCache初始化完成");
+            Logger.LogInformation($"RedisCache初始化完成");
         }
 
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new()
@@ -307,7 +307,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(GetEntitiesAsync));
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(GetEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -315,7 +315,7 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogGetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+                Logger.LogGetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
 
                 AggregateException? aggregateException = null;
 
@@ -367,11 +367,11 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogCacheInvalidationConcurrencyWithEntities(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
+                        Logger.LogCacheInvalidationConcurrencyWithEntities(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                     else if (rt == 9)
                     {
-                        _logger.LogCacheUpdateVersionConcurrency(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
+                        Logger.LogCacheUpdateVersionConcurrency(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                 }
 
@@ -379,7 +379,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(SetEntitiesAsync));
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(SetEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -410,7 +410,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(RemoveEntitiesAsync));
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(RemoveEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -441,7 +441,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(ForcedRemoveEntitiesAsync));
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(ForcedRemoveEntitiesAsync));
 
                 InitLoadedLuas();
 

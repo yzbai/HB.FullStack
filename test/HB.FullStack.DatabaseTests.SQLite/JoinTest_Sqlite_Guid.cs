@@ -14,7 +14,7 @@ namespace HB.FullStack.DatabaseTests
     public class JoinTest_Sqlite_Guid : BaseTestClass
     {
         [ClassInitialize]
-        public static void ClassInitialize(TestContext testContext)
+        public static void ClassInitialize(TestContext _)
         {
             AddSomeDataAsync(Db).Wait();
         }

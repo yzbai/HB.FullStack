@@ -32,7 +32,7 @@ namespace System
 
             int leapMonth = _cc.GetLeapMonth(nYear);
 
-            return (nYear, (leapMonth != 0 && nMonth >= leapMonth) ? nMonth - 1 : nMonth, nDay, nMonth == leapMonth ? true : false);
+            return (nYear, (leapMonth != 0 && nMonth >= leapMonth) ? nMonth - 1 : nMonth, nDay, nMonth == leapMonth);
         }
 
         /// <summary>
@@ -70,5 +70,4 @@ namespace System
             return dateTimeOffset.AddMinutes(hours * 60 + minutes);
         }
     }
-
 }

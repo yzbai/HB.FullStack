@@ -119,7 +119,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(GetAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(GetAsync));
 
                 InitLoadedLuas();
 
@@ -127,7 +127,7 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogCacheGetError(key, ex);
+                Logger.LogCacheGetError(key, ex);
 
                 AggregateException? aggregateException = null;
 
@@ -188,18 +188,18 @@ return data[3]";
                 }
                 else if (rt == 8)
                 {
-                    _logger.LogCacheInvalidationConcurrencyWithTimestamp(key, utcTicks, options);
+                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(key, utcTicks, options);
                 }
                 else if (rt == 9)
                 {
-                    _logger.LogCacheUpdateTimestampConcurrency(key, utcTicks, options);
+                    Logger.LogCacheUpdateTimestampConcurrency(key, utcTicks, options);
                 }
 
                 return false;
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(SetAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(SetAsync));
 
                 InitLoadedLuas();
 
@@ -245,7 +245,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
 
                 InitLoadedLuas();
 
@@ -297,7 +297,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
 
                 InitLoadedLuas();
 

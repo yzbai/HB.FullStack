@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+using HB.FullStack.Common;
+
 using System;
 using System.Data;
 using System.Globalization;

@@ -120,68 +120,68 @@ namespace HB.Infrastructure.MySQL
         /// <summary>
         /// ExecuteCommandNonQueryAsync
         /// </summary>
-        /// <param name="Transaction"></param>
+        /// <param name="trans"></param>
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <returns></returns>
 
-        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (Transaction == null)
+            if (trans == null)
             {
                 return await MySQLExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), command).ConfigureAwait(false);
             }
             else
             {
-                return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
+                return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
 
         /// <summary>
         /// ExecuteCommandReaderAsync
         /// </summary>
-        /// <param name="Transaction"></param>
+        /// <param name="trans"></param>
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (Transaction == null)
+            if (trans == null)
             {
                 return await MySQLExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
             }
             else
             {
-                return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
+                return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
 
         /// <summary>
         /// ExecuteCommandScalarAsync
         /// </summary>
-        /// <param name="Transaction"></param>
+        /// <param name="trans"></param>
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
 
-        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (Transaction == null)
+            if (trans == null)
             {
                 return await MySQLExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
             }
             else
             {
-                return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
+                return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
 

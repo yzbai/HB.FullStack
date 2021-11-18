@@ -25,7 +25,7 @@ namespace HB.FullStack.Repository
 
         public static string GetCollectionKey<T>() where T : CachedCollectionItem
         {
-            return typeof(T).Name;  
+            return typeof(T).Name;
         }
     }
 
@@ -35,7 +35,6 @@ namespace HB.FullStack.Repository
 
         protected CachedCollectionItem(string itemKey) : base(itemKey)
         {
-
         }
 
         public CachedCollectionItem<TResult> Value(TResult result)
@@ -52,4 +51,3 @@ namespace HB.FullStack.Repository
         }
     }
 }
-

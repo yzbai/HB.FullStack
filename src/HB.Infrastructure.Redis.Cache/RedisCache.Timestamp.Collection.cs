@@ -125,7 +125,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(GetFromCollectionAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(GetFromCollectionAsync));
 
                 InitLoadedLuas();
 
@@ -133,7 +133,7 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogCacheCollectionGetError(collectionKey, itemKey, ex);
+                Logger.LogCacheCollectionGetError(collectionKey, itemKey, ex);
 
                 AggregateException? aggregateException = null;
 
@@ -210,18 +210,18 @@ return data[3]";
                 }
                 else if (rt < 90000)
                 {
-                    _logger.LogCacheInvalidationConcurrencyWithTimestamp(collectionKey, utcTicks, options);
+                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(collectionKey, utcTicks, options);
                 }
                 else
                 {
-                    _logger.LogCacheUpdateTimestampConcurrency(collectionKey, utcTicks, options);
+                    Logger.LogCacheUpdateTimestampConcurrency(collectionKey, utcTicks, options);
                 }
 
                 return false;
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(SetToCollectionAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(SetToCollectionAsync));
 
                 InitLoadedLuas();
 
@@ -282,7 +282,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveFromCollectionAsync));
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveFromCollectionAsync));
 
                 InitLoadedLuas();
 

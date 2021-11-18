@@ -141,7 +141,7 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(cached2!.Version == 2);
         }
 
-        private async Task RetrieveDbAndUpdateCacheAsync(DistributedCacheEntryOptions entryOptions, DatabaseMocker databaseMocker)
+        private static async Task RetrieveDbAndUpdateCacheAsync(DistributedCacheEntryOptions entryOptions, DatabaseMocker databaseMocker)
         {
             //模拟Retrieve data
             VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);
@@ -154,7 +154,7 @@ namespace HB.FullStack.CacheTests
             await Cache.SetAsync(versionData.Guid, versionData, timestamp, entryOptions).ConfigureAwait(false);
         }
 
-        private async Task UpdateDbAndInvalidateCacheAsync(DatabaseMocker databaseMocker)
+        private static async Task UpdateDbAndInvalidateCacheAsync(DatabaseMocker databaseMocker)
         {
             //模拟Update Database
             VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);

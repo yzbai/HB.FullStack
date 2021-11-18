@@ -268,16 +268,15 @@ namespace HB.FullStack.Repository
             CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItem, Cache);
         }
 
-        public void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, UtcNowTicks utcNowTicks)
+        public void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems)
         {
-            CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItems, utcNowTicks, Cache);
+            CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItems, Cache);
         }
 
         public void InvalidateCacheCollection<T>() where T : CachedCollectionItem
         {
             CachedCollectionItemCacheStrategy.InvalidateCacheCollection(CachedCollectionItem.GetCollectionKey<T>(), Cache);
         }
-
 
         #endregion
 
@@ -480,11 +479,11 @@ namespace HB.FullStack.Repository
         }
 
         //public Task<IEnumerable<TEntity>> GetByForeignKeyAsync(
-        //    Expression<Func<TEntity, object>> foreignKeyExp, 
-        //    object foreignKeyValue, 
-        //    TransactionContext? transactionContext, 
-        //    int? page, 
-        //    int? perPage, 
+        //    Expression<Func<TEntity, object>> foreignKeyExp,
+        //    object foreignKeyValue,
+        //    TransactionContext? transactionContext,
+        //    int? page,
+        //    int? perPage,
         //    string? orderBy)
         //{
         //    return Database.RetrieveByForeignKeyAsync(foreignKeyExp, foreignKeyValue, transactionContext, page, perPage, orderBy);

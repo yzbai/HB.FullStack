@@ -21,8 +21,7 @@ namespace HB.FullStack.CommonTests
             Assert.IsNull(entity);
 
             SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out IEnumerable<TestEntity>? entities);
-            Assert.IsTrue(entities!=null && !entities.Any());
-
+            Assert.IsTrue(entities != null && !entities.Any());
 
             Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out TestEntity? entity1));
             Assert.IsNull(entity1);
@@ -92,7 +91,7 @@ namespace HB.FullStack.CommonTests
             }
 
             //moreCollection - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out TestEntity? entity2))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out TestEntity? _))
             {
                 Assert.Fail("moreCollection - item failed");
             }
@@ -124,7 +123,6 @@ namespace HB.FullStack.CommonTests
         {
             string json = "{\"Number\": \"123\", \"Price\": \"12.123456789\"}";
 
-
             NumberTestCls? obj = SerializeUtil.FromJson<NumberTestCls>(json);
 
             NumberTestCls? newtonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<NumberTestCls>(json);
@@ -145,8 +143,6 @@ namespace HB.FullStack.CommonTests
 
             Assert.AreEqual(json, newtonJson);
             _ = SerializeUtil.FromJson<IList<Student>>(json);
-
-
         }
     }
 }

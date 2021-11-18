@@ -67,16 +67,16 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <summary>
         /// StartHandle
         /// </summary>
-        /// <param name="eventType"></param>
+        /// <param name="eventName"></param>
 
-        public void StartHandle(string eventType)
+        public void StartHandle(string eventName)
         {
-            if (!_consumeTaskManagers.ContainsKey(eventType))
+            if (!_consumeTaskManagers.ContainsKey(eventName))
             {
-                throw Exceptions.NoHandler(eventType: eventType);
+                throw Exceptions.NoHandler(eventType: eventName);
             }
 
-            _consumeTaskManagers[eventType].Start();
+            _consumeTaskManagers[eventName].Start();
         }
 
         /// <summary>
@@ -84,20 +84,20 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 开始处理
         /// </summary>
 
-        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public void SubscribeHandler(string brokerName, string eventName, IEventHandler eventHandler)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
             lock (_consumeTaskManagerLocker)
             {
-                if (_consumeTaskManagers.ContainsKey(eventType))
+                if (_consumeTaskManagers.ContainsKey(eventName))
                 {
-                    throw Exceptions.HandlerAlreadyExisted(eventType: eventType, brokerName: brokerName);
+                    throw Exceptions.HandlerAlreadyExisted(eventType: eventName, brokerName: brokerName);
                 }
 
-                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventType, eventHandler, _logger);
+                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventName, eventHandler, _logger);
 
-                _consumeTaskManagers.Add(eventType, consumeTaskManager);
+                _consumeTaskManagers.Add(eventName, consumeTaskManager);
             }
         }
 
@@ -105,21 +105,21 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 停止处理
         /// </summary>
 
-        public async Task UnSubscribeHandlerAsync(string eventType)
+        public async Task UnSubscribeHandlerAsync(string eventyName)
         {
-            await _consumeTaskManagers[eventType].CancelAsync().ConfigureAwait(false);
+            await _consumeTaskManagers[eventyName].CancelAsync().ConfigureAwait(false);
 
-            _consumeTaskManagers[eventType].Dispose();
+            _consumeTaskManagers[eventyName].Dispose();
 
             lock (_consumeTaskManagerLocker)
             {
-                if (!_consumeTaskManagers.ContainsKey(eventType))
+                if (!_consumeTaskManagers.ContainsKey(eventyName))
                 {
-                    throw Exceptions.NoHandler(eventType);
+                    throw Exceptions.NoHandler(eventyName);
                 }
 
                 //_consumeTaskManagers[eventType] = null;
-                _consumeTaskManagers.Remove(eventType);
+                _consumeTaskManagers.Remove(eventyName);
             }
         }
 

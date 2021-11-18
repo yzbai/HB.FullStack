@@ -18,15 +18,15 @@ namespace HB.Infrastructure.Redis.Cache
         protected const int INVALIDATION_VERSION_EXPIRY_SECONDS = 60;
 
         private readonly RedisCacheOptions _options;
-        protected readonly ILogger _logger;
 
         private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
         private readonly IDictionary<string, LoadedLuas> _loadedLuaDict = new Dictionary<string, LoadedLuas>();
+        protected ILogger Logger { get; private set; }
 
         public RedisCacheBase(IOptions<RedisCacheOptions> options, ILogger logger)
         {
             _options = options.Value;
-            _logger = logger;
+            Logger = logger;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
 
             InitLoadedLuas();
@@ -54,7 +54,7 @@ namespace HB.Infrastructure.Redis.Cache
         {
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
-                IServer server = RedisInstanceManager.GetServer(setting, _logger);
+                IServer server = RedisInstanceManager.GetServer(setting, Logger);
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
                     LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP),
@@ -113,7 +113,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
-                return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
+                return await RedisInstanceManager.GetDatabaseAsync(setting, Logger).ConfigureAwait(false);
             }
 
             throw CacheExceptions.InstanceNotFound(instanceName);
@@ -130,7 +130,7 @@ namespace HB.Infrastructure.Redis.Cache
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
-                return RedisInstanceManager.GetDatabase(setting, _logger);
+                return RedisInstanceManager.GetDatabase(setting, Logger);
             }
 
             throw CacheExceptions.InstanceNotFound(instanceName);

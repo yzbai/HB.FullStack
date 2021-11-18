@@ -1,25 +1,24 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Data;
+
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Database.Converter
 {
-    internal class SqliteGuidTypeConverter : ITypeConverter
+    public class Time24HourTypeConverter : ITypeConverter
     {
         public DbType DbType => DbType.String;
 
-        public string Statement => "CHAR(36)";
+        public string Statement => "VARCHAR(10)";
 
         public object DbValueToTypeValue(object dbValue, Type propertyType)
         {
-
-            return new Guid((string)dbValue);
+            return new Time24Hour(dbValue.ToString()!);
         }
 
         public object TypeValueToDbValue(object typeValue, Type propertyType)
         {
-            return ((Guid)typeValue).ToString();
+            return ((Time24Hour)typeValue).ToString();
         }
     }
 }

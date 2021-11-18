@@ -1,6 +1,7 @@
 ﻿using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
+
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -41,7 +42,6 @@ namespace HB.FullStack.Repository
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
                 UtcNowTicks now = TimeUtil.UtcNowTicks;
 
-
                 // 如果TResult是集合类型，可能会存入空集合。而在EntityCache中是不会存入空集合的。
                 //这样设计是合理的，因为EntityCache是按Entity角度，存入的Entity会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
@@ -74,9 +74,9 @@ namespace HB.FullStack.Repository
             cache.SetAsync(cachedItem).Fire();
         }
 
-        internal static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, UtcNowTicks utcNowTicks, ICache cache)
+        internal static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, ICache cache)
         {
-            cache.RemoveAsync(cachedCollectionItems, utcNowTicks).Fire();
+            cache.RemoveAsync(cachedCollectionItems).Fire();
         }
 
         public static void InvalidateCacheCollection(string collectionKey, ICache cache)

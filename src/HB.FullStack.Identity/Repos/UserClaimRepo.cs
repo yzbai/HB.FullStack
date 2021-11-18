@@ -13,13 +13,7 @@ namespace HB.FullStack.Identity
 {
     public class UserClaimRepo : DbEntityRepository<UserClaim>
     {
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="databaseReader"></param>
-        /// <param name="cache"></param>
-        /// <param name="memoryLockManager"></param>
+ 
 
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
