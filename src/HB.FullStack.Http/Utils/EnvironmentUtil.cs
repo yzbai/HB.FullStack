@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using HB.FullStack.WebApi;
+
 using Microsoft.Extensions.Logging;
 
 namespace System
@@ -65,6 +67,20 @@ namespace System
         public static bool IsProduction()
         {
             return "Production".Equals(AspNetCoreEnvironment, StringComparison.Ordinal);
+        }
+
+        public static void EnsureEnvironment()
+        {
+            //检查环境变量
+            if (!EnvironmentUtil.IsAspnetcoreEnvironmentOk())
+            {
+                throw WebApiExceptions.StartupError(value: EnvironmentUtil.AspNetCoreEnvironment, cause: "环境变量ASPNETCORE_ENVIRONMENT设置错误");
+            }
+
+            if (EnvironmentUtil.MachineId.GetValueOrDefault() == 0)
+            {
+                throw WebApiExceptions.StartupError(value: EnvironmentUtil.MachineId, cause: "环境变量MachineId设置错误");
+            }
         }
     }
 }
