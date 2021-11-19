@@ -12,9 +12,9 @@ namespace HB.FullStack.WebApi
 {
     public class PublicResourceTokenService : IPublicResourceTokenService
     {
-        private const string _prefix = "PRT_";
-        private readonly int _tokenlength = 36 + _prefix.Length;
-        private const string _defaultValue = "0";
+        private const string Prefix = "PRT_";
+        private readonly int _tokenlength = 36 + Prefix.Length;
+        private const string DefaultValue = "0";
         private readonly ICache _cache;
         private readonly IDataProtector _dataProtector;
         private readonly ILogger _logger;
@@ -29,11 +29,11 @@ namespace HB.FullStack.WebApi
 
         public async Task<string> GetNewTokenAsync(int expiredSeconds)
         {
-            string token = _prefix + Guid.NewGuid().ToString();
+            string token = Prefix + Guid.NewGuid().ToString();
 
             await _cache.SetStringAsync(
                 token,
-                _defaultValue,
+                DefaultValue,
                 TimeUtil.UtcNowTicks,
                 new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(expiredSeconds) }).ConfigureAwait(false);
 
@@ -53,7 +53,7 @@ namespace HB.FullStack.WebApi
             {
                 unProtectedToken = _dataProtector.Unprotect(protectedToken);
 
-                if (unProtectedToken.IsNullOrEmpty() || unProtectedToken.Length != _tokenlength || !unProtectedToken.StartsWith(_prefix, GlobalSettings.Comparison))
+                if (unProtectedToken.IsNullOrEmpty() || unProtectedToken.Length != _tokenlength || !unProtectedToken.StartsWith(Prefix, GlobalSettings.Comparison))
                 {
                     _logger.LogWarning("UnProtected Failed. May has an attack. {protectedToken}.", protectedToken);
                     return false;

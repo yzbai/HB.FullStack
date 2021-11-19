@@ -1,42 +1,26 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Microsoft.IdentityModel.Tokens;
 namespace HB.FullStack.Identity
 {
     public interface IIdentityService
     {
         string JsonWebKeySetJson { get; }
 
-        
-        
-        
         Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
 
-        
-        
-        
-        
         Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser);
 
-        
         Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
 
-        
         Task SignOutAsync(Guid signInTokenId, string lastUser);
 
-        
-        
-        
         Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
 
         #region Role
-        
-        
+
         Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser);
 
-        
-        
         Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
 
         #endregion

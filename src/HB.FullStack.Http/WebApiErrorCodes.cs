@@ -16,8 +16,6 @@ namespace HB.FullStack.WebApi
         public static ErrorCode ServerUnKownNonErrorCodeError { get; } = new ErrorCode(ErrorCodeStartIds.API + 33, nameof(ServerUnKownNonErrorCodeError), "");
 
         public static ErrorCode GlobalExceptionError { get; } = new ErrorCode(ErrorCodeStartIds.API + 34, nameof(GlobalExceptionError), "");
-
-
     }
 
     public static class WebApiExceptions
@@ -53,6 +51,16 @@ namespace HB.FullStack.WebApi
         public static void LogGlobalException(this ILogger logger, string? path, string? route, string? query, string? content, ErrorCode errorCode, Exception? exception)
         {
             _logGlobalException(logger, path, route, query, content, errorCode, exception);
+        }
+
+        public static void LogStarup(this ILogger logger)
+        {
+            logger.LogInformation($"启动 MyColorfulTime.MainApi, 环境: {EnvironmentUtil.AspNetCoreEnvironment}, MachineId:{EnvironmentUtil.MachineId}");
+        }
+
+        public static void LogCriticalShutDown(this ILogger logger, Exception ex)
+        {
+            logger.LogCritical(ex, "MyColorfulTime.MainApi 因为没有处理的异常，现在关闭!!!!!!!!!!!!!!!!!!!!!.");
         }
     }
 }

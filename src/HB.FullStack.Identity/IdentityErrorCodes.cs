@@ -28,6 +28,7 @@ namespace HB.FullStack.Identity
         public static ErrorCode IdentityAlreadyTaken { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 19, nameof(IdentityAlreadyTaken), "");
         public static ErrorCode ServiceRegisterError { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 20, nameof(ServiceRegisterError), "");
         public static ErrorCode TryRemoveRoleFromUserError { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 21, nameof(TryRemoveRoleFromUserError), "");
+        public static ErrorCode AudienceNotFound { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 22, nameof(AudienceNotFound), "");
     }
 
     internal static class IdentityExceptions
@@ -154,6 +155,14 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
+        internal static Exception AudienceNotFound(SignInContext context)
+        {
+            IdentityException exception = new IdentityException(IdentityErrorCodes.AudienceNotFound);
+            exception.Data["SignInContext"] = SerializeUtil.ToJson(context);
+
+            return exception;
+        }
+
         internal static Exception ServiceRegisterError(string cause)
         {
             IdentityException exception = new IdentityException(IdentityErrorCodes.ServiceRegisterError);
@@ -200,9 +209,10 @@ namespace HB.FullStack.Identity
     public static class IdentityLoggerExtensions
     {
         private static readonly Action<ILogger, Guid, Guid, string?, Exception?> _logTryRemoveRoleFromUserError = LoggerMessage.Define<Guid, Guid, string?>(
-            LogLevel.Error, 
+            LogLevel.Error,
             IdentityErrorCodes.TryRemoveRoleFromUserError.ToEventId(),
             "TryRemoveRoleFromUserError. UserId={UserId}, RoleId={RoleId}, LastUser={LastUser}");
+
         public static void LogTryRemoveRoleFromUserError(this ILogger logger, Guid userId, Guid roleId, string? lastUser, Exception? innerEx)
         {
             _logTryRemoveRoleFromUserError(logger, userId, roleId, lastUser, innerEx);

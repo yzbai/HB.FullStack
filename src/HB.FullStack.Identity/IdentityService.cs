@@ -43,6 +43,8 @@ namespace HB.FullStack.Identity
 
         private SecurityKey _decryptionSecurityKey = null!;
 
+        private HashSet<string> _validAudiences = new HashSet<string>();
+
         public IdentityService(
             IOptions<IdentityOptions> options,
             ILogger<IdentityService> logger,
@@ -72,6 +74,15 @@ namespace HB.FullStack.Identity
             _userActivityEntityRepo = userActivityEntityRepo;
 
             InitializeCredencials();
+
+            //ValidateAudiences
+            if (_options.ValidAudiences != null)
+            {
+                foreach (string audience in _options.ValidAudiences)
+                {
+                    _validAudiences.Add(audience);
+                }
+            }
         }
 
         public string JsonWebKeySetJson => _jsonWebKeySetJson;
@@ -79,6 +90,8 @@ namespace HB.FullStack.Identity
         public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
+
+            EnsureValidateAudience(context);
 
             switch (context.SignInType)
             {
@@ -186,6 +199,14 @@ namespace HB.FullStack.Identity
             }
         }
 
+        private void EnsureValidateAudience(SignInContext context)
+        {
+            if (!_validAudiences.Contains(context.SignToWhere))
+            {
+                throw IdentityExceptions.AudienceNotFound(context);
+            }
+        }
+
         public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
@@ -206,7 +227,13 @@ namespace HB.FullStack.Identity
 
             try
             {
-                claimsPrincipal = JwtHelper.ValidateTokenWithoutLifeCheck(context.AccessToken, _options.OpenIdConnectConfiguration.Issuer, _issuerSigningKeys, _decryptionSecurityKey);
+                claimsPrincipal = JwtHelper.ValidateTokenWithoutLifeCheck(
+                    context.AccessToken,
+                    _options.OpenIdConnectConfiguration.Issuer,
+                    _options.NeedAudienceToBeChecked,
+                    _options.ValidAudiences,
+                    _issuerSigningKeys,
+                    _decryptionSecurityKey);
             }
             catch (Exception ex)
             {
@@ -274,7 +301,7 @@ namespace HB.FullStack.Identity
 
                 // 发布新的AccessToken
 
-                string accessToken = await ConstructJwtAsync(user, signInToken, claimsPrincipal.GetAudience(), transactionContext).ConfigureAwait(false);
+                string accessToken = await ConstructJwtAsync(user, signInToken, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -369,7 +396,7 @@ namespace HB.FullStack.Identity
             await _signInTokenRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string? signToWhere, TransactionContext transactionContext)
+        private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string audience, TransactionContext transactionContext)
         {
             IEnumerable<Role> roles = await _roleRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
             IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
@@ -379,7 +406,7 @@ namespace HB.FullStack.Identity
             string jwt = JwtHelper.BuildJwt(
                 claims,
                 _options.OpenIdConnectConfiguration.Issuer,
-                _options.NeedAudienceToBeChecked ? signToWhere : null,
+                _options.NeedAudienceToBeChecked ? audience : null,
                 _options.SignInOptions.AccessTokenExpireTimeSpan,
                 _signingCredentials,
                 _encryptingCredentials);

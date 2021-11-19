@@ -37,15 +37,8 @@ using System.Threading.Tasks;
 
 namespace System
 {
-    public static class StartupExtensions
+    public static class StartupUtils
     {
-        /// <summary>
-        /// AddDataProtectionWithCertInRedis
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        
         public static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
             DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
@@ -88,13 +81,9 @@ namespace System
         }
 
         /// <summary>
-        /// 
+        /// audience:我是谁，即jwt是颁发给谁的
+        /// authority:当局。我该去向谁核实，即是谁颁发了这个jwt
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="audience">我是谁，即jwt是颁发给谁的</param>
-        /// <param name="authority">当局。我该去向谁核实，即是谁颁发了这个jwt</param>
-        /// <returns></returns>
-        
         public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration,
             Func<JwtBearerChallengeContext, Task> onChallenge,
             Func<TokenValidatedContext, Task> onTokenValidated,
@@ -106,8 +95,8 @@ namespace System
             configuration.Bind(jwtSettings);
 
             X509Certificate2 encryptCert = CertificateUtil.GetCertificateFromSubjectOrFile(
-                jwtSettings.JwtContentCertificateSubject, 
-                jwtSettings.JwtContentCertificateFileName, 
+                jwtSettings.JwtContentCertificateSubject,
+                jwtSettings.JwtContentCertificateFileName,
                 jwtSettings.JwtContentCertificateFilePassword);
 
             return
@@ -119,9 +108,9 @@ namespace System
                 })
                 .AddJwtBearer(jwtOptions =>
                 {
-//#if DEBUG
-//                    jwtOptions.RequireHttpsMetadata = false;
-//#endif
+                    //#if DEBUG
+                    //                    jwtOptions.RequireHttpsMetadata = false;
+                    //#endif
                     jwtOptions.Audience = jwtSettings.Audience;
                     jwtOptions.Authority = jwtSettings.Authority;
                     jwtOptions.TokenValidationParameters = new TokenValidationParameters
@@ -145,19 +134,18 @@ namespace System
                         OnForbidden = onForbidden
                     };
 
-//#if DEBUG
-//                    //这是为了ubuntu这货，在开发阶段不认开发证书。这个http请求，是由jwt audience 发向 jwt authority的。authority配置了正式证书后，就没问题了
-//                    jwtOptions.BackchannelHttpHandler = new HttpClientHandler
-//                    {
-//                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-//                        {
-//                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
-//                                return true;
-//                            return errors == System.Net.Security.SslPolicyErrors.None;
-//                        }
-//                    };
-//#endif
-
+                    //#if DEBUG
+                    //                    //这是为了ubuntu这货，在开发阶段不认开发证书。这个http请求，是由jwt audience 发向 jwt authority的。authority配置了正式证书后，就没问题了
+                    //                    jwtOptions.BackchannelHttpHandler = new HttpClientHandler
+                    //                    {
+                    //                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                    //                        {
+                    //                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                    //                                return true;
+                    //                            return errors == System.Net.Security.SslPolicyErrors.None;
+                    //                        }
+                    //                    };
+                    //#endif
                 });
         }
 
@@ -173,9 +161,8 @@ namespace System
                     //need authenticated by default. no need add [Authorize] everywhere
                     AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
-                    
-                    //options.Filters
 
+                    //options.Filters
                     options.Filters.AddService<UserActivityFilter>();
                 })
                 .AddJsonOptions(options =>
@@ -191,20 +178,12 @@ namespace System
                             ContentTypes = { "application/problem+json" }
                         };
                     };
-
                 }))
                 .PartManager.ApplicationParts.Add(new AssemblyPart(httpFrameworkAssembly));
 
             return services;
         }
 
-        /// <summary>
-        /// InitializeDatabaseAsync
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="lockManager"></param>
-        /// <returns></returns>
-        
         public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
             GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
@@ -231,15 +210,9 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// ThrowIfDatabaseInitLockNotGet
-        /// </summary>
-        /// <param name="databaseNames"></param>
-        
         private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
         {
-            throw WebApiExceptions.DatabaseInitLockError(databases:databaseNames);
+            throw WebApiExceptions.DatabaseInitLockError(databases: databaseNames);
         }
-
     }
 }

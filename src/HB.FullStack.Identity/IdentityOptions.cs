@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -12,7 +11,8 @@ namespace HB.FullStack.Identity
 {
     public class IdentityOptions : IOptions<IdentityOptions>
     {
-        public IdentityOptions Value { get { return this; } }
+        public IdentityOptions Value
+        { get { return this; } }
 
         /// <summary>
         /// 面向用户的要求
@@ -22,6 +22,11 @@ namespace HB.FullStack.Identity
         #region Jwt Options;
 
         public bool NeedAudienceToBeChecked { get; set; } = true;
+
+        /// <summary>
+        /// 接受json并验证的站点
+        /// </summary>
+        public IEnumerable<string>? ValidAudiences { get; set; }
 
         /// <summary>
         /// 签名算法
@@ -47,7 +52,6 @@ namespace HB.FullStack.Identity
         public string? JwtContentCertificateFilePassword { get; set; }
 
         public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; } = new OpenIdConnectConfiguration();
-
 
         /// <summary>
         /// 连续两次请求Refresh最小时间间隔
@@ -78,15 +82,14 @@ namespace HB.FullStack.Identity
     //{
     //    public IdentityOptions Value { get { return this; } }
 
+    //TODO: 考虑是否需要在SecurityStamp改变后，删除SignInToken？
+    //public IdentityEvents Events { get; set; } = new IdentityEvents();
 
-        //TODO: 考虑是否需要在SecurityStamp改变后，删除SignInToken？
-        //public IdentityEvents Events { get; set; } = new IdentityEvents();
-
-        /// <summary>
-        /// 用来查mobile，loginname，email是否重复的布隆表 名称
-        /// </summary>
-        //[Required]
-        //public string BloomFilterName { get; set; } = null!;
+    /// <summary>
+    /// 用来查mobile，loginname，email是否重复的布隆表 名称
+    /// </summary>
+    //[Required]
+    //public string BloomFilterName { get; set; } = null!;
     //}
 
     //public class IdentityEvents
@@ -104,5 +107,4 @@ namespace HB.FullStack.Identity
     //        await _asyncEventManager.RaiseEventAsync(nameof(SecurityStampChanged), context, new EventArgs()).ConfigureAwait(false);
     //    }
     //}
-
 }

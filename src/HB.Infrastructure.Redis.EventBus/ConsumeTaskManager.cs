@@ -18,35 +18,34 @@ namespace HB.Infrastructure.Redis.EventBus
 {
     internal class ConsumeTaskManager : IDisposable
     {
-        private const int _cONSUME_INTERVAL_SECONDS = 5;
-
+        private const int CONSUME_INTERVAL_SECONDS = 5;
 
         /// <summary>
         ///  -- keys = {history_queue, acks_sortedset, queue}
         ///  -- argvs={currentTimestampSeconds, waitSecondsToBeHistory
         /// </summary>
-        private const string _hISTORY_REDIS_SCRIPT = @"
-local rawEvent = redis.call('rpop', KEYS[1]) 
+        private const string HISTORY_REDIS_SCRIPT = @"
+local rawEvent = redis.call('rpop', KEYS[1])
 
 --还没有数据
-if (not rawEvent) then 
-    return 0 
-end 
-local event = cjson.decode(rawEvent) 
-local aliveTime = ARGV[1] - event['Timestamp'] 
-local eid = event['Guid'] 
+if (not rawEvent) then
+    return 0
+end
+local event = cjson.decode(rawEvent)
+local aliveTime = ARGV[1] - event['Timestamp']
+local eid = event['Guid']
 
  --如果太新，就直接放回去，然后返回
-if (aliveTime < ARGV[2] + 0) then 
-    redis.call('rpush', KEYS[1], rawEvent) 
-    return 1 
-end 
+if (aliveTime < ARGV[2] + 0) then
+    redis.call('rpush', KEYS[1], rawEvent)
+    return 1
+end
 
 --如果已存在acks set中，则直接返回
-if (redis.call('zrank', KEYS[2], eid) ~= nil) then 
-    -- 移除acks队列    
-    redis.call('zrem', KEYS[2], eid) 
-    return 2 
+if (redis.call('zrank', KEYS[2], eid) ~= nil) then
+    -- 移除acks队列
+    redis.call('zrem', KEYS[2], eid)
+    return 2
 end
 
 --说明还没有被处理，遗忘了，放回处理队列
@@ -99,12 +98,11 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         {
             IServer server = RedisInstanceManager.GetServer(_instanceSetting, _logger);
 
-            _loadedHistoryLua = server.ScriptLoad(_hISTORY_REDIS_SCRIPT);
+            _loadedHistoryLua = server.ScriptLoad(HISTORY_REDIS_SCRIPT);
         }
 
         private async Task ScanHistoryAsync(CancellationToken cancellationToken)
         {
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -186,7 +184,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// CosumeTaskProcedure
         /// </summary>
 
-
         private async Task CosumeAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
@@ -204,7 +201,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         _logger.LogTrace("ConsumeTask Sleep, {InstanceName}, {eventType}", _instanceSetting.InstanceName, _eventType);
 
-                        await Task.Delay(_cONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
+                        await Task.Delay(CONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
 
                         continue;
                     }
@@ -317,7 +314,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
             //寻找小于stopTimestamp的，删除他们
             await database.SortedSetRemoveRangeByScoreAsync(setName, 0, stopTimestamp).ConfigureAwait(false);
-
         }
 
         #endregion
@@ -325,7 +321,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// <summary>
         /// Cancel
         /// </summary>
-
 
         public async Task CancelAsync()
         {
@@ -356,14 +351,11 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         /// Start
         /// </summary>
 
-
-
         public void Start()
         {
             _consumeTask = CosumeAsync(_consumeTaskCTS.Token);
 
             _consumeTask.Fire();
-
 
             _historyTask = ScanHistoryAsync(_historyTaskCTS.Token);
 
@@ -371,14 +363,13 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         }
 
         #region IDisposable Support
+
         private bool _disposedValue; // To detect redundant calls
 
         /// <summary>
         /// Dispose
         /// </summary>
         /// <param name="disposing"></param>
-
-
 
         protected virtual void Dispose(bool disposing)
         {
@@ -419,4 +410,3 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         #endregion
     }
 }
-

@@ -25,7 +25,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// keys: resource1, resource2, resource3
         /// argv: 3(resource_count), expire_milliseconds, resource1_value, resource2_value, resource3_value
         /// </summary>
-        private const string _lUA_LOCK = @"
+        private const string LUA_LOCK = @"
 if(redis.call('exists', unpack(KEYS)) ~= 0) then
 	return 0
 end
@@ -42,7 +42,7 @@ return 1";
         /// keys: resource1,resource2,resource3
         /// argv:3(resource_count), resource1_value, resource2_value, resource3_value
         /// </summary>
-        private const string _lUA_UNLOCK = @"
+        private const string LUA_UNLOCK = @"
 local count = tonumber(ARGV[1])
 local ok = 1
 for i = 1, count do
@@ -59,7 +59,7 @@ return ok
         /// keys:resource1,resource2,resource3
         /// argv:3(resource_count),expire_milliseconds, resource1_value, resource2_value, resource3_value
         /// </summary>
-        private const string _lUA_EXTEND = @"
+        private const string LUA_EXTEND = @"
 local count = tonumber(ARGV[1])
 
 for i =1, count do
@@ -400,9 +400,9 @@ return 1";
 
             _loadedLuas = new LoadedLuas
             {
-                LoadedLockLua = server.ScriptLoad(_lUA_LOCK),
-                LoadedUnLockLua = server.ScriptLoad(_lUA_UNLOCK),
-                LoadedExtendLua = server.ScriptLoad(_lUA_EXTEND)
+                LoadedLockLua = server.ScriptLoad(LUA_LOCK),
+                LoadedUnLockLua = server.ScriptLoad(LUA_UNLOCK),
+                LoadedExtendLua = server.ScriptLoad(LUA_EXTEND)
             };
         }
 

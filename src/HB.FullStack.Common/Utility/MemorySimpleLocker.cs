@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Common
@@ -19,7 +18,7 @@ namespace HB.FullStack.Common
     /// </summary>
     public class MemorySimpleLocker : ISimpleLocker
     {
-        private const int _maxItems = 100;
+        private const int MaxItems = 100;
 
         /// <summary>
         /// resource : time info
@@ -71,7 +70,7 @@ namespace HB.FullStack.Common
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="resource"></param>
         /// <returns>是否解锁成功</returns>
@@ -86,7 +85,7 @@ namespace HB.FullStack.Common
 
         private void Clear(long now)
         {
-            if (_resourceCount > _maxItems)
+            if (_resourceCount > MaxItems)
             {
                 IEnumerable<string> toRemoveKeys = _resourceExpiryInfoDict
                     .Where(kv => now - kv.Value.Timestamp >= kv.Value.ExpiryMilliseconds)
@@ -100,7 +99,7 @@ namespace HB.FullStack.Common
             }
         }
 
-        class ResourceExpiryInfo
+        private class ResourceExpiryInfo
         {
             public long Timestamp { get; set; }
 

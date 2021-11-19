@@ -15,7 +15,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 {
     public class RedisLock : IDistributedLock
     {
-        private const string _pREFIX = "HBRL_";
+        private const string PREFIX = "HBRL_";
 
         private readonly ILogger _logger;
 
@@ -47,7 +47,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
             foreach (string item in resources)
             {
-                keyResources.Add(_pREFIX + Options.ApplicationName + item);
+                keyResources.Add(PREFIX + Options.ApplicationName + item);
             }
 
             Resources = keyResources;
@@ -70,12 +70,9 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         public bool NotUnlockWhenDispose { get; set; }
 
-
         #region Disposable Pattern
 
         private bool _disposedValue;
-
-
 
         protected virtual void Dispose(bool disposing)
         {
@@ -91,8 +88,6 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
 
-
-
                 //Resources = null!;
                 ResourceValues = null!;
                 _disposedValue = true;
@@ -106,7 +101,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// </summary>
         /// <param name="disposing"></param>
         /// <returns></returns>
-        
+
         protected virtual async ValueTask DisposeAsync(bool disposing)
         {
             _logger.LogDebug("锁开始Dispose，{Resources}", Resources);
@@ -117,12 +112,10 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 {
                     // TODO: dispose managed state (managed objects)
                     await SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).ConfigureAwait(false);
-
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-
 
                 //Resources = null!;
                 ResourceValues = null!;
@@ -150,12 +143,13 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// DisposeAsync
         /// </summary>
         /// <returns></returns>
-        
+
         public async ValueTask DisposeAsync()
         {
             await DisposeAsync(true).ConfigureAwait(false);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

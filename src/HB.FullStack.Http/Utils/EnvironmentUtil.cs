@@ -11,20 +11,19 @@ namespace System
 {
     public static class EnvironmentUtil
     {
-        private const string _hB_FULLSTACK_MACHINE_ID = "HB_FULLSTACK_MACHINE_ID";
-
-        private static string? _aspnetcore_environment;
+        private const string HB_FULLSTACK_MACHINE_ID = "HB_FULLSTACK_MACHINE_ID";
+        private const string ASPNETCORE_ENVIRONMENT = "ASPNETCORE_ENVIRONMENT";
 
         public static string? AspNetCoreEnvironment
         {
             get
             {
-                if (_aspnetcore_environment.IsNullOrEmpty())
-                {
-                    _aspnetcore_environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                }
+                return Environment.GetEnvironmentVariable(ASPNETCORE_ENVIRONMENT);
+            }
 
-                return _aspnetcore_environment;
+            set
+            {
+                Environment.SetEnvironmentVariable(ASPNETCORE_ENVIRONMENT, value);
             }
         }
 
@@ -32,20 +31,14 @@ namespace System
         {
             get
             {
-                string? str = Environment.GetEnvironmentVariable(_hB_FULLSTACK_MACHINE_ID);
+                string? str = Environment.GetEnvironmentVariable(HB_FULLSTACK_MACHINE_ID);
 
-                if (str.IsNullOrEmpty())
-                {
-                    return null;
-                }
-
-                return Convert.ToInt32(str, CultureInfo.InvariantCulture);
+                return str.IsNullOrEmpty() ? null : Convert.ToInt32(str, CultureInfo.InvariantCulture);
             }
-        }
-
-        public static bool IsDevelopment()
-        {
-            return "Development".Equals(AspNetCoreEnvironment, StringComparison.Ordinal);
+            set
+            {
+                Environment.SetEnvironmentVariable(HB_FULLSTACK_MACHINE_ID, value.ToString());
+            }
         }
 
         public static bool IsAspnetcoreEnvironmentOk()
@@ -57,6 +50,11 @@ namespace System
                 "Production" => true,
                 _ => false
             };
+        }
+
+        public static bool IsDevelopment()
+        {
+            return "Development".Equals(AspNetCoreEnvironment, StringComparison.Ordinal);
         }
 
         public static bool IsStaging()
@@ -72,12 +70,12 @@ namespace System
         public static void EnsureEnvironment()
         {
             //检查环境变量
-            if (!EnvironmentUtil.IsAspnetcoreEnvironmentOk())
+            if (!IsAspnetcoreEnvironmentOk())
             {
                 throw WebApiExceptions.StartupError(value: EnvironmentUtil.AspNetCoreEnvironment, cause: "环境变量ASPNETCORE_ENVIRONMENT设置错误");
             }
 
-            if (EnvironmentUtil.MachineId.GetValueOrDefault() == 0)
+            if (MachineId.GetValueOrDefault() == 0)
             {
                 throw WebApiExceptions.StartupError(value: EnvironmentUtil.MachineId, cause: "环境变量MachineId设置错误");
             }
