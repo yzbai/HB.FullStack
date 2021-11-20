@@ -15,7 +15,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
 {
     public class TCaptchaDialog : BaseContentPage
     {
-        private const string _hTML = @"
+        private const string HTML = @"
                 <html>
                 <head>
                     <script src=""https://ssl.captcha.qq.com/TCaptcha.js""></script>
@@ -42,15 +42,16 @@ namespace HB.FullStack.XamarinForms.TCaptcha
 
         public TCaptchaDialog(Func<string?, Task>? poppedDelegate)
         {
-            Content = new StackLayout { 
-                Children = { 
+            Content = new StackLayout
+            {
+                Children = {
                     new HybridWebView{ }.FillExpand().Assign(out _webView)
                 }
             }.FillExpand();
 
             PoppedDelegate = poppedDelegate;
 
-            _webView.Source = new HtmlWebViewSource { Html = _hTML };
+            _webView.Source = new HtmlWebViewSource { Html = HTML };
             _webView.Loaded += WebView_Loaded;
         }
 
@@ -78,7 +79,7 @@ namespace HB.FullStack.XamarinForms.TCaptcha
         {
             base.OnAppearing();
 
-           // Application.Current.ModalPopped += TCaptchaDialog_ModalPopped;
+            // Application.Current.ModalPopped += TCaptchaDialog_ModalPopped;
         }
 
         //private static void TCaptchaDialog_ModalPopped(object sender, ModalPoppedEventArgs e)

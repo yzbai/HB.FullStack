@@ -6,11 +6,12 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
 [assembly: ExportRenderer(typeof(HB.FullStack.XamarinForms.Controls.HybridWebView), typeof(HB.FullStack.XamarinForms.Droid.Renders.HybridWebViewRenderer))]
+
 namespace HB.FullStack.XamarinForms.Droid.Renders
 {
     public class HybridWebViewRenderer : WebViewRenderer
     {
-        const string _jAVASCRIPT_FUNCTION = @"
+        private const string JAVASCRIPT_FUNCTION = @"
             function invokeCSharpAction(data){
                 jsBridge.invokeAction(data);
             }";
@@ -40,7 +41,7 @@ namespace HB.FullStack.XamarinForms.Droid.Renders
                 Control.Settings.JavaScriptEnabled = true;
                 Control.AddJavascriptInterface(new JSBridge(this), "jsBridge");
 
-                Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {_jAVASCRIPT_FUNCTION}"));
+                Control.SetWebViewClient(new JavascriptWebViewClient(this, $"javascript: {JAVASCRIPT_FUNCTION}"));
                 //Control.LoadUrl($"file:///android_asset/Content/{((HybridWebView)Element).Uri}");
 
                 if (Element is HybridWebView hybridWebView)
