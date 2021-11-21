@@ -63,12 +63,9 @@ namespace HB.Infrastructure.Redis.EventBus
             await database.ListLeftPushAsync(QueueName(entity.EventName), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
         }
 
-        //启动Consume线程, 启动History线程
         /// <summary>
-        /// StartHandle
+        /// StartHandle启动Consume线程, 启动History线程
         /// </summary>
-        /// <param name="eventName"></param>
-
         public void StartHandle(string eventName)
         {
             if (!_consumeTaskManagers.ContainsKey(eventName))
@@ -83,7 +80,6 @@ namespace HB.Infrastructure.Redis.EventBus
         /// 每一种事件，只有一次SubscribeHandler的机会。之后再订阅，就报错了。
         /// 开始处理
         /// </summary>
-
         public void SubscribeHandler(string brokerName, string eventName, IEventHandler eventHandler)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
@@ -104,7 +100,6 @@ namespace HB.Infrastructure.Redis.EventBus
         /// <summary>
         /// 停止处理
         /// </summary>
-
         public async Task UnSubscribeHandlerAsync(string eventyName)
         {
             await _consumeTaskManagers[eventyName].CancelAsync().ConfigureAwait(false);
@@ -156,12 +151,6 @@ namespace HB.Infrastructure.Redis.EventBus
                 };
             }
         }
-
-        /// <summary>
-        /// GetRedisInstanceSetting
-        /// </summary>
-        /// <param name="brokerName"></param>
-        /// <returns></returns>
 
         private RedisInstanceSetting GetRedisInstanceSetting(string brokerName)
         {

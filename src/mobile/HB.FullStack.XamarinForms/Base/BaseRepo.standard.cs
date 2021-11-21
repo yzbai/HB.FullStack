@@ -34,7 +34,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (Application.Current is BaseApplication baseApplication)
                 {
-                    ThreadUtil.JoinableTaskFactory.Run(async () => await baseApplication.InitializeTask.ConfigureAwait(false));
+                    JoinableTaskUtil.JoinableTaskFactory.Run(async () => await baseApplication.InitializeTask.ConfigureAwait(false));
                     //baseApplication.InitializeTask.Wait();
                 }
 

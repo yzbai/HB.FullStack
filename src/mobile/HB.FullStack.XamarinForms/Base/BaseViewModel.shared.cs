@@ -16,6 +16,7 @@ namespace HB.FullStack.XamarinForms.Base
     public abstract class BaseViewModel : ObservableObject
     {
         private bool _isBusy;
+
         public bool IsBusy
         {
             get => _isBusy;
@@ -23,6 +24,7 @@ namespace HB.FullStack.XamarinForms.Base
         }
 
         private string _title = string.Empty;
+
         public string Title
         {
             get => _title;
@@ -35,7 +37,7 @@ namespace HB.FullStack.XamarinForms.Base
         /// </summary>
         /// <param name="pageTypeName"></param>
         /// <returns></returns>
-        public virtual Task OnAppearingAsync(string pageTypeName) 
+        public virtual Task OnAppearingAsync(string pageTypeName)
         {
             return Task.CompletedTask;
         }
@@ -63,6 +65,5 @@ namespace HB.FullStack.XamarinForms.Base
         {
             return Application.Current.MainPage.DisplayAlert(title, message, acceptButton, cancelButton);
         }
-
     }
 }

@@ -18,7 +18,7 @@ using Xamarin.CommunityToolkit.ObjectModel;
 
 namespace HB.FullStack.XamarinForms.Skia
 {
-    enum InvalidateSurfaceType
+    internal enum InvalidateSurfaceType
     {
         ByTouch,
         ByTimeTick
@@ -157,15 +157,19 @@ namespace HB.FullStack.XamarinForms.Skia
                 case NotifyCollectionChangedAction.Add:
                     SetSKFigureParent(e.NewItems, this);
                     break;
+
                 case NotifyCollectionChangedAction.Move:
                     break;
+
                 case NotifyCollectionChangedAction.Remove:
                     SetSKFigureParent(e.OldItems, null);
                     break;
+
                 case NotifyCollectionChangedAction.Replace:
                     SetSKFigureParent(e.OldItems, null);
                     SetSKFigureParent(e.NewItems, this);
                     break;
+
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
@@ -332,6 +336,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
 
                     break;
+
                 case SKTouchAction.Moved:
 
                     if (relatedFigure != null)
@@ -344,6 +349,7 @@ namespace HB.FullStack.XamarinForms.Skia
                         }
                     }
                     break;
+
                 case SKTouchAction.Released:
                 case SKTouchAction.Exited:
                 case SKTouchAction.Cancelled:
@@ -360,6 +366,7 @@ namespace HB.FullStack.XamarinForms.Skia
                     }
 
                     break;
+
                 default:
                     break;
             }

@@ -60,7 +60,7 @@ namespace HB.FullStack.XamarinForms.Utils
 
         public static string? Get(string key)
         {
-            return ThreadUtil.JoinableTaskFactory.Run(async () => await GetAsync(key).ConfigureAwait(false));
+            return JoinableTaskUtil.JoinableTaskFactory.Run(async () => await GetAsync(key).ConfigureAwait(false));
         }
 
         static async Task SetAsync(string key, string value)
@@ -89,7 +89,7 @@ namespace HB.FullStack.XamarinForms.Utils
         //TODO: 考虑非异步方法
         public static void Set(string key, string value)
         {
-            ThreadUtil.JoinableTaskFactory.Run(async () => await SetAsync(key, value).ConfigureAwait(false));
+            JoinableTaskUtil.JoinableTaskFactory.Run(async () => await SetAsync(key, value).ConfigureAwait(false));
         }
     }
 }

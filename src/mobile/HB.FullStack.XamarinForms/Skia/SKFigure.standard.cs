@@ -1,5 +1,4 @@
-﻿
-using HB.FullStack.Common;
+﻿using HB.FullStack.Common;
 
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -82,7 +81,8 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public FigureState CurrentState { get; private set; } = FigureState.None;
 
-        public SKPath HitTestPath { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
+        public SKPath HitTestPath
+        { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
 
         protected bool HitTestPathNeedUpdate { get; set; }
 
@@ -164,13 +164,17 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         /// <param name="info"></param>
         /// <param name="canvas"></param>
-        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas) { }
+        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas)
+        { }
 
-        protected virtual void OnUpdateHitTestPath(SKImageInfo info) { }
+        protected virtual void OnUpdateHitTestPath(SKImageInfo info)
+        { }
 
-        protected virtual void OnCaculateOutput() { }
+        protected virtual void OnCaculateOutput()
+        { }
 
-        protected virtual void CaculateMatrixByTime(long elapsedMilliseconds) { }
+        protected virtual void CaculateMatrixByTime(long elapsedMilliseconds)
+        { }
 
         #region OnTouch
 
@@ -440,7 +444,6 @@ namespace HB.FullStack.XamarinForms.Skia
                 OnLongTapped(info);
 
                 Device.BeginInvokeOnMainThread(() => CanvasView?.InvalidateSurface());
-
             }, cancellationToken);
         }
 
@@ -449,7 +452,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return new SKPoint(point.X - CanvasSize.Width * NewCoordinateOriginalRatioPoint.XRatio, point.Y - CanvasSize.Height * NewCoordinateOriginalRatioPoint.YRatio);
         }
 
-        class LongTouchTaskInfo
+        private class LongTouchTaskInfo
         {
             public Task Task { get; set; } = null!;
 
@@ -611,7 +614,6 @@ namespace HB.FullStack.XamarinForms.Skia
         }
 
         #endregion
-
     }
 
     public abstract class SKFigure<TDrawInfo, TData> : SKFigure
@@ -633,7 +635,6 @@ namespace HB.FullStack.XamarinForms.Skia
                     null,
                     BindingMode.OneWay,
                     propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseInitDataChanged());
-
 
         public static BindableProperty ResultDataProperty = BindableProperty.Create(
                     nameof(ResultData),
@@ -739,7 +740,6 @@ namespace HB.FullStack.XamarinForms.Skia
         protected abstract void OnUpdateFigureHitTestPath(SKImageInfo info);
 
         protected abstract void OnCaculateFigureOutput(out TData? newResultData);
-
     }
 
     public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureDrawInfo
@@ -753,7 +753,6 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             //Do nothing
         }
-
     }
 
     public abstract class SKDataFigure<TData> : SKFigure<EmptyDrawInfo, TData> where TData : FigureData
@@ -779,6 +778,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return HashCode.Combine(nameof(EmptyDrawInfo));
         }
     }
+
     public class EmptyData : FigureData
     {
         protected override bool EqualsCore(FigureData other)
