@@ -92,7 +92,7 @@ namespace HB.FullStack.Common.Api.Requests
 
         #endregion
 
-        public GetRequest(Guid id, string? condition) : this(id, ApiAuthType.Jwt, condition)
+        public GetRequest(Guid id, string? condition = null) : this(id, ApiAuthType.Jwt, condition)
         {
         }
 
