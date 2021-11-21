@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using System;
 using System.IO;
 using System.Threading;
@@ -16,17 +17,19 @@ using Java.Util.Zip;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-[assembly: Dependency(typeof(HB.FullStack.XamarinForms.Droid.PlatformHelper))]
+[assembly: Dependency(typeof(HB.FullStack.XamarinForms.Droid.AndroidPlatformHelper))]
+
 namespace HB.FullStack.XamarinForms.Droid
 {
-    public class PlatformHelper : IPlatformHelper
+    public class AndroidPlatformHelper : XamarinForms.Platforms.PlatformHelper
     {
         #region StatusBar
+
         private WindowManagerFlags _orginalFlags;
 
-        public bool IsStatusBarShowing { get; set; } = true;
+        //public bool IsStatusBarShowing { get; set; } = true;
 
-        public void ShowStatusBar()
+        public override void ShowStatusBar()
         {
             if (IsStatusBarShowing)
             {
@@ -42,7 +45,7 @@ namespace HB.FullStack.XamarinForms.Droid
             IsStatusBarShowing = true;
         }
 
-        public void HideStatusBar()
+        public override void HideStatusBar()
         {
             if (!IsStatusBarShowing)
             {
@@ -64,7 +67,7 @@ namespace HB.FullStack.XamarinForms.Droid
 
         #region File
 
-        public async Task<Stream> GetResourceStreamAsync(string resourceName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null)
+        public override async Task<Stream> GetResourceStreamAsync(string resourceName, ResourceType resourceType, string? packageName = null, CancellationToken? cancellationToken = null)
         {
             if (string.IsNullOrEmpty(packageName))
             {
@@ -127,7 +130,6 @@ namespace HB.FullStack.XamarinForms.Droid
 
                 if (await bitmap!.CompressAsync(Android.Graphics.Bitmap.CompressFormat.Png, 100, fileStream).ConfigureAwait(false))
                 {
-
                     await fileStream.FlushAsync().ConfigureAwait(false);
                     return true;
                 }
@@ -139,7 +141,7 @@ namespace HB.FullStack.XamarinForms.Droid
             }
         }
 
-        public async Task UnZipAsync(Stream stream, string directory)
+        public override async Task UnZipAsync(Stream stream, string directory)
         {
             FileUtil.CreateDirectoryIfNotExist(directory);
 
@@ -182,4 +184,5 @@ namespace HB.FullStack.XamarinForms.Droid
         #endregion
     }
 }
+
 #nullable restore

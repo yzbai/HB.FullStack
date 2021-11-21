@@ -234,7 +234,11 @@ namespace HB.FullStack.Database.SQL
 
         public static string GetQuoted(string name)
         {
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
             return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR, GlobalSettings.Comparison) + QUOTED_CHAR;
+#elif NETSTANDARD2_0
+            return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR) + QUOTED_CHAR;
+#endif
         }
 
         public static string GetParameterized(string name)
@@ -451,7 +455,7 @@ namespace HB.FullStack.Database.SQL
                 if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains('(', StringComparison.InvariantCulture))
 #endif
 #if NETSTANDARD2_0
-				if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains("("))
+                if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains("("))
 #endif
                 {
                     if (propertyDef.DbMaxLength == null || propertyDef.DbMaxLength == 0)

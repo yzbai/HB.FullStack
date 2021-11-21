@@ -29,8 +29,7 @@ namespace HB.FullStack.XamarinForms.Base
         private IConfiguration? _configuration;
         private readonly IList<Task> _initializeTasks = new List<Task>();
 
-        public static new BaseApplication Current => (BaseApplication)Application.Current;
-
+        public new static BaseApplication Current => (BaseApplication)Application.Current;
 
 #if DEBUG
         public static string Environment => "Debug";
@@ -88,7 +87,7 @@ namespace HB.FullStack.XamarinForms.Base
             //FileService
             if (VersionTracking.IsFirstLaunchEver)
             {
-                AddInitTask(IFileService.UnzipInitFilesAsync(InitAssetFileName));
+                AddInitTask(FileService.UnzipInitFilesAsync(InitAssetFileName));
             }
         }
 
@@ -153,16 +152,13 @@ namespace HB.FullStack.XamarinForms.Base
             }
             else if (ex is MobileException _)
             {
-
             }
             else if (ex is DatabaseException _)
             {
-
             }
 
             Log(ex, message, logLevel);
         }
-
 
         public abstract void OnOfflineDataUsed();
 
@@ -172,6 +168,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             GlobalSettings.Logger.Log(logLevel, ex, message);
         }
+
         public static void LogDebug(string message, Exception? ex = null)
         {
             Log(ex, message, LogLevel.Debug);

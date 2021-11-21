@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common
@@ -96,10 +97,17 @@ namespace HB.FullStack.Common
         /// </summary>
         public Time24Hour(string timeString)
         {
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
             if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(':', GlobalSettings.Comparison))
             {
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }
+#elif NETSTANDARD2_0
+            if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(":"))
+            {
+                throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
+            }
+#endif
 
             string str = timeString.Trim();
 

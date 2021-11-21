@@ -25,21 +25,24 @@ namespace System
             }
             else
             {
-                int index = urlStr.IndexOf('?', StringComparison.InvariantCulture);
+                int index = urlStr.IndexOf("?", StringComparison.InvariantCulture);
 
-                string oldQuery = index > 0 ? urlStr[(index + 1)..] : "";
+                string oldQuery = index > 0 ? urlStr.Substring(index + 1) : "";
 
                 string? query = AddQuerysCore(oldQuery, parameters);
-                
+
                 if (index > 0)
                 {
-                    return urlStr[..(index + 1)] + query;
+#if NET5_0_OR_GREATER
+                    return string.Concat(urlStr.AsSpan(0, index + 1), query);
+#elif NETSTANDARD2_0 || NETSTANDARD2_1
+                    return urlStr.Substring(0, index + 1) + query;
+#endif
                 }
                 else
                 {
                     return urlStr + "?" + query;
                 }
-
             }
 
             static string? AddQuerysCore(string oldQuery, IDictionary<string, string?> parameters)

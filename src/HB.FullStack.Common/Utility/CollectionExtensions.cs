@@ -102,7 +102,7 @@ namespace System
                     stringBuilder.Append(obj.ToString());
                     stringBuilder.Append(seprator);
                 }
-                else if(nullReplacement != null)
+                else if (nullReplacement != null)
                 {
                     stringBuilder.Append(nullReplacement);
                     stringBuilder.Append(seprator);
@@ -119,7 +119,8 @@ namespace System
 
         public static bool TryToGuids(this string idsString, string seprator, out IList<Guid> guids)
         {
-            string[] ids = idsString.Split(seprator, StringSplitOptions.RemoveEmptyEntries);
+            //string[] ids = idsString.Split(seprator, StringSplitOptions.RemoveEmptyEntries);
+            string[] ids = idsString.Split(new string[] { seprator }, StringSplitOptions.RemoveEmptyEntries);
 
             guids = new List<Guid>(ids.Length);
 

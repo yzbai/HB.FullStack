@@ -72,7 +72,6 @@ namespace HB.Infrastructure.SQLite
             return _connectionStringDict[dbName + "_0"];
         }
 
-
         #endregion
 
         public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
@@ -97,7 +96,6 @@ namespace HB.Infrastructure.SQLite
             return command;
         }
 
-
         #region Command 能力
 
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
@@ -116,7 +114,7 @@ namespace HB.Infrastructure.SQLite
 
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
-            //使用using的话，会同时关闭reader. 
+            //使用using的话，会同时关闭reader.
             //在Microsoft.Data.Sqlite实现中， dipose connection后，会自动dispose command
 #pragma warning disable CA2000 // Dispose objects before losing scope
             SqliteCommand dbCommand = CreateTextCommand(engineCommand);

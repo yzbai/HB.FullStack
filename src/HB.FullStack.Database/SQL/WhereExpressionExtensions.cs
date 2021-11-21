@@ -16,7 +16,7 @@ namespace HB.FullStack.Database.SQL
 
             if (orderBy.IsNotNullOrEmpty())
             {
-                string[] orderNames = orderBy.Trim().Split(',', ' ', StringSplitOptions.RemoveEmptyEntries);
+                string[] orderNames = orderBy.Trim().Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 StringBuilder orderBuilder = new StringBuilder();
 
                 foreach (string orderName in orderNames)

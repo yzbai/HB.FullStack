@@ -22,11 +22,6 @@ namespace HB.FullStack.Database.Entities
         /// </summary>
         private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="databaseEngine"></param>
-        
         public static void Initialize(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
@@ -54,13 +49,6 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        /// <summary>
-        /// WarmUp
-        /// </summary>
-        /// <param name="allEntityTypes"></param>
-        /// <param name="engineType"></param>
-        /// <param name="entitySchemaDict"></param>
-        
         private static void WarmUpEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             foreach (var t in allEntityTypes)
@@ -96,7 +84,11 @@ namespace HB.FullStack.Database.Entities
 
                         if (type.Name.EndsWith(attribute.SuffixToRemove, GlobalSettings.Comparison))
                         {
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
                             entitySchema.TableName += type.Name[..^attribute.SuffixToRemove.Length].ToLower(GlobalSettings.Culture);
+#elif NETSTANDARD2_0
+                            entitySchema.TableName += type.Name.Substring(0, type.Name.Length - attribute.SuffixToRemove.Length).ToLower(GlobalSettings.Culture);
+#endif
                         }
                         else
                         {
@@ -157,7 +149,7 @@ namespace HB.FullStack.Database.Entities
 
         public static EntityDef? GetDef(Type? entityType)
         {
-            if(entityType == null)
+            if (entityType == null)
             {
                 return null;
             }
@@ -170,21 +162,13 @@ namespace HB.FullStack.Database.Entities
             return null;
         }
 
-        /// <summary>
-        /// CreateEntityDef
-        /// </summary>
-        /// <param name="entityType"></param>
-        /// <param name="engineType"></param>
-        /// <param name="entitySchemaDict"></param>
-        /// <returns></returns>
-        
         private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
             if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw DatabaseExceptions.EntityError(type:entityType.FullName,"", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
+                throw DatabaseExceptions.EntityError(type: entityType.FullName, "", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
             }
 
             EntityDef entityDef = new EntityDef
@@ -211,7 +195,7 @@ namespace HB.FullStack.Database.Entities
                 {
                     IgnoreEntityPropertyAttribute? ignoreAttribute = info.GetCustomAttribute<IgnoreEntityPropertyAttribute>(true);
 
-                    if(ignoreAttribute != null)
+                    if (ignoreAttribute != null)
                     {
                         continue;
                     }
@@ -242,15 +226,6 @@ namespace HB.FullStack.Database.Entities
             return entityDef;
         }
 
-        /// <summary>
-        /// CreatePropertyDef
-        /// </summary>
-        /// <param name="entityDef"></param>
-        /// <param name="propertyInfo"></param>
-        /// <param name="propertyAttribute"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        
         private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, EngineType engineType)
         {
             EntityPropertyDef propertyDef = new EntityPropertyDef
@@ -262,11 +237,10 @@ namespace HB.FullStack.Database.Entities
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause:"实体属性缺少Set方法. ");
+                ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
 
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
                 ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
-
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;
             propertyDef.IsNullable = !propertyAttribute.NotNull;

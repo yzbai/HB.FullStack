@@ -12,11 +12,6 @@ namespace HB.FullStack.XamarinForms.Converters
         /// <summary>
         /// Enum to string
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="targetType"></param>
-        /// <param name="parameter"></param>
-        /// <param name="culture"></param>
-        /// <returns></returns>
         public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             return value?.ToString();
@@ -25,19 +20,31 @@ namespace HB.FullStack.XamarinForms.Converters
         /// <summary>
         /// string to enum
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="targetType"></param>
-        /// <param name="parameter"></param>
-        /// <param name="culture"></param>
-        /// <returns></returns>
         public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
+#if NETSTANDARD2_1
             if (value is string str && Enum.TryParse(targetType, str, out object result))
             {
                 return result;
             }
 
             return null;
+#elif NETSTANDARD2_0
+
+            try
+            {
+                if (value is string str)
+                {
+                    return Enum.Parse(targetType, str);
+                }
+
+                return null;
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+#endif
         }
     }
 }

@@ -43,7 +43,7 @@ namespace System.Net.Http
                 {
 #if NET6_0_OR_GREATER
                     string responseString = await responseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-#elif NETSTANDARD2_1
+#elif NETSTANDARD2_1 || NETSTANDARD2_0
                     string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 #endif
 
@@ -66,7 +66,7 @@ namespace System.Net.Http
 #if NET6_0_OR_GREATER
 
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);
-#elif NETSTANDARD2_1
+#elif NETSTANDARD2_1 || NETSTANDARD2_0
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false), responseMessage);
 #endif
         }

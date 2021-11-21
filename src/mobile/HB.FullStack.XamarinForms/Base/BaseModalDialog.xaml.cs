@@ -60,7 +60,7 @@ namespace HB.FullStack.XamarinForms.Base
             }
 
 
-            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
+            await NavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
 
         protected override IList<IBaseContentView?>? GetAllCustomerControls() => null;

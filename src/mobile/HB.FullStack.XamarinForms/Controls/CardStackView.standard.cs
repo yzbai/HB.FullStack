@@ -17,11 +17,14 @@ namespace HB.FullStack.XamarinForms.Controls
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList), typeof(CardStackView), propertyChanged: (b, o, n) => { ((CardStackView)b).OnItemsSourceChanged((IList)o, (IList)n); });
 
         #region Privates
+
         private readonly Grid _root;
         private readonly List<Grid> _cards = new List<Grid>();
         private Grid _lastCard = null!;
         private readonly ICommand _tapCommand;
+
         #endregion
+
         public CardStackView()
         {
             Content = _root = new Grid
@@ -110,7 +113,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
             //交换
             _cards[index] = _lastCard;
-            _cards[^1] = card;
+            _cards[_cards.Count - 1] = card;
 
             _root.Children.Clear();
 
@@ -146,7 +149,6 @@ namespace HB.FullStack.XamarinForms.Controls
                 return;
             }
 
-
             if (CardBackgroundColors.IsNullOrEmpty())
             {
                 GenerateRandomBackgroudColors();
@@ -175,7 +177,6 @@ namespace HB.FullStack.XamarinForms.Controls
                     labelView = new StackLayout();
                 }
 
-
                 Grid card = new Grid
                 {
                     WidthRequest = OneCardWidth
@@ -200,7 +201,6 @@ namespace HB.FullStack.XamarinForms.Controls
 
                 _cards.Add(card);
             }
-
 
             _lastCard = _cards.Last();
             _lastCard.Children[0].Opacity = 1;

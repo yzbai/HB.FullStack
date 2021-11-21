@@ -19,7 +19,6 @@ namespace System
         /// <param name="item"></param>
         /// <returns></returns>
 
-
         public static byte[] GetUTF8Bytes(string item)
         {
             return Encoding.UTF8.GetBytes(item);
@@ -31,8 +30,6 @@ namespace System
         /// <param name="item"></param>
         /// <returns></returns>
 
-
-
         public static string GetUTF8String(byte[] item)
         {
             return Encoding.UTF8.GetString(item);
@@ -43,7 +40,6 @@ namespace System
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-
 
         public static string ToHexString(byte[] bytes)
         {
@@ -231,7 +227,7 @@ namespace System
         public static string RemoveSuffix(this string str, string suffix)
         {
             return str.EndsWith(suffix, GlobalSettings.Comparison)
-                ? str[..^suffix.Length]
+                ? str.Substring(0, str.Length - suffix.Length)
                 : str;
         }
 
@@ -250,7 +246,5 @@ namespace System
             }
             return stringBuilder;
         }
-
-
     }
 }

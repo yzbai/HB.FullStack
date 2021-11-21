@@ -14,14 +14,6 @@ namespace System
 {
     public static class ThrowIf
     {
-
-        /// <summary>
-        /// NotLongId
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         public static long NotLongId(long id, string paramName)
         {
             if (id > 0)
@@ -31,12 +23,6 @@ namespace System
 
             throw new ArgumentException($"不合格 long Id. Parameter:{paramName}");
         }
-        /// <summary>
-        /// Null
-        /// </summary>
-        /// <param name="o"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
 
         [return: NotNull]
         public static T Null<T>([ValidatedNotNull][NotNull] T? o, string paramName) where T : class
@@ -46,12 +32,6 @@ namespace System
 
             return o;
         }
-
-        /// <summary>
-        /// NotValid
-        /// </summary>
-        /// <param name="o"></param>
-        /// <returns></returns>
 
         [return: NotNull]
         public static T NotValid<T>(T o, string paramName) where T : ValidatableObject
@@ -63,13 +43,6 @@ namespace System
 
             return o;
         }
-
-        /// <summary>
-        /// NotValid
-        /// </summary>
-        /// <param name="ts"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
 
         [return: NotNull]
         public static IEnumerable<T> NotValid<T>([ValidatedNotNull] IEnumerable<T> ts, string paramName) where T : ValidatableObject
@@ -88,13 +61,6 @@ namespace System
             return ts;
         }
 
-        /// <summary>
-        /// NullOrEmpty
-        /// </summary>
-        /// <param name="lst"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         [return: NotNull]
         public static IEnumerable<T> NullOrEmpty<T>([ValidatedNotNull][NotNull] IEnumerable<T>? lst, string paramName)
         {
@@ -110,13 +76,6 @@ namespace System
 
             return lst;
         }
-
-        /// <summary>
-        /// NullOrEmpty
-        /// </summary>
-        /// <param name="lst"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
 
         [return: NotNull]
         public static ICollection NullOrEmpty<T>([ValidatedNotNull][NotNull] ICollection? lst, string paramName)
@@ -134,13 +93,6 @@ namespace System
             return lst;
         }
 
-        /// <summary>
-        /// Empty
-        /// </summary>
-        /// <param name="lst"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         public static IEnumerable<T> Empty<T>(IEnumerable<T> lst, string paramName)
         {
             if (!lst.Any())
@@ -153,7 +105,7 @@ namespace System
 
         public static void Empty(ref Guid guid, string paramName)
         {
-            if(guid == Guid.Empty)
+            if (guid == Guid.Empty)
             {
                 throw new ArgumentException($"Empty Guid. Parameter: {paramName}");
             }
@@ -169,13 +121,6 @@ namespace System
             return str;
         }
 
-        /// <summary>
-        /// AnyNull
-        /// </summary>
-        /// <param name="lst"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         [return: NotNull]
         public static IEnumerable<T> AnyNull<T>([ValidatedNotNull][NotNull] IEnumerable<T>? lst, string paramName)
         {
@@ -187,13 +132,6 @@ namespace System
             return lst;
         }
 
-        /// <summary>
-        /// NullOrEmpty
-        /// </summary>
-        /// <param name="o"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         [return: NotNull]
         public static string NullOrEmpty([ValidatedNotNull][NotNull] string? o, string paramName)
         {
@@ -202,16 +140,10 @@ namespace System
                 throw new ArgumentNullException($"Parameter:{ paramName}");
             }
 
+#pragma warning disable CS8777 // net standard 2.0 不能良好识别 string.IsNullOrEmpty
             return o!;
+#pragma warning restore CS8777 // Parameter must have a non-null value when exiting.
         }
-
-        /// <summary>
-        /// NotMobile
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="paramName"></param>
-        /// <param name="canBeNull"></param>
-        /// <returns></returns>
 
         public static string? NotMobile(string? mobile, string paramName, bool canBeNull)
         {
@@ -235,14 +167,6 @@ namespace System
             return mobile;
         }
 
-        /// <summary>
-        /// NotPassword
-        /// </summary>
-        /// <param name="password"></param>
-        /// <param name="paramName"></param>
-        /// <param name="canBeNull"></param>
-        /// <returns></returns>
-
         public static string? NotPassword(string? password, string paramName, bool canBeNull)
         {
             if (canBeNull && password == null)
@@ -257,14 +181,6 @@ namespace System
 
             return password;
         }
-
-        /// <summary>
-        /// NotLoginName
-        /// </summary>
-        /// <param name="loginName"></param>
-        /// <param name="paramName"></param>
-        /// <param name="canBeNull"></param>
-        /// <returns></returns>
 
         public static string? NotLoginName(string? loginName, string paramName, bool canBeNull)
         {
@@ -288,14 +204,6 @@ namespace System
             return loginName;
         }
 
-        /// <summary>
-        /// NotEmail
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="paramName"></param>
-        /// <param name="canBeNull"></param>
-        /// <returns></returns>
-
         public static string? NotEmail(string? email, string paramName, bool canBeNull)
         {
             if (email == null)
@@ -318,14 +226,6 @@ namespace System
             return email;
         }
 
-        /// <summary>
-        /// NotEqual
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         [return: MaybeNull]
         public static string? NotEqual(string? a, string? b, string paramName)
         {
@@ -340,13 +240,6 @@ namespace System
 
     public static class ThrowIfExtensions
     {
-        /// <summary>
-        /// ThrowIfNull
-        /// </summary>
-        /// <param name="o"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class
         {
             if (o == null)
@@ -354,13 +247,6 @@ namespace System
 
             return o;
         }
-
-        /// <summary>
-        /// ThrowIfNullOrNotValid
-        /// </summary>
-        /// <param name="o"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
 
         public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class, ISupportValidate
         {
@@ -375,13 +261,6 @@ namespace System
             return o;
         }
 
-        /// <summary>
-        /// ThrowIfNullOrEmpty
-        /// </summary>
-        /// <param name="o"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         [return: NotNull]
         public static string ThrowIfNullOrEmpty([ValidatedNotNull][NotNull] this string? o, string paramName)
         {
@@ -390,15 +269,10 @@ namespace System
                 throw new ArgumentNullException($"Parameter:{ paramName}");
             }
 
+#pragma warning disable CS8777 // net standard 2.0 不能良好识别string.IsNullOrEmpty()
             return o!;
+#pragma warning restore CS8777 // Parameter must have a non-null value when exiting.
         }
-
-        /// <summary>
-        /// ThrowIfNullOrEmpty
-        /// </summary>
-        /// <param name="dict"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
 
         [return: NotNull]
         public static IDictionary<TKey, TValue> ThrowIfNullOrEmpty<TKey, TValue>([ValidatedNotNull][NotNull] this IDictionary<TKey, TValue>? dict, string paramName)
@@ -411,13 +285,6 @@ namespace System
             return dict;
         }
 
-        /// <summary>
-        /// ThrowIfNullOrEmpty
-        /// </summary>
-        /// <param name="lst"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-
         [return: NotNull]
         public static IEnumerable<T> ThrowIfNullOrEmpty<T>([ValidatedNotNull][NotNull] this IEnumerable<T>? lst, string paramName)
         {
@@ -428,14 +295,6 @@ namespace System
 
             return lst;
         }
-
-        /// <summary>
-        /// ThrowIfNotEqual
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
 
         [return: MaybeNull]
         public static string? ThrowIfNotEqual(this string? a, string? b, string paramName)

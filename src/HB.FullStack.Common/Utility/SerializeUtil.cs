@@ -17,7 +17,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-
 namespace System
 {
     public static class SerializeUtil
@@ -83,7 +82,6 @@ namespace System
             return await JsonSerializer.DeserializeAsync<T>(responseStream, _jsonSerializerOptions).ConfigureAwait(false);
         }
 
-
         public static object? FromJson(Type type, string? jsonString)
         {
             if (jsonString.IsNullOrEmpty())
@@ -137,7 +135,7 @@ namespace System
                 if (_collectionType.IsAssignableFrom(targetType))
                 {
                     //target is collection
-                    if (jsonString != null && jsonString.StartsWith('['))
+                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.InvariantCulture))
                     {
                         target = FromJson<T>(jsonString);
                         return true;
@@ -162,7 +160,7 @@ namespace System
                 }
                 else
                 {
-                    if (jsonString != null && jsonString.StartsWith('['))
+                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.InvariantCulture))
                     {
                         Type genericType = typeof(IEnumerable<>).MakeGenericType(targetType);
 

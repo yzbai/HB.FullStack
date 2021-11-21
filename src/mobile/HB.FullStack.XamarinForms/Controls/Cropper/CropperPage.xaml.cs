@@ -111,7 +111,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
         private async Task CancelAsync()
         {
-            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
+            await NavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
 
         private async Task CropAsync()
@@ -127,7 +127,7 @@ namespace HB.FullStack.XamarinForms.Controls.Cropper
 
             _onCroppFinish(isSucceed);
             
-            await INavigationService.Current.GoBackAsync().ConfigureAwait(false);
+            await NavigationService.Current.GoBackAsync().ConfigureAwait(false);
         }
 
         private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPath)

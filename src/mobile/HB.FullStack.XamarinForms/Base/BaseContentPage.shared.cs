@@ -72,17 +72,17 @@ namespace HB.FullStack.XamarinForms.Base
         {
             get
             {
-                return IPlatformHelper.Current.IsStatusBarShowing;
+                return PlatformHelper.Current.IsStatusBarShowing;
             }
             set
             {
                 if (value)
                 {
-                    IPlatformHelper.Current.ShowStatusBar();
+                    PlatformHelper.Current.ShowStatusBar();
                 }
                 else
                 {
-                    IPlatformHelper.Current.HideStatusBar();
+                    PlatformHelper.Current.HideStatusBar();
                 }
             }
         }

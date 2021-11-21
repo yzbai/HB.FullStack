@@ -160,7 +160,11 @@ namespace System
 
                 using FileStream fileStream = File.Open(fullPath, fileMode);
 
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
                 await fileStream.WriteAsync(data).ConfigureAwait(false);
+#elif NETSTANDARD2_0
+                await fileStream.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
+#endif
 
                 await fileStream.FlushAsync().ConfigureAwait(false);
 
@@ -199,8 +203,6 @@ namespace System
             }
         }
 
-        
-        
         public static byte[] ComputeFileHash(string filePath)
         {
             int runCount = 1;

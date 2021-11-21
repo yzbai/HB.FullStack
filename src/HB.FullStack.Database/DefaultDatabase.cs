@@ -1257,7 +1257,7 @@ namespace HB.FullStack.Database
                 object id = entityDef.IsIdLong ? ((LongIdEntity)(object)item).Id : entityDef.IsIdGuid ? ((GuidEntity)(object)item).Id : "None";
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
-                lastUser = lastUser[..DefaultLengthConventions.MAX_LAST_USER_LENGTH];
+                lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
             }
         }
 
@@ -1267,7 +1267,7 @@ namespace HB.FullStack.Database
             {
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
-                lastUser = lastUser[..DefaultLengthConventions.MAX_LAST_USER_LENGTH];
+                lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
             }
         }
 

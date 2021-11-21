@@ -72,6 +72,11 @@ namespace HB.FullStack.Common.ApiClient
         //    return Task.CompletedTask;
         //}
 
+        public Task<Stream> GetStreamAsync(ApiRequest request)
+        {
+            return GetStreamAsync(request, CancellationToken.None);
+        }
+
         public async Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken)
         {
             if (!request.IsValid())
@@ -118,6 +123,8 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
+        public Task<TResponse?> GetAsync<TResponse>(ApiRequest request) where TResponse : class => GetAsync<TResponse>(request, CancellationToken.None);
+
         public async Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class
         {
             if (!request.IsValid())
@@ -160,6 +167,10 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiClientUnkownError($"ApiClient.SendAsync Failed.", request, ex);
             }
         }
+
+        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyResponse>(request, cancellationToken);
+
+        public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
 
         private void AddTokenInfo(ApiRequest request)
         {

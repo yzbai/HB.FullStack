@@ -103,6 +103,8 @@ namespace HB.FullStack.Common.Api
             return new WrappedStream(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), response);
 #elif NETSTANDARD2_1
 			return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
+#elif NETSTANDARD2_0
+            return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
 #endif
         }
     }
