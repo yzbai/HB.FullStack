@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using MessagePack;
+using MessagePack.Resolvers;
 
 using System.Buffers;
 using System.Buffers.Text;
@@ -212,14 +213,14 @@ namespace System
         public static byte[] Serialize<T>(T? t)
         {
             //MessagePack可以处理null
-            return MessagePackSerializer.Serialize<T>(t!);
+            return MessagePackSerializer.Serialize<T>(t!, ContractlessStandardResolver.Options);
         }
 
         public static IEnumerable<byte[]> Serialize<T>(IEnumerable<T?> ts)
         {
             foreach (T? t in ts)
             {
-                yield return MessagePackSerializer.Serialize<T>(t!);
+                yield return MessagePackSerializer.Serialize<T>(t!, ContractlessStandardResolver.Options);
             }
         }
 
@@ -230,7 +231,7 @@ namespace System
                 return default;
             }
 
-            return MessagePackSerializer.Deserialize<T>(bytes);
+            return MessagePackSerializer.Deserialize<T>(bytes, ContractlessStandardResolver.Options);
         }
 
         public static IEnumerable<T?> Deserialize<T>(IEnumerable<byte[]?> bytess)

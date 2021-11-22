@@ -17,6 +17,8 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
+        private static readonly Version _version20 = new Version(2, 0);
+
         public static async Task<TResponse?> GetResponseAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
         {
             //HttpClient不再 在接受response后主动dispose request content。 所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
@@ -103,7 +105,10 @@ namespace System.Net.Http
                 httpMethod = HttpMethod.Post;
             }
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.GetUrl());
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.GetUrl())
+            {
+                Version = _version20
+            };
 
             foreach (var kv in request.Headers)
             {

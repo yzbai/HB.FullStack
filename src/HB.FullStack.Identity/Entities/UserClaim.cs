@@ -1,13 +1,10 @@
 ﻿using HB.FullStack.Database.Entities;
 
-using MessagePack;
-
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Entities
 {
-    [MessagePackObject]
     public class UserClaim : GuidEntity
     {
         [NoEmptyGuid]

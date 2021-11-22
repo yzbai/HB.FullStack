@@ -1,9 +1,8 @@
 ﻿using HB.FullStack.Database.Entities;
 
-using MessagePack;
-
 using System;
 using System.ComponentModel.DataAnnotations;
+
 using static HB.FullStack.Identity.LengthConventions;
 
 namespace HB.FullStack.Identity.Entities
@@ -11,7 +10,7 @@ namespace HB.FullStack.Identity.Entities
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
-    [MessagePackObject]
+
     public class User : GuidEntity
     {
         [Required]

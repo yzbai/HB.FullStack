@@ -1,10 +1,10 @@
-﻿
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 using System;
 using System.Net.Http;
 using System.Linq;
 using HB.FullStack.Common.ApiClient;
+using System.Net;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -39,6 +39,9 @@ namespace Microsoft.Extensions.DependencyInjection
             //添加默认HttpClient
             services.AddHttpClient(ApiClientOptions.NO_BASEURL_HTTPCLIENT_NAME, httpClient =>
             {
+#if NET5_0_OR_GREATER
+                httpClient.DefaultRequestVersion = HttpVersion.Version20;
+#endif
                 httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
             })
 #if DEBUG
@@ -63,6 +66,9 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 services.AddHttpClient(endpoint.HttpClientName, httpClient =>
                 {
+#if NET5_0_OR_GREATER
+                    httpClient.DefaultRequestVersion = HttpVersion.Version20;
+#endif
                     httpClient.BaseAddress = endpoint.Url;
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
@@ -97,6 +103,5 @@ namespace Microsoft.Extensions.DependencyInjection
             //HttpClientHandler会随着HttpClient Dispose 而Dispose
             services.AddTransient<TokenAutoRefreshedHttpClientHandler>();
         }
-
     }
 }
