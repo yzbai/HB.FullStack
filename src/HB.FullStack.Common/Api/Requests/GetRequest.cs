@@ -24,11 +24,11 @@ namespace HB.FullStack.Common.Api.Requests
 
         #endregion
 
-        protected GetRequest(string? condition) : base(HttpMethod.Get, condition) { }
+        public GetRequest(string? condition = null) : base(HttpMethod.Get, condition) { }
 
-        protected GetRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethod.Get, condition) { }
+        public GetRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethod.Get, condition) { }
 
-        protected GetRequest(ApiAuthType apiAuthType, string? condition) : base(apiAuthType, HttpMethod.Get, condition) { }
+        public GetRequest(ApiAuthType apiAuthType, string? condition) : base(apiAuthType, HttpMethod.Get, condition) { }
 
         protected override string GetUrlCore()
         {

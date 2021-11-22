@@ -13,12 +13,10 @@ namespace HB.FullStack.Identity.Entities
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User), false)]
-        [MessagePack.Key(7)]
         public Guid UserId { get; set; }
 
         [NoEmptyGuid]
         [ForeignKey(typeof(Role), false)]
-        [MessagePack.Key(8)]
         public Guid RoleId { get; set; }
 
         public UserRole()

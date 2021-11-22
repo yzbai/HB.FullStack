@@ -15,11 +15,9 @@ namespace HB.FullStack.Identity.Entities
     {
         [Required]
         [Guid32String(NotNull = true)]
-        [MessagePack.Key(7)]
         public string SecurityStamp { get; set; } = default!;
 
         [Password]
-        [MessagePack.Key(8)]
         public string? PasswordHash { get; set; }
 
         /// <summary>
@@ -28,7 +26,6 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [LoginName]
         [EntityProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
-        [MessagePack.Key(9)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -37,7 +34,6 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [Mobile]
         [EntityProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
-        [MessagePack.Key(10)]
         public string? Mobile { get; set; }
 
         /// <summary>
@@ -45,25 +41,24 @@ namespace HB.FullStack.Identity.Entities
         /// </summary>
         [EmailAddress]
         [EntityProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
-        [MessagePack.Key(11)]
         public string? Email { get; set; }
 
         /// <summary>
         /// "手机号码是否验证"
         /// </summary>
-        [MessagePack.Key(12)]
+
         public bool MobileConfirmed { get; set; }
 
         /// <summary>
         /// "邮箱是否验证"
         /// </summary>
-        [MessagePack.Key(13)]
+
         public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// "Two Factor"
         /// </summary>
-        [MessagePack.Key(14)]
+
         public bool TwoFactorEnabled { get; set; }
 
         public User()

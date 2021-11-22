@@ -59,7 +59,18 @@ namespace HB.FullStack.XamarinForms.Logging
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            throw new NotImplementedException();
+            return new LoggerScope();
         }
     }
+
+    public sealed class LoggerScope:IDisposable
+    {
+        public void Dispose()
+        {
+            
+        }
+
+        
+    }
+
 }

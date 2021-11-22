@@ -51,5 +51,7 @@ namespace HB.FullStack.XamarinForms.Files
         public abstract ObservableTask<ImageSource> GetImageSourceTask(string directory, string fileName, string? defaultFileName, bool remoteForced = false);
 
         public abstract ObservableTask<ImageSource> GetImageSourceTask(string directory, string? initFileName, Func<Task<string?>> getFileNameAsyncFunc, string? defaultFileName, bool remoteForced = false);
+
+
     }
 }

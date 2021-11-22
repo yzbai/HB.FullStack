@@ -81,6 +81,15 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected BaseApplication()
         {
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                //TODO: 设置这个
+
+                ExceptionHandler(e.Exception);
+                e.SetObserved();
+            };
+
             //Version
             VersionTracking.Track();
 
