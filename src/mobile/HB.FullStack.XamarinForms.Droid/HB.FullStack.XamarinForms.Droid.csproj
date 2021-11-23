@@ -91,6 +91,10 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\HB.FullStack.Client\HB.FullStack.Client.csproj">
+      <Project>{076bb4b1-22c7-4c0e-8e16-ef78d76eb319}</Project>
+      <Name>HB.FullStack.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\HB.FullStack.Common\HB.FullStack.Common.csproj">
       <Project>{8549a27a-5de3-44e0-b9c7-0264ac0c6042}</Project>
       <Name>HB.FullStack.Common</Name>

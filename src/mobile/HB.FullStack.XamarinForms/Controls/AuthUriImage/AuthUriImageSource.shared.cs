@@ -89,8 +89,8 @@ namespace HB.FullStack.XamarinForms.Controls
         /// </summary>
         /// <param name="userToken"></param>
         /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
-        /// <exception cref="Exception"></exception>
+        
+        
         [EditorBrowsable(EditorBrowsableState.Never)]
         public async Task<Stream> GetStreamAsync(CancellationToken userToken = default)
         {
@@ -151,7 +151,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// <param name="uri"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
+        
         private async Task<Stream> GetStreamAsync(Uri uri, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -280,7 +280,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// <param name="uri"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
+        
         private async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
             string key = GetCacheKey(uri);

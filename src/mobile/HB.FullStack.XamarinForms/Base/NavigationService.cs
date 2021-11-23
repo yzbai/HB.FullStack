@@ -1,13 +1,7 @@
-﻿using HB.FullStack.XamarinForms.TCaptcha;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 
 namespace HB.FullStack.XamarinForms.Base
 {

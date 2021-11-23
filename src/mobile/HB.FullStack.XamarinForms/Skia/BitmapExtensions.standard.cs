@@ -27,19 +27,13 @@ namespace SkiaSharp
     }
     public static class BitmapExtensions
     {
-        /// <summary>
-        /// LoadBitmapResource
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="resourceID"></param>
-        /// <returns></returns>
-        /// <exception cref="MobileException"></exception>
+ 
         public static SKBitmap LoadBitmapResource(Type type, string resourceID)
         {
             Assembly assembly = type.GetTypeInfo().Assembly;
 
             using Stream stream = assembly.GetManifestResourceStream(resourceID)
-                ?? throw MobileExceptions.ResourceNotFound(resourceId: resourceID);
+                ?? throw ClientExceptions.ResourceNotFound(resourceId: resourceID);
 
             return SKBitmap.Decode(stream);
         }

@@ -13,14 +13,7 @@ namespace HB.FullStack.XamarinForms.Api
 {
     public static class ApiClientTCaptchaExtensions
     {
-        /// <summary>
-        /// GetSingleWithTCaptchaCheckedAsync
-        /// </summary>
-        /// <param name="apiClient"></param>
-        /// <param name="request"></param>
-        /// <param name="onSuccessDelegate"></param>
-        /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
+ 
         public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest request, Func<T?, Task>? onSuccessDelegate) where T : ApiResource2
         {
             try

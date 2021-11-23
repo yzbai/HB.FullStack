@@ -138,7 +138,7 @@ namespace HB.FullStack.CacheTests
         /// </summary>
         /// <param name="books"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private async Task AddToDatabaeAsync(IEnumerable<Book> books)
         {
             await Db.BatchAddAsync(books, "", GetFakeTransactionContext()).ConfigureAwait(false);

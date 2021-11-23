@@ -81,7 +81,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// warning: 不改变items！！！！
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+        
         //public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseEntity, new()
         //{
         //    ThrowIf.NotValid(items, nameof(items));

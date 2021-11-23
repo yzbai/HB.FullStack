@@ -22,7 +22,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="sqliteTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -30,7 +30,7 @@ namespace HB.Infrastructure.SQLite
         }
 
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
@@ -45,7 +45,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="isOwnedConnection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             SqliteDataReader? reader = null;
@@ -96,7 +96,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
@@ -109,7 +109,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="sqliteTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<object?> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -122,7 +122,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="connection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<object?> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
         {
             try
@@ -154,7 +154,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
@@ -169,7 +169,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="sqliteTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
@@ -183,7 +183,7 @@ namespace HB.Infrastructure.SQLite
         /// <param name="conn"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, SqliteCommand command)
         {
             try

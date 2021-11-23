@@ -22,7 +22,7 @@ namespace HB.FullStack.CacheTests
         /// <summary>
         /// 同时有多个线程来update
         /// </summary>
-        /// <exception cref="CacheException"></exception>
+        
         [TestMethod]
         [DataRow(50, 40)]
         [DataRow(null, 20)]

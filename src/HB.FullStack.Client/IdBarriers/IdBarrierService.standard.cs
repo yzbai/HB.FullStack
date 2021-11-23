@@ -3,10 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.XamarinForms.Api;
-using HB.FullStack.XamarinForms.IdBarriers;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database;
@@ -36,9 +33,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             _apiClient = apiClient;
             _transaction = transaction;
         }
-
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="MobileException"></exception>
+ 
         public void Initialize()
         {
             _apiClient.Requesting += OnApiClientRequestingAsync;
@@ -46,8 +41,8 @@ namespace HB.FullStack.XamarinForms.IdBarriers
         }
 
         //TODO: 考虑手工硬编码
-        /// <exception cref="MobileException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         private async Task OnApiClientRequestingAsync(ApiRequest request, ApiEventArgs args)
         {
             if (request.HttpMethod == HttpMethod.Post)
@@ -58,8 +53,8 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             await ChangeIdAsync(request, request.RequestId, request.HttpMethod, ChangeDirection.ToServer).ConfigureAwait(false);
         }
 
-        /// <exception cref="DatabaseException"></exception>
-        /// <exception cref="MobileException"></exception>
+        
+        
         private async Task OnApiClientResponsedAsync(object? sender, ApiEventArgs args)
         {
             if(args.RequestHttpMethod == HttpMethod.Post)
@@ -89,8 +84,8 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-        /// <exception cref="MobileException"></exception>
-        /// <exception cref="DatabaseException"></exception>
+        
+        
         private async Task ChangeIdAsync(object? obj, string requestId, HttpMethod httpMethod, ChangeDirection direction)
         {
             if (obj == null) { return; }
@@ -129,12 +124,12 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 }
                 else
                 {
-                    throw MobileExceptions.IdBarrierError(cause: "Id Barrier碰到无法解析的类型");
+                    throw ClientExceptions.IdBarrierError(cause: "Id Barrier碰到无法解析的类型");
                 }
             }
         }
 
-        /// <exception cref="DatabaseException"></exception>
+        
         private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, HttpMethod httpMethod, ChangeDirection direction, string requestId)
         {
             if (id < 0)
@@ -171,7 +166,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             propertyInfo.SetValue(obj, changedId);
         }
 
-        /// <exception cref="DatabaseException"></exception>
+        
         private Task AddServerIdToClientIdAsync(long serverId, long clientId)
         {
             if (serverId <= 0)
@@ -182,7 +177,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             return _idBarrierRepo.AddIdBarrierAsync(clientId: clientId, serverId: serverId);
         }
 
-        /// <exception cref="DatabaseException"></exception>
+        
         private async Task AddServerIdToClientIdAsync(IEnumerable<long> serverIds, List<long> clientIds)
         {
             List<long> serverAdds = new List<long>();

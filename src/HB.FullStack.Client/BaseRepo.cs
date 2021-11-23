@@ -8,63 +8,62 @@ using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Database;
-using Xamarin.Essentials;
-using Xamarin.Forms;
+//using Xamarin.Essentials;
+//using Xamarin.Forms;
 using Microsoft;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Database.Entities;
 using Microsoft.VisualStudio.Threading;
 using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Client;
+using AsyncAwaitBestPractices;
 
-namespace HB.FullStack.XamarinForms.Base
+namespace HB.FullStack.Client
 {
+    public enum RepoGetMode
+    {
+        None,//Mixed
+        LocalForced,
+        RemoteForced
+    }
+
+    public enum RepoSetMode
+    {
+        None, //Mixed
+        LocalForced,
+        RemoteForced
+    }
+
     public abstract class BaseRepo
     {
-        private static bool _isAppInitTaskFinished;
-
         protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
+        protected IUserPreferenceProvider ApiTokenProvider { get; }
+        protected ConnectivityManager ConnectivityManager { get; }
 
-        protected static void CheckAppInitIsFinished()
+        protected IApiClient ApiClient { get; }
+
+        protected void EnsureLogined()
         {
-            if (!_isAppInitTaskFinished)
+            if (!ApiTokenProvider.IsLogined())
             {
-                if (Application.Current is BaseApplication baseApplication)
-                {
-                    JoinableTaskUtil.JoinableTaskFactory.Run(async () => await baseApplication.InitializeTask.ConfigureAwait(false));
-                    //baseApplication.InitializeTask.Wait();
-                }
-
-                _isAppInitTaskFinished = true;
+                throw ClientExceptions.NotLogined();
             }
         }
 
-        /// <exception cref="ApiException"></exception>
-        protected static void EnsureLogined()
+        protected bool IsInternetConnected(bool throwIfNot = true)
         {
-            if (!UserPreferences.IsLogined)
-            {
-                throw MobileExceptions.NotLogined();
-            }
-        }
+            bool isInternetConnected = ConnectivityManager.IsInternetConnected();
 
-        /// <exception cref="ApiException"></exception>
-        protected static bool EnsureInternet(bool throwIfNot = true)
-        {
-            if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+            if(throwIfNot && !isInternetConnected)
             {
-                if (throwIfNot)
-                {
-                    throw MobileExceptions.NoInternet(cause: "没有联网，且不允许离线");
-                }
-
-                return false;
+                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
             }
 
-            return true;
+            return isInternetConnected;
         }
 
-        /// <exception cref="ApiException"></exception>
+
         protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string entityName)
         {
             if (obj == null)
@@ -73,9 +72,11 @@ namespace HB.FullStack.XamarinForms.Base
             }
         }
 
-        protected BaseRepo()
+        protected BaseRepo(IApiClient apiClient, IUserPreferenceProvider apiTokenProvider, ConnectivityManager connectivityManager)
         {
-            CheckAppInitIsFinished();
+            ApiClient = apiClient;
+            ApiTokenProvider = apiTokenProvider;
+            ConnectivityManager = connectivityManager;
         }
     }
 
@@ -84,9 +85,8 @@ namespace HB.FullStack.XamarinForms.Base
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
     {
         private readonly ILogger _logger;
-        protected IDatabase Database { get; }
 
-        protected IApiClient ApiClient { get; }
+        protected IDatabase Database { get; }
 
         protected TimeSpan LocalDataExpiryTime { get; set; }
 
@@ -96,11 +96,15 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected bool NeedLogined { get; set; }
 
-        protected BaseRepo(ILogger logger, IDatabase database, IApiClient apiClient)
+        protected BaseRepo(
+            ILogger logger,
+            IDatabase database,
+            IApiClient apiClient,
+            IUserPreferenceProvider apiTokenProvider,
+            ConnectivityManager connectivityManager) : base(apiClient, apiTokenProvider, connectivityManager)
         {
             _logger = logger;
             Database = database;
-            ApiClient = apiClient;
 
             LocalDataAttribute? localDataAttribute = typeof(TEntity).GetCustomAttribute<LocalDataAttribute>(true);
 
@@ -160,7 +164,9 @@ namespace HB.FullStack.XamarinForms.Base
             ApiRequest<TRes> request,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.None,
-            WhetherUseLocalData<TEntity>? whetherUseLocalData = null)
+            WhetherUseLocalData<TEntity>? whetherUseLocalData = null,
+            Action<Exception>? onException = null,
+            bool continueOnCapturedContext = false)
         {
             if (NeedLogined)
             {
@@ -172,13 +178,14 @@ namespace HB.FullStack.XamarinForms.Base
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                return new ObservableTask<IEnumerable<TEntity>>(locals, null, BaseApplication.ExceptionHandler);
+                return new ObservableTask<IEnumerable<TEntity>>(locals, null, onException, continueOnCapturedContext);
             }
 
             return new ObservableTask<IEnumerable<TEntity>>(
                 locals,
                 () => SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData ?? DefaultWhetherUseLocalData),
-                BaseApplication.ExceptionHandler);
+                onException,
+                continueOnCapturedContext);
         }
 
         protected async Task<TEntity?> GetFirstOrDefaultAsync(
@@ -198,7 +205,9 @@ namespace HB.FullStack.XamarinForms.Base
             ApiRequest<TRes> request,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.None,
-            WhetherUseLocalData<TEntity>? whetherUseLocalData = null)
+            WhetherUseLocalData<TEntity>? whetherUseLocalData = null,
+            Action<Exception>? onException = null,
+            bool continueOnCapturedContext = false)
         {
             if (NeedLogined)
             {
@@ -210,7 +219,7 @@ namespace HB.FullStack.XamarinForms.Base
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                return new ObservableTask<TEntity?>(locals.FirstOrDefault(), null, BaseApplication.ExceptionHandler);
+                return new ObservableTask<TEntity?>(locals.FirstOrDefault(), null, onException, continueOnCapturedContext);
             }
 
             if (whetherUseLocalData == null)
@@ -221,7 +230,8 @@ namespace HB.FullStack.XamarinForms.Base
             return new ObservableTask<TEntity?>(
                 locals.FirstOrDefault(),
                 async () => (await SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
-                BaseApplication.ExceptionHandler);
+                onException,
+                continueOnCapturedContext);
         }
 
         private async Task<IEnumerable<TEntity>> SyncGetAsync(
@@ -239,11 +249,11 @@ namespace HB.FullStack.XamarinForms.Base
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!EnsureInternet(!AllowOfflineRead))
+            if (!IsInternetConnected(!AllowOfflineRead))
             {
                 _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TEntity).Name);
 
-                OnOfflineDataRead();
+                ConnectivityManager.OnOfflineDataReaded();
 
                 return locals;
             }
@@ -284,7 +294,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             ThrowIf.NotValid(entities, nameof(entities));
 
-            if (EnsureInternet(!AllowOfflineWrite))
+            if (IsInternetConnected(!AllowOfflineWrite))
             {
                 //Remote
                 AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
@@ -305,7 +315,7 @@ namespace HB.FullStack.XamarinForms.Base
         {
             ThrowIf.NotValid(entity, nameof(entity));
 
-            if (EnsureInternet(!AllowOfflineWrite))
+            if (IsInternetConnected(!AllowOfflineWrite))
             {
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 
@@ -361,9 +371,6 @@ namespace HB.FullStack.XamarinForms.Base
                 expiryTime);
         }
 
-        private static void OnOfflineDataRead()
-        {
-            BaseApplication.Current.OnOfflineDataUsed();
-        }
+
     }
 }

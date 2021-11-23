@@ -1,14 +1,12 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using HB.FullStack.XamarinForms.Base;
-
-using HB.FullStack.XamarinForms;
 
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using System;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.XamarinForms.Platforms;
+using HB.FullStack.Common;
 
 namespace HB.FullStack.XamarinForms.Files
 {

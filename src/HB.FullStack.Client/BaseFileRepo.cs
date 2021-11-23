@@ -1,45 +1,30 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HB.FullStack.XamarinForms.Api;
-using HB.FullStack.Common.Api;
-using Xamarin.Forms;
-using System.Net.Http;
+﻿using System.Net.Http;
+
+using HB.FullStack.Client;
 using HB.FullStack.Common;
-using System;
 using HB.FullStack.Common.ApiClient;
 
-namespace HB.FullStack.XamarinForms.Base
+namespace HB.FullStack.Client
 {
     public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource2
     {
-        private static TokenAutoRefreshedHttpClientHandler? _httpClientHandler;
-        private static TokenAutoRefreshedHttpClientHandler HttpClientHandler
+        public TokenAutoRefreshedHttpClientHandler TokenAutoRefreshedHttpClientHandler { get; }
+
+        protected BaseFileRepo(
+            IApiClient apiClient,
+            IUserPreferenceProvider userPreferenceProvider,
+            TokenAutoRefreshedHttpClientHandler tokenAutoRefreshedHttpClientHandler,
+            ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
-            get
-            {
-                if (_httpClientHandler == null)
-                {
-                    _httpClientHandler = DependencyService.Resolve<TokenAutoRefreshedHttpClientHandler>();
-                }
-
-                return _httpClientHandler;
-            }
-        }
-
-        protected IApiClient ApiClient { get; }
-
-        protected BaseFileRepo(IApiClient apiClient)
-        {
-            ApiClient = apiClient;
+            TokenAutoRefreshedHttpClientHandler = tokenAutoRefreshedHttpClientHandler;
         }
 
         protected HttpClient CreateHttpClient()
         {
-            return new HttpClient(HttpClientHandler);
+            return new HttpClient(TokenAutoRefreshedHttpClientHandler);
         }
 
-        /// <exception cref="System.ApiException"></exception>
+
         //public Task UploadAsync(string fileSuffix, byte[] file)
         //{
         //    EnsureInternet();

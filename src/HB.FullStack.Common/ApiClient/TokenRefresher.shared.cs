@@ -12,7 +12,6 @@ using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.ApiClient
 {
-
     public static class TokenRefresher
     {
         private static readonly MemorySimpleLocker _requestLimiter = new MemorySimpleLocker();
@@ -21,14 +20,7 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        /// <summary>
-        /// RefreshAccessTokenAsync
-        /// </summary>
-        /// <param name="apiClient"></param>
-        /// <param name="endpointSettings"></param>
-        /// <returns></returns>
-        
-        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IApiTokenProvider userTokenProvider)
+        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IUserPreferenceProvider userTokenProvider)
         {
             if (userTokenProvider.AccessToken.IsNullOrEmpty())
             {
@@ -118,12 +110,12 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private static void OnRefreshSucceed(AccessTokenResource resource, IApiTokenProvider userTokenProvider)
+        private static void OnRefreshSucceed(AccessTokenResource resource, IUserPreferenceProvider userTokenProvider)
         {
             userTokenProvider.AccessToken = resource.AccessToken;
         }
 
-        private static void OnRefreshFailed(IApiTokenProvider userTokenProvider)
+        private static void OnRefreshFailed(IUserPreferenceProvider userTokenProvider)
         {
             userTokenProvider.OnTokenRefreshFailed();
         }
@@ -171,7 +163,7 @@ namespace HB.FullStack.Common.ApiClient
 
             public override int GetHashCode()
             {
-                return HashCode.Combine( base.GetHashCode(), AccessToken, RefreshToken);
+                return HashCode.Combine(base.GetHashCode(), AccessToken, RefreshToken);
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using HB.FullStack.XamarinForms.Utils;
+﻿using HB.FullStack.Client;
+using HB.FullStack.XamarinForms.Utils;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;

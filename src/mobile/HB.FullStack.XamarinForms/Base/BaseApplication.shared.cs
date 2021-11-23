@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using HB.FullStack.Client;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Api;
@@ -118,7 +119,9 @@ namespace HB.FullStack.XamarinForms.Base
                     builder.AddProvider(new LoggerProvider(MinimumLogLevel));
                 });
 
-                services.AddSingleton<IApiTokenProvider, ApiTokenProvider>();
+                services.AddSingleton<IUserPreferenceProvider, UserPreferenceProvider>();
+                services.AddSingleton<ConnectivityManager, LocalConnectivityManager>();
+                services.AddSingleton<NavigationService, LocalNavigationService>(); 
 
                 RegisterServices(services);
 
@@ -159,7 +162,7 @@ namespace HB.FullStack.XamarinForms.Base
             if (ex is ApiException _)
             {
             }
-            else if (ex is MobileException _)
+            else if (ex is ClientException _)
             {
             }
             else if (ex is DatabaseException _)

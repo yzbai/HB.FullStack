@@ -1,14 +1,9 @@
 ﻿//#nullable disable
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading.Tasks;
 
-using Xamarin.CommunityToolkit.ObjectModel;
-
-namespace HB.FullStack.XamarinForms.Base
+namespace HB.FullStack.Common
 {
     /// <summary>
     /// 这是一个Bindable 的Task，可以让空间binding 这个task，等task完成后，更新结果。
@@ -22,6 +17,8 @@ namespace HB.FullStack.XamarinForms.Base
 
         public Task? TaskCompletion { get; private set; }
 
+        [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "已经判断过TaskStaus为RanToCompletion了")]
+        [SuppressMessage("Usage", "VSTHRD104:Offer async methods", Justification = "已经判断过TaskStaus为RanToCompletion了")]
         public TResult? Result => (Task == null || Task.Status != TaskStatus.RanToCompletion) ? InitialResult : Task.Result;
 
         public TaskStatus Status => Task == null ? TaskStatus.RanToCompletion : Task.Status;

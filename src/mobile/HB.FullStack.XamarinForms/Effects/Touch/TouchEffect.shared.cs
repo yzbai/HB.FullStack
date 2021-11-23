@@ -1,3 +1,5 @@
+using HB.FullStack.Client;
+
 using System;
 
 using Xamarin.Forms;

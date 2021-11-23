@@ -15,6 +15,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.ApiClient
 {
+    /// <summary>
+    /// 保持单例复用
+    /// </summary>
     public class DefaultApiClient : IApiClient
     {
         private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
@@ -22,13 +25,15 @@ namespace HB.FullStack.Common.ApiClient
         private readonly ApiClientOptions _options;
 
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IApiTokenProvider _tokenProvider;
+        private readonly IUserPreferenceProvider _tokenProvider;
 
-        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IApiTokenProvider tokenProvider)
+        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IUserPreferenceProvider tokenProvider)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
             _tokenProvider = tokenProvider;
+
+            GlobalDefaultApiClientAccessor.ApiClient = this;
         }
 
         public JwtEndpointSetting GetDefaultJwtEndpointSetting()

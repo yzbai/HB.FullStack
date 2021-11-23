@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public static class MobileErrorCodes
+    public static class ClientErrorCodes
     {
         public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 0, nameof(ImageOptionsOutOfRange), "");
         public static ErrorCode IdBarrierError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 1, nameof(IdBarrierError), "");
@@ -18,20 +18,20 @@
         public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 13, nameof(UploadError), "");
     }
 
-    public static class MobileExceptions
+    public static class ClientExceptions
     {
-        internal static Exception LocalFileSaveError(string fullPath)
+        public static Exception LocalFileSaveError(string fullPath)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.LocalFileSaveError);
+            ClientException ex = new ClientException(ClientErrorCodes.LocalFileSaveError);
 
             ex.Data["FullPath"] = fullPath;
 
             return ex;
         }
 
-        internal static Exception NoInternet(string cause)
+        public static Exception NoInternet(string cause)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.NoInternet);
+            ClientException ex = new ClientException(ClientErrorCodes.NoInternet);
 
             ex.Data["Cause"] = cause;
 
@@ -40,7 +40,7 @@
 
         public static Exception AliyunOssPutObjectError(string cause, Exception? innerException)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.AliyunOssPutObjectError, innerException);
+            ClientException ex = new ClientException(ClientErrorCodes.AliyunOssPutObjectError, innerException);
 
             ex.Data["Cause"] = cause;
 
@@ -49,7 +49,7 @@
 
         public static Exception FileServiceError(string fileName, string directory, string cause, Exception innerException)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.FileServiceError, innerException);
+            ClientException ex = new ClientException(ClientErrorCodes.FileServiceError, innerException);
 
             ex.Data["FileName"] = fileName;
             ex.Data["Directory"] = directory;
@@ -58,9 +58,9 @@
             return ex;
         }
 
-        internal static Exception ImageOptionsOutOfRange(int selectedIndex, string cause)
+        public static Exception ImageOptionsOutOfRange(int selectedIndex, string cause)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.ImageOptionsOutOfRange);
+            ClientException ex = new ClientException(ClientErrorCodes.ImageOptionsOutOfRange);
 
             ex.Data["SelectedIndex"] = selectedIndex;
             ex.Data["Cause"] = cause;
@@ -68,18 +68,18 @@
             return ex;
         }
 
-        internal static Exception IdBarrierError(string cause)
+        public static Exception IdBarrierError(string cause)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.IdBarrierError);
+            ClientException ex = new ClientException(ClientErrorCodes.IdBarrierError);
 
             ex.Data["Cause"] = cause;
 
             return ex;
         }
 
-        internal static Exception ResourceNotFound(string resourceId)
+        public static Exception ResourceNotFound(string resourceId)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.ResourceNotFound);
+            ClientException ex = new ClientException(ClientErrorCodes.ResourceNotFound);
 
             ex.Data["ResourceId"] = resourceId;
 
@@ -88,7 +88,7 @@
 
         public static Exception AliyunStsTokenOverTime(string casuse, string requestDirectory, bool needWrite)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.AliyunStsTokenOverTime);
+            ClientException ex = new ClientException(ClientErrorCodes.AliyunStsTokenOverTime);
 
             ex.Data["Cause"] = casuse;
             ex.Data["RequestDirectory"] = requestDirectory;
@@ -99,23 +99,23 @@
 
         public static Exception NotLogined()
         {
-            MobileException ex = new MobileException(MobileErrorCodes.NotLogined);
+            ClientException ex = new ClientException(ClientErrorCodes.NotLogined);
 
             return ex;
         }
 
         public static Exception SmsCodeValidateError(string mobile)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.SmsCodeValidateError);
+            ClientException ex = new ClientException(ClientErrorCodes.SmsCodeValidateError);
 
             ex.Data["Mobile"] = mobile;
 
             return ex;
         }
 
-        internal static Exception UploadError(string cause)
+        public static Exception UploadError(string cause)
         {
-            MobileException ex = new MobileException(MobileErrorCodes.UploadError);
+            ClientException ex = new ClientException(ClientErrorCodes.UploadError);
 
             ex.Data["Cause"] = cause;
 

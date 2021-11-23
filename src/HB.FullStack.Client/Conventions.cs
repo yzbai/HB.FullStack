@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.XamarinForms
+namespace HB.FullStack.Client
 {
     /// <summary>
     /// 警告：不要修改
