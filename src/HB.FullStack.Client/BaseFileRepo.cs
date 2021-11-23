@@ -12,7 +12,7 @@ namespace HB.FullStack.Client
 
         protected BaseFileRepo(
             IApiClient apiClient,
-            IUserPreferenceProvider userPreferenceProvider,
+            IPreferenceProvider userPreferenceProvider,
             TokenAutoRefreshedHttpClientHandler tokenAutoRefreshedHttpClientHandler,
             ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {

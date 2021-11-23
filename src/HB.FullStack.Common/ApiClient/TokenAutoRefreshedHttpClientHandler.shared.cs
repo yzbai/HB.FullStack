@@ -16,10 +16,10 @@ namespace HB.FullStack.Common.ApiClient
     public class TokenAutoRefreshedHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
-        private readonly IUserPreferenceProvider _tokenProvider;
+        private readonly IPreferenceProvider _tokenProvider;
         private readonly ApiClientOptions _options;
 
-        public TokenAutoRefreshedHttpClientHandler(IApiClient apiClient, IUserPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
+        public TokenAutoRefreshedHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
             _tokenProvider = tokenProvider;
@@ -77,7 +77,7 @@ namespace HB.FullStack.Common.ApiClient
             return responseMessage;
         }
 
-        private static void AddTokenInfo(HttpRequestMessage request, IUserPreferenceProvider tokenProvider)
+        private static void AddTokenInfo(HttpRequestMessage request, IPreferenceProvider tokenProvider)
         {
             //Jwt
             if (tokenProvider.AccessToken.IsNotNullOrEmpty())

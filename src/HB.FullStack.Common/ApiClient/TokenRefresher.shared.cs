@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IUserPreferenceProvider userTokenProvider)
+        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IPreferenceProvider userTokenProvider)
         {
             if (userTokenProvider.AccessToken.IsNullOrEmpty())
             {
@@ -110,12 +110,12 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private static void OnRefreshSucceed(AccessTokenResource resource, IUserPreferenceProvider userTokenProvider)
+        private static void OnRefreshSucceed(AccessTokenResource resource, IPreferenceProvider userTokenProvider)
         {
             userTokenProvider.AccessToken = resource.AccessToken;
         }
 
-        private static void OnRefreshFailed(IUserPreferenceProvider userTokenProvider)
+        private static void OnRefreshFailed(IPreferenceProvider userTokenProvider)
         {
             userTokenProvider.OnTokenRefreshFailed();
         }

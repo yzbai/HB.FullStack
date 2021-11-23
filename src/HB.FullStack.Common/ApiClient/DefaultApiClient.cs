@@ -25,9 +25,9 @@ namespace HB.FullStack.Common.ApiClient
         private readonly ApiClientOptions _options;
 
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IUserPreferenceProvider _tokenProvider;
+        private readonly IPreferenceProvider _tokenProvider;
 
-        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IUserPreferenceProvider tokenProvider)
+        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider tokenProvider)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;

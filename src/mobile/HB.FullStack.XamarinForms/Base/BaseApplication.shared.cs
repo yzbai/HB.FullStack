@@ -119,7 +119,7 @@ namespace HB.FullStack.XamarinForms.Base
                     builder.AddProvider(new LoggerProvider(MinimumLogLevel));
                 });
 
-                services.AddSingleton<IUserPreferenceProvider, UserPreferenceProvider>();
+                services.AddSingleton<IPreferenceProvider, PreferenceProvider>();
                 services.AddSingleton<ConnectivityManager, LocalConnectivityManager>();
                 services.AddSingleton<NavigationService, LocalNavigationService>(); 
 

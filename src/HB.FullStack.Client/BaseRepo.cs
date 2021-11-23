@@ -38,14 +38,14 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo
     {
         protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
-        protected IUserPreferenceProvider ApiTokenProvider { get; }
+        protected IPreferenceProvider PreferenceProvider { get; }
         protected ConnectivityManager ConnectivityManager { get; }
 
         protected IApiClient ApiClient { get; }
 
         protected void EnsureLogined()
         {
-            if (!ApiTokenProvider.IsLogined())
+            if (!PreferenceProvider.IsLogined())
             {
                 throw ClientExceptions.NotLogined();
             }
@@ -72,10 +72,10 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected BaseRepo(IApiClient apiClient, IUserPreferenceProvider apiTokenProvider, ConnectivityManager connectivityManager)
+        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, ConnectivityManager connectivityManager)
         {
             ApiClient = apiClient;
-            ApiTokenProvider = apiTokenProvider;
+            PreferenceProvider = userPreferenceProvider;
             ConnectivityManager = connectivityManager;
         }
     }
@@ -100,8 +100,8 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
-            IUserPreferenceProvider apiTokenProvider,
-            ConnectivityManager connectivityManager) : base(apiClient, apiTokenProvider, connectivityManager)
+            IPreferenceProvider userPreferenceProvider,
+            ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
             _logger = logger;
             Database = database;

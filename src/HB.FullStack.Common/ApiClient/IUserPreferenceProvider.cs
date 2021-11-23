@@ -1,7 +1,10 @@
-﻿namespace HB.FullStack.Common.ApiClient
+﻿using System;
+
+namespace HB.FullStack.Common.ApiClient
 {
-    public interface IUserPreferenceProvider
+    public interface IPreferenceProvider
     {
+        Guid? UserId { get; set; }
         string? AccessToken { get; set; }
         string? RefreshToken { get; set; }
         string DeviceId { get; }

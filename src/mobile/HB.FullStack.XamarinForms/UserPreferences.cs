@@ -60,7 +60,7 @@ namespace HB.FullStack.XamarinForms
 
                 return _userId;
             }
-            private set
+            set
             {
                 _userId = value;
 
