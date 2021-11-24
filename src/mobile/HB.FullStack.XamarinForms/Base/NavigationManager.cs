@@ -5,17 +5,17 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Base
 {
-    public abstract class NavigationService
+    public abstract class NavigationManager
     {
-        private static NavigationService? _current;
+        private static NavigationManager? _current;
 
-        public static NavigationService Current
+        public static NavigationManager Current
         {
             get
             {
                 if (_current == null)
                 {
-                    _current = DependencyService.Resolve<NavigationService>();
+                    _current = DependencyService.Resolve<NavigationManager>();
                 }
 
                 return _current;

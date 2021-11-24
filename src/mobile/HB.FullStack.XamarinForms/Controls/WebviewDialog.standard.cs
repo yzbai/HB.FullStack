@@ -34,7 +34,7 @@ namespace HB.FullStack.XamarinForms.Controls
             };
             retButton.Clicked += async (sender, e) =>
             {
-                await NavigationService.Current.GoBackAsync().ConfigureAwait(false);
+                await NavigationManager.Current.GoBackAsync().ConfigureAwait(false);
             };
 
 

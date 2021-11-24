@@ -9,7 +9,7 @@ namespace HB.FullStack.Client
     /// <summary>
     /// 警告：不要修改
     /// </summary>
-    public static class Conventions
+    public static class ClientConventions
     {
         public const string MATERIAL_ICON_FONT_FAMILY = "MaterialIcon";
 

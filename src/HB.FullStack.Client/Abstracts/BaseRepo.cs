@@ -110,7 +110,7 @@ namespace HB.FullStack.Client
 
             if (localDataAttribute == null)
             {
-                LocalDataExpiryTime = Conventions.DefaultLocalDataExpiryTime;
+                LocalDataExpiryTime = ClientConventions.DefaultLocalDataExpiryTime;
                 NeedLogined = true;
                 AllowOfflineRead = false;
                 AllowOfflineWrite = false;
@@ -363,7 +363,7 @@ namespace HB.FullStack.Client
 
         private static bool IsRequestRecently(ApiRequest apiRequest)
         {
-            TimeSpan expiryTime = apiRequest.RateLimit ?? Conventions.DefaultApiRequestRateLimit;
+            TimeSpan expiryTime = apiRequest.RateLimit ?? ClientConventions.DefaultApiRequestRateLimit;
 
             return !RequestLocker.NoWaitLock(
                 "request",

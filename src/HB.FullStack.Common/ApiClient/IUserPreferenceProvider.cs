@@ -12,5 +12,6 @@ namespace HB.FullStack.Common.ApiClient
         bool IsLogined();
 
         void OnTokenRefreshFailed();
+        void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
     }
 }

@@ -21,7 +21,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms.Droid
 {
-    public class AndroidPlatformHelper : XamarinForms.Platforms.PlatformHelper
+    public class AndroidPlatformHelper : PlatformHelper
     {
         #region StatusBar
 
@@ -113,12 +113,12 @@ namespace HB.FullStack.XamarinForms.Droid
             return resId;
         }
 
-        public Stream GetAssetStream(string fileName)
+        public override Stream GetAssetStream(string assetFileName)
         {
-            return Platform.CurrentActivity.Assets!.Open(fileName);
+            return Platform.CurrentActivity.Assets!.Open(assetFileName);
         }
 
-        public async Task<bool> SaveAvatarAsync(ImageSource imageSource, string fullPath)
+        public override async Task<bool> SaveImageSourceAsync(ImageSource imageSource, string fullPath)
         {
             try
             {

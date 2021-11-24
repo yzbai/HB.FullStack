@@ -9,7 +9,7 @@ using Xamarin.Forms;
 
 namespace HB.FullStack.XamarinForms
 {
-    public class LocalNavigationService : NavigationService
+    public class XFNavigationManager : NavigationManager
     {
         public override async Task GoBackAsync(bool animated = false)
         {
@@ -27,7 +27,7 @@ namespace HB.FullStack.XamarinForms
             await Shell.Current.GoToAsync(uri, animated).ConfigureAwait(false);
         }
 
-        public override async Task GotoAsync(string uri, IDictionary<string, string> parameters, bool animated =false)
+        public override async Task GotoAsync(string uri, IDictionary<string, string> parameters, bool animated = false)
         {
             string fullUri = BuildUri(uri, parameters);
             await Shell.Current.GoToAsync(fullUri, animated).ConfigureAwait(false);

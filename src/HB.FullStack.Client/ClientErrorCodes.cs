@@ -1,4 +1,6 @@
-﻿namespace System
+﻿using Microsoft.Extensions.Logging;
+
+namespace System
 {
     public static class ClientErrorCodes
     {
@@ -16,6 +18,34 @@
         public static ErrorCode SmsCodeValidateError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 11, nameof(SmsCodeValidateError), "");
         public static ErrorCode NoInternet { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 12, nameof(NoInternet), "");
         public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 13, nameof(UploadError), "");
+
+        public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 14, nameof(DbSimpleLockerNoWaitLockFailed), "");
+    }
+
+    public static class LoggerExtensions
+    {
+        private static Action<ILogger, string?, string?, TimeSpan?, Exception?> _logDbSimpleLockerNoWaitLockFailed = 
+            LoggerMessage.Define<string?, string?, TimeSpan?>(
+                LogLevel.Error, 
+                ClientErrorCodes.DbSimpleLockerNoWaitLockFailed.ToEventId(), 
+                "客户端的DbSimpleLocker不等待Lock失败.ResourceType = {ResourceType}, Resource={Resource}, AvailableTime={AvailableTime}");
+
+        public static void LogDbSimpleLockerNoWaitLockFailed(this ILogger logger, string? resourceType, string? resource, TimeSpan? availableTime, Exception? exception)
+        {
+            _logDbSimpleLockerNoWaitLockFailed(logger, resourceType, resource, availableTime, exception);
+        }
+
+
+        private static Action<ILogger, string?, string?, Exception?> _logDbSimpleLockerUnLockFailed =
+            LoggerMessage.Define<string?, string?>(
+                LogLevel.Error,
+                ClientErrorCodes.DbSimpleLockerNoWaitLockFailed.ToEventId(),
+                "客户端的DbSimpleLocker解锁失败.ResourceType = {ResourceType}, Resource={Resource}");
+
+        public static void LogDbSimpleLockerUnLockFailed(this ILogger logger, string? resourceType, string? resource, Exception? exception)
+        {
+            _logDbSimpleLockerUnLockFailed(logger, resourceType, resource, exception);
+        }
     }
 
     public static class ClientExceptions

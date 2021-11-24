@@ -45,7 +45,7 @@ namespace HB.FullStack.XamarinForms.Api
                     }
                 });
 
-                await NavigationService.Current.GotoAsync(dialog, false).ConfigureAwait(false);
+                await NavigationManager.Current.GotoAsync(dialog, false).ConfigureAwait(false);
             }
         }
     }

@@ -67,7 +67,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
         private async void Confirm_Button_Clicked(object sender, EventArgs e)
         {
-            await NavigationService.Current.GoBackAsync().ConfigureAwait(false);
+            await NavigationManager.Current.GoBackAsync().ConfigureAwait(false);
         }
     }
 }

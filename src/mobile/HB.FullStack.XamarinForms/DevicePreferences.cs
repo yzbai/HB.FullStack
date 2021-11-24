@@ -29,12 +29,12 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceId.IsNullOrEmpty())
                 {
-                    string? stored = PreferenceHelper.Get(Conventions.PREFERENCE_NAME_DEVICEID);
+                    string? stored = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_DEVICEID);
 
                     if (stored.IsNullOrEmpty())
                     {
                         stored = MobileUtils.CreateNewDeviceId();
-                        PreferenceHelper.Set(Conventions.PREFERENCE_NAME_DEVICEID, stored);
+                        PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_DEVICEID, stored);
                     }
 
                     _deviceId = stored;

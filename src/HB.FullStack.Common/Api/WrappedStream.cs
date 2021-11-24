@@ -99,7 +99,7 @@ namespace HB.FullStack.Common.Api
             // the HttpResponseMessage needs to be disposed of after the calling code is done with the stream
             // otherwise the stream may get disposed before the caller can use it
 
-#if NET6_0_OR_GREATER
+#if NET5_0_OR_GREATER
             return new WrappedStream(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), response);
 #elif NETSTANDARD2_1
 			return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);

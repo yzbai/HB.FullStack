@@ -10,7 +10,7 @@ using Xamarin.Essentials;
 
 namespace HB.FullStack.XamarinForms
 {
-    public class LocalConnectivityManager : ConnectivityManager
+    public class XFConnectivityManager : ConnectivityManager
     {
         public override bool IsInternetConnected()
         {

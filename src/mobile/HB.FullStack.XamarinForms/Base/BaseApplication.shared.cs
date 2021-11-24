@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client;
-using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
-using HB.FullStack.XamarinForms.Api;
-using HB.FullStack.XamarinForms.Controls;
-using HB.FullStack.XamarinForms.Files;
 using HB.FullStack.XamarinForms.Logging;
-using HB.FullStack.XamarinForms.Platforms;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +32,6 @@ namespace HB.FullStack.XamarinForms.Base
 #if RELEASE
         public static string Environment => "Release";
 #endif
-
         public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
 
         public IConfiguration Configuration
@@ -93,12 +86,6 @@ namespace HB.FullStack.XamarinForms.Base
 
             //Version
             VersionTracking.Track();
-
-            //FileService
-            if (VersionTracking.IsFirstLaunchEver)
-            {
-                AddInitTask(FileService.UnzipInitFilesAsync(InitAssetFileName));
-            }
         }
 
         protected void InitializeServices(IServiceCollection services)
@@ -119,9 +106,12 @@ namespace HB.FullStack.XamarinForms.Base
                     builder.AddProvider(new LoggerProvider(MinimumLogLevel));
                 });
 
-                services.AddSingleton<IPreferenceProvider, PreferenceProvider>();
-                services.AddSingleton<ConnectivityManager, LocalConnectivityManager>();
-                services.AddSingleton<NavigationService, LocalNavigationService>(); 
+                services.AddSingleton<IPreferenceProvider, XFPreferenceProvider>();
+                services.AddSingleton<ConnectivityManager, XFConnectivityManager>();
+                services.AddSingleton<NavigationManager, XFNavigationManager>();
+                services.AddSingleton<ImageSourceManager>();
+
+                services.AddKV();
 
                 RegisterServices(services);
 
@@ -132,6 +122,13 @@ namespace HB.FullStack.XamarinForms.Base
 
             void ConfigureBaseServices()
             {
+                //FileService
+                if (VersionTracking.IsFirstLaunchEver)
+                {
+                    IFileManager fileManager = DependencyService.Resolve<IFileManager>();
+                    AddInitTask(fileManager.UnzipAssetZipAsync(InitAssetFileName));
+                }
+
                 //Log
                 GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
                 GlobalSettings.MessageExceptionHandler = ExceptionHandler;
