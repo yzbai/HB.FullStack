@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Common
+namespace System
 {
     /// <summary>
     /// 警告：这是NoWaitLock，即两个前程前后或同时抢夺，一个成功，另一个不等待，直接返回，即不保证都能运行。

@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
-using HB.FullStack.Common.Utility;
-using HB.FullStack.Common.Api;
 using System.Collections.Generic;
 using System.Globalization;
 

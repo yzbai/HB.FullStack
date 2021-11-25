@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace HB.FullStack.Common
+namespace System
 {
     /// <summary>
     /// 不存在24：00

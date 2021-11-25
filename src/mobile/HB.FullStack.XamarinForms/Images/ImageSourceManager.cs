@@ -19,17 +19,25 @@ namespace HB.FullStack.XamarinForms
             _fileManager = fileManager;
         }
 
-        public ObservableTask<ImageSource> GetImageSourceTask(string directory, string fileName, string? defaultFileName, bool remoteForced = false)
+        public ObservableTask<ImageSource> GetImageSourceTask(string directory, string? fileName, string defaultFileName, bool remoteForced = false)
         {
-            string localFullPath = _fileManager.GetFullPath(directory, fileName);
+            ImageSource? initImageSource = null;
 
-            ImageSource initImageSource;
-
-            if (File.Exists(localFullPath))
+            if (fileName.IsNotNullOrEmpty())
             {
-                initImageSource = ImageSource.FromFile(localFullPath);
+                string localFullPath = _fileManager.GetFullPath(directory, fileName);
+
+                if (File.Exists(localFullPath))
+                {
+                    initImageSource = ImageSource.FromFile(localFullPath);
+                }
             }
             else
+            {
+                return new ObservableTask<ImageSource>(ImageSource.FromFile(defaultFileName), null);
+            }
+
+            if (initImageSource == null)
             {
                 initImageSource = ImageSource.FromFile(defaultFileName);
             }
@@ -44,7 +52,7 @@ namespace HB.FullStack.XamarinForms
                 });
         }
 
-        public ObservableTask<ImageSource> GetImageSourceTask(string directory, string? initFileName, Func<Task<string?>> getFileNameAsyncFunc, string? defaultFileName, bool remoteForced = false)
+        public ObservableTask<ImageSource> GetImageSourceTask(string directory, string? initFileName, Func<Task<string?>> updateFileNameAsyncFunc, string defaultFileName, bool remoteForced = false)
         {
             ImageSource? initImageSource = null;
 
@@ -63,11 +71,16 @@ namespace HB.FullStack.XamarinForms
                 initImageSource = ImageSource.FromFile(defaultFileName);
             }
 
+            if (updateFileNameAsyncFunc == null)
+            {
+                return new ObservableTask<ImageSource>(initImageSource, null);
+            }
+
             return new ObservableTask<ImageSource>(
                 initImageSource,
                 async () =>
                 {
-                    string? fileName = await getFileNameAsyncFunc().ConfigureAwait(false);
+                    string? fileName = await updateFileNameAsyncFunc().ConfigureAwait(false);
 
                     if (fileName.IsNullOrEmpty())
                     {

@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.XamarinForms.Base;
 using HB.FullStack.XamarinForms.Effects.Touch;
+using HB.FullStack.XamarinForms.Navigation;
 using HB.FullStack.XamarinForms.Platforms;
 using HB.FullStack.XamarinForms.Skia;
 

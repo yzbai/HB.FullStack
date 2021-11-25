@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace HB.FullStack.Common
+namespace System
 {
     //TODO: 考虑国际
     /// <summary>

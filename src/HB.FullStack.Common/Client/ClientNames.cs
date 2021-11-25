@@ -2,6 +2,9 @@
 
 namespace System
 {
+    /// <summary>
+    /// Client与Server沟通时，约定好的默认名称
+    /// </summary>
     public static class ClientNames
     {
         //public const string ACCESS_TOKEN = "AccessToken";

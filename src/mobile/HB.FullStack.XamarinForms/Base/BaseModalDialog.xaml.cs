@@ -10,6 +10,7 @@ using Xamarin.Forms.Xaml;
 using Xamarin.CommunityToolkit.Effects;
 using System.Windows.Input;
 using Xamarin.CommunityToolkit.ObjectModel;
+using HB.FullStack.XamarinForms.Navigation;
 
 namespace HB.FullStack.XamarinForms.Base
 {

@@ -1,5 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.FullStack.XamarinForms.Base;
+using HB.FullStack.XamarinForms.Navigation;
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;

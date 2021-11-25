@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
-namespace HB.FullStack.XamarinForms
+namespace HB.FullStack.XamarinForms.Navigation
 {
     public class XFNavigationManager : NavigationManager
     {

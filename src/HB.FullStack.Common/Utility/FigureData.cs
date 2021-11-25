@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common
+namespace System
 {
     /// <summary>
     /// Figure中的数据与状态

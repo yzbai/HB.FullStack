@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Common.Utility
+namespace System
 {
     public interface IBloomFilter
     {

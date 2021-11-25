@@ -2,7 +2,7 @@
 
 
 
-namespace HB.FullStack.Common
+namespace System
 {
 
     public struct RatioSize : IEquatable<RatioSize>

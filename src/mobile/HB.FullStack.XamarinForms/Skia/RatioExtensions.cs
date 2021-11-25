@@ -3,6 +3,8 @@ using HB.FullStack.Common;
 
 using SkiaSharp;
 
+using System;
+
 namespace HB.FullStack.Common
 {
     public static class RatioExtensions

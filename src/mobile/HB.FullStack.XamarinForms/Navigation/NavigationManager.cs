@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
-namespace HB.FullStack.XamarinForms.Base
+namespace HB.FullStack.XamarinForms.Navigation
 {
     public abstract class NavigationManager
     {

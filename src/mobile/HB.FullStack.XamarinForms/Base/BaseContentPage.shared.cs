@@ -117,6 +117,12 @@ namespace HB.FullStack.XamarinForms.Base
             base.OnAppearing();
 
             IsAppearing = true;
+            
+            //viewmodel
+            if (BindingContext is BaseViewModel viewModel)
+            {
+                await viewModel.OnAppearingAsync(PageTypeName).ConfigureAwait(false);
+            }
 
             //baseContentViews
             IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
@@ -125,7 +131,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 foreach (IBaseContentView? v in customerControls)
                 {
-                    if(v == null)
+                    if (v == null)
                     {
                         GlobalSettings.Logger.LogDebug("######################   Shit happend!");
                     }
@@ -134,11 +140,7 @@ namespace HB.FullStack.XamarinForms.Base
                 }
             }
 
-            //viewmodel
-            if (BindingContext is BaseViewModel viewModel)
-            {
-                await viewModel.OnAppearingAsync(PageTypeName).ConfigureAwait(false);
-            }
+
 
             await ExecuteAppearedAsync().ConfigureAwait(false);
         }

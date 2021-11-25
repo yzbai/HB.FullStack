@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common
+namespace System
 {
     public interface ISimpleLocker
     {

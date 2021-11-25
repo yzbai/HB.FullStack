@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Logging;
+using HB.FullStack.XamarinForms.Navigation;
 
+using Microsoft;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,7 +43,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (_configuration == null)
                 {
-                    _configuration = MobileUtils.GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
+                    _configuration = GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
                 }
 
                 return _configuration;
@@ -186,6 +189,21 @@ namespace HB.FullStack.XamarinForms.Base
         public static void LogError(string message, Exception? ex = null)
         {
             Log(ex, message, LogLevel.Error);
+        }
+
+        public static IConfiguration GetConfiguration(string appsettingsFile, [ValidatedNotNull] Assembly executingAssembly)
+        {
+            ThrowIf.Empty(appsettingsFile, nameof(appsettingsFile));
+
+            string fileName = $"{executingAssembly.FullName!.Split(',')[0]}.{appsettingsFile}";
+
+            using Stream resFileStream = executingAssembly.GetManifestResourceStream(fileName);
+
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+
+            builder.AddJsonStream(resFileStream);
+
+            return builder.Build();
         }
     }
 }

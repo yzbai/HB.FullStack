@@ -12,7 +12,7 @@ namespace HB.FullStack.XamarinForms.Utils
 {
     //TODO: 如果SecurityStorage不支持，改用普通的Preference
     
-    public static class PreferenceHelper
+    internal static class PreferenceHelper
     {
         private static bool? _securityNotSupported;
 

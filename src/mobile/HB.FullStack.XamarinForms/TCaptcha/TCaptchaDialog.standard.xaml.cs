@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.XamarinForms.Base;
 using HB.FullStack.XamarinForms.Controls;
+using HB.FullStack.XamarinForms.Navigation;
 
 using Microsoft.Extensions.Options;
 
