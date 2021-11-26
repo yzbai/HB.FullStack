@@ -17,6 +17,16 @@ namespace HB.FullStack.XamarinForms
 {
     public static class UserPreferences
     {
+        public const string PREFERENCE_NAME_USERID = "wjUfoxCi";
+        public const string PREFERENCE_NAME_USERCREATETIME = "WMIliRIP";
+        public const string PREFERENCE_NAME_MOBILE = "H8YA3d5aj";
+        public const string PREFERENCE_NAME_EMAIL = "B2JG5UN5f";
+        public const string PREFERENCE_NAME_LOGINNAME = "UwsSmhY1";
+        public const string PREFERENCE_NAME_ACCESSTOKEN = "D3SQAAtrv";
+        public const string PREFERENCE_NAME_REFRESHTOKEN = "ZTpMCJQl";
+        public const string PREFERENCE_NAME_INTRODUCEDYET = "BuOMCJ7l";
+        
+
         private static Guid? _userId;
         private static bool _userIdFirstRead = true;
         private static DateTimeOffset? _userCreateTime;
@@ -32,17 +42,16 @@ namespace HB.FullStack.XamarinForms
         private static string _refreshToken = null!;
         private static bool _refreshTokenFirstRead = true;
 
-
         public static bool IsIntroducedYet
         {
             get
             {
-                string? storedValue = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_INTRODUCEDYET);
+                string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_INTRODUCEDYET);
                 return storedValue != null && Convert.ToBoolean(storedValue, CultureInfo.InvariantCulture);
             }
             set
             {
-                PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_INTRODUCEDYET, value.ToString(CultureInfo.InvariantCulture));
+                PreferenceHelper.Set(PREFERENCE_NAME_INTRODUCEDYET, value.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -54,7 +63,7 @@ namespace HB.FullStack.XamarinForms
                 {
                     _userIdFirstRead = false;
 
-                    string? storedValue = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_USERID);
+                    string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_USERID);
                     _userId = storedValue == null ? null : Guid.Parse(storedValue);
                 }
 
@@ -66,7 +75,7 @@ namespace HB.FullStack.XamarinForms
 
                 if (_userId.HasValue)
                 {
-                    PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_USERID, _userId.Value.ToString());
+                    PreferenceHelper.Set(PREFERENCE_NAME_USERID, _userId.Value.ToString());
                 }
             }
         }
@@ -78,7 +87,7 @@ namespace HB.FullStack.XamarinForms
                 if (_userCreateTimeFirstRead && !_userCreateTime.HasValue)
                 {
                     _userCreateTimeFirstRead = false;
-                    string? storedValue = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_USERCREATETIME);
+                    string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_USERCREATETIME);
                     _userCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
                 }
 
@@ -90,7 +99,7 @@ namespace HB.FullStack.XamarinForms
 
                 if (_userCreateTime.HasValue)
                 {
-                    PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_USERCREATETIME, _userCreateTime.Value.ToString(CultureInfo.InvariantCulture));
+                    PreferenceHelper.Set(PREFERENCE_NAME_USERCREATETIME, _userCreateTime.Value.ToString(CultureInfo.InvariantCulture));
                 }
             }
         }
@@ -102,7 +111,7 @@ namespace HB.FullStack.XamarinForms
                 if (_mobileFirstRead && _mobile.IsNullOrEmpty())
                 {
                     _mobileFirstRead = false;
-                    _mobile = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_MOBILE);
+                    _mobile = PreferenceHelper.Get(PREFERENCE_NAME_MOBILE);
                 }
                 return _mobile;
             }
@@ -112,7 +121,7 @@ namespace HB.FullStack.XamarinForms
 
                 if (_mobile.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_MOBILE, _mobile);
+                    PreferenceHelper.Set(PREFERENCE_NAME_MOBILE, _mobile);
                 }
             }
         }
@@ -124,7 +133,7 @@ namespace HB.FullStack.XamarinForms
                 if (_emailFirstRead && _email.IsNullOrEmpty())
                 {
                     _emailFirstRead = false;
-                    _email = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_EMAIL);
+                    _email = PreferenceHelper.Get(PREFERENCE_NAME_EMAIL);
                 }
 
                 return _email;
@@ -135,7 +144,7 @@ namespace HB.FullStack.XamarinForms
 
                 if (_email.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_EMAIL, _email);
+                    PreferenceHelper.Set(PREFERENCE_NAME_EMAIL, _email);
                 }
             }
         }
@@ -147,7 +156,7 @@ namespace HB.FullStack.XamarinForms
                 if (_loginNameFirstRead && _loginName.IsNullOrEmpty())
                 {
                     _loginNameFirstRead = false;
-                    _loginName = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_LOGINNAME);
+                    _loginName = PreferenceHelper.Get(PREFERENCE_NAME_LOGINNAME);
                 }
 
                 return _loginName;
@@ -158,7 +167,7 @@ namespace HB.FullStack.XamarinForms
 
                 if (_loginName.IsNotNullOrEmpty())
                 {
-                    PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_LOGINNAME, _loginName);
+                    PreferenceHelper.Set(PREFERENCE_NAME_LOGINNAME, _loginName);
                 }
             }
         }
@@ -171,7 +180,7 @@ namespace HB.FullStack.XamarinForms
                 {
                     _accessTokenFirstRead = false;
 
-                    string? stored = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_ACCESSTOKEN);
+                    string? stored = PreferenceHelper.Get(PREFERENCE_NAME_ACCESSTOKEN);
 
                     _accessToken = stored ?? "";
                 }
@@ -182,7 +191,7 @@ namespace HB.FullStack.XamarinForms
             {
                 _accessToken = value;
 
-                PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_ACCESSTOKEN, _accessToken);
+                PreferenceHelper.Set(PREFERENCE_NAME_ACCESSTOKEN, _accessToken);
             }
         }
 
@@ -193,7 +202,7 @@ namespace HB.FullStack.XamarinForms
                 if (_refreshTokenFirstRead && _refreshToken.IsNullOrEmpty())
                 {
                     _refreshTokenFirstRead = false;
-                    string? stored = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_REFRESHTOKEN);
+                    string? stored = PreferenceHelper.Get(PREFERENCE_NAME_REFRESHTOKEN);
 
                     _refreshToken = stored ?? "";
                 }
@@ -204,7 +213,7 @@ namespace HB.FullStack.XamarinForms
             {
                 _refreshToken = value;
 
-                PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_REFRESHTOKEN, _refreshToken);
+                PreferenceHelper.Set(PREFERENCE_NAME_REFRESHTOKEN, _refreshToken);
             }
         }
 

@@ -76,7 +76,7 @@
                 Command="{Binding AmPmChangedCommand}"
                 CommandParameter="True"
                 IsVisible="{Binding IsDisplay24HourFormat}"
-                Source="{FontImage FontFamily=MaterialIcon,
+                Source="{FontImage FontFamily=MaterialFont,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronUp},
                                    Color=White}" />
             <ImageButton
@@ -84,7 +84,7 @@
                 Grid.Column="1"
                 Command="{Binding HourChangedCommand}"
                 CommandParameter="True"
-                Source="{FontImage FontFamily=MaterialIcon,
+                Source="{FontImage FontFamily=MaterialFont,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronUp},
                                    Color=White}" />
             <ImageButton
@@ -92,7 +92,7 @@
                 Grid.Column="3"
                 Command="{Binding MinuteChangedCommand}"
                 CommandParameter="True"
-                Source="{FontImage FontFamily=MaterialIcon,
+                Source="{FontImage FontFamily=MaterialFont,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronUp},
                                    Color=White}" />
 
@@ -102,7 +102,7 @@
                 Command="{Binding AmPmChangedCommand}"
                 CommandParameter="False"
                 IsVisible="{Binding IsDisplay24HourFormat}"
-                Source="{FontImage FontFamily=MaterialIcon,
+                Source="{FontImage FontFamily=MaterialFont,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronDown},
                                    Color=White}" />
             <ImageButton
@@ -110,7 +110,7 @@
                 Grid.Column="1"
                 Command="{Binding HourChangedCommand}"
                 CommandParameter="False"
-                Source="{FontImage FontFamily=MaterialIcon,
+                Source="{FontImage FontFamily=MaterialFont,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronDown},
                                    Color=White}" />
             <ImageButton
@@ -118,7 +118,7 @@
                 Grid.Column="3"
                 Command="{Binding MinuteChangedCommand}"
                 CommandParameter="False"
-                Source="{FontImage FontFamily=MaterialIcon,
+                Source="{FontImage FontFamily=MaterialFont,
                                    Glyph={x:Static Member=styles:MaterialFont.ChevronDown},
                                    Color=White}" />
         </Grid>

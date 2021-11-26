@@ -5,6 +5,8 @@ namespace System
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class LocalDataAttribute : Attribute
     {
+        public static readonly TimeSpan DefaultLocalDataExpiryTime = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan DefaultApiRequestRateLimit = TimeSpan.FromMinutes(1);
         public int ExpirySeconds { get; }
 
         public bool AllowOfflineWrite { get; }

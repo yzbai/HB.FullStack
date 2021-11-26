@@ -1,10 +1,15 @@
-﻿using System;
+﻿using HB.FullStack.XamarinForms.Fonts;
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.XamarinForms.Styles
+using Xamarin.Forms;
+
+[assembly: ExportFont("materialdesignicons-webfont.ttf", Alias = nameof(MaterialFont))]
+
+namespace HB.FullStack.XamarinForms.Fonts
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
     public static class MaterialFont
     {
         public const string VectorSquare = "\uf001";

@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<None Remove="Styles\materialdesignicons-webfont.ttf" />
+	<None Remove="Fonts\materialdesignicons-webfont.ttf" />
   </ItemGroup>
 
   <ItemGroup>
-	<EmbeddedResource Include="Styles\materialdesignicons-webfont.ttf" />
+	<EmbeddedResource Include="Fonts\materialdesignicons-webfont.ttf" />
   </ItemGroup>
 
   <ItemGroup>

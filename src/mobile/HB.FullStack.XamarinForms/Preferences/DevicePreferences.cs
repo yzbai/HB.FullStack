@@ -17,6 +17,7 @@ namespace HB.FullStack.XamarinForms
     public static class DevicePreferences
     {
         private const int ADDRESS_REQUEST_INTERVAL_SECONDS = 60;
+        public const string PREFERENCE_NAME_DEVICEID = "dbuKErtT";
 
         private static string? _deviceId;
         private static string? _deviceVersion;
@@ -31,12 +32,12 @@ namespace HB.FullStack.XamarinForms
             {
                 if (_deviceId.IsNullOrEmpty())
                 {
-                    string? stored = PreferenceHelper.Get(ClientConventions.PREFERENCE_NAME_DEVICEID);
+                    string? stored = PreferenceHelper.Get(PREFERENCE_NAME_DEVICEID);
 
                     if (stored.IsNullOrEmpty())
                     {
                         stored = CreateNewDeviceId();
-                        PreferenceHelper.Set(ClientConventions.PREFERENCE_NAME_DEVICEID, stored);
+                        PreferenceHelper.Set(PREFERENCE_NAME_DEVICEID, stored);
                     }
 
                     _deviceId = stored;

@@ -110,7 +110,7 @@ namespace HB.FullStack.Client
 
             if (localDataAttribute == null)
             {
-                LocalDataExpiryTime = ClientConventions.DefaultLocalDataExpiryTime;
+                LocalDataExpiryTime = LocalDataAttribute.DefaultLocalDataExpiryTime;
                 NeedLogined = true;
                 AllowOfflineRead = false;
                 AllowOfflineWrite = false;
@@ -335,9 +335,6 @@ namespace HB.FullStack.Client
         /// <summary>
         /// 本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="locals"></param>
-        /// <returns></returns>
         private bool DefaultWhetherUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
         {
             return
@@ -363,7 +360,7 @@ namespace HB.FullStack.Client
 
         private static bool IsRequestRecently(ApiRequest apiRequest)
         {
-            TimeSpan expiryTime = apiRequest.RateLimit ?? ClientConventions.DefaultApiRequestRateLimit;
+            TimeSpan expiryTime = apiRequest.RateLimit ?? LocalDataAttribute.DefaultApiRequestRateLimit;
 
             return !RequestLocker.NoWaitLock(
                 "request",
