@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -69,7 +70,6 @@ namespace HB.FullStack.Common.ApiClient
                         jwtEndpoint.EndpointName!,
                         jwtEndpoint.Version!,
                         jwtEndpoint.ResName!,
-                        null,
                         userTokenProvider.AccessToken,
                         userTokenProvider.RefreshToken);
 
@@ -112,7 +112,14 @@ namespace HB.FullStack.Common.ApiClient
 
         private static void OnRefreshSucceed(AccessTokenResource resource, IPreferenceProvider userTokenProvider)
         {
-            userTokenProvider.AccessToken = resource.AccessToken;
+            userTokenProvider.OnTokenFetched(
+                resource.UserId,
+                resource.CreatedTime,
+                resource.Mobile,
+                resource.Email,
+                resource.LoginName,
+                resource.AccessToken,
+                resource.RefreshToken);
         }
 
         private static void OnRefreshFailed(IPreferenceProvider userTokenProvider)
@@ -122,11 +129,23 @@ namespace HB.FullStack.Common.ApiClient
 
         private class AccessTokenResource : ApiResource2
         {
+            public Guid UserId { get; set; }
+
+            public string? Mobile { get; set; }
+
+            public string? LoginName { get; set; }
+
+            public string? Email { get; set; }
+
+            public DateTimeOffset CreatedTime { get; set; }
+
             public string AccessToken { get; set; } = null!;
+
+            public string RefreshToken { get; set; } = null!;
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(nameof(AccessTokenResource), AccessToken);
+                return HashCode.Combine(nameof(AccessTokenResource), AccessToken, RefreshToken, UserId, Mobile, LoginName, Email, CreatedTime);
             }
         }
 
@@ -140,7 +159,6 @@ namespace HB.FullStack.Common.ApiClient
                 string? endPointName,
                 string? apiVersion,
                 string? resName,
-                TimeSpan? rateLimit,
                 string accessToken,
                 string refreshToken)
                 : base(

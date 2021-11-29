@@ -240,8 +240,6 @@ namespace HB.FullStack.Identity
                 throw IdentityExceptions.AuthorizationInvalideAccessToken(context: context, innerException: ex);
             }
 
-            //TODO: 这里缺DeviceId验证. 放在了StartupUtil.cs中
-
             if (claimsPrincipal == null)
             {
                 //TODO: Black concern SigninToken by RefreshToken
@@ -278,7 +276,7 @@ namespace HB.FullStack.Identity
                     throw IdentityExceptions.AuthorizationNoTokenInStore(cause: "Refresh token error. signInToken not saved in db. ");
                 }
 
-                //验证SignInToken过期问题
+                //验证SignInToken过期问题,即RefreshToken是否过期
 
                 if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
@@ -295,17 +293,22 @@ namespace HB.FullStack.Identity
                 }
 
                 // 更新SignInToken
+                /*
+                 * 在 OAuth 2.0 安全最佳实践中, 推荐 refresh_token 是一次性的, 什么意思呢? 
+                 * 使用 refresh_token 获取 access_token 时, 同时会返回一个 新的 refresh_token, 之前的 refresh_token 就会失效, 
+                 * 但是两个 refresh_token 的绝对过期时间是一样的, 所以不会存在 refresh_token 快过期就获取一个新的, 然后重复，永不过期的情况
+                 */
                 signInToken.RefreshCount++;
+                signInToken.RefreshToken = SecurityUtil.CreateUniqueToken();
 
                 await _signInTokenRepo.UpdateAsync(signInToken, lastUser, transactionContext).ConfigureAwait(false);
 
                 // 发布新的AccessToken
-
                 string accessToken = await ConstructJwtAsync(user, signInToken, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new UserAccessResult(accessToken, context.RefreshToken, user);
+                return new UserAccessResult(accessToken, signInToken.RefreshToken, user);
             }
             catch
             {
