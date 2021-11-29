@@ -26,13 +26,13 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             //HB.FullStack.WebApi
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
-            services.AddSingleton<IPublicResourceTokenService, PublicResourceTokenService>();
+            services.AddSingleton<ICommonResourceTokenService, CommonResourceTokenService>();
 
             //UserActivity
             services.AddScoped<UserActivityFilter>();
             
             
-            services.AddScoped<CheckPublicResourceTokenFilter>();
+            services.AddScoped<CheckCommonResourceTokenFilter>();
         }
     }
 }

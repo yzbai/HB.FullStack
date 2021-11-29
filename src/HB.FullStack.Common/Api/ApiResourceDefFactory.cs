@@ -26,10 +26,11 @@ namespace HB.FullStack.Common.Api
 
             return new ApiResourceDef
             {
-                RateLimit = TimeSpan.FromMilliseconds(attr.RateLimitMilliseconds),
                 ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
                 ResName = attr.ResName ?? type.Name,
+
+             
             };
         }
     }

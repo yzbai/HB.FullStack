@@ -13,12 +13,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        public DeleteRequest(IEnumerable<T> ress) : base(HttpMethod.Delete, null)
+        public DeleteRequest(IEnumerable<T> ress) : base(HttpMethodName.Delete, null)
         {
             Resources.AddRange(ress);
         }
 
-        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethod.Delete, null)
+        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethodName.Delete, null)
         {
             Resources.AddRange(ress);
         }
@@ -54,12 +54,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<TSub> SubResources { get; } = new List<TSub>();
 
-        public DeleteRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethod.Delete, null)
+        public DeleteRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethodName.Delete, null)
         {
             SubResources.AddRange(ress);
         }
 
-        public DeleteRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethod.Delete, null)
+        public DeleteRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethodName.Delete, null)
         {
             SubResources.AddRange(ress);
         }

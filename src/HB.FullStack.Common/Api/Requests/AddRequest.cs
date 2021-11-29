@@ -12,12 +12,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; } = new List<T>();
 
-        public AddRequest(IEnumerable<T> ress) : base(HttpMethod.Post, null)
+        public AddRequest(IEnumerable<T> ress) : base(HttpMethodName.Post, null)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethod.Post, null)
+        public AddRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethodName.Post, null)
         {
             Resources.AddRange(ress);
         }
@@ -53,12 +53,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<TSub> SubResources { get; } = new List<TSub>();
 
-        public AddRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethod.Post, null)
+        public AddRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethodName.Post, null)
         {
             SubResources.AddRange(ress);
         }
 
-        public AddRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethod.Post, null)
+        public AddRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethodName.Post, null)
         {
             SubResources.AddRange(ress);
         }

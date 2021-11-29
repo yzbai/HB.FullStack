@@ -7,28 +7,23 @@ using Microsoft.AspNetCore.Mvc;
 using HB.FullStack.Common.Api;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.WebApi.Security;
+using Microsoft.Extensions.Primitives;
 
 namespace HB.FullStack.WebApi.Filters
 {
-    public class CheckPublicResourceTokenFilter : IAsyncActionFilter
+    public class CheckCommonResourceTokenFilter : IAsyncActionFilter
     {
-        private readonly ILogger<CheckPublicResourceTokenFilter> _logger;
+        private readonly ILogger<CheckCommonResourceTokenFilter> _logger;
         private readonly ISecurityService _securityService;
-        private readonly IPublicResourceTokenService _publicResourceTokenManager;
+        private readonly ICommonResourceTokenService _commonResTokenService;
 
-        public CheckPublicResourceTokenFilter(ILogger<CheckPublicResourceTokenFilter> logger, ISecurityService securityService, IPublicResourceTokenService publicResourceTokenManager)
+        public CheckCommonResourceTokenFilter(ILogger<CheckCommonResourceTokenFilter> logger, ISecurityService securityService, ICommonResourceTokenService publicResourceTokenManager)
         {
             _logger = logger;
             _securityService = securityService;
-            _publicResourceTokenManager = publicResourceTokenManager;
+            _commonResTokenService = publicResourceTokenManager;
         }
-
-        /// <summary>
-        /// OnActionExecutionAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="next"></param>
-        /// <returns></returns>
+ 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             try
@@ -40,22 +35,26 @@ namespace HB.FullStack.WebApi.Filters
                 {
                     if (await _securityService.NeedPublicResourceTokenAsync(apiRequest).ConfigureAwait(false))
                     {
-                        if (apiRequest.PublicResourceToken.IsNullOrEmpty())
+                        StringValues token = context!.HttpContext.Request.Headers[ApiHeaderNames.CommonResourceToken];
+
+                        if (token.IsNullOrEmpty())
                         {
-                            OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
+                            OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
                             return;
                         }
 
-                        if (!await _publicResourceTokenManager.CheckTokenAsync(apiRequest.PublicResourceToken).ConfigureAwait(false))
+                        string crt = token.First();
+
+                        if(!_commonResTokenService.TryCheckToken(crt,out string? _))
                         {
-                            OnError(context, ApiErrorCodes.PublicResourceTokenError);
+                            OnError(context, ApiErrorCodes.CommonResourceTokenError);
                             return;
                         }
                     }
                 }
                 else
                 {
-                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
                     return;
                 }
 
@@ -63,15 +62,15 @@ namespace HB.FullStack.WebApi.Filters
             }
             catch (CacheException ex)
             {
-                OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
-                _logger.LogError(ex, "PublicResourceToken 验证失败");
+                OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                _logger.LogError(ex, "CommonResourceToken 验证失败");
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
-                _logger.LogError(ex, "PublicResourceToken 验证失败");
+                OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                _logger.LogError(ex, "CommonResourceToken 验证失败");
             }
         }
 

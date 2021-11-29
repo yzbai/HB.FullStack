@@ -12,7 +12,6 @@ namespace HB.FullStack.Common.Api
 
         public string ResName { get; internal set; } = null!;
 
-
-        public TimeSpan? RateLimit { get; set; }
+     
     }
 }

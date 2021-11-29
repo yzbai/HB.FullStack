@@ -97,7 +97,7 @@ namespace System.Net.Http
 
         private static HttpRequestMessage ToHttpRequestMessage(this ApiRequest request)
         {
-            HttpMethod httpMethod = request.HttpMethod;
+            HttpMethod httpMethod = request.HttpMethod.ToHttpMethod();
 
             if (request.NeedHttpMethodOveride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
             {

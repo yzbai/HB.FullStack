@@ -17,12 +17,12 @@ namespace HB.FullStack.Common.Api
         [CollectionNotEmpty]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        public UpdateRequest(IEnumerable<T> ress) : base(HttpMethod.Put, null)
+        public UpdateRequest(IEnumerable<T> ress) : base(HttpMethodName.Put, null)
         {
             Resources.AddRange(ress);
         }
 
-        public UpdateRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethod.Put, null)
+        public UpdateRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethodName.Put, null)
         {
             Resources.AddRange(ress);
         }
@@ -58,12 +58,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<TSub> SubResources { get; } = new List<TSub>();
 
-        public UpdateRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethod.Put, null)
+        public UpdateRequest(Guid id, IEnumerable<TSub> ress) : base(id, HttpMethodName.Put, null)
         {
             SubResources.AddRange(ress);
         }
 
-        public UpdateRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethod.Put, null)
+        public UpdateRequest(string apiKeyName, Guid id, IEnumerable<TSub> ress) : base(id, apiKeyName, HttpMethodName.Put, null)
         {
             SubResources.AddRange(ress);
         }

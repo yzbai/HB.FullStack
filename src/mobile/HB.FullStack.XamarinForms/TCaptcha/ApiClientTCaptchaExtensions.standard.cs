@@ -26,7 +26,7 @@ namespace HB.FullStack.XamarinForms.Api
                     await onSuccessDelegate(resource).ConfigureAwait(false);
                 }
             }
-            catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.PublicResourceTokenNeeded)
+            catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.CapthcaNotFound)
             {
                 TCaptchaDialog dialog = new TCaptchaDialog(async (result) =>
                 {
@@ -36,7 +36,7 @@ namespace HB.FullStack.XamarinForms.Api
                         return;
                     }
 
-                    request.PublicResourceToken = result;
+                    request.Headers.Add(ApiHeaderNames.Captcha, result);
 
                     T? resource = await apiClient.GetAsync<T>(request).ConfigureAwait(false);
 

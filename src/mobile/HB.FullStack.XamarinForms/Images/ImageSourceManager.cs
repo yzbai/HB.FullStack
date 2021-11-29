@@ -25,7 +25,7 @@ namespace HB.FullStack.XamarinForms
 
             if (fileName.IsNotNullOrEmpty())
             {
-                string localFullPath = _fileManager.GetFullPath(directory, fileName);
+                string localFullPath = _fileManager.GetLocalFullPath(directory, fileName);
 
                 if (File.Exists(localFullPath))
                 {
@@ -58,7 +58,7 @@ namespace HB.FullStack.XamarinForms
 
             if (initFileName.IsNotNullOrEmpty())
             {
-                string localFullPath = _fileManager.GetFullPath(directory, initFileName);
+                string localFullPath = _fileManager.GetLocalFullPath(directory, initFileName);
 
                 if (File.Exists(localFullPath))
                 {

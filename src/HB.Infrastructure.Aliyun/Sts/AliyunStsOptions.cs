@@ -13,6 +13,9 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         public IList<string> Resources { get; set; } = new List<string>();
         
+        /// <summary>
+        /// 有效时间，这个事件后过期
+        /// </summary>
         public int ExpireSeconds { get; set; } = 3600;
     }
 

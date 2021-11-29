@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Api;
 using HB.FullStack.Identity;
 
 using Microsoft.AspNetCore.Http.Extensions;
@@ -38,9 +34,7 @@ namespace HB.FullStack.WebApi.Filters
                 
                 SerializeUtil.TryToJson(context.ActionArguments, out string? arguments);
 
-                
-
-                ActionExecutedContext? resultContext = await next().ConfigureAwait(false);
+                ActionExecutedContext? resultContext = await next().ConfigureAwait(true);
 
                 int? resultStatusCode = null;
                 ErrorCode? errorCode = null;

@@ -144,13 +144,12 @@ namespace HB.FullStack.Common.ApiClient
                 string accessToken,
                 string refreshToken)
                 : base(
-                      HttpMethod.Get,
+                      HttpMethodName.Get,
                       ApiAuthType.None,
                       endPointName,
                       apiVersion,
                       resName,
-                      "ByRefresh",
-                      rateLimit)
+                      "ByRefresh")
             {
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;

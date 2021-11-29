@@ -20,8 +20,8 @@ namespace System
         public static ErrorCode NotApiResourceEntity { get; } = new ErrorCode(ErrorCodeStartIds.API + 5, nameof(NotApiResourceEntity), "");
         public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(ErrorCodeStartIds.API + 6, nameof(ApiSmsCodeInvalid), "");
         public static ErrorCode SmsServiceError { get; } = new ErrorCode(ErrorCodeStartIds.API + 7, nameof(SmsServiceError), "");
-        public static ErrorCode PublicResourceTokenNeeded { get; } = new ErrorCode(ErrorCodeStartIds.API + 8, nameof(PublicResourceTokenNeeded), "");
-        public static ErrorCode PublicResourceTokenError { get; } = new ErrorCode(ErrorCodeStartIds.API + 9, nameof(PublicResourceTokenError), "");
+        public static ErrorCode CommonResourceTokenNeeded { get; } = new ErrorCode(ErrorCodeStartIds.API + 8, nameof(CommonResourceTokenNeeded), "");
+        public static ErrorCode CommonResourceTokenError { get; } = new ErrorCode(ErrorCodeStartIds.API + 9, nameof(CommonResourceTokenError), "");
         public static ErrorCode ApiUploadEmptyFile { get; } = new ErrorCode(ErrorCodeStartIds.API + 10, nameof(ApiUploadEmptyFile), "");
         public static ErrorCode ApiUploadOverSize { get; } = new ErrorCode(ErrorCodeStartIds.API + 11, nameof(ApiUploadOverSize), "");
         public static ErrorCode ApiUploadWrongType { get; } = new ErrorCode(ErrorCodeStartIds.API + 12, nameof(ApiUploadWrongType), "");
@@ -62,6 +62,9 @@ namespace System
         public static ErrorCode ApiClientUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 39, nameof(ApiClientUnkownError), "");
         public static ErrorCode ServerNullReturn { get; } = new ErrorCode(ErrorCodeStartIds.API + 40, nameof(ServerNullReturn), "");
         public static ErrorCode ArgumentIdsError { get; } = new ErrorCode(ErrorCodeStartIds.API + 41, nameof(ArgumentIdsError), "");
+        public static ErrorCode RequestIntervalFilterError { get; } = new ErrorCode(ErrorCodeStartIds.API + 42, nameof(RequestIntervalFilterError), "");
+        public static ErrorCode CapthcaNotFound { get; } = new ErrorCode(ErrorCodeStartIds.API + 43, nameof(CapthcaNotFound), "");
+        public static ErrorCode CapthcaError { get; } = new ErrorCode(ErrorCodeStartIds.API + 44, nameof(CapthcaError), "");
     }
 
     public static partial class ApiExceptions

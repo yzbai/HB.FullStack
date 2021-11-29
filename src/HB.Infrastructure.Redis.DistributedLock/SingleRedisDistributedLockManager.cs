@@ -98,6 +98,7 @@ return 1";
 		/// <param name="expiryTime">对资源的最大占用时间，应该大于TimeSpan.Zero, null表示使用默认</param>
 		/// <param name="waitTime">如果资源被占用，你愿意等多久，TimeSpan.Zero表明不愿意等。null表示使用默认等待时间</param>
 		/// <param name="retryInterval">等待时不断尝试获取资源 的 等待间隔，应该大于TimeSpan.Zero, null 表示使用默认时间</param>
+		/// <param name="notUnlockWhenDispose">释放锁时，是否解除索，还是等他自己慢慢过期</param>
 		/// <returns></returns>
 		public async Task<IDistributedLock> LockAsync(IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan? waitTime, TimeSpan? retryInterval, bool notUnlockWhenDispose = false, CancellationToken? cancellationToken = null)
 		{
@@ -304,7 +305,7 @@ return 1";
 
 			if (redisLock.NotUnlockWhenDispose)
 			{
-				logger.LogDebug($"自动延期停止,但锁等他自己过期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"自动延期停止,但锁被设置为等他自己过期，不干预它... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				return;
 			}
 

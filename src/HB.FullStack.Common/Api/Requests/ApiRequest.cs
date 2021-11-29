@@ -13,6 +13,11 @@ namespace HB.FullStack.Common.Api
     public abstract class ApiRequest : ValidatableObject
     {
         /// <summary>
+        /// TODO: 防止同一个RequestID两次被处理
+        /// </summary>
+        public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
+
+        /// <summary>
         /// 客户端的DeviceId
         /// </summary>
         public string DeviceId { get; set; } = null!;
@@ -20,18 +25,12 @@ namespace HB.FullStack.Common.Api
         /// 客户端的版本
         /// </summary>
         public string DeviceVersion { get; set; } = null!;
-        /// <summary>
-        /// PRT
-        /// </summary>
-        public string? PublicResourceToken { get; set; }
-
+        
         #region Others
 
         [JsonIgnore]
-        public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
 
-        [JsonIgnore]
-        public HttpMethod HttpMethod { get; } = null!;
+        public HttpMethodName HttpMethod { get; }
 
         [JsonIgnore]
         public bool NeedHttpMethodOveride { get; } = true;
@@ -41,12 +40,6 @@ namespace HB.FullStack.Common.Api
 
         [JsonIgnore]
         public string? ApiVersion { get; set; }
-
-        //[JsonIgnore]
-        //public string? ResourceName { get; set; }
-
-        //[JsonIgnore]
-        //public string? ResourceCollectionName { get; set; }
 
         [JsonIgnore]
         public string? ResName { get; set; }
@@ -63,25 +56,16 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string? ApiKeyName { get; set; }
 
-        /// <summary>
-        /// 请求间隔
-        /// </summary>
-        [JsonIgnore]
-        public TimeSpan? RateLimit { get; set; }
-
-        //[JsonIgnore]
-        //public string RandomStr { get; } = SecurityUtil.CreateRandomString(6);
 
         #endregion
 
         protected ApiRequest(
-            HttpMethod httpMethod,
+            HttpMethodName httpMethod,
             ApiAuthType apiAuthType,
             string? endPointName,
             string? apiVersion,
             string? resName,
-            string? condition,
-            TimeSpan? rateLimit)
+            string? condition)
         {
             ApiAuthType = apiAuthType;
             EndpointName = endPointName;
@@ -89,17 +73,16 @@ namespace HB.FullStack.Common.Api
             HttpMethod = httpMethod;
             ResName = resName;
             Condition = condition;
-            RateLimit = rateLimit;
         }
 
         public void SetJwt(string jwt)
         {
-            Headers["Authorization"] = "Bearer " + jwt;
+            Headers[ApiHeaderNames.Authorization] = "Bearer " + jwt;
         }
 
         public void SetApiKey(string apiKey)
         {
-            Headers["X-Api-Key"] = apiKey;
+            Headers[ApiHeaderNames.XApiKey] = apiKey;
         }
 
         public string GetUrl()
@@ -131,7 +114,7 @@ namespace HB.FullStack.Common.Api
 
             hashCode.Add(DeviceId);
             hashCode.Add(DeviceVersion);
-            hashCode.Add(PublicResourceToken);
+            //hashCode.Add(PublicResourceToken);
             hashCode.Add(EndpointName);
             hashCode.Add(ApiVersion);
             hashCode.Add(ApiAuthType);
@@ -150,23 +133,23 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         /// <param name="httpMethod"></param>
         /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
-        protected ApiRequest(HttpMethod httpMethod, string? condition) : this(ApiAuthType.Jwt, httpMethod, condition)
+        protected ApiRequest(HttpMethodName httpMethod, string? condition) : this(ApiAuthType.Jwt, httpMethod, condition)
         {
         }
 
-        protected ApiRequest(string apiKeyName, HttpMethod httpMethod, string? condition) : this(ApiAuthType.ApiKey, httpMethod, condition)
+        protected ApiRequest(string apiKeyName, HttpMethodName httpMethod, string? condition) : this(ApiAuthType.ApiKey, httpMethod, condition)
         {
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition, null)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition)
+            : base(httpMethod, apiAuthType, null, null, null, condition)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
             ResName = def.ResName;
-            RateLimit = def.RateLimit;
         }
 
         public override int GetHashCode()
@@ -186,16 +169,16 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string SubResName { get; set; } = null!;
 
-        protected ApiRequest(Guid id, HttpMethod httpMethod, string? condition) : this(id, ApiAuthType.Jwt, httpMethod, condition)
+        protected ApiRequest(Guid id, HttpMethodName httpMethod, string? condition) : this(id, ApiAuthType.Jwt, httpMethod, condition)
         {
         }
 
-        protected ApiRequest(Guid id, string apiKeyName, HttpMethod httpMethod, string? condition) : this(id, ApiAuthType.ApiKey, httpMethod, condition)
+        protected ApiRequest(Guid id, string apiKeyName, HttpMethodName httpMethod, string? condition) : this(id, ApiAuthType.ApiKey, httpMethod, condition)
         {
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(Guid id, ApiAuthType apiAuthType, HttpMethod httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition, null)
+        protected ApiRequest(Guid id, ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition)
         {
             Id = id;
 
@@ -204,7 +187,6 @@ namespace HB.FullStack.Common.Api
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
             ResName = def.ResName;
-            RateLimit = def.RateLimit;
 
             ApiResourceDef subDef = ApiResourceDefFactory.Get<TSub>();
 

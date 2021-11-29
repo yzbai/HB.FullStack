@@ -37,7 +37,6 @@ namespace HB.FullStack.Client
 
     public abstract class BaseRepo
     {
-        protected static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
         protected IPreferenceProvider PreferenceProvider { get; }
         protected ConnectivityManager ConnectivityManager { get; }
 
@@ -55,7 +54,7 @@ namespace HB.FullStack.Client
         {
             bool isInternetConnected = ConnectivityManager.IsInternetConnected();
 
-            if(throwIfNot && !isInternetConnected)
+            if (throwIfNot && !isInternetConnected)
             {
                 throw ClientExceptions.NoInternet("没有联网，且不允许离线");
             }
@@ -80,7 +79,7 @@ namespace HB.FullStack.Client
         }
     }
 
-    public delegate bool WhetherUseLocalData<TEntity>(ApiRequest request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new();
+    public delegate bool IfUseLocalData<TEntity>(ApiRequest request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new();
 
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
     {
@@ -88,7 +87,7 @@ namespace HB.FullStack.Client
 
         protected IDatabase Database { get; }
 
-        protected TimeSpan LocalDataExpiryTime { get; set; }
+        protected TimeSpan ClientEntityExpiryTime { get; set; }
 
         protected bool AllowOfflineWrite { get; set; }
 
@@ -106,18 +105,18 @@ namespace HB.FullStack.Client
             _logger = logger;
             Database = database;
 
-            LocalDataAttribute? localDataAttribute = typeof(TEntity).GetCustomAttribute<LocalDataAttribute>(true);
+            ClientEntityAttribute? localDataAttribute = typeof(TEntity).GetCustomAttribute<ClientEntityAttribute>(true);
 
             if (localDataAttribute == null)
             {
-                LocalDataExpiryTime = LocalDataAttribute.DefaultLocalDataExpiryTime;
+                ClientEntityExpiryTime = TimeSpan.FromSeconds(ClientEntityAttribute.DefaultExpirySeconds);
                 NeedLogined = true;
-                AllowOfflineRead = false;
+                AllowOfflineRead = true;
                 AllowOfflineWrite = false;
             }
             else
             {
-                LocalDataExpiryTime = TimeSpan.FromSeconds(localDataAttribute.ExpirySeconds);
+                ClientEntityExpiryTime = TimeSpan.FromSeconds(localDataAttribute.ExpirySeconds);
                 NeedLogined = localDataAttribute.NeedLogined;
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead;
                 AllowOfflineWrite = localDataAttribute.AllowOfflineWrite;
@@ -135,7 +134,7 @@ namespace HB.FullStack.Client
             ApiRequest request,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            WhetherUseLocalData<TEntity>? whetherUseLocalData = null)
+            IfUseLocalData<TEntity>? whetherUseLocalData = null)
         {
             if (NeedLogined)
             {
@@ -153,7 +152,7 @@ namespace HB.FullStack.Client
                 return locals;
             }
 
-            return await SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData ?? DefaultWhetherUseLocalData).ConfigureAwait(false);
+            return await SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -164,7 +163,7 @@ namespace HB.FullStack.Client
             ApiRequest<TRes> request,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.None,
-            WhetherUseLocalData<TEntity>? whetherUseLocalData = null,
+            IfUseLocalData<TEntity>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
@@ -183,7 +182,7 @@ namespace HB.FullStack.Client
 
             return new ObservableTask<IEnumerable<TEntity>>(
                 locals,
-                () => SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData ?? DefaultWhetherUseLocalData),
+                () => SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
                 onException,
                 continueOnCapturedContext);
         }
@@ -193,7 +192,7 @@ namespace HB.FullStack.Client
             ApiRequest request,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            WhetherUseLocalData<TEntity>? ifUseLocalData = null)
+            IfUseLocalData<TEntity>? ifUseLocalData = null)
         {
             IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
@@ -205,7 +204,7 @@ namespace HB.FullStack.Client
             ApiRequest<TRes> request,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.None,
-            WhetherUseLocalData<TEntity>? whetherUseLocalData = null,
+            IfUseLocalData<TEntity>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
@@ -222,14 +221,14 @@ namespace HB.FullStack.Client
                 return new ObservableTask<TEntity?>(locals.FirstOrDefault(), null, onException, continueOnCapturedContext);
             }
 
-            if (whetherUseLocalData == null)
+            if (ifUseLocalData == null)
             {
-                whetherUseLocalData = DefaultWhetherUseLocalData;
+                ifUseLocalData = DefaultIfUseLocalData;
             }
 
             return new ObservableTask<TEntity?>(
                 locals.FirstOrDefault(),
-                async () => (await SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
+                async () => (await SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
                 onException,
                 continueOnCapturedContext);
         }
@@ -239,7 +238,7 @@ namespace HB.FullStack.Client
             ApiRequest request,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            WhetherUseLocalData<TEntity> whetherUseLocalData)
+            IfUseLocalData<TEntity> whetherUseLocalData)
         {
             //如果不强制远程，并且满足使用本地数据条件
             if (getMode != RepoGetMode.RemoteForced && whetherUseLocalData(request, locals))
@@ -335,39 +334,10 @@ namespace HB.FullStack.Client
         /// <summary>
         /// 本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
         /// </summary>
-        private bool DefaultWhetherUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
-        {
-            return
-                (locals.Any() && !IsLocalDataExpired(locals, LocalDataExpiryTime))
-                ||
-                (!locals.Any() && IsRequestRecently(request));
-        }
-
-        private static bool IsLocalDataExpired(IEnumerable<TEntity> entities, TimeSpan expiryTimeSpan)
+        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
         {
             DateTimeOffset now = TimeUtil.UtcNow;
-
-            foreach (TEntity entity in entities)
-            {
-                if (now - entity.LastTime > expiryTimeSpan)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return locals.Any() &&  locals.All(t => now - t.LastTime < ClientEntityExpiryTime);
         }
-
-        private static bool IsRequestRecently(ApiRequest apiRequest)
-        {
-            TimeSpan expiryTime = apiRequest.RateLimit ?? LocalDataAttribute.DefaultApiRequestRateLimit;
-
-            return !RequestLocker.NoWaitLock(
-                "request",
-                apiRequest.GetHashCode().ToString(CultureInfo.InvariantCulture),
-                expiryTime);
-        }
-
-
     }
 }

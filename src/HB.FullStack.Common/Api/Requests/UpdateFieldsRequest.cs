@@ -13,18 +13,18 @@ namespace HB.FullStack.Common.Api
     {
 #if NETSTANDARD2_1 || NET5_0_OR_GREATER
 
-        protected UpdateFieldsRequest(string? condition) : base(HttpMethod.Patch, condition) { }
+        protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
 
 #elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(string? condition) : base(new HttpMethod("Patch"), condition) { }
+        protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
 #endif
 
 #if NETSTANDARD2_1 || NET5_0_OR_GREATER
 
-        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethod.Patch, condition) { }
+        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
 
 #elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, new HttpMethod("Patch"), condition) { }
+        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
 #endif
 
         public override string ToDebugInfo()
@@ -37,18 +37,18 @@ namespace HB.FullStack.Common.Api
     {
 #if NETSTANDARD2_1 || NET5_0_OR_GREATER
 
-        protected UpdateFieldsRequest(Guid id, string? condition) : base(id, HttpMethod.Patch, condition) { }
+        protected UpdateFieldsRequest(Guid id, string? condition) : base(id, HttpMethodName.Patch, condition) { }
 
 #elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(Guid id, string? condition) : base(id, new HttpMethod("Patch"), condition) { }
+        protected UpdateFieldsRequest(Guid id, string? condition) : base(id, HttpMethodName.Patch, condition) { }
 #endif
 
 #if NETSTANDARD2_1 || NET5_0_OR_GREATER
 
-        protected UpdateFieldsRequest(string apiKeyName, Guid id, string? condition) : base(id, apiKeyName, HttpMethod.Patch, condition) { }
+        protected UpdateFieldsRequest(string apiKeyName, Guid id, string? condition) : base(id, apiKeyName, HttpMethodName.Patch, condition) { }
 
 #elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(string apiKeyName, Guid id, string? condition) : base(id, apiKeyName, new HttpMethod("Patch"), condition) { }
+        protected UpdateFieldsRequest(string apiKeyName, Guid id, string? condition) : base(id, apiKeyName, HttpMethodName.Patch, condition) { }
 #endif
 
         public override string ToDebugInfo()
