@@ -15,6 +15,9 @@ namespace HB.FullStack.Common.Api.Requests
     /// <typeparam name="T"></typeparam>
     public class GetByIdRequest<T> : GetRequest<T> where T : ApiResource2
     {
+        /// <summary>
+        /// 服务器端不可用
+        /// </summary>
         [JsonIgnore]
         [NoEmptyGuid]
         public Guid Id { get; private set; }
@@ -47,37 +50,43 @@ namespace HB.FullStack.Common.Api.Requests
         }
     }
 
-    public class GetByIdRequest<T, TSub> : GetRequest<T,TSub> where T : ApiResource2 where TSub:ApiResource2
+    public class GetByIdRequest2<T, TOwner> : GetByIdRequest<T> where T : ApiResource2 where TOwner : ApiResource2
     {
+        /// <summary>
+        /// 主要Resource 的ID
+        /// 服务器端不可用
+        /// </summary>
         [JsonIgnore]
-        [NoEmptyGuid]
-        public Guid SubId { get; private set; }
+        public Guid OwnerId { get; set; }
 
-        public GetByIdRequest(Guid id, Guid subId):base(id, null)
-        {
-            SubId = subId;
-        }
+        /// <summary>
+        /// 服务器端不可用
+        /// </summary>
+        [JsonIgnore]
+        public string OwnerResName { get; set; } = null!;
 
-        public GetByIdRequest(string apiKeyName, Guid id, Guid subId) : base(id, apiKeyName, null)
+        public GetByIdRequest2(Guid ownerId, Guid id) : base(id)
         {
-            SubId=subId;
+            ApiResourceDef ownerDef = ApiResourceDefFactory.Get<TOwner>();
+            OwnerId = ownerId;
+            OwnerResName = ownerDef.ResName;
         }
 
         public override string ToDebugInfo()
         {
-            return $"GetByIdRequest. Resource:{typeof(T).FullName}, Id:{Id}. SubResource:{typeof(TSub).FullName}, SubId:{SubId}";
+            return $"GetByIdRequest. Resource:{typeof(T).FullName}, Id:{Id}. OwnerResource:{typeof(TOwner).FullName}, OwnerId:{OwnerId}";
         }
 
         protected override string GetUrlCore()
         {
-            string url = $"{ApiVersion}/{ResName}/{Id}/{SubResName}/{SubId}";
+            string url = $"{ApiVersion}/{OwnerResName}/{OwnerId}/{ResName}/{Id}";
 
             return AddCommonQueryToUrl(url);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), SubId);
+            return HashCode.Combine(base.GetHashCode(), OwnerId, OwnerResName);
         }
     }
 }

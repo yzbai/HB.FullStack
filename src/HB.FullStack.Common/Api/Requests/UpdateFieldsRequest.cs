@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
@@ -11,21 +12,9 @@ namespace HB.FullStack.Common.Api
     /// <typeparam name="T"></typeparam>
     public abstract class UpdateFieldsRequest<T> : ApiRequest<T> where T : ApiResource2
     {
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-
         protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
 
-#elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
-#endif
-
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-
         protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
-
-#elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
-#endif
 
         public override string ToDebugInfo()
         {
@@ -33,27 +22,40 @@ namespace HB.FullStack.Common.Api
         }
     }
 
-    public abstract class UpdateFieldsRequest<T, TSub> : ApiRequest<T, TSub> where T : ApiResource2 where TSub : ApiResource2
+    public abstract class UpdateFieldsRequest2<T, TOwner> : UpdateFieldsRequest<T> where T : ApiResource2 where TOwner : ApiResource2
     {
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
+        /// <summary>
+        /// 主要Resource 的ID
+        /// 服务器端不可用
+        /// </summary>
+        [JsonIgnore]
+        public Guid OwnerId { get; set; }
 
-        protected UpdateFieldsRequest(Guid id, string? condition) : base(id, HttpMethodName.Patch, condition) { }
-
-#elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(Guid id, string? condition) : base(id, HttpMethodName.Patch, condition) { }
-#endif
-
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-
-        protected UpdateFieldsRequest(string apiKeyName, Guid id, string? condition) : base(id, apiKeyName, HttpMethodName.Patch, condition) { }
-
-#elif NETSTANDARD2_0
-        protected UpdateFieldsRequest(string apiKeyName, Guid id, string? condition) : base(id, apiKeyName, HttpMethodName.Patch, condition) { }
-#endif
+        /// <summary>
+        /// 服务器端不可用
+        /// </summary>
+        [JsonIgnore]
+        public string OwnerResName { get; set; } = null!;
+        protected UpdateFieldsRequest2(Guid ownerId, string? condition) : base(condition)
+        {
+            ApiResourceDef ownerDef = ApiResourceDefFactory.Get<TOwner>();
+            OwnerId = ownerId;
+            OwnerResName = ownerDef.ResName;
+        }
 
         public override string ToDebugInfo()
         {
-            return $"UpdateFieldsRequest, ApiResourceType:{typeof(T).Name}, SubResourceType:{typeof(TSub).Name},  Json:{SerializeUtil.ToJson(this)}";
+            return $"UpdateFieldsRequest, ApiResourceType:{typeof(T).Name}, OwnerResourceType:{typeof(TOwner).Name},  Json:{SerializeUtil.ToJson(this)}";
+        }
+
+        protected override string GetUrlCore()
+        {
+            return $"{ApiVersion}/{OwnerResName}/{OwnerId}/{ResName}/{Condition}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), OwnerId, OwnerResName);
         }
     }
 }

@@ -26,10 +26,9 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string DeviceVersion { get; set; } = null!;
         
-        #region Others
+        #region Others 在服务器端不可用，因为是JsonIgnore
 
         [JsonIgnore]
-
         public HttpMethodName HttpMethod { get; }
 
         [JsonIgnore]
@@ -158,49 +157,45 @@ namespace HB.FullStack.Common.Api
         }
     }
 
-    public abstract class ApiRequest<T, TSub> : ApiRequest where T : ApiResource2 where TSub : ApiResource2
+    public abstract class ApiRequest2<T, TOwner> : ApiRequest<T> where T : ApiResource2 where TOwner : ApiResource2
     {
         /// <summary>
         /// 主要Resource 的ID
+        /// 服务器端不可用
         /// </summary>
         [JsonIgnore]
-        public Guid Id { get; set; }
+        public Guid OwnerId { get; set; }
 
+        /// <summary>
+        /// 服务器端不可用
+        /// </summary>
         [JsonIgnore]
-        public string SubResName { get; set; } = null!;
+        public string OwnerResName { get; set; } = null!;
 
-        protected ApiRequest(Guid id, HttpMethodName httpMethod, string? condition) : this(id, ApiAuthType.Jwt, httpMethod, condition)
+        protected ApiRequest2(Guid ownerId, HttpMethodName httpMethod, string? condition) : this(ownerId, ApiAuthType.Jwt, httpMethod, condition)
         {
         }
 
-        protected ApiRequest(Guid id, string apiKeyName, HttpMethodName httpMethod, string? condition) : this(id, ApiAuthType.ApiKey, httpMethod, condition)
+        protected ApiRequest2(Guid ownerId, string apiKeyName, HttpMethodName httpMethod, string? condition) : this(ownerId, ApiAuthType.ApiKey, httpMethod, condition)
         {
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(Guid id, ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition) : base(httpMethod, apiAuthType, null, null, null, condition)
+        protected ApiRequest2(Guid ownerId, ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition) : base(apiAuthType, httpMethod, condition)
         {
-            Id = id;
-
-            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
-
-            EndpointName = def.EndpointName;
-            ApiVersion = def.ApiVersion;
-            ResName = def.ResName;
-
-            ApiResourceDef subDef = ApiResourceDefFactory.Get<TSub>();
-
-            SubResName = subDef.ResName;
+            ApiResourceDef ownerDef = ApiResourceDefFactory.Get<TOwner>();
+            OwnerId = ownerId;
+            OwnerResName = ownerDef.ResName;
         }
 
         protected override string GetUrlCore()
         {
-            return $"{ApiVersion}/{ResName}/{Id}/{SubResName}/{Condition}";
+            return $"{ApiVersion}/{OwnerResName}/{OwnerId}/{ResName}/{Condition}";
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), SubResName, Id);
+            return HashCode.Combine(base.GetHashCode(), OwnerResName, OwnerId);
         }
     }
 }

@@ -77,57 +77,33 @@ namespace HB.FullStack.Common.Api.Requests
         }
     }
 
-    public class GetRequest<T, TSub> : ApiRequest<T, TSub> where T : ApiResource2 where TSub : ApiResource2
+    public class GetRequest2<T, TOwner> : GetRequest<T> where T : ApiResource2 where TOwner : ApiResource2
     {
-        #region Querys
-
+        /// <summary>
+        /// 主要Resource 的ID
+        /// 服务器端不可用
+        /// </summary>
         [JsonIgnore]
-        public int? Page { get; set; }
+        public Guid OwnerId { get; set; }
 
+        /// <summary>
+        /// 服务器端不可用
+        /// </summary>
         [JsonIgnore]
-        public int? PerPage { get; set; }
+        public string OwnerResName { get; set; } = null!;
 
-        [JsonIgnore]
-        public string? OrderBy { get; set; }
-
-        #endregion
-
-        public GetRequest(Guid id, string? condition = null) : this(id, ApiAuthType.Jwt, condition)
+        public GetRequest2(Guid ownerId, string? condition = null) : base(condition)
         {
-        }
-
-        public GetRequest(Guid id, string apiKeyName, string? condition) : this(id, ApiAuthType.ApiKey, condition)
-        {
-            ApiKeyName = apiKeyName;
-        }
-
-        public GetRequest(Guid id, ApiAuthType apiAuthType, string? condition) : base(id, apiAuthType, HttpMethodName.Get, condition)
-        {
+            ApiResourceDef ownerDef = ApiResourceDefFactory.Get<TOwner>();
+            OwnerId = ownerId;
+            OwnerResName = ownerDef.ResName;
         }
 
         protected override string GetUrlCore()
         {
-            string url = $"{ApiVersion}/{ResName}/{Id}/{SubResName}/{Condition}";
+            string url = $"{ApiVersion}/{OwnerResName}/{OwnerId}/{ResName}/{Condition}";
 
             return AddCommonQueryToUrl(url);
-        }
-
-        protected string AddCommonQueryToUrl(string url)
-        {
-            Dictionary<string, string?> parameters = new Dictionary<string, string?>();
-
-            if (Page.HasValue && PerPage.HasValue)
-            {
-                parameters.Add(ClientNames.Page, Page.Value.ToString(CultureInfo.InvariantCulture));
-                parameters.Add(ClientNames.PerPage, PerPage.Value.ToString(CultureInfo.InvariantCulture));
-            }
-
-            if (OrderBy.IsNotNullOrEmpty())
-            {
-                parameters.Add(ClientNames.OrderBy, OrderBy);
-            }
-
-            return parameters.Any() ? UriUtil.AddQuerys(url, parameters) : url;
         }
 
         public override string ToDebugInfo()
@@ -137,7 +113,7 @@ namespace HB.FullStack.Common.Api.Requests
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Page, PerPage, OrderBy);
+            return HashCode.Combine(base.GetHashCode(), OwnerId, OwnerResName);
         }
     }
 }
