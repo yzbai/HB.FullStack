@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+
 namespace HB.FullStack.Database.Entities
 {
     /// <summary>

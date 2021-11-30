@@ -62,7 +62,6 @@ namespace HB.FullStack.Client
             return isInternetConnected;
         }
 
-
         protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string entityName)
         {
             if (obj == null)
@@ -84,6 +83,7 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
     {
         private readonly ILogger _logger;
+        private EntityDef _entityDef { get; } = null!;
 
         protected IDatabase Database { get; }
 
@@ -95,6 +95,7 @@ namespace HB.FullStack.Client
 
         protected bool NeedLogined { get; set; }
 
+
         protected BaseRepo(
             ILogger logger,
             IDatabase database,
@@ -103,6 +104,8 @@ namespace HB.FullStack.Client
             ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
             _logger = logger;
+            _entityDef = EntityDefFactory.GetDef<TEntity>()!;
+
             Database = database;
 
             ClientEntityAttribute? localDataAttribute = typeof(TEntity).GetCustomAttribute<ClientEntityAttribute>(true);
@@ -264,6 +267,7 @@ namespace HB.FullStack.Client
 
             _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TEntity).Name);
 
+            //TODO:
             //检查同步. 比如：离线创建的数据，现在联线，本地数据反而是新的。
             //多客户端：version相同，但lastuser不同。根据时间合并
 
@@ -285,13 +289,27 @@ namespace HB.FullStack.Client
             return remotes;
         }
 
+        /// <summary>
+        /// 本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
+        /// </summary>
+        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
+        {
+            DateTimeOffset now = TimeUtil.UtcNow;
+            return locals.Any() && locals.All(t => now - t.LastTime < ClientEntityExpiryTime);
+        }
+
         #endregion
 
         #region 更改
 
-        public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext? transactionContext)
+        public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext transactionContext)
         {
             ThrowIf.NotValid(entities, nameof(entities));
+
+            if (!entities.Any())
+            {
+                return;
+            }
 
             if (IsInternetConnected(!AllowOfflineWrite))
             {
@@ -305,12 +323,17 @@ namespace HB.FullStack.Client
             }
             else
             {
-                //TODO: 脱网下操作
-                throw new NotSupportedException();
+                //允许脱网下写操作
+
+                //Local
+                await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
+
+                //Record History
+                await Database.BatchAddAsync(GetHistories(entities, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
             }
         }
 
-        public async Task UpdateAsync(TEntity entity, TransactionContext? transactionContext = null)
+        public async Task UpdateAsync(TEntity entity, TransactionContext transactionContext)
         {
             ThrowIf.NotValid(entity, nameof(entity));
 
@@ -324,20 +347,57 @@ namespace HB.FullStack.Client
             }
             else
             {
-                //TODO: 脱网下操作
+                //允许脱网下写操作
                 throw new NotSupportedException();
             }
         }
 
+        private List<OfflineHistory> GetHistories(IEnumerable<TEntity> entities, DbOperation dbOperation)
+        {
+            List<OfflineHistory> histories = new List<OfflineHistory>(entities.Count());
+
+            if (_entityDef.IsIdLong)
+            {
+                foreach (TEntity entity in entities)
+                {
+                    OfflineHistory history = new OfflineHistory
+                    {
+                        EntityId = (entity as LongIdEntity)!.Id.ToString(CultureInfo.InvariantCulture),
+                        EntityFullName = _entityDef.EntityFullName,
+                        Operation = dbOperation,
+                        OperationTime = entity.LastTime,
+                        Handled = false
+                    };
+
+                    histories.Add(history);
+                }
+            }
+            else if (_entityDef.IsIdGuid)
+            {
+                foreach (TEntity entity in entities)
+                {
+                    OfflineHistory history = new OfflineHistory
+                    {
+                        EntityId = (entity as GuidEntity)!.Id.ToString(),
+                        EntityFullName = _entityDef.EntityFullName,
+                        Operation = dbOperation,
+                        OperationTime = entity.LastTime,
+                        Handled = false
+                    };
+
+                    histories.Add(history);
+                }
+            }
+            else
+            {
+                throw ClientExceptions.UnSupportedEntityType(_entityDef.EntityFullName);
+            }
+
+            return histories;
+        }
+
         #endregion
 
-        /// <summary>
-        /// 本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
-        /// </summary>
-        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
-        {
-            DateTimeOffset now = TimeUtil.UtcNow;
-            return locals.Any() &&  locals.All(t => now - t.LastTime < ClientEntityExpiryTime);
-        }
+
     }
 }

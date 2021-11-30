@@ -19,22 +19,12 @@ namespace HB.FullStack.Database
             Transaction = transaction;
             Status = status;
         }
-
-        /// <summary>
-        /// CommitAsync
-        /// </summary>
-        /// <returns></returns>
         
         public Task CommitAsync()
         {
             return _transactionManager.CommitAsync(this);
         }
 
-        /// <summary>
-        /// RollbackAsync
-        /// </summary>
-        /// <returns></returns>
-        
         public Task RollbackAsync()
         {
             return _transactionManager.RollbackAsync(this);

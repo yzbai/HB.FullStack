@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Database.Engine;
 
+[assembly:InternalsVisibleTo("HB.FullStack.Client")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.MySQL")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.SQLite")]

@@ -19,7 +19,7 @@ namespace System
         public const int IDENTITY = 8000;
         public const int TENCENT = 9000;
         public const int WEB_API = 10000;
-        public const int MOBILE = 11000;
+        public const int CLIENT = 11000;
         public const int API = 12000;
     }
 

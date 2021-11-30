@@ -1,25 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.FullStack.Database.Entities;
+
+using Microsoft.Extensions.Logging;
 
 namespace System
 {
     public static class ClientErrorCodes
     {
-        public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 0, nameof(ImageOptionsOutOfRange), "");
-        public static ErrorCode IdBarrierError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 1, nameof(IdBarrierError), "");
-        public static ErrorCode ResourceNotFound { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 2, nameof(ResourceNotFound), "");
-        public static ErrorCode BizError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 3, nameof(BizError), "");
-        public static ErrorCode NotLogined { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 4, nameof(NotLogined), "");
-        public static ErrorCode AliyunStsTokenError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 5, nameof(AliyunStsTokenError), "");
-        public static ErrorCode FileServiceError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 6, nameof(FileServiceError), "");
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 7, nameof(AliyunOssPutObjectError), "");
-        public static ErrorCode LocalFileCopyError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 8, nameof(LocalFileCopyError), "");
-        public static ErrorCode LocalFileSaveError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 9, nameof(LocalFileSaveError), "");
-        public static ErrorCode AliyunStsTokenOverTime { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 10, nameof(AliyunStsTokenOverTime), "");
-        public static ErrorCode SmsCodeValidateError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 11, nameof(SmsCodeValidateError), "");
-        public static ErrorCode NoInternet { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 12, nameof(NoInternet), "");
-        public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 13, nameof(UploadError), "");
+        public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 0, nameof(ImageOptionsOutOfRange), "");
+        public static ErrorCode IdBarrierError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 1, nameof(IdBarrierError), "");
+        public static ErrorCode ResourceNotFound { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 2, nameof(ResourceNotFound), "");
+        public static ErrorCode BizError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 3, nameof(BizError), "");
+        public static ErrorCode NotLogined { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 4, nameof(NotLogined), "");
+        public static ErrorCode AliyunStsTokenError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 5, nameof(AliyunStsTokenError), "");
+        public static ErrorCode FileServiceError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 6, nameof(FileServiceError), "");
+        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 7, nameof(AliyunOssPutObjectError), "");
+        public static ErrorCode LocalFileCopyError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 8, nameof(LocalFileCopyError), "");
+        public static ErrorCode LocalFileSaveError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 9, nameof(LocalFileSaveError), "");
+        public static ErrorCode AliyunStsTokenOverTime { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 10, nameof(AliyunStsTokenOverTime), "");
+        public static ErrorCode SmsCodeValidateError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 11, nameof(SmsCodeValidateError), "");
+        public static ErrorCode NoInternet { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 12, nameof(NoInternet), "");
+        public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 13, nameof(UploadError), "");
 
-        public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(ErrorCodeStartIds.MOBILE + 14, nameof(DbSimpleLockerNoWaitLockFailed), "");
+        public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 14, nameof(DbSimpleLockerNoWaitLockFailed), "");
+        public static ErrorCode UnSupportedEntityType { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 15, nameof(UnSupportedEntityType), "");
     }
 
     public static class LoggerExtensions
@@ -148,6 +151,15 @@ namespace System
             ClientException ex = new ClientException(ClientErrorCodes.UploadError);
 
             ex.Data["Cause"] = cause;
+
+            return ex;
+        }
+
+        internal static Exception UnSupportedEntityType(string? entityFullName)
+        {
+            ClientException ex = new ClientException(ClientErrorCodes.UnSupportedEntityType);
+
+            ex.Data["FullName"] = entityFullName;
 
             return ex;
         }
