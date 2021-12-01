@@ -12,6 +12,6 @@ namespace HB.FullStack.Common.Api
 
         public string ResName { get; internal set; } = null!;
 
-     
+        public string? OwnerResName { get; internal set; }
     }
 }

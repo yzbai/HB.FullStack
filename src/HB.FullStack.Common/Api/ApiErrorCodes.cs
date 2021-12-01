@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,6 +66,7 @@ namespace System
         public static ErrorCode RequestIntervalFilterError { get; } = new ErrorCode(ErrorCodeStartIds.API + 42, nameof(RequestIntervalFilterError), "");
         public static ErrorCode CapthcaNotFound { get; } = new ErrorCode(ErrorCodeStartIds.API + 43, nameof(CapthcaNotFound), "");
         public static ErrorCode CapthcaError { get; } = new ErrorCode(ErrorCodeStartIds.API + 44, nameof(CapthcaError), "");
+        public static ErrorCode NeedOwnerResId { get; } = new ErrorCode(ErrorCodeStartIds.API + 45, nameof(NeedOwnerResId), "");
     }
 
     public static partial class ApiExceptions
@@ -219,6 +221,15 @@ namespace System
 
             ex.Data["Parameter"] = parameter;
 
+            return ex;
+        }
+
+        public static Exception NeedOwnerResId(string resName)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.NeedOwnerResId);
+
+            ex.Data["ResName"] = resName;
+            
             return ex;
         }
     }

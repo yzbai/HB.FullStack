@@ -13,13 +13,14 @@ namespace HB.FullStack.Common.Api
 
         public string ResName { get; }
 
+        public string OwnerResName { get; }
 
-
-        public ApiResourceAttribute(string endPointName, string version, string resName)
+        public ApiResourceAttribute(string endPointName, string version, string resName, string ownerResName)
         {
             EndPointName = endPointName;
             Version = version;
             ResName = resName;
+            OwnerResName = ownerResName;
 
         }
     }

@@ -24,22 +24,30 @@ namespace HB.FullStack.Common.Api.Requests
 
         #endregion
 
-        public GetRequest(string? condition = null) : base(HttpMethodName.Get, condition) { }
+        public GetRequest(string? condition, Guid? ownerResId, Guid? resId) : base(HttpMethodName.Get, condition,ownerResId, resId) { }
 
-        public GetRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Get, condition) { }
-
-        public GetRequest(ApiAuthType apiAuthType, string? condition) : base(apiAuthType, HttpMethodName.Get, condition) { }
+        public GetRequest(string apiKeyName, string? condition, Guid? ownerResId, Guid? resId) : base(apiKeyName, HttpMethodName.Get, condition, ownerResId, resId) { }
 
         protected override string GetUrlCore()
         {
-            string url = $"{ApiVersion}/{ResName}/{Condition}";
+            string url = base.GetUrlCore();
 
             return AddCommonQueryToUrl(url);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Page, PerPage, OrderBys);
+            HashCode hashCode = new HashCode();
+            
+            hashCode.Add(Page);
+            hashCode.Add(PerPage);
+
+            foreach (var exp in OrderBys)
+            {
+                hashCode.Add(exp.GetHashCode());
+            }
+
+            return hashCode.ToHashCode();
         }
 
         protected string AddCommonQueryToUrl(string url)
@@ -74,46 +82,6 @@ namespace HB.FullStack.Common.Api.Requests
         public override string ToDebugInfo()
         {
             return $"{GetType().FullName}. Resource:{typeof(T).FullName}, Json:{SerializeUtil.ToJson(this)}";
-        }
-    }
-
-    public class GetRequest2<T, TOwner> : GetRequest<T> where T : ApiResource2 where TOwner : ApiResource2
-    {
-        /// <summary>
-        /// 主要Resource 的ID
-        /// 服务器端不可用
-        /// </summary>
-        [JsonIgnore]
-        public Guid OwnerId { get; set; }
-
-        /// <summary>
-        /// 服务器端不可用
-        /// </summary>
-        [JsonIgnore]
-        public string OwnerResName { get; set; } = null!;
-
-        public GetRequest2(Guid ownerId, string? condition = null) : base(condition)
-        {
-            ApiResourceDef ownerDef = ApiResourceDefFactory.Get<TOwner>();
-            OwnerId = ownerId;
-            OwnerResName = ownerDef.ResName;
-        }
-
-        protected override string GetUrlCore()
-        {
-            string url = $"{ApiVersion}/{OwnerResName}/{OwnerId}/{ResName}/{Condition}";
-
-            return AddCommonQueryToUrl(url);
-        }
-
-        public override string ToDebugInfo()
-        {
-            return $"{GetType().FullName}. Resource:{typeof(T).FullName}, Json:{SerializeUtil.ToJson(this)}";
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), OwnerId, OwnerResName);
         }
     }
 }

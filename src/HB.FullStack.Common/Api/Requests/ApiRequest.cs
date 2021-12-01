@@ -25,7 +25,7 @@ namespace HB.FullStack.Common.Api
         /// 客户端的版本
         /// </summary>
         public string DeviceVersion { get; set; } = null!;
-        
+
         #region Others 在服务器端不可用，因为是JsonIgnore
 
         [JsonIgnore]
@@ -41,9 +41,6 @@ namespace HB.FullStack.Common.Api
         public string? ApiVersion { get; set; }
 
         [JsonIgnore]
-        public string? ResName { get; set; }
-
-        [JsonIgnore]
         public string? Condition { get; set; }
 
         [JsonIgnore]
@@ -55,6 +52,24 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string? ApiKeyName { get; set; }
 
+        [JsonIgnore]
+        public string? ResName { get; set; }
+
+        [JsonIgnore]
+        public Guid? ResId { get; set; }
+        /// <summary>
+        /// 主要Resource 的ID
+        /// 服务器端不可用
+        /// </summary>
+        [JsonIgnore]
+        public Guid? OwnerResId { get; set; }
+
+        /// <summary>
+        /// 服务器端不可用
+        /// </summary>
+        [JsonIgnore]
+        public string? OwnerResName { get; set; }
+
 
         #endregion
 
@@ -64,6 +79,9 @@ namespace HB.FullStack.Common.Api
             string? endPointName,
             string? apiVersion,
             string? resName,
+            Guid? resId,
+            string? ownerResName,
+            Guid? ownerResId,
             string? condition)
         {
             ApiAuthType = apiAuthType;
@@ -71,6 +89,9 @@ namespace HB.FullStack.Common.Api
             ApiVersion = apiVersion;
             HttpMethod = httpMethod;
             ResName = resName;
+            ResId = resId;
+            OwnerResName = ownerResName;
+            OwnerResId = ownerResId;
             Condition = condition;
         }
 
@@ -102,7 +123,22 @@ namespace HB.FullStack.Common.Api
 
         protected virtual string GetUrlCore()
         {
-            return $"{ApiVersion}/{ResName}/{Condition}";
+            if (OwnerResName == null && ResId == null)
+            {
+                return $"{ApiVersion}/{ResName}/{Condition}";
+            }
+            else if (OwnerResName == null && ResId != null)
+            {
+                return $"{ApiVersion}/{ResName}/{ResId}/{Condition}";
+            }
+            else if (OwnerResName != null && ResId == null)
+            {
+                return $"{ApiVersion}/{OwnerResName}/{OwnerResId}/{ResName}/{Condition}";
+            }
+            else //if(OwnerResName != null && ResId != null)
+            {
+                return $"{ApiVersion}/{OwnerResName}/{OwnerResId}/{ResName}/{ResId}/{Condition}";
+            }
         }
 
         public abstract string ToDebugInfo();
@@ -113,13 +149,22 @@ namespace HB.FullStack.Common.Api
 
             hashCode.Add(DeviceId);
             hashCode.Add(DeviceVersion);
-            //hashCode.Add(PublicResourceToken);
             hashCode.Add(EndpointName);
             hashCode.Add(ApiVersion);
             hashCode.Add(ApiAuthType);
             hashCode.Add(ApiKeyName);
             hashCode.Add(Condition);
             hashCode.Add(ResName);
+            hashCode.Add(ResId);
+            hashCode.Add(OwnerResId);
+            hashCode.Add(OwnerResName);
+            hashCode.Add(HttpMethod);
+
+            foreach (KeyValuePair<string, string> kv in Headers)
+            {
+                hashCode.Add(kv.Key);
+                hashCode.Add(kv.Value);
+            }
 
             return hashCode.ToHashCode();
         }
@@ -132,70 +177,36 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         /// <param name="httpMethod"></param>
         /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
-        protected ApiRequest(HttpMethodName httpMethod, string? condition) : this(ApiAuthType.Jwt, httpMethod, condition)
+        protected ApiRequest(HttpMethodName httpMethod, string? condition, Guid? ownerResId, Guid? resId) : this(ApiAuthType.Jwt, httpMethod, condition, ownerResId, resId)
         {
         }
 
-        protected ApiRequest(string apiKeyName, HttpMethodName httpMethod, string? condition) : this(ApiAuthType.ApiKey, httpMethod, condition)
+        protected ApiRequest(string apiKeyName, HttpMethodName httpMethod, string? condition, Guid? ownerResId, Guid? resId) : this(ApiAuthType.ApiKey, httpMethod, condition, ownerResId, resId)
         {
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition)
-            : base(httpMethod, apiAuthType, null, null, null, condition)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition, Guid? ownerResId, Guid? resId)
+            : base(httpMethod, apiAuthType, null, null, null, resId, null, ownerResId, condition)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
+
             ResName = def.ResName;
+            OwnerResName = def.OwnerResName;
+            OwnerResId = ownerResId;
+
+            if (OwnerResName != null && OwnerResId == null)
+            {
+                throw ApiExceptions.NeedOwnerResId(def.ResName);
+            }
         }
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
-        }
-    }
-
-    public abstract class ApiRequest2<T, TOwner> : ApiRequest<T> where T : ApiResource2 where TOwner : ApiResource2
-    {
-        /// <summary>
-        /// 主要Resource 的ID
-        /// 服务器端不可用
-        /// </summary>
-        [JsonIgnore]
-        public Guid OwnerId { get; set; }
-
-        /// <summary>
-        /// 服务器端不可用
-        /// </summary>
-        [JsonIgnore]
-        public string OwnerResName { get; set; } = null!;
-
-        protected ApiRequest2(Guid ownerId, HttpMethodName httpMethod, string? condition) : this(ownerId, ApiAuthType.Jwt, httpMethod, condition)
-        {
-        }
-
-        protected ApiRequest2(Guid ownerId, string apiKeyName, HttpMethodName httpMethod, string? condition) : this(ownerId, ApiAuthType.ApiKey, httpMethod, condition)
-        {
-            ApiKeyName = apiKeyName;
-        }
-
-        protected ApiRequest2(Guid ownerId, ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition) : base(apiAuthType, httpMethod, condition)
-        {
-            ApiResourceDef ownerDef = ApiResourceDefFactory.Get<TOwner>();
-            OwnerId = ownerId;
-            OwnerResName = ownerDef.ResName;
-        }
-
-        protected override string GetUrlCore()
-        {
-            return $"{ApiVersion}/{OwnerResName}/{OwnerId}/{ResName}/{Condition}";
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), OwnerResName, OwnerId);
         }
     }
 }

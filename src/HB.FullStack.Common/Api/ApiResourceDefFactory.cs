@@ -29,8 +29,7 @@ namespace HB.FullStack.Common.Api
                 ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
                 ResName = attr.ResName ?? type.Name,
-
-             
+                OwnerResName = attr.OwnerResName
             };
         }
     }
