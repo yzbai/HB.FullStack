@@ -16,8 +16,6 @@ using Microsoft.Extensions.Logging;
 using HB.FullStack.Database.Entities;
 using Microsoft.VisualStudio.Threading;
 using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Client;
-using AsyncAwaitBestPractices;
 
 namespace HB.FullStack.Client
 {
@@ -83,7 +81,7 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
     {
         private readonly ILogger _logger;
-        private EntityDef _entityDef { get; } = null!;
+        private readonly EntityDef _entityDef = null!;
 
         protected IDatabase Database { get; }
 

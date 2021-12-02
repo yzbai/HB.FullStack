@@ -65,13 +65,6 @@ namespace System
             return Convert.ToBase64String(result);
         }
 
-        /// <summary>
-        /// EncryptPwdWithSalt
-        /// </summary>
-        /// <param name="pwd"></param>
-        /// <param name="salt"></param>
-        /// <returns></returns>
-
         public static string EncryptPwdWithSalt(string pwd, string salt)
         {
             return GetHash(pwd + salt);

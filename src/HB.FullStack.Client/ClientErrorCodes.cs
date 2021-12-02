@@ -1,6 +1,4 @@
-﻿using HB.FullStack.Database.Entities;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace System
 {
@@ -27,7 +25,7 @@ namespace System
 
     public static class LoggerExtensions
     {
-        private static Action<ILogger, string?, string?, TimeSpan?, Exception?> _logDbSimpleLockerNoWaitLockFailed = 
+        private static readonly Action<ILogger, string?, string?, TimeSpan?, Exception?> _logDbSimpleLockerNoWaitLockFailed = 
             LoggerMessage.Define<string?, string?, TimeSpan?>(
                 LogLevel.Error, 
                 ClientErrorCodes.DbSimpleLockerNoWaitLockFailed.ToEventId(), 
@@ -39,7 +37,7 @@ namespace System
         }
 
 
-        private static Action<ILogger, string?, string?, Exception?> _logDbSimpleLockerUnLockFailed =
+        private static readonly Action<ILogger, string?, string?, Exception?> _logDbSimpleLockerUnLockFailed =
             LoggerMessage.Define<string?, string?>(
                 LogLevel.Error,
                 ClientErrorCodes.DbSimpleLockerNoWaitLockFailed.ToEventId(),

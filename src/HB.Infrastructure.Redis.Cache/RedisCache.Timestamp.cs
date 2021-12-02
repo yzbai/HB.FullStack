@@ -1,16 +1,11 @@
-﻿using HB.FullStack.Cache;
-using HB.FullStack.Common;
-
+﻿
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using StackExchange.Redis;
 
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

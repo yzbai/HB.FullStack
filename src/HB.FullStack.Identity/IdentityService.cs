@@ -43,7 +43,7 @@ namespace HB.FullStack.Identity
 
         private SecurityKey _decryptionSecurityKey = null!;
 
-        private HashSet<string> _validAudiences = new HashSet<string>();
+        private readonly HashSet<string> _validAudiences = new HashSet<string>();
 
         public IdentityService(
             IOptions<IdentityOptions> options,

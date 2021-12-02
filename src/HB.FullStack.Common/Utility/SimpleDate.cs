@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace System
 {
@@ -53,13 +52,14 @@ namespace System
                 throw new ArgumentException($"SimpleData无法解析{str}");
             }
 
-            SimpleDate date = new SimpleDate();
-
-            date.Year = Convert.ToInt32(parts[0], CultureInfo.InvariantCulture);
-            date.Month = Convert.ToInt32(parts[1], CultureInfo.InvariantCulture);
-            date.Day = Convert.ToInt32(parts[2], CultureInfo.InvariantCulture);
-            date.IsNongli = Convert.ToBoolean(parts[3], CultureInfo.InvariantCulture);
-            date.IsMonthLeap = Convert.ToBoolean(parts[4], CultureInfo.InvariantCulture);
+            SimpleDate date = new SimpleDate
+            {
+                Year = Convert.ToInt32(parts[0], CultureInfo.InvariantCulture),
+                Month = Convert.ToInt32(parts[1], CultureInfo.InvariantCulture),
+                Day = Convert.ToInt32(parts[2], CultureInfo.InvariantCulture),
+                IsNongli = Convert.ToBoolean(parts[3], CultureInfo.InvariantCulture),
+                IsMonthLeap = Convert.ToBoolean(parts[4], CultureInfo.InvariantCulture)
+            };
 
             return date;
         }
