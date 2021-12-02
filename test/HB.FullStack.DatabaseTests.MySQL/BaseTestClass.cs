@@ -35,7 +35,7 @@ namespace HB.FullStack.DatabaseTests
 
             //删除之前的表结构
             string dbName = database.DatabaseNames.ElementAt(0);
-            string sql = $"DROP TABLE `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
+            string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
 
             await database.DatabaseEngine.ExecuteCommandNonQueryAsync(null, dbName, new EngineCommand(sql));
 

@@ -5,6 +5,7 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
@@ -47,17 +48,14 @@ namespace HB.Infrastructure.MySQL
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
-
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlConnection connection, bool isOwnedConnection, MySqlCommand command)
         {
+            //var ids = command.Parameters.Where(p => p.ParameterName.Contains("Id", StringComparison.InvariantCulture)).Select(p => new Guid((byte[])p.Value!)).ToList();
+
+            //IEnumerable<byte[]>? bytess = ids.Select(id => id.ToByteArray()).ToList();
+
+
+
             MySqlDataReader? reader = null;
 
             try

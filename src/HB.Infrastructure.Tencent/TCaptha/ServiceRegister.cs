@@ -37,11 +37,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return services;
         }
-
-        /// <summary>
-        /// AddTCapthaCore
-        /// </summary>
-        /// <param name="services"></param>
         
         private static void AddTCapthaCore(IServiceCollection services)
         {

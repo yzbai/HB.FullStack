@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AsyncAwaitBestPractices" Version="6.0.3" />
+		<PackageReference Include="AsyncAwaitBestPractices" Version="6.0.4" />
 		<PackageReference Include="MessagePack" Version="2.3.85" />
 		<PackageReference Include="MessagePackAnalyzer" Version="2.3.85" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
