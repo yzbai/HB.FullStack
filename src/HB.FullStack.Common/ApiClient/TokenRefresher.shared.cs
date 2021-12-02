@@ -167,9 +167,6 @@ namespace HB.FullStack.Common.ApiClient
                       endPointName,
                       apiVersion,
                       resName,
-                      null,
-                      null,
-                      null,
                       "ByRefresh")
             {
                 AccessToken = accessToken;

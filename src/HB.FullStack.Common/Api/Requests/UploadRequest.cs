@@ -30,7 +30,7 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string FileName { get; protected set; } = null!;
 
-        public UploadRequest(byte[] file, string fileName, string? condition, Guid? ownerResId, Guid? resId) : base(resId, ownerResId, condition)
+        public UploadRequest(byte[] file, string fileName, string? condition) : base(condition)
         {
             _file = file;
             FileName = fileName;

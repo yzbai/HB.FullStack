@@ -12,9 +12,9 @@ namespace HB.FullStack.Common.Api
     /// <typeparam name="T"></typeparam>
     public abstract class UpdateFieldsRequest<T> : ApiRequest<T> where T : ApiResource2
     {
-        protected UpdateFieldsRequest(Guid? resId, Guid? ownerResId, string? condition) : base(HttpMethodName.Patch, condition, ownerResId, resId) { }
+        protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
 
-        protected UpdateFieldsRequest(string apiKeyName, Guid? resId, Guid? ownerResId, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition, ownerResId, resId) { }
+        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
 
         public override string ToDebugInfo()
         {

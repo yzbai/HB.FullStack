@@ -11,7 +11,5 @@ namespace HB.FullStack.Common.Api
         public string ApiVersion { get; internal set; } = null!;
 
         public string ResName { get; internal set; } = null!;
-
-        public string? OwnerResName { get; internal set; }
     }
 }

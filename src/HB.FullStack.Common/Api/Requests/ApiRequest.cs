@@ -57,19 +57,9 @@ namespace HB.FullStack.Common.Api
 
         [JsonIgnore]
         public Guid? ResId { get; set; }
-        /// <summary>
-        /// 主要Resource 的ID
-        /// 服务器端不可用
-        /// </summary>
-        [JsonIgnore]
-        public Guid? OwnerResId { get; set; }
 
-        /// <summary>
-        /// 服务器端不可用
-        /// </summary>
         [JsonIgnore]
-        public string? OwnerResName { get; set; }
-
+        public IList<(string parentResName, string parentResId)> Parents { get; } = new List<(string parentResName, string parentResId)>();
 
         #endregion
 
@@ -79,9 +69,6 @@ namespace HB.FullStack.Common.Api
             string? endPointName,
             string? apiVersion,
             string? resName,
-            Guid? resId,
-            string? ownerResName,
-            Guid? ownerResId,
             string? condition)
         {
             ApiAuthType = apiAuthType;
@@ -89,9 +76,6 @@ namespace HB.FullStack.Common.Api
             ApiVersion = apiVersion;
             HttpMethod = httpMethod;
             ResName = resName;
-            ResId = resId;
-            OwnerResName = ownerResName;
-            OwnerResId = ownerResId;
             Condition = condition;
         }
 
@@ -123,21 +107,42 @@ namespace HB.FullStack.Common.Api
 
         protected virtual string GetUrlCore()
         {
-            if (OwnerResName == null && ResId == null)
+            string? parentSegment = GetParentSegment(Parents);
+
+            if (parentSegment == null && ResId == null)
             {
                 return $"{ApiVersion}/{ResName}/{Condition}";
             }
-            else if (OwnerResName == null && ResId != null)
+            else if (parentSegment == null && ResId != null)
             {
                 return $"{ApiVersion}/{ResName}/{ResId}/{Condition}";
             }
-            else if (OwnerResName != null && ResId == null)
+            else if (parentSegment != null && ResId == null)
             {
-                return $"{ApiVersion}/{OwnerResName}/{OwnerResId}/{ResName}/{Condition}";
+                return $"{ApiVersion}/{parentSegment}/{ResName}/{Condition}";
             }
-            else //if(OwnerResName != null && ResId != null)
+            else //if(parentSegment != null && ResId != null)
             {
-                return $"{ApiVersion}/{OwnerResName}/{OwnerResId}/{ResName}/{ResId}/{Condition}";
+                return $"{ApiVersion}/{parentSegment}/{ResName}/{ResId}/{Condition}";
+            }
+
+            static string? GetParentSegment(IList<(string parentResName, string parentResId)> lst)
+            {
+                if (lst.IsNullOrEmpty())
+                {
+                    return null;
+                }
+
+                StringBuilder stringBuilder = new StringBuilder();
+                foreach (var (parentResName, parentResId) in lst)
+                {
+                    stringBuilder.Append(parentResName);
+                    stringBuilder.Append('/');
+                    stringBuilder.Append(parentResId);
+                    stringBuilder.Append('/');
+                }
+
+                return stringBuilder.RemoveLast().ToString();
             }
         }
 
@@ -156,14 +161,18 @@ namespace HB.FullStack.Common.Api
             hashCode.Add(Condition);
             hashCode.Add(ResName);
             hashCode.Add(ResId);
-            hashCode.Add(OwnerResId);
-            hashCode.Add(OwnerResName);
             hashCode.Add(HttpMethod);
 
             foreach (KeyValuePair<string, string> kv in Headers)
             {
                 hashCode.Add(kv.Key);
                 hashCode.Add(kv.Value);
+            }
+            foreach ((string parentResName, string parentResId) in Parents)
+
+            {
+                hashCode.Add(parentResId);
+                hashCode.Add(parentResName);
             }
 
             return hashCode.ToHashCode();
@@ -177,31 +186,23 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         /// <param name="httpMethod"></param>
         /// <param name="condition">同一Verb下的条件分支，比如在ApiController上标注的[HttpGet("BySms")],BySms就是condition</param>
-        protected ApiRequest(HttpMethodName httpMethod, string? condition, Guid? ownerResId, Guid? resId) : this(ApiAuthType.Jwt, httpMethod, condition, ownerResId, resId)
+        protected ApiRequest(HttpMethodName httpMethod, string? condition) : this(ApiAuthType.Jwt, httpMethod, condition)
         {
         }
 
-        protected ApiRequest(string apiKeyName, HttpMethodName httpMethod, string? condition, Guid? ownerResId, Guid? resId) : this(ApiAuthType.ApiKey, httpMethod, condition, ownerResId, resId)
+        protected ApiRequest(string apiKeyName, HttpMethodName httpMethod, string? condition) : this(ApiAuthType.ApiKey, httpMethod, condition)
         {
             ApiKeyName = apiKeyName;
         }
 
-        protected ApiRequest(ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition, Guid? ownerResId, Guid? resId)
-            : base(httpMethod, apiAuthType, null, null, null, resId, null, ownerResId, condition)
+        protected ApiRequest(ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition)
+            : base(httpMethod, apiAuthType, null, null, null, condition)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
             EndpointName = def.EndpointName;
             ApiVersion = def.ApiVersion;
-
             ResName = def.ResName;
-            OwnerResName = def.OwnerResName;
-            OwnerResId = ownerResId;
-
-            if (OwnerResName != null && OwnerResId == null)
-            {
-                throw ApiExceptions.NeedOwnerResId(def.ResName);
-            }
         }
 
         public override int GetHashCode()
