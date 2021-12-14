@@ -21,7 +21,7 @@ namespace HB.FullStack.CommonTests
             TimeSpan newTimeSpan = timeSpan.Add(TimeSpan.FromHours(25).Add(TimeSpan.FromMinutes(89)));
             var json = SerializeUtil.ToJson(newTimeSpan);
             TimeSpan rt = SerializeUtil.FromJson<TimeSpan>(json);
-            
+
             Console.WriteLine(json);
             Assert.AreEqual(newTimeSpan, rt);
 
@@ -29,6 +29,24 @@ namespace HB.FullStack.CommonTests
 
             Console.WriteLine(rt2);
             Console.WriteLine(SerializeUtil.ToJson(rt2));
+        }
+
+        [TestMethod]
+        public void TestSimpleDateSerializable()
+        {
+            SimpleDate simpleDate = new SimpleDate { Day = 1, Month = 1, IsMonthLeap = false, IsNongli = true, Year = 2020 };
+
+            string json = SerializeUtil.ToJson(simpleDate);
+
+            Console.WriteLine(json);
+
+            SimpleDate simpleDate1 = SerializeUtil.FromJson<SimpleDate>(json);
+
+            string json2 = SerializeUtil.ToJson(simpleDate1);
+
+            Console.WriteLine(json2);
+
+            Assert.AreEqual(json, json2);
         }
     }
 }

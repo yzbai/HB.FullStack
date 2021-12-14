@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,8 +20,27 @@ namespace System.ComponentModel.DataAnnotations
 
         public override bool IsValid(object? value)
         {
-            return value != null && ((Guid)value) != Guid.Empty;
+            if (value is IEnumerable cols)
+            {
+                foreach (object? obj in cols)
+                {
+                    if (!IsObjectValid(obj))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return IsObjectValid(value);
         }
 
+        public static bool IsObjectValid(object? value)
+        {
+            Guid? guid = value as Guid?;
+
+            return guid != null && guid != Guid.Empty;
+        }
     }
 }

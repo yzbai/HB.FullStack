@@ -11,19 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace HB.FullStack.Repository
 {
     public static class CachedItemCacheStrategy
-    {
-        /// <summary>
-        /// CacheAsideAsync
-        /// </summary>
-        /// <param name="cacheItem"></param>
-        /// <param name="dbRetrieve"></param>
-        /// <param name="cache"></param>
-        /// <param name="memoryLockManager"></param>
-        /// <param name="database"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        
-        
+    {          
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
@@ -75,22 +63,12 @@ namespace HB.FullStack.Repository
             }
         }
 
-        /// <summary>
-        /// InvalidateCache
-        /// </summary>
-        /// <param name="cachedItem"></param>
-        /// <param name="cache"></param>
+
         
         public static void InvalidateCache(CachedItem cachedItem, ICache cache)
         {
             cache.RemoveAsync(cachedItem).Fire();
         }
-
-        /// <summary>
-        /// UpdateCache
-        /// </summary>
-        /// <param name="cachedItem"></param>
-        /// <param name="cache"></param>
         
         private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
         {

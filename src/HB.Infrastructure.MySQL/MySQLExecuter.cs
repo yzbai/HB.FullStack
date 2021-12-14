@@ -17,13 +17,6 @@ namespace HB.Infrastructure.MySQL
     internal static class MySQLExecuter
     {
         #region Command Reader
-
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="mySqlTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
         
         public static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
@@ -35,12 +28,7 @@ namespace HB.Infrastructure.MySQL
                 dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
+
         
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
         {
@@ -50,12 +38,6 @@ namespace HB.Infrastructure.MySQL
 
         private static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlConnection connection, bool isOwnedConnection, MySqlCommand command)
         {
-            //var ids = command.Parameters.Where(p => p.ParameterName.Contains("Id", StringComparison.InvariantCulture)).Select(p => new Guid((byte[])p.Value!)).ToList();
-
-            //IEnumerable<byte[]>? bytess = ids.Select(id => id.ToByteArray()).ToList();
-
-
-
             MySqlDataReader? reader = null;
 
             try

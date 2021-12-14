@@ -95,13 +95,6 @@ namespace HB.Infrastructure.Aliyun.Sms
         }
 
 #if DEBUG
-        /// <summary>
-        /// SendValidationCode
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="smsCode"></param>
-        /// <param name="expiryMinutes"></param>
-
         public void SendValidationCode(string mobile, string smsCode, int expiryMinutes)
         {
             try
@@ -115,13 +108,6 @@ namespace HB.Infrastructure.Aliyun.Sms
         }
 
 #endif
-
-        /// <summary>
-        /// ValidateAsync
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="code"></param>
-        /// <returns></returns>
 
         public async Task<bool> ValidateAsync(string mobile, string code)
         {
@@ -142,13 +128,6 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
         }
 
-        /// <summary>
-        /// SetSmsCodeToCache
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="cachedSmsCode"></param>
-        /// <param name="expireMinutes"></param>
-
         private void SetSmsCodeToCache(string mobile, string cachedSmsCode, int expireMinutes)
         {
             _cache.SetStringAsync(
@@ -160,12 +139,6 @@ namespace HB.Infrastructure.Aliyun.Sms
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
                         }).Fire();
         }
-
-        /// <summary>
-        /// GetSmsCodeFromCacheAsync
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <returns></returns>
 
         private Task<string?> GetSmsCodeFromCacheAsync(string mobile)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,74 +12,50 @@ namespace HB.FullStack.Common.Api.Requests
 {
     public class GetRequest<T> : ApiRequest<T> where T : ApiResource2
     {
-        #region Querys
-
-        [JsonIgnore]
         public int? Page { get; set; }
 
-        [JsonIgnore]
         public int? PerPage { get; set; }
 
-        [JsonIgnore]
-        public IEnumerable<Expression<Func<T, object>>> OrderBys { get; } = new List<Expression<Func<T, object>>>();
+        public string? OrderBys { get; set; }
 
-        #endregion
+        public GetRequest() : base(HttpMethodName.Get, null) { }
 
         public GetRequest(string? condition) : base(HttpMethodName.Get, condition) { }
 
         public GetRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Get, condition) { }
 
-        public GetRequest(ApiAuthType apiAuthType, string? condition) : base(apiAuthType, HttpMethodName.Get, condition) { }
-
-        protected override string GetUrlCore()
-        {
-            string url = base.GetUrlCore();
-
-            return AddCommonQueryToUrl(url);
-        }
+        public GetRequest(ApiAuthType apiAuthType,string? condition) : base(apiAuthType, HttpMethodName.Get, condition) { }
 
         public override int GetHashCode()
         {
             HashCode hashCode = new HashCode();
-            
+
             hashCode.Add(Page);
             hashCode.Add(PerPage);
-
-            foreach (var exp in OrderBys)
-            {
-                hashCode.Add(exp.GetHashCode());
-            }
+            hashCode.Add(OrderBys);
 
             return hashCode.ToHashCode();
         }
 
-        protected string AddCommonQueryToUrl(string url)
+        public void OrderBy(params Expression<Func<T, object>>[]? orderBys)
         {
-            Dictionary<string, string?> parameters = new Dictionary<string, string?>();
-
-            if (Page.HasValue && PerPage.HasValue)
+            if (orderBys.IsNullOrEmpty())
             {
-                parameters.Add(ClientNames.Page, Page.Value.ToString(CultureInfo.InvariantCulture));
-                parameters.Add(ClientNames.PerPage, PerPage.Value.ToString(CultureInfo.InvariantCulture));
+                return;
             }
 
-            if (OrderBys.IsNotNullOrEmpty())
+            StringBuilder orderByBuilder = new StringBuilder();
+
+            foreach (Expression<Func<T, object>> orderBy in orderBys)
             {
-                StringBuilder orderByBuilder = new StringBuilder();
-
-                foreach (Expression<Func<T, object>> orderBy in OrderBys)
-                {
-                    string orderByName = ((MemberExpression)orderBy.Body).Member.Name;
-                    orderByBuilder.Append(orderByName);
-                    orderByBuilder.Append(',');
-                }
-
-                orderByBuilder.RemoveLast();
-
-                parameters.Add(ClientNames.OrderBy, orderByBuilder.ToString());
+                string orderByName = ((MemberExpression)orderBy.Body).Member.Name;
+                orderByBuilder.Append(orderByName);
+                orderByBuilder.Append(',');
             }
 
-            return parameters.Any() ? UriUtil.AddQuerys(url, parameters) : url;
+            orderByBuilder.RemoveLast();
+
+            OrderBys = orderByBuilder.ToString();
         }
 
         public override string ToDebugInfo()
