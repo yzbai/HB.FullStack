@@ -45,13 +45,6 @@ namespace HB.Infrastructure.Redis.EventBus
             _logger.LogInformation("RedisEventBusEngine初始化完成");
         }
 
-        /// <summary>
-        /// PublishAsync
-        /// </summary>
-        /// <param name="brokerName"></param>
-        /// <param name="eventMessage"></param>
-        /// <returns></returns>
-
         public async Task PublishAsync(string brokerName, string eventName, string jsonData)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);

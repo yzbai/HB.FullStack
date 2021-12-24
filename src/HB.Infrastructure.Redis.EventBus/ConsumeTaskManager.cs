@@ -103,6 +103,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
         private async Task ScanHistoryAsync(CancellationToken cancellationToken)
         {
+            //TODO: 考虑使用BlockingCollection
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -129,13 +130,15 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         //还没有数据，等会吧
                         _logger.LogTrace("ScanHistory {InstanceName} 中,还没有数据，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
-                        await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        //await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        Thread.Sleep(10 * 1000);//让出线程
                     }
                     else if (result == 1)
                     {
                         //时间太早，等会再检查
                         _logger.LogTrace("ScanHistory {InstanceName} 中,数据还太新，一会再检查，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
-                        await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        //await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        Thread.Sleep(10 * 1000); //让出线程
                     }
                     else if (result == 2)
                     {
@@ -179,10 +182,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
             _logger.LogTrace("History Task For {eventType} Stopped.", _eventType);
         }
-
-        /// <summary>
-        /// CosumeTaskProcedure
-        /// </summary>
 
         private async Task CosumeAsync(CancellationToken cancellationToken)
         {
@@ -318,10 +317,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
         #endregion
 
-        /// <summary>
-        /// Cancel
-        /// </summary>
-
         public async Task CancelAsync()
         {
             _consumeTaskCTS.Cancel();
@@ -347,10 +342,10 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
             _logger.LogTrace("Task For {eventType} Stopped.", _eventType);
         }
 
-        /// <summary>
-        /// Start
-        /// </summary>
-
+        //TODO: 使用Channel重写
+        //TODO：使用LongTimeTask
+        //TODO: 考虑如果使用asp.net的话，使用IHostedService注入
+        //TODO：考虑怎么优雅的shutdown，比如登记到IHostedApplicationLifetime的Stopped
         public void Start()
         {
             _consumeTask = CosumeAsync(_consumeTaskCTS.Token);
