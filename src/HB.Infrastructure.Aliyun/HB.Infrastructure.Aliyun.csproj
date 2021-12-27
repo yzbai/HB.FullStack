@@ -16,7 +16,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="aliyun-net-sdk-core" Version="1.5.10" />
+    <PackageReference Include="aliyun-net-sdk-core" Version="1.5.11" />
     <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
     
     <PackageReference Include="Polly" Version="7.2.2" />
