@@ -27,7 +27,7 @@ namespace HB.FullStack.DatabaseTests
         [AssemblyInitialize]
         public static async Task AssemblyInit(TestContext _)
         {
-            (IServiceProvider serviceProvider2, string sqliteDbName) = BuildSqlite();
+            (IServiceProvider serviceProvider2, string sqliteDbName) = BuildServices();
 
             IDatabase sqliteDb = serviceProvider2.GetRequiredService<IDatabase>();
 
@@ -46,7 +46,7 @@ namespace HB.FullStack.DatabaseTests
             File.Delete(DbName);
         }
 
-        public static (IServiceProvider serviceProvider, string dbName) BuildSqlite()
+        public static (IServiceProvider serviceProvider, string dbName) BuildServices()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 

@@ -45,6 +45,7 @@ namespace HB.FullStack.Database
         public static ErrorCode EntityHasNotSupportedPropertyType { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 23, nameof(EntityHasNotSupportedPropertyType), "");
 
         public static ErrorCode EntityVersionError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 24, nameof(EntityVersionError), "");
+        public static ErrorCode NotInitializedYet { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 25, nameof(NotInitializedYet), "");
     }
 
     internal static class DatabaseExceptions
@@ -320,6 +321,12 @@ namespace HB.FullStack.Database
             exception.Data["ForeignKeyValue"] = foreignKeyValue?.ToString();
             exception.Data["ForeignKeyType"] = foreignKeyType;
 
+            return exception;
+        }
+
+        internal static Exception NotInitializedYet()
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotInitializedYet);
             return exception;
         }
     }

@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAliyunOss(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<AliyunOssOptions>(configuration);
 
@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddAliyunOss(this IServiceCollection services, Action<AliyunOssOptions> action)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(action);
 

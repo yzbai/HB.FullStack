@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTCaptha(this IServiceCollection services, Action<TCapthaOptions> action)
         {
 
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(action);
 
@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTCaptha(this IServiceCollection services, IConfiguration configuration)
         {
 
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<TCapthaOptions>(configuration);
 

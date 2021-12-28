@@ -14,6 +14,12 @@ namespace Microsoft.Extensions.DependencyInjection
             IdGenSettings settings = new IdGenSettings();
             configuration.Bind(settings);
 
+            //使用环境变量覆盖
+            if (EnvironmentUtil.MachineId.HasValue)
+            {
+                settings.MachineId = EnvironmentUtil.MachineId.Value;
+            }
+
             FlackIdGen.Initialize(settings);
             return services;
         }
@@ -22,6 +28,12 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             IdGenSettings settings = new IdGenSettings();
             action(settings);
+
+            //使用环境变量覆盖
+            if (EnvironmentUtil.MachineId.HasValue)
+            {
+                settings.MachineId = EnvironmentUtil.MachineId.Value;
+            }
 
             FlackIdGen.Initialize(settings);
             return services;

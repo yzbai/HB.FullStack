@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddIdentity(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(optionsSetup);
             AddIdentityCore(services);
@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<IdentityOptions>(configuration);
 

@@ -15,14 +15,7 @@ using HB.FullStack.Database.Entities;
 namespace HB.FullStack.Database.SQL
 {
     internal static class SQLExpressionVisitor
-    {
-        /// <summary>
-        /// Visit
-        /// </summary>
-        /// <param name="exp"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        
+    {       
         public static object Visit(Expression? exp, SQLExpressionVisitorContenxt context)
         {
             if (exp == null) return string.Empty;

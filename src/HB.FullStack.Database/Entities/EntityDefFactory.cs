@@ -18,7 +18,7 @@ namespace HB.FullStack.Database.Entities
         public static int VarcharDefaultLength { get; set; }
 
         /// <summary>
-        /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经WarmUpEntityDefs，后续只有read，没有write
+        /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructEntityDefs，后续只有read，没有write
         /// </summary>
         private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
@@ -30,18 +30,18 @@ namespace HB.FullStack.Database.Entities
 
             IEnumerable<Type> allEntityTypes;
 
-            if (databaseSettings.AssembliesIncludeEntity.IsNullOrEmpty())
+            if (databaseSettings.Assemblies.IsNullOrEmpty())
             {
                 allEntityTypes = ReflectUtil.GetAllTypeByCondition(entityTypeCondition);
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(databaseSettings.AssembliesIncludeEntity, entityTypeCondition);
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(databaseSettings.Assemblies, entityTypeCondition);
             }
 
-            IDictionary<string, EntitySetting> entitySchemaDict = ConstructeSchemaDict(databaseSettings, databaseEngine, allEntityTypes);
+            IDictionary<string, EntitySetting> entitySettingDict = ConstructeSettingDict(databaseSettings, databaseEngine, allEntityTypes);
 
-            WarmUpEntityDefs(allEntityTypes, databaseEngine.EngineType, entitySchemaDict);
+            ConstructEntityDefs(allEntityTypes, databaseEngine.EngineType, entitySettingDict);
 
             static bool entityTypeCondition(Type t)
             {
@@ -49,15 +49,15 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        private static void WarmUpEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private static void ConstructEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySettingDict)
         {
             foreach (var t in allEntityTypes)
             {
-                _defDict[t] = CreateEntityDef(t, engineType, entitySchemaDict);
+                _defDict[t] = CreateEntityDef(t, engineType, entitySettingDict);
             }
         }
 
-        private static IDictionary<string, EntitySetting> ConstructeSchemaDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allEntityTypes)
+        private static IDictionary<string, EntitySetting> ConstructeSettingDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allEntityTypes)
         {
             IDictionary<string, EntitySetting> fileConfiguredDict = databaseSettings.EntitySettings.ToDictionary(t => t.EntityTypeFullName);
 
@@ -162,11 +162,11 @@ namespace HB.FullStack.Database.Entities
             return null;
         }
 
-        private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySettingDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
-            if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
+            if (!entitySettingDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
                 throw DatabaseExceptions.EntityError(type: entityType.FullName, "", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
             }

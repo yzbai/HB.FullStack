@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddSQLite(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<SQLiteOptions>(configuration);
 
@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddSQLite(this IServiceCollection services, Action<SQLiteOptions> databaseEngineOptionsSetup)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(databaseEngineOptionsSetup);
 

@@ -26,6 +26,8 @@ namespace System
         public static readonly ErrorCode PerformValidateError = new ErrorCode(ErrorCodeStartIds.COMMON + 8, nameof(PerformValidateError), "");
 
         public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode(ErrorCodeStartIds.COMMON + 9, nameof(TryFromJsonWithCollectionCheckError), "");
+
+        public static readonly ErrorCode EnvironmentVariableError = new ErrorCode(ErrorCodeStartIds.COMMON + 10, nameof(EnvironmentVariableError), "");
     }
 
     public static partial class LoggerExtensions
@@ -111,6 +113,29 @@ namespace System
         }
     }
 
+    public class CommonException : ErrorCode2Exception
+    {
+        public CommonException()
+        {
+        }
+
+        public CommonException(ErrorCode errorCode) : base(errorCode)
+        {
+        }
+
+        public CommonException(string? message) : base(message)
+        {
+        }
+
+        public CommonException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
+        {
+        }
+
+        public CommonException(string? message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
     public static partial class CommonExceptions
     {
         public static ErrorCode2Exception CertNotFound(string? subject, string? fullPath)
@@ -122,6 +147,15 @@ namespace System
             return ex;
         }
 
+        internal static Exception EnvironmentVariableError(object? value, string cause)
+        {
+            CommonException ex = new CommonException(CommonErrorCodes.EnvironmentVariableError);
 
+            ex.Data["Value"] = value?.ToString();
+            ex.Data["Cause"] = cause;
+
+            return ex;
+
+        }
     }
 }

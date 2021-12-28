@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-
-using HB.FullStack.WebApi;
-
-using Microsoft.Extensions.Logging;
+﻿using System.Globalization;
 
 namespace System
 {
@@ -72,12 +65,13 @@ namespace System
             //检查环境变量
             if (!IsAspnetcoreEnvironmentOk())
             {
-                throw WebApiExceptions.StartupError(value: EnvironmentUtil.AspNetCoreEnvironment, cause: "环境变量ASPNETCORE_ENVIRONMENT设置错误");
+                throw CommonExceptions.EnvironmentVariableError(value: EnvironmentUtil.AspNetCoreEnvironment, cause: "环境变量ASPNETCORE_ENVIRONMENT设置错误");
             }
 
+            //要求必须在运行环境中设置环境变量MachineId，预防配置文件没有改动。
             if (MachineId.GetValueOrDefault() == 0)
             {
-                throw WebApiExceptions.StartupError(value: EnvironmentUtil.MachineId, cause: "环境变量MachineId设置错误");
+                throw CommonExceptions.EnvironmentVariableError(value: EnvironmentUtil.MachineId, cause: "环境变量MachineId设置错误");
             }
         }
     }

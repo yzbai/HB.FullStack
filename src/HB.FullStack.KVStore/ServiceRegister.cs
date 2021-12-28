@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddKVStore(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddOptions();
+            //serviceCollection.AddOptions();
 
             serviceCollection.AddSingleton<IKVStore, DefaultKVStore>();
 

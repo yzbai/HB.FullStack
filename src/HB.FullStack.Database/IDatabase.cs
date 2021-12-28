@@ -17,9 +17,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 必须加分布式锁进行。
         /// </summary>
-        /// <param name="migrations"></param>
-        /// <returns></returns>
-
         Task InitializeAsync(IEnumerable<Migration>? migrations = null);
 
         EngineType EngineType { get; }

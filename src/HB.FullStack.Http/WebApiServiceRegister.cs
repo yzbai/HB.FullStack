@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddWebApiServerService(this IServiceCollection services)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             AddCore(services);
 

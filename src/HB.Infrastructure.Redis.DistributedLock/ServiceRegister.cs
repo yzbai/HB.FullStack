@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddSingleRedisDistributedLock(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<SingleRedisDistributedLockOptions>(configuration);
 
@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddSingleRedisDistributedLock(this IServiceCollection services, Action<SingleRedisDistributedLockOptions> action)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(action);
 

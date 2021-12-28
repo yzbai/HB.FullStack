@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddRedisEventBus(this IServiceCollection services, Action<RedisEventBusOptions> action)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(action);
 
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddRedisEventBus(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<RedisEventBusOptions>(configuration);
 
