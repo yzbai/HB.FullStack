@@ -8,7 +8,7 @@ namespace HB.FullStack.Database.Entities
     /// <summary>
     /// 实体内属性定义（一个）
     /// </summary>
-    internal class EntityPropertyDef
+    public class EntityPropertyDef
     {
         public EntityDef EntityDef { get; set; } = null!;
 

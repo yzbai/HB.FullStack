@@ -17,7 +17,7 @@ namespace HB.FullStack.Database
     {
         public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity, new()
         {
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            EntityDef entityDef = database.EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -28,7 +28,7 @@ namespace HB.FullStack.Database
             {
                 WhereExpression<T> where = database.Where(whereExpr).And(t => !t.Deleted);
 
-                var command = DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
+                var command = database.DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
 
                 await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
             }
@@ -42,7 +42,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            EntityDef entityDef = database.EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
@@ -61,11 +61,11 @@ namespace HB.FullStack.Database
                     item.Version = 0;
                 }
 
-                var command = DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
+                var command = database.DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
 
                 using var reader = await database.DatabaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
 
-                IList<T> entities = reader.ToEntities<T>(database.EngineType, entityDef);
+                IList<T> entities = reader.ToEntities<T>(database.EngineType, database.EntityDefFactory, entityDef);
 
                 T newItem = entities[0];
 

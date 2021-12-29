@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 
 using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -23,7 +24,7 @@ namespace HB.FullStack.Database.SQL
         public string[]? OrderByStatementBySQLUtilIn_Ins { get; set; }
 
         public EngineType EngineType { get; private set; }
-
+        
         public SQLExpressionVisitorContenxt(EngineType engineType)
         {
             EngineType = engineType;

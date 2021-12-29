@@ -7,7 +7,7 @@ namespace HB.FullStack.Database.Entities
     /// <summary>
     /// 实体定义
     /// </summary>
-    internal class EntityDef
+    public class EntityDef
     {
         /// <summary>
         /// 是否是GuidEntity
@@ -69,7 +69,7 @@ namespace HB.FullStack.Database.Entities
         /// <summary>
         /// 属性枚举
         /// </summary>
-        public List<EntityPropertyDef> PropertyDefs { get; } = new List<EntityPropertyDef>();
+        public IList<EntityPropertyDef> PropertyDefs { get; } = new List<EntityPropertyDef>();
 
         public EntityPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
 

@@ -11,10 +11,12 @@ namespace HB.FullStack.Database
     public class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
+        private readonly IEntityDefFactory _entityDefFactory;
 
-        public DefaultTransaction(IDatabaseEngine datbaseEngine)
+        public DefaultTransaction(IDatabaseEngine datbaseEngine, IEntityDefFactory entityDefFactory)
         {
             _databaseEngine = datbaseEngine;
+            _entityDefFactory = entityDefFactory;
         }
 
         #region 事务
@@ -28,7 +30,7 @@ namespace HB.FullStack.Database
 
         public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity
         {
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            EntityDef entityDef = _entityDefFactory.GetDef<T>()!;
 
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }

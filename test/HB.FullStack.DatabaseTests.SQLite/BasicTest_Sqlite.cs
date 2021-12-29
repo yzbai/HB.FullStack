@@ -402,7 +402,7 @@ namespace HB.FullStack.DatabaseTests
                 EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                EntityDef definition = EntityDefFactory.GetDef<BookEntity_Client>()!;
+                EntityDef definition = Db.EntityDefFactory.GetDef<BookEntity_Client>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -410,7 +410,7 @@ namespace HB.FullStack.DatabaseTests
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
+                Func<IEntityDefFactory, IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
@@ -424,7 +424,7 @@ namespace HB.FullStack.DatabaseTests
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(reader0);
+                    object obj1 = mapper1(Db.EntityDefFactory, reader0);
 
                     list1.Add((BookEntity_Client)obj1);
                     stopwatch1.Stop();

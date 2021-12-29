@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.DatabaseTests
 {
     [TestClass]
-    public class EntityMapperTests
+    public class EntityMapperTests : BaseTestClass
     {
         [TestMethod]
         [DataRow(EngineType.MySQL)]
@@ -27,9 +27,9 @@ namespace HB.FullStack.DatabaseTests
 
             publisherEntity.Version = 0;
 
-            var emit_results = publisherEntity.ToParameters(EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
+            var emit_results = publisherEntity.ToParameters(Db.EntityDefFactory.GetDef<PublisherEntity>()!, engineType, Db.EntityDefFactory, 1);
 
-            var reflect_results = publisherEntity.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
+            var reflect_results = publisherEntity.ToParametersUsingReflection(Db.EntityDefFactory.GetDef<PublisherEntity>()!, engineType, 1);
 
             AssertEqual(emit_results, reflect_results, engineType);
 
@@ -38,9 +38,9 @@ namespace HB.FullStack.DatabaseTests
             PublisherEntity2 publisherEntity2 = new PublisherEntity2();
             publisherEntity2.Version = 0;
 
-            var emit_results2 = publisherEntity2.ToParameters(EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
+            var emit_results2 = publisherEntity2.ToParameters(Db.EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, Db.EntityDefFactory, 1);
 
-            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
+            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(Db.EntityDefFactory.GetDef<PublisherEntity2>()!, engineType, 1);
 
             AssertEqual(emit_results2, reflect_results2, engineType);
 
@@ -49,9 +49,9 @@ namespace HB.FullStack.DatabaseTests
             PublisherEntity3 publisherEntity3 = new PublisherEntity3();
             publisherEntity3.Version = 0;
 
-            var emit_results3 = publisherEntity3.ToParameters(EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
+            var emit_results3 = publisherEntity3.ToParameters(Db.EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, Db.EntityDefFactory, 1);
 
-            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
+            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(Db.EntityDefFactory.GetDef<PublisherEntity3>()!, engineType, 1);
 
             AssertEqual(emit_results3, reflect_results3, engineType);
         }
@@ -81,14 +81,14 @@ namespace HB.FullStack.DatabaseTests
 
             Parallel.ForEach(entities, e => e.Version = 0);
 
-            var def = EntityDefFactory.GetDef<PublisherEntity>();
+            var def = Db.EntityDefFactory.GetDef<PublisherEntity>();
 
             Stopwatch stopwatch = new Stopwatch();
 
             stopwatch.Restart();
             foreach (var entity in entities)
             {
-                _ = entity.ToParameters(def!, engineType);
+                _ = entity.ToParameters(def!, engineType, Db.EntityDefFactory);
             }
             stopwatch.Stop();
 

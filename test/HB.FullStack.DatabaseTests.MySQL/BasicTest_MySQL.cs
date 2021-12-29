@@ -396,7 +396,7 @@ namespace HB.FullStack.DatabaseTests
                 EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                EntityDef definition = EntityDefFactory.GetDef<BookEntity>()!;
+                EntityDef definition = Db.EntityDefFactory.GetDef<BookEntity>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -404,7 +404,7 @@ namespace HB.FullStack.DatabaseTests
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
+                Func<IEntityDefFactory, IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
@@ -417,7 +417,7 @@ namespace HB.FullStack.DatabaseTests
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(reader0);
+                    object obj1 = mapper1(Db.EntityDefFactory, reader0);
 
                     list1.Add((BookEntity)obj1);
                     stopwatch1.Stop();

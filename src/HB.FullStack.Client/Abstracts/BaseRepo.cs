@@ -102,7 +102,7 @@ namespace HB.FullStack.Client
             ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
             _logger = logger;
-            _entityDef = EntityDefFactory.GetDef<TEntity>()!;
+            _entityDef = database.EntityDefFactory.GetDef<TEntity>()!;
 
             Database = database;
 

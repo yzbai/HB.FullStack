@@ -36,12 +36,18 @@ namespace HB.FullStack.Database
         private readonly string _deletedPropertyReservedName;
         private bool _initialized;
 
+        public IEntityDefFactory EntityDefFactory { get; }
+        public IDbCommandBuilder DbCommandBuilder { get; }
+
         public EngineType EngineType { get; }
         IDatabaseEngine IDatabase.DatabaseEngine => _databaseEngine;
         public IEnumerable<string> DatabaseNames => _databaseEngine.DatabaseNames;
+        public int VarcharDefaultLength { get; }
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
+            IEntityDefFactory entityDefFactory,
+            IDbCommandBuilder commandBuilder,
             ITransaction transaction,
             ILogger<DefaultDatabase> logger)
         {
@@ -52,12 +58,16 @@ namespace HB.FullStack.Database
 
             _databaseSettings = databaseEngine.DatabaseSettings;
             _databaseEngine = databaseEngine;
+            EntityDefFactory = entityDefFactory;
+            DbCommandBuilder = commandBuilder;
             _transaction = transaction;
             _logger = logger;
 
             EngineType = databaseEngine.EngineType;
 
-            EntityDefFactory.Initialize(databaseEngine);
+
+            VarcharDefaultLength = _databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : _databaseSettings.DefaultVarcharLength;
+
 
             _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(Entity.Deleted), _databaseEngine.EngineType);
         }
@@ -148,7 +158,7 @@ namespace HB.FullStack.Database
 
         private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext, bool addDropStatement)
         {
-            var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, addDropStatement);
+            var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, addDropStatement, VarcharDefaultLength);
 
             _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
 
@@ -315,25 +325,13 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : DatabaseEntity, new()
-        {
-            return new FromExpression<T>(EngineType);
-        }
+        public FromExpression<T> From<T>() where T : DatabaseEntity, new() => DbCommandBuilder.From<T>(EngineType);
 
-        public WhereExpression<T> Where<T>() where T : DatabaseEntity, new()
-        {
-            return new WhereExpression<T>(EngineType);
-        }
+        public WhereExpression<T> Where<T>() where T : DatabaseEntity, new() => DbCommandBuilder.Where<T>(EngineType);
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new()
-        {
-            return new WhereExpression<T>(EngineType).Where(sqlFilter, filterParams);
-        }
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new() => DbCommandBuilder.Where<T>(EngineType, sqlFilter, filterParams);
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseEntity, new()
-        {
-            return new WhereExpression<T>(EngineType).Where(predicate);
-        }
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseEntity, new() => DbCommandBuilder.Where(EngineType, predicate);
 
         #endregion
 
@@ -366,7 +364,7 @@ namespace HB.FullStack.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TWhere>(EngineType);
+                whereCondition = Where<TWhere>();
             }
 
             EntityDef selectDef = EntityDefFactory.GetDef<TSelect>()!;
@@ -381,7 +379,7 @@ namespace HB.FullStack.Database
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
 
-                return reader.ToEntities<TSelect>(_databaseEngine.EngineType, selectDef);
+                return reader.ToEntities<TSelect>(_databaseEngine.EngineType, EntityDefFactory, selectDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -396,7 +394,7 @@ namespace HB.FullStack.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<T>(EngineType);
+                whereCondition = Where<T>();
             }
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -408,7 +406,7 @@ namespace HB.FullStack.Database
                 var command = DbCommandBuilder.CreateRetrieveCommand(EngineType, entityDef, fromCondition, whereCondition);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToEntities<T>(_databaseEngine.EngineType, entityDef);
+                return reader.ToEntities<T>(_databaseEngine.EngineType, EntityDefFactory, entityDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -423,7 +421,7 @@ namespace HB.FullStack.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<T>(EngineType);
+                whereCondition = Where<T>();
             }
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -567,7 +565,7 @@ namespace HB.FullStack.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TSource>(EngineType);
+                whereCondition = Where<TSource>();
             }
 
             EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>()!;
@@ -603,7 +601,7 @@ namespace HB.FullStack.Database
             {
                 var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(EngineType, fromCondition, whereCondition, sourceEntityDef, targetEntityDef);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToEntities<TSource, TTarget>(_databaseEngine.EngineType, sourceEntityDef, targetEntityDef);
+                return reader.ToEntities<TSource, TTarget>(_databaseEngine.EngineType, EntityDefFactory, sourceEntityDef, targetEntityDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -645,7 +643,7 @@ namespace HB.FullStack.Database
 
             if (whereCondition == null)
             {
-                whereCondition = new WhereExpression<TSource>(EngineType);
+                whereCondition = Where<TSource>();
             }
 
             EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>()!;
@@ -682,7 +680,7 @@ namespace HB.FullStack.Database
             {
                 var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(EngineType, fromCondition, whereCondition, sourceEntityDef, targetEntityDef1, targetEntityDef2);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToEntities<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, sourceEntityDef, targetEntityDef1, targetEntityDef2);
+                return reader.ToEntities<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, EntityDefFactory, sourceEntityDef, targetEntityDef1, targetEntityDef2);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -1274,7 +1272,7 @@ namespace HB.FullStack.Database
 
         private void ThrowIfNotInitializedYet()
         {
-            if(!_initialized)
+            if (!_initialized)
             {
                 throw DatabaseExceptions.NotInitializedYet();
             }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
@@ -9,24 +8,18 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
-using Microsoft.Extensions.Logging;
-
 namespace HB.FullStack.Database.Entities
 {
-    internal static class EntityDefFactory
+    internal class EntityDefFactory2 : IEntityDefFactory
     {
-        public static int VarcharDefaultLength { get; set; }
-
         /// <summary>
         /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructEntityDefs，后续只有read，没有write
         /// </summary>
-        private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
+        private readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
 
-        public static void Initialize(IDatabaseEngine databaseEngine)
+        public EntityDefFactory2(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
-
-            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
 
             IEnumerable<Type> allEntityTypes;
 
@@ -49,7 +42,7 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        private static void ConstructEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySettingDict)
+        private void ConstructEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySettingDict)
         {
             foreach (var t in allEntityTypes)
             {
@@ -142,12 +135,12 @@ namespace HB.FullStack.Database.Entities
             return resusltEntitySchemaDict;
         }
 
-        public static EntityDef? GetDef<T>() where T : DatabaseEntity
+        public EntityDef? GetDef<T>() where T : DatabaseEntity
         {
             return GetDef(typeof(T));
         }
 
-        public static EntityDef? GetDef(Type? entityType)
+        public EntityDef? GetDef(Type? entityType)
         {
             if (entityType == null)
             {
@@ -285,12 +278,12 @@ namespace HB.FullStack.Database.Entities
             return propertyDef;
         }
 
-        public static IEnumerable<EntityDef> GetAllDefsByDatabase(string databaseName)
+        public IEnumerable<EntityDef> GetAllDefsByDatabase(string databaseName)
         {
             return _defDict.Values.Where(def => databaseName.Equals(def.DatabaseName, GlobalSettings.ComparisonIgnoreCase));
         }
 
-        public static ITypeConverter? GetPropertyTypeConverter(Type entityType, string propertyName)
+        public ITypeConverter? GetPropertyTypeConverter(Type entityType, string propertyName)
         {
             return GetDef(entityType)?.GetPropertyDef(propertyName)!.TypeConverter;
         }
