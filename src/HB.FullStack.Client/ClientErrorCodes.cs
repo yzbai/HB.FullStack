@@ -21,14 +21,15 @@ namespace System
 
         public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 14, nameof(DbSimpleLockerNoWaitLockFailed), "");
         public static ErrorCode UnSupportedEntityType { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 15, nameof(UnSupportedEntityType), "");
+        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 16, nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
     }
 
     public static class LoggerExtensions
     {
-        private static readonly Action<ILogger, string?, string?, TimeSpan?, Exception?> _logDbSimpleLockerNoWaitLockFailed = 
+        private static readonly Action<ILogger, string?, string?, TimeSpan?, Exception?> _logDbSimpleLockerNoWaitLockFailed =
             LoggerMessage.Define<string?, string?, TimeSpan?>(
-                LogLevel.Error, 
-                ClientErrorCodes.DbSimpleLockerNoWaitLockFailed.ToEventId(), 
+                LogLevel.Error,
+                ClientErrorCodes.DbSimpleLockerNoWaitLockFailed.ToEventId(),
                 "客户端的DbSimpleLocker不等待Lock失败.ResourceType = {ResourceType}, Resource={Resource}, AvailableTime={AvailableTime}");
 
         public static void LogDbSimpleLockerNoWaitLockFailed(this ILogger logger, string? resourceType, string? resource, TimeSpan? availableTime, Exception? exception)
@@ -158,6 +159,13 @@ namespace System
             ClientException ex = new ClientException(ClientErrorCodes.UnSupportedEntityType);
 
             ex.Data["FullName"] = entityFullName;
+
+            return ex;
+        }
+
+        internal static Exception OperationInvalidCauseofSyncingAfterReconnected()
+        {
+            ClientException ex = new ClientException(ClientErrorCodes.OperationInvalidCauseofSyncingAfterReconnected);
 
             return ex;
         }

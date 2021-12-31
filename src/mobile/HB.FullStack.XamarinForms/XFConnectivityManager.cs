@@ -12,6 +12,34 @@ namespace HB.FullStack.XamarinForms
 {
     public class XFConnectivityManager : ConnectivityManager
     {
+        public XFConnectivityManager()
+        {
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+        }
+
+        private void Connectivity_ConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool _isDiposed;
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if(!_isDiposed)
+            {
+                if(disposing)
+                {
+                    // managed
+                }
+                //unmanaged
+
+                _isDiposed = true;
+            }
+        }
+
         public override bool IsInternetConnected()
         {
             return Connectivity.NetworkAccess == NetworkAccess.Internet;

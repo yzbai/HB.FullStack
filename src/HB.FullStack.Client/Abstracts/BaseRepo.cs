@@ -19,19 +19,7 @@ using HB.FullStack.Common.ApiClient;
 
 namespace HB.FullStack.Client
 {
-    public enum RepoGetMode
-    {
-        None,//Mixed
-        LocalForced,
-        RemoteForced
-    }
-
-    public enum RepoSetMode
-    {
-        None, //Mixed
-        LocalForced,
-        RemoteForced
-    }
+    public delegate bool IfUseLocalData<TEntity>(ApiRequest request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new();
 
     public abstract class BaseRepo
     {
@@ -60,6 +48,22 @@ namespace HB.FullStack.Client
             return isInternetConnected;
         }
 
+        protected void EnsureInternetConnected()
+        {
+            if(!ConnectivityManager.IsInternetConnected())
+            {
+                throw ClientExceptions.NoInternet("没有联网");
+            }
+        }
+
+        protected void EnsureNotSyncing()
+        {
+            if(ConnectivityManager.SyncingAfterReconnected)
+            {
+                throw ClientExceptions.OperationInvalidCauseofSyncingAfterReconnected();
+            }
+        }
+
         protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string entityName)
         {
             if (obj == null)
@@ -76,8 +80,6 @@ namespace HB.FullStack.Client
         }
     }
 
-    public delegate bool IfUseLocalData<TEntity>(ApiRequest request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new();
-
     public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
     {
         private readonly ILogger _logger;
@@ -92,7 +94,6 @@ namespace HB.FullStack.Client
         protected bool AllowOfflineRead { get; set; }
 
         protected bool NeedLogined { get; set; }
-
 
         protected BaseRepo(
             ILogger logger,
@@ -137,6 +138,8 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TEntity>? whetherUseLocalData = null)
         {
+            EnsureNotSyncing();
+
             if (NeedLogined)
             {
                 _logger.LogDebug("检查Logined, Type:{type}", typeof(TEntity).Name);
@@ -168,6 +171,8 @@ namespace HB.FullStack.Client
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
+            EnsureNotSyncing();
+
             if (NeedLogined)
             {
                 EnsureLogined();
@@ -195,6 +200,8 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TEntity>? ifUseLocalData = null)
         {
+            EnsureNotSyncing();
+
             IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
             return entities.FirstOrDefault();
@@ -209,6 +216,8 @@ namespace HB.FullStack.Client
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
+            EnsureNotSyncing();
+
             if (NeedLogined)
             {
                 EnsureLogined();
@@ -239,10 +248,10 @@ namespace HB.FullStack.Client
             ApiRequest request,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            IfUseLocalData<TEntity> whetherUseLocalData)
+            IfUseLocalData<TEntity> ifUseLocalData)
         {
             //如果不强制远程，并且满足使用本地数据条件
-            if (getMode != RepoGetMode.RemoteForced && whetherUseLocalData(request, locals))
+            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(request, locals))
             {
                 _logger.LogDebug("本地数据可用，返回本地, Type:{type}", typeof(TEntity).Name);
                 return locals;
@@ -302,6 +311,8 @@ namespace HB.FullStack.Client
 
         public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext transactionContext)
         {
+            EnsureNotSyncing();
+
             ThrowIf.NotValid(entities, nameof(entities));
 
             if (!entities.Any())
@@ -327,12 +338,14 @@ namespace HB.FullStack.Client
                 await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
 
                 //Record History
-                await Database.BatchAddAsync(GetHistories(entities, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
+                await Database.BatchAddAsync(GetOfflineHistories(entities, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
             }
         }
 
         public async Task UpdateAsync(TEntity entity, TransactionContext transactionContext)
         {
+            EnsureNotSyncing();
+
             ThrowIf.NotValid(entity, nameof(entity));
 
             if (IsInternetConnected(!AllowOfflineWrite))
@@ -350,7 +363,7 @@ namespace HB.FullStack.Client
             }
         }
 
-        private List<OfflineHistory> GetHistories(IEnumerable<TEntity> entities, DbOperation dbOperation)
+        private List<OfflineHistory> GetOfflineHistories(IEnumerable<TEntity> entities, DbOperation dbOperation)
         {
             List<OfflineHistory> histories = new List<OfflineHistory>(entities.Count());
 
@@ -395,7 +408,5 @@ namespace HB.FullStack.Client
         }
 
         #endregion
-
-
     }
 }
