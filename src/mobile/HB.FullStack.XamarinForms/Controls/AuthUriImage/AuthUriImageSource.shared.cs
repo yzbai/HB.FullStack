@@ -89,8 +89,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// </summary>
         /// <param name="userToken"></param>
         /// <returns></returns>
-        
-        
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public async Task<Stream> GetStreamAsync(CancellationToken userToken = default)
         {
@@ -151,7 +150,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// <param name="uri"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        
+
         private async Task<Stream> GetStreamAsync(Uri uri, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -280,7 +279,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// <param name="uri"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        
+
         private async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
             string key = GetCacheKey(uri);
@@ -375,11 +374,6 @@ namespace HB.FullStack.XamarinForms.Controls
         public ImageUrlRequest(string uri) : base(HttpMethodName.Get, ApiAuthType.Jwt, null, null, null, null)
         {
             _uri = uri;
-        }
-
-        public override string ToDebugInfo()
-        {
-            return $"ImageUrlRequest Uri:{_uri}";
         }
 
         protected override string GetUrlCore()

@@ -15,10 +15,5 @@ namespace HB.FullStack.Common.Api.Requests
         {
             ids.AddRange(ids);
         }
-
-        public override string ToDebugInfo()
-        {
-            return $"GetByIdsRequest. {GetType().FullName}";
-        }
     }
 }

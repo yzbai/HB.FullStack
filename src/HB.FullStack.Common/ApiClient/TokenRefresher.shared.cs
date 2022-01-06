@@ -173,11 +173,6 @@ namespace HB.FullStack.Common.ApiClient
                 RefreshToken = refreshToken;
             }
 
-            public override string ToDebugInfo()
-            {
-                return "RefreshUserTokenRequest";
-            }
-
             public override int GetHashCode()
             {
                 return HashCode.Combine(base.GetHashCode(), AccessToken, RefreshToken);

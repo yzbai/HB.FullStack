@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-
     public interface IUploadRequest
     {
         string HttpContentName { get; }
@@ -39,11 +38,6 @@ namespace HB.FullStack.Common.Api
         public byte[] GetFile()
         {
             return _file;
-        }
-
-        public override string ToDebugInfo()
-        {
-            return $"FileUpdateRequest. FileNames:{SerializeUtil.ToJson(FileName)}";
         }
 
         public override int GetHashCode()

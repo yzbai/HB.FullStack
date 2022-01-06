@@ -74,7 +74,6 @@ namespace System
         internal static Exception RequestUnderlyingIssue(ApiRequest request, HttpRequestException innerException)
         {
             ApiException ex = new(ApiErrorCodes.RequestUnderlyingIssue, innerException);
-            ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
         }
@@ -82,7 +81,6 @@ namespace System
         internal static Exception RequestAlreadyUsed(ApiRequest request, Exception innerException)
         {
             ApiException ex = new(ApiErrorCodes.RequestAlreadyUsed, innerException);
-            ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
         }
@@ -90,7 +88,6 @@ namespace System
         public static Exception RequestCanceled(ApiRequest request, Exception innerException)
         {
             ApiException ex = new(ApiErrorCodes.RequestCanceled, innerException);
-            ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
         }
@@ -99,8 +96,6 @@ namespace System
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiClientGetStreamUnkownError, innerException);
 
-            ex.Data["Request"] = request.ToDebugInfo();
-
             return ex;
         }
 
@@ -108,7 +103,6 @@ namespace System
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestInvalidateError);
 
-            ex.Data["Request"] = request.ToDebugInfo();
             ex.Data["ValidationError"] = validationErrorMessage;
 
             return ex;
@@ -118,8 +112,6 @@ namespace System
         {
             ApiException ex = new ApiException(ApiErrorCodes.RequestTimeout, innerException);
 
-            ex.Data["Request"] = request.ToDebugInfo();
-
             return ex;
         }
 
@@ -128,7 +120,6 @@ namespace System
             ApiException ex = new ApiException(ApiErrorCodes.ApiClientUnkownError, innerException);
 
             ex.Data["Cause"] = cause;
-            ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
         }
@@ -143,8 +134,6 @@ namespace System
         public static Exception ApiClientSendUnkownError(ApiRequest request, Exception innerException)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiClientSendUnkownError, innerException);
-
-            ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
         }
@@ -192,16 +181,12 @@ namespace System
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetJwtError);
 
-            ex.Data["Request"] = request.ToDebugInfo();
-
             return ex;
         }
 
         public static Exception ApiRequestSetApiKeyError(ApiRequest request)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetApiKeyError);
-
-            ex.Data["Request"] = request.ToDebugInfo();
 
             return ex;
         }
@@ -229,7 +214,7 @@ namespace System
             ApiException ex = new ApiException(ApiErrorCodes.NeedOwnerResId);
 
             ex.Data["ResName"] = resName;
-            
+
             return ex;
         }
     }

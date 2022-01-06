@@ -89,7 +89,7 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiRequestInvalidateError(request, request.GetValidateErrorMessage());
             }
 
-            EndpointSettings? endpoint = GetEndpoint(request);
+            EndpointSettings? endpoint = GetEndpoint(request.Builder!);
 
             AddTokenInfo(request);
 
@@ -100,17 +100,17 @@ namespace HB.FullStack.Common.ApiClient
 
                 HttpClient httpClient = GetHttpClient(endpoint);
 
-                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.HttpMethod)).ConfigureAwait(false);
+                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.Builder!.HttpMethod)).ConfigureAwait(false);
 
                 Stream stream = await httpClient.GetStreamAsync(request, cancellationToken).ConfigureAwait(false);
 
-                await OnResponsedAsync(stream, new ApiEventArgs(request.RequestId, request.HttpMethod)).ConfigureAwait(false);
+                await OnResponsedAsync(stream, new ApiEventArgs(request.RequestId, request.Builder!.HttpMethod)).ConfigureAwait(false);
 
                 return stream;
             }
             catch (ErrorCode2Exception ex)
             {
-                if (request.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (request.Builder!.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint, _tokenProvider).ConfigureAwait(false);
 
@@ -137,7 +137,7 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiRequestInvalidateError(request, request.GetValidateErrorMessage());
             }
 
-            EndpointSettings? endpoint = GetEndpoint(request);
+            EndpointSettings? endpoint = GetEndpoint(request.Builder!);
 
             AddTokenInfo(request);
 
@@ -145,17 +145,17 @@ namespace HB.FullStack.Common.ApiClient
             {
                 HttpClient httpClient = GetHttpClient(endpoint);
 
-                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.HttpMethod)).ConfigureAwait(false);
+                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.Builder!.HttpMethod)).ConfigureAwait(false);
 
                 TResponse? rt = await httpClient.GetResponseAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
 
-                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.HttpMethod)).ConfigureAwait(false);
+                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.Builder!.HttpMethod)).ConfigureAwait(false);
 
                 return rt;
             }
             catch (ErrorCode2Exception ex)
             {
-                if (request.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (request.Builder!.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpoint, _tokenProvider).ConfigureAwait(false);
 
@@ -183,15 +183,15 @@ namespace HB.FullStack.Common.ApiClient
             request.DeviceVersion = _tokenProvider.DeviceVersion;
 
             //Auto
-            switch (request.ApiAuthType)
+            switch (request.Builder!.ApiAuthType)
             {
                 case ApiAuthType.ApiKey:
                     {
-                        ThrowIf.NullOrEmpty(request.ApiKeyName, nameof(ApiRequest.ApiKeyName));
+                        ThrowIf.NullOrEmpty(request.Builder!.ApiKeyName, nameof(ApiRequestBuilder.ApiKeyName));
 
-                        if (_options.TryGetApiKey(request.ApiKeyName, out string? key))
+                        if (_options.TryGetApiKey(request.Builder!.ApiKeyName, out string? key))
                         {
-                            request.SetApiKey(key);
+                            request.Builder!.SetApiKey(key);
                         }
                         else
                         {
@@ -207,7 +207,7 @@ namespace HB.FullStack.Common.ApiClient
                         throw ApiExceptions.ApiRequestSetJwtError(request);
                     }
 
-                    request.SetJwt(_tokenProvider.AccessToken);
+                    request.Builder.SetJwt(_tokenProvider.AccessToken);
                     break;
 
                 default:
@@ -215,15 +215,15 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private EndpointSettings? GetEndpoint(ApiRequest request)
+        private EndpointSettings? GetEndpoint(ApiRequestBuilder requestBuilder)
         {
             return _options.Endpoints.FirstOrDefault(e =>
-                e.Name == request.EndpointName
+                e.Name == requestBuilder.EndpointName
                     &&
                 (
-                    e.Version == request.ApiVersion
+                    e.Version == requestBuilder.ApiVersion
                         ||
-                    (request.ApiVersion.IsNullOrEmpty() && e.Version.IsNullOrEmpty())
+                    (requestBuilder.ApiVersion.IsNullOrEmpty() && e.Version.IsNullOrEmpty())
                 ));
         }
 

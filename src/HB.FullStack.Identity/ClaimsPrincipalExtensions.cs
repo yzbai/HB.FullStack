@@ -52,7 +52,7 @@ namespace System
             return principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
         }
 
-        public static string? GetLastUser(this ClaimsPrincipal principal)
+        public static string GetLastUser(this ClaimsPrincipal principal)
         {
             string? userIdStr = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
             string? deviceId = principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);

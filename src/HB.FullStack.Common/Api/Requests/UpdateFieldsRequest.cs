@@ -15,10 +15,5 @@ namespace HB.FullStack.Common.Api
         protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
 
         protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
-
-        public override string ToDebugInfo()
-        {
-            return $"PatchRequest, ApiResourceType:{typeof(T).Name}, Json:{SerializeUtil.ToJson(this)}";
-        }
     }
 }

@@ -97,20 +97,20 @@ namespace System.Net.Http
 
         private static HttpRequestMessage ToHttpRequestMessage(this ApiRequest request)
         {
-            HttpMethod httpMethod = request.HttpMethod.ToHttpMethod();
+            HttpMethod httpMethod = request.Builder!.HttpMethod.ToHttpMethod();
 
-            if (request.NeedHttpMethodOveride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
+            if (request.Builder.NeedHttpMethodOveride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
             {
-                request.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
+                request.Builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
                 httpMethod = HttpMethod.Post;
             }
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.GetUrl())
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.Builder.GetUrl(request.DeviceId))
             {
                 Version = _version20
             };
 
-            foreach (var kv in request.Headers)
+            foreach (var kv in request.Builder.Headers)
             {
                 httpRequest.Headers.Add(kv.Key, kv.Value);
             }

@@ -13,10 +13,9 @@ using System.Net.Http;
 
 namespace HB.FullStack.XamarinForms.IdBarriers
 {
-
     internal class IdBarrierService : IIdBarrierService
     {
-        enum ChangeDirection
+        private enum ChangeDirection
         {
             ToServer,
             FromServer
@@ -33,7 +32,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             _apiClient = apiClient;
             _transaction = transaction;
         }
- 
+
         public void Initialize()
         {
             _apiClient.Requesting += OnApiClientRequestingAsync;
@@ -41,23 +40,20 @@ namespace HB.FullStack.XamarinForms.IdBarriers
         }
 
         //TODO: 考虑手工硬编码
-        
-        
+
         private async Task OnApiClientRequestingAsync(ApiRequest request, ApiEventArgs args)
         {
-            if (request.HttpMethod == HttpMethodName.Post)
+            if (request.Builder!.HttpMethod == HttpMethodName.Post)
             {
                 _addRequestClientIdDict[request.RequestId] = new List<long>();
             }
 
-            await ChangeIdAsync(request, request.RequestId, request.HttpMethod, ChangeDirection.ToServer).ConfigureAwait(false);
+            await ChangeIdAsync(request, request.RequestId, request.Builder.HttpMethod, ChangeDirection.ToServer).ConfigureAwait(false);
         }
 
-        
-        
         private async Task OnApiClientResponsedAsync(object? sender, ApiEventArgs args)
         {
-            if(args.RequestHttpMethod == HttpMethodName.Post)
+            if (args.RequestHttpMethod == HttpMethodName.Post)
             {
                 if (sender is IEnumerable<long> servierIds)
                 {
@@ -68,7 +64,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                     _addRequestClientIdDict.Remove(args.RequestId);
                 }
             }
-            else if(args.RequestHttpMethod == HttpMethodName.Get)
+            else if (args.RequestHttpMethod == HttpMethodName.Get)
             {
                 if (sender is IEnumerable enumerable)
                 {
@@ -84,8 +80,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-        
-        
         private async Task ChangeIdAsync(object? obj, string requestId, HttpMethodName httpMethod, ChangeDirection direction)
         {
             if (obj == null) { return; }
@@ -129,7 +123,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-        
         private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, HttpMethodName httpMethod, ChangeDirection direction, string requestId)
         {
             if (id < 0)
@@ -166,7 +159,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             propertyInfo.SetValue(obj, changedId);
         }
 
-        
         private Task AddServerIdToClientIdAsync(long serverId, long clientId)
         {
             if (serverId <= 0)
@@ -177,7 +169,6 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             return _idBarrierRepo.AddIdBarrierAsync(clientId: clientId, serverId: serverId);
         }
 
-        
         private async Task AddServerIdToClientIdAsync(IEnumerable<long> serverIds, List<long> clientIds)
         {
             List<long> serverAdds = new List<long>();

@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.Logging
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            logger.LogError(exception, " {request}, [ {lineNumber} in {memeberName} at {sourceFilePath} ] ", request.ToDebugInfo(), sourceLineNumber, memberName, sourceFilePath);
+            logger.LogError(exception, " {request}, [ {lineNumber} in {memeberName} at {sourceFilePath} ] ", SerializeUtil.ToJson(request), sourceLineNumber, memberName, sourceFilePath);
         }
 
         public static void LogCritical2(

@@ -14,10 +14,5 @@ namespace HB.FullStack.Common.Api.Requests
         {
             Id = id;
         }
-
-        public override string ToDebugInfo()
-        {
-            return $"GetByIdRequest. {GetType().FullName}";
-        }
     }
 }

@@ -31,11 +31,6 @@ namespace HB.FullStack.Common.Api
 
         public UpdateRequest(string apiKeyName, T res) : this(apiKeyName, new T[] { res }) { }
 
-        public override string ToDebugInfo()
-        {
-            return $"UpdateRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
-        }
-
         public override int GetHashCode()
         {
             HashCode hash = new HashCode();
@@ -57,7 +52,7 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Parents.Add((paretnDef.ResName, parentId.ToString()));
+            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
         }
 
         public UpdateRequest(Guid parentId, T res) : this(parentId, new T[] { res }) { }
@@ -66,7 +61,7 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Parents.Add((paretnDef.ResName, parentId.ToString()));
+            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
         }
 
         public UpdateRequest(string apiKeyName, Guid parentId, T res) : this(apiKeyName, parentId, new T[] { res }) { }
@@ -78,11 +73,11 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            Builder!.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
         }
 
         public UpdateRequest(Guid parent1Id, Guid parent2Id, T res) : this(parent1Id, parent2Id, new T[] { res }) { }
@@ -91,11 +86,11 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            Builder!.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
         }
 
         public UpdateRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, T res) : this(apiKeyName, parent1Id, parent2Id, new T[] { res }) { }
