@@ -17,6 +17,12 @@ namespace HB.FullStack.Common.Api
         [CollectionNotEmpty]
         public IList<T> Resources { get; set; } = new List<T>();
 
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public UpdateRequest()
+        { }
+
         public UpdateRequest(IEnumerable<T> ress) : base(HttpMethodName.Put, null)
         {
             Resources.AddRange(ress);
@@ -48,6 +54,12 @@ namespace HB.FullStack.Common.Api
 
     public class UpdateRequest<T, TParent> : UpdateRequest<T> where T : ApiResource2 where TParent : ApiResource2
     {
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public UpdateRequest()
+        { }
+
         public UpdateRequest(Guid parentId, IEnumerable<T> ress) : base(ress)
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
@@ -69,6 +81,12 @@ namespace HB.FullStack.Common.Api
 
     public class UpdateRequest<T, TParent1, TParent2> : UpdateRequest<T> where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
     {
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public UpdateRequest()
+        { }
+
         public UpdateRequest(Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(ress)
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();

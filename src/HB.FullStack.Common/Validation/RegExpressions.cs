@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 namespace HB.FullStack.Common.Validate
 {
@@ -80,4 +80,3 @@ namespace HB.FullStack.Common.Validate
     }
 }
 
-#nullable restore

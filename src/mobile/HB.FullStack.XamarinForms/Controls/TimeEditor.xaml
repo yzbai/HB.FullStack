@@ -9,9 +9,7 @@
     x:Name="Root">
     <base:BaseContentView.Resources>
 
-        <Style
-            x:Key="TimeBorder"
-            TargetType="Frame">
+        <Style x:Key="TimeBorder" TargetType="Frame">
             <Setter Property="Padding" Value="8,0,8,0" />
             <Setter Property="BorderColor" Value="Green" />
         </Style>
@@ -26,10 +24,10 @@
     <base:BaseContentView.Content>
         <Grid
             BindingContext="{x:Reference Root}"
-            HorizontalOptions="CenterAndExpand"
-            VerticalOptions="CenterAndExpand"
             ColumnDefinitions="Auto, Auto,Auto, Auto"
-            RowDefinitions="Auto,Auto,Auto">
+            HorizontalOptions="CenterAndExpand"
+            RowDefinitions="Auto,Auto,Auto"
+            VerticalOptions="CenterAndExpand">
             <Label
                 Grid.Row="1"
                 Grid.Column="0"
@@ -40,9 +38,7 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Style="{StaticResource TimeBorder}">
-                <Entry
-                    HorizontalTextAlignment="Center"
-                    Text="{Binding Hour}">
+                <Entry HorizontalTextAlignment="Center" Text="{Binding Hour}">
                     <Entry.Effects>
                         <xct:RemoveBorderEffect />
                         <xct:SelectAllTextEffect />
@@ -54,9 +50,7 @@
                 Grid.Row="1"
                 Grid.Column="3"
                 Style="{StaticResource TimeBorder}">
-                <Entry
-                    HorizontalTextAlignment="Center"
-                    Text="{Binding Minute}">
+                <Entry HorizontalTextAlignment="Center" Text="{Binding Minute}">
                     <Entry.Effects>
                         <xct:RemoveBorderEffect />
                         <xct:SelectAllTextEffect />

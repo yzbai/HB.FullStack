@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -10,13 +10,38 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
+    public abstract class ApiRequestBuilder
+    {
+        public abstract void SetDeviceId(string deviceId);
+        public abstract void SetDeviceVersion(string deviceVersion);
+        public abstract void SetJwt(string jwt);
+        public abstract void SetApiKey(string apiKey);
+
+        public abstract void AddParent(string parentResName, string parentResId);
+
+        public string GetUrl()
+        {
+            string uri = GetUrlCore();
+
+            IDictionary<string, string?> parameters = new Dictionary<string, string?>
+            {
+                { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
+                { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)}
+            };
+
+            return UriUtil.AddQuerys(uri, parameters);
+        }
+
+        protected abstract string GetUrlCore();
+    }
+
     /// <summary>
     /// 强调构造条件
     /// Url
     /// HttpMethod
     /// Headers
     /// </summary>
-    public class ApiRequestBuilder
+    public class DefaultApiRequestBuilder : ApiRequestBuilder
     {
         public HttpMethodName HttpMethod { get; }
 
@@ -40,39 +65,32 @@ namespace HB.FullStack.Common.Api
 
         public IList<(string parentResName, string parentResId)> Parents { get; } = new List<(string parentResName, string parentResId)>();
 
-        public void SetJwt(string jwt)
+        public override void SetJwt(string jwt)
         {
             Headers[ApiHeaderNames.Authorization] = "Bearer " + jwt;
         }
 
-        public void SetApiKey(string apiKey)
+        public override void SetApiKey(string apiKey)
         {
             Headers[ApiHeaderNames.XApiKey] = apiKey;
         }
 
-        public void SetDeviceId(string deviceId)
+        public override void SetDeviceId(string deviceId)
         {
             Headers[ApiHeaderNames.DEVICE_ID] = deviceId;
         }
 
-        public string GetUrl(string deviceId)
+        public override void SetDeviceVersion(string deviceVersion)
         {
-            string uri = GetUrlCore();
-
-            IDictionary<string, string?> parameters = new Dictionary<string, string?>
-            {
-                { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
-                { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)},
-
-                //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
-                //已经移动到Header中去
-                //{ ClientNames.DEVICE_ID, deviceId }
-            };
-
-            return UriUtil.AddQuerys(uri, parameters);
+            Headers[ApiHeaderNames.DEVICE_VERSION] = deviceVersion;
         }
 
-        protected virtual string GetUrlCore()
+        public override void AddParent(string parentResName, string parentResId)
+        {
+            Parents.Add((parentResName, parentResId));
+        }
+
+        protected override string GetUrlCore()
         {
             string? parentSegment = GetParentSegment(Parents);
 
@@ -142,7 +160,7 @@ namespace HB.FullStack.Common.Api
             return hashCode.ToHashCode();
         }
 
-        public ApiRequestBuilder(HttpMethodName httpMethod,
+        public DefaultApiRequestBuilder(HttpMethodName httpMethod,
             bool needHttpMethodOveride,
             ApiAuthType apiAuthType,
             string? endPointName,
@@ -160,11 +178,47 @@ namespace HB.FullStack.Common.Api
         }
     }
 
+    public class PlainUrlRequestBuilder : ApiRequestBuilder
+    {
+        public override void SetDeviceId(string deviceId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetDeviceVersion(string deviceVersion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetJwt(string jwt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetApiKey(string apiKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override string GetUrlCore()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AddParent(string parentResName, string parentResId)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     /// <summary>
     /// 只强调数据
     /// </summary>
     public abstract class ApiRequest : ValidatableObject
     {
+        /// <summary>
+        /// 为了客户端的Request建立，不包含具体请求数据
+        /// </summary>
         [JsonIgnore]
         public ApiRequestBuilder? Builder { get; }
 
@@ -173,13 +227,15 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
 
-        public string DeviceId { get; set; } = null!;
-
-        public string DeviceVersion { get; set; } = null!;
+        /// <summary>
+        /// 为了反序列化
+        /// </summary>
+        protected ApiRequest()
+        { }
 
         protected ApiRequest(HttpMethodName httpMethod, ApiAuthType apiAuthType, string? endPointName, string? apiVersion, string? resName, string? condition)
         {
-            Builder = new ApiRequestBuilder(httpMethod, true, apiAuthType, endPointName, apiVersion, resName, condition);
+            Builder = new DefaultApiRequestBuilder(httpMethod, true, apiAuthType, endPointName, apiVersion, resName, condition);
         }
 
         protected ApiRequest(ApiRequestBuilder apiRequestBuilder)
@@ -196,15 +252,18 @@ namespace HB.FullStack.Common.Api
                 hashCode.Add(Builder.GetHashCode());
             }
 
-            hashCode.Add(DeviceId);
-            hashCode.Add(DeviceVersion);
-
             return hashCode.ToHashCode();
         }
     }
 
     public abstract class ApiRequest<T> : ApiRequest where T : ApiResource2
     {
+        /// <summary>
+        /// 为了反序列化
+        /// </summary>
+        protected ApiRequest()
+        { }
+
         /// <summary>
         /// 因为不会直接使用ApiRequest作为Api的请求参数，所以不用提供无参构造函数，而具体的子类需要提供
         /// </summary>
@@ -216,17 +275,23 @@ namespace HB.FullStack.Common.Api
 
         protected ApiRequest(string apiKeyName, HttpMethodName httpMethod, string? condition) : this(ApiAuthType.ApiKey, httpMethod, condition)
         {
-            Builder!.ApiKeyName = apiKeyName;
+            if (Builder is DefaultApiRequestBuilder builder)
+            {
+                builder.ApiKeyName = apiKeyName;
+            }
         }
 
         protected ApiRequest(ApiAuthType apiAuthType, HttpMethodName httpMethod, string? condition)
             : base(httpMethod, apiAuthType, null, null, null, condition)
         {
-            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
+            if (Builder is DefaultApiRequestBuilder builder)
+            {
+                ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 
-            Builder!.EndpointName = def.EndpointName;
-            Builder.ApiVersion = def.ApiVersion;
-            Builder.ResName = def.ResName;
+                builder.EndpointName = def.EndpointName;
+                builder.ApiVersion = def.ApiVersion;
+                builder.ResName = def.ResName;
+            }
         }
 
         public override int GetHashCode()

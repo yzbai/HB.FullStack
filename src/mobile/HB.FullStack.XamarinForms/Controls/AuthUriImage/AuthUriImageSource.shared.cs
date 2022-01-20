@@ -1,4 +1,9 @@
-﻿#nullable disable
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+#nullable disable
 
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
@@ -84,11 +89,6 @@ namespace HB.FullStack.XamarinForms.Controls
             set { SetValue(UriProperty, value); }
         }
 
-        /// <summary>
-        /// GetStreamAsync
-        /// </summary>
-        /// <param name="userToken"></param>
-        /// <returns></returns>
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public async Task<Stream> GetStreamAsync(CancellationToken userToken = default)
@@ -144,12 +144,6 @@ namespace HB.FullStack.XamarinForms.Controls
             return (await _store.GetLastWriteTimeAsync(path).ConfigureAwait(false)).UtcDateTime;
         }
 
-        /// <summary>
-        /// GetStreamAsync
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
 
         private async Task<Stream> GetStreamAsync(Uri uri, CancellationToken cancellationToken = default)
         {
@@ -273,12 +267,6 @@ namespace HB.FullStack.XamarinForms.Controls
             }
         }
 
-        /// <summary>
-        /// GetStreamFromCacheAsync
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
 
         private async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
@@ -366,6 +354,8 @@ namespace HB.FullStack.XamarinForms.Controls
             }
         }
     }
+
+
 
     internal class ImageUrlRequest : ApiRequest
     {

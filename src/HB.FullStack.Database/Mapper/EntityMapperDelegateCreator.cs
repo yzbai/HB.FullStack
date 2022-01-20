@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -11,7 +17,6 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
-
 namespace HB.FullStack.Database.Mapper
 {
     internal static class EntityMapperDelegateCreator
@@ -21,7 +26,7 @@ namespace HB.FullStack.Database.Mapper
         /// </summary>
         public static Func<IEntityDefFactory, IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
-            DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] {typeof(IEntityDefFactory), typeof(IDataReader) }, true);
+            DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IEntityDefFactory), typeof(IDataReader) }, true);
             ILGenerator il = dm.GetILGenerator();
 
             EmitEntityMapper(def, reader, startIndex, length, returnNullIfFirstNull, engineType, il);
@@ -116,6 +121,7 @@ namespace HB.FullStack.Database.Mapper
                     il.Emit(OpCodes.Brtrue_S, dbNullLabel);//stack is now [...][value-as-object]
 
                     #region DbValueToTypeValue,逻辑同DatabaseConverty.DbValueToTypeValue一致
+
                     if (propertyDef.TypeConverter != null)
                     {
                         // stack is now [target][target][TypeConverter][value-as-object]
@@ -290,7 +296,6 @@ namespace HB.FullStack.Database.Mapper
 
                 il.EmitCall(OpCodes.Call, _getStringConcatMethod, null);//[array][key]
 
-
                 il.Emit(OpCodes.Ldloc, entityLocal);//[array][key][entity]
 
                 if (propertyDef.Type.IsValueType)
@@ -390,9 +395,8 @@ namespace HB.FullStack.Database.Mapper
 
                 #endregion
 
+                #region If Null
 
-
-                #region If Null 
                 il.MarkLabel(nullLabel);
                 //emiter.MarkLabel(nullLabel);
                 //[array][key][property_value_obj]
@@ -401,28 +405,23 @@ namespace HB.FullStack.Database.Mapper
                 //emiter.Pop();
                 //[array][key]
 
-
                 il.Emit(OpCodes.Ldsfld, _dbNullValueFiled);
                 //emiter.LoadField(typeof(DBNull).GetField("Value"));
                 //[array][key][DBNull]
 
                 //il.Emit(OpCodes.Br_S, finishLabel);
                 ////emiter.Branch(finishLabel);
-                #endregion
 
+                #endregion
 
                 il.MarkLabel(finishLabel);
                 ////emiter.MarkLabel(finishLabel);
-
-
 
                 var kvCtor = typeof(KeyValuePair<string, object>).GetConstructor(new Type[] { typeof(string), typeof(object) })!;
 
                 il.Emit(OpCodes.Newobj, kvCtor);
                 //emiter.NewObject(kvCtor);
                 //[array][kv]
-
-
 
                 il.Emit(OpCodes.Box, typeof(KeyValuePair<string, object>));
                 //emiter.Box<KeyValuePair<string, object>>();
@@ -443,7 +442,6 @@ namespace HB.FullStack.Database.Mapper
 
             il.Emit(OpCodes.Ret);
             //emiter.Return();
-
 
             Type funType = Expression.GetFuncType(typeof(IEntityDefFactory), typeof(object), typeof(int), typeof(KeyValuePair<string, object>[]));
 

@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 namespace HB.FullStack.Database.SQL
 {

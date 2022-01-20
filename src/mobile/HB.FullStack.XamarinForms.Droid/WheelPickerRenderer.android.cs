@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 using Android.Content;
 using Android.Widget;
 using System;
@@ -294,4 +294,3 @@ namespace HB.FullStack.XamarinForms.Droid.Renders
         }
     }
 }
-#nullable restore

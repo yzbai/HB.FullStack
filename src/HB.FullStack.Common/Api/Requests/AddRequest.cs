@@ -13,6 +13,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; } = new List<T>();
 
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public AddRequest()
+        { }
+
         public AddRequest(IEnumerable<T> ress) : base(HttpMethodName.Post, null)
         {
             Resources.AddRange(ress);
@@ -44,11 +50,17 @@ namespace HB.FullStack.Common.Api
 
     public class AddRequest<T, TParent> : AddRequest<T> where T : ApiResource2 where TParent : ApiResource2
     {
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public AddRequest()
+        { }
+
         public AddRequest(Guid parentId, IEnumerable<T> ress) : base(ress)
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
+            Builder!.AddParent(paretnDef.ResName, parentId.ToString());
         }
 
         public AddRequest(Guid parentId, T res) : this(parentId, new T[] { res }) { }
@@ -57,7 +69,7 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
+            Builder!.AddParent(paretnDef.ResName, parentId.ToString());
         }
 
         public AddRequest(string apiKeyName, Guid parentId, T res) : this(apiKeyName, parentId, new T[] { res }) { }
@@ -65,15 +77,21 @@ namespace HB.FullStack.Common.Api
 
     public class AddRequest<T, TParent1, TParent2> : AddRequest<T> where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
     {
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public AddRequest()
+        { }
+
         public AddRequest(Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(ress)
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            Builder!.AddParent(paretn1Def.ResName, parent1Id.ToString());
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Builder.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            Builder.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
 
         public AddRequest(Guid parent1Id, Guid parent2Id, T res) : this(parent1Id, parent2Id, new T[] { res }) { }
@@ -82,11 +100,11 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            Builder!.AddParent(paretn1Def.ResName, parent1Id.ToString());
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Builder.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            Builder.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
 
         public AddRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, T res) : this(apiKeyName, parent1Id, parent2Id, new T[] { res }) { }

@@ -105,7 +105,7 @@ namespace System.Net.Http
                 httpMethod = HttpMethod.Post;
             }
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.Builder.GetUrl(request.DeviceId))
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, request.Builder.GetUrl())
             {
                 Version = _version20
             };

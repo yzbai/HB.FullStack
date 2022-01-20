@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common.Validate;

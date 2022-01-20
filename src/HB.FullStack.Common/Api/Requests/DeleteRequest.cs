@@ -13,6 +13,12 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public DeleteRequest()
+        { }
+
         public DeleteRequest(IEnumerable<T> ress) : base(HttpMethodName.Delete, null)
         {
             Resources.AddRange(ress);
@@ -44,6 +50,12 @@ namespace HB.FullStack.Common.Api
 
     public class DeleteRequest<T, TParent> : DeleteRequest<T> where T : ApiResource2 where TParent : ApiResource2
     {
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public DeleteRequest()
+        { }
+
         public DeleteRequest(Guid parentId, IEnumerable<T> ress) : base(ress)
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
@@ -65,6 +77,12 @@ namespace HB.FullStack.Common.Api
 
     public class DeleteRequest<T, TParent1, TParent2> : DeleteRequest<T> where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
     {
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public DeleteRequest()
+        { }
+
         public DeleteRequest(Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(ress)
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();

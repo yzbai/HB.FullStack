@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 namespace System
 {
@@ -8,4 +8,3 @@ namespace System
     //}
 }
 
-#nullable restore

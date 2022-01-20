@@ -8,9 +8,13 @@ namespace HB.FullStack.Common.Api.Requests
         [NoEmptyGuid]
         public Guid Id { get; set; }
 
-        public GetByIdRequest() : base(HttpMethodName.Get, "ById") { }
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public GetByIdRequest()
+        { }
 
-        public GetByIdRequest(Guid id) : this()
+        public GetByIdRequest(Guid id) : base(HttpMethodName.Get, "ById")
         {
             Id = id;
         }

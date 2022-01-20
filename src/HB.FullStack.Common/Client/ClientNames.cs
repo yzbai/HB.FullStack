@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 namespace System
 {
@@ -11,7 +11,7 @@ namespace System
         //public const string REFRESH_TOKEN = "RefreshToken";
 
         public const string DEVICE_ID = "DeviceId";
-        //public const string DEVICE_VERSION = "DeviceVersion";
+        public const string DEVICE_VERSION = "DeviceVersion";
         //public const string DEVICE_INFOS = "DeviceInfos";
         //public const string DEVICE_ADDRESS = "DeviceAddress";
 

@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using MessagePack;
 using MessagePack.Resolvers;

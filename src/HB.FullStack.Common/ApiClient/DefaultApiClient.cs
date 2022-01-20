@@ -1,14 +1,10 @@
-﻿using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Api.Requests;
+﻿using HB.FullStack.Common.Api;
 
 using Microsoft.Extensions.Options;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -179,15 +175,15 @@ namespace HB.FullStack.Common.ApiClient
 
         private void AddTokenInfo(ApiRequest request)
         {
-            request.DeviceId = _tokenProvider.DeviceId;
-            request.DeviceVersion = _tokenProvider.DeviceVersion;
+            request.Builder!.SetDeviceId(_tokenProvider.DeviceId);
+            request.Builder.SetDeviceVersion(_tokenProvider.DeviceVersion);
 
             //Auto
             switch (request.Builder!.ApiAuthType)
             {
                 case ApiAuthType.ApiKey:
                     {
-                        ThrowIf.NullOrEmpty(request.Builder!.ApiKeyName, nameof(ApiRequestBuilder.ApiKeyName));
+                        ThrowIf.NullOrEmpty(request.Builder!.ApiKeyName, nameof(DefaultApiRequestBuilder.ApiKeyName));
 
                         if (_options.TryGetApiKey(request.Builder!.ApiKeyName, out string? key))
                         {
@@ -215,7 +211,7 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private EndpointSettings? GetEndpoint(ApiRequestBuilder requestBuilder)
+        private EndpointSettings? GetEndpoint(DefaultApiRequestBuilder requestBuilder)
         {
             return _options.Endpoints.FirstOrDefault(e =>
                 e.Name == requestBuilder.EndpointName

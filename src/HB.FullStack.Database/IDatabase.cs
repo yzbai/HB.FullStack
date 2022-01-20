@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
+
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Client")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]

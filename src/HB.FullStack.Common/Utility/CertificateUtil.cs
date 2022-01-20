@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System.IO;
 using System.Security.Cryptography.X509Certificates;

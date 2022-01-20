@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using HB.FullStack.Common;
 using HB.FullStack.Database.Converter;

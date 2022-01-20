@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.Extensions.Options;
 using System;

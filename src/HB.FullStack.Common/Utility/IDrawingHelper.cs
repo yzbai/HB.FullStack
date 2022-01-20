@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System.IO;
 
@@ -10,4 +10,3 @@ namespace System
     }
 }
 
-#nullable restore

@@ -18,7 +18,11 @@ namespace HB.FullStack.Common.Api.Requests
 
         public string? OrderBys { get; set; }
 
-        public GetRequest() : base(HttpMethodName.Get, null) { }
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public GetRequest()
+        { }
 
         public GetRequest(string? condition) : base(HttpMethodName.Get, condition) { }
 

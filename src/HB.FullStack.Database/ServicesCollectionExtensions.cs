@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using HB.FullStack.Database;
 using HB.FullStack.Database.Entities;

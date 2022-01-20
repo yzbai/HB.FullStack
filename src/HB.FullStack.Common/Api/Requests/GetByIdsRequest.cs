@@ -9,9 +9,13 @@ namespace HB.FullStack.Common.Api.Requests
         [NoEmptyGuid]
         public IList<Guid> Ids { get; set; } = new List<Guid>();
 
-        public GetByIdsRequest() : base(HttpMethodName.Get, "ByIds") { }
+        /// <summary>
+        /// Only for Deserialization
+        /// </summary>
+        public GetByIdsRequest()
+        { }
 
-        public GetByIdsRequest(params Guid[] ids) : this()
+        public GetByIdsRequest(params Guid[] ids) : base(HttpMethodName.Get, "ByIds")
         {
             ids.AddRange(ids);
         }

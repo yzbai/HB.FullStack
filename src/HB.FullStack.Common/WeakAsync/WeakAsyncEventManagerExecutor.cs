@@ -1,4 +1,9 @@
-﻿#nullable disable
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+#nullable disable
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common
 {
-    static class WeakAsyncEventManagerExecutor
+    internal static class WeakAsyncEventManagerExecutor
     {
         internal static void Add(string eventName, object caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
         {
@@ -98,7 +103,7 @@ namespace HB.FullStack.Common
             return Task.WhenAll(tasks);
         }
 
-        static DynamicMethod TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
+        private static DynamicMethod TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
         {
             var typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
             var typeRTDynamicMethod = typeInfoRTDynamicMethod?.AsType();
@@ -108,13 +113,12 @@ namespace HB.FullStack.Common
                 : null;
         }
 
-        static bool IsLightweightMethod(this MethodBase method)
+        private static bool IsLightweightMethod(this MethodBase method)
         {
             var typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
             return method is DynamicMethod || (typeInfoRTDynamicMethod?.IsAssignableFrom(method.GetType().GetTypeInfo()) ?? false);
         }
     }
-
-
 }
+
 #nullable restore
