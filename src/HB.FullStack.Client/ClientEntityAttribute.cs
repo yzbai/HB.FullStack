@@ -2,7 +2,6 @@
 
 namespace System
 {
-    
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ClientEntityAttribute : Attribute
     {

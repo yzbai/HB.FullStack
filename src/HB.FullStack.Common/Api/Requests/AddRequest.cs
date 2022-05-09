@@ -6,27 +6,23 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class AddRequest<T> : ApiRequest where T : ApiResource2
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
         [IdBarrier]
         public IList<T> Resources { get; } = new List<T>();
 
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public AddRequest() { }
+        public AddRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, ApiAuthType.Jwt, null)) { }
 
-        public AddRequest(IEnumerable<T> ress) : base(HttpMethodName.Post, null)
+        public AddRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethodName.Post, null)
-        {
-            Resources.AddRange(ress);
-        }
+        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, ApiAuthType.Jwt, null)) { }
+
+        public AddRequest(string apiKeyName, IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, apiKeyName, null)) { }
 
         public AddRequest(T res) : this(new T[] { res }) { }
 
@@ -45,65 +41,5 @@ namespace HB.FullStack.Common.Api
 
             return hash.ToHashCode();
         }
-    }
-
-    public class AddRequest<T, TParent> : AddRequest<T> where T : ApiResource2 where TParent : ApiResource2
-    {
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public AddRequest() { }
-
-        public AddRequest(Guid parentId, IEnumerable<T> ress) : base(ress)
-        {
-            ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
-        }
-
-        public AddRequest(Guid parentId, T res) : this(parentId, new T[] { res }) { }
-
-        public AddRequest(string apiKeyName, Guid parentId, IEnumerable<T> ress) : base(apiKeyName, ress)
-        {
-            ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
-        }
-
-        public AddRequest(string apiKeyName, Guid parentId, T res) : this(apiKeyName, parentId, new T[] { res }) { }
-    }
-
-    public class AddRequest<T, TParent1, TParent2> : AddRequest<T> where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
-    {
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public AddRequest() { }
-
-        public AddRequest(Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(ress)
-        {
-            ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
-
-            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
-
-            ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
-
-            BuildInfo.AddParent(paretn2Def.ResName, parent2Id.ToString());
-        }
-
-        public AddRequest(Guid parent1Id, Guid parent2Id, T res) : this(parent1Id, parent2Id, new T[] { res }) { }
-
-        public AddRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(apiKeyName, ress)
-        {
-            ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
-
-            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
-
-            ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
-
-            BuildInfo.AddParent(paretn2Def.ResName, parent2Id.ToString());
-        }
-
-        public AddRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, T res) : this(apiKeyName, parent1Id, parent2Id, new T[] { res }) { }
     }
 }

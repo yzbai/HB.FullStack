@@ -6,24 +6,22 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class DeleteRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class DeleteRequest<T> : ApiRequest where T : ApiResource2
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        public DeleteRequest() { }
+        public DeleteRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, true, ApiAuthType.Jwt, null)) { }
 
-        public DeleteRequest(IEnumerable<T> ress) : base(HttpMethodName.Delete, null)
+        public DeleteRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {
             Resources.AddRange(ress);
         }
+        public DeleteRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, true, ApiAuthType.Jwt, null)) { }
 
-        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : base(apiKeyName, HttpMethodName.Delete, null)
-        {
-            Resources.AddRange(ress);
-        }
+        public DeleteRequest(string apiKeyName, IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, true, apiKeyName, null)) { }
 
         public DeleteRequest(T res) : this(new T[] { res }) { }
 
@@ -42,67 +40,5 @@ namespace HB.FullStack.Common.Api
 
             return hash.ToHashCode();
         }
-    }
-
-    public class DeleteRequest<T, TParent> : DeleteRequest<T> where T : ApiResource2 where TParent : ApiResource2
-    {
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public DeleteRequest()
-        { }
-
-        public DeleteRequest(Guid parentId, IEnumerable<T> ress) : base(ress)
-        {
-            ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
-        }
-
-        public DeleteRequest(Guid parentId, T res) : this(parentId, new T[] { res }) { }
-
-        public DeleteRequest(string apiKeyName, Guid parentId, IEnumerable<T> ress) : base(apiKeyName, ress)
-        {
-            ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
-        }
-
-        public DeleteRequest(string apiKeyName, Guid parentId, T res) : this(apiKeyName, parentId, new T[] { res }) { }
-    }
-
-    public class DeleteRequest<T, TParent1, TParent2> : DeleteRequest<T> where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
-    {
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public DeleteRequest()
-        { }
-
-        public DeleteRequest(Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(ress)
-        {
-            ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
-
-            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
-
-            ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
-
-            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
-        }
-
-        public DeleteRequest(Guid parent1Id, Guid parent2Id, T res) : this(parent1Id, parent2Id, new T[] { res }) { }
-
-        public DeleteRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, IEnumerable<T> ress) : base(apiKeyName, ress)
-        {
-            ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
-
-            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
-
-            ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
-
-            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
-        }
-
-        public DeleteRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, T res) : this(apiKeyName, parent1Id, parent2Id, new T[] { res }) { }
     }
 }

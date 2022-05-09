@@ -161,13 +161,14 @@ namespace HB.FullStack.Common.ApiClient
                 string? resName,
                 string accessToken,
                 string refreshToken)
-                : base(
-                      HttpMethodName.Get,
-                      ApiAuthType.None,
-                      endPointName,
-                      apiVersion,
-                      resName,
-                      "ByRefresh")
+                : base(new RestfulHttpRequestBuilder(
+                    httpMethod: HttpMethodName.Get,
+                    needHttpMethodOveride: true,
+                    apiAuthType: ApiAuthType.None,
+                    endPointName: endPointName,
+                    apiVersion: apiVersion,
+                    resName: resName,
+                    condition: "ByRefresh"))
             {
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;

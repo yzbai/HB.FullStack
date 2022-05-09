@@ -361,14 +361,9 @@ namespace HB.FullStack.XamarinForms.Controls
     {
         private readonly string _uri;
 
-        public ImageUrlRequest(string uri) : base(HttpMethodName.Get, ApiAuthType.Jwt, null, null, null, null)
+        public ImageUrlRequest(string uri) : base(new PlainUrlHttpRequestBuilder(HttpMethodName.Get, true, ApiAuthType.Jwt, uri))
         {
             _uri = uri;
-        }
-
-        protected override string GetUrlCore()
-        {
-            return _uri;
         }
 
         public override int GetHashCode()

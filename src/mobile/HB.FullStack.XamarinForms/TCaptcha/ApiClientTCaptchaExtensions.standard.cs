@@ -36,7 +36,7 @@ namespace HB.FullStack.XamarinForms.Api
                         return;
                     }
 
-                    request.Headers.Add(ApiHeaderNames.Captcha, result);
+                    request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, result);
 
                     T? resource = await apiClient.GetAsync<T>(request).ConfigureAwait(false);
 

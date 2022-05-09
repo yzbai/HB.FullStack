@@ -164,7 +164,7 @@ namespace HB.FullStack.Client
         /// </summary>
         protected async Task<ObservableTask<IEnumerable<TEntity>>> GetObservableTaskAsync(
             Expression<Func<TEntity, bool>> where,
-            ApiRequest<TRes> request,
+            ApiRequest request,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.None,
             IfUseLocalData<TEntity>? ifUseLocalData = null,
@@ -209,7 +209,7 @@ namespace HB.FullStack.Client
 
         protected async Task<ObservableTask<TEntity?>> GetFirstOrDefaultObservableTaskAsync(
             Expression<Func<TEntity, bool>> where,
-            ApiRequest<TRes> request,
+            ApiRequest request,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.None,
             IfUseLocalData<TEntity>? ifUseLocalData = null,

@@ -10,16 +10,12 @@ namespace HB.FullStack.Common.Api
     /// 更新几个字段
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class UpdateFieldsRequest<T> : ApiRequest<T> where T : ApiResource2
+    public abstract class UpdateFieldsRequest<T> : ApiRequest where T : ApiResource2
     {
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        protected UpdateFieldsRequest()
-        { }
+        protected UpdateFieldsRequest() : this(null) { }
 
-        protected UpdateFieldsRequest(string? condition) : base(HttpMethodName.Patch, condition) { }
+        protected UpdateFieldsRequest(string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Patch, true, ApiAuthType.Jwt, condition)) { }
 
-        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Patch, condition) { }
+        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Patch, true, apiKeyName, condition)) { }
     }
 }

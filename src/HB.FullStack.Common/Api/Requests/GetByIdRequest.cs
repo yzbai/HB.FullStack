@@ -3,18 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetByIdRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class GetByIdRequest<T> : ApiRequest where T : ApiResource2
     {
         [NoEmptyGuid]
         public Guid Id { get; set; }
 
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public GetByIdRequest()
-        { }
+        public GetByIdRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, ApiAuthType.Jwt, "ById")) { }
 
-        public GetByIdRequest(Guid id) : base(HttpMethodName.Get, "ById")
+        public GetByIdRequest(Guid id) : this()
         {
             Id = id;
         }

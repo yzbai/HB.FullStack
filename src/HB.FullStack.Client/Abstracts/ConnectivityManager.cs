@@ -27,6 +27,11 @@ namespace HB.FullStack.Client
 
         public ConnectivityStatus Status { get; protected set; }
 
+
+
+        //TODO: 指示正在网络重连后的数据同步中，所以，其他的网络操作应该等一等
+        public bool SyncingAfterReconnected { get; internal set; }
+
         private bool _disposedValue;
 
         protected virtual void Dispose(bool disposing)

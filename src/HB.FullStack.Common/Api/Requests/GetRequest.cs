@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class GetRequest<T> : ApiRequest where T : ApiResource2
     {
         public int? Page { get; set; }
 
@@ -18,17 +12,13 @@ namespace HB.FullStack.Common.Api.Requests
 
         public string? OrderBys { get; set; }
 
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public GetRequest()
-        { }
+        public GetRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, ApiAuthType.Jwt, null)) { }
 
-        public GetRequest(string? condition) : base(HttpMethodName.Get, condition) { }
+        public GetRequest(HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
 
-        public GetRequest(string apiKeyName, string? condition) : base(apiKeyName, HttpMethodName.Get, condition) { }
+        public GetRequest(ApiAuthType apiAuthType, string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, apiAuthType, condition)) { }
 
-        public GetRequest(ApiAuthType apiAuthType, string? condition) : base(apiAuthType, HttpMethodName.Get, condition) { }
+        public GetRequest(string apiKeyName, string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, apiKeyName, condition)) { }
 
         public override int GetHashCode()
         {
@@ -60,48 +50,6 @@ namespace HB.FullStack.Common.Api.Requests
             orderByBuilder.RemoveLast();
 
             OrderBys = orderByBuilder.ToString();
-        }
-    }
-
-    public class GetRequest<T, TParent> : GetRequest<T> where T : ApiResource2 where TParent : ApiResource2
-    {
-        public GetRequest(Guid parentId, string? condition) : base(condition)
-        {
-            ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
-        }
-
-        public GetRequest(string apiKeyName, Guid parentId, string? condition) : base(apiKeyName, condition)
-        {
-            ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
-        }
-    }
-
-    public class GetRequest<T, TParent1, TParent2> : GetRequest<T> where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
-    {
-        public GetRequest(Guid parent1Id, Guid parent2Id, string? condition) : base(condition)
-        {
-            ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
-
-            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
-
-            ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
-
-            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
-        }
-
-        public GetRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, string? condition) : base(apiKeyName, condition)
-        {
-            ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
-
-            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
-
-            ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
-
-            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
     }
 }
