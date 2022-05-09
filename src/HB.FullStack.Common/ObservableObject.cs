@@ -13,35 +13,38 @@ namespace HB.FullStack.Common
 	/// <summary>
 	/// Observable object with INotifyPropertyChanged implemented using WeakEventManager
 	/// </summary>
-	public abstract class ObservableObject : INotifyPropertyChanged
+	public abstract class ObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		readonly WeakEventManager _weakEventManager = new WeakEventManager();
 
-		/// <summary>
-		/// Occurs when property changed.
-		/// </summary>
+		public event PropertyChangingEventHandler? PropertyChanging 
+		{
+			add=>_weakEventManager.AddEventHandler(value); 
+			remove =>_weakEventManager.RemoveEventHandler(value);
+		}
+
 		public event PropertyChangedEventHandler? PropertyChanged
 		{
 			add => _weakEventManager.AddEventHandler(value);
 			remove => _weakEventManager.RemoveEventHandler(value);
 		}
 
-		/// <summary>
-		/// Sets the property.
-		/// </summary>
-		/// <returns><c>true</c>, if property was set, <c>false</c> otherwise.</returns>
-		/// <param name="backingStore">Backing store.</param>
-		/// <param name="value">Value.</param>
-		/// <param name="validateValue">Validates value.</param>
-		/// <param name="propertyName">Property name.</param>
-		/// <param name="onChanged">On changed.</param>
-		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		protected virtual void OnPropertyChanging([CallerMemberName] string? propertyName = "")
+		{
+			_weakEventManager.RaiseEvent(this, new PropertyChangingEventArgs(propertyName), nameof(PropertyChanging));
+		}
+
+		protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = "")
+		{
+			_weakEventManager.RaiseEvent(this, new PropertyChangedEventArgs(propertyName), nameof(PropertyChanged));
+		}
+
 		protected virtual bool SetProperty<T>(
 			ref T backingStore,
 			T value,
 			[CallerMemberName] string? propertyName = "",
-			Action? onChanging = null,
-			Action? onChanged = null,
+			//Action? onChanging = null,
+			//Action? onChanged = null,
 			Func<T, T, bool>? validateValue = null)
 		{
 			// if value didn't change
@@ -52,18 +55,15 @@ namespace HB.FullStack.Common
 			if (validateValue != null && !validateValue(backingStore, value))
 				return false;
 
-			onChanging?.Invoke();
+			//onChanging?.Invoke();
+			OnPropertyChanging(propertyName);
+
 			backingStore = value;
-			onChanged?.Invoke();
+
+			//onChanged?.Invoke();
 			OnPropertyChanged(propertyName);
+			
 			return true;
 		}
-
-		/// <summary>
-		/// Raises the property changed event.
-		/// </summary>
-		/// <param name="propertyName">Property name.</param>
-		protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = "") =>
-			_weakEventManager.RaiseEvent(this, new PropertyChangedEventArgs(propertyName), nameof(PropertyChanged));
 	}
 }

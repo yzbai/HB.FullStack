@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
-    /// 从Xamarin.Forms中拷贝
+    /// provide the ability to dispose additional thing with stream
     /// </summary>
     public class WrappedStream : Stream
     {

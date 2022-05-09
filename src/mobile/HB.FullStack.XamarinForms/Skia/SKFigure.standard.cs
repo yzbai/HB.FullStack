@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Figures;
 
 using SkiaSharp;
 using SkiaSharp.Views.Forms;

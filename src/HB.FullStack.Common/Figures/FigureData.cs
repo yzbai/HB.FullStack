@@ -1,6 +1,7 @@
-﻿using System;
+﻿
+using System;
 
-namespace System
+namespace HB.FullStack.Common.Figures
 {
     /// <summary>
     /// Figure中的数据与状态
@@ -11,7 +12,7 @@ namespace System
 
         public bool Equals(FigureData? other)
         {
-            if(other is null)
+            if (other is null)
             {
                 return false;
             }

@@ -1,8 +1,9 @@
-﻿using System;
+﻿
+using System;
 
 
 
-namespace System
+namespace HB.FullStack.Common.Figures
 {
 
     public struct RatioSize : IEquatable<RatioSize>

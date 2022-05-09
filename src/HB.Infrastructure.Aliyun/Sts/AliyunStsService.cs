@@ -3,6 +3,8 @@ using Aliyun.Acs.Core.Auth.Sts;
 using Aliyun.Acs.Core.Exceptions;
 using Aliyun.Acs.Core.Http;
 
+using HB.FullStack.Common.Extensions;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

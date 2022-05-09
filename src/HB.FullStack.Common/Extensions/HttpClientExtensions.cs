@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
@@ -29,7 +24,7 @@ namespace System.Net.Http
             try
             {
                 //T? data = SerializeUtil.FromJson<T>(jsonString);
-                if (SerializeUtil.TryFromJsonWithCollectionCheck<T>(jsonString, out T? data))
+                if (SerializeUtil.TryFromJsonWithCollectionCheck(jsonString, out T? data))
                 {
                     return (true, data);
                 }
@@ -42,7 +37,7 @@ namespace System.Net.Http
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogHttpResponseDeSerializeJsonError(jsonString, ((int)responseMessage.StatusCode), responseMessage.ReasonPhrase, responseMessage?.RequestMessage?.RequestUri, ex);
+                GlobalSettings.Logger?.LogHttpResponseDeSerializeJsonError(jsonString, (int)responseMessage.StatusCode, responseMessage.ReasonPhrase, responseMessage?.RequestMessage?.RequestUri, ex);
                 return (false, null);
             }
         }

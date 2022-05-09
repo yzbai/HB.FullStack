@@ -1,8 +1,9 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ApiResourceAttribute : Attribute

@@ -33,3 +33,6 @@ dotnet_diagnostic.CA2211.severity = none
 
 # CA1024:在适用处使用属性 让人烦躁
 dotnet_diagnostic.CA1024.severity = none
+
+# CA1003: 使用泛型事件处理程序实例
+dotnet_diagnostic.CA1003.severity = none

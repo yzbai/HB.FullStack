@@ -1,9 +1,8 @@
 ﻿
 using HB.FullStack.Common;
+using HB.FullStack.Common.Figures;
 
 using SkiaSharp;
-
-using System;
 
 namespace HB.FullStack.Common
 {

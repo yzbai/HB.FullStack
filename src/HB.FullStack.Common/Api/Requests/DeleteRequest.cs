@@ -13,11 +13,7 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public DeleteRequest()
-        { }
+        public DeleteRequest() { }
 
         public DeleteRequest(IEnumerable<T> ress) : base(HttpMethodName.Delete, null)
         {
@@ -60,7 +56,7 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
+            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
         }
 
         public DeleteRequest(Guid parentId, T res) : this(parentId, new T[] { res }) { }
@@ -69,7 +65,7 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
+            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
         }
 
         public DeleteRequest(string apiKeyName, Guid parentId, T res) : this(apiKeyName, parentId, new T[] { res }) { }
@@ -87,11 +83,11 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Builder!.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
 
         public DeleteRequest(Guid parent1Id, Guid parent2Id, T res) : this(parent1Id, parent2Id, new T[] { res }) { }
@@ -100,11 +96,11 @@ namespace HB.FullStack.Common.Api
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Builder!.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
 
         public DeleteRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, T res) : this(apiKeyName, parent1Id, parent2Id, new T[] { res }) { }

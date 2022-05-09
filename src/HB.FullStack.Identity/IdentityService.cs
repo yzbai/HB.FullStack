@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Extensions;
 using HB.FullStack.Database;
 using HB.FullStack.Identity.Entities;
 using HB.FullStack.Lock.Distributed;

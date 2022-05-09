@@ -14,10 +14,8 @@ namespace HB.FullStack.Common.ApiClient
 {
     public interface IApiClient
     {
-        [SuppressMessage("Design", "CA1003:Use generic event handler instances", Justification = "<Pending>")]
         event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting;
 
-        [SuppressMessage("Design", "CA1003:Use generic event handler instances", Justification = "<Pending>")]
         event AsyncEventHandler<object, ApiEventArgs> Responsed;
 
         JwtEndpointSetting GetDefaultJwtEndpointSetting();

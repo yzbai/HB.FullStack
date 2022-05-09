@@ -69,14 +69,14 @@ namespace HB.FullStack.Common.Api.Requests
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
+            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
         }
 
         public GetRequest(string apiKeyName, Guid parentId, string? condition) : base(apiKeyName, condition)
         {
             ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
 
-            Builder!.Parents.Add((paretnDef.ResName, parentId.ToString()));
+            BuildInfo!.AddParent(paretnDef.ResName, parentId.ToString());
         }
     }
 
@@ -86,22 +86,22 @@ namespace HB.FullStack.Common.Api.Requests
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Builder!.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
 
         public GetRequest(string apiKeyName, Guid parent1Id, Guid parent2Id, string? condition) : base(apiKeyName, condition)
         {
             ApiResourceDef paretn1Def = ApiResourceDefFactory.Get<TParent1>();
 
-            Builder!.Parents.Add((paretn1Def.ResName, parent1Id.ToString()));
+            BuildInfo!.AddParent(paretn1Def.ResName, parent1Id.ToString());
 
             ApiResourceDef paretn2Def = ApiResourceDefFactory.Get<TParent2>();
 
-            Builder!.Parents.Add((paretn2Def.ResName, parent2Id.ToString()));
+            BuildInfo!.AddParent(paretn2Def.ResName, parent2Id.ToString());
         }
     }
 }

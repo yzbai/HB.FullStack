@@ -1,6 +1,7 @@
 ﻿
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Extensions;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Mapper;

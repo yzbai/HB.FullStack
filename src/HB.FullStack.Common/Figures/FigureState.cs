@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
-namespace System
+namespace HB.FullStack.Common.Figures
 {
     public enum FigureState
     {

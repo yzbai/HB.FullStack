@@ -2,7 +2,7 @@
 
 namespace System
 {
-    public static class DelegateUtility
+    public static class DelegateUtil
     {
         public static T Cast<T>(Delegate source) where T : class
         {

@@ -1,6 +1,7 @@
-﻿using System;
+﻿
+using System;
 
-namespace System
+namespace HB.FullStack.Common.Figures
 {
     /// <summary>
     /// 用于绘制Figure的参数

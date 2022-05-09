@@ -43,12 +43,12 @@ namespace HB.FullStack.XamarinForms.IdBarriers
 
         private async Task OnApiClientRequestingAsync(ApiRequest request, ApiEventArgs args)
         {
-            if (request.Builder!.HttpMethod == HttpMethodName.Post)
+            if (request.RequestBuilder!.HttpMethod == HttpMethodName.Post)
             {
                 _addRequestClientIdDict[request.RequestId] = new List<long>();
             }
 
-            await ChangeIdAsync(request, request.RequestId, request.Builder.HttpMethod, ChangeDirection.ToServer).ConfigureAwait(false);
+            await ChangeIdAsync(request, request.RequestId, request.RequestBuilder.HttpMethod, ChangeDirection.ToServer).ConfigureAwait(false);
         }
 
         private async Task OnApiClientResponsedAsync(object? sender, ApiEventArgs args)

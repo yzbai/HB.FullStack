@@ -33,14 +33,7 @@ namespace HB.FullStack.Common.ApiClient
 
             GlobalSettings.Logger.LogInformation("TokenAutoRefreshedHttpClientHandler Inited.");
         }
-
-        /// <summary>
-        /// SendAsync
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        
+       
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
@@ -57,7 +50,7 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+                await HttpClientExtensions.ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
             }
             catch (ErrorCode2Exception ex)
             {
