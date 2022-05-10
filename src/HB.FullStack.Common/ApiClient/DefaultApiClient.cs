@@ -103,7 +103,7 @@ namespace HB.FullStack.Common.ApiClient
             }
             catch (ErrorCode2Exception ex)
             {
-                if (request.RequestBuilder!.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (request.RequestBuilder!.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, GetEndpoint(request), _tokenProvider).ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace HB.FullStack.Common.ApiClient
             }
             catch (ErrorCode2Exception ex)
             {
-                if (request.RequestBuilder!.ApiAuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (request.RequestBuilder!.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, GetEndpoint(request), _tokenProvider).ConfigureAwait(false);
 
@@ -174,7 +174,7 @@ namespace HB.FullStack.Common.ApiClient
             request.RequestBuilder.SetDeviceVersion(_tokenProvider.DeviceVersion);
 
             //Auto
-            switch (request.RequestBuilder!.ApiAuthType)
+            switch (request.RequestBuilder!.AuthType)
             {
                 case ApiAuthType.ApiKey:
                     {

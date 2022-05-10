@@ -27,9 +27,12 @@ namespace HB.FullStack.Common.Api
 
             return new ApiResourceDef
             {
-                ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
-                ResName = attr.ResName ?? type.Name
+                Version = attr.Version,
+                AuthType = attr.AuthType,
+                ResName = attr.ResName,
+                Parent1ResName = attr.Parent1ResName,
+                ApiKeyName = attr.ApiKeyName
             };
         }
     }

@@ -22,7 +22,7 @@ namespace HB.FullStack.Common.Api.Tests
 
             Assert.IsNotNull(def.EndpointName);
             Assert.IsNotNull(def.ResName);
-            Assert.IsNotNull(def.ApiVersion);
+            Assert.IsNotNull(def.Version);
 
 
         }
