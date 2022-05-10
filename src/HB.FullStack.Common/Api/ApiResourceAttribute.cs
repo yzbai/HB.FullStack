@@ -33,6 +33,8 @@ namespace HB.FullStack.Common.Api
         public string? Parent1ResName { get; set; }
 
         private string? _apiKeyName;
+        private string _pieces;
+
         public string? ApiKeyName
         {
             get => _apiKeyName;
@@ -56,6 +58,11 @@ namespace HB.FullStack.Common.Api
             Version = version;
             AuthType = authType;
             ResName = resName;
+        }
+
+        public ApiResourceAttribute(string endPointName, string version, ApiAuthType authType, string resName, string pieces) : this(endPointName, version, authType, resName)
+        {
+            _pieces = pieces;
         }
     }
 }
