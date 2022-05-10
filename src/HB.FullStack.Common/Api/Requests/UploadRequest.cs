@@ -29,11 +29,8 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string FileName { get; protected set; } = null!;
 
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public UploadRequest()
-        { }
+        [OnlyForJsonConstructor]
+        public UploadRequest() { }
 
         public UploadRequest(byte[] file, string fileName, string? condition) : base(condition)
         {

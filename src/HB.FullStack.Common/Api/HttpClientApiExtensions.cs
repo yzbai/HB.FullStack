@@ -89,18 +89,18 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
-            (_, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonAsync<ErrorCode>().ConfigureAwait(false);
+            (bool success, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonAsync<ErrorCode>().ConfigureAwait(false);
 
-            responseMessage.Dispose();
+            //responseMessage.Dispose();
 
-            if (errorCode == null)
+            if (success && errorCode != null)
             {
-                string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw ApiExceptions.ServerUnkownError(response: responseString);
+                throw ApiExceptions.ServerReturnError(errorCode);
             }
             else
             {
-                throw ApiExceptions.ServerReturnError(errorCode);
+                string? responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                throw ApiExceptions.ServerUnkownError(response: responseString);
             }
         }
     }

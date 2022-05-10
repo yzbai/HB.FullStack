@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
@@ -9,9 +10,10 @@ namespace HB.FullStack.Common.Api.Requests
         [NoEmptyGuid]
         public IList<Guid> Ids { get; set; } = new List<Guid>();
 
-        public GetByIdsRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, ApiAuthType.Jwt, "ByIds")) { }
+        [OnlyForJsonConstructor]
+        public GetByIdsRequest()  { }
 
-        public GetByIdsRequest(params Guid[] ids) : this()
+        public GetByIdsRequest(params Guid[] ids) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, ApiAuthType.Jwt, "ByIds"))
         {
             ids.AddRange(ids);
         }

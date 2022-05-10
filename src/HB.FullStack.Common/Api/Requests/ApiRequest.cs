@@ -1,4 +1,6 @@
-﻿using System;
+﻿global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
+
+using System;
 using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
@@ -18,6 +20,9 @@ namespace HB.FullStack.Common.Api
         /// TODO: 防止同一个RequestID两次被处理
         /// </summary>
         public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
+
+        [OnlyForJsonConstructor]
+        protected ApiRequest() { }
 
         protected ApiRequest(HttpRequestBuilder requestBuilder)
         {

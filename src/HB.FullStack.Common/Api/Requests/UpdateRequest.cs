@@ -13,9 +13,10 @@ namespace HB.FullStack.Common.Api
         [CollectionNotEmpty]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        public UpdateRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, true, ApiAuthType.Jwt, null)) { }
+        [OnlyForJsonConstructor]
+        public UpdateRequest() { }
 
-        public UpdateRequest(IEnumerable<T> ress) : this()
+        public UpdateRequest(IEnumerable<T> ress) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, true, ApiAuthType.Jwt, null))
         {
             Resources.AddRange(ress);
         }

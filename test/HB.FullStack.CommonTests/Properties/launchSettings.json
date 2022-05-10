@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "HB.FullStack.CommonTests": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:59749;http://localhost:59750"
+    }
+  }
+}

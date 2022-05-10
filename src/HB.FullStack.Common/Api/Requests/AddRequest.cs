@@ -13,7 +13,8 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; } = new List<T>();
 
-        public AddRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, ApiAuthType.Jwt, null)) { }
+        [OnlyForJsonConstructor]
+        public AddRequest() { }
 
         public AddRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {

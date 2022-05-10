@@ -5,7 +5,7 @@ namespace System.Net.Http
     public static class HttpClientExtensions
     {
         /// <summary>
-        /// 尝试解析Json，不成功返回null
+        /// 尝试解析Json,可以解析返回（true,data),data 可能为null
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="responseMessage"></param>

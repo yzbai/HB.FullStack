@@ -32,7 +32,7 @@ namespace HB.FullStack.CommonTests
             {
                 orderList.Add(1);
                 Console.WriteLine("Task 1 Start");
-                
+
                 await Task.Delay(1000);
 
                 orderList.Add(1);

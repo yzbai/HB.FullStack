@@ -12,7 +12,8 @@ namespace HB.FullStack.Common.Api
     /// <typeparam name="T"></typeparam>
     public abstract class UpdateFieldsRequest<T> : ApiRequest where T : ApiResource2
     {
-        protected UpdateFieldsRequest() : this(null) { }
+        [OnlyForJsonConstructor]
+        protected UpdateFieldsRequest() { }
 
         protected UpdateFieldsRequest(string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Patch, true, ApiAuthType.Jwt, condition)) { }
 

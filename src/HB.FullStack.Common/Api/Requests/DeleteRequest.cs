@@ -13,7 +13,8 @@ namespace HB.FullStack.Common.Api
         [IdBarrier]
         public IList<T> Resources { get; set; } = new List<T>();
 
-        public DeleteRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, true, ApiAuthType.Jwt, null)) { }
+        [OnlyForJsonConstructor]
+        public DeleteRequest()  { }
 
         public DeleteRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {

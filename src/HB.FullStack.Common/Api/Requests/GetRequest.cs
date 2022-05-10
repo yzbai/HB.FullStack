@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
@@ -12,7 +13,8 @@ namespace HB.FullStack.Common.Api.Requests
 
         public string? OrderBys { get; set; }
 
-        public GetRequest() : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, ApiAuthType.Jwt, null)) { }
+        [OnlyForJsonConstructor]
+        public GetRequest()  { }
 
         public GetRequest(HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
 
