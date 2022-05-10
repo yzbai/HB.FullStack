@@ -21,13 +21,9 @@ namespace HB.FullStack.Common.Api
             Resources.AddRange(ress);
         }
 
-        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, ApiAuthType.Jwt, null)) { }
-
-        public AddRequest(string apiKeyName, IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, apiKeyName, null)) { }
+        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, null)) { }
 
         public AddRequest(T res) : this(new T[] { res }) { }
-
-        public AddRequest(string apiKeyName, T res) : this(apiKeyName, new T[] { res }) { }
 
         public override int GetHashCode()
         {

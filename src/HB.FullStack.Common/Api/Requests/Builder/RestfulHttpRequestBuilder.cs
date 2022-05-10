@@ -176,19 +176,8 @@ namespace HB.FullStack.Common.Api
 
     public class RestfulHttpRequestBuilder<T> : RestfulHttpRequestBuilder where T : ApiResource2
     {
-        public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, ApiAuthType apiAuthType, string? condition)
-            : base(httpMethod, needHttpMethodOveride, apiAuthType, null, null, null, condition)
-        {
-            SetByApiResourceDef();
-        }
-
-        public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, string apiKeyName, string? condition)
-            : base(httpMethod, needHttpMethodOveride, apiKeyName, null, null, null, condition)
-        {
-            SetByApiResourceDef();
-        }
-
-        private void SetByApiResourceDef()
+        public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, string? condition)
+            : base(httpMethod, needHttpMethodOveride, ApiAuthType.None, null, null, null, condition)
         {
             ApiResourceDef def = ApiResourceDefFactory.Get<T>();
 

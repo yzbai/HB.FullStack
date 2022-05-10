@@ -16,19 +16,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UpdateRequest() { }
 
-        public UpdateRequest(IEnumerable<T> ress) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, true, ApiAuthType.Jwt, null))
-        {
-            Resources.AddRange(ress);
-        }
-
-        public UpdateRequest(string apiKeyName, IEnumerable<T> ress) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, true, apiKeyName, null))
+        public UpdateRequest(IEnumerable<T> ress) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, true, null))
         {
             Resources.AddRange(ress);
         }
 
         public UpdateRequest(T res) : this(new T[] { res }) { }
-
-        public UpdateRequest(string apiKeyName, T res) : this(apiKeyName, new T[] { res }) { }
 
         public override int GetHashCode()
         {

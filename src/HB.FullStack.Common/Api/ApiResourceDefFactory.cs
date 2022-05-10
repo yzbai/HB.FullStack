@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace HB.FullStack.Common.Api
 {
-    //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取
+    //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取.并且Configuration可以覆盖Attribute设置
     public static class ApiResourceDefFactory
     {
         private static readonly ConcurrentDictionary<Type, ApiResourceDef> _defDict = new ConcurrentDictionary<Type, ApiResourceDef>();

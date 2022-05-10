@@ -14,13 +14,20 @@ namespace HB.FullStack.Common.Api.Requests
         public string? OrderBys { get; set; }
 
         [OnlyForJsonConstructor]
-        public GetRequest()  { }
+        public GetRequest() { }
 
         public GetRequest(HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
 
-        public GetRequest(ApiAuthType apiAuthType, string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, apiAuthType, condition)) { }
-
-        public GetRequest(string apiKeyName, string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, apiKeyName, condition)) { }
+        /// <summary>
+        ///指定的AuthType可以覆盖ApiResourceDef中定义的
+        /// </summary>
+        public GetRequest(string? condition, ApiAuthType? authType = null) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, condition))
+        {
+            if(authType != null)
+            {
+                RequestBuilder!.AuthType = authType.Value;
+            }
+        }
 
         public override int GetHashCode()
         {

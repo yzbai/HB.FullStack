@@ -19,7 +19,7 @@ namespace HB.FullStack.Common.Api
 
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
-        public ApiAuthType AuthType { get; protected set; }
+        public ApiAuthType AuthType { get; internal set; }
 
         public string? ApiKeyName { get; set; }
 

@@ -11,9 +11,9 @@ namespace HB.FullStack.Common.Api.Requests
         public IList<Guid> Ids { get; set; } = new List<Guid>();
 
         [OnlyForJsonConstructor]
-        public GetByIdsRequest()  { }
+        public GetByIdsRequest() { }
 
-        public GetByIdsRequest(params Guid[] ids) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, ApiAuthType.Jwt, "ByIds"))
+        public GetByIdsRequest(params Guid[] ids) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, "ByIds"))
         {
             ids.AddRange(ids);
         }

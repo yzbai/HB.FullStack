@@ -15,8 +15,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         protected UpdateFieldsRequest() { }
 
-        protected UpdateFieldsRequest(string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Patch, true, ApiAuthType.Jwt, condition)) { }
+        protected UpdateFieldsRequest(string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Patch, true, condition)) { }
 
-        protected UpdateFieldsRequest(string apiKeyName, string? condition) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Patch, true, apiKeyName, condition)) { }
     }
 }
