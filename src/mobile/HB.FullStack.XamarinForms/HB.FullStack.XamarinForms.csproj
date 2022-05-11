@@ -28,7 +28,7 @@
 	  <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
 	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2401" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.4" />
+	  <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.5" />
 	  <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
 	  <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />

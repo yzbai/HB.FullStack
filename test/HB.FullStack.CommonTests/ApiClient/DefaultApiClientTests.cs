@@ -66,7 +66,7 @@ namespace HB.FullStack.CommonTests.ApiClient
         [JsonConstructor]
         public GetBookByNameRequest() { }
 
-        public GetBookByNameRequest(string name) : base(ApiAuthType.Jwt, "ByName")
+        public GetBookByNameRequest(string name) : base("ByName")
         {
             Name = name;
         }
