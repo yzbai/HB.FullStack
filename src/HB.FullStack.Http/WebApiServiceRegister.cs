@@ -30,8 +30,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //UserActivity
             services.AddScoped<UserActivityFilter>();
-            
-            
+
+
             services.AddScoped<CheckCommonResourceTokenFilter>();
         }
     }
