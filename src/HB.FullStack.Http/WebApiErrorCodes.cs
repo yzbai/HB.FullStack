@@ -55,7 +55,7 @@ namespace HB.FullStack.WebApi
 
         public static void LogStarup(this ILogger logger)
         {
-            logger.LogInformation($"启动 MyColorfulTime.MainApi, 环境: {EnvironmentUtil.AspNetCoreEnvironment}, MachineId:{EnvironmentUtil.MachineId}");
+            logger.LogInformation($"启动 MyColorfulTime.Server.MainApi, 环境: {EnvironmentUtil.AspNetCoreEnvironment}, MachineId:{EnvironmentUtil.MachineId}");
         }
 
         public static void LogCriticalShutDown(this ILogger logger, Exception ex)

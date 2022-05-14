@@ -35,7 +35,6 @@ namespace HB.FullStack.Database
         private readonly ITransaction _transaction;
         private readonly ILogger _logger;
         private readonly string _deletedPropertyReservedName;
-        private bool _initialized;
 
         public IEntityDefFactory EntityDefFactory { get; }
         public IDbCommandBuilder DbCommandBuilder { get; }
@@ -98,8 +97,6 @@ namespace HB.FullStack.Database
                 _logger.LogInformation("Database Migarate Finished.");
             }
 
-            _initialized = true;
-
             _logger.LogInformation("数据初始化成功！");
         }
 
@@ -111,10 +108,10 @@ namespace HB.FullStack.Database
 
                 try
                 {
-                    SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
+                    SystemInfo? sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
 
                     //表明是新数据库
-                    if (sys.Version == 0)
+                    if (sys == null)
                     {
                         //要求新数据必须从version = 1开始
                         if (_databaseSettings.Version != 1)
@@ -187,9 +184,9 @@ namespace HB.FullStack.Database
 
                 try
                 {
-                    SystemInfo sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
+                    SystemInfo? sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
 
-                    if (sys.Version < _databaseSettings.Version)
+                    if (sys!.Version < _databaseSettings.Version)
                     {
                         if (migrations == null)
                         {
@@ -292,13 +289,14 @@ namespace HB.FullStack.Database
             return Convert.ToBoolean(result, GlobalSettings.Culture);
         }
 
-        internal async Task<SystemInfo> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
+        internal async Task<SystemInfo?> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
         {
             bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SYSTEM_INFO_TABLE_NAME, transaction).ConfigureAwait(false);
 
             if (!isExisted)
             {
-                return new SystemInfo(databaseName) { Version = 0 };
+                //return new SystemInfo(databaseName) { Version = 0 };
+                return null;
             }
 
             var command = DbCommandBuilder.CreateSystemInfoRetrieveCommand(EngineType);
@@ -361,8 +359,6 @@ namespace HB.FullStack.Database
             where TFrom : DatabaseEntity, new()
             where TWhere : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (whereCondition == null)
             {
                 whereCondition = Where<TWhere>();
@@ -391,8 +387,6 @@ namespace HB.FullStack.Database
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
@@ -418,8 +412,6 @@ namespace HB.FullStack.Database
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
@@ -450,7 +442,7 @@ namespace HB.FullStack.Database
         {
             WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
 
-            return RetrieveAsync<T>(null, where, transContext);
+            return RetrieveAsync(null, where, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
@@ -528,8 +520,6 @@ namespace HB.FullStack.Database
         public async Task<IEnumerable<T>> RetrieveByForeignKeyAsync<T>(Expression<Func<T, object>> foreignKeyExp, object foreignKeyValue, TransactionContext? transactionContext, int? page, int? perPage, string? orderBy)
             where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -562,8 +552,6 @@ namespace HB.FullStack.Database
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (whereCondition == null)
             {
                 whereCondition = Where<TSource>();
@@ -614,8 +602,6 @@ namespace HB.FullStack.Database
             where TSource : DatabaseEntity, new()
             where TTarget : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
             if (lst.IsNullOrEmpty())
@@ -640,8 +626,6 @@ namespace HB.FullStack.Database
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (whereCondition == null)
             {
                 whereCondition = Where<TSource>();
@@ -694,8 +678,6 @@ namespace HB.FullStack.Database
             where TTarget1 : DatabaseEntity, new()
             where TTarget2 : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
             if (lst.IsNullOrEmpty())
@@ -720,8 +702,6 @@ namespace HB.FullStack.Database
         /// </summary>
         public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             ThrowIf.NotValid(item, nameof(item));
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -782,8 +762,6 @@ namespace HB.FullStack.Database
         /// </summary>
         public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             ThrowIf.NotValid(item, nameof(item));
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -854,8 +832,6 @@ namespace HB.FullStack.Database
         /// </summary>
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             ThrowIf.NotValid(item, nameof(item));
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -916,8 +892,6 @@ namespace HB.FullStack.Database
 
         public async Task UpdateFieldsAsync<T>(object id, int version, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (id is long longId && longId <= 0)
             {
                 throw DatabaseExceptions.LongIdShouldBePositive(longId);
@@ -975,8 +949,6 @@ namespace HB.FullStack.Database
         /// </summary>
         public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
                 throw DatabaseExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
@@ -1086,8 +1058,6 @@ namespace HB.FullStack.Database
         /// </summary>
         public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
                 throw DatabaseExceptions.TooManyForBatch("BatchUpdate超过批量操作的最大数目", items.Count(), lastUser);
@@ -1179,8 +1149,6 @@ namespace HB.FullStack.Database
         /// </summary>
         public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            ThrowIfNotInitializedYet();
-
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
                 throw DatabaseExceptions.TooManyForBatch("BatchDelete超过批量操作的最大数目", items.Count(), lastUser);
@@ -1270,14 +1238,6 @@ namespace HB.FullStack.Database
         }
 
         #endregion
-
-        private void ThrowIfNotInitializedYet()
-        {
-            if (!_initialized)
-            {
-                throw DatabaseExceptions.NotInitializedYet();
-            }
-        }
 
         private static void ThrowIfNotWriteable(EntityDef entityDef)
         {
