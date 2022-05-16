@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Client.Network
 {
     public abstract class ConnectivityManager : IDisposable
     {
         private readonly WeakEventManager _weakEventManager = new WeakEventManager();
-        
+
         public event EventHandler OfflineDataReaded
         {
             add => _weakEventManager.AddEventHandler(value, nameof(OfflineDataReaded));
@@ -23,14 +23,13 @@ namespace HB.FullStack.Client
             _weakEventManager.RaiseEvent(nameof(OfflineDataReaded));
         }
 
-        public abstract bool IsInternetConnected();
-
         public ConnectivityStatus Status { get; protected set; }
 
 
 
         //TODO: 指示正在网络重连后的数据同步中，所以，其他的网络操作应该等一等
-        public bool SyncingAfterReconnected { get; internal set; }
+        //TODO: 应该存储到数据库中
+        public bool NeedSyncAfterReconnected { get; internal set; }
 
         private bool _disposedValue;
 
@@ -62,12 +61,5 @@ namespace HB.FullStack.Client
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-    }
-
-    public enum ConnectivityStatus
-    {
-        ConnectedReady,
-        ConnectedSyncing,
-        Disconnected,
     }
 }

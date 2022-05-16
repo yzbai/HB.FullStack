@@ -11,10 +11,10 @@ namespace HB.FullStack.Client.KeyValue
     public class DbSimpleLocker
     {
         private readonly ITransaction _transaction;
-        private readonly KVRepo _kvRepo;
+        private readonly KVManager _kvRepo;
         private readonly ILogger<DbSimpleLocker> _logger;
 
-        public DbSimpleLocker(ITransaction transaction, KVRepo kvRepo, ILogger<DbSimpleLocker> logger)
+        public DbSimpleLocker(ITransaction transaction, KVManager kvRepo, ILogger<DbSimpleLocker> logger)
         {
             _transaction = transaction;
             _kvRepo = kvRepo;

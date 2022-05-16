@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-using HB.FullStack.Client;
+using HB.FullStack.Client.File;
 using HB.FullStack.Common;
 
 using Xamarin.Forms;
@@ -46,7 +46,7 @@ namespace HB.FullStack.XamarinForms
                 initImageSource,
                 async () =>
                 {
-                    string? fullPath = await _fileManager.GetFileAsync(directory, fileName, remoteForced).ConfigureAwait(false);
+                    string? fullPath = await _fileManager.GetFileFromRemoteAsync(directory, fileName, remoteForced).ConfigureAwait(false);
 
                     return fullPath.IsNullOrEmpty() ? initImageSource : ImageSource.FromFile(fullPath);
                 });
@@ -87,7 +87,7 @@ namespace HB.FullStack.XamarinForms
                         return initImageSource;
                     }
 
-                    string? fullPath = await _fileManager.GetFileAsync(directory, fileName, remoteForced).ConfigureAwait(false);
+                    string? fullPath = await _fileManager.GetFileFromRemoteAsync(directory, fileName, remoteForced).ConfigureAwait(false);
 
                     return fullPath.IsNullOrEmpty() ? initImageSource : ImageSource.FromFile(fullPath);
                 });

@@ -9,13 +9,13 @@ using HB.FullStack.Database;
 namespace HB.FullStack.Client.KeyValue
 {
     /// <summary>
-    /// 简单的KV加过期系统，后期添加泛型，删除过期
+    /// //TODO: 简单的KV加过期系统，后期添加泛型，删除过期
     /// </summary>
-    public class KVRepo
+    public class KVManager
     {
         private readonly IDatabase _database;
 
-        public KVRepo(IDatabase database)
+        public KVManager(IDatabase database)
         {
             _database = database;
         }

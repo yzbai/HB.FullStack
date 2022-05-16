@@ -4,7 +4,8 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using HB.FullStack.Client;
+using HB.FullStack.Client.File;
+using HB.FullStack.Client.Network;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Logging;
 using HB.FullStack.XamarinForms.Navigation;
@@ -114,7 +115,7 @@ namespace HB.FullStack.XamarinForms.Base
                 services.AddSingleton<NavigationManager, XFNavigationManager>();
                 services.AddSingleton<ImageSourceManager>();
 
-                services.AddKV();
+                services.AddKVManager();
 
                 RegisterServices(services);
 

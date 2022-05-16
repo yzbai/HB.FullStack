@@ -19,7 +19,8 @@ namespace HB.FullStack.Repository
         public static async Task<IEnumerable<TEntity>> CacheAsideAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve,
             IDatabase database, ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TEntity : Entity, new()
         {
-            if (!ICache.IsEntityEnabled<TEntity>())
+
+            if (!cache.IsEntityEnabled<TEntity>())
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
@@ -106,7 +107,7 @@ namespace HB.FullStack.Repository
         /// </summary>
         /// <param name="entities"></param>
         /// <param name="cache"></param>
-        
+
         private static void UpdateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             #region 普通缓存，加锁的做法
@@ -145,10 +146,10 @@ namespace HB.FullStack.Repository
         /// </summary>
         /// <param name="entities"></param>
         /// <param name="cache"></param>
-        
+
         public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
-            if (ICache.IsEntityEnabled<TEntity>())
+            if (cache.IsEntityEnabled<TEntity>())
             {
                 cache.RemoveEntitiesAsync(entities).Fire();
             }

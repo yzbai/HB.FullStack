@@ -179,7 +179,12 @@ namespace HB.FullStack.Common.Api
         public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, string? condition)
             : base(httpMethod, needHttpMethodOveride, ApiAuthType.None, null, null, null, condition)
         {
-            ApiResourceDef def = ApiResourceDefFactory.Get<T>();
+            ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
+
+            if (def == null)
+            {
+                throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
+            }
 
             EndpointName = def.EndpointName;
             ApiVersion = def.Version;

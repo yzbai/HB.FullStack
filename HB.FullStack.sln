@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.MySQL", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Repository", "src\HB.FullStack.Business\HB.FullStack.Repository.csproj", "{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Cache", "src\HB.FullStack.Cache\HB.FullStack.Cache.csproj", "{5257A177-EA20-41EE-B93E-B073849F03E9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Lock", "src\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj", "{876B10C8-62F2-4182-87B1-AB8EC7528A2B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.WebApi", "src\HB.FullStack.Http\HB.FullStack.WebApi.csproj", "{27CC76A9-A790-4816-B8C2-AD855157F3CE}"
@@ -91,14 +89,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.WebApiTests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client", "src\HB.FullStack.Client\HB.FullStack.Client.csproj", "{B1740970-B195-40AE-8112-4035992DFD60}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.UI.Maui", "src\HB.FullStack.Client.UI.Maui\HB.FullStack.Client.UI.Maui.csproj", "{4CF4AA3A-7CC7-464E-A523-54D5F297A81D}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{05d89622-f591-4330-affc-2ca4987addef}*SharedItemsImports = 13
-		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{1ebed9d1-d2e4-4e70-8469-218e89e8ac7a}*SharedItemsImports = 5
-		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{31d840a7-1b5a-45a2-97c5-0d9bf66dfbcd}*SharedItemsImports = 5
-		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{83e6a105-c465-46c7-99b8-ee705a805c6c}*SharedItemsImports = 5
-		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{fdc80253-6604-4960-9b0d-4fc60c52003e}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -132,10 +125,6 @@ Global
 		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5257A177-EA20-41EE-B93E-B073849F03E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5257A177-EA20-41EE-B93E-B073849F03E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5257A177-EA20-41EE-B93E-B073849F03E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5257A177-EA20-41EE-B93E-B073849F03E9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{876B10C8-62F2-4182-87B1-AB8EC7528A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -240,6 +229,10 @@ Global
 		{B1740970-B195-40AE-8112-4035992DFD60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1740970-B195-40AE-8112-4035992DFD60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1740970-B195-40AE-8112-4035992DFD60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CF4AA3A-7CC7-464E-A523-54D5F297A81D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CF4AA3A-7CC7-464E-A523-54D5F297A81D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CF4AA3A-7CC7-464E-A523-54D5F297A81D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CF4AA3A-7CC7-464E-A523-54D5F297A81D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -252,7 +245,6 @@ Global
 		{E5011CF3-D6C9-430E-B1C9-FB873C4F2B02} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 		{94403123-B19B-43EA-A390-9368AD966083} = {AE389908-33C3-4113-BF55-A45C817AB4F1}
 		{B5C6C3CD-5FE4-4217-88A5-16B0FA977099} = {AE389908-33C3-4113-BF55-A45C817AB4F1}
-		{5257A177-EA20-41EE-B93E-B073849F03E9} = {AE389908-33C3-4113-BF55-A45C817AB4F1}
 		{876B10C8-62F2-4182-87B1-AB8EC7528A2B} = {AE389908-33C3-4113-BF55-A45C817AB4F1}
 		{27CC76A9-A790-4816-B8C2-AD855157F3CE} = {AE389908-33C3-4113-BF55-A45C817AB4F1}
 		{DA1BF01A-2950-4D0E-8CDD-04F9D7D62030} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
@@ -280,8 +272,16 @@ Global
 		{73B4CA4A-7FEE-43A2-BCFD-05A39E3ABF3C} = {D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}
 		{A5CA9EC7-08B3-485C-940F-17A97216A3FF} = {D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}
 		{B1740970-B195-40AE-8112-4035992DFD60} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
+		{4CF4AA3A-7CC7-464E-A523-54D5F297A81D} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{05d89622-f591-4330-affc-2ca4987addef}*SharedItemsImports = 13
+		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{1ebed9d1-d2e4-4e70-8469-218e89e8ac7a}*SharedItemsImports = 5
+		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{31d840a7-1b5a-45a2-97c5-0d9bf66dfbcd}*SharedItemsImports = 5
+		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{83e6a105-c465-46c7-99b8-ee705a805c6c}*SharedItemsImports = 5
+		src\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems*{fdc80253-6604-4960-9b0d-4fc60c52003e}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

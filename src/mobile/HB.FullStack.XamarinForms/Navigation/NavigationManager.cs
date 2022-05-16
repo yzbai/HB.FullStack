@@ -22,11 +22,6 @@ namespace HB.FullStack.XamarinForms.Navigation
             }
         }
 
-        //void PushLoginPage(bool animated);
-        //void PopModal();
-        //void Pop();
-        //void PushModal(TCaptchaDialog dialog, bool v);
-
         /// <summary>
         /// 用于登记在
         /// </summary>

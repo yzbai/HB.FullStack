@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 using HB.FullStack.Database.Entities;
 using Microsoft.VisualStudio.Threading;
 using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Client.ClientEntity;
+using HB.FullStack.Client.Network;
 
 namespace HB.FullStack.Client
 {
@@ -50,7 +52,7 @@ namespace HB.FullStack.Client
 
         protected void EnsureInternetConnected()
         {
-            if(!ConnectivityManager.IsInternetConnected())
+            if (!ConnectivityManager.IsInternetConnected())
             {
                 throw ClientExceptions.NoInternet("没有联网");
             }
@@ -58,7 +60,7 @@ namespace HB.FullStack.Client
 
         protected void EnsureNotSyncing()
         {
-            if(ConnectivityManager.SyncingAfterReconnected)
+            if (ConnectivityManager.SyncingAfterReconnected)
             {
                 throw ClientExceptions.OperationInvalidCauseofSyncingAfterReconnected();
             }
@@ -87,13 +89,7 @@ namespace HB.FullStack.Client
 
         protected IDatabase Database { get; }
 
-        protected TimeSpan ClientEntityExpiryTime { get; set; }
-
-        protected bool AllowOfflineWrite { get; set; }
-
-        protected bool AllowOfflineRead { get; set; }
-
-        protected bool NeedLogined { get; set; }
+        protected ClientEntityDef ClientEntityDef { get; set; }
 
         protected BaseRepo(
             ILogger logger,
@@ -107,21 +103,25 @@ namespace HB.FullStack.Client
 
             Database = database;
 
-            ClientEntityAttribute? localDataAttribute = typeof(TEntity).GetCustomAttribute<ClientEntityAttribute>(true);
+            ClientEntityDef? clientEntityDef = ClientEntityDefFactory.Get<TEntity>();
 
-            if (localDataAttribute == null)
+            if (clientEntityDef == null)
             {
-                ClientEntityExpiryTime = TimeSpan.FromSeconds(ClientEntityAttribute.DefaultExpirySeconds);
-                NeedLogined = true;
-                AllowOfflineRead = true;
-                AllowOfflineWrite = false;
+                clientEntityDef = CreateDefaultClientEntityDef();
             }
-            else
+
+            ClientEntityDef = clientEntityDef;
+
+            //NOTICE: Move this to options?
+            static ClientEntityDef CreateDefaultClientEntityDef()
             {
-                ClientEntityExpiryTime = TimeSpan.FromSeconds(localDataAttribute.ExpirySeconds);
-                NeedLogined = localDataAttribute.NeedLogined;
-                AllowOfflineRead = localDataAttribute.AllowOfflineRead;
-                AllowOfflineWrite = localDataAttribute.AllowOfflineWrite;
+                return new ClientEntityDef
+                {
+                    ExpiryTime = TimeSpan.FromSeconds(ClientEntityAttribute.DefaultExpirySeconds),
+                    NeedLogined = true,
+                    AllowOfflineRead = true,
+                    AllowOfflineWrite = false
+                };
             }
         }
 
@@ -140,7 +140,7 @@ namespace HB.FullStack.Client
         {
             EnsureNotSyncing();
 
-            if (NeedLogined)
+            if (ClientEntityDef.NeedLogined)
             {
                 _logger.LogDebug("检查Logined, Type:{type}", typeof(TEntity).Name);
 
@@ -166,14 +166,14 @@ namespace HB.FullStack.Client
             Expression<Func<TEntity, bool>> where,
             ApiRequest request,
             TransactionContext? transactionContext = null,
-            RepoGetMode getMode = RepoGetMode.None,
+            RepoGetMode getMode = RepoGetMode.Mixed,
             IfUseLocalData<TEntity>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
             EnsureNotSyncing();
 
-            if (NeedLogined)
+            if (ClientEntityDef.NeedLogined)
             {
                 EnsureLogined();
             }
@@ -211,14 +211,14 @@ namespace HB.FullStack.Client
             Expression<Func<TEntity, bool>> where,
             ApiRequest request,
             TransactionContext? transactionContext = null,
-            RepoGetMode getMode = RepoGetMode.None,
+            RepoGetMode getMode = RepoGetMode.Mixed,
             IfUseLocalData<TEntity>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
             EnsureNotSyncing();
 
-            if (NeedLogined)
+            if (ClientEntityDef.NeedLogined)
             {
                 EnsureLogined();
             }
@@ -258,7 +258,7 @@ namespace HB.FullStack.Client
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!IsInternetConnected(!AllowOfflineRead))
+            if (!IsInternetConnected(!ClientEntityDef.AllowOfflineRead))
             {
                 _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TEntity).Name);
 
@@ -302,7 +302,7 @@ namespace HB.FullStack.Client
         private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
         {
             DateTimeOffset now = TimeUtil.UtcNow;
-            return locals.Any() && locals.All(t => now - t.LastTime < ClientEntityExpiryTime);
+            return locals.Any() && locals.All(t => now - t.LastTime < ClientEntityDef.ExpiryTime);
         }
 
         #endregion
@@ -320,7 +320,7 @@ namespace HB.FullStack.Client
                 return;
             }
 
-            if (IsInternetConnected(!AllowOfflineWrite))
+            if (IsInternetConnected(!ClientEntityDef.AllowOfflineWrite))
             {
                 //Remote
                 AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
@@ -348,7 +348,7 @@ namespace HB.FullStack.Client
 
             ThrowIf.NotValid(entity, nameof(entity));
 
-            if (IsInternetConnected(!AllowOfflineWrite))
+            if (IsInternetConnected(!ClientEntityDef.AllowOfflineWrite))
             {
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
 

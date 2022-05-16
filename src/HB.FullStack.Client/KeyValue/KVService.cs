@@ -10,9 +10,9 @@ namespace HB.FullStack.Client.KeyValue
     public class KVService
     {
         private readonly ITransaction _transaction;
-        private readonly KVRepo _kvRepo;
+        private readonly KVManager _kvRepo;
 
-        public KVService(ITransaction transaction, KVRepo kvRepo)
+        public KVService(ITransaction transaction, KVManager kvRepo)
         {
             _transaction = transaction;
             _kvRepo = kvRepo;

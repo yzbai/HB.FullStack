@@ -3,9 +3,9 @@
 
 namespace HB.FullStack.Client
 {
-    public enum RepoSetMode
+    public enum RepoGetMode
     {
-        None, //Mixed
+        Mixed,//Mixed
         LocalForced,
         RemoteForced
     }

@@ -10,9 +10,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class KVServiceRegister
     {
-        public static IServiceCollection AddKV(this IServiceCollection services)
+        public static IServiceCollection AddKVManager(this IServiceCollection services)
         {
-            services.AddSingleton<KVRepo>();
+            services.AddSingleton<KVManager>();
             services.AddSingleton<DbSimpleLocker>();
             services.AddSingleton<KVService>();
 

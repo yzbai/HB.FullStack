@@ -558,7 +558,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
 
-            //SetState(FigureState.None);
+            //SetState(FigureState.Mixed);
         }
 
         public void OnHitFailed()

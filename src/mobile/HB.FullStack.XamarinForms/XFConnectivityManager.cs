@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Client;
+﻿using HB.FullStack.Client.Network;
 
 using System;
 using System.Collections.Generic;

@@ -4,21 +4,23 @@ using System;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Common;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Client.File
 {
-    public  interface IFileManager
+    public interface IFileManager
     {
         /// <summary>
         /// 本地和远程同时
         /// 返回本地 FullPath
         /// </summary>
-        Task<string> GetFileAsync(string directory, string fileName, bool remoteForced = false);
+        Task<string> GetFileFromRemoteAsync(string directory, string fileName, bool remoteForced = false);
 
         /// <summary>
         /// 本地和远程同时
         /// 返回Local FullPath
         /// </summary>
-        Task<string> SetFileAsync(string sourceFullPath, string destDirectory, string destFileName, bool recheckPermissionForced = false);
+        Task<string> SetFileToRemoteAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false);
+
+        #region Local
 
         string GetLocalFullPath(string directory, string fileName);
         string GetNewTempFullPath(string fileExtension);
@@ -27,5 +29,7 @@ namespace HB.FullStack.Client
         Task<string> SaveFileToLocalAsync(Stream stream, string directory, string fileName);
         Task<string> SaveFileToLocalAsync(Stream stream, string fullPath);
         Task UnzipAssetZipAsync(string? assetFileName);
+
+        #endregion
     }
 }

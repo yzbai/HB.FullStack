@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
 	<ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
 	<ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
 	<ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />

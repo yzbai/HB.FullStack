@@ -79,33 +79,16 @@ namespace HB.FullStack.KVStore.Entities
             return resultDict;
         }
 
-        /// <summary>
-        /// GetDef
-        /// </summary>
-        /// <returns></returns>
-        
         public static KVStoreEntityDef GetDef<T>()
         {
             return GetDef(typeof(T));
         }
 
-        /// <summary>
-        /// GetDef
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        
         public static KVStoreEntityDef GetDef(Type type)
         {
             return _defDict.GetOrAdd(type, t => CreateEntityDef(t));
         }
 
-        /// <summary>
-        /// CreateEntityDef
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        
         private static KVStoreEntityDef CreateEntityDef(Type type)
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreEntitySchema? storeEntitySchema))
