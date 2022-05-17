@@ -18,6 +18,7 @@ namespace HB.FullStack.Client.UI.Maui
             services.AddKVManager();
 
             //HB.FullStack.Client.UI.Maui
+            services.AddPreferences();
             services.AddFileManager(fileManagerOptionConfig);
             services.AddNetworkManager();
 

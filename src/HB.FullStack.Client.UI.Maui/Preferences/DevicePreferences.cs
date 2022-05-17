@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Client;
-using HB.FullStack.Common;
-using HB.FullStack.XamarinForms.Preferences;
-
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Devices;
+using Microsoft.Maui.Devices.Sensors;
 using Microsoft.VisualStudio.Threading;
 
-using Xamarin.Essentials;
-
-namespace HB.FullStack.XamarinForms
+namespace HB.FullStack.Client.UI.Maui
 {
     public static class DevicePreferences
     {

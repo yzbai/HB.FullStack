@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<base:BaseContentPage
+    x:Class="HB.FullStack.Client.UI.Maui.BaseModalDialog"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.FullStack.Client.UI.Maui">
+    <base:BaseContentPage.Resources>
+            <ControlTemplate x:Key="DialogControlTemplate">
+                <StackLayout x:Name="ModalDialogContainer">
+                    <Frame
+                        x:Name="ModalDialogFrame"
+                        BackgroundColor="White"
+                        CornerRadius="10"
+                        HasShadow="True"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="CenterAndExpand"
+                        WidthRequest="280">
+                        <StackLayout>
+                            <ContentPresenter />
+                        </StackLayout>
+                    </Frame>
+                </StackLayout>
+            </ControlTemplate>
+    </base:BaseContentPage.Resources>
+</base:BaseContentPage>

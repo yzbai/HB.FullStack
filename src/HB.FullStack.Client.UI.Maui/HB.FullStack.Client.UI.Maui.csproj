@@ -49,8 +49,32 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Remove="Base\BaseModalDialog.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Base\BaseModalDialog.xaml">
+	    <SubType>Designer</SubType>
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
 		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Base\BaseModalDialog.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
+	  <Compile Update="TCaptcha\TCaptchaDialog.standard.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 </Project>

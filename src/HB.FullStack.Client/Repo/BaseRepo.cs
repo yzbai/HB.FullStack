@@ -40,7 +40,7 @@ namespace HB.FullStack.Client
 
         protected bool IsInternetConnected(bool throwIfNot = true)
         {
-            bool isInternetConnected = ConnectivityManager.IsInternetConnected();
+            bool isInternetConnected = ConnectivityManager.IsInternet();
 
             if (throwIfNot && !isInternetConnected)
             {
@@ -52,7 +52,7 @@ namespace HB.FullStack.Client
 
         protected void EnsureInternetConnected()
         {
-            if (!ConnectivityManager.IsInternetConnected())
+            if (!ConnectivityManager.IsInternet())
             {
                 throw ClientExceptions.NoInternet("没有联网");
             }
@@ -60,7 +60,7 @@ namespace HB.FullStack.Client
 
         protected void EnsureNotSyncing()
         {
-            if (ConnectivityManager.SyncingAfterReconnected)
+            if (ConnectivityManager.NeedSyncAfterReconnected)
             {
                 throw ClientExceptions.OperationInvalidCauseofSyncingAfterReconnected();
             }

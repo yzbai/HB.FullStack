@@ -4,31 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging;
+
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace HB.FullStack.XamarinForms.Utils
+namespace HB.FullStack.XamarinForms.Preferences
 {
     //TODO: 如果SecurityStorage不支持，改用普通的Preference
-    
+
     internal static class PreferenceHelper
     {
         private static bool? _securityNotSupported;
 
         public static bool SecurityStorageSupported
         {
-            get 
+            get
             {
-                if(!_securityNotSupported.HasValue)
+                if (!_securityNotSupported.HasValue)
                 {
                     _securityNotSupported = Preferences.Get(nameof(SecurityStorageSupported), true);
                 }
 
                 return _securityNotSupported.Value;
-            
+
             }
-            set 
+            set
             {
                 _securityNotSupported = value;
                 Preferences.Set(nameof(SecurityStorageSupported), value);
@@ -48,7 +50,7 @@ namespace HB.FullStack.XamarinForms.Utils
                     return Preferences.Get(key, null);
                 }
             }
-            catch(FeatureNotSupportedException ex)
+            catch (FeatureNotSupportedException ex)
             {
                 GlobalSettings.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
 

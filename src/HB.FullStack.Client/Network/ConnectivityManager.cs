@@ -25,7 +25,10 @@ namespace HB.FullStack.Client.Network
 
         public ConnectivityStatus Status { get; protected set; }
 
-
+        public bool IsInternet()
+        {
+            return Status != ConnectivityStatus.Disconnected;
+        }
 
         //TODO: 指示正在网络重连后的数据同步中，所以，其他的网络操作应该等一等
         //TODO: 应该存储到数据库中
@@ -47,6 +50,8 @@ namespace HB.FullStack.Client.Network
                 _disposedValue = true;
             }
         }
+
+
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
         // ~ConnectivityManager()

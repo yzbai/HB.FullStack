@@ -1,9 +1,9 @@
 ﻿using Microsoft.Maui.Controls;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System;
 
 namespace HB.FullStack.Client.UI.Maui
 {
@@ -31,11 +31,6 @@ namespace HB.FullStack.Client.UI.Maui
             await Shell.Current.GoToAsync(fullUri, animated).ConfigureAwait(false);
         }
 
-        public async Task GotoAsync(Page page, bool animated = false)
-        {
-            await Shell.Current.Navigation.PushAsync(page, animated).ConfigureAwait(false);
-        }
-
         public async Task PopAsync(bool animated = false)
         {
             await Shell.Current.Navigation.PopAsync(animated).ConfigureAwait(false);
@@ -46,14 +41,38 @@ namespace HB.FullStack.Client.UI.Maui
             await Shell.Current.Navigation.PopModalAsync(animated).ConfigureAwait(false);
         }
 
-        public async Task PushAsync(Page page, bool animated = false)
+        public async Task PushAsync(string pageFullName, bool animated = false)
         {
+            Page? page = ServicesProviderUtil.GetPage(pageFullName);
+
+            if (page == null)
+            {
+                return;
+            }
+
             await Shell.Current.Navigation.PushAsync(page, animated).ConfigureAwait(false);
         }
 
-        public async Task PushModalAsync(Page page, bool animated = false)
+        public async Task PushModalAsync(string pageFullName, bool animated = false)
         {
+            Page? page = ServicesProviderUtil.GetPage(pageFullName);
+
+            if(page == null)
+            {
+                return;
+            }
+
             await Shell.Current.Navigation.PushModalAsync(page, animated).ConfigureAwait(false);
+        }
+
+        public Task PushAsync(BaseViewModel baseViewModel, bool animated = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task PushModalAsync(BaseViewModel baseViewModel, bool animated = false)
+        {
+            throw new NotImplementedException();
         }
 
         private static string BuildUri(string uri, IDictionary<string, string> parameters)
@@ -63,6 +82,26 @@ namespace HB.FullStack.Client.UI.Maui
             fullUrl.Append('?');
             fullUrl.Append(string.Join("&", parameters.Select(kvp => $"{kvp.Key}={kvp.Value}")));
             return fullUrl.ToString();
+        }
+
+        public async Task PushAsync(object page, bool animated = false)
+        {
+            if (page is not Page item)
+            {
+                return;
+            }
+
+            await Shell.Current.Navigation.PushAsync(item, animated).ConfigureAwait(false);
+        }
+
+        public async Task PushModalAsync(object page, bool animated = false)
+        {
+            if (page is not Page item)
+            {
+                return;
+            }
+
+            await Shell.Current.Navigation.PushModalAsync(item, animated).ConfigureAwait(false);
         }
     }
 }

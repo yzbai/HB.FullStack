@@ -1,19 +1,7 @@
-﻿using HB.FullStack.Client;
-using HB.FullStack.XamarinForms.Preferences;
-
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Threading;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
 using System.Globalization;
-using System.Threading.Tasks;
 
-using Xamarin.Essentials;
-using Xamarin.Forms;
-
-namespace HB.FullStack.XamarinForms
+namespace HB.FullStack.Client.UI.Maui
 {
     public static class UserPreferences
     {
@@ -25,7 +13,7 @@ namespace HB.FullStack.XamarinForms
         public const string PREFERENCE_NAME_ACCESSTOKEN = "D3SQAAtrv";
         public const string PREFERENCE_NAME_REFRESHTOKEN = "ZTpMCJQl";
         public const string PREFERENCE_NAME_INTRODUCEDYET = "BuOMCJ7l";
-        
+
 
         private static Guid? _userId;
         private static bool _userIdFirstRead = true;

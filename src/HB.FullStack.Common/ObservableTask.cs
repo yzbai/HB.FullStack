@@ -36,7 +36,7 @@ namespace HB.FullStack.Common
         public AggregateException? Exception { get { return Task?.Exception; } }
 
         public Exception? InnerException { get { return Exception?.InnerException; } }
-        
+
         public Action<Exception>? ExceptionHandler { get; private set; }
         public bool ContinueOnCapturedContext { get; private set; }
 

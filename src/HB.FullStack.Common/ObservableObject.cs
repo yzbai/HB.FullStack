@@ -17,9 +17,9 @@ namespace HB.FullStack.Common
 	{
 		readonly WeakEventManager _weakEventManager = new WeakEventManager();
 
-		public event PropertyChangingEventHandler? PropertyChanging 
+		public event PropertyChangingEventHandler? PropertyChanging
 		{
-			add=>_weakEventManager.AddEventHandler(value); 
+			add=>_weakEventManager.AddEventHandler(value);
 			remove =>_weakEventManager.RemoveEventHandler(value);
 		}
 
@@ -62,7 +62,7 @@ namespace HB.FullStack.Common
 
 			//onChanged?.Invoke();
 			OnPropertyChanged(propertyName);
-			
+
 			return true;
 		}
 	}
