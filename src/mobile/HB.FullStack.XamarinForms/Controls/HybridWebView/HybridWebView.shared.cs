@@ -71,12 +71,14 @@ namespace HB.FullStack.XamarinForms.Controls
 
         public void OnAppearing()
         {
-            IsAppearing = true;
+
+
+            IsAppearred = true;
         }
 
         public void OnDisappearing()
         {
-            IsAppearing = false;
+            IsAppearred = false;
         }
 
         
@@ -86,6 +88,6 @@ namespace HB.FullStack.XamarinForms.Controls
             return null;
         }
 
-        public bool IsAppearing { get; private set; }
+        public bool IsAppearred { get; private set; }
     }
 }

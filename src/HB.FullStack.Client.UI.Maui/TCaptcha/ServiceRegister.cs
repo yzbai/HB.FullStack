@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using HB.FullStack.XamarinForms.TCaptcha;
+﻿using HB.FullStack.Client.UI.Maui.TCaptcha;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

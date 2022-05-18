@@ -60,6 +60,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="1.0.0-rc3" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0-rc3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
 	</ItemGroup>
 
@@ -72,7 +74,7 @@
 	  <Compile Update="Base\BaseModalDialog.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
-	  <Compile Update="TCaptcha\TCaptchaDialog.standard.xaml.cs">
+	  <Compile Update="TCaptcha\TCaptchaDialog.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	</ItemGroup>

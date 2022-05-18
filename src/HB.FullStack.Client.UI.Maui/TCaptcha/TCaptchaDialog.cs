@@ -1,8 +1,13 @@
-﻿using System;
+﻿using HB.FullStack.Client.UI.Maui.Controls;
+
+using Microsoft.Maui.Controls;
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CommunityToolkit.Maui.Markup;
 
-namespace HB.FullStack.Client.UI.Maui
+namespace HB.FullStack.Client.UI.Maui.TCaptcha
 {
     public class TCaptchaDialog : BaseContentPage
     {
@@ -36,35 +41,33 @@ namespace HB.FullStack.Client.UI.Maui
             Content = new StackLayout
             {
                 Children = {
-                    new HybridWebView{ }.FillExpand().Assign(out _webView)
+                    new HybridWebView{ }.Fill().Assign(out _webView)
                 }
-            }.FillExpand();
+            }.Fill();
 
             PoppedDelegate = poppedDelegate;
 
             _webView.Source = new HtmlWebViewSource { Html = HTML };
-            _webView.Loaded += WebView_Loaded;
+            _webView.PageFinished += WebView_PageFinished;
+            _webView.OnJavascriptCallCommand = new Command(json => { CaptchaCallback(json?.ToString()); });
         }
 
-        private void WebView_Loaded(object sender, EventArgs e)
+        private void WebView_PageFinished(object? sender, EventArgs e)
         {
             _webView.EvaluateJavaScriptAsync($"showCaptcha(\"{AppId}\")").Fire();
-
-            //TODO: 如果RegisterAction放在构造函数里，再次显示Dialog时，不会加载
-            _webView.RegisterCSharpAction(CaptchaCallback);
         }
 
-        private void CaptchaCallback(string json)
+        private void CaptchaCallback(string? json)
         {
             Result = json;
 
             PoppedDelegate?.Invoke(json).Fire();
             PoppedDelegate = null;
 
-            NavigationManager.Current.GoBackAsync();
+            INavigationManager.Current?.GoBackAsync();
         }
 
-        protected override IList<IBaseContentView?>? GetAllCustomerControls() => new List<IBaseContentView?> { _webView };
+        protected override IList<IBaseContentView?>? GetAllCustomerControls() => new List<IBaseContentView?> { /*_webView */};
 
         protected override void OnAppearing()
         {
