@@ -6,7 +6,9 @@ using WebKit;
 
 namespace HB.FullStack.Client.UI.Maui.Controls
 {
-    public partial class HybridWebViewHandler : IWKScriptMessageHandler
+    //TODO: 找到调用HybridWebView.OnPageFinished方法的地方
+    //在MauiWebViewNavigationDelegate中，但没有提供override方法。所以要不大改，但发现Navigated事件总会被调用，不跟Android一样，所以可以在Navigated事件中注入。
+    public partial class HybridWebViewHandler : IWKScriptMessageHandler,IWKNavigationDelegate
     {
         private const string JavaScriptFunction = "function CallCSharp(data){window.webkit.messageHandlers.jsBridge.postMessage(data);}";
         protected override WKWebView CreatePlatformView()
@@ -30,6 +32,8 @@ namespace HB.FullStack.Client.UI.Maui.Controls
                 hybrid.OnJavascriptCall(message.Body.ToString());
             }
         }
+
+        
 
         protected override void DisconnectHandler(WKWebView platformView)
         {

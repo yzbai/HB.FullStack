@@ -1,54 +1,22 @@
 ﻿using Microsoft.Maui.Controls;
 
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
-using Xamarin.Forms;
-
-namespace HB.FullStack.Client.UI.Maui
+namespace HB.FullStack.Client.UI.Maui.Base
 {
-
     public abstract class BaseContentView : ContentView, IBaseContentView
     {
-        public virtual void OnAppearing()
+        public virtual void OnPageAppearing()
         {
-            IsAppearing = true;
-
-            IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
-
-            if (contentViews == null)
-            {
-                return;
-            }
-
-            foreach (IBaseContentView? baseContentView in contentViews)
-            {
-                baseContentView?.OnAppearing();
-            }
-        }
-        public virtual void OnDisappearing()
-        {
-            IsAppearing = false;
-
-            IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
-
-            if (contentViews == null)
-            {
-                return;
-            }
-
-            foreach (IBaseContentView? baseContentView in contentViews)
-            {
-                baseContentView?.OnDisappearing();
-            }
+            Parallel.ForEach(GetAllCustomerControls(), v => v.OnPageAppearing());
         }
 
-        public abstract IList<IBaseContentView?>? GetAllCustomerControls();
-
-        public bool IsAppearing
+        public virtual void OnPageDisappearing()
         {
-            get; private set;
+            Parallel.ForEach(GetAllCustomerControls(), v => v.OnPageDisappearing());
         }
+
+        public abstract IList<IBaseContentView> GetAllCustomerControls();
     }
 }

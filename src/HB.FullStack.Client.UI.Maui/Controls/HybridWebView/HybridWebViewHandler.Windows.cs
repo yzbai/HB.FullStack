@@ -23,6 +23,11 @@ namespace HB.FullStack.Client.UI.Maui.Controls
         private async void Webview_NavigationCompleted(WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs args)
         {
             await sender.ExecuteScriptAsync("function CallCSharp(data){chrome.webview.postMessage(data);}");
+
+            if (VirtualView is HybridWebView hybrid)
+            {
+                hybrid.OnPageFinished();
+            }
         }
 
         private void Webview_WebMessageReceived(WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs args)

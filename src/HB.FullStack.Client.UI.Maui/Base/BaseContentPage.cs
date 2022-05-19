@@ -1,22 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
+
+using HB.FullStack.Client.UI.Maui.Utils;
+
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 
-namespace HB.FullStack.Client.UI.Maui
+namespace HB.FullStack.Client.UI.Maui.Base
 {
+    public abstract class BaseContentPage<TViewModel> : BaseContentPage where TViewModel : BaseViewModel
+    {
+        protected BaseContentPage(TViewModel viewModel) : base(viewModel)
+        {
+        }
+
+        public new TViewModel ViewModel => (TViewModel)base.ViewModel!;
+    }
+
     public abstract class BaseContentPage : ContentPage
     {
-        public bool IsAppearing { get; private set; }
+        public BaseViewModel? ViewModel { get; protected set; }
 
-        public string PageTypeName { get; private set; }
+        public Task? ViewModelOnPageAppearingTask { get; set; }
 
-        //public bool NeedLogined { get; set; }
+        protected BaseContentPage(BaseViewModel? viewModel)
+        {
+            if (Application.Current != null && Application.Current.Resources.TryGetValue("BaseContentPageControlTemplate", out object controlTemplate))
+            {
+                ControlTemplate = (ControlTemplate)controlTemplate;
+            }
 
-        public bool NavBarIsVisible
+            BindingContext = ViewModel = viewModel;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            //viewmodel
+            ViewModelOnPageAppearingTask = ViewModel?.OnPageAppearingAsync();
+
+            //baseContentViews
+            foreach (IBaseContentView v in GetAllCustomerControls())
+            {
+                v.OnPageAppearing();
+            }
+
+            Parallel.ForEach(GetAllCustomerControls(), v => v.OnPageAppearing());
+        }
+
+        protected override async void OnDisappearing()
+        {
+            base.OnDisappearing();
+
+            Parallel.ForEach(GetAllCustomerControls(), v => v.OnPageDisappearing());
+
+            if (ViewModel != null)
+            {
+                await ViewModel.OnPageDisappearingAsync().ConfigureAwait(false);
+
+            }
+        }
+
+        protected abstract IList<IBaseContentView> GetAllCustomerControls();
+
+        #region Back Button
+
+        public bool DisableBackButton { get; set; }
+
+        protected override bool OnBackButtonPressed()
+        {
+            if (DisableBackButton)
+            {
+                return true;
+            }
+
+            return base.OnBackButtonPressed();
+        }
+
+        #endregion
+
+        #region Visual Settings
+
+        public bool IsNavBarVisible
         {
             get
             {
@@ -44,7 +115,7 @@ namespace HB.FullStack.Client.UI.Maui
             }
         }
 
-        public bool BottomTabBarIsVisible
+        public bool IsBottomTabBarVisible
         {
             get
             {
@@ -65,130 +136,18 @@ namespace HB.FullStack.Client.UI.Maui
         }
 
         [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public bool StatusBarIsVisible
+        public bool IsFullScreen
         {
             get
             {
-                return PlatformHelper.Current.IsStatusBarShowing;
+                return PlatformUtil.IsFullScreen;
             }
             set
             {
-                if (value)
-                {
-                    PlatformHelper.Current.ShowStatusBar();
-                }
-                else
-                {
-                    PlatformHelper.Current.HideStatusBar();
-                }
+                PlatformUtil.IsFullScreen = value;
             }
         }
 
-        public bool DisableBackButton { get; set; }
-
-        protected BaseContentPage()
-        {
-            if (Application.Current!= null && Application.Current.Resources.TryGetValue("BaseContentPageControlTemplate", out object controlTemplate))
-            {
-                ControlTemplate = (ControlTemplate)controlTemplate;
-            }
-
-            PageTypeName = GetType().Name;
-
-            //Application.Current.LogUsage(UsageType.PageCreate, PageName);
-        }
-
-        protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
-
-        protected override async void OnAppearing()
-        {
-            // 放到AppShell中去集中控制路由
-            //if(NeedLogined && !UserPreferences.IsLogined)
-            //{
-            //    INavigationService.Current.PushLoginPage(false);
-            //    BaseApplication.NavigationService.PushLoginPage(false);
-            //    NavigationService.Current.PushLoginPage(false);
-            //    return;
-            //}
-
-            base.OnAppearing();
-
-            IsAppearing = true;
-
-            //viewmodel
-            if (BindingContext is BaseViewModel viewModel)
-            {
-                await viewModel.OnAppearingAsync(PageTypeName).ConfigureAwait(false);
-            }
-
-            //baseContentViews
-            IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
-
-            if (customerControls != null)
-            {
-                foreach (IBaseContentView? v in customerControls)
-                {
-                    if (v == null)
-                    {
-                        GlobalSettings.Logger.LogDebug("######################   Shit happend!");
-                    }
-
-                    v?.OnAppearing();
-                }
-            }
-
-
-
-            await ExecuteAppearedAsync().ConfigureAwait(false);
-        }
-
-        private async Task ExecuteAppearedAsync()
-        {
-            //TODO: This is a bullshit
-            await Task.Delay(600).ConfigureAwait(true);
-
-            await OnAppearedAsync().ConfigureAwait(true);
-        }
-
-        protected virtual Task OnAppearedAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        protected override async void OnDisappearing()
-        {
-            //Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
-
-            base.OnDisappearing();
-
-            IsAppearing = false;
-
-            //baseContentViews
-            IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
-
-            if (customerControls != null)
-            {
-                foreach (var v in customerControls)
-                {
-                    v?.OnDisappearing();
-                }
-            }
-
-            //viewmodel
-            if (BindingContext is BaseViewModel viewModel)
-            {
-                await viewModel.OnDisappearingAsync(PageTypeName).ConfigureAwait(false);
-            }
-        }
-
-        protected override bool OnBackButtonPressed()
-        {
-            if (DisableBackButton)
-            {
-                return true;
-            }
-
-            return base.OnBackButtonPressed();
-        }
+        #endregion
     }
 }

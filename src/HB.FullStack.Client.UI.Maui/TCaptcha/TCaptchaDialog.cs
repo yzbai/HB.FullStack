@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Maui.Markup;
+using HB.FullStack.Client.UI.Maui.Base;
 
 namespace HB.FullStack.Client.UI.Maui.TCaptcha
 {
@@ -36,7 +37,7 @@ namespace HB.FullStack.Client.UI.Maui.TCaptcha
 
         private readonly HybridWebView _webView;
 
-        public TCaptchaDialog(Func<string?, Task>? poppedDelegate)
+        public TCaptchaDialog(Func<string?, Task>? poppedDelegate) : base(null)
         {
             Content = new StackLayout
             {
@@ -67,7 +68,7 @@ namespace HB.FullStack.Client.UI.Maui.TCaptcha
             INavigationManager.Current?.GoBackAsync();
         }
 
-        protected override IList<IBaseContentView?>? GetAllCustomerControls() => new List<IBaseContentView?> { /*_webView */};
+        protected override IList<IBaseContentView> GetAllCustomerControls() => new List<IBaseContentView> { /*_webView */};
 
         protected override void OnAppearing()
         {

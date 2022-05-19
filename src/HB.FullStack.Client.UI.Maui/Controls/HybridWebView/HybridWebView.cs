@@ -8,6 +8,9 @@ using System.Windows.Input;
 
 namespace HB.FullStack.Client.UI.Maui.Controls
 {
+    /// <summary>
+    /// 可以在js中，使用CallCSharp(data)。调用OnJavascriptCallCommand
+    /// </summary>
     public class HybridWebView : WebView
     {
         public static readonly BindableProperty OnJavascriptCallCommandProperty = BindableProperty.Create(nameof(OnJavascriptCallCommand), typeof(ICommand), typeof(HybridWebView), null);
@@ -26,11 +29,6 @@ namespace HB.FullStack.Client.UI.Maui.Controls
             set { SetValue(OnJavascriptCallCommandProperty, value); }
         }
 
-        public HybridWebView()
-        {
-            PageFinished += HybridWebView_InitEveryTime;
-        }
-
         internal void OnPageFinished()
         {
             _eventManager.HandleEvent(this, new EventArgs(), nameof(PageFinished));
@@ -44,19 +42,6 @@ namespace HB.FullStack.Client.UI.Maui.Controls
             }
 
             OnJavascriptCallCommand?.Execute(data);
-        }
-
-        private async void HybridWebView_InitEveryTime(object? sender, EventArgs e)
-        {
-#if ANDROID
-            //必须放在第一个
-            //为了统一调用接口，不必在iOS下是CallCSharp,而在Android下是jsBridge.CallCSharp
-            //另外一个办法就是在Handler.Mapper中，覆盖Mapper[nameof(WebViewClient)]，指向一个新的WebViewClient，然后在WebViewClient中添加这段js
-            //后续：Navigated事件在直接html字符串作为source时，不触发事件。所以只能覆盖WebViewClient了。
-            _ = await EvaluateJavaScriptAsync(@"function CallCSharp(data){jsBridge.CallCSharp(data);}").ConfigureAwait(true);
-#else
-            await Task.CompletedTask.ConfigureAwait(true);
-#endif
         }
     }
 }

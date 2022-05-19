@@ -1,35 +1,64 @@
 ﻿using HB.FullStack.Client.UI.Maui.Controls;
 using HB.FullStack.Client.UI.Maui.File;
 
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Maui.Hosting;
 
 using System;
+using System.IO;
+using System.Reflection;
 
-namespace HB.FullStack.Client.UI.Maui
+namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceRegister
+    public static class FullStackMauiServiceRegister
     {
-        public static IServiceCollection AddFullStackMaui(this IServiceCollection services, Action<FileManagerOptions> fileManagerOptionConfig, string tCaptchaAppId)
+        public static MauiAppBuilder UseFullStack(this MauiAppBuilder builder, Action<FileManagerOptions> fileManagerOptionConfig, string tCaptchaAppId)
         {
+            #region Services
+            
+            IServiceCollection services = builder.Services;
+
+            services.AddOptions();
+
             //HB.FullStack.Client
             services.AddKVManager();
 
             //HB.FullStack.Client.UI.Maui
             services.AddPreferences();
+            services.AddNavigationManager();
             services.AddFileManager(fileManagerOptionConfig);
             services.AddNetworkManager();
             services.AddTCaptcha(tCaptchaAppId);
 
-            return services;
-        }
+            #endregion
 
-        public static MauiAppBuilder AddFullStackHandler(this MauiAppBuilder builder)
-        {
             builder.ConfigureMauiHandlers(handlers => {
                 handlers.AddHandler<HybridWebView, HybridWebViewHandler>();
             });
             return builder;
         }
+
+        public static IConfiguration GetConfiguration(string appsettingsFile, [ValidatedNotNull] Assembly executingAssembly)
+        {
+            ThrowIf.Empty(appsettingsFile, nameof(appsettingsFile));
+
+            string fileName = $"{executingAssembly.FullName!.Split(',')[0]}.{appsettingsFile}";
+
+            using Stream? resFileStream = executingAssembly.GetManifestResourceStream(fileName);
+
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+
+            builder.AddJsonStream(resFileStream);
+
+            return builder.Build();
+        }
+
+        public static string Environment =>
+#if DEBUG
+    "Debug";
+#endif
+#if RELEASE
+            "Release";
+#endif
     }
 }

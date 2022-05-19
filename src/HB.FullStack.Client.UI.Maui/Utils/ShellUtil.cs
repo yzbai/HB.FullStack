@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.Maui.Controls;
 
-using Xamarin.Forms;
+using System;
 
-namespace Xamarin.Forms
+namespace HB.FullStack.Client.UI.Maui.Utils
 {
-    public static class ShellHelper
+    public static class ShellUtil
     {
         public static bool IsCurrentPageA(Type pageType)
         {

@@ -18,12 +18,15 @@ namespace HB.FullStack.Client.UI.Maui.Controls
             _handler = handler;
         }
 
-        public override void OnPageFinished(Android.Webkit.WebView? view, string? url)
+        public override async void OnPageFinished(Android.Webkit.WebView? view, string? url)
         {
             base.OnPageFinished(view, url);
 
-            if(_handler.VirtualView is HybridWebView hybrid)
+            if (_handler.VirtualView is HybridWebView hybrid)
             {
+                //为了使各个平台调用接口统一
+                _ = await hybrid.EvaluateJavaScriptAsync(@"function CallCSharp(data){jsBridge.CallCSharp(data);}").ConfigureAwait(true);
+
                 hybrid.OnPageFinished();
             }
         }

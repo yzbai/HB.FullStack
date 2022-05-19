@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 
-namespace HB.FullStack.Client.UI.Maui
+namespace HB.FullStack.Client.UI.Maui.Base
 {
     public interface IBaseContentView
     {
-        bool IsAppearing { get; }
+        //bool IsAppearing { get; }
 
-        void OnAppearing();
+        void OnPageAppearing();
 
-        void OnDisappearing();
+        void OnPageDisappearing();
 
-        IList<IBaseContentView?>? GetAllCustomerControls();
+        IList<IBaseContentView> GetAllCustomerControls();
     }
 }

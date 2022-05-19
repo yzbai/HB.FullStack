@@ -49,17 +49,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Remove="Base\BaseModalDialog.xaml" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <EmbeddedResource Include="Base\BaseModalDialog.xaml">
-	    <SubType>Designer</SubType>
-	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-	  </EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="1.0.0-rc3" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0-rc3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
@@ -71,12 +60,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Base\BaseModalDialog.xaml.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
-	  </Compile>
 	  <Compile Update="TCaptcha\TCaptchaDialog.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Base\BaseModal.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 </Project>

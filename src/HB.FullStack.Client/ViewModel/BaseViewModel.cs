@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 
@@ -24,23 +25,17 @@ namespace HB.FullStack.Client
         }
 
         /// <summary>
-        /// page将要呈现时执行，
-        /// page和viewmodel的生命周期不一定一致。
+        /// ViewModel可以是Singleton，所以多个page先后使用同一个viewmodel，这里做准备工作。与这个page相关的数据被建立
         /// </summary>
-        /// <param name="pageTypeName"></param>
-        /// <returns></returns>
-        public virtual Task OnAppearingAsync(string pageTypeName)
+        public virtual Task OnPageAppearingAsync()
         {
             return Task.CompletedTask;
         }
 
         /// <summary>
-        /// page将要消失时执行，
-        /// page和viewmodel的生命周期不一定一致。
+        /// page将要消失时执行，viewmodel做清理工作。与这个page相关的数据被清楚
         /// </summary>
-        /// <param name="pageTypeName"></param>
-        /// <returns></returns>
-        public virtual Task OnDisappearingAsync(string pageTypeName)
+        public virtual Task OnPageDisappearingAsync()
         {
             return Task.CompletedTask;
         }
