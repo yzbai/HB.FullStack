@@ -6,19 +6,22 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Client.File
 {
+    /// <summary>
+    /// 模糊本地和远端，只要知道directory和fileName即可
+    /// </summary>
     public interface IFileManager
     {
         /// <summary>
         /// 本地和远程同时
         /// 返回本地 FullPath
         /// </summary>
-        Task<string> GetFileFromRemoteAsync(string directory, string fileName, bool remoteForced = false);
+        Task<string> GetFileFromMixedAsync(string directory, string fileName, bool remoteForced = false);
 
         /// <summary>
         /// 本地和远程同时
         /// 返回Local FullPath
         /// </summary>
-        Task<string> SetFileToRemoteAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false);
+        Task<string> SetFileToMixedAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false);
 
         #region Local
 

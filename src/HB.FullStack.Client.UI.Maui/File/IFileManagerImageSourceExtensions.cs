@@ -5,29 +5,21 @@ using System.Threading.Tasks;
 using HB.FullStack.Client.File;
 using HB.FullStack.Common;
 
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
 
-
-namespace HB.FullStack.XamarinForms
+namespace HB.FullStack.Client.UI.Maui.File
 {
-    public class ImageSourceManager
+    public static class IFileManagerImageSourceExtensions
     {
-        private readonly IFileManager _fileManager;
-
-        public ImageSourceManager(IFileManager fileManager)
-        {
-            _fileManager = fileManager;
-        }
-
-        public ObservableTask<ImageSource> GetImageSourceTask(string directory, string? fileName, string defaultFileName, bool remoteForced = false)
+        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, string directory, string? fileName, string defaultFileName, bool remoteForced = false)
         {
             ImageSource? initImageSource = null;
 
             if (fileName.IsNotNullOrEmpty())
             {
-                string localFullPath = _fileManager.GetLocalFullPath(directory, fileName);
+                string localFullPath = fileManager.GetLocalFullPath(directory, fileName);
 
-                if (File.Exists(localFullPath))
+                if (System.IO.File.Exists(localFullPath))
                 {
                     initImageSource = ImageSource.FromFile(localFullPath);
                 }
@@ -46,21 +38,21 @@ namespace HB.FullStack.XamarinForms
                 initImageSource,
                 async () =>
                 {
-                    string? fullPath = await _fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced).ConfigureAwait(false);
+                    string? fullPath = await fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced).ConfigureAwait(false);
 
                     return fullPath.IsNullOrEmpty() ? initImageSource : ImageSource.FromFile(fullPath);
                 });
         }
 
-        public ObservableTask<ImageSource> GetImageSourceTask(string directory, string? initFileName, Func<Task<string?>> updateFileNameAsyncFunc, string defaultFileName, bool remoteForced = false)
+        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, string directory, string? initFileName, Func<Task<string?>> updateFileNameAsyncFunc, string defaultFileName, bool remoteForced = false)
         {
             ImageSource? initImageSource = null;
 
             if (initFileName.IsNotNullOrEmpty())
             {
-                string localFullPath = _fileManager.GetLocalFullPath(directory, initFileName);
+                string localFullPath = fileManager.GetLocalFullPath(directory, initFileName);
 
-                if (File.Exists(localFullPath))
+                if (System.IO.File.Exists(localFullPath))
                 {
                     initImageSource = ImageSource.FromFile(localFullPath);
                 }
@@ -87,7 +79,7 @@ namespace HB.FullStack.XamarinForms
                         return initImageSource;
                     }
 
-                    string? fullPath = await _fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced).ConfigureAwait(false);
+                    string? fullPath = await fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced).ConfigureAwait(false);
 
                     return fullPath.IsNullOrEmpty() ? initImageSource : ImageSource.FromFile(fullPath);
                 });

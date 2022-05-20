@@ -4,9 +4,12 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 
-namespace HB.FullStack.XamarinForms.Converters
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Graphics;
+
+namespace HB.FullStack.Client.UI.Maui.Converters
 {
     public class BoundsToCenterConverter : IValueConverter
     {
@@ -14,7 +17,7 @@ namespace HB.FullStack.XamarinForms.Converters
         {
             if (value is Rectangle rectangle)
             {
-                return  rectangle.Center;
+                return rectangle.GetCenter();
             }
 
             return null;

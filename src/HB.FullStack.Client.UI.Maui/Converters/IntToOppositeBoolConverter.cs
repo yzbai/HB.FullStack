@@ -4,19 +4,18 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
 
-namespace HB.FullStack.XamarinForms.Converters
+namespace HB.FullStack.Client.UI.Maui.Converters
 {
-    public class BoundsToCenterConverter : IValueConverter
+    public class IntToOppositeBoolConverter : IValueConverter
     {
         public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Rectangle rectangle)
+            if (value is int number)
             {
-                return  rectangle.Center;
+                return number <= 0;
             }
-
             return null;
         }
 

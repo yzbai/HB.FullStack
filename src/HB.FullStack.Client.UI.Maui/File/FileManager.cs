@@ -107,7 +107,7 @@ namespace HB.FullStack.Client.UI.Maui.File
         ///<summary>
         ///返回本地fullpath
         ///</summary>
-        public async Task<string> SetFileToRemoteAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false)
+        public async Task<string> SetFileToMixedAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false)
         {
             //TODO: 先检查网络连接
 
@@ -170,7 +170,7 @@ namespace HB.FullStack.Client.UI.Maui.File
         /// <summary>
         /// 返回本地FullPath
         /// </summary>
-        public async Task<string> GetFileFromRemoteAsync(string directory, string fileName, bool remoteForced = false)
+        public async Task<string> GetFileFromMixedAsync(string directory, string fileName, bool remoteForced = false)
         {
             string ossKey = GetOssKey(directory, fileName);
             TimeSpan localFileExpiryTime = GetOssFileExpiryTime(directory);
