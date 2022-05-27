@@ -80,7 +80,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public bool CanvasSizeChanged { get; set; }
 
-        public FigureState CurrentState { get; private set; } = FigureState.None;
+        public FigureVisualState CurrentState { get; private set; } = FigureVisualState.None;
 
         public SKPath HitTestPath
         { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
@@ -92,7 +92,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         protected SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        public void SetState(FigureState figureState)
+        public void SetState(FigureVisualState figureState)
         {
             CurrentState = figureState;
         }
@@ -513,37 +513,37 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
-            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
+            if (CurrentState == FigureVisualState.Selected || CurrentState == FigureVisualState.LongSelected)
             {
                 return;
             }
 
-            SetState(FigureState.Selected);
+            SetState(FigureVisualState.Selected);
         }
 
         public void OnTwoFingerDragged(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
-            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
+            if (CurrentState == FigureVisualState.Selected || CurrentState == FigureVisualState.LongSelected)
             {
                 return;
             }
 
-            SetState(FigureState.Selected);
+            SetState(FigureVisualState.Selected);
         }
 
         public void OnTapped(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            if (CurrentState == FigureState.Selected)
+            if (CurrentState == FigureVisualState.Selected)
             {
-                SetState(FigureState.None);
+                SetState(FigureVisualState.None);
             }
-            else if (CurrentState == FigureState.None)
+            else if (CurrentState == FigureVisualState.None)
             {
-                SetState(FigureState.Selected);
+                SetState(FigureVisualState.Selected);
             }
         }
 
@@ -551,14 +551,14 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
 
-            SetState(FigureState.LongSelected);
+            SetState(FigureVisualState.LongSelected);
         }
 
         public void OnCancelled(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
 
-            //SetState(FigureState.Mixed);
+            //SetState(FigureVisualState.Mixed);
         }
 
         public void OnHitFailed()
@@ -573,7 +573,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 }
             }
 
-            SetState(FigureState.None);
+            SetState(FigureVisualState.None);
         }
 
         #endregion
@@ -718,7 +718,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (newResult != null)
             {
-                newResult.State = CurrentState;
+                newResult.VisualState = CurrentState;
             }
 
             if (newResult != ResultData)

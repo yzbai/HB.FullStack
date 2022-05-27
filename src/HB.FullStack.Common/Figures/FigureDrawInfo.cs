@@ -4,7 +4,7 @@ using System;
 namespace HB.FullStack.Common.Figures
 {
     /// <summary>
-    /// 用于绘制Figure的参数
+    /// 用于绘制Figure的参数,只与UI有关。比如钟表，只与钟表样貌有关，与几点几分无关。
     /// </summary>
     public abstract class FigureDrawInfo : IEquatable<FigureDrawInfo>
     {

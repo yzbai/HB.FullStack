@@ -87,7 +87,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public IList<SKDataFigure<TData>> SelectedFigures { get; } = new List<SKDataFigure<TData>>();
 
-        public FigureState SelectedFiguresState { get; private set; }
+        public FigureVisualState SelectedFiguresState { get; private set; }
 
         protected SKFigureGroup(IFigureFactory<TData> figureFactory)
         {
@@ -243,14 +243,14 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             SelectedFigures.Remove(figure);
 
-            figure.SetState(FigureState.None);
+            figure.SetState(FigureVisualState.None);
         }
 
         public void UnSelectAll()
         {
             foreach (SKFigure f in SelectedFigures)
             {
-                f.SetState(FigureState.None);
+                f.SetState(FigureVisualState.None);
             }
 
             SelectedFigures.Clear();
@@ -258,14 +258,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void CheckSelected(SKDataFigure<TData> figure)
         {
-            if (figure.CurrentState != FigureState.Selected && figure.CurrentState != FigureState.LongSelected)
+            if (figure.CurrentState != FigureVisualState.Selected && figure.CurrentState != FigureVisualState.LongSelected)
             {
                 return;
             }
 
             if (SelectedFiguresState != figure.CurrentState
-                || (figure.CurrentState == FigureState.Selected && !EnableMultipleSelected)
-                || (figure.CurrentState == FigureState.LongSelected && !EnableMultipleLongSelected))
+                || (figure.CurrentState == FigureVisualState.Selected && !EnableMultipleSelected)
+                || (figure.CurrentState == FigureVisualState.LongSelected && !EnableMultipleLongSelected))
             {
                 UnSelectAllExcept(figure);
             }
@@ -283,7 +283,7 @@ namespace HB.FullStack.XamarinForms.Skia
                         continue;
                     }
 
-                    sf.SetState(FigureState.None);
+                    sf.SetState(FigureVisualState.None);
                 }
 
                 SelectedFigures.Clear();

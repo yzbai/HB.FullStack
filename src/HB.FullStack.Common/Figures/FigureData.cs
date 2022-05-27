@@ -4,11 +4,11 @@ using System;
 namespace HB.FullStack.Common.Figures
 {
     /// <summary>
-    /// Figure中的数据与状态
+    /// Figure中的数据与状态。也会影响到绘制。比如钟表的时间，是关键数据，而与钟表长什么样子无关。
     /// </summary>
     public abstract class FigureData : IEquatable<FigureData>
     {
-        public FigureState State { get; set; }
+        public FigureVisualState VisualState { get; set; }
 
         public bool Equals(FigureData? other)
         {
@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Figures
                 return false;
             }
 
-            return State == other.State && EqualsCore(other);
+            return VisualState == other.VisualState && EqualsCore(other);
         }
 
         public static bool operator ==(FigureData? d1, FigureData? d2)
@@ -52,7 +52,7 @@ namespace HB.FullStack.Common.Figures
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(GetHashCodeCore(), State);
+            return HashCode.Combine(GetHashCodeCore(), VisualState);
         }
 
         protected abstract bool EqualsCore(FigureData other);
