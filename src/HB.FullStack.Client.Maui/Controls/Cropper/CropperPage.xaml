@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <base:BaseContentPage
-    x:Class="HB.FullStack.XamarinForms.Controls.Cropper.CropperPage"
-    xmlns="http://xamarin.com/schemas/2014/forms"
+    x:Class="HB.FullStack.Client.Maui.Controls.Cropper.CropperPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:base="clr-namespace:HB.FullStack.XamarinForms.Base"
-    xmlns:figure="clr-namespace:HB.FullStack.XamarinForms.Skia">
+    xmlns:base="clr-namespace:HB.FullStack.Client.Maui.Base"
+    xmlns:cropper="clr-namespace:HB.FullStack.Client.Maui.Controls.Cropper"
+    xmlns:figure="clr-namespace:HB.FullStack.Client.Maui.Figures" x:DataType="cropper:CropperViewModel">
     <ContentPage.Resources>
         <ResourceDictionary>
             <Style TargetType="Button">

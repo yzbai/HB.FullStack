@@ -7,7 +7,7 @@ using SkiaSharp;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     public enum EstimateType
     {

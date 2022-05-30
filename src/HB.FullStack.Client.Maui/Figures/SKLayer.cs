@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     /// <summary>
     /// one layer is one bitmap

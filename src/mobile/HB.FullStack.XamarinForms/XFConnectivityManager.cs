@@ -40,7 +40,7 @@ namespace HB.FullStack.XamarinForms
             }
         }
 
-        public override bool IsInternetConnected()
+        public static bool IsInternetConnected()
         {
             return Connectivity.NetworkAccess == NetworkAccess.Internet;
         }

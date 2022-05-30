@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Client.Maui.Controls.SkiaGraphics
 {
     /// <summary>
-    /// notice:小心和Microsoft.Maui.Graphics.Skia.Views.SkiaGraphicsView重名
+    /// notice:小心和Microsoft.Maui.Graphics.Figures.Views.SkiaGraphicsView重名
     /// </summary>
     public class SkiaGraphicsView : GraphicsView
     {

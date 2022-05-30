@@ -513,37 +513,37 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
-            if (CurrentState == FigureVisualState.Selected || CurrentState == FigureVisualState.LongSelected)
+            if (CurrentState == FigureVisualState.Tapped|| CurrentState == FigureVisualState.LongTapped)
             {
                 return;
             }
 
-            SetState(FigureVisualState.Selected);
+            SetState(FigureVisualState.Tapped);
         }
 
         public void OnTwoFingerDragged(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
-            if (CurrentState == FigureVisualState.Selected || CurrentState == FigureVisualState.LongSelected)
+            if (CurrentState == FigureVisualState.Tapped || CurrentState == FigureVisualState.LongTapped)
             {
                 return;
             }
 
-            SetState(FigureVisualState.Selected);
+            SetState(FigureVisualState.Tapped);
         }
 
         public void OnTapped(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            if (CurrentState == FigureVisualState.Selected)
+            if (CurrentState == FigureVisualState.Tapped)
             {
                 SetState(FigureVisualState.None);
             }
             else if (CurrentState == FigureVisualState.None)
             {
-                SetState(FigureVisualState.Selected);
+                SetState(FigureVisualState.Tapped);
             }
         }
 
@@ -551,7 +551,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
 
-            SetState(FigureVisualState.LongSelected);
+            SetState(FigureVisualState.LongTapped);
         }
 
         public void OnCancelled(SKFigureTouchEventArgs touchInfo)

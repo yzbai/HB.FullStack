@@ -1,4 +1,6 @@
-﻿using SkiaSharp;
+﻿using HB.FullStack.Client.Maui.Figures;
+
+using SkiaSharp;
 
 using System;
 
@@ -65,47 +67,50 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
             CanvasView?.InvalidateSurface();
         }
 
-        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
+        protected override void OnDrawInfoIntialized()
         {
-            if (CanvasSizeChanged)
-            {
-                _outterRect = SKRect.Create(
-                    _outterWidthRatio * info.Width / -2,
-                    _outterHeightRatio * info.Height / -2,
-                    _outterWidthRatio * info.Width,
-                    _outterHeightRatio * info.Height);
-            }
+            float width = CanvasSize.Width;
+            float height = CanvasSize.Height;
+
+            _outterRect = SKRect.Create(
+                    _outterWidthRatio * width / -2,
+                    _outterHeightRatio * height / -2,
+                    _outterWidthRatio * width,
+                    _outterHeightRatio * height);
 
             if (_firstDraw)
             {
                 if (IsSquare)
                 {
-                    float cropRectLength = Math.Min(_initCropperWidthRatio * info.Width, _initCropperHeightRatio * info.Height);
+                    float cropRectLength = Math.Min(_initCropperWidthRatio * width, _initCropperHeightRatio * height);
 
                     _cropRect = SKRect.Create(cropRectLength / -2, cropRectLength / -2, cropRectLength, cropRectLength);
                 }
                 else
                 {
                     _cropRect = SKRect.Create(
-                        _initCropperWidthRatio * info.Width / -2,
-                        _initCropperHeightRatio * info.Height / -2,
-                        _initCropperWidthRatio * info.Width,
-                        _initCropperHeightRatio * info.Height);
+                        _initCropperWidthRatio * width / -2,
+                        _initCropperHeightRatio * height / -2,
+                        _initCropperWidthRatio * width,
+                        _initCropperHeightRatio * height);
                 }
                 _firstDraw = false;
             }
+        }
 
-            //Draw Dim Bg
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
+        {
+            //OnDraw Dim Bg
             using SKRegion bgRegion = new SKRegion(SKRectI.Round(_outterRect));
 
             bgRegion.Op(SKRectI.Round(_cropRect), SKRegionOperation.Difference);
 
             canvas.DrawRegion(bgRegion, _outterRectPaint);
 
-            //Draw CropRect
+            //OnDraw CropRect
             canvas.DrawRect(_cropRect, _cropperRectPaint);
 
-            //Draw Corner
+            //OnDraw Corner
 
             using SKPath cornerPath = new SKPath();
 
@@ -132,9 +137,10 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
             canvas.DrawPath(cornerPath, _cornerPaint);
         }
 
-        public override bool OnHitTest(SKPoint location, long fingerId)
+        public override bool HitTest(SKPoint canvasPoint, long fingerId)
         {
-            SKPoint hitPoint = GetNewCoordinatedPoint(location);
+
+            SKPoint hitPoint = ToCurrentCoordinatePoint(canvasPoint);
 
             //左上角
             SKRect rect = SKRect.Create(_cropRect.Left - _cornerTouchRadius, _cropRect.Top - _cornerTouchRadius, _cornerTouchRadius * 2, _cornerTouchRadius * 2);
@@ -176,7 +182,11 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
             return false;
         }
 
-        private void CropperFrameFigure_OneFingerDragged(object sender, SKFigureTouchEventArgs e)
+        protected override SKPath CaculateHitTestPath(SKImageInfo info) => new SKPath();
+
+        protected override void CaculateOutput() { }
+
+        private void CropperFrameFigure_OneFingerDragged(object? sender, SKFigureTouchEventArgs e)
         {
             float xOffset = e.CurrentPoint.X - e.PreviousPoint.X;
             float yOffset = e.CurrentPoint.Y - e.PreviousPoint.Y;

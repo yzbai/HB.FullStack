@@ -9,7 +9,7 @@ using SkiaSharp;
 
 using Svg.Skia;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     public class SKSvg2 : IDisposable
     {

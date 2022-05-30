@@ -1,11 +1,4 @@
-﻿using System;
-using System.Globalization;
-
-using HB.FullStack.XamarinForms.Utils;
-
-using Xamarin.Essentials;
-
-namespace HB.FullStack.XamarinForms
+﻿namespace HB.FullStack.XamarinForms
 {
     public static class AppStates
     {

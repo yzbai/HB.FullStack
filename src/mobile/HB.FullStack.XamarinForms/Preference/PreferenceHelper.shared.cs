@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace HB.FullStack.XamarinForms.Preferences
+namespace HB.FullStack.XamarinForms.Preference
 {
     //TODO: 如果SecurityStorage不支持，改用普通的Preference
 

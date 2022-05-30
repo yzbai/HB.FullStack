@@ -10,8 +10,8 @@
 		<!--<ImplicitUsings>enable</ImplicitUsings>-->
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<WarningsAsErrors />
+		<!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />-->
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 
@@ -68,7 +68,7 @@
 	  <Compile Update="Base\BaseModal.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
-	  <Compile Update="Controls\Chip.standard.xaml.cs">
+	  <Compile Update="Controls\Chip.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	  <Compile Update="Controls\Cropper\CropperPage.xaml.cs">

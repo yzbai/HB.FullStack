@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     public abstract class SKFigure<TDrawInfo, TData> : SKFigure
         where TDrawInfo : FigureDrawInfo
@@ -49,7 +49,7 @@ namespace HB.FullStack.Client.Maui.Skia
         {
             HitTestPathNeedUpdate = true;
 
-            OnDrawInfoOrCanvasSizeChanged();
+            OnDrawInfoIntialized();
 
             RestoreMatrix();
         }
@@ -58,22 +58,10 @@ namespace HB.FullStack.Client.Maui.Skia
         {
             HitTestPathNeedUpdate = true;
 
-            OnInitDataChanged();
+            OnDrawInfoIntialized();
 
             RestoreMatrix();
         }
-
-        protected abstract void OnInitDataChanged();
-
-        protected override void OnCanvasSizeChanged(SKSize oldCanvasSize, SKSize canvasSize)
-        {
-            OnDrawInfoOrCanvasSizeChanged();
-        }
-
-        /// <summary>
-        /// 计算因为DrawInfo或者CanvasSize发生变化，引起的绘画数据变化
-        /// </summary>
-        protected abstract void OnDrawInfoOrCanvasSizeChanged();
 
         protected sealed override void CaculateOutput()
         {
@@ -98,11 +86,6 @@ namespace HB.FullStack.Client.Maui.Skia
         protected override void CaculateOutput(out EmptyData? newResultData)
         {
             newResultData = null;
-        }
-
-        protected override void OnInitDataChanged()
-        {
-            //Do nothing
         }
     }
 

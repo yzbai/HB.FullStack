@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using SkiaSharp;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     public class SKGif : IDisposable
     {

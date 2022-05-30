@@ -258,14 +258,14 @@ namespace HB.FullStack.XamarinForms.Skia
 
         private void CheckSelected(SKDataFigure<TData> figure)
         {
-            if (figure.CurrentState != FigureVisualState.Selected && figure.CurrentState != FigureVisualState.LongSelected)
+            if (figure.CurrentState != FigureVisualState.Tapped && figure.CurrentState != FigureVisualState.LongTapped)
             {
                 return;
             }
 
             if (SelectedFiguresState != figure.CurrentState
-                || (figure.CurrentState == FigureVisualState.Selected && !EnableMultipleSelected)
-                || (figure.CurrentState == FigureVisualState.LongSelected && !EnableMultipleLongSelected))
+                || (figure.CurrentState == FigureVisualState.Tapped && !EnableMultipleSelected)
+                || (figure.CurrentState == FigureVisualState.LongTapped && !EnableMultipleLongSelected))
             {
                 UnSelectAllExcept(figure);
             }

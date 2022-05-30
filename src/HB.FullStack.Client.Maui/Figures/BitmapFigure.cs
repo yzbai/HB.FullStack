@@ -1,14 +1,9 @@
-﻿using HB.FullStack.XamarinForms.Effects.Touch;
-using HB.FullStack.XamarinForms.Skia;
-
-using SkiaSharp;
+﻿using SkiaSharp;
 
 
 using System.IO;
 
-using Xamarin.Forms;
-
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
 
     /// <summary>
@@ -115,18 +110,18 @@ namespace HB.FullStack.Client.Maui.Skia
             //SetBitmap(croppedBitmap);
         }
 
-        protected override void Draw(SKImageInfo info, SKCanvas canvas)
+        protected override void OnDrawInfoIntialized()
         {
-            if (CanvasSizeChanged)
-            {
-                //新坐标系下的。
-                _destRect = SKRect.Create(
-                    _widthRatio * info.Width / -2,
-                    _heightRatio * info.Height / -2,
-                    _widthRatio * info.Width,
-                    _heightRatio * info.Height);
-            }
+            //新坐标系下的。
+            _destRect = SKRect.Create(
+                _widthRatio * CanvasSize.Width / -2,
+                _heightRatio * CanvasSize.Height / -2,
+                _widthRatio * CanvasSize.Width,
+                _heightRatio * CanvasSize.Height);
+        }
 
+        protected override void OnDraw(SKImageInfo info, SKCanvas canvas)
+        {
             if (_bitmap != null)
             {
                 SKRect mappedDestRect = Matrix.Invert().MapRect(_destRect);
@@ -141,17 +136,21 @@ namespace HB.FullStack.Client.Maui.Skia
             }
         }
 
-        protected override void OnUpdateHitTestPath(SKImageInfo info)
+        protected override SKPath CaculateHitTestPath(SKImageInfo info)
         {
-            if (CanvasSizeChanged)
-            {
-                HitTestPath = new SKPath();
+            SKPath path = new SKPath();
 
-                HitTestPath.AddRect(_destRect);
-            }
+            path.AddRect(_destRect);
+
+            return path;
         }
 
-        private void OnTwoFingerDragged(object sender, SKFigureTouchEventArgs args)
+        protected override void CaculateOutput()
+        {
+
+        }
+
+        private void OnTwoFingerDragged(object? sender, SKFigureTouchEventArgs args)
         {
             SKPoint previousPivotedPoint = args.PreviousPoint;
             SKPoint currentPivotedPoint = args.CurrentPoint;
@@ -162,7 +161,7 @@ namespace HB.FullStack.Client.Maui.Skia
             Matrix = Matrix.PostConcat(changedMatrix);
         }
 
-        private void OnOneFingerDragged(object sender, SKFigureTouchEventArgs args)
+        private void OnOneFingerDragged(object? sender, SKFigureTouchEventArgs args)
         {
             SKPoint previousPivotedPoint = args.PreviousPoint;
             SKPoint currentPivotedPoint = args.CurrentPoint;

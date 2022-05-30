@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:BaseContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:base="clr-namespace:HB.FullStack.Client.Maui.Base"
-             x:Class="HB.FullStack.Client.Maui.Controls.TimeEditor"
-                      x:Name="Root">
+<base:BaseContentView
+    x:Class="HB.FullStack.Client.Maui.Controls.TimeEditor"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.FullStack.Client.Maui.Base"
+    xmlns:fonts="clr-namespace:HB.FullStack.Client.Maui.Fonts"
+    x:Name="Root">
     <base:BaseContentView.Resources>
 
         <Style x:Key="TimeBorder" TargetType="Frame">

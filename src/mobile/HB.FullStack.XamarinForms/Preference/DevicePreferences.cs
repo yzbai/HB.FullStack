@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client;
 using HB.FullStack.Common;
-using HB.FullStack.XamarinForms.Preferences;
+using HB.FullStack.XamarinForms.Preference;
 
 using Microsoft.VisualStudio.Threading;
 

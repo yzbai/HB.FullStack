@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     public class MatrixDisplay
     {
@@ -78,7 +78,7 @@ namespace HB.FullStack.Client.Maui.Skia
                     x += widths[col] - bounds[i].Width;
                     y += (MatrixPaint.FontSpacing - bounds[i].Height) / 2 - bounds[i].Top;
 
-                    // Draw the text
+                    // OnDraw the text
                     MatrixPaint.Style = SKPaintStyle.Fill;
                     canvas.DrawText(texts[i], x, y, MatrixPaint);
                 }

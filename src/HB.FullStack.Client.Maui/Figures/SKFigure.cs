@@ -15,14 +15,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     public abstract class SKFigure : BindableObject, IDisposable
     {
         public const int LONG_TAP_MIN_DURATION_IN_MILLISECONDS = 400;
 
         public SKFigureCanvasView? CanvasView { get; set; }
-        
+
         public ISKFigureGroupController? GroupController { get; set; }
 
         public string? GroupName { get; set; }
@@ -110,7 +110,7 @@ namespace HB.FullStack.Client.Maui.Skia
             canvas.Concat(ref Matrix);
 
             //draw
-            Draw(info, canvas);
+            OnDraw(info, canvas);
 
             //Update
             if (HitTestPathNeedUpdate)
@@ -122,108 +122,43 @@ namespace HB.FullStack.Client.Maui.Skia
             CaculateOutput();
         }
 
+        protected virtual void OnCanvasSizeChanged(SKSize oldCanvasSize, SKSize newCanvasSize)
+        {
+            OnDrawInfoIntialized();
+        }
+
         /// <summary>
-        /// 这里可以做一些需要根据CanvasSize初始化的一些工作
+        /// step 1:只有第一次，或者CanvasSize发生变化或者绘画要求发生变化才会调用。这里可以初始化一些不太变动的数据。
         /// </summary>
-        protected abstract void OnCanvasSizeChanged(SKSize oldCanvasSize, SKSize canvasSize);
-
-        protected virtual void Draw(SKImageInfo info, SKCanvas canvas) { }
-
-        protected virtual SKPath CaculateHitTestPath(SKImageInfo info) { return new SKPath(); }
-
-        protected virtual void CaculateOutput() { }
+        protected abstract void OnDrawInfoIntialized();
 
         /// <summary>
-        /// 时间对Matrix的影响
+        /// step 2: 时间对Matrix的影响
         /// </summary>
         protected virtual void CaculateMatrixByTime(long elapsedMilliseconds) { }
 
-        #region VisualState
+        /// <summary>
+        /// step 3: 绘制
+        /// </summary>
+        protected abstract void OnDraw(SKImageInfo info, SKCanvas canvas);
 
-        public FigureVisualState LastVisualState { get; protected set; } = FigureVisualState.None;
+        /// <summary>
+        /// step 4: 计算点击区域
+        /// </summary>
+        protected abstract SKPath CaculateHitTestPath(SKImageInfo info);
 
-        public FigureVisualState VisualState { get; protected set; } = FigureVisualState.None;
-
-        private void BindVisualStateChangeToEvents()
-        {
-            OneFingerDragged += (sender, e) =>
-            {
-                //最后一个Drag
-                if (e.IsOver)
-                {
-                    VisualState = LastVisualState;
-                    LastVisualState = FigureVisualState.Dragging;
-                    return;
-                }
-
-                //Drag中
-                if (VisualState == FigureVisualState.Dragging)
-                {
-                    return;
-                }
-
-                //第一个Drag
-                LastVisualState = VisualState;
-                VisualState = FigureVisualState.Dragging;
-            };
-
-            TwoFingerDragged += (sender, e) =>
-            {
-                //最后一个Drag
-                if (e.IsOver)
-                {
-                    VisualState = LastVisualState;
-                    LastVisualState = FigureVisualState.TwoFinglerDragging;
-                    return;
-                }
-
-                //Drag中
-                if (VisualState == FigureVisualState.TwoFinglerDragging)
-                {
-                    return;
-                }
-
-                //第一个Drag
-                LastVisualState = VisualState;
-                VisualState = FigureVisualState.TwoFinglerDragging;
-            };
-
-            Tapped += (sender, e) =>
-            {
-                LastVisualState = VisualState;
-                VisualState = VisualState == FigureVisualState.Tapped ? FigureVisualState.None : FigureVisualState.Tapped;
-            };
-
-            LongTapped += (sender, e) =>
-            {
-                LastVisualState = VisualState;
-                VisualState = FigureVisualState.LongTapped;
-            };
-
-            HitFailed += (sender, e) =>
-            {
-                if (GroupController != null)
-                {
-                    if (GroupController.EnableMultipleSelected)
-                    {
-                        return;
-                    }
-                }
-
-                VisualState = FigureVisualState.None;
-            };
-        }
-
-        #endregion
+        /// <summary>
+        /// step 5: 计算输出
+        /// </summary>
+        protected abstract void CaculateOutput();
 
         #region HitTest
 
         /// <summary>
-        /// 由Parent调用
+        /// 由Parent调用，重写以实现更复杂的点击效果，比如记录点击位置
         /// </summary>
         /// <param name="canvasPoint">原始坐标系下的点</param>
         /// <param name="fingerId">第几个指头</param>
-        /// <returns></returns>
         public virtual bool HitTest(SKPoint canvasPoint, long fingerId)
         {
             if (!EnableTouch)
@@ -245,19 +180,16 @@ namespace HB.FullStack.Client.Maui.Skia
             #endregion
 
             return IsHitted(mappedPoint);
-        }
 
-        /// <summary>
-        /// point已经经过当前坐标系和Matrix转化的点
-        /// </summary>
-        protected virtual bool IsHitted(SKPoint figurePoint)
-        {
-            if (HitTestPath.IsNullOrEmpty())
+            bool IsHitted(SKPoint figurePoint)
             {
-                return false;
-            }
+                if (HitTestPath.IsNullOrEmpty())
+                {
+                    return false;
+                }
 
-            return HitTestPath.Contains(figurePoint.X, figurePoint.Y);
+                return HitTestPath.Contains(figurePoint.X, figurePoint.Y);
+            }
         }
 
         #endregion
@@ -582,6 +514,105 @@ namespace HB.FullStack.Client.Maui.Skia
         public void OnHitFailed()
         {
             _weakEventManager.HandleEvent(this, EventArgs.Empty, nameof(HitFailed));
+        }
+
+        #endregion
+
+        #region VisualState
+
+        public FigureVisualState LastVisualState { get; protected set; } = FigureVisualState.None;
+
+        public FigureVisualState VisualState { get; internal set; } = FigureVisualState.None;
+
+        private void BindVisualStateChangeToEvents()
+        {
+            OneFingerDragged += (sender, e) =>
+            {
+                //最后一个Drag
+                if (e.IsOver)
+                {
+                    VisualState = LastVisualState;
+                    LastVisualState = FigureVisualState.Dragging;
+
+                    OnVisualStateChanged(LastVisualState, VisualState);
+
+                    return;
+                }
+
+                //Drag中
+                if (VisualState == FigureVisualState.Dragging)
+                {
+                    return;
+                }
+
+                //第一个Drag
+                LastVisualState = VisualState;
+                VisualState = FigureVisualState.Dragging;
+
+                OnVisualStateChanged(LastVisualState, VisualState);
+            };
+
+            TwoFingerDragged += (sender, e) =>
+            {
+                //最后一个Drag
+                if (e.IsOver)
+                {
+                    VisualState = LastVisualState;
+                    LastVisualState = FigureVisualState.TwoFinglerDragging;
+                    OnVisualStateChanged(LastVisualState, VisualState);
+                    return;
+                }
+
+                //Drag中
+                if (VisualState == FigureVisualState.TwoFinglerDragging)
+                {
+                    return;
+                }
+
+                //第一个Drag
+                LastVisualState = VisualState;
+                VisualState = FigureVisualState.TwoFinglerDragging;
+                OnVisualStateChanged(LastVisualState, VisualState);
+            };
+
+            Tapped += (sender, e) =>
+            {
+                LastVisualState = VisualState;
+                VisualState = VisualState == FigureVisualState.Tapped ? FigureVisualState.None : FigureVisualState.Tapped;
+                OnVisualStateChanged(LastVisualState, VisualState);
+            };
+
+            LongTapped += (sender, e) =>
+            {
+                LastVisualState = VisualState;
+                VisualState = FigureVisualState.LongTapped;
+                OnVisualStateChanged(LastVisualState, VisualState);
+            };
+
+            HitFailed += (sender, e) =>
+            {
+                if (GroupController != null)
+                {
+                    if (GroupController.EnableMultiple)
+                    {
+                        return;
+                    }
+                }
+
+                VisualState = FigureVisualState.None;
+
+                OnVisualStateChanged(LastVisualState, VisualState);
+            };
+        }
+
+        private void OnVisualStateChanged(FigureVisualState lastVisualState, FigureVisualState currentVisualState)
+        {
+            if (GroupController == null)
+            {
+                return;
+            }
+
+            GroupController.NotifyVisualStateChanged(this);
         }
 
         #endregion

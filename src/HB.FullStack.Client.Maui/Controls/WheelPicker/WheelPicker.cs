@@ -39,7 +39,7 @@ namespace HB.FullStack.Client.Maui.Controls
             typeof(double),
             typeof(WheelPicker),
             -1.0,
-            defaultValueCreator: bindable => Device.GetNamedSize(NamedSize.Default, (WheelPicker)bindable),
+            defaultValueCreator: bindable => 30,//Device.GetNamedSize(NamedSize.Default, (WheelPicker)bindable),
             coerceValue: CoerceFontSize);
 
         public double FontSize
@@ -52,7 +52,7 @@ namespace HB.FullStack.Client.Maui.Controls
         {
             if (value == null)
             {
-                return Device.GetNamedSize(NamedSize.Default, (WheelPicker)bindable);
+                return 30;//Device.GetNamedSize(NamedSize.Default, (WheelPicker)bindable);
             }
             return value;
         }

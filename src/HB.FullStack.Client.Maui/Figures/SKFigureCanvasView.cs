@@ -16,8 +16,9 @@ using HB.FullStack.Common;
 using SkiaSharp.Views.Maui;
 using Microsoft.Maui;
 using System.Diagnostics.CodeAnalysis;
+using HB.FullStack.Common.Figures;
 
-namespace HB.FullStack.Client.Maui.Skia
+namespace HB.FullStack.Client.Maui.Figures
 {
     internal enum InvalidateSurfaceType
     {
@@ -208,7 +209,7 @@ namespace HB.FullStack.Client.Maui.Skia
             {
                 return;
             }
-            
+
             foreach (var item in list)
             {
                 if (item is SKFigure figure)
@@ -216,7 +217,7 @@ namespace HB.FullStack.Client.Maui.Skia
                     //TODO: 我们需要在这里dispose figure吗，figure需要View来管理吗
                     //figure.Dispose();
 
-                    if(figure.GroupName.IsNotNullOrEmpty())
+                    if (figure.GroupName.IsNotNullOrEmpty())
                     {
                         RemoveFromGroup(figure.GroupName, figure);
                     }
@@ -452,14 +453,10 @@ namespace HB.FullStack.Client.Maui.Skia
 
         private Dictionary<string, List<SKFigure>> _groupFigures = new Dictionary<string, List<SKFigure>>();
 
-        public bool EnableMultipleSelected { get; set; }
-
-        public bool EnableMultipleLongSelected { get; set; }
-
-        public bool EnableUnSelectedByHitFailed { get; set; }
-
         public void AddToGroup(string groupName, SKFigure figure)
         {
+            figure.GroupName = groupName;
+
             if (_groupFigures.ContainsKey(groupName))
             {
                 _groupFigures[groupName].Add(figure);
@@ -478,6 +475,33 @@ namespace HB.FullStack.Client.Maui.Skia
             }
 
             _groupFigures[groupName].Remove(figure);
+        }
+
+        public bool EnableMultiple { get; set; }
+
+        public IEnumerable<SKFigure> GetFiguresByGroup(string groupName)
+        {
+            if (_groupFigures.TryGetValue(groupName, out List<SKFigure>? figures))
+            {
+                return figures;
+            }
+
+            return new List<SKFigure>();
+        }
+
+        public void SetGroupVisualState(string groupName, FigureVisualState visualState)
+        {
+            IEnumerable figures = GetFiguresByGroup(groupName);
+
+            foreach (SKFigure figure in figures)
+            {
+                figure.VisualState = visualState;
+            }
+        }
+
+        public void NotifyVisualStateChanged(SKFigure figure)
+        {
+            
         }
 
         #endregion
