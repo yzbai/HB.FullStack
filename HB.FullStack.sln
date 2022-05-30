@@ -55,13 +55,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.Tencent",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{AE389908-33C3-4113-BF55-A45C817AB4F1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.XamarinForms", "src\mobile\HB.FullStack.XamarinForms\HB.FullStack.XamarinForms.csproj", "{2FED6A70-F313-49E9-AB6B-FDBF8A33B999}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.XamarinForms", "src\mobile\HB.FullStack.XamarinForms\HB.FullStack.Client.XamarinForms.csproj", "{2FED6A70-F313-49E9-AB6B-FDBF8A33B999}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Database.ClientExtension", "src\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj", "{46D7CDE3-184F-44B6-8E2C-04270437E538}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.XamarinForms.Droid", "src\mobile\HB.FullStack.XamarinForms.Droid\HB.FullStack.XamarinForms.Droid.csproj", "{2C1A549F-2759-48C3-83E9-D527A09301B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Client.XamarinForms.Droid", "src\mobile\HB.FullStack.XamarinForms.Droid\HB.FullStack.Client.XamarinForms.Droid.csproj", "{2C1A549F-2759-48C3-83E9-D527A09301B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Database.ClientExtensionTests", "src\HB.FullStack.Database.ClientExtensionTests\HB.FullStack.Database.ClientExtensionTests.csproj", "{6E441FEC-D745-4668-9029-7A738E6C3D57}"
 EndProject
@@ -89,7 +89,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.WebApiTests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client", "src\HB.FullStack.Client\HB.FullStack.Client.csproj", "{B1740970-B195-40AE-8112-4035992DFD60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Client.Maui", "src\HB.FullStack.Client.Maui\HB.FullStack.Client.Maui.csproj", "{5EE361A0-F317-46E2-97D9-995204012206}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.Maui", "src\HB.FullStack.Client.Maui\HB.FullStack.Client.Maui.csproj", "{5EE361A0-F317-46E2-97D9-995204012206}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
