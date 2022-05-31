@@ -1,7 +1,10 @@
-﻿using HB.FullStack.Client.Maui.Controls;
+﻿using HB.FullStack.Client.Maui.Base;
+using HB.FullStack.Client.Maui.Controls;
 using HB.FullStack.Client.Maui.File;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Maui.Hosting;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -10,23 +13,19 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Maui.Hosting
 {
     public static class FullStackMauiServiceRegister
     {
         public static MauiAppBuilder UseFullStack(this MauiAppBuilder builder, Action<FileManagerOptions> fileManagerOptionConfig, string tCaptchaAppId)
         {
-            #region Services
-            
             IServiceCollection services = builder.Services;
 
-            //add skiasharp
+            //Skiasharp
             builder.UseSkiaSharp();
 
-
+            //Options
             services.AddOptions();
-
-
 
             //HB.FullStack.Client
             services.AddKVManager();
@@ -38,11 +37,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddNetworkManager();
             services.AddTCaptcha(tCaptchaAppId);
 
-            #endregion
+            //Initializers
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeService, BaseInitializeService>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeScopedService, BaseInitalizeScopedService>());
 
+            //Handlers
             builder.ConfigureMauiHandlers(handlers => {
                 handlers.AddHandler<HybridWebView, HybridWebViewHandler>();
             });
+
             return builder;
         }
 

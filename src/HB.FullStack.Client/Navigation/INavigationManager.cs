@@ -11,7 +11,7 @@ namespace HB.FullStack.Client
         /// This must be set in each implementation manually, as we can't
         /// have a true static be used in the implementation.
         /// </summary>
-        public static INavigationManager? Current { get; set; }
+        public static INavigationManager Current { get; set; } = null!;
 
         Task GotoAsync(string uri, bool animated = false);
 
