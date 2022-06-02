@@ -21,7 +21,7 @@ namespace HB.FullStack.Client
 
         Task PushAsync(string pageFullName, bool animated = false);
 
-        Task PushAsync(BaseViewModel baseViewModel, bool animated = false);
+        Task PushAsync(IBaseViewModel baseViewModel, bool animated = false);
 
         Task PushAsync(object page, bool animated = false);
 
@@ -29,7 +29,7 @@ namespace HB.FullStack.Client
 
         Task PushModalAsync(string pageFullName, bool animated = false);
 
-        Task PushModalAsync(BaseViewModel baseViewModel, bool animated = false);
+        Task PushModalAsync(IBaseViewModel baseViewModel, bool animated = false);
 
         Task PushModalAsync(object page, bool animated = false);
 

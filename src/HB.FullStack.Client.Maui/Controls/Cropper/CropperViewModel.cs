@@ -1,6 +1,10 @@
-﻿using HB.FullStack.Client.Maui.Figures;
+﻿using AsyncAwaitBestPractices.MVVM;
+
+using HB.FullStack.Client.Maui.Base;
+using HB.FullStack.Client.Maui.Figures;
 using HB.FullStack.Common;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -14,14 +18,24 @@ using System.Windows.Input;
 
 namespace HB.FullStack.Client.Maui.Controls.Cropper
 {
-    [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "已在Disappear中Dispose")]
+    [QueryProperty(nameof(ImageFullPath), nameof(ImageFullPath))]
+    [QueryProperty(nameof(CroppedImageFullPath), nameof(CroppedImageFullPath))]
     public class CropperViewModel : BaseViewModel
     {
-        private readonly string _imageFullPath;
-        private readonly string _croppedImageFullPath;
-        private readonly Action<bool> _onCroppFinish;
+
+        //private readonly Action<bool> _onCroppFinish;
         private CropperFrameFigure? _cropperFrameFigure;
         private BitmapFigure? _bitmapFigure;
+
+        /// <summary>
+        /// 本地原始图片路径
+        /// </summary>
+        public string? ImageFullPath { get; set; }
+
+        /// <summary>
+        /// 剪切后的存储位置
+        /// </summary>
+        public string? CroppedImageFullPath { get; set; }
 
         public ICommand RotateCommand { get; }
 
@@ -33,32 +47,22 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        /// <summary>
-        /// CropperViewModel
-        /// </summary>
-        /// <param name="originalImageFullPath">本地原始图片路径</param>
-        /// <param name="croppedImageFullPath">剪切后的存储位置</param>
-        /// <param name="onCroppFinish"></param>
-        public CropperViewModel(string originalImageFullPath, string croppedImageFullPath, Action<bool> onCroppFinish)
+        public CropperViewModel(ILogger<CropperViewModel> logger/*string originalImageFullPath, string croppedImageFullPath, Action<bool> onCroppFinish*/) : base(logger)
         {
-            _imageFullPath = originalImageFullPath;
-            _croppedImageFullPath = croppedImageFullPath;
-            _onCroppFinish = onCroppFinish;
-
-            CropCommand = new AsyncRelayCommand(CropAsync);
+            CropCommand = new AsyncCommand(CropAsync);
             RotateCommand = new Command(Rotate);
-            CancelCommand = new AsyncRelayCommand(CancelAsync);
+            CancelCommand = new AsyncCommand(CancelAsync);
             ResetCommand = new Command(Reset);
         }
 
         public override Task OnPageAppearingAsync()
         {
             IsBusy = true;
-            
+
             ResumeFigures();
-            
+
             IsBusy = false;
-            
+
             return base.OnPageAppearingAsync();
         }
 
@@ -70,7 +74,7 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
         private void ResumeFigures()
         {
-            using FileStream stream = new FileStream(_imageFullPath, FileMode.Open);
+            using FileStream stream = new FileStream(ImageFullPath, FileMode.Open);
 
             _bitmapFigure = new BitmapFigure(0.9f, 0.9f, stream)
             {
@@ -111,11 +115,11 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
             using SKBitmap croppedBitmap = _bitmapFigure.Crop(_cropperFrameFigure.CropRect);
 
-            bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath).ConfigureAwait(false);
+            bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, CroppedImageFullPath).ConfigureAwait(false);
 
-            _onCroppFinish(isSucceed);
+            //_onCroppFinish(isSucceed);
 
-            await INavigationManager.Current!.GoBackAsync().ConfigureAwait(false);
+            await INavigationManager.Current.GotoAsync($"..?IsCropSucceed={isSucceed}").ConfigureAwait(false);
         }
 
         private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPathToSave)

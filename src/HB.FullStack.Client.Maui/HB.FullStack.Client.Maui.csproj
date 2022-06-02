@@ -49,6 +49,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="1.0.0" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
@@ -65,9 +66,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Base\BaseModal.xaml.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
-	  </Compile>
 	  <Compile Update="Controls\Chip.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
@@ -83,10 +81,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Base\BaseModal.xaml">
+	  <MauiXaml Update="Controls\Cropper\CropperPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Controls\Cropper\CropperPage.xaml">
+	  <MauiXaml Update="Controls\Popups\ExceptionPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\TimeEditor.xaml">

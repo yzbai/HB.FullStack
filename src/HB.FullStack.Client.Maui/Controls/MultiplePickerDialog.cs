@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Markup;
+using CommunityToolkit.Maui.Views;
 
 using HB.FullStack.Client.Maui.Base;
 
@@ -10,7 +11,7 @@ using System.Windows.Input;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class MultiplePickerDialog : BaseModal
+    public class MultiplePickerDialog : Popup
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
             nameof(ItemsSource),
@@ -53,7 +54,7 @@ namespace HB.FullStack.Client.Maui.Controls
 
         private readonly MultipleListPicker _multipleListPicker;
 
-        public MultiplePickerDialog() : base(null)
+        public MultiplePickerDialog()
         {
             Content = new StackLayout
             {

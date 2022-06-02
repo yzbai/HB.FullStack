@@ -1,19 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Dispatching;
 
-using HB.FullStack.Client.File;
-using HB.FullStack.Client.Network;
-
-using Microsoft;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Hosting;
+using System;
 
 namespace HB.FullStack.Client.Maui.Base
 {
@@ -21,7 +9,65 @@ namespace HB.FullStack.Client.Maui.Base
     {
         public new static BaseApplication Current => (BaseApplication?)Application.Current!;
 
-        public abstract void OnOfflineDataUsed();
-        
+        public static Page CurrentPage
+        {
+            get
+            {
+                if (Shell.Current != null)
+                {
+                    return Shell.Current.CurrentPage;
+                }
+
+                if (Application.Current?.MainPage?.Navigation.ModalStack.Count > 0)
+                {
+                    return Application.Current.MainPage.Navigation.ModalStack[0];
+                }
+
+                if (Application.Current?.MainPage?.Navigation.NavigationStack.Count > 0)
+                {
+                    return Application.Current.MainPage.Navigation.NavigationStack[0];
+                }
+
+                return Application.Current!.MainPage!;
+            }
+        }
+
+        public static IDispatcher CurrentDispatcher => CurrentPage.Dispatcher;
+
+        #region Lifecycle
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            SubscribeMessages();
+        }
+
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+            UnSubscribeMessages();
+        }
+
+        #endregion
+
+        #region Messaging
+
+        private void SubscribeMessages()
+        {
+            MessagingCenter.Subscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName, OnExceptionDisplayRequested);
+        }
+
+        private void UnSubscribeMessages()
+        {
+            MessagingCenter.Unsubscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName);
+        }
+
+        private async void OnExceptionDisplayRequested(BaseViewModel viewModel, ExceptionDisplayArguments arg)
+        {
+            await CurrentPage.DisplayAlert("Exception", arg.Message, "OK").ConfigureAwait(false);
+        }
+
+        #endregion
     }
 }

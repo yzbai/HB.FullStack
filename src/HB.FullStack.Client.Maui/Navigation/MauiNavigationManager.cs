@@ -65,12 +65,12 @@ namespace HB.FullStack.Client.Maui
             await Shell.Current.Navigation.PushModalAsync(page, animated).ConfigureAwait(false);
         }
 
-        public Task PushAsync(BaseViewModel baseViewModel, bool animated = false)
+        public Task PushAsync(IBaseViewModel baseViewModel, bool animated = false)
         {
             throw new NotImplementedException();
         }
 
-        public Task PushModalAsync(BaseViewModel baseViewModel, bool animated = false)
+        public Task PushModalAsync(IBaseViewModel baseViewModel, bool animated = false)
         {
             throw new NotImplementedException();
         }

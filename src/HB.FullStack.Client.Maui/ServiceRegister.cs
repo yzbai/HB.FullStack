@@ -1,5 +1,7 @@
 ﻿using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.Controls;
+using HB.FullStack.Client.Maui.Controls.Cropper;
+using HB.FullStack.Client.Maui.Controls.Popups;
 using HB.FullStack.Client.Maui.File;
 
 using Microsoft.Extensions.Configuration;
@@ -45,6 +47,11 @@ namespace Microsoft.Maui.Hosting
             builder.ConfigureMauiHandlers(handlers => {
                 handlers.AddHandler<HybridWebView, HybridWebViewHandler>();
             });
+
+            //controlers
+            services.AddSingleton<PopupSizeConstants>();
+
+            services.AddTransient<CropperViewModel>();
 
             return builder;
         }

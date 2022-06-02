@@ -5,13 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Client.Maui.Controls.Cropper
 {
-    
+
     public partial class CropperPage : BaseContentPage
     {
-        public CropperPage(string imageFullPath, string croppedImageFullPath, Action<bool> onCroppFinish) 
-            : base(new CropperViewModel(imageFullPath, croppedImageFullPath, onCroppFinish))
+        public CropperPage(CropperViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
-        }        
+        }
     }
 }

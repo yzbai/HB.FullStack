@@ -1,4 +1,6 @@
-﻿using HB.FullStack.Client.Maui.Base;
+﻿using CommunityToolkit.Maui.Views;
+
+using HB.FullStack.Client.Maui.Base;
 
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
@@ -10,7 +12,7 @@ using System.Linq;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class WebViewDialog : BaseModal
+    public class WebViewDialog : Popup
     {
         private readonly HybridWebView _hybridWebView;
         private readonly ActivityIndicator _indicator;
@@ -21,7 +23,7 @@ namespace HB.FullStack.Client.Maui.Controls
             set { _hybridWebView.Source = value; }
         }
 
-        public WebViewDialog() : base(null)
+        public WebViewDialog()
         {
             _indicator = new ActivityIndicator() { VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Fill };
             _indicator.BindingContext = this;
@@ -29,8 +31,8 @@ namespace HB.FullStack.Client.Maui.Controls
 
             _hybridWebView = new HybridWebView() { HeightRequest = 400 };
 
-            _hybridWebView.Navigating += (sender, e) => { IsBusy = true; };
-            _hybridWebView.Navigated += (sender, e) => { IsBusy = false; };
+            //_hybridWebView.Navigating += (sender, e) => { IsBusy = true; };
+            //_hybridWebView.Navigated += (sender, e) => { IsBusy = false; };
 
 
             Button retButton = new Button

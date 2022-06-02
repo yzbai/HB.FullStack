@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HB.FullStack.Client.Maui.Base
+namespace HB.FullStack.Client
 {
     public interface IBaseContentView
     {
