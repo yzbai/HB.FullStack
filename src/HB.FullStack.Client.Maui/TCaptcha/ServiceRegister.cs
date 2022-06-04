@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddTCaptcha(this IServiceCollection services, string appid)
         {
-            TCaptchaDialog.AppId = appid;
+            TCaptchaPopup.AppId = appid;
 
             return services;
         }

@@ -75,7 +75,7 @@
 	  <Compile Update="Controls\TimeEditor.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
-	  <Compile Update="TCaptcha\TCaptchaDialog.cs">
+	  <Compile Update="TCaptcha\TCaptchaPopup.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	</ItemGroup>

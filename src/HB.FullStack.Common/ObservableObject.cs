@@ -13,7 +13,7 @@ namespace HB.FullStack.Common
 	/// <summary>
 	/// Observable object with INotifyPropertyChanged implemented using WeakEventManager
 	/// </summary>
-	public abstract class ObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
+	public abstract class ObservableObject2 : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		readonly WeakEventManager _weakEventManager = new WeakEventManager();
 

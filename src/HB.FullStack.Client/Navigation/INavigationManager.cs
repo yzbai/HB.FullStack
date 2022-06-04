@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Client.Navigation
 {
     public interface INavigationManager
     {

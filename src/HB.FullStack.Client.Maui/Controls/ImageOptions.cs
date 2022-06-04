@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Markup;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Common;

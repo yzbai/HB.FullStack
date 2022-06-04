@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using CommunityToolkit.Maui.Views;
+
 using HB.FullStack.Client;
+using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.TCaptcha;
+using HB.FullStack.Client.Navigation;
 using HB.FullStack.Common.Api;
 
 using Microsoft.Maui.Controls;
@@ -11,38 +15,22 @@ namespace HB.FullStack.Common.ApiClient
 {
     public static class ApiClientTCaptchaExtensions
     {
-        public static async Task GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest request, Func<T?, Task>? onSuccessDelegate) where T : ApiResource2
+        public static async Task<T?> GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest request) where T : ApiResource2
         {
             try
             {
-                T? resource = await apiClient.GetAsync<T>(request).ConfigureAwait(false);
+                return await apiClient.GetAsync<T>(request).ConfigureAwait(false);
 
-                if (onSuccessDelegate != null)
-                {
-                    await onSuccessDelegate(resource).ConfigureAwait(false);
-                }
             }
             catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.CapthcaNotFound)
             {
-                TCaptchaDialog dialog = new TCaptchaDialog(async (result) =>
-                {
-                    if (result.IsNullOrEmpty())
-                    {
-                        GlobalSettings.ExceptionHandler.Invoke(new ApiException(ApiErrorCodes.ApiCapthaError));
-                        return;
-                    }
+                TCaptchaPopup popup = new TCaptchaPopup();
 
-                    request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, result);
+                var captcha = await popup.ShowAsync().ConfigureAwait(false);
 
-                    T? resource = await apiClient.GetAsync<T>(request).ConfigureAwait(false);
+                request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, captcha!.ToString()!);
 
-                    if (onSuccessDelegate != null)
-                    {
-                        await onSuccessDelegate(resource).ConfigureAwait(false);
-                    }
-                });
-
-               await INavigationManager.Current!.PushModalAsync(dialog, false).ConfigureAwait(false);
+                return await apiClient.GetAsync<T>(request).ConfigureAwait(false);
             }
         }
     }

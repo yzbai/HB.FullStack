@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System;
+using HB.FullStack.Client.Navigation;
 
 namespace HB.FullStack.Client.Maui
 {

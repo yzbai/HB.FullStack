@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Maui.Markup;
+﻿using AsyncAwaitBestPractices;
+
+using CommunityToolkit.Maui.Markup;
 
 using HB.FullStack.Client.Maui.Fonts;
 
@@ -164,7 +166,7 @@ namespace HB.FullStack.Client.Maui.Controls
 
         private void TapGestureRecognizer_Tapped(object? sender, EventArgs e)
         {
-            DisplayActionSheetAndExecuteAsync().Fire();
+            DisplayActionSheetAndExecuteAsync().SafeFireAndForget();
         }
 
         private async Task DisplayActionSheetAndExecuteAsync()

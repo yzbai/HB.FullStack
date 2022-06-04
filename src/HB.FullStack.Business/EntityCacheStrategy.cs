@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Cache;
 using HB.FullStack.Common;
 using HB.FullStack.Database;
@@ -102,12 +104,6 @@ namespace HB.FullStack.Repository
 
         }
 
-        /// <summary>
-        /// UpdateCache
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="cache"></param>
-
         private static void UpdateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             #region 普通缓存，加锁的做法
@@ -135,25 +131,24 @@ namespace HB.FullStack.Repository
 
             #region 有版本控制的Cache. 就一句话，爽不爽
 
-            cache.SetEntitiesAsync(entities).Fire();
+            cache.SetEntitiesAsync(entities).SafeFireAndForget(OnException);
 
             #endregion
 
         }
 
-        /// <summary>
-        /// InvalidateCache
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="cache"></param>
-
         public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             if (cache.IsEntityEnabled<TEntity>())
             {
-                cache.RemoveEntitiesAsync(entities).Fire();
+                cache.RemoveEntitiesAsync(entities).SafeFireAndForget(OnException);
             }
         }
 
+        private static void OnException(Exception ex)
+        {
+            //TODO: 是否要停用缓存？停机等等。
+            GlobalSettings.Logger.LogCritical(ex, "EntityCacheStrategy 中缓存Update或者Invalidate出错，Cache中可能出现脏数据/旧数据.请重建缓存或其他操作");
+        }
     }
 }

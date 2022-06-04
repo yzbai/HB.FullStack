@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Identity;
 
 using Microsoft.AspNetCore.Http.Extensions;
@@ -31,7 +33,7 @@ namespace HB.FullStack.WebApi.Filters
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
                 string? httpMethod = context.HttpContext?.Request?.Method;
-                
+
                 SerializeUtil.TryToJson(context.ActionArguments, out string? arguments);
 
                 ActionExecutedContext? resultContext = await next().ConfigureAwait(true);
@@ -59,7 +61,12 @@ namespace HB.FullStack.WebApi.Filters
                     }
                 }
 
-                _identityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode).Fire();
+                _identityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode)
+                    .SafeFireAndForget(ex =>
+                    {
+                        //TODO:错误处理？
+                        _logger.LogError(ex, $"{nameof(_identityService.RecordUserActivityAsync)} 在 {nameof(UserActivityFilter)} 中调用出错。");
+                    });
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)

@@ -350,11 +350,11 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         {
             _consumeTask = CosumeAsync(_consumeTaskCTS.Token);
 
-            _consumeTask.Fire();
+            _consumeTask.SafeFireAndForget();
 
             _historyTask = ScanHistoryAsync(_historyTaskCTS.Token);
 
-            _historyTask.Fire();
+            _historyTask.SafeFireAndForget();
         }
 
         #region IDisposable Support

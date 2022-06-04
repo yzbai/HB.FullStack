@@ -1,4 +1,5 @@
-﻿//#nullable disable
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ namespace HB.FullStack.Common
     /// <summary>
     /// 这是一个Bindable 的Task，可以让空间binding 这个task，等task完成后，更新结果。
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
     public sealed class ObservableTask<TResult> : ObservableObject
     {
         public TResult? InitialResult { get; private set; }
@@ -112,4 +112,3 @@ namespace HB.FullStack.Common
         }
     }
 }
-//

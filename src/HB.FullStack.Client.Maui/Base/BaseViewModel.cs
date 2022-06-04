@@ -1,39 +1,24 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-
-using HB.FullStack.Common;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Dispatching;
 
 namespace HB.FullStack.Client.Maui.Base
 {
-    public abstract class BaseViewModel : ObservableObject, IBaseViewModel
+    public abstract partial class BaseViewModel : ObservableObject, IBaseViewModel
     {
         public const string ExceptionDisplaySignalName = "HB.FullStack.Client.Maui.ExceptionDisplay";
         public ILogger Logger { get; }
 
+        [ObservableProperty]
         private bool _isBusy;
 
-        public bool IsBusy
-        {
-            get => _isBusy;
-            set => SetProperty(ref _isBusy, value);
-        }
-
+        [ObservableProperty]
         private string _title = string.Empty;
-
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
 
         protected BaseViewModel(ILogger? logger = null)
         {
@@ -55,8 +40,6 @@ namespace HB.FullStack.Client.Maui.Base
         {
             return Task.CompletedTask;
         }
-
-        public IDispatcher Dispatcher => BaseApplication.CurrentDispatcher;
 
         #region Exception Handle
 

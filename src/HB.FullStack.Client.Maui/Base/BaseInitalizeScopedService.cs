@@ -1,5 +1,7 @@
 ﻿using System;
 
+using HB.FullStack.Client.Navigation;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Hosting;
 

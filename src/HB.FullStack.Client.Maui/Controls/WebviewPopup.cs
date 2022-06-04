@@ -1,18 +1,14 @@
 ﻿using CommunityToolkit.Maui.Views;
 
-using HB.FullStack.Client.Maui.Base;
+using HB.FullStack.Client.Navigation;
 
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Layouts;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class WebViewDialog : Popup
+    public class WebviewPopup : Popup
     {
         private readonly HybridWebView _hybridWebView;
         private readonly ActivityIndicator _indicator;
@@ -23,7 +19,7 @@ namespace HB.FullStack.Client.Maui.Controls
             set { _hybridWebView.Source = value; }
         }
 
-        public WebViewDialog()
+        public WebviewPopup()
         {
             _indicator = new ActivityIndicator() { VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Fill };
             _indicator.BindingContext = this;

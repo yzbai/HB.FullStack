@@ -10,6 +10,7 @@ using System.Text.Json;
 using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 using HB.FullStack.Common.Server;
 using HB.FullStack.Cache;
+using AsyncAwaitBestPractices;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
@@ -137,7 +138,11 @@ namespace HB.Infrastructure.Aliyun.Sms
                         new DistributedCacheEntryOptions()
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
-                        }).Fire();
+                        })
+                .SafeFireAndForget(ex =>
+                {
+                    _logger.LogCritical(ex, "Aliyun Sms 服务在使用缓存时出错，有可能缓存不可用。");
+                });
         }
 
         private Task<string?> GetSmsCodeFromCacheAsync(string mobile)

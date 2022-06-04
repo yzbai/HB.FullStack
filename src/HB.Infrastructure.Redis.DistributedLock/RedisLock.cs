@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Lock;
 using HB.FullStack.Lock.Distributed;
 
@@ -82,7 +84,8 @@ namespace HB.Infrastructure.Redis.DistributedLock
             {
                 if (disposing)
                 {
-                    SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
+                    SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger)
+                        .SafeFireAndForget(ex => _logger.LogError(ex, "在Dispose中释放Resource失败。"));
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

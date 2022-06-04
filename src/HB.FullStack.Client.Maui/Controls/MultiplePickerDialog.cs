@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui.Views;
 
 using HB.FullStack.Client.Maui.Base;
+using HB.FullStack.Client.Navigation;
 
 using Microsoft.Maui.Controls;
 

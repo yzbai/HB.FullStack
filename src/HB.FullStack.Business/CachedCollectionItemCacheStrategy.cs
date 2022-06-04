@@ -6,9 +6,8 @@ using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using AsyncAwaitBestPractices;
 
 namespace HB.FullStack.Repository
 {
@@ -19,6 +18,7 @@ namespace HB.FullStack.Repository
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
             where TResult : class
         {
+
             //Cache First
             TResult? result = await cache.GetAsync(cacheCollectionItem).ConfigureAwait(false);
 
@@ -66,22 +66,28 @@ namespace HB.FullStack.Repository
 
         public static void InvalidateCache(CachedCollectionItem cachedCollectionItem, ICache cache)
         {
-            cache.RemoveAsync(cachedCollectionItem).Fire();
+            cache.RemoveAsync(cachedCollectionItem).SafeFireAndForget(OnException);
         }
 
         private static void UpdateCache<TResult>(CachedCollectionItem<TResult> cachedItem, ICache cache) where TResult : class
         {
-            cache.SetAsync(cachedItem).Fire();
+            cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
         internal static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, ICache cache)
         {
-            cache.RemoveAsync(cachedCollectionItems).Fire();
+            cache.RemoveAsync(cachedCollectionItems).SafeFireAndForget(OnException);
         }
 
         public static void InvalidateCacheCollection(string collectionKey, ICache cache)
         {
-            cache.RemoveCollectionAsync(collectionKey).Fire();
+            cache.RemoveCollectionAsync(collectionKey).SafeFireAndForget(OnException);
+        }
+
+        private static void OnException(Exception ex)
+        {
+            //TODO: 是否要停用缓存？停机等等。
+            GlobalSettings.Logger.LogCritical(ex, "CachedCollectionItemCacheStrategy中缓存Update或者Invalidate出错，Cache中可能出现脏数据/旧数据.请重建缓存或其他操作");
         }
     }
 }

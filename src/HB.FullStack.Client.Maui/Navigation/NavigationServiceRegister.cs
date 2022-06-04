@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Client;
 using HB.FullStack.Client.Maui;
+using HB.FullStack.Client.Navigation;
 
 using System;
 using System.Collections.Generic;

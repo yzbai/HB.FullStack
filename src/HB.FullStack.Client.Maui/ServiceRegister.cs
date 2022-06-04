@@ -51,7 +51,6 @@ namespace Microsoft.Maui.Hosting
             //controlers
             services.AddSingleton<PopupSizeConstants>();
 
-            services.AddTransient<CropperViewModel>();
 
             return builder;
         }
