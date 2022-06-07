@@ -7,22 +7,20 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client.Maui.Utils;
 
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.Maui.Base
 {
-    public abstract class BaseContentPage<TViewModel> : BaseContentPage where TViewModel : BaseViewModel
+    public abstract class BasePage<TViewModel> : BasePage where TViewModel : BaseViewModel
     {
-        protected BaseContentPage(TViewModel viewModel) : base(viewModel)
-        {
-        }
+        protected BasePage() : base(Currents.Services.GetRequiredService<TViewModel>()) { }
 
         public new TViewModel ViewModel => (TViewModel)base.ViewModel!;
     }
 
-    public abstract class BaseContentPage : ContentPage
+    public abstract class BasePage : ContentPage
     {
         public BaseViewModel? ViewModel { get; protected set; }
 
@@ -32,7 +30,7 @@ namespace HB.FullStack.Client.Maui.Base
         /// </summary>
         private List<Task> _pendingTasks = new List<Task>();
 
-        protected BaseContentPage(BaseViewModel? viewModel)
+        protected BasePage(BaseViewModel? viewModel)
         {
             if (Application.Current != null && Application.Current.Resources.TryGetValue("BaseContentPageControlTemplate", out object controlTemplate))
             {
@@ -40,6 +38,8 @@ namespace HB.FullStack.Client.Maui.Base
             }
 
             BindingContext = ViewModel = viewModel;
+
+            this.SetBinding(TitleProperty, nameof(IBaseViewModel.Title));
         }
 
         protected override void OnAppearing()
@@ -87,7 +87,8 @@ namespace HB.FullStack.Client.Maui.Base
             base.OnDisappearing();
         }
 
-        public IList<IBaseContentView>? CustomerControls { get; protected set; }
+        //TODO: 使用SourceGeneration代替
+        public IList<IBaseContentView> CustomerControls { get; } = new List<IBaseContentView>();
 
         #region Back Button
 

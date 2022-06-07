@@ -11,7 +11,7 @@ using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class SingleListPicker : BaseContentView
+    public class SingleListPicker : BaseView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
             nameof(ItemsSource),

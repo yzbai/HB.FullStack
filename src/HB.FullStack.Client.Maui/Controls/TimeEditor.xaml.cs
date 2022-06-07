@@ -7,7 +7,7 @@ using System;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public partial class TimeEditor : BaseContentView
+    public partial class TimeEditor : BaseView
     {
         public static readonly BindableProperty IsDisplay24HourFormatProperty = BindableProperty.Create(nameof(IsDisplay24HourFormat), typeof(bool), typeof(TimeEditor), false, propertyChanged: (b, o, n) => ((TimeEditor)b).OnIsDisplay24HourFormatChanged((bool)o, (bool)n));
         public static readonly BindableProperty TimeProperty = BindableProperty.Create(nameof(Time), typeof(Time24Hour), typeof(TimeEditor), propertyChanged: (b, o, n) => ((TimeEditor)b).OnTimeChanged((Time24Hour)o, (Time24Hour)n));

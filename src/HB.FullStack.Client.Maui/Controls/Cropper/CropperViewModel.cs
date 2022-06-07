@@ -16,6 +16,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using HB.FullStack.Client.Navigation;
+using System.Collections.Generic;
 
 namespace HB.FullStack.Client.Maui.Controls.Cropper
 {
@@ -24,7 +25,6 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
     {
         private readonly string _imageFullPath;
         private readonly string _croppedImageFullPath;
-        private readonly Action<bool> _onSucceed;
 
         private CropperFrameFigure? _cropperFrameFigure;
         private BitmapFigure? _bitmapFigure;
@@ -45,11 +45,10 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
         /// <param name="imageFullPath">本地原始图片路径</param>
         /// <param name="croppedImageFullPath">剪切后的存储位置</param>
         /// <param name="onSucceed"></param>
-        public CropperViewModel(string imageFullPath, string croppedImageFullPath, Action<bool> onSucceed)
+        public CropperViewModel(string imageFullPath, string croppedImageFullPath)
         {
             _imageFullPath = imageFullPath;
             _croppedImageFullPath = croppedImageFullPath;
-            _onSucceed = onSucceed;
 
             CropCommand = new AsyncCommand(CropAsync);
             RotateCommand = new Command(Rotate);
@@ -65,13 +64,13 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
             IsBusy = false;
 
-            return base.OnPageAppearingAsync();
+            return Task.CompletedTask;
         }
 
         public override Task OnPageDisappearingAsync()
         {
             RemoveFigures();
-            return base.OnPageDisappearingAsync();
+            return Task.CompletedTask;
         }
 
         private void ResumeFigures()
@@ -119,9 +118,7 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
             bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath).ConfigureAwait(false);
 
-            _onSucceed(isSucceed);
-
-            await INavigationManager.Current.GoBackAsync().ConfigureAwait(false);
+            await INavigationManager.Current.GoBackAsync(new Dictionary<string, object?> { { CropperPage.Query_CroppedSucceed, isSucceed } }).ConfigureAwait(false);
         }
 
         private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPathToSave)

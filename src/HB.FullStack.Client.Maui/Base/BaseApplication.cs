@@ -33,17 +33,14 @@ namespace HB.FullStack.Client.Maui.Base
 
         private void SubscribeMessages()
         {
-            MessagingCenter.Subscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName, OnExceptionDisplayRequested);
+            //MessagingCenter.Subscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName, OnExceptionDisplayRequested);
+            throw new NotImplementedException();
         }
 
         private void UnSubscribeMessages()
         {
-            MessagingCenter.Unsubscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName);
-        }
-
-        private async void OnExceptionDisplayRequested(BaseViewModel viewModel, ExceptionDisplayArguments arg)
-        {
-            await Currents.Page.DisplayAlert("Exception", arg.Message, "OK").ConfigureAwait(false);
+            //MessagingCenter.Unsubscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName);
+            throw new NotImplementedException();
         }
 
         #endregion

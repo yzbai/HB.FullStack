@@ -11,7 +11,7 @@ using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class MultipleListPicker : BaseContentView
+    public class MultipleListPicker : BaseView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
             nameof(ItemsSource),

@@ -8,10 +8,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Client.Maui.Controls.Cropper
 {
-    public partial class CropperPage : BaseContentPage
+    /// <summary>
+    /// 通过 Navigation 返回 IsSucceed
+    /// </summary>
+    public partial class CropperPage : BasePage
     {
-        public CropperPage(string imageFullPath, string croppedImageFullPath, Action<bool> onSucceed) 
-            : base(new CropperViewModel(imageFullPath, croppedImageFullPath, onSucceed))
+        public const string Query_CroppedSucceed = "CroppedSucceed";
+
+        public CropperPage(string imageFullPath, string croppedImageFullPath) 
+            : base(new CropperViewModel(imageFullPath, croppedImageFullPath))
         {
             InitializeComponent();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Maui.Views;
@@ -15,11 +16,11 @@ namespace HB.FullStack.Common.ApiClient
 {
     public static class ApiClientTCaptchaExtensions
     {
-        public static async Task<T?> GetSingleWithTCaptchaCheckedAsync<T>(this IApiClient apiClient, ApiRequest request) where T : ApiResource2
+        public static async Task<T?> GetWithTCaptchaCheckAsync<T>(this IApiClient apiClient, ApiRequest request, CancellationToken? cancellationToken = null) where T : ApiResource2
         {
             try
             {
-                return await apiClient.GetAsync<T>(request).ConfigureAwait(false);
+                return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
             }
             catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.CapthcaNotFound)
@@ -30,7 +31,7 @@ namespace HB.FullStack.Common.ApiClient
 
                 request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, captcha!.ToString()!);
 
-                return await apiClient.GetAsync<T>(request).ConfigureAwait(false);
+                return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
             }
         }
     }

@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class CardStackView : BaseContentView
+    public class CardStackView : BaseView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList), typeof(CardStackView), propertyChanged: (b, o, n) => { ((CardStackView)b).OnItemsSourceChanged((IList)o, (IList)n); });
 

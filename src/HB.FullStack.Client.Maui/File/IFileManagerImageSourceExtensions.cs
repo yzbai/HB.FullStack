@@ -7,7 +7,7 @@ using HB.FullStack.Common;
 
 using Microsoft.Maui.Controls;
 
-namespace HB.FullStack.Client.Maui.File
+namespace System
 {
     public static class IFileManagerImageSourceExtensions
     {

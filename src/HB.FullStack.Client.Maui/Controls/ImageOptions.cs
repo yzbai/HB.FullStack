@@ -42,7 +42,7 @@ namespace HB.FullStack.Client.Maui.Controls
     /// <summary>
     /// 单选图形列表
     /// </summary>
-    public class ImageOptions : BaseContentView
+    public class ImageOptions : BaseView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList<ImageOptionItem>), typeof(ImageOptions), propertyChanged: (b, o, n) => ((ImageOptions)b).OnItemsSourceChanged());
         public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(ImageOptions), -1, BindingMode.TwoWay, propertyChanged: (b, o, n) => ((ImageOptions)b).OnSelectedIndexChanged());

@@ -3,8 +3,6 @@
 using Microsoft.Maui.Controls;
 using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Maui.Views;
-using HB.FullStack.Client.Maui.Controls.Popups;
-using HB.FullStack.Client.Maui.Base;
 using System;
 
 namespace HB.FullStack.Client.Maui.TCaptcha
@@ -31,8 +29,6 @@ namespace HB.FullStack.Client.Maui.TCaptcha
 
         private readonly HybridWebView _webView;
 
-        
-
         public TCaptchaPopup()
         {
             CanBeDismissedByTappingOutsideOfPopup = false;
@@ -49,7 +45,7 @@ namespace HB.FullStack.Client.Maui.TCaptcha
             _webView.OnJavascriptCallCommand = new Command(json => { Close(json?.ToString()); });
 
 
-            Size = Current.PopupSizeConstants.Large;
+            Size = Currents.PopupSizeConstants.Large;
         }
     }
 }

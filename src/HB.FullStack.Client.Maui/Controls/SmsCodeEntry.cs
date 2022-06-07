@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class SmsCodeEntry : BaseContentView
+    public class SmsCodeEntry : BaseView
     {
         public static readonly BindableProperty CodeCountProperty = BindableProperty.Create(nameof(CodeCount), typeof(int), typeof(SmsCodeEntry), 6, BindingMode.OneWay, propertyChanged: (bindable, oldValue, newValue) =>
         {

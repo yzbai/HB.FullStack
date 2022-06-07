@@ -29,7 +29,7 @@ namespace HB.FullStack.Client.Maui.Controls
         //TODO:加上图片
     }
 
-    public class ChipGroup : BaseContentView
+    public class ChipGroup : BaseView
     {
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
             nameof(ItemsSource),

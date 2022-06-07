@@ -13,27 +13,27 @@ namespace HB.FullStack.Client.Navigation
         /// </summary>
         public static INavigationManager Current { get; set; } = null!;
 
-        Task GotoAsync(string uri, bool animated = false);
+        Task GotoAsync(string uri, IDictionary<string, object?>? parameters = null);
 
-        Task GotoAsync(string uri, IDictionary<string, string> parameters, bool animated = false);
+        Task GoBackAsync(IDictionary<string, object?>? parameters = null);
 
-        Task GoBackAsync(bool animated = false);
+        Task PushAsync(string pageFullName);
 
-        Task PushAsync(string pageFullName, bool animated = false);
+        Task PushAsync(IBaseViewModel baseViewModel);
 
-        Task PushAsync(IBaseViewModel baseViewModel, bool animated = false);
+        Task PushAsync(object page);
 
-        Task PushAsync(object page, bool animated = false);
+        Task PopAsync();
 
-        Task PopAsync(bool animated = false);
+        Task PushModalAsync(string pageFullName);
 
-        Task PushModalAsync(string pageFullName, bool animated = false);
+        Task PushModalAsync(IBaseViewModel baseViewModel);
 
-        Task PushModalAsync(IBaseViewModel baseViewModel, bool animated = false);
+        Task PushModalAsync(object page);
 
-        Task PushModalAsync(object page, bool animated = false);
+        Task PopModalAsync();
 
-        Task PopModalAsync(bool animated = false);
+        bool Animated { get; }
 
     }
 }

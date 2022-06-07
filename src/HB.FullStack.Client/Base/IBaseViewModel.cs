@@ -15,6 +15,7 @@ namespace HB.FullStack.Client
         string Title { get; }
 
         /// <summary>
+        /// 本质是：像网络请求一样，为无状态 储存或恢复状态
         /// ViewModel可以是Singleton，所以多个page先后使用同一个viewmodel，这里做准备工作。与这个page相关的数据被建立
         /// </summary>
         Task OnPageAppearingAsync();
@@ -24,8 +25,9 @@ namespace HB.FullStack.Client
         /// </summary>
         Task OnPageDisappearingAsync();
 
-        void OnException(Exception ex, string message, ExceptionHandler handler, [CallerMemberName] string caller = "");
-        void OnException(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, [CallerMemberName] string caller = "");
+        void OnException(Exception ex, string message, ExceptionHandler handler, bool report = false, [CallerMemberName] string caller = "");
+
+        void OnException(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "");
     }
 
 

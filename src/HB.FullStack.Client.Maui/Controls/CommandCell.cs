@@ -14,7 +14,7 @@ using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class CommandCell : BaseContentView
+    public class CommandCell : BaseView
     {
         //public string ChevronRight { get; } = MaterialFont.ChevronRight;
 

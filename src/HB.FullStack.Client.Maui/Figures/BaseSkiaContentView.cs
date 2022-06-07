@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Client.Maui.Figures
 {
-    //public abstract class BaseSkiaContentView : BaseContentView
+    //public abstract class BaseSkiaContentView : BaseView
     //{
     //    public override void OnPageAppearing()
     //    {

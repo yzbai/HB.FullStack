@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Client.Maui.Base
 {
-    public abstract class BaseContentView : ContentView, IBaseContentView
+    public abstract class BaseView : ContentView, IBaseContentView
     {
         public virtual void OnPageAppearing()
         {
@@ -23,6 +23,7 @@ namespace HB.FullStack.Client.Maui.Base
             }
         }
 
+        //TODO: 使用SourceGeneration代替
         public IList<IBaseContentView>? CustomerControls { get; protected set; }
     }
 }

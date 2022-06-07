@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:BaseContentView
+<base:BaseView
     x:Class="HB.FullStack.Client.Maui.Controls.TimeEditor"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.Maui.Base"
     xmlns:fonts="clr-namespace:HB.FullStack.Client.Maui.Fonts"
     x:Name="Root">
-    <base:BaseContentView.Resources>
+    <base:BaseView.Resources>
 
         <Style x:Key="TimeBorder" TargetType="Frame">
             <Setter Property="Padding" Value="8,0,8,0" />
@@ -18,9 +18,9 @@
         <Style TargetType="Label">
             <Setter Property="FontSize" Value="Body" />
         </Style>
-    </base:BaseContentView.Resources>
+    </base:BaseView.Resources>
 
-    <base:BaseContentView.Content>
+    <base:BaseView.Content>
         <Grid
             BindingContext="{x:Reference Root}"
             ColumnDefinitions="Auto, Auto,Auto, Auto"
@@ -115,5 +115,5 @@
                                    Glyph={x:Static Member=fonts:MaterialFont.ChevronDown},
                                    Color=White}" />
         </Grid>
-    </base:BaseContentView.Content>
-</base:BaseContentView>
+    </base:BaseView.Content>
+</base:BaseView>

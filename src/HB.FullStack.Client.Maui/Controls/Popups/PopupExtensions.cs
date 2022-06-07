@@ -8,13 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommunityToolkit.Maui.Views
+namespace Microsoft.Maui.Controls
 { 
     public static class PopupExtensions
     {
         public static Task<object?> ShowAsync<TPopup>(this TPopup popup) where TPopup : Popup
         {
-            return Current.Page.ShowPopupAsync(popup);
+            return Currents.Page.ShowPopupAsync(popup);
         }
     }
 }

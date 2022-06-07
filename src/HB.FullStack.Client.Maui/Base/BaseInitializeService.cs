@@ -15,15 +15,24 @@ namespace HB.FullStack.Client.Maui.Base
 
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
-                //TODO: 设置这个
+                //TODO: 上报
 
                 GlobalSettings.Logger.LogError(e.Exception, $"发现没有处理的UnobservedTaskException。Sender: {sender?.GetType().FullName}");
 
-                //TODO: UI反应，比如显示Toast等等
-
+                Currents.ShowToast("抱歉，发生了错误");
 
                 e.SetObserved();
             };
+
+            AsyncAwaitBestPractices.SafeFireAndForgetExtensions.SetDefaultExceptionHandling(ex =>
+            {
+                //TODO:上报
+
+                GlobalSettings.Logger.LogError(ex, "使用了SafeFireAndForget的默认异常处理");
+
+
+                Currents.ShowToast("抱歉，发生了错误");
+            });
         }
     }
 }

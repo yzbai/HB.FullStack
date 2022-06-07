@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace HB.FullStack.Client.Maui.Controls
 {
-    public class Chip : BaseContentView
+    public class Chip : BaseView
     {
         public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(Chip), null, BindingMode.OneWay);
 
