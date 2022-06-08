@@ -27,7 +27,7 @@ namespace HB.FullStack.Client.Maui.File
 
         public TimeSpan DefaultFileExpiryTime { get; set; } = TimeSpan.FromHours(1);
 
-        public IList<DirectoryInfo> Directories { get; set; } = new List<DirectoryInfo>();
+        public IList<DirectoryDescription> Directories { get; set; } = new List<DirectoryDescription>();
 
         //public string PublicDirectory { get; set; } = "public";
 
@@ -42,15 +42,20 @@ namespace HB.FullStack.Client.Maui.File
 
     }
 
-    public class DirectoryInfo
+    public class DirectoryDescription
     {
         public const string USER_TEMP_DIRECTORY_NAME = "UserTempDirectory";
 
         public string DirectoryName { get; set; } = null!;
 
-        public string Directory { get; set; } = null!;
+        public string DirectoryPath { get; set; } = null!;
 
+        /// <summary>
+        /// path中可以出现UsrePlaceHolder，后期进行替换
+        /// </summary>
         public string UserPlaceHolder { get; set; } = "{User}";
+
+        public bool NeedUserPlace { get; set; } = true;
 
         public TimeSpan ExpiryTime { get; set; } = TimeSpan.FromHours(1);
 

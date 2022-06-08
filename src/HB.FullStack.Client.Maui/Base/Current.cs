@@ -7,6 +7,8 @@ using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.Controls.Popups;
 using HB.FullStack.Client.Navigation;
 
+using Microsoft.Extensions.Configuration;
+using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui;
@@ -14,11 +16,57 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Dispatching;
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace System
 {
     public static class Currents
     {
+        public static string Environment =>
+#if DEBUG
+    "Debug";
+#endif
+#if RELEASE
+     "Release";
+#endif
+        public static bool IsDebug => Environment == "Debug";
+
+        private static IConfiguration? _configuration;
+        /// <summary>
+        /// 要确保在App项目中调用
+        /// </summary>
+        public static IConfiguration Configuration
+        {
+            get
+            {
+                if (_configuration != null)
+                {
+                    return _configuration;
+                }
+
+                string appsettingsFile = $"appsettings.{Environment}.json";
+                Assembly assembly = Assembly.GetCallingAssembly();
+
+                string fileName = $"{assembly.FullName!.Split(',')[0]}.{appsettingsFile}";
+
+                using Stream? resFileStream = assembly.GetManifestResourceStream(fileName);
+
+                IConfigurationBuilder builder = new ConfigurationBuilder();
+
+                builder.AddJsonStream(resFileStream);
+
+                _configuration = builder.Build();
+
+                return _configuration;
+            }
+        }
+
+
+        public static IList<Task> AppendingTasks { get; } = new List<Task>();
+
         public static BaseApplication Application => (BaseApplication?)Microsoft.Maui.Controls.Application.Current!;
 
         public static IServiceProvider Services => IPlatformApplication.Current!.Services;

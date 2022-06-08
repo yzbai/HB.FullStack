@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Microsoft;
+﻿using Microsoft;
 using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Dispatching;
 using Microsoft.VisualStudio.Threading;
 
 namespace System
 {
-    public static class JoinableTaskUtil
+    public static class JoinableTasks
     {
         public static JoinableTaskFactory JoinableTaskFactory { get; } = new JoinableTaskFactory(JoinableTaskContext);
 

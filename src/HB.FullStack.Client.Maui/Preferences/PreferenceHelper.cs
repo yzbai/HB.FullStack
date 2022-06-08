@@ -62,7 +62,7 @@ namespace HB.FullStack.Client.Maui
 
         public static string? Get(string key)
         {
-            return JoinableTaskUtil.JoinableTaskFactory.Run(async () => await GetAsync(key).ConfigureAwait(false));
+            return JoinableTasks.JoinableTaskFactory.Run(async () => await GetAsync(key).ConfigureAwait(false));
         }
 
         static async Task SetAsync(string key, string value)
@@ -92,7 +92,7 @@ namespace HB.FullStack.Client.Maui
         //TODO: 考虑非异步方法
         public static void Set(string key, string value)
         {
-            JoinableTaskUtil.JoinableTaskFactory.Run(async () => await SetAsync(key, value).ConfigureAwait(false));
+            JoinableTasks.JoinableTaskFactory.Run(async () => await SetAsync(key, value).ConfigureAwait(false));
         }
     }
 }
