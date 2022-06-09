@@ -23,12 +23,14 @@ namespace HB.FullStack.Client.Maui.File
 {
     public partial class FileManager : IFileManager
     {
+        public const string USER_TEMP_DIRECTORY_NAME = "UserTempDirectory";
+
         private readonly ILogger _logger;
         private readonly IPreferenceProvider _preferenceProvider;
         private readonly DbSimpleLocker _dbLocker;
         private readonly AliyunStsTokenRepo _aliyunStsTokenRepo;
         private readonly FileManagerOptions _options;
-        private Dictionary<string, DirectoryInfo> _directories;
+        private Dictionary<string, DirectoryDescription> _directories;
         private readonly ObjectPool<IOss> _ossPool;
 
         public FileManager(ILogger<FileManager> logger, IOptions<FileManagerOptions> options, IPreferenceProvider preferenceProvider, DbSimpleLocker dbLocker, AliyunStsTokenRepo aliyunStsTokenRepo)
@@ -75,20 +77,20 @@ namespace HB.FullStack.Client.Maui.File
         {
             get
             {
-                string? directory;
+                string? directoryPath;
                 string? placeHolder;
-                if(_directories.TryGetValue(DirectoryInfo.USER_TEMP_DIRECTORY_NAME, out DirectoryInfo? directoryInfo))
+                if(_directories.TryGetValue(USER_TEMP_DIRECTORY_NAME, out DirectoryDescription? directoryInfo))
                 {
                     placeHolder = directoryInfo.UserPlaceHolder;
-                    directory = directoryInfo.Directory;
+                    directoryPath = directoryInfo.DirectoryPath;
                 }
                 else
                 {
                     placeHolder = "{User}";
-                    directory = "UserDatas/{User}/Temp";
+                    directoryPath = "UserDatas/{User}/Temp";
                 }
 
-                return directory.Replace(placeHolder, _preferenceProvider.UserId.ToString(), StringComparison.InvariantCulture);
+                return directoryPath.Replace(placeHolder, _preferenceProvider.UserId.ToString(), StringComparison.InvariantCulture);
             }
         }
 
@@ -278,7 +280,7 @@ namespace HB.FullStack.Client.Maui.File
 
         private TimeSpan GetOssFileExpiryTime(string directory)
         {
-            if (_directories.TryGetValue(directory, out DirectoryInfo? directoryInfo))
+            if (_directories.TryGetValue(directory, out DirectoryDescription? directoryInfo))
             {
                 return directoryInfo.ExpiryTime;
             }

@@ -44,8 +44,6 @@ namespace HB.FullStack.Client.Maui.File
 
     public class DirectoryDescription
     {
-        public const string USER_TEMP_DIRECTORY_NAME = "UserTempDirectory";
-
         public string DirectoryName { get; set; } = null!;
 
         public string DirectoryPath { get; set; } = null!;
