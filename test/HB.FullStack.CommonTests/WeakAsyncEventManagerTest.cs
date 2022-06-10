@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Common;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -83,7 +86,7 @@ namespace HB.FullStack.CommonTests
                 Console.WriteLine("Task 5 Finish.");
             };
 
-            _weakAsyncEventManager.RaiseEventAsync(nameof(Updating), this, EventArgs.Empty).Fire();
+            _weakAsyncEventManager.RaiseEventAsync(nameof(Updating), this, EventArgs.Empty).SafeFireAndForget();
 
             await Task.Delay(1200);
 
