@@ -20,7 +20,7 @@ jobs:
         dotnet-version: 6.0.x
         
     - name: Restore dependencies
-      run: dotnet restore ./HB.FullStack.sln
+      run: dotnet restore HB.FullStack.sln
     
     - name: Build
-      run: dotnet build ./HB.FullStack.sln --configuration Release --no-restore
+      run: dotnet build HB.FullStack.sln --configuration Release --no-restore
