@@ -26,7 +26,9 @@ namespace System
                 }
             }
 
-            return SerializeUtil.TryToJson(errorDict);
+            SerializeUtil.TryToJson(errorDict, out string? errorJson);
+
+            return errorJson;
         }
     }
 }

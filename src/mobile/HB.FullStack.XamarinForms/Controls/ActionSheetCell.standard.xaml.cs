@@ -1,6 +1,5 @@
-﻿using AsyncAwaitBestPractices;
-using HB.FullStack.XamarinForms.Base;
-using HB.FullStack.XamarinForms.Styles;
+﻿using HB.FullStack.XamarinForms.Fonts;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,6 @@ using System.Windows.Input;
 
 using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 using static Xamarin.CommunityToolkit.Markup.GridRowsColumns;
 
@@ -66,9 +64,7 @@ namespace HB.FullStack.XamarinForms.Controls
             null,
             BindingMode.OneWay);
 
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<ActionSheetCellOptionItem> Options
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (IList<ActionSheetCellOptionItem>)GetValue(OptionsProperty); }
             set { SetValue(OptionsProperty, value); }
@@ -154,7 +150,7 @@ namespace HB.FullStack.XamarinForms.Controls
                         .Bind(Label.TextProperty, nameof(SelectedDisplayText)),
 
                     new Label{ Text = MaterialFont.ChevronRight }
-                        .Row(0).Column(2).EndExpand().TextCenterVertical().Font("MaterialIcon", Device.GetNamedSize(NamedSize.Medium, typeof(Label)))
+                        .Row(0).Column(2).EndExpand().TextCenterVertical().Font(nameof(MaterialFont), Device.GetNamedSize(NamedSize.Medium, typeof(Label)))
                 }
             }.Bind(Grid.MarginProperty, nameof(Margin))
             .Invoke(v=>v.GestureRecognizers.Add(new TapGestureRecognizer { }.Invoke(v=>v.Tapped+=TapGestureRecognizer_Tapped)))

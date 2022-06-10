@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddMySQL(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<MySQLOptions>(configuration);
 
@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddMySQL(this IServiceCollection services, Action<MySQLOptions> databaseEngineOptionsSetup)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(databaseEngineOptionsSetup);
 

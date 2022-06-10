@@ -1,21 +1,20 @@
-﻿using HB.FullStack.Cache;
-using HB.FullStack.Common;
-
+﻿
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using StackExchange.Redis;
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.Cache
 {
-    internal partial class RedisCache
+    /// <summary>
+    /// key-value的Timestamp构型
+    /// </summary>
+    public partial class RedisCache
     {
         // KEYS[1] = = key
         // ARGV[1] = absolute-expiration - unix time seconds as long (null for none)
@@ -36,10 +35,10 @@ if(cachedTimestamp and tonumber(cachedTimestamp)>tonumber(ARGV[5])) then
     return 9
 end
 
-redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4], 'timestamp', ARGV[5]) 
+redis.call('hmset', KEYS[1],'absexp',ARGV[1],'sldexp',ARGV[2],'data',ARGV[4], 'timestamp', ARGV[5])
 
-if(ARGV[3]~='-1') then 
-    redis.call('expire',KEYS[1], ARGV[3]) 
+if(ARGV[3]~='-1') then
+    redis.call('expire',KEYS[1], ARGV[3])
 end
 
 return 1";
@@ -54,18 +53,29 @@ return redis.call('del', KEYS[1])
 ";
 
         /// <summary>
+        /// keys: key1, key2, key3
+        /// argv: key_count, utcTicks, invalidationKey_expire_seconds
+        /// </summary>
+        public const string LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP = @"
+local number=tonumber(ARGV[1])
+for i=1,number do
+    redis.call('set', '_minTS'..KEYS[i], ARGV[2], 'EX', ARGV[3])
+end
+return redis.call('del', unpack(KEYS))";
+
+        /// <summary>
         /// keys:key
         /// argv:utcTicks
         /// </summary>
-        public const string LUA_GET_AND_REFRESH = @"
-local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data') 
+        public const string LUA_GET_AND_REFRESH_WITH_TIMESTAMP = @"
+local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data')
 
 if (not data[3]) then
     return nil
 end
 
 if(data[1]~='-1') then
-    local now = tonumber(ARGV[1]) 
+    local now = tonumber(ARGV[1])
     local absexp = tonumber(data[1])
     if(now>=absexp) then
         redis.call('del', KEYS[1])
@@ -85,7 +95,8 @@ return data[3]";
         /// <param name="key"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
@@ -103,7 +114,7 @@ return data[3]";
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(GetAsync));
 
                 InitLoadedLuas();
 
@@ -111,7 +122,9 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个GetAsync");
+                Logger.LogCacheGetError(key, ex);
+
+                AggregateException? aggregateException = null;
 
                 try
                 {
@@ -119,10 +132,10 @@ return data[3]";
                 }
                 catch (Exception ex2)
                 {
-                    _logger.LogError(ex2, "在因为Get异常而删除中出错，Key:{key} ", key);
+                    aggregateException = new AggregateException(ex, ex2);
                 }
 
-                throw Exceptions.Unkown(key, null, ex);
+                throw (Exception?)aggregateException ?? CacheExceptions.GetError(key, ex);
             }
         }
 
@@ -135,7 +148,7 @@ return data[3]";
         /// <param name="options"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+
         public async Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
@@ -170,19 +183,18 @@ return data[3]";
                 }
                 else if (rt == 8)
                 {
-                    _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {key}, {Timestamp}", key, utcTicks);
+                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(key, utcTicks, options);
                 }
                 else if (rt == 9)
                 {
-                    _logger.LogWarning("检测到，Cache Update Concurrency冲突，已被阻止. {key}, {Timestamp}", key, utcTicks);
+                    Logger.LogCacheUpdateTimestampConcurrency(key, utcTicks, options);
                 }
 
                 return false;
-
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(SetAsync));
 
                 InitLoadedLuas();
 
@@ -190,9 +202,7 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
-
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.SetError(key, utcTicks, options, ex);
             }
         }
 
@@ -203,7 +213,7 @@ return data[3]";
         /// <param name="timestampInUnixMilliseconds"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
+
         public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default)
         {
             if (key == null)
@@ -223,14 +233,14 @@ return data[3]";
                     new RedisValue[]
                     {
                         utcTicks.Ticks,
-                        _invalidationVersionExpirySeconds
+                        INVALIDATION_VERSION_EXPIRY_SECONDS
                     }).ConfigureAwait(false);
 
                 return (int)redisResult == 1;
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
 
                 InitLoadedLuas();
 
@@ -238,10 +248,65 @@ return data[3]";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
-
-                throw Exceptions.Unkown(key, null, ex);
+                throw CacheExceptions.RemoveError(key, utcTicks, ex);
             }
+        }
+
+        public async Task<bool> RemoveAsync(string[] keys, UtcNowTicks utcTicks, CancellationToken token = default)
+        {
+            //TODO: 测试这个
+            if (keys.IsNullOrEmpty())
+            {
+                return true;
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            //划分组 100个一组
+            int groupLength = 100;
+
+            IEnumerable<string[]> groups = keys.Chunk(groupLength);//PartitionToGroup(keys, groupLength);
+
+            IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
+
+            int deletedSum = 0;
+
+            try
+            {
+                foreach (string[] group in groups)
+                {
+                    RedisResult redisResult = await database.ScriptEvaluateAsync(
+                        GetDefaultLoadLuas().LoadedRemoveMultipleWithTimestampLua,
+                        group.Select(key => (RedisKey)GetRealKey("", key)).ToArray(),
+                        new RedisValue[]
+                        {
+                            group.Length,
+                            utcTicks.Ticks,
+                            INVALIDATION_VERSION_EXPIRY_SECONDS
+                        }).ConfigureAwait(false);
+
+                    deletedSum += (int)redisResult;
+                }
+
+                return deletedSum == keys.Length;
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            {
+                Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
+
+                InitLoadedLuas();
+
+                return await RemoveAsync(keys, utcTicks, token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw CacheExceptions.RemoveMultipleError(keys, utcTicks, ex);
+            }
+        }
+
+        public Task RemoveByKeyPrefixAsync(string keyPrefix, UtcNowTicks utcTikcs, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

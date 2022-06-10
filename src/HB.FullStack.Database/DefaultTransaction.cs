@@ -3,20 +3,20 @@ using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 
-
 namespace HB.FullStack.Database
 {
-    internal class DefaultTransaction : ITransaction
+    public class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
+        private readonly IEntityDefFactory _entityDefFactory;
 
-        public DefaultTransaction(IDatabaseEngine datbaseEngine)
+        public DefaultTransaction(IDatabaseEngine datbaseEngine, IEntityDefFactory entityDefFactory)
         {
             _databaseEngine = datbaseEngine;
+            _entityDefFactory = entityDefFactory;
         }
 
         #region 事务
@@ -30,18 +30,12 @@ namespace HB.FullStack.Database
 
         public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity
         {
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            EntityDef entityDef = _entityDefFactory.GetDef<T>()!;
 
             return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
         }
 
-        /// <summary>
-        /// CommitAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public async Task CommitAsync(TransactionContext context, [CallerMemberName]string? callerMemberName = null, [CallerLineNumber]int callerLineNumber = 0 )
+        public async Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
         {
             //if (context == null || context.Transaction == null)
             //{
@@ -55,7 +49,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw Exceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
+                throw DatabaseExceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
             }
 
             try
@@ -81,12 +75,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// RollbackAsync
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
         public async Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
         {
             //if (context == null || context.Transaction == null)
@@ -101,7 +89,7 @@ namespace HB.FullStack.Database
 
             if (context.Status != TransactionStatus.InTransaction)
             {
-                throw Exceptions.TransactionError("AlreadyFinished",callerMemberName, callerLineNumber);
+                throw DatabaseExceptions.TransactionError("AlreadyFinished", callerMemberName, callerLineNumber);
             }
 
             try

@@ -1,21 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\common.props" />
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <LangVersion>Latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+	  <TargetFramework>net6.0</TargetFramework>
+	<LangVersion>Latest</LangVersion>
+	<Nullable>enable</Nullable>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<WarningsAsErrors />
+	<EnableNETAnalyzers>true</EnableNETAnalyzers>
+	<AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
-    <ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
-    <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
-    <ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
-    <ProjectReference Include="..\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
+	<ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
+	<ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
+	<ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
+	<ProjectReference Include="..\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
   </ItemGroup>
 
 </Project>

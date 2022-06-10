@@ -5,6 +5,7 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
@@ -16,47 +17,25 @@ namespace HB.Infrastructure.MySQL
     internal static class MySQLExecuter
     {
         #region Command Reader
-
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="mySqlTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
 
             return await ExecuteCommandReaderAsync(
-                mySqlTransaction.Connection ?? throw Exceptions.TransactionConnectionIsNull(commandText:dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(commandText:dbCommand.CommandText),
                 false,
                 dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+
+        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
         {
-            //这里无法用Using，因为reader要用
             MySqlConnection conn = new MySqlConnection(connectString);
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
-
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         private static async Task<IDataReader> ExecuteCommandReaderAsync(MySqlConnection connection, bool isOwnedConnection, MySqlCommand command)
         {
             MySqlDataReader? reader = null;
@@ -93,7 +72,7 @@ namespace HB.Infrastructure.MySQL
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                throw Exceptions.ExecuterError(commandText:command.CommandText, innerException: ex);
+                throw DatabaseExceptions.ExecuterError(commandText:command.CommandText, innerException: ex);
             }
         }
 
@@ -107,7 +86,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="connectString"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);
@@ -120,12 +99,12 @@ namespace HB.Infrastructure.MySQL
         /// <param name="mySqlTransaction"></param>
         /// <param name="dbCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         public static async Task<object?> ExecuteCommandScalarAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandScalarAsync(
-                mySqlTransaction.Connection ?? throw Exceptions.TransactionConnectionIsNull(dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
                 dbCommand).ConfigureAwait(false);
         }
 
@@ -135,7 +114,7 @@ namespace HB.Infrastructure.MySQL
         /// <param name="connection"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+        
         private static async Task<object?> ExecuteCommandScalarAsync(MySqlConnection connection, MySqlCommand command)
         {
             try
@@ -151,7 +130,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                throw Exceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
+                throw DatabaseExceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
             }
         }
 
@@ -159,13 +138,8 @@ namespace HB.Infrastructure.MySQL
 
         #region Comand NonQuery
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+ 
+        
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, MySqlCommand dbCommand)
         {
             using MySqlConnection conn = new MySqlConnection(connectString);
@@ -173,28 +147,18 @@ namespace HB.Infrastructure.MySQL
             return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="mySqlTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+ 
+        
         public static async Task<int> ExecuteCommandNonQueryAsync(MySqlTransaction mySqlTransaction, MySqlCommand dbCommand)
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandNonQueryAsync(
-                mySqlTransaction.Connection ?? throw Exceptions.TransactionConnectionIsNull(dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
                 dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
+ 
+        
         private static async Task<int> ExecuteCommandNonQueryAsync(MySqlConnection conn, MySqlCommand command)
         {
             try
@@ -210,7 +174,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                throw Exceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
+                throw DatabaseExceptions.ExecuterError(commandText: command.CommandText, innerException: ex);
             }
         }
 

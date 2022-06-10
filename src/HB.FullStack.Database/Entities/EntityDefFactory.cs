@@ -8,41 +8,33 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
-using Microsoft.Extensions.Logging;
-
 namespace HB.FullStack.Database.Entities
 {
-    internal static class EntityDefFactory
+    internal class EntityDefFactory2 : IEntityDefFactory
     {
-        public static int VarcharDefaultLength { get; set; }
-
-        private static readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
-
         /// <summary>
-        /// Initialize
+        /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructEntityDefs，后续只有read，没有write
         /// </summary>
-        /// <param name="databaseEngine"></param>
-        /// <exception cref="DatabaseException"></exception>
-        public static void Initialize(IDatabaseEngine databaseEngine)
+        private readonly IDictionary<Type, EntityDef> _defDict = new Dictionary<Type, EntityDef>();
+
+        public EntityDefFactory2(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
-            VarcharDefaultLength = databaseSettings.DefaultVarcharLength == 0 ? LengthConvention.DEFAULT_VARCHAR_LENGTH : databaseSettings.DefaultVarcharLength;
-
             IEnumerable<Type> allEntityTypes;
 
-            if (databaseSettings.AssembliesIncludeEntity.IsNullOrEmpty())
+            if (databaseSettings.Assemblies.IsNullOrEmpty())
             {
                 allEntityTypes = ReflectUtil.GetAllTypeByCondition(entityTypeCondition);
             }
             else
             {
-                allEntityTypes = ReflectUtil.GetAllTypeByCondition(databaseSettings.AssembliesIncludeEntity, entityTypeCondition);
+                allEntityTypes = ReflectUtil.GetAllTypeByCondition(databaseSettings.Assemblies, entityTypeCondition);
             }
 
-            IDictionary<string, EntitySetting> entitySchemaDict = ConstructeSchemaDict(databaseSettings, databaseEngine, allEntityTypes);
+            IDictionary<string, EntitySetting> entitySettingDict = ConstructeSettingDict(databaseSettings, databaseEngine, allEntityTypes);
 
-            WarmUp(allEntityTypes, databaseEngine.EngineType, entitySchemaDict);
+            ConstructEntityDefs(allEntityTypes, databaseEngine.EngineType, entitySettingDict);
 
             static bool entityTypeCondition(Type t)
             {
@@ -50,22 +42,15 @@ namespace HB.FullStack.Database.Entities
             }
         }
 
-        /// <summary>
-        /// WarmUp
-        /// </summary>
-        /// <param name="allEntityTypes"></param>
-        /// <param name="engineType"></param>
-        /// <param name="entitySchemaDict"></param>
-        /// <exception cref="DatabaseException"></exception>
-        private static void WarmUp(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private void ConstructEntityDefs(IEnumerable<Type> allEntityTypes, EngineType engineType, IDictionary<string, EntitySetting> entitySettingDict)
         {
             foreach (var t in allEntityTypes)
             {
-                _defDict[t] = CreateEntityDef(t, engineType, entitySchemaDict);
+                _defDict[t] = CreateEntityDef(t, engineType, entitySettingDict);
             }
         }
 
-        private static IDictionary<string, EntitySetting> ConstructeSchemaDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allEntityTypes)
+        private static IDictionary<string, EntitySetting> ConstructeSettingDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allEntityTypes)
         {
             IDictionary<string, EntitySetting> fileConfiguredDict = databaseSettings.EntitySettings.ToDictionary(t => t.EntityTypeFullName);
 
@@ -92,7 +77,11 @@ namespace HB.FullStack.Database.Entities
 
                         if (type.Name.EndsWith(attribute.SuffixToRemove, GlobalSettings.Comparison))
                         {
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
+                            entitySchema.TableName += type.Name[..^attribute.SuffixToRemove.Length].ToLower(GlobalSettings.Culture);
+#elif NETSTANDARD2_0
                             entitySchema.TableName += type.Name.Substring(0, type.Name.Length - attribute.SuffixToRemove.Length).ToLower(GlobalSettings.Culture);
+#endif
                         }
                         else
                         {
@@ -146,13 +135,18 @@ namespace HB.FullStack.Database.Entities
             return resusltEntitySchemaDict;
         }
 
-        public static EntityDef? GetDef<T>() where T : DatabaseEntity
+        public EntityDef? GetDef<T>() where T : DatabaseEntity
         {
             return GetDef(typeof(T));
         }
 
-        public static EntityDef? GetDef(Type entityType)
+        public EntityDef? GetDef(Type? entityType)
         {
+            if (entityType == null)
+            {
+                return null;
+            }
+
             if (_defDict.TryGetValue(entityType, out EntityDef? entityDef))
             {
                 return entityDef;
@@ -161,27 +155,20 @@ namespace HB.FullStack.Database.Entities
             return null;
         }
 
-        /// <summary>
-        /// CreateEntityDef
-        /// </summary>
-        /// <param name="entityType"></param>
-        /// <param name="engineType"></param>
-        /// <param name="entitySchemaDict"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySchemaDict)
+        private static EntityDef CreateEntityDef(Type entityType, EngineType engineType, IDictionary<string, EntitySetting> entitySettingDict)
         {
             //GlobalSettings.Logger.LogInformation($"{entityType} : {entityType.GetHashCode()}");
 
-            if (!entitySchemaDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
+            if (!entitySettingDict!.TryGetValue(entityType.FullName!, out EntitySetting? dbSchema))
             {
-                throw Exceptions.EntityError(type:entityType.FullName,"", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
+                throw DatabaseExceptions.EntityError(type: entityType.FullName, "", cause: "不是Entity，或者没有DatabaseEntityAttribute.");
             }
 
             EntityDef entityDef = new EntityDef
             {
                 IsIdAutoIncrement = entityType.IsSubclassOf(typeof(AutoIncrementIdEntity)),
                 IsIdGuid = entityType.IsSubclassOf(typeof(GuidEntity)),
+                IsIdLong = entityType.IsSubclassOf(typeof(LongIdEntity)),
                 EntityType = entityType,
                 EntityFullName = entityType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
@@ -201,7 +188,7 @@ namespace HB.FullStack.Database.Entities
                 {
                     IgnoreEntityPropertyAttribute? ignoreAttribute = info.GetCustomAttribute<IgnoreEntityPropertyAttribute>(true);
 
-                    if(ignoreAttribute != null)
+                    if (ignoreAttribute != null)
                     {
                         continue;
                     }
@@ -212,7 +199,7 @@ namespace HB.FullStack.Database.Entities
 
                     if (info.Name == nameof(Entity.LastUser))
                     {
-                        entityPropertyAttribute.MaxLength = LengthConvention.LAST_USER_MAX_LENGTH;
+                        entityPropertyAttribute.MaxLength = DefaultLengthConventions.MAX_LAST_USER_LENGTH;
                     }
                 }
 
@@ -232,15 +219,6 @@ namespace HB.FullStack.Database.Entities
             return entityDef;
         }
 
-        /// <summary>
-        /// CreatePropertyDef
-        /// </summary>
-        /// <param name="entityDef"></param>
-        /// <param name="propertyInfo"></param>
-        /// <param name="propertyAttribute"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         private static EntityPropertyDef CreatePropertyDef(EntityDef entityDef, PropertyInfo propertyInfo, EntityPropertyAttribute propertyAttribute, EngineType engineType)
         {
             EntityPropertyDef propertyDef = new EntityPropertyDef
@@ -252,11 +230,10 @@ namespace HB.FullStack.Database.Entities
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
             propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw Exceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause:"实体属性缺少Set方法. ");
+                ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
 
             propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
-                ?? throw Exceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
-
+                ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;
             propertyDef.IsNullable = !propertyAttribute.NotNull;
@@ -294,19 +271,19 @@ namespace HB.FullStack.Database.Entities
                     propertyDef.IsAutoIncrementPrimaryKey = false;
                     propertyDef.IsForeignKey = true;
                     propertyDef.IsNullable = true;
-                    propertyDef.IsUnique = false;
+                    propertyDef.IsUnique = atts2.IsUnique;
                 }
             }
 
             return propertyDef;
         }
 
-        public static IEnumerable<EntityDef> GetAllDefsByDatabase(string databaseName)
+        public IEnumerable<EntityDef> GetAllDefsByDatabase(string databaseName)
         {
             return _defDict.Values.Where(def => databaseName.Equals(def.DatabaseName, GlobalSettings.ComparisonIgnoreCase));
         }
 
-        public static ITypeConverter? GetPropertyTypeConverter(Type entityType, string propertyName)
+        public ITypeConverter? GetPropertyTypeConverter(Type entityType, string propertyName)
         {
             return GetDef(entityType)?.GetPropertyDef(propertyName)!.TypeConverter;
         }

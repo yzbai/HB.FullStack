@@ -13,40 +13,38 @@ using HB.FullStack.Lock.Memory;
 
 namespace HB.FullStack.Identity
 {
-    internal class SignInTokenRepo : DatabaseRepository<SignInToken>
+    public class SignInTokenRepo : DbEntityRepository<SignInToken>
     {
-        private readonly IDatabaseReader _databaseReader;
-
-        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
-        {
-            _databaseReader = databaseReader;
-        }
+        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+            : base(logger, databaseReader, cache, memoryLockManager) { }
 
         #region Read
 
-        public Task<IEnumerable<SignInToken>> GetByUserIdAsync(long userId, TransactionContext? transactionContext)
+        public Task<IEnumerable<SignInToken>> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext)
         {
-            return _databaseReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
+            return DbReader.RetrieveAsync<SignInToken>(s => s.UserId == userId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByIdAsync(long signInTokenId, TransactionContext? transactionContext)
+        public Task<SignInToken?> GetByIdAsync(Guid signInTokenId, TransactionContext? transactionContext)
         {
-            return _databaseReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
+            return DbReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
-        public Task<SignInToken?> GetByConditionAsync(long signInTokenId, string? refreshToken, string deviceId, long userId, TransactionContext? transContext = null)
-        {
-            if (refreshToken.IsNullOrEmpty())
-            {
-                return Task.FromResult((SignInToken?)null);
-            }
+        protected override Task InvalidateCacheItemsOnChanged(SignInToken sender, DatabaseWriteEventArgs args) => Task.CompletedTask;
 
-            return _databaseReader.ScalarAsync<SignInToken>(s =>
-                s.UserId == userId &&
-                s.Id == signInTokenId &&
-                s.RefreshToken == refreshToken &&
-                s.DeviceId == deviceId, transContext);
-        }
+        //public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
+        //{
+        //    if (refreshToken.IsNullOrEmpty())
+        //    {
+        //        return Task.FromResult((SignInToken?)null);
+        //    }
+
+        //    return _databaseReader.ScalarAsync<SignInToken>(s =>
+        //        s.RefreshToken == refreshToken &&
+        //        s.UserId == userId &&
+        //        s.Id == signInTokenId &&
+        //        s.DeviceId == deviceId, transContext);
+        //}
 
         #endregion
     }

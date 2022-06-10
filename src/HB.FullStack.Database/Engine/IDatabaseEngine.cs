@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -29,17 +29,17 @@ namespace HB.FullStack.Database.Engine
 
         #region Command执行功能
 
-        /// <exception cref="DatabaseException"></exception>
-        Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand);
+        
+        Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand);
 
         /// <summary>
         /// 使用后必须Dispose，必须使用using
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
-        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
+        
+        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster);
 
-        /// <exception cref="DatabaseException"></exception>
-        Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand dbCommand, bool useMaster);
+        
+        Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster);
 
         #endregion Command执行功能
 

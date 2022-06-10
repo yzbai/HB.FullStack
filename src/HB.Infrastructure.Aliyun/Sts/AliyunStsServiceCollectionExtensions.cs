@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAliyunSts(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<AliyunStsOptions>(configuration);
 
@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddAliyunSts(this IServiceCollection services, Action<AliyunStsOptions> action)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(action);
 

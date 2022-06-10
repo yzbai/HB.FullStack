@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ using System.Reflection;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Database.Converter
 {
@@ -67,10 +68,27 @@ namespace HB.FullStack.Database.Converter
 
         static TypeConvert()
         {
-            //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
-            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetConverter(), EngineType.MySQL);
+            #region MySQL
 
-            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetConverter(), EngineType.SQLite);
+            //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetTypeConverter(), EngineType.MySQL);
+
+            //解决MySql存储Guid的问题，存储为Binary(16)
+            RegisterGlobalTypeConverter(typeof(Guid), new MySqlGuidTypeConverter(), EngineType.MySQL);
+
+            RegisterGlobalTypeConverter(typeof(SimpleDate), new SimpleDateTypeConverter(), EngineType.MySQL);
+            RegisterGlobalTypeConverter(typeof(Time24Hour), new Time24HourTypeConverter(), EngineType.MySQL);
+
+            #endregion
+
+            #region SQLite
+
+            RegisterGlobalTypeConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetTypeConverter(), EngineType.SQLite);
+            RegisterGlobalTypeConverter(typeof(Guid), new SqliteGuidTypeConverter(), EngineType.SQLite);
+            RegisterGlobalTypeConverter(typeof(SimpleDate), new SimpleDateTypeConverter(), EngineType.SQLite);
+            RegisterGlobalTypeConverter(typeof(Time24Hour), new Time24HourTypeConverter(), EngineType.SQLite);
+
+            #endregion
         }
 
         public static void RegisterGlobalTypeConverter(Type type, ITypeConverter typeConverter, EngineType engineType)
@@ -149,7 +167,10 @@ namespace HB.FullStack.Database.Converter
             return ctor!.Invoke(new object?[] { typeValue });
         }
 
-        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef propertyDef, EngineType engineType)
+        /// <summary>
+        /// propertyDef为null，则不考虑这个属性自定义的TypeConverter
+        /// </summary>
+        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef? propertyDef, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -157,12 +178,12 @@ namespace HB.FullStack.Database.Converter
             }
 
             //查看当前Property的TypeConvert
-            if (propertyDef.TypeConverter != null)
+            if (propertyDef?.TypeConverter != null)
             {
                 return propertyDef.TypeConverter.TypeValueToDbValue(typeValue, propertyDef.Type);
             }
 
-            Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+            Type trueType = propertyDef == null ? typeValue.GetType() : propertyDef.NullableUnderlyingType ?? propertyDef.Type;
 
             //查看全局TypeConvert
 
@@ -184,13 +205,10 @@ namespace HB.FullStack.Database.Converter
 
         /// <summary>
         /// 没有考虑属性自定义的TypeConvert
+        /// 有安全隐患,
         /// </summary>
-        /// <param name="typeValue"></param>
-        /// <param name="quotedIfNeed"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public static string TypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
+
+        public static string DoNotUseUnSafeTypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -212,7 +230,7 @@ namespace HB.FullStack.Database.Converter
                 //null => "null",
                 //Enum e => e.ToString(),
                 DBNull _ => "null",
-                DateTime _ => throw Exceptions.UseDateTimeOffsetOnly(),
+                DateTime _ => throw DatabaseExceptions.UseDateTimeOffsetOnly(),
                 DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", GlobalSettings.Culture),
                 bool b => b ? "1" : "0",
                 _ => dbValue.ToString()!
@@ -226,13 +244,6 @@ namespace HB.FullStack.Database.Converter
             return SqlHelper.GetQuoted(statement);
         }
 
-        /// <summary>
-        /// TypeToDbType
-        /// </summary>
-        /// <param name="propertyDef"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public static DbType TypeToDbType(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
@@ -257,16 +268,9 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName:(propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName:propertyDef.Name);
+            throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
-        /// <summary>
-        /// TypeToDbTypeStatement
-        /// </summary>
-        /// <param name="propertyDef"></param>
-        /// <param name="engineType"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义
@@ -290,7 +294,7 @@ namespace HB.FullStack.Database.Converter
             {
                 return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
             }
-            throw Exceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)

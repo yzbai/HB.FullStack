@@ -1,5 +1,5 @@
-﻿
-using HB.FullStack.Common;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Figures;
 
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -80,9 +80,10 @@ namespace HB.FullStack.XamarinForms.Skia
 
         public bool CanvasSizeChanged { get; set; }
 
-        public FigureState CurrentState { get; private set; } = FigureState.None;
+        public FigureVisualState CurrentState { get; private set; } = FigureVisualState.None;
 
-        public SKPath HitTestPath { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
+        public SKPath HitTestPath
+        { get => _hitTestPathBB; set { _hitTestPathBB?.Dispose(); _hitTestPathBB = value; } }
 
         protected bool HitTestPathNeedUpdate { get; set; }
 
@@ -91,7 +92,7 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         protected SKMatrix Matrix = SKMatrix.CreateIdentity();
 
-        public void SetState(FigureState figureState)
+        public void SetState(FigureVisualState figureState)
         {
             CurrentState = figureState;
         }
@@ -164,13 +165,17 @@ namespace HB.FullStack.XamarinForms.Skia
         /// </summary>
         /// <param name="info"></param>
         /// <param name="canvas"></param>
-        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas) { }
+        protected virtual void OnDraw(SKImageInfo info, SKCanvas canvas)
+        { }
 
-        protected virtual void OnUpdateHitTestPath(SKImageInfo info) { }
+        protected virtual void OnUpdateHitTestPath(SKImageInfo info)
+        { }
 
-        protected virtual void OnCaculateOutput() { }
+        protected virtual void OnCaculateOutput()
+        { }
 
-        protected virtual void CaculateMatrixByTime(long elapsedMilliseconds) { }
+        protected virtual void CaculateMatrixByTime(long elapsedMilliseconds)
+        { }
 
         #region OnTouch
 
@@ -406,7 +411,6 @@ namespace HB.FullStack.XamarinForms.Skia
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public void ProcessUnTouchAction(long fingerId, SKPoint location)
         {
             OnHitFailed();
@@ -427,7 +431,7 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             return Task.Run(async () =>
             {
-                await Task.Delay(Conventions.LongTapMinDurationInMilliseconds).ConfigureAwait(false);
+                await Task.Delay(Conventions.LONG_TAP_MIN_DURATION_IN_MILLISECONDS).ConfigureAwait(false);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -441,7 +445,6 @@ namespace HB.FullStack.XamarinForms.Skia
                 OnLongTapped(info);
 
                 Device.BeginInvokeOnMainThread(() => CanvasView?.InvalidateSurface());
-
             }, cancellationToken);
         }
 
@@ -450,7 +453,7 @@ namespace HB.FullStack.XamarinForms.Skia
             return new SKPoint(point.X - CanvasSize.Width * NewCoordinateOriginalRatioPoint.XRatio, point.Y - CanvasSize.Height * NewCoordinateOriginalRatioPoint.YRatio);
         }
 
-        class LongTouchTaskInfo
+        private class LongTouchTaskInfo
         {
             public Task Task { get; set; } = null!;
 
@@ -510,37 +513,37 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(OneFingerDragged));
 
-            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
+            if (CurrentState == FigureVisualState.Tapped|| CurrentState == FigureVisualState.LongTapped)
             {
                 return;
             }
 
-            SetState(FigureState.Selected);
+            SetState(FigureVisualState.Tapped);
         }
 
         public void OnTwoFingerDragged(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(TwoFingerDragged));
 
-            if (CurrentState == FigureState.Selected || CurrentState == FigureState.LongSelected)
+            if (CurrentState == FigureVisualState.Tapped || CurrentState == FigureVisualState.LongTapped)
             {
                 return;
             }
 
-            SetState(FigureState.Selected);
+            SetState(FigureVisualState.Tapped);
         }
 
         public void OnTapped(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Tapped));
 
-            if (CurrentState == FigureState.Selected)
+            if (CurrentState == FigureVisualState.Tapped)
             {
-                SetState(FigureState.None);
+                SetState(FigureVisualState.None);
             }
-            else if (CurrentState == FigureState.None)
+            else if (CurrentState == FigureVisualState.None)
             {
-                SetState(FigureState.Selected);
+                SetState(FigureVisualState.Tapped);
             }
         }
 
@@ -548,14 +551,14 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(LongTapped));
 
-            SetState(FigureState.LongSelected);
+            SetState(FigureVisualState.LongTapped);
         }
 
         public void OnCancelled(SKFigureTouchEventArgs touchInfo)
         {
             _weakEventManager.HandleEvent(this, touchInfo, nameof(Cancelled));
 
-            //SetState(FigureState.None);
+            //SetState(FigureVisualState.Mixed);
         }
 
         public void OnHitFailed()
@@ -570,7 +573,7 @@ namespace HB.FullStack.XamarinForms.Skia
                 }
             }
 
-            SetState(FigureState.None);
+            SetState(FigureVisualState.None);
         }
 
         #endregion
@@ -612,7 +615,6 @@ namespace HB.FullStack.XamarinForms.Skia
         }
 
         #endregion
-
     }
 
     public abstract class SKFigure<TDrawInfo, TData> : SKFigure
@@ -634,7 +636,6 @@ namespace HB.FullStack.XamarinForms.Skia
                     null,
                     BindingMode.OneWay,
                     propertyChanged: (b, oldValue, newValue) => ((SKFigure<TDrawInfo, TData>)b).OnBaseInitDataChanged());
-
 
         public static BindableProperty ResultDataProperty = BindableProperty.Create(
                     nameof(ResultData),
@@ -717,7 +718,7 @@ namespace HB.FullStack.XamarinForms.Skia
 
             if (newResult != null)
             {
-                newResult.State = CurrentState;
+                newResult.VisualState = CurrentState;
             }
 
             if (newResult != ResultData)
@@ -740,7 +741,6 @@ namespace HB.FullStack.XamarinForms.Skia
         protected abstract void OnUpdateFigureHitTestPath(SKImageInfo info);
 
         protected abstract void OnCaculateFigureOutput(out TData? newResultData);
-
     }
 
     public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureDrawInfo
@@ -754,7 +754,6 @@ namespace HB.FullStack.XamarinForms.Skia
         {
             //Do nothing
         }
-
     }
 
     public abstract class SKDataFigure<TData> : SKFigure<EmptyDrawInfo, TData> where TData : FigureData
@@ -770,26 +769,27 @@ namespace HB.FullStack.XamarinForms.Skia
 
     public class EmptyDrawInfo : FigureDrawInfo
     {
-        protected override bool EqualsImpl(FigureDrawInfo other)
+        protected override bool EqualsCore(FigureDrawInfo other)
         {
             return other is EmptyDrawInfo;
         }
 
-        protected override HashCode GetHashCodeImpl()
+        public override int GetHashCode()
         {
-            return new HashCode();
+            return HashCode.Combine(nameof(EmptyDrawInfo));
         }
     }
+
     public class EmptyData : FigureData
     {
-        protected override bool EqualsImpl(FigureData other)
+        protected override bool EqualsCore(FigureData other)
         {
             return other is EmptyData;
         }
 
-        protected override HashCode GetHashCodeImpl()
+        protected override int GetHashCodeCore()
         {
-            return new HashCode();
+            return HashCode.Combine(nameof(EmptyData));
         }
     }
 }

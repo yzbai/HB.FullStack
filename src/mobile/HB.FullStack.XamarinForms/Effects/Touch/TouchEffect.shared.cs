@@ -1,3 +1,5 @@
+using HB.FullStack.Client;
+
 using System;
 
 using Xamarin.Forms;
@@ -24,7 +26,7 @@ namespace HB.FullStack.XamarinForms.Effects.Touch
         /// </summary>
         public bool Enable { get; set; } = true;
 
-        public TouchEffect() : base($"{Conventions.EffectsGroupName}.{nameof(TouchEffect)}")
+        public TouchEffect() : base($"{Conventions.EFFECTS_GROUP_NAME}.{nameof(TouchEffect)}")
         {
         }
 

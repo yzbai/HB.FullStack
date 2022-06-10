@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Api;
-using HB.FullStack.XamarinForms.Api;
-using HB.FullStack.XamarinForms.Controls;
-using HB.FullStack.XamarinForms.Files;
+using HB.FullStack.Client.File;
+using HB.FullStack.Client.Network;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Logging;
-using HB.FullStack.XamarinForms.Platforms;
+using HB.FullStack.XamarinForms.Navigation;
 
+using Microsoft;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,9 +28,7 @@ namespace HB.FullStack.XamarinForms.Base
         private IConfiguration? _configuration;
         private readonly IList<Task> _initializeTasks = new List<Task>();
 
-        public static new BaseApplication Current => (BaseApplication)Application.Current;
-
-        public static IPlatformHelper PlatformHelper = DependencyService.Resolve<IPlatformHelper>();
+        public new static BaseApplication Current => (BaseApplication)Application.Current;
 
 #if DEBUG
         public static string Environment => "Debug";
@@ -38,7 +36,6 @@ namespace HB.FullStack.XamarinForms.Base
 #if RELEASE
         public static string Environment => "Release";
 #endif
-
         public Task InitializeTask { get => Task.WhenAll(_initializeTasks); }
 
         public IConfiguration Configuration
@@ -47,7 +44,7 @@ namespace HB.FullStack.XamarinForms.Base
             {
                 if (_configuration == null)
                 {
-                    _configuration = ClientUtils.GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
+                    _configuration = GetConfiguration($"appsettings.{Environment}.json", Assembly.GetCallingAssembly());
                 }
 
                 return _configuration;
@@ -82,21 +79,21 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected BaseApplication()
         {
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                //TODO: 设置这个
+
+                ExceptionHandler(e.Exception);
+                e.SetObserved();
+            };
+
             //Version
             VersionTracking.Track();
-
-            //FileService
-            if (VersionTracking.IsFirstLaunchEver)
-            {
-                AddInitTask(IFileService.UnzipInitFilesAsync(InitAssetFileName));
-            }
         }
 
         protected void InitializeServices(IServiceCollection services)
         {
-            //设置导航
-            NavigationService.Init(GetNavigationServiceImpl());
-
             //注册服务
             RegisterBaseServices(services);
 
@@ -113,6 +110,13 @@ namespace HB.FullStack.XamarinForms.Base
                     builder.AddProvider(new LoggerProvider(MinimumLogLevel));
                 });
 
+                services.AddSingleton<IPreferenceProvider, XFPreferenceProvider>();
+                services.AddSingleton<ConnectivityManager, XFConnectivityManager>();
+                services.AddSingleton<NavigationManager, XFNavigationManager>();
+                services.AddSingleton<ImageSourceManager>();
+
+                services.AddKVManager();
+
                 RegisterServices(services);
 
                 //Build
@@ -122,6 +126,13 @@ namespace HB.FullStack.XamarinForms.Base
 
             void ConfigureBaseServices()
             {
+                //FileService
+                if (VersionTracking.IsFirstLaunchEver)
+                {
+                    IFileManager fileManager = DependencyService.Resolve<IFileManager>();
+                    AddInitTask(fileManager.UnzipAssetZipAsync(InitAssetFileName));
+                }
+
                 //Log
                 GlobalSettings.Logger = DependencyService.Resolve<ILogger<BaseApplication>>();
                 GlobalSettings.MessageExceptionHandler = ExceptionHandler;
@@ -140,8 +151,6 @@ namespace HB.FullStack.XamarinForms.Base
             _initializeTasks.Add(task);
         }
 
-        protected abstract NavigationService GetNavigationServiceImpl();
-
         protected abstract void RegisterServices(IServiceCollection services);
 
         protected abstract void ConfigureServices();
@@ -150,21 +159,19 @@ namespace HB.FullStack.XamarinForms.Base
 
         public static void ExceptionHandler(Exception? ex, string? message, LogLevel logLevel = LogLevel.Error)
         {
-            if (ex is ApiException apiEx)
+            //TODO: ExceptionHandler
+            if (ex is ApiException _)
             {
             }
-            else if (ex is MobileException mobileException)
+            else if (ex is ClientException _)
             {
-
             }
-            else if (ex is DatabaseException dbException)
+            else if (ex is DatabaseException _)
             {
-
             }
 
             Log(ex, message, logLevel);
         }
-
 
         public abstract void OnOfflineDataUsed();
 
@@ -174,6 +181,7 @@ namespace HB.FullStack.XamarinForms.Base
 
             GlobalSettings.Logger.Log(logLevel, ex, message);
         }
+
         public static void LogDebug(string message, Exception? ex = null)
         {
             Log(ex, message, LogLevel.Debug);
@@ -182,6 +190,21 @@ namespace HB.FullStack.XamarinForms.Base
         public static void LogError(string message, Exception? ex = null)
         {
             Log(ex, message, LogLevel.Error);
+        }
+
+        public static IConfiguration GetConfiguration(string appsettingsFile, [ValidatedNotNull] Assembly executingAssembly)
+        {
+            ThrowIf.Empty(appsettingsFile, nameof(appsettingsFile));
+
+            string fileName = $"{executingAssembly.FullName!.Split(',')[0]}.{appsettingsFile}";
+
+            using Stream resFileStream = executingAssembly.GetManifestResourceStream(fileName);
+
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+
+            builder.AddJsonStream(resFileStream);
+
+            return builder.Build();
         }
     }
 }

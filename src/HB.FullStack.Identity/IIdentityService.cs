@@ -1,24 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using HB.FullStack.Database;
-using HB.FullStack.Identity.Entities;
 
 namespace HB.FullStack.Identity
 {
     public interface IIdentityService
     {
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        Task AddRolesToUserAsync(long userId, long roleId, string lastUser);
+        string JsonWebKeySetJson { get; }
 
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        Task<User> CreateUserAsync(string mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext);
+        Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
 
-        /// <exception cref="IdentityException"></exception>
-        /// <exception cref="DatabaseException"></exception>
-        Task RemoveRoleFromUserAsync(long userId, long roleId, string lastUser);
+        Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser);
+
+        Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
+
+        Task SignOutAsync(Guid signInTokenId, string lastUser);
+
+        Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
+
+        #region Role
+
+        Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser);
+
+        Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
+
+        #endregion
+
+        #region UserActivity
+
+        Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
+
+        #endregion
     }
 }

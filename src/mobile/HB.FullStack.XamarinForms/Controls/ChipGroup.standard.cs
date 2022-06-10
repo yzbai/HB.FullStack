@@ -58,9 +58,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// <summary>
         /// 这里只能保证当ItemsSource整个re new的时候，相应变化，而不是集合本身的变化。通过ItemsSourceProperty的OnItemsSourceChanged来注册集合变化
         /// </summary>
-#pragma warning disable CA2227 // Collection properties should be read only
         public IList<ChipGroupItem> ItemsSource
-#pragma warning restore CA2227 // Collection properties should be read only
         {
             get { return (IList<ChipGroupItem>)GetValue(ItemsSourceProperty); }
             set { SetValue(ItemsSourceProperty, value); }

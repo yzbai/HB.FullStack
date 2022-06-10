@@ -17,7 +17,7 @@ namespace HB.FullStack.XamarinForms.Base
 
         public string PageTypeName { get; private set; }
 
-        public bool NeedLogined { get; set; }
+        //public bool NeedLogined { get; set; }
 
         public bool NavBarIsVisible
         {
@@ -72,17 +72,17 @@ namespace HB.FullStack.XamarinForms.Base
         {
             get
             {
-                return BaseApplication.PlatformHelper.IsStatusBarShowing;
+                return PlatformHelper.Current.IsStatusBarShowing;
             }
             set
             {
                 if (value)
                 {
-                    BaseApplication.PlatformHelper.ShowStatusBar();
+                    PlatformHelper.Current.ShowStatusBar();
                 }
                 else
                 {
-                    BaseApplication.PlatformHelper.HideStatusBar();
+                    PlatformHelper.Current.HideStatusBar();
                 }
             }
         }
@@ -103,40 +103,46 @@ namespace HB.FullStack.XamarinForms.Base
 
         protected abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
-            if(NeedLogined && !UserPreferences.IsLogined)
-            {
-                NavigationService.Current.PushLoginPage(false);
-                return;
-            }
+            // 放到AppShell中去集中控制路由
+            //if(NeedLogined && !UserPreferences.IsLogined)
+            //{
+            //    INavigationService.Current.PushLoginPage(false);
+            //    BaseApplication.NavigationService.PushLoginPage(false);
+            //    NavigationService.Current.PushLoginPage(false);
+            //    return;
+            //}
 
             base.OnAppearing();
 
             IsAppearing = true;
+            
+            //viewmodel
+            if (BindingContext is BaseViewModel viewModel)
+            {
+                await viewModel.OnAppearingAsync(PageTypeName).ConfigureAwait(false);
+            }
 
             //baseContentViews
             IList<IBaseContentView?>? customerControls = GetAllCustomerControls();
 
             if (customerControls != null)
             {
-                foreach (var v in customerControls)
+                foreach (IBaseContentView? v in customerControls)
                 {
-                    if(v == null)
+                    if (v == null)
                     {
                         GlobalSettings.Logger.LogDebug("######################   Shit happend!");
                     }
+
                     v?.OnAppearing();
                 }
             }
 
-            //viewmodel
-            if (BindingContext is BaseViewModel viewModel)
-            {
-                viewModel.OnAppearing(PageTypeName);
-            }
 
-            ExecuteAppearedAsync().Fire();
+
+            await ExecuteAppearedAsync().ConfigureAwait(false);
         }
 
         private async Task ExecuteAppearedAsync()
@@ -152,7 +158,7 @@ namespace HB.FullStack.XamarinForms.Base
             return Task.CompletedTask;
         }
 
-        protected override void OnDisappearing()
+        protected override async void OnDisappearing()
         {
             //Application.Current.LogUsage(UsageType.PageDisappearing, PageName);
 
@@ -174,7 +180,7 @@ namespace HB.FullStack.XamarinForms.Base
             //viewmodel
             if (BindingContext is BaseViewModel viewModel)
             {
-                viewModel.OnDisappearing(PageTypeName);
+                await viewModel.OnDisappearingAsync(PageTypeName).ConfigureAwait(false);
             }
         }
 

@@ -53,19 +53,13 @@ namespace HB.FullStack.XamarinForms.Controls
 
         public TimeEditor()
         {
-
-
             AmPmChangedCommand = new Command<object>(OnAmPmChanged);
             HourChangedCommand = new Command<object>(OnHourChanged);
             MinuteChangedCommand = new Command<object>(OnMinuteChanged);
 
-
             TestCommand = new Command(() =>
             {
-
-
             });
-
 
             //如果 放到Command声明之前，则要OnPropertyChanged通知Command发生改变
             InitializeComponent();
@@ -89,20 +83,17 @@ namespace HB.FullStack.XamarinForms.Controls
 
         private void OnAmPmChanged(object obj)
         {
-            bool isUp = Convert.ToBoolean(obj, GlobalSettings.Culture);
+            _ = Convert.ToBoolean(obj, GlobalSettings.Culture);
             Time = Time.AddTime(Time.IsAm ? 12 : -12, 0);
         }
 
         public override IList<IBaseContentView?>? GetAllCustomerControls() => null;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         private void OnIsDisplay24HourFormatChanged(bool oldValue, object newValue)
         {
-
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         private void OnTimeChanged(Time24Hour oldValue, Time24Hour newValue)
         {
             OnPropertyChanged(nameof(Hour));

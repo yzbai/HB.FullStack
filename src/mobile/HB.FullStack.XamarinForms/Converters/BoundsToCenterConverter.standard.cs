@@ -14,7 +14,7 @@ namespace HB.FullStack.XamarinForms.Converters
         {
             if (value is Rectangle rectangle)
             {
-                return rectangle.Center;
+                return  rectangle.Center;
             }
 
             return null;

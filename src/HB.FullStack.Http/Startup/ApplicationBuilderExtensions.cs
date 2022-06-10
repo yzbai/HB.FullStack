@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Builder
     {
         public static IApplicationBuilder UseExceptionController(this IApplicationBuilder app)
         {
-            return app.UseExceptionHandler("/exception");
+            return app.UseExceptionHandler("/GlobalException");
         }
 
         public static IApplicationBuilder UseOnlyHttps(this IApplicationBuilder app)

@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -18,9 +18,9 @@ namespace HB.FullStack.Common
     /// </summary>
     public class ValidatableObject : ISupportValidate
     {
-        #region Validation
-
+        [MessagePack.IgnoreMember]
         private IList<ValidationResult>? _validateResults;
+        [MessagePack.IgnoreMember]
         private ValidationContext? _validationContext;
 
         public bool IsValid()
@@ -83,22 +83,14 @@ namespace HB.FullStack.Common
 
                 return result;
             }
-            catch (ArgumentNullException)
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                return false;
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
-            catch (Exception)
-            {
+                GlobalSettings.Logger?.LogPerformValidateError(propertyName, ex);
                 return false;
             }
         }
-
-        #endregion Validation
     }
 }
 
-#nullable restore

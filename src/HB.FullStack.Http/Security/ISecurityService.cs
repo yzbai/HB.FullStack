@@ -12,7 +12,7 @@ namespace HB.FullStack.WebApi.Security
     {
         Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest);
 
-        /// <exception cref="ApiException"></exception>
+        
         Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedFileSuffixes, long sizeLimit);
     }
 }

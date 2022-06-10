@@ -1,27 +1,36 @@
-﻿#nullable enable
+﻿
 
 namespace System
 {
+    /// <summary>
+    /// Client与Server沟通时，约定好的默认名称
+    /// </summary>
     public static class ClientNames
     {
-        public const string AccessToken = nameof(AccessToken);
-        public const string RefreshToken = nameof(RefreshToken);
+        //public const string ACCESS_TOKEN = "AccessToken";
+        //public const string REFRESH_TOKEN = "RefreshToken";
 
-        public const string DeviceId = nameof(DeviceId);
-        public const string DeviceVersion = nameof(DeviceVersion);
-        public const string DeviceInfos = nameof(DeviceInfos);
-        public const string DeviceAddress = nameof(DeviceAddress);
+        public const string DEVICE_ID = "DeviceId";
+        public const string DEVICE_VERSION = "DeviceVersion";
+        //public const string DEVICE_INFOS = "DeviceInfos";
+        //public const string DEVICE_ADDRESS = "DeviceAddress";
 
-        public const string RandomStr = nameof(RandomStr);
+        public const string RANDOM_STR = "RandomStr";
 
-        public const string Timestamp = nameof(Timestamp);
+        public const string TIMESTAMP = "Timestamp";
 
-        public const string PublicResourceToken = nameof(PublicResourceToken);
+        public const string Page = "Page";
 
-        public const string Mobile = nameof(Mobile);
+        public const string PerPage = "PerPage";
 
-        public const string SmsCode = nameof(SmsCode);
+        public const string OrderBy = "OrderBy";
 
-        public const string Email = nameof(Email);
+        //public const string PUBLIC_RESOURCE_TOKEN = "PublicResourceToken";
+
+        //public const string MOBILE = "Mobile";
+
+        //public const string SMS_CODE = "SmsCode";
+
+        //public const string EMAIL = "Email";
     }
 }

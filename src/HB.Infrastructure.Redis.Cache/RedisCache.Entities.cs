@@ -19,19 +19,19 @@ namespace HB.Infrastructure.Redis.Cache
 {
     /// <summary>
     /// Entity in Redis:
-    /// 
+    ///
     ///                                 |------ abexp    :  value
     /// Id------------------------------|------ slidexp  :  value        //same as IDistributed way
     ///                                 |------ data     :  jsonString
-    /// 
-    /// 
+    ///
+    ///
     ///                                 |------- DimensionKeyValue_1   :  Id
     /// EntityName_DimensionKeyName-----|......
     ///                                 |------- DimensionKeyValue_n   :  Id
-    ///                                 
+    ///
     /// 所以EntityName_DimensionKeyName 这个key是一个索引key
     /// </summary>
-    internal partial class RedisCache : RedisCacheBase, ICache
+    public partial class RedisCache : RedisCacheBase, ICache
     {
         /// <summary>
         /// keys:id1, id2, id3
@@ -54,27 +54,27 @@ for j =1,number do
         local absexp = tonumber(data[1])
         if(now>=absexp) then
             redis.call('del',KEYS[j])
-    
+
             if (data[3]~='') then
                 for i in string.gmatch(data[3], '%S+') do
-                   redis.call('del', i) 
+                   redis.call('del', i)
                 end
             end
-            return nil 
+            return nil
         end
     end
 
     if(ARGV[2]~='-1') then
         redis.call('expire', KEYS[j], ARGV[2])
-    
+
         if (data[3]~='') then
             for k in string.gmatch(data[3], '%S+') do
-               redis.call('expire', k, ARGV[2]) 
+               redis.call('expire', k, ARGV[2])
             end
         end
     end
 
-    array[j]= data[2] 
+    array[j]= data[2]
 end
 return array
 ";
@@ -96,7 +96,7 @@ local array={}
 for j =1,number do
     local id = redis.call('get',KEYS[j])
 
-    local data= redis.call('hmget',id, 'absexp','data','dim') 
+    local data= redis.call('hmget',id, 'absexp','data','dim')
 
     if (not data[1]) then
         redis.call('del', KEYS[j])
@@ -108,22 +108,22 @@ for j =1,number do
         local absexp = tonumber(data[1])
         if(now>=absexp) then
             redis.call('del',id)
-    
+
             if (data[3]~='') then
                 for i in string.gmatch(data[3], '%S+') do
-                   redis.call('del', i) 
+                   redis.call('del', i)
                 end
             end
-            return nil 
+            return nil
         end
     end
 
     if(ARGV[2]~='-1') then
         redis.call('expire', id, ARGV[2])
-    
+
         if (data[3]~='') then
             for k in string.gmatch(data[3], '%S+') do
-               redis.call('expire', k, ARGV[2]) 
+               redis.call('expire', k, ARGV[2])
             end
         end
     end
@@ -152,11 +152,11 @@ for j=1, entityNum do
         local cached=redis.call('hget', KEYS[keyIndex], 'version')
         if((not cached) or tonumber(cached)< tonumber(ARGV[6+(j-1) * 3])) then
 
-            redis.call('hmset', KEYS[keyIndex],'absexp',ARGV[1],'data',ARGV[5+(j-1)*3], 'version', ARGV[6+(j-1)*3], 'dim', ARGV[7+(j-1)*3]) 
+            redis.call('hmset', KEYS[keyIndex],'absexp',ARGV[1],'data',ARGV[5+(j-1)*3], 'version', ARGV[6+(j-1)*3], 'dim', ARGV[7+(j-1)*3])
 
-            if(ARGV[2]~='-1') then 
-                redis.call('expire',KEYS[keyIndex], ARGV[2]) 
-            end 
+            if(ARGV[2]~='-1') then
+                redis.call('expire',KEYS[keyIndex], ARGV[2])
+            end
 
             for i=keyIndex+1, keyIndex+dimNum do
                 redis.call('set', KEYS[i], KEYS[keyIndex])
@@ -179,7 +179,7 @@ return rt";
         /// keys: idKey1, idKey2, idKey3
         /// argv: 3(entity_num), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
         /// </summary>
-        public const string LUA_ENTITIES_REMOVE = @" 
+        public const string LUA_ENTITIES_REMOVE = @"
 local entityNum = tonumber(ARGV[1])
 for j=1, entityNum do
 
@@ -187,7 +187,7 @@ for j=1, entityNum do
 
     local data=redis.call('hget', KEYS[j], 'dim')
 
-    redis.call('del', KEYS[j]) 
+    redis.call('del', KEYS[j])
 
     if(data and data~='') then
         for i in string.gmatch(data, '%S+') do
@@ -211,22 +211,23 @@ for j = 1, entityNum do
 
         redis.call('set', '_minV'..id, ARGV[j+2], 'EX', ARGV[2])
 
-        local data= redis.call('hget',id, 'dim') 
+        local data= redis.call('hget',id, 'dim')
 
         if (not data) then
             redis.call('del', KEYS[1])
         else
             redis.call('del',id)
-    
+
             if (data~='') then
                 for i in string.gmatch(data, '%S+') do
-                    redis.call('del', i) 
+                    redis.call('del', i)
                 end
             end
         end
     end
 end
 ";
+
         /// <summary>
         /// keys:entity1_dimensionkey, entity2_dimensionkey, entity3_dimensionKey
         /// argv: 3(entity_count)
@@ -239,37 +240,34 @@ for j = 1, entityNum do
 
     if (id) then
 
-       
-
-        local data= redis.call('hget',id, 'dim') 
+        local data= redis.call('hget',id, 'dim')
 
         if (not data) then
             redis.call('del', KEYS[1])
         else
             redis.call('del',id)
-    
+
             if (data~='') then
                 for i in string.gmatch(data, '%S+') do
-                    redis.call('del', i) 
+                    redis.call('del', i)
                 end
             end
         end
     end
 end
 ";
+
         /// <summary>
         /// keys: idKey1, idKey2, idKey3
         /// argv: 3(entity_num)
         /// </summary>
-        public const string LUA_ENTITIES_REMOVE_FORECED_NO_VERSION = @" 
+        public const string LUA_ENTITIES_REMOVE_FORECED_NO_VERSION = @"
 local entityNum = tonumber(ARGV[1])
 for j=1, entityNum do
 
-    
-
     local data=redis.call('hget', KEYS[j], 'dim')
 
-    redis.call('del', KEYS[j]) 
+    redis.call('del', KEYS[j])
 
     if(data and data~='') then
         for i in string.gmatch(data, '%S+') do
@@ -281,17 +279,9 @@ end
 
         public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
         {
-            _logger.LogInformation($"RedisCache初始化完成");
+            Logger.LogInformation($"RedisCache初始化完成");
         }
 
-        /// <summary>
-        /// GetEntitiesAsync
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public async Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -313,11 +303,11 @@ end
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                return await MapGetEntitiesRedisResultAsync<TEntity>(result).ConfigureAwait(false);
+                return MapGetEntitiesRedisResult<TEntity>(result);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(GetEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -325,28 +315,25 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个GetEntitiesAsync.情况1，程序中实体改了");
+                Logger.LogGetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+
+                AggregateException? aggregateException = null;
 
                 try
                 {
                     await ForcedRemoveEntitiesAsync<TEntity>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex2)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    _logger.LogError(ex2, "在强制删除中出错，{TEntity}, dimKey:{dimensionKeyname} ", typeof(TEntity).Name, dimensionKeyName);
+                    aggregateException = new AggregateException(ex, ex2);
                 }
 
-                throw Exceptions.UnkownButDeleted(cause: "缓存中取值时，未知错误, 删除此项缓存", innerException: ex);
+                throw (Exception?)aggregateException ?? CacheExceptions.GetEntitiesErrorButDeleted(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
 
-        /// <summary>
-        /// SetEntitiesAsync
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public async Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -354,11 +341,10 @@ end
             ThrowIfNotCacheEnabled(entityDef);
             ThrowIf.NullOrEmpty(entities, nameof(entities));
 
-
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            await AddSetEntitiesRedisInfoAsync(entities, entityDef, redisKeys, redisValues).ConfigureAwait(false);
+            AddSetEntitiesRedisInfo(entities, entityDef, redisKeys, redisValues);
 
             IDatabase database = await GetDatabaseAsync(entityDef.CacheInstanceName).ConfigureAwait(false);
 
@@ -381,11 +367,11 @@ end
 
                     if (rt == 8)
                     {
-                        _logger.LogWarning("检测到，Cache Invalidation Concurrency冲突，已被阻止. {Entity}, {Id}", entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
+                        Logger.LogCacheInvalidationConcurrencyWithEntities(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                     else if (rt == 9)
                     {
-                        _logger.LogWarning("检测到，Cache Update Concurrency冲突，已被阻止. {Entity}, {Id}", entityDef.Name, SerializeUtil.ToJson(entities.ElementAt(i)));
+                        Logger.LogCacheUpdateVersionConcurrency(entityDef.CacheInstanceName, entityDef.Name, entities.ElementAt(i));
                     }
                 }
 
@@ -393,7 +379,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(SetEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -401,21 +387,10 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个");
-
-                throw Exceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.SetEntitiesError(entityDef.CacheInstanceName, entityDef.Name, entities, ex);
             }
         }
 
-        /// <summary>
-        /// RemoveEntitiesAsync
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="updatedVersions"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         public async Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new()
         {
             CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
@@ -435,7 +410,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(RemoveEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -443,9 +418,7 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个RemoveEntitiesAsync");
-
-                throw Exceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.RemoveEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, updatedVersions, ex);
             }
         }
 
@@ -468,7 +441,7 @@ end
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
             {
-                _logger.LogError(ex, "NOSCRIPT, will try again.");
+                Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(ForcedRemoveEntitiesAsync));
 
                 InitLoadedLuas();
 
@@ -476,23 +449,10 @@ end
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "分析这个ForcedRemoveEntitiesAsync");
-
-                throw Exceptions.Unkown(redisKeys, redisValues, ex);
+                throw CacheExceptions.ForcedRemoveEntitiesError(entityDef.CacheInstanceName, entityDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
 
-        /// <summary>
-        /// AddRemoveEntitiesRedisInfo
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="updatedVersions"></param>
-        /// <param name="entityDef"></param>
-        /// <param name="redisKeys"></param>
-        /// <param name="redisValues"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         private byte[] AddRemoveEntitiesRedisInfo<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             byte[] loadedScript;
@@ -510,7 +470,7 @@ end
             {
                 foreach (object dimensionKeyValue in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue.ToString()));
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue.ToString()!));
                 }
 
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesRemoveByDimensionLua;
@@ -519,7 +479,7 @@ end
             /// argv: 3(entity_count), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
 
             redisValues.Add(redisKeys.Count);
-            redisValues.Add(_invalidationVersionExpirySeconds);
+            redisValues.Add(INVALIDATION_VERSION_EXPIRY_SECONDS);
 
             foreach (int updatedVersion in updatedVersions)
             {
@@ -546,7 +506,7 @@ end
             {
                 foreach (object dimensionKeyValue in dimensionKeyValues)
                 {
-                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue.ToString()));
+                    redisKeys.Add(GetEntityDimensionKey(entityDef.Name, dimensionKeyName, dimensionKeyValue.ToString()!));
                 }
 
                 loadedScript = GetLoadedLuas(entityDef.CacheInstanceName!).LoadedEntitiesForcedRemoveByDimensionLua;
@@ -559,17 +519,6 @@ end
             return loadedScript;
         }
 
-
-        /// <summary>
-        /// AddGetEntitiesRedisInfo
-        /// </summary>
-        /// <param name="dimensionKeyName"></param>
-        /// <param name="dimensionKeyValues"></param>
-        /// <param name="entityDef"></param>
-        /// <param name="redisKeys"></param>
-        /// <param name="redisValues"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         private byte[] AddGetEntitiesRedisInfo(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
             byte[] loadedScript;
@@ -600,7 +549,7 @@ end
             return loadedScript;
         }
 
-        private async Task AddSetEntitiesRedisInfoAsync<TEntity>(IEnumerable<TEntity> entities, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
+        private void AddSetEntitiesRedisInfo<TEntity>(IEnumerable<TEntity> entities, CacheEntityDef entityDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TEntity : Entity, new()
         {
             /// keys: entity1_idKey, entity1_dimensionkey1, entity1_dimensionkey2, entity1_dimensionkey3, entity2_idKey, entity2_dimensionkey1, entity2_dimensionkey2, entity2_dimensionkey3
             /// argv: absexp_value, expire_value,2(entity_cout), 3(dimensionkey_count), entity1_data, entity1_version, entity1_dimensionKeyJoinedString, entity2_data, entity2_version, entity2_dimensionKeyJoinedString
@@ -636,7 +585,7 @@ end
                     joinedDimensinKeyBuilder.Remove(joinedDimensinKeyBuilder.Length - 1, 1);
                 }
 
-                byte[] data = await SerializeUtil.PackAsync(entity).ConfigureAwait(false);
+                byte[] data = SerializeUtil.Serialize(entity);
 
                 redisValues.Add(data);
                 redisValues.Add(entity.Version);
@@ -644,7 +593,7 @@ end
             }
         }
 
-        private static async Task<(IEnumerable<TEntity>?, bool)> MapGetEntitiesRedisResultAsync<TEntity>(RedisResult result) where TEntity : Entity, new()
+        private static (IEnumerable<TEntity>?, bool) MapGetEntitiesRedisResult<TEntity>(RedisResult result) where TEntity : Entity, new()
         {
             if (result.IsNull)
             {
@@ -662,7 +611,7 @@ end
 
             foreach (RedisResult item in results)
             {
-                TEntity? entity = await SerializeUtil.UnPackAsync<TEntity>((byte[])item).ConfigureAwait(false);
+                TEntity? entity = SerializeUtil.Deserialize<TEntity>((byte[])item);
 
                 //因为lua中已经检查过全部存在，所以这里都不为null
                 entities.Add(entity!);

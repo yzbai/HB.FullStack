@@ -23,7 +23,6 @@ namespace HB.FullStack.XamarinForms.Controls
             declaringType: typeof(HybridWebView),
             defaultValue: default(string));
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "<Pending>")]
         public string Uri
         {
             get { return (string)GetValue(UriProperty); }
@@ -72,12 +71,14 @@ namespace HB.FullStack.XamarinForms.Controls
 
         public void OnAppearing()
         {
-            IsAppearing = true;
+
+
+            IsAppearred = true;
         }
 
         public void OnDisappearing()
         {
-            IsAppearing = false;
+            IsAppearred = false;
         }
 
         
@@ -87,6 +88,6 @@ namespace HB.FullStack.XamarinForms.Controls
             return null;
         }
 
-        public bool IsAppearing { get; private set; }
+        public bool IsAppearred { get; private set; }
     }
 }

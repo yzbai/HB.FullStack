@@ -18,7 +18,7 @@ namespace HB.Infrastructure.Redis.EventBus
     /// <summary>
     /// brokerName 就是 InstanceName
     /// </summary>
-    internal class RedisEventBusEngine : IEventBusEngine
+    public class RedisEventBusEngine : IEventBusEngine
     {
         private readonly ILogger _logger;
 
@@ -45,13 +45,6 @@ namespace HB.Infrastructure.Redis.EventBus
             _logger.LogInformation("RedisEventBusEngine初始化完成");
         }
 
-        /// <summary>
-        /// PublishAsync
-        /// </summary>
-        /// <param name="brokerName"></param>
-        /// <param name="eventMessage"></param>
-        /// <returns></returns>
-        /// <exception cref="EventBusException"></exception>
         public async Task PublishAsync(string brokerName, string eventName, string jsonData)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
@@ -61,66 +54,60 @@ namespace HB.Infrastructure.Redis.EventBus
             EventMessageEntity entity = new EventMessageEntity(eventName, jsonData);
 
             await database.ListLeftPushAsync(QueueName(entity.EventName), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
-
         }
 
-        //启动Consume线程, 启动History线程
         /// <summary>
-        /// StartHandle
+        /// StartHandle启动Consume线程, 启动History线程
         /// </summary>
-        /// <param name="eventType"></param>
-        /// <exception cref="EventBusException"></exception>
-        public void StartHandle(string eventType)
+        public void StartHandle(string eventName)
         {
-            if (!_consumeTaskManagers.ContainsKey(eventType))
+            if (!_consumeTaskManagers.ContainsKey(eventName))
             {
-                throw Exceptions.NoHandler(eventType: eventType);
+                throw Exceptions.NoHandler(eventType: eventName);
             }
 
-            _consumeTaskManagers[eventType].Start();
+            _consumeTaskManagers[eventName].Start();
         }
 
         /// <summary>
         /// 每一种事件，只有一次SubscribeHandler的机会。之后再订阅，就报错了。
         /// 开始处理
         /// </summary>
-        /// <exception cref="EventBusException"></exception>
-        public void SubscribeHandler(string brokerName, string eventType, IEventHandler eventHandler)
+        public void SubscribeHandler(string brokerName, string eventName, IEventHandler eventHandler)
         {
             RedisInstanceSetting instanceSetting = GetRedisInstanceSetting(brokerName);
 
             lock (_consumeTaskManagerLocker)
             {
-                if (_consumeTaskManagers.ContainsKey(eventType))
+                if (_consumeTaskManagers.ContainsKey(eventName))
                 {
-                    throw Exceptions.HandlerAlreadyExisted(eventType: eventType, brokerName: brokerName);
+                    throw Exceptions.HandlerAlreadyExisted(eventType: eventName, brokerName: brokerName);
                 }
 
-                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventType, eventHandler, _logger);
+                ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventName, eventHandler, _logger);
 
-                _consumeTaskManagers.Add(eventType, consumeTaskManager);
+                _consumeTaskManagers.Add(eventName, consumeTaskManager);
             }
         }
 
         /// <summary>
         /// 停止处理
         /// </summary>
-        /// <exception cref="EventBusException"></exception>
-        public async Task UnSubscribeHandlerAsync(string eventType)
+        public async Task UnSubscribeHandlerAsync(string eventyName)
         {
-            await _consumeTaskManagers[eventType].CancelAsync().ConfigureAwait(false);
+            await _consumeTaskManagers[eventyName].CancelAsync().ConfigureAwait(false);
 
-            _consumeTaskManagers[eventType].Dispose();
+            _consumeTaskManagers[eventyName].Dispose();
 
             lock (_consumeTaskManagerLocker)
             {
-                if (!_consumeTaskManagers.ContainsKey(eventType))
+                if (!_consumeTaskManagers.ContainsKey(eventyName))
                 {
-                    throw Exceptions.NoHandler(eventType);
+                    throw Exceptions.NoHandler(eventyName);
                 }
 
                 //_consumeTaskManagers[eventType] = null;
-                _consumeTaskManagers.Remove(eventType);
+                _consumeTaskManagers.Remove(eventyName);
             }
         }
 
@@ -158,13 +145,6 @@ namespace HB.Infrastructure.Redis.EventBus
             }
         }
 
-
-        /// <summary>
-        /// GetRedisInstanceSetting
-        /// </summary>
-        /// <param name="brokerName"></param>
-        /// <returns></returns>
-        /// <exception cref="EventBusException"></exception>
         private RedisInstanceSetting GetRedisInstanceSetting(string brokerName)
         {
             if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting? instanceSetting))

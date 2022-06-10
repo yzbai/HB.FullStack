@@ -15,35 +15,49 @@ namespace HB.FullStack.XamarinForms.Base
 {
     public abstract class BaseViewModel : ObservableObject
     {
+        private bool _isBusy;
 
-        bool _isBusy;
         public bool IsBusy
         {
-            get { return _isBusy; }
-            set { SetProperty(ref _isBusy, value); }
+            get => _isBusy;
+            set => SetProperty(ref _isBusy, value);
         }
 
-        string _title = string.Empty;
+        private string _title = string.Empty;
+
         public string Title
         {
-            get { return _title; }
-            set { SetProperty(ref _title, value); }
+            get => _title;
+            set => SetProperty(ref _title, value);
         }
 
-        public virtual void OnAppearing(string pageTypeName)
+        /// <summary>
+        /// page将要呈现时执行，
+        /// page和viewmodel的生命周期不一定一致。
+        /// </summary>
+        /// <param name="pageTypeName"></param>
+        /// <returns></returns>
+        public virtual Task OnAppearingAsync(string pageTypeName)
         {
+            return Task.CompletedTask;
         }
 
-        public virtual void OnDisappearing(string pageTypeName)
+        /// <summary>
+        /// page将要消失时执行，
+        /// page和viewmodel的生命周期不一定一致。
+        /// </summary>
+        /// <param name="pageTypeName"></param>
+        /// <returns></returns>
+        public virtual Task OnDisappearingAsync(string pageTypeName)
         {
-
+            return Task.CompletedTask;
         }
 
         public static void DisplayAlert(string message, string title, string button)
         {
-            Device.BeginInvokeOnMainThread(() =>
+            Device.BeginInvokeOnMainThread(async () =>
             {
-                Application.Current.MainPage.DisplayAlert(message, title, button).Fire();
+                await Application.Current.MainPage.DisplayAlert(message, title, button).ConfigureAwait(false);
             });
         }
 
@@ -51,6 +65,5 @@ namespace HB.FullStack.XamarinForms.Base
         {
             return Application.Current.MainPage.DisplayAlert(title, message, acceptButton, cancelButton);
         }
-
     }
 }

@@ -18,38 +18,46 @@ namespace System
             return null;
         }
 
-        public static long? GetUserId(this ClaimsPrincipal principal)
+        public static Guid? GetUserId(this ClaimsPrincipal principal)
         {
-            string? strUserId = principal.GetClaimValue(ClaimExtensionTypes.UserId);
+            string? strUserId = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
 
             if (strUserId.IsNullOrEmpty())
             {
                 return null;
             }
 
-            return Convert.ToInt64(strUserId, GlobalSettings.Culture);
+            return new Guid(strUserId);
         }
 
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.SecurityStamp);
+            return principal.GetClaimValue(ClaimExtensionTypes.SECURITY_STAMP);
         }
 
         public static string? GetAudience(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.Audience);
+            return principal.GetClaimValue(ClaimExtensionTypes.AUDIENCE);
         }
 
-        public static long? GetSignInTokenId(this ClaimsPrincipal principal)
+        public static Guid? GetSignInTokenId(this ClaimsPrincipal principal)
         {
-            string? str = principal.GetClaimValue(ClaimExtensionTypes.SignInTokenId);
+            string? str = principal.GetClaimValue(ClaimExtensionTypes.SIGN_IN_TOKEN_ID);
 
-            return str.IsNullOrEmpty() ? null : Convert.ToInt64(str, GlobalSettings.Culture);
+            return str.IsNullOrEmpty() ? null : new Guid(str);
         }
 
         public static string? GetDeviceId(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.DeviceId);
+            return principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
+        }
+
+        public static string GetLastUser(this ClaimsPrincipal principal)
+        {
+            string? userIdStr = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
+            string? deviceId = principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
+
+            return $"{userIdStr}-{deviceId}";
         }
 
         //public static string GetAuthtoken(this ClaimsPrincipal principal)
@@ -57,10 +65,10 @@ namespace System
         //    return principal.GetClaimValue(ClaimExtensionTypes.Authtoken);
         //}
 
-        public static string? GetLoginName(this ClaimsPrincipal principal)
-        {
-            return principal.GetClaimValue(ClaimExtensionTypes.LoginName);
-        }
+        //public static string? GetLoginName(this ClaimsPrincipal principal)
+        //{
+        //    return principal.GetClaimValue(ClaimExtensionTypes.LoginName);
+        //}
 
         //public static string GetMobile(this ClaimsPrincipal principal)
         //{

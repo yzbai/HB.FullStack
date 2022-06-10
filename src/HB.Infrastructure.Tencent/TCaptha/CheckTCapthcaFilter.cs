@@ -10,9 +10,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace HB.Infrastructure.Tencent.TCaptha
 {
+    /// <summary>
+    /// 验证Http Header中的Captha
+    /// </summary>
     public class CheckTCapthcaFilter : IAsyncActionFilter
     {
         private readonly ILogger<CheckTCapthcaFilter> _logger;
@@ -28,25 +32,21 @@ namespace HB.Infrastructure.Tencent.TCaptha
         {
             try
             {
-                KeyValuePair<string, object>? firstArgument = context?.ActionArguments?.FirstOrDefault();
-                object? firstArgumentValue = firstArgument.HasValue ? firstArgument.Value.Value : null;
+                StringValues captcha = context.HttpContext.Request.Headers[ApiHeaderNames.Captcha];
 
-                if (firstArgumentValue is not ApiRequest apiRequest)
+                if (captcha.IsNullOrEmpty())
                 {
-                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
-                    return;
-                }
-                if (apiRequest.PublicResourceToken.IsNullOrEmpty())
-                {
-                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.CapthcaNotFound);
                     return;
                 }
 
-                TCaptchaResult? result = SerializeUtil.FromJson<TCaptchaResult>(apiRequest.PublicResourceToken);
+                string captchaJson = captcha.First();
+
+                TCaptchaResult? result = SerializeUtil.FromJson<TCaptchaResult>(captchaJson);
 
                 if (result == null || !result.IsSuccessed)
                 {
-                    OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
+                    OnError(context, ApiErrorCodes.CapthcaError);
                     return;
                 }
 
@@ -54,15 +54,17 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (!verifyResult)
                 {
-                    OnError(context, ApiErrorCodes.PublicResourceTokenError);
+                    OnError(context, ApiErrorCodes.CapthcaError);
                     return;
                 }
 
                 await next().ConfigureAwait(false);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                OnError(context, ApiErrorCodes.PublicResourceTokenNeeded);
+                OnError(context, ApiErrorCodes.CapthcaError);
                 _logger.LogError(ex, "TCaptcha 验证执行失败");
             }
         }

@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Api;
 using HB.FullStack.WebApi;
+
 using Microsoft.AspNetCore.Http;
 
 namespace HB.FullStack.WebApi.Security
@@ -50,19 +52,19 @@ namespace HB.FullStack.WebApi.Security
         /// <param name="permittedFileSuffixes"></param>
         /// <param name="sizeLimit"></param>
         /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
+        
         public async Task<byte[]> ProcessFormFileAsync(IFormFile? formFile, string[] permittedFileSuffixes, long sizeLimit)
         {
             // Check the file length. This check doesn't catch files that only have 
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedFileSuffixes.IsNullOrEmpty())
             {
-                throw ApiExceptions.ApiUploadEmptyFile();
+                throw ApiExceptions.UploadError(cause: "empty file.", formFile?.FileName, null);
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw ApiExceptions.ApiUploadOverSize();
+                throw ApiExceptions.UploadError(cause: "Upload OverSize", formFile.FileName, null);
             }
 
             try
@@ -76,13 +78,12 @@ namespace HB.FullStack.WebApi.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw ApiExceptions.ApiUploadEmptyFile();
+                    throw ApiExceptions.UploadError(cause: "empty file after removing BOM.", formFile.FileName, null);
                 }
 
-                if (!IsValidFileExtensionAndSignature(
-                    formFile.FileName, memoryStream, permittedFileSuffixes))
+                if (!IsValidFileExtensionAndSignature(formFile.FileName, memoryStream, permittedFileSuffixes))
                 {
-                    throw ApiExceptions.ApiUploadWrongType();
+                    throw ApiExceptions.UploadError(cause: "Upload Wrong Type Files", formFile.FileName, null);
                 }
                 else
                 {
@@ -91,7 +92,7 @@ namespace HB.FullStack.WebApi.Security
             }
             catch (Exception ex)
             {
-                throw ApiExceptions.ServerUnkownError(fileName:formFile.FileName,innerException: ex);
+                throw ApiExceptions.UploadError(cause:"Unkown file upload error", formFile.FileName, innerException: ex);
             }
         }
 

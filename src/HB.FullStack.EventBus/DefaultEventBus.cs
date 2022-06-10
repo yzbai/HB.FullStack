@@ -10,7 +10,7 @@ namespace HB.FullStack.EventBus
     /// <summary>
     /// 单例启动
     /// </summary>
-    internal class DefaultEventBus : IEventBus
+    public class DefaultEventBus : IEventBus
     {
         private readonly IEventBusEngine _engine;
         private readonly IDictionary<string, EventSchema> _eventSchemaDict;
@@ -21,54 +21,26 @@ namespace HB.FullStack.EventBus
             _eventSchemaDict = eventBusEngine.EventBusSettings.EventSchemas.ToDictionary(e => e.EventName);
         }
 
-        /// <summary>
-        /// PublishAsync
-        /// </summary>
-        /// <param name="eventMessage"></param>
-        /// <returns></returns>
-        /// <exception cref="EventBusException"></exception>
         public async Task PublishAsync(string eventName, string jsonData)
         {
             await _engine.PublishAsync(GetBrokerName(eventName), eventName, jsonData).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// StartHandle
-        /// </summary>
-        /// <param name="eventType"></param>
-        /// <exception cref="EventBusException"></exception>
-        public void StartHandle(string eventType)
+        public void StartHandle(string eventName)
         {
-            _engine.StartHandle(eventType);
+            _engine.StartHandle(eventName);
         }
 
-        /// <summary>
-        /// Subscribe
-        /// </summary>
-        /// <param name="eventType"></param>
-        /// <param name="handler"></param>
-        /// <exception cref="EventBusException"></exception>
-        public void Subscribe(string eventType, IEventHandler handler)
+        public void Subscribe(string eventName, IEventHandler handler)
         {
-            _engine.SubscribeHandler(brokerName: GetBrokerName(eventType), eventName: eventType, eventHandler: handler);
+            _engine.SubscribeHandler(brokerName: GetBrokerName(eventName), eventName: eventName, eventHandler: handler);
         }
 
-        /// <summary>
-        /// UnSubscribe
-        /// </summary>
-        /// <param name="eventType"></param>
-        /// <exception cref="EventBusException"></exception>
-        public async Task UnSubscribeAsync(string eventType)
+        public async Task UnSubscribeAsync(string eventName)
         {
-            await _engine.UnSubscribeHandlerAsync(eventyName: eventType).ConfigureAwait(false);
+            await _engine.UnSubscribeHandlerAsync(eventyName: eventName).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// GetBrokerName
-        /// </summary>
-        /// <param name="eventName"></param>
-        /// <returns></returns>
-        /// <exception cref="EventBusException"></exception>
         private string GetBrokerName(string eventName)
         {
             if (_eventSchemaDict.TryGetValue(eventName, out EventSchema? eventSchema))

@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTCaptha(this IServiceCollection services, Action<TCapthaOptions> action)
         {
 
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(action);
 
@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTCaptha(this IServiceCollection services, IConfiguration configuration)
         {
 
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<TCapthaOptions>(configuration);
 
@@ -37,15 +37,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return services;
         }
-
-        /// <summary>
-        /// AddTCapthaCore
-        /// </summary>
-        /// <param name="services"></param>
-        /// <exception cref="InvalidOperationException">Ignore.</exception>
+        
         private static void AddTCapthaCore(IServiceCollection services)
         {
-            services.AddHttpClient(TCapthaOptions.EndpointName, httpClient =>
+            services.AddHttpClient(TCapthaOptions.ENDPOINT_NAME, httpClient =>
             {
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                 httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ITCapthaClient).FullName);

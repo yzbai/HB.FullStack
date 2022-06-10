@@ -1,13 +1,13 @@
 ﻿namespace System
 {
-    public class ErrorCodeException : Exception
+    public class ErrorCode2Exception : Exception
     {
-        public ErrorCodeException(ErrorCode errorCode) : base(errorCode.Message)
+        public ErrorCode2Exception(ErrorCode errorCode) : base(errorCode.Message)
         {
             ErrorCode = errorCode;
         }
 
-        public ErrorCodeException(ErrorCode errorCode, Exception? innerException) : base(errorCode.Message, innerException)
+        public ErrorCode2Exception(ErrorCode errorCode, Exception? innerException) : base(errorCode.Message, innerException)
         {
             ErrorCode = errorCode;
         }
@@ -16,12 +16,24 @@
         {
             get
             {
-                return (ErrorCode)Data[nameof(ErrorCode)];
+                return (ErrorCode?)Data[nameof(ErrorCode)]!;
             }
             private set
             {
                 Data[nameof(ErrorCode)] = value;
             }
+        }
+
+        public ErrorCode2Exception()
+        {
+        }
+
+        public ErrorCode2Exception(string? message) : base(message)
+        {
+        }
+
+        public ErrorCode2Exception(string? message, Exception innerException) : base(message, innerException)
+        {
         }
     }
 }

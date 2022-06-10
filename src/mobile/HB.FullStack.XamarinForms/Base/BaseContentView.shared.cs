@@ -11,7 +11,7 @@ namespace HB.FullStack.XamarinForms.Base
     {
         public virtual void OnAppearing()
         {
-            IsAppearing = true;
+            IsAppearred = true;
 
             IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
 
@@ -27,7 +27,7 @@ namespace HB.FullStack.XamarinForms.Base
         }
         public virtual void OnDisappearing()
         {
-            IsAppearing = false;
+            IsAppearred = false;
 
             IList<IBaseContentView?>? contentViews = GetAllCustomerControls();
 
@@ -44,7 +44,7 @@ namespace HB.FullStack.XamarinForms.Base
 
         public abstract IList<IBaseContentView?>? GetAllCustomerControls();
 
-        public bool IsAppearing
+        public bool IsAppearred
         {
             get; private set;
         }

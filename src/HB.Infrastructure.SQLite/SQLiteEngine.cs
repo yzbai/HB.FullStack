@@ -72,8 +72,7 @@ namespace HB.Infrastructure.SQLite
             return _connectionStringDict[dbName + "_0"];
         }
 
-
-        #endregion 自身 & 构建
+        #endregion
 
         public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
         {
@@ -97,17 +96,8 @@ namespace HB.Infrastructure.SQLite
             return command;
         }
 
-
         #region Command 能力
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
@@ -122,18 +112,9 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
-            //使用using的话，会同时关闭reader. 
+            //使用using的话，会同时关闭reader.
             //在Microsoft.Data.Sqlite实现中， dipose connection后，会自动dispose command
 #pragma warning disable CA2000 // Dispose objects before losing scope
             SqliteCommand dbCommand = CreateTextCommand(engineCommand);
@@ -149,15 +130,6 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="Transaction"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
@@ -172,7 +144,7 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        #endregion Command 能力
+        #endregion
 
         #region 事务
 
@@ -189,7 +161,7 @@ namespace HB.Infrastructure.SQLite
         {
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
-            SqliteConnection connection = sqliteTransaction.Connection;
+            SqliteConnection connection = sqliteTransaction.Connection!;
 
             try
             {
@@ -205,7 +177,7 @@ namespace HB.Infrastructure.SQLite
         {
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
-            SqliteConnection connection = sqliteTransaction.Connection;
+            SqliteConnection connection = sqliteTransaction.Connection!;
 
             try
             {

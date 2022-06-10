@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -17,83 +17,58 @@ namespace HB.FullStack.Database.SQL
             if (exp == null)
                 return exp;
 
-            switch (exp.NodeType)
+            return exp.NodeType switch
             {
-                case ExpressionType.Negate:
-                case ExpressionType.NegateChecked:
-                case ExpressionType.Not:
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.ArrayLength:
-                case ExpressionType.Quote:
-                case ExpressionType.TypeAs:
-                    return VisitUnary((UnaryExpression)exp);
+                ExpressionType.Negate 
+                    or ExpressionType.NegateChecked 
+                    or ExpressionType.Not 
+                    or ExpressionType.Convert 
+                    or ExpressionType.ConvertChecked 
+                    or ExpressionType.ArrayLength 
+                    or ExpressionType.Quote 
+                    or ExpressionType.TypeAs 
+                    => VisitUnary((UnaryExpression)exp),
 
-                case ExpressionType.Add:
-                case ExpressionType.AddChecked:
-                case ExpressionType.Subtract:
-                case ExpressionType.SubtractChecked:
-                case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked:
-                case ExpressionType.Divide:
-                case ExpressionType.Modulo:
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
-                case ExpressionType.Equal:
-                case ExpressionType.NotEqual:
-                case ExpressionType.Coalesce:
-                case ExpressionType.ArrayIndex:
-                case ExpressionType.RightShift:
-                case ExpressionType.LeftShift:
-                case ExpressionType.ExclusiveOr:
-                    return VisitBinary((BinaryExpression)exp);
+                ExpressionType.Add 
+                    or ExpressionType.AddChecked 
+                    or ExpressionType.Subtract 
+                    or ExpressionType.SubtractChecked 
+                    or ExpressionType.Multiply 
+                    or ExpressionType.MultiplyChecked 
+                    or ExpressionType.Divide 
+                    or ExpressionType.Modulo 
+                    or ExpressionType.And 
+                    or ExpressionType.AndAlso 
+                    or ExpressionType.Or 
+                    or ExpressionType.OrElse 
+                    or ExpressionType.LessThan 
+                    or ExpressionType.LessThanOrEqual 
+                    or ExpressionType.GreaterThan 
+                    or ExpressionType.GreaterThanOrEqual 
+                    or ExpressionType.Equal 
+                    or ExpressionType.NotEqual 
+                    or ExpressionType.Coalesce 
+                    or ExpressionType.ArrayIndex 
+                    or ExpressionType.RightShift 
+                    or ExpressionType.LeftShift 
+                    or ExpressionType.ExclusiveOr 
+                    => VisitBinary((BinaryExpression)exp),
 
-                case ExpressionType.TypeIs:
-                    return VisitTypeIs((TypeBinaryExpression)exp);
-
-                case ExpressionType.Conditional:
-                    return VisitConditional((ConditionalExpression)exp);
-
-                case ExpressionType.Constant:
-                    return VisitConstant((ConstantExpression)exp);
-
-                case ExpressionType.Parameter:
-                    return VisitParameter((ParameterExpression)exp);
-
-                case ExpressionType.MemberAccess:
-                    return VisitMemberAccess((MemberExpression)exp);
-
-                case ExpressionType.Call:
-                    return VisitMethodCall((MethodCallExpression)exp);
-
-                case ExpressionType.Lambda:
-                    return VisitLambda((LambdaExpression)exp);
-
-                case ExpressionType.New:
-                    return VisitNew((NewExpression)exp);
-
-                case ExpressionType.NewArrayInit:
-                case ExpressionType.NewArrayBounds:
-                    return VisitNewArray((NewArrayExpression)exp);
-
-                case ExpressionType.Invoke:
-                    return VisitInvocation((InvocationExpression)exp);
-
-                case ExpressionType.MemberInit:
-                    return VisitMemberInit((MemberInitExpression)exp);
-
-                case ExpressionType.ListInit:
-                    return VisitListInit((ListInitExpression)exp);
-
-                default:
-                    throw new NotSupportedException();
-            }
+                ExpressionType.Lambda => VisitLambda((LambdaExpression)exp),
+                ExpressionType.TypeIs => VisitTypeIs((TypeBinaryExpression)exp),
+                ExpressionType.Conditional => VisitConditional((ConditionalExpression)exp),
+                ExpressionType.Constant => VisitConstant((ConstantExpression)exp),
+                ExpressionType.Parameter => VisitParameter((ParameterExpression)exp),
+                ExpressionType.MemberAccess => VisitMemberAccess((MemberExpression)exp),
+                ExpressionType.Call => VisitMethodCall((MethodCallExpression)exp),
+                ExpressionType.New => VisitNew((NewExpression)exp),
+                ExpressionType.NewArrayInit or ExpressionType.NewArrayBounds => VisitNewArray((NewArrayExpression)exp),
+                ExpressionType.Invoke => VisitInvocation((InvocationExpression)exp),
+                ExpressionType.MemberInit => VisitMemberInit((MemberInitExpression)exp),
+                ExpressionType.ListInit => VisitListInit((ListInitExpression)exp),
+                
+                _ => throw new NotSupportedException(),
+            };
         }
 
         /// <summary>

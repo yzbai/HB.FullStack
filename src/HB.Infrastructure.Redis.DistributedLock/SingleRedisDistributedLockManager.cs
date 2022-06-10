@@ -17,17 +17,15 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.DistributedLock
 {
-	internal class SingleRedisDistributedLockManager : IDistributedLockManager
+	public class SingleRedisDistributedLockManager : IDistributedLockManager
 	{
-
 		//TODO: 清理Log
-
 
 		/// <summary>
 		/// keys: resource1, resource2, resource3
 		/// argv: 3(resource_count), expire_milliseconds, resource1_value, resource2_value, resource3_value
 		/// </summary>
-		private const string _luaLock = @"
+		private const string LUA_LOCK = @"
 if(redis.call('exists', unpack(KEYS)) ~= 0) then
 	return 0
 end
@@ -44,7 +42,7 @@ return 1";
 		/// keys: resource1,resource2,resource3
 		/// argv:3(resource_count), resource1_value, resource2_value, resource3_value
 		/// </summary>
-		private const string _luaUnlock = @"
+		private const string LUA_UNLOCK = @"
 local count = tonumber(ARGV[1])
 local ok = 1
 for i = 1, count do
@@ -61,7 +59,7 @@ return ok
 		/// keys:resource1,resource2,resource3
 		/// argv:3(resource_count),expire_milliseconds, resource1_value, resource2_value, resource3_value
 		/// </summary>
-		private const string _luaExtend = @"
+		private const string LUA_EXTEND = @"
 local count = tonumber(ARGV[1])
 
 for i =1, count do
@@ -94,12 +92,13 @@ return 1";
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="resources"></param>
 		/// <param name="expiryTime">对资源的最大占用时间，应该大于TimeSpan.Zero, null表示使用默认</param>
 		/// <param name="waitTime">如果资源被占用，你愿意等多久，TimeSpan.Zero表明不愿意等。null表示使用默认等待时间</param>
 		/// <param name="retryInterval">等待时不断尝试获取资源 的 等待间隔，应该大于TimeSpan.Zero, null 表示使用默认时间</param>
+		/// <param name="notUnlockWhenDispose">释放锁时，是否解除索，还是等他自己慢慢过期</param>
 		/// <returns></returns>
 		public async Task<IDistributedLock> LockAsync(IEnumerable<string> resources, TimeSpan expiryTime, TimeSpan? waitTime, TimeSpan? retryInterval, bool notUnlockWhenDispose = false, CancellationToken? cancellationToken = null)
 		{
@@ -111,7 +110,7 @@ return 1";
 
 			if (retryInterval != null && retryInterval.Value < _minimumRetryTime)
 			{
-				_logger.LogWarning("Retry {settingTime} ms too low, setting to {minimumRetryTime} ms",  retryInterval.Value.TotalMilliseconds, _minimumRetryTime.TotalMilliseconds);
+				_logger.LogWarning("Retry {settingTime} ms too low, setting to {minimumRetryTime} ms", retryInterval.Value.TotalMilliseconds, _minimumRetryTime.TotalMilliseconds);
 				retryInterval = _minimumRetryTime;
 			}
 
@@ -140,13 +139,13 @@ return 1";
 
 				while (!redisLock.IsAcquired && stopwatch.Elapsed <= redisLock.WaitTime)
 				{
-					logger.LogDebug($"锁在等待... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug($"锁在等待... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
 					redisLock.Status = await AcquireResourceAsync(redisLock, logger).ConfigureAwait(false);
 
 					if (!redisLock.IsAcquired)
 					{
-						logger.LogDebug($"锁继续等待... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+						logger.LogDebug($"锁继续等待... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 						if (redisLock.CancellationToken == null)
 						{
 							await Task.Delay((int)redisLock.RetryTime.TotalMilliseconds).ConfigureAwait(false);
@@ -160,7 +159,7 @@ return 1";
 
 				if (!redisLock.IsAcquired)
 				{
-					logger.LogDebug($"锁等待超时... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug($"锁等待超时... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 					redisLock.Status = DistributedLockStatus.Expired;
 				}
 
@@ -174,12 +173,12 @@ return 1";
 
 			if (redisLock.IsAcquired)
 			{
-				logger.LogDebug($"锁获取成功... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"锁获取成功... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				StartAutoExtendTimer(redisLock, logger);
 			}
 			else
 			{
-				logger.LogDebug($"锁获取失败... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"锁获取失败... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 			}
 		}
 
@@ -234,11 +233,11 @@ return 1";
 		{
 			if (redisLock.Status != DistributedLockStatus.Acquired)
 			{
-				logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+				logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
 				return;
 			}
 
-			logger.LogDebug($"锁在自动延期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+			logger.LogDebug($"锁在自动延期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 
 			List<RedisKey> redisKeys = new List<RedisKey>();
 			List<RedisValue> redisValues = new List<RedisValue>();
@@ -280,7 +279,9 @@ return 1";
 			{
 				lock (redisLock.StopKeepAliveTimerLockObj)
 				{
+#pragma warning disable CA1508 // CA1508在Double Check时会误判
 					if (redisLock.KeepAliveTimer != null)
+#pragma warning restore CA1508 // Avoid dead conditional code
 					{
 						redisLock.KeepAliveTimer.Change(Timeout.Infinite, Timeout.Infinite);
 						redisLock.KeepAliveTimer.Dispose();
@@ -298,14 +299,13 @@ return 1";
 		/// <param name="redisLock"></param>
 		/// <param name="logger"></param>
 		/// <returns></returns>
-		/// <exception cref="LockException"></exception>
 		internal static async Task ReleaseResourceAsync(RedisLock redisLock, ILogger logger)
 		{
 			StopKeepAliveTimer(redisLock, logger);
 
 			if (redisLock.NotUnlockWhenDispose)
 			{
-				logger.LogDebug($"自动延期停止,但锁等他自己过期... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug($"自动延期停止,但锁被设置为等他自己过期，不干预它... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				return;
 			}
 
@@ -327,11 +327,11 @@ return 1";
 
 				if (rt == 1)
 				{
-					logger.LogDebug($"锁已经解锁... ThreadID: {Thread.CurrentThread.ManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug($"锁已经解锁... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
 				}
 				else
 				{
-					throw Exceptions.DistributedLockUnLockFailed(threadId: Thread.CurrentThread.ManagedThreadId, resources: redisLock.Resources);
+					throw LockExceptions.DistributedLockUnLockFailed(threadId: Environment.CurrentManagedThreadId, resources: redisLock.Resources);
 				}
 			}
 			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
@@ -340,11 +340,11 @@ return 1";
 
 				await ReleaseResourceAsync(redisLock, logger).ConfigureAwait(false);
 			}
-			catch(Exception ex) when (ex is not LockException)
+			catch (Exception ex) when (ex is not LockException)
 			{
-				logger.LogDebug(ex, "锁解锁失败... {ThreadID}, {Resources}", Thread.CurrentThread.ManagedThreadId, redisLock.Resources);
+				logger.LogDebug(ex, "锁解锁失败... {ThreadID}, {Resources}", Environment.CurrentManagedThreadId, redisLock.Resources);
 
-				throw Exceptions.DistributedLockUnLockFailed(threadId: Thread.CurrentThread.ManagedThreadId, resources:redisLock.Resources, innerException: ex);
+				throw LockExceptions.DistributedLockUnLockFailed(threadId: Environment.CurrentManagedThreadId, resources: redisLock.Resources, innerException: ex);
 			}
 		}
 
@@ -373,7 +373,6 @@ return 1";
 
 			//有可能到这里，dispose了，redisLock.Resources都为空
 
-
 			try
 			{
 				foreach (string item in redisLock.Resources)
@@ -401,9 +400,9 @@ return 1";
 
 			_loadedLuas = new LoadedLuas
 			{
-				LoadedLockLua = server.ScriptLoad(_luaLock),
-				LoadedUnLockLua = server.ScriptLoad(_luaUnlock),
-				LoadedExtendLua = server.ScriptLoad(_luaExtend)
+				LoadedLockLua = server.ScriptLoad(LUA_LOCK),
+				LoadedUnLockLua = server.ScriptLoad(LUA_UNLOCK),
+				LoadedExtendLua = server.ScriptLoad(LUA_EXTEND)
 			};
 		}
 

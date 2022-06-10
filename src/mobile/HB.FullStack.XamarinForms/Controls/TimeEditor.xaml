@@ -4,14 +4,12 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.XamarinForms.Base"
-    xmlns:styles="clr-namespace:HB.FullStack.XamarinForms.Styles"
+    xmlns:fonts="clr-namespace:HB.FullStack.XamarinForms.Fonts"
     xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
     x:Name="Root">
     <base:BaseContentView.Resources>
 
-        <Style
-            x:Key="TimeBorder"
-            TargetType="Frame">
+        <Style x:Key="TimeBorder" TargetType="Frame">
             <Setter Property="Padding" Value="8,0,8,0" />
             <Setter Property="BorderColor" Value="Green" />
         </Style>
@@ -26,10 +24,10 @@
     <base:BaseContentView.Content>
         <Grid
             BindingContext="{x:Reference Root}"
-            HorizontalOptions="CenterAndExpand"
-            VerticalOptions="CenterAndExpand"
             ColumnDefinitions="Auto, Auto,Auto, Auto"
-            RowDefinitions="Auto,Auto,Auto">
+            HorizontalOptions="CenterAndExpand"
+            RowDefinitions="Auto,Auto,Auto"
+            VerticalOptions="CenterAndExpand">
             <Label
                 Grid.Row="1"
                 Grid.Column="0"
@@ -40,9 +38,7 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Style="{StaticResource TimeBorder}">
-                <Entry
-                    HorizontalTextAlignment="Center"
-                    Text="{Binding Hour}">
+                <Entry HorizontalTextAlignment="Center" Text="{Binding Hour}">
                     <Entry.Effects>
                         <xct:RemoveBorderEffect />
                         <xct:SelectAllTextEffect />
@@ -54,9 +50,7 @@
                 Grid.Row="1"
                 Grid.Column="3"
                 Style="{StaticResource TimeBorder}">
-                <Entry
-                    HorizontalTextAlignment="Center"
-                    Text="{Binding Minute}">
+                <Entry HorizontalTextAlignment="Center" Text="{Binding Minute}">
                     <Entry.Effects>
                         <xct:RemoveBorderEffect />
                         <xct:SelectAllTextEffect />
@@ -76,24 +70,24 @@
                 Command="{Binding AmPmChangedCommand}"
                 CommandParameter="True"
                 IsVisible="{Binding IsDisplay24HourFormat}"
-                Source="{FontImage FontFamily=MaterialIcon,
-                                   Glyph={x:Static Member=styles:MaterialFont.ChevronUp},
+                Source="{FontImage FontFamily=MaterialFont,
+                                   Glyph={x:Static Member=fonts:MaterialFont.ChevronUp},
                                    Color=White}" />
             <ImageButton
                 Grid.Row="0"
                 Grid.Column="1"
                 Command="{Binding HourChangedCommand}"
                 CommandParameter="True"
-                Source="{FontImage FontFamily=MaterialIcon,
-                                   Glyph={x:Static Member=styles:MaterialFont.ChevronUp},
+                Source="{FontImage FontFamily=MaterialFont,
+                                   Glyph={x:Static Member=fonts:MaterialFont.ChevronUp},
                                    Color=White}" />
             <ImageButton
                 Grid.Row="0"
                 Grid.Column="3"
                 Command="{Binding MinuteChangedCommand}"
                 CommandParameter="True"
-                Source="{FontImage FontFamily=MaterialIcon,
-                                   Glyph={x:Static Member=styles:MaterialFont.ChevronUp},
+                Source="{FontImage FontFamily=MaterialFont,
+                                   Glyph={x:Static Member=fonts:MaterialFont.ChevronUp},
                                    Color=White}" />
 
             <ImageButton
@@ -102,24 +96,24 @@
                 Command="{Binding AmPmChangedCommand}"
                 CommandParameter="False"
                 IsVisible="{Binding IsDisplay24HourFormat}"
-                Source="{FontImage FontFamily=MaterialIcon,
-                                   Glyph={x:Static Member=styles:MaterialFont.ChevronDown},
+                Source="{FontImage FontFamily=MaterialFont,
+                                   Glyph={x:Static Member=fonts:MaterialFont.ChevronDown},
                                    Color=White}" />
             <ImageButton
                 Grid.Row="2"
                 Grid.Column="1"
                 Command="{Binding HourChangedCommand}"
                 CommandParameter="False"
-                Source="{FontImage FontFamily=MaterialIcon,
-                                   Glyph={x:Static Member=styles:MaterialFont.ChevronDown},
+                Source="{FontImage FontFamily=MaterialFont,
+                                   Glyph={x:Static Member=fonts:MaterialFont.ChevronDown},
                                    Color=White}" />
             <ImageButton
                 Grid.Row="2"
                 Grid.Column="3"
                 Command="{Binding MinuteChangedCommand}"
                 CommandParameter="False"
-                Source="{FontImage FontFamily=MaterialIcon,
-                                   Glyph={x:Static Member=styles:MaterialFont.ChevronDown},
+                Source="{FontImage FontFamily=MaterialFont,
+                                   Glyph={x:Static Member=fonts:MaterialFont.ChevronDown},
                                    Color=White}" />
         </Grid>
     </base:BaseContentView.Content>

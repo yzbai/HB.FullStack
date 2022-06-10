@@ -56,6 +56,7 @@ namespace HB.FullStack.XamarinForms.Controls
 
         private readonly WeakEventManager _eventManager = new WeakEventManager();
 
+#pragma warning disable CA1030 // Use events where appropriate
         public event EventHandler OnClicked
         {
             add => _eventManager.AddEventHandler(value);
@@ -79,6 +80,7 @@ namespace HB.FullStack.XamarinForms.Controls
             add => _eventManager.AddEventHandler(value);
             remove => _eventManager.RemoveEventHandler(value);
         }
+#pragma warning restore CA1030 // Use events where appropriate
 
         public string Text
         {
@@ -218,7 +220,7 @@ namespace HB.FullStack.XamarinForms.Controls
                 ((Chip)bindable).RefreshVisualState();
         }
 
-        private Frame _frame;
+        private readonly Frame _frame;
         public Chip()
         {
             Content = new Frame

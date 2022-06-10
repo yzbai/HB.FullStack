@@ -10,12 +10,12 @@
                 <StackLayout x:Name="ModalDialogContainer">
                     <Frame
                         x:Name="ModalDialogFrame"
-                        WidthRequest="280"
-                        HorizontalOptions="CenterAndExpand"
-                        VerticalOptions="CenterAndExpand"
                         BackgroundColor="White"
                         CornerRadius="10"
-                        HasShadow="True">
+                        HasShadow="True"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="CenterAndExpand"
+                        WidthRequest="280">
                         <StackLayout>
                             <ContentPresenter />
                         </StackLayout>

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
@@ -11,38 +14,26 @@ using Microsoft.Extensions.Logging;
 namespace HB.FullStack.Repository
 {
     public static class CachedItemCacheStrategy
-    {
-        /// <summary>
-        /// CacheAsideAsync
-        /// </summary>
-        /// <param name="cacheItem"></param>
-        /// <param name="dbRetrieve"></param>
-        /// <param name="cache"></param>
-        /// <param name="memoryLockManager"></param>
-        /// <param name="database"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="RepositoryException"></exception>
+    {          
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
             where TResult : class
         {
             //Cache First
-            TResult? result = await cacheItem.GetFromAsync(cache).ConfigureAwait(false);
+            TResult? result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
 
             if (result != null)
             {
                 return result;
             }
 
-            using var @lock = memoryLockManager.Lock(cacheItem.ResourceType, cacheItem.CacheKey, Consts.OccupiedTime, Consts.PatienceTime);
+            using var @lock = memoryLockManager.Lock(cacheItem.CachedType, cacheItem.CacheKey, Consts.OccupiedTime, Consts.PatienceTime);
 
             if (@lock.IsAcquired)
             {
                 //Double Check
-                result = await cacheItem.GetFromAsync(cache).ConfigureAwait(false);
+                result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
 
                 if (result != null)
                 {
@@ -74,27 +65,28 @@ namespace HB.FullStack.Repository
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
         }
-
-        /// <summary>
-        /// InvalidateCache
-        /// </summary>
-        /// <param name="cacheItem"></param>
-        /// <param name="cache"></param>
-        /// <exception cref="CacheException">Ignore.</exception>
-        public static void InvalidateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
+        
+        public static void InvalidateCache(CachedItem cachedItem, ICache cache)
         {
-            cacheItem.RemoveFromAsync(cache).Fire();
+            cache.RemoveAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
-        /// <summary>
-        /// UpdateCache
-        /// </summary>
-        /// <param name="cacheItem"></param>
-        /// <param name="cache"></param>
-        /// <exception cref="CacheException"></exception>
-        private static void UpdateCache<TResult>(CachedItem<TResult> cacheItem, ICache cache) where TResult : class
+
+        private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
         {
-            cacheItem.SetToAsync(cache).Fire();
+            cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
+
+        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, ICache cache)
+        {
+            cache.RemoveAsync(cachedItems, utcNowTicks).SafeFireAndForget(OnException);
+        }
+
+        private static void OnException(Exception ex)
+        {
+            //TODO: 是否要停用缓存？停机等等。
+            GlobalSettings.Logger.LogCritical(ex, "CachedItemCacheStrategy 中缓存Update或者Invalidate出错，Cache中可能出现脏数据/旧数据.请重建缓存或其他操作");
+        }
+
     }
 }

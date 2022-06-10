@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System.Collections.Generic;
 
@@ -15,8 +15,15 @@ namespace HB.FullStack.Database
 
         public bool AutomaticCreateTable { get; set; } = true;
 
-        public IList<string> AssembliesIncludeEntity { get; set; } = new List<string>();
+        /// <summary>
+        /// 指定包含Entity的Assemblies，不再包含其他的
+        /// </summary>
+        public IList<string> Assemblies { get; set; } = new List<string>();
 
         public IList<EntitySetting> EntitySettings { get; set; } = new List<EntitySetting>();
+
+        public int MaxBatchNumber { get; set; } = 500;
+
+        public bool AddDropStatementWhenCreateTable { get; set; }
     }
 }

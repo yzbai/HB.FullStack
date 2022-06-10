@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddRedisKVStore(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
             services.Configure<RedisKVStoreOptions>(configuration);
 
             services.AddSingleton<IKVStoreEngine, RedisKVStoreEngine>();
@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddRedisKVStore(this IServiceCollection services, Action<RedisKVStoreOptions> action)
         {
-            services.AddOptions();
+            //services.AddOptions();
             services.Configure(action);
 
             services.AddSingleton<IKVStoreEngine, RedisKVStoreEngine>();

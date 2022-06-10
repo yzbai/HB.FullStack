@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HB.FullStack.Client;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +11,7 @@ namespace HB.FullStack.XamarinForms.Effects
 {
     public class FocusEffect : RoutingEffect
     {
-        public FocusEffect() : base($"{Conventions.EffectsGroupName}.{nameof(FocusEffect)}")
+        public FocusEffect() : base($"{Conventions.EFFECTS_GROUP_NAME}.{nameof(FocusEffect)}")
         {
         }
     }

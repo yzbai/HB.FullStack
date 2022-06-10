@@ -1,5 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.FullStack.XamarinForms.Base;
+using HB.FullStack.XamarinForms.Navigation;
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -51,7 +53,7 @@ namespace HB.FullStack.XamarinForms.Controls
         //    set { SetValue(ConfirmCommandParameterProperty, value); }
         //}
 
-        private MultipleListPicker _multipleListPicker;
+        private readonly MultipleListPicker _multipleListPicker;
 
         public MultiplePickerDialog()
         {
@@ -65,9 +67,9 @@ namespace HB.FullStack.XamarinForms.Controls
             }.Invoke(v => v.BindingContext = this);
         }
 
-        private void Confirm_Button_Clicked(object sender, EventArgs e)
+        private async void Confirm_Button_Clicked(object sender, EventArgs e)
         {
-            NavigationService.Current.PopModal();
+            await NavigationManager.Current.GoBackAsync().ConfigureAwait(false);
         }
     }
 }

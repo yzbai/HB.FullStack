@@ -1,71 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using HB.FullStack.Cache;
-
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Repository
 {
-    public abstract class CachedItem<TResult> where TResult : class
+    public abstract class CachedItem
     {
-        private CachedItem() { ResourceType = this.GetType().Name; }
-        protected CachedItem(params string[] keys) : this()
-        {
-            CacheKey = ResourceType + keys.ToJoinedString("_");
-        }
-        public string ResourceType { get; private set; }
+        public string CachedType => GetType().Name;
 
+        /// <summary>
+        /// 对于那些无法主动Invalidate的项目，必须设置绝对过期值
+        /// 如果设置为null，那么就是需要确保主动invalidation正确
+        /// </summary>
         public abstract TimeSpan? AbsoluteExpirationRelativeToNow { get; }
 
         public abstract TimeSpan? SlidingExpiration { get; }
 
-        public string CacheKey { get; private set; } = null!;
+        public string CacheKey { get; protected set; } = null!;
 
+        /// <summary>
+        /// 刚从数据库取出的时间，越贴近数据库取出时间，越好
+        /// </summary>
+        public UtcNowTicks UtcTicks { get; protected set; } = UtcNowTicks.Empty;
+    }
+
+    /// <summary>
+    /// 每个CachedItem条目都是独立存在的，有独立的过期日期。
+    /// 要确保可以准确的Invalidation
+    /// </summary>
+    /// <typeparam name="TResult"></typeparam>
+    public abstract class CachedItem<TResult> : CachedItem where TResult : class
+    {
         public TResult? CacheValue { get; private set; }
 
-        public UtcNowTicks UtcTikcs { get; private set; } = UtcNowTicks.Empty;
-
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="RepositoryException"></exception>
-        public Task<TResult?> GetFromAsync(ICache cache, CancellationToken cancellationToken = default)
+        protected CachedItem(object? key)
         {
-            ThrowOnNullOrEmptyCacheKey();
-
-            return cache.GetAsync<TResult>(CacheKey, cancellationToken);
-        }
-
-        /// <exception cref="RepositoryException"></exception>
-        /// <exception cref="CacheException"></exception>
-        public Task SetToAsync(ICache cache, CancellationToken cancellationToken = default)
-        {
-            ThrowOnNullOrEmptyCacheKey();
-            ThrowOnNullCacheValue();
-            ThrowOnEmptyUtcTicks();
-
-            return cache.SetAsync<TResult>(
-                CacheKey,
-                CacheValue!,
-                UtcTikcs,
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = AbsoluteExpirationRelativeToNow,
-                    SlidingExpiration = SlidingExpiration
-                },
-                cancellationToken);
-        }
-
-        /// <exception cref="CacheException"></exception>
-        /// <exception cref="RepositoryException"></exception>
-        public async Task<bool> RemoveFromAsync(ICache cache)
-        {
-            ThrowOnNullOrEmptyCacheKey();
-            ThrowOnEmptyUtcTicks();
-
-            return await cache.RemoveAsync(CacheKey, UtcTikcs).ConfigureAwait(false);
+            CacheKey = $"{CachedType}_{key ?? "null"}";
         }
 
         public CachedItem<TResult> Value(TResult result)
@@ -76,34 +46,9 @@ namespace HB.FullStack.Repository
 
         public CachedItem<TResult> Timestamp(UtcNowTicks utcTicks)
         {
-            UtcTikcs = utcTicks;
+            UtcTicks = utcTicks;
 
             return this;
         }
-
-        private void ThrowOnEmptyUtcTicks()
-        {
-            if (UtcTikcs.IsEmpty())
-            {
-                throw Exceptions.UtcTicksNotSet(resourceType:ResourceType, cacheKey:CacheKey, cacheValue:CacheValue);
-            }
-        }
-
-        private void ThrowOnNullCacheValue()
-        {
-            if (CacheValue == null)
-            {
-                throw Exceptions.CacheValueNotSet(resourceType:ResourceType, cacheKey:CacheKey);
-            }
-        }
-
-        private void ThrowOnNullOrEmptyCacheKey()
-        {
-            if (string.IsNullOrEmpty(CacheKey))
-            {
-                throw Exceptions.CacheKeyNotSet(resourceType:ResourceType);
-            }
-        }
     }
 }
-

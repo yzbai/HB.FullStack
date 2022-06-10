@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 
+using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.SQL;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
 [assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
+
 namespace HB.FullStack.Database
 {
     /// <summary>
@@ -14,22 +17,38 @@ namespace HB.FullStack.Database
     /// </summary>
     internal static class DatabaseErrorCodes
     {
-        public static ErrorCode ExecuterError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 0, nameof(ExecuterError), "");
-        public static ErrorCode Unkown { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 1, nameof(Unkown), "");
-        public static ErrorCode UseDateTimeOffsetOnly { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 2, nameof(UseDateTimeOffsetOnly), "");
-        public static ErrorCode EntityError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 3, nameof(EntityError), "");
-        public static ErrorCode MapperError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 4, nameof(MapperError), "");
-        public static ErrorCode SqlError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 5, nameof(SqlError), "");
-        public static ErrorCode DatabaseTableCreateError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 6, nameof(DatabaseTableCreateError), "");
-        public static ErrorCode MigrateError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 7, nameof(MigrateError), "");
-        public static ErrorCode FoundTooMuch { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 8, nameof(FoundTooMuch), "");
-        public static ErrorCode DatabaseNotWriteable { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 9, nameof(DatabaseNotWriteable), "");
-        public static ErrorCode NotFound { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 10, nameof(NotFound), "");
-        public static ErrorCode TransactionError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 11, nameof(TransactionError), "");
-        public static ErrorCode SystemInfoError { get;  } = new ErrorCode(ErrorCodeStartIds.DATABASE + 12, nameof(SystemInfoError), "");
+        public static ErrorCode ExecuterError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 0, nameof(ExecuterError), "");
+        public static ErrorCode Unkown { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 1, nameof(Unkown), "");
+        public static ErrorCode UseDateTimeOffsetOnly { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 2, nameof(UseDateTimeOffsetOnly), "");
+        public static ErrorCode EntityError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 3, nameof(EntityError), "");
+        public static ErrorCode MapperError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 4, nameof(MapperError), "");
+        public static ErrorCode SqlError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 5, nameof(SqlError), "");
+        public static ErrorCode DatabaseTableCreateError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 6, nameof(DatabaseTableCreateError), "");
+        public static ErrorCode MigrateError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 7, nameof(MigrateError), "");
+        public static ErrorCode FoundTooMuch { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 8, nameof(FoundTooMuch), "");
+        public static ErrorCode DatabaseNotWriteable { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 9, nameof(DatabaseNotWriteable), "");
+        public static ErrorCode NotFound { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 10, nameof(NotFound), "");
+        public static ErrorCode TransactionError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 11, nameof(TransactionError), "");
+        public static ErrorCode SystemInfoError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 12, nameof(SystemInfoError), "");
+        public static ErrorCode NotSupported { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 13, nameof(NotSupported), "");
+        public static ErrorCode BatchError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 14, nameof(BatchError), "");
+        public static ErrorCode TypeConverterError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 15, nameof(TypeConverterError), "");
+        public static ErrorCode EmptyGuid { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 16, nameof(EmptyGuid), "");
+        public static ErrorCode UpdatePropertiesCountShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 17, nameof(UpdatePropertiesCountShouldBePositive), "");
+        public static ErrorCode LongIdShouldBePositive { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 18, nameof(LongIdShouldBePositive), "");
+        public static ErrorCode PropertyNotFound { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 19, nameof(PropertyNotFound), "");
+        public static ErrorCode NoSuchForeignKey { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 20, nameof(NoSuchForeignKey), "");
+
+        public static ErrorCode NoSuchProperty { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 21, nameof(NoSuchProperty), "");
+        public static ErrorCode KeyValueNotLongOrGuid { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 22, nameof(KeyValueNotLongOrGuid), "");
+
+        public static ErrorCode EntityHasNotSupportedPropertyType { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 23, nameof(EntityHasNotSupportedPropertyType), "");
+
+        public static ErrorCode EntityVersionError { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 24, nameof(EntityVersionError), "");
+        public static ErrorCode NotInitializedYet { get; } = new ErrorCode(ErrorCodeStartIds.DATABASE + 25, nameof(NotInitializedYet), "");
     }
 
-    internal static class Exceptions
+    internal static class DatabaseExceptions
     {
         internal static Exception VersionShouldBePositive(int wrongVersion)
         {
@@ -90,7 +109,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception FoundTooMuch(string type, string? from, string? where)
+        internal static Exception FoundTooMuch(string? type, string? from, string? where)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.FoundTooMuch);
 
@@ -101,7 +120,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception FoundTooMuch(string type, string item)
+        internal static Exception FoundTooMuch(string? type, string item)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.FoundTooMuch);
 
@@ -109,6 +128,15 @@ namespace HB.FullStack.Database
             exception.Data["Item"] = item;
 
             return exception; ;
+        }
+
+        internal static Exception PropertyNotFound(string? type, string property)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.PropertyNotFound);
+            exception.Data["Type"] = type;
+            exception.Data["Property"] = property;
+
+            return exception;
         }
 
         internal static Exception UnKown(string type, string? from, string? where, Exception? innerException = null)
@@ -143,8 +171,6 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-
-
         internal static Exception NotWriteable(string type, string database)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.DatabaseNotWriteable);
@@ -168,13 +194,12 @@ namespace HB.FullStack.Database
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UseDateTimeOffsetOnly);
 
-
             return exception;
         }
 
-        internal static Exception EntityHasNotSupportedPropertyType(string type, string propertyTypeName, string propertyName)
+        internal static Exception EntityHasNotSupportedPropertyType(string type, string? propertyTypeName, string propertyName)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityHasNotSupportedPropertyType);
 
             exception.Data["Type"] = type;
             exception.Data["PropertyTypeName"] = propertyTypeName;
@@ -183,7 +208,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception EntityError(string type, string propertyName, string cause)
+        internal static Exception EntityError(string? type, string propertyName, string cause)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
 
@@ -196,7 +221,7 @@ namespace HB.FullStack.Database
 
         internal static Exception EntityVersionError(string type, int version, string cause)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityVersionError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = "Version Error. - " + cause;
@@ -218,6 +243,90 @@ namespace HB.FullStack.Database
 
             exception.Data["Cause"] = "Sql join type mixed.";
 
+            return exception;
+        }
+
+        internal static Exception NotSupportYet(string cause, EngineType engineType)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotSupported);
+            exception.Data["Cause"] = cause;
+            exception.Data["EngineType"] = engineType.ToString();
+
+            return exception;
+        }
+
+        internal static Exception TooManyForBatch(string cause, int count, string lastUser)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.BatchError);
+            exception.Data["Cause"] = cause;
+            exception.Data["Count"] = count;
+            exception.Data["LastUser"] = lastUser;
+
+            return exception;
+        }
+
+        internal static Exception TypeConverterError(string cause, string? typeFullName)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.TypeConverterError);
+            exception.Data["Cause"] = cause;
+            exception.Data["Type"] = typeFullName;
+
+            return exception;
+        }
+
+        internal static Exception GuidShouldNotEmpty()
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EmptyGuid);
+
+            return exception;
+        }
+
+        internal static Exception UpdatePropertiesCountShouldBePositive()
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UpdatePropertiesCountShouldBePositive);
+
+            return exception;
+        }
+
+        internal static Exception LongIdShouldBePositive(long id)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.LongIdShouldBePositive);
+            exception.Data["Id"] = id;
+
+            return exception;
+        }
+
+        internal static Exception NoSuchForeignKey(string entityFullName, string foreignKeyName)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NoSuchForeignKey);
+            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ForeignKeyName"] = foreignKeyName;
+
+            return exception;
+        }
+
+        internal static Exception NoSuchProperty(string entityFullName, string propertyName)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NoSuchProperty);
+            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["PropertyName"] = propertyName;
+            return exception;
+        }
+
+        internal static Exception KeyValueNotLongOrGuid(string entityFullName, string foreignKeyName, object? foreignKeyValue, string? foreignKeyType)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.KeyValueNotLongOrGuid);
+            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ForeignKeyName"] = foreignKeyName;
+            exception.Data["ForeignKeyValue"] = foreignKeyValue?.ToString();
+            exception.Data["ForeignKeyType"] = foreignKeyType;
+
+            return exception;
+        }
+
+        internal static Exception NotInitializedYet()
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotInitializedYet);
             return exception;
         }
     }

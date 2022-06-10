@@ -14,7 +14,7 @@ namespace HB.FullStack.Lock
         public static ErrorCode MemoryLockError { get; set; } = new ErrorCode(ErrorCodeStartIds.LOCK + 1, nameof(MemoryLockError), "");
     }
 
-    internal static class Exceptions
+    internal static class LockExceptions
     {
         internal static Exception MemoryLockError(string cause)
         {

@@ -1,65 +1,40 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace HB.FullStack.Common.Api
 {
     public static class ApiResourceDefFactory
     {
-        private static readonly ConcurrentDictionary<Type, ApiResourceDef> _defDict = new ConcurrentDictionary<Type, ApiResourceDef>();
+        private static readonly ConcurrentDictionary<Type, ApiResourceDef?> _defDict = new ConcurrentDictionary<Type, ApiResourceDef?>();
 
-        private static readonly object _defDictLocker = new object();
-
-        /// <summary>
-        /// Get
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
-        public static ApiResourceDef Get<T>() where T : ApiResource
+        public static ApiResourceDef? Get<T>() where T : ApiResource2
         {
-            Type type = typeof(T);
-
-            if (_defDict.TryGetValue(type, out ApiResourceDef? def))
-            {
-                return def;
-            }
-
-            lock (_defDictLocker)
-            {
-                if (_defDict.TryGetValue(type, out def))
-                {
-                    return def;
-                }
-
-                def = CreateResourceDef(type);
-
-                _defDict[type] = def;
-            }
-
-            return _defDict[type];
+            return _defDict.GetOrAdd(typeof(T), t => CreateResourceDef(t));
         }
 
-        /// <summary>
-        /// CreateResourceDef
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        /// <exception cref="ApiException"></exception>
-        private static ApiResourceDef CreateResourceDef(Type type)
+        private static ApiResourceDef? CreateResourceDef(Type type)
         {
+            //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取.并且Configuration可以覆盖Attribute设置
             var attr = type.GetCustomAttribute<ApiResourceAttribute>();
 
-            if (attr == null)
+            return attr == null ? null : new ApiResourceDef
             {
-                throw ApiExceptions.NotApiResourceEntity(type:type.FullName);
-            }
-
-            return new ApiResourceDef
-            {
-                ApiVersion = attr.Version,
                 EndpointName = attr.EndPointName,
-                Name = type.Name
+                Version = attr.Version,
+                AuthType = attr.AuthType,
+                ResName = attr.ResName,
+                Parent1ResName = attr.Parent1ResName,
+                ApiKeyName = attr.ApiKeyName
             };
         }
+
+        public static void Register<T>(ApiResourceDef def) where T : ApiResource2
+        {
+            _ = _defDict.AddOrUpdate(typeof(T), def, (_, _) => def);
+        }
     }
+
 }

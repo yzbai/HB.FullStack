@@ -10,10 +10,11 @@ using System.Text.Json;
 using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 using HB.FullStack.Common.Server;
 using HB.FullStack.Cache;
+using AsyncAwaitBestPractices;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    internal class AliyunSmsService : ISmsServerService
+    public class AliyunSmsService : ISmsServerService
     {
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;
@@ -28,16 +29,15 @@ namespace HB.Infrastructure.Aliyun.Sms
 
             AliyunUtil.AddEndpoint(AliyunProductNames.SMS, _options.RegionId, _options.Endpoint);
             _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
-
         }
 
         //TODO: 等待阿里云增加异步方法
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="mobile"></param>
         /// <returns></returns>
-        /// <exception cref="SmsException"></exception>
+
         public void SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
@@ -74,35 +74,28 @@ namespace HB.Infrastructure.Aliyun.Sms
                 else
                 {
                     string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
-                    throw Exceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message:sendResult?.Message);
+                    throw AliyunExceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message: sendResult?.Message);
                 }
             }
-            catch(CacheException ex)
+            catch (CacheException ex)
             {
-                throw Exceptions.SmsCacheError("", ex);
+                throw AliyunExceptions.SmsCacheError("", ex);
             }
-            catch(AliyunException ex)
+            catch (AliyunException ex)
             {
-                throw Exceptions.SmsServerError("", ex);
+                throw AliyunExceptions.SmsServerError("", ex);
             }
             catch (JsonException ex)
             {
-                throw Exceptions.SmsFormatError( "阿里云短信服务，格式返回错误", ex);
+                throw AliyunExceptions.SmsFormatError("阿里云短信服务，格式返回错误", ex);
             }
             catch (ClientException ex)
             {
-                throw Exceptions.SmsClientError("AliyunSmsServiceDownErrorMessage", ex);
+                throw AliyunExceptions.SmsClientError("AliyunSmsServiceDownErrorMessage", ex);
             }
         }
 
 #if DEBUG
-        /// <summary>
-        /// SendValidationCode
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="smsCode"></param>
-        /// <param name="expiryMinutes"></param>
-        /// <exception cref="SmsException"></exception>
         public void SendValidationCode(string mobile, string smsCode, int expiryMinutes)
         {
             try
@@ -111,18 +104,12 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (CacheException ex)
             {
-                throw Exceptions.SmsCacheError( "", ex);
+                throw AliyunExceptions.SmsCacheError("", ex);
             }
         }
+
 #endif
 
-        /// <summary>
-        /// ValidateAsync
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="code"></param>
-        /// <returns></returns>
-        /// <exception cref="SmsException"></exception>
         public async Task<bool> ValidateAsync(string mobile, string code)
         {
             if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsAllNumber(code))
@@ -138,17 +125,10 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
             catch (CacheException ex)
             {
-                throw Exceptions.SmsCacheError( "", ex);
+                throw AliyunExceptions.SmsCacheError("", ex);
             }
         }
 
-        /// <summary>
-        /// SetSmsCodeToCache
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="cachedSmsCode"></param>
-        /// <param name="expireMinutes"></param>
-        /// <exception cref="CacheException"></exception>
         private void SetSmsCodeToCache(string mobile, string cachedSmsCode, int expireMinutes)
         {
             _cache.SetStringAsync(
@@ -158,15 +138,13 @@ namespace HB.Infrastructure.Aliyun.Sms
                         new DistributedCacheEntryOptions()
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
-                        }).Fire();
+                        })
+                .SafeFireAndForget(ex =>
+                {
+                    _logger.LogCritical(ex, "Aliyun Sms 服务在使用缓存时出错，有可能缓存不可用。");
+                });
         }
 
-        /// <summary>
-        /// GetSmsCodeFromCacheAsync
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <returns></returns>
-        /// <exception cref="CacheException"></exception>
         private Task<string?> GetSmsCodeFromCacheAsync(string mobile)
         {
             return _cache.GetStringAsync(GetCachedKey(mobile));
@@ -182,7 +160,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             return mobile + "_vlc";
         }
 
-        class SendResult
+        private class SendResult
         {
             public string? Code { get; set; }
 
@@ -193,6 +171,5 @@ namespace HB.Infrastructure.Aliyun.Sms
                 return "OK".Equals(Code, GlobalSettings.ComparisonIgnoreCase);
             }
         }
-
     }
 }

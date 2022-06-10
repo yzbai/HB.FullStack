@@ -43,6 +43,13 @@ namespace System
         }
 
         //[Obsolete("无法处理JsonHttpContent")]
+        /// <summary>
+        /// 无法处理JsonHttpContent
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="key"></param>
+        /// <param name="includeCookie"></param>
+        /// <returns></returns>
         public static string GetValue(this HttpRequest request, string key, bool includeCookie = false)
         {
             ThrowIf.Empty(key, nameof(key));
@@ -95,7 +102,9 @@ namespace System
                 {
                     ip = httpContext.Connection.RemoteIpAddress?.ToString();
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     ip = null;
                 }
@@ -122,7 +131,9 @@ namespace System
                 }
                 return default;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return default;
             }

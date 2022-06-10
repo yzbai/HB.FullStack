@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAliyunSms(this IServiceCollection services, Action<AliyunSmsOptions> optionSetup)
         {
-            services.AddOptions();
+            //services.AddOptions();
             services.Configure(optionSetup);
 
             services.AddSingleton<ISmsServerService, AliyunSmsService>();
@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddAliyunSms(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
             services.Configure<AliyunSmsOptions>(configuration);
 
             services.AddSingleton<ISmsServerService, AliyunSmsService>();

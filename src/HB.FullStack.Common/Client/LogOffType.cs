@@ -2,9 +2,9 @@
 {
     public enum LogOffType
     {
+        None,
         LogOffAllOthers,
         LogOffAllButWeb,
         LogOffSameIdiom,
-        None
     }
 }

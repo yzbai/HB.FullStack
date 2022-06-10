@@ -16,34 +16,32 @@
 
     <ContentPage.Content>
         <StackLayout
+            BackgroundColor="Black"
             HorizontalOptions="FillAndExpand"
-            VerticalOptions="FillAndExpand"
-            BackgroundColor="Black">
+            VerticalOptions="FillAndExpand">
             <figure:SKFigureCanvasView
                 x:Name="FigureCanvas"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="FillAndExpand"
                 AutoBringToFront="False"
                 EnableTimeTick="False"
-                Figures="{Binding Figures}" />
-            <Button
-                HorizontalOptions="Start"
-                Command="{Binding RotateCommand}"
-                Text="旋转" />
-            <StackLayout
+                Figures="{Binding Figures}"
                 HorizontalOptions="FillAndExpand"
-                Orientation="Horizontal">
+                VerticalOptions="FillAndExpand" />
+            <Button
+                Command="{Binding RotateCommand}"
+                HorizontalOptions="Start"
+                Text="旋转" />
+            <StackLayout HorizontalOptions="FillAndExpand" Orientation="Horizontal">
                 <Button
-                    HorizontalOptions="StartAndExpand"
                     Command="{Binding CancelCommand}"
+                    HorizontalOptions="StartAndExpand"
                     Text="取消" />
                 <Button
-                    HorizontalOptions="CenterAndExpand"
                     Command="{Binding ResetCommand}"
+                    HorizontalOptions="CenterAndExpand"
                     Text="重来" />
                 <Button
-                    HorizontalOptions="EndAndExpand"
                     Command="{Binding CropCommand}"
+                    HorizontalOptions="EndAndExpand"
                     Text="确定" />
             </StackLayout>
         </StackLayout>

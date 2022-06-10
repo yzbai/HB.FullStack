@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -150,4 +150,3 @@ namespace HB.FullStack.Common.Validate
     }
 }
 
-#nullable restore

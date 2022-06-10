@@ -6,3 +6,5 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>", Scope = "member", Target = "~F:HB.FullStack.XamarinForms.Skia.SKFigure.Matrix")]
+[assembly: SuppressMessage("Design", "CA1003:Use generic event handler instances", Justification = "<Pending>", Scope = "member", Target = "~E:HB.FullStack.XamarinForms.Api.IApiClient.Requesting")]
+[assembly: SuppressMessage("Design", "CA1003:Use generic event handler instances", Justification = "<Pending>", Scope = "member", Target = "~E:HB.FullStack.XamarinForms.Api.IApiClient.Responsed")]

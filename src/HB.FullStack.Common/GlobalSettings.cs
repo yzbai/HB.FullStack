@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -16,11 +14,11 @@ namespace System
 
         [NotNull] public static StringComparison ComparisonIgnoreCase { get; set; } = StringComparison.InvariantCultureIgnoreCase;
 
-        public static ILogger? Logger { get; set; }
+        public static ILogger Logger { get; set; } = null!;
 
-        public static Action<Exception?, string?, LogLevel> MessageExceptionHandler { get; set; } = (ex, msg, level) => { Logger.Log(level, ex, $"开火失败 : {msg}"); };
+        //public static Action<Exception?, string?, LogLevel> MessageExceptionHandler { get; set; } = (ex, msg, level) => { Logger.Log(level, ex, $"开火失败 : {msg}"); };
 
-        public static Action<Exception> ExceptionHandler { get; } = ex => MessageExceptionHandler.Invoke(ex, $"开火失败", LogLevel.Error);
+        //public static Action<Exception> ExceptionHandler { get; } = ex => MessageExceptionHandler.Invoke(ex, $"开火失败", LogLevel.Error);
 
         public static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -28,4 +26,3 @@ namespace System
     }
 }
 
-#nullable restore

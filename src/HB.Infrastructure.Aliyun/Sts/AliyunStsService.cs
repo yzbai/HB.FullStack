@@ -3,6 +3,8 @@ using Aliyun.Acs.Core.Auth.Sts;
 using Aliyun.Acs.Core.Exceptions;
 using Aliyun.Acs.Core.Http;
 
+using HB.FullStack.Common.Extensions;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,21 +14,18 @@ using System.Linq;
 
 namespace HB.Infrastructure.Aliyun.Sts
 {
-    internal class AliyunStsService : IAliyunStsService
+    public class AliyunStsService : IAliyunStsService
     {
         private const string OSS_WRITE_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\", \"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
         private const string OSS_READ_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
 
         private readonly AliyunStsOptions _options;
-        private readonly ILogger _logger;
         private readonly IAcsClient _acsClient;
         private readonly Dictionary<string, AssumedRole> _resourceAssumedRoleDict = new Dictionary<string, AssumedRole>();
 
-
-        public AliyunStsService(IOptions<AliyunStsOptions> options, ILogger<AliyunStsService> logger)
+        public AliyunStsService(IOptions<AliyunStsOptions> options)
         {
             _options = options.Value;
-            _logger = logger;
 
             AliyunUtil.AddEndpoint(AliyunProductNames.STS, "", _options.Endpoint);
             _acsClient = AliyunUtil.CreateAcsClient("", _options.AccessKeyId, _options.AccessKeySecret);
@@ -40,15 +39,14 @@ namespace HB.Infrastructure.Aliyun.Sts
             }
         }
 
-        private static string GetRoleSessionName(long userId)
+        private static string GetRoleSessionName(Guid userId)
         {
-            return "User" + userId;
+            return "User" + userId.ToString();
         }
 
-        /// <exception cref="AliyunException"></exception>
-        public AliyunStsToken? RequestOssStsToken(long userId, string bucketName, string directory, bool readOnly)
+        public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly)
         {
-            if (bucketName.IsNullOrEmpty() || userId < 0 || directory.IsNullOrEmpty())
+            if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())
             {
                 return null;
             }
@@ -57,7 +55,7 @@ namespace HB.Infrastructure.Aliyun.Sts
 
             string ossResourceName = $"acs:oss:*:*:{bucketName}";
 
-            if (!_resourceAssumedRoleDict.TryGetValue(ossResourceName, out AssumedRole assumedRole))
+            if (!_resourceAssumedRoleDict.TryGetValue(ossResourceName, out AssumedRole? assumedRole))
             {
                 return null;
             }
@@ -94,9 +92,8 @@ namespace HB.Infrastructure.Aliyun.Sts
             catch (Exception ex)
             {
                 //TODO: 处理报错
-                throw Exceptions.StsError(userId:userId, bucketname:bucketName, direcotry:directory, readOnly:readOnly, ex);
+                throw AliyunExceptions.StsError(userId: userId, bucketname: bucketName, direcotry: directory, readOnly: readOnly, ex);
             }
         }
     }
 }
-

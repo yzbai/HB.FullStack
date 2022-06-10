@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -27,22 +27,22 @@ namespace HB.FullStack.Database
         /// <param name="oldVersion"></param>
         /// <param name="newVersion"></param>
         /// <param name="sql"></param>
-        /// <exception cref="DatabaseException"></exception>
+        
         public Migration(string databaseName, int oldVersion, int newVersion)
         {
             if (databaseName.IsNullOrEmpty())
             {
-                throw new ArgumentNullException(nameof(databaseName));
+                throw DatabaseExceptions.MigrateError(databaseName, "databaseName is Empty");
             }
 
             if (oldVersion < 0)
             {
-                throw Exceptions.MigrateError(databaseName, "oldVersion < 0");
+                throw DatabaseExceptions.MigrateError(databaseName, "oldVersion < 0");
             }
 
             if (newVersion != oldVersion + 1)
             {
-                throw Exceptions.MigrateError(databaseName, "newVersion != oldVersoin + 1 ");
+                throw DatabaseExceptions.MigrateError(databaseName, "newVersion != oldVersoin + 1 ");
             }
 
             DatabaseName = databaseName;
@@ -50,7 +50,7 @@ namespace HB.FullStack.Database
             NewVersion = newVersion;
         }
 
-        /// <exception cref="DatabaseException"></exception>
+        
         public Migration(string targetSchema, int oldVersion, int newVersion, string sql) : this(targetSchema, oldVersion, newVersion)
         {
             SqlStatement = sql;

@@ -23,7 +23,7 @@ namespace HB.FullStack.XamarinForms.Controls
             set { _selectedDay = value; OnPropertyChanged(); }
         }
 
-        private Grid _root;
+        private readonly Grid _root;
 
         public MonthDayPicker()
         {

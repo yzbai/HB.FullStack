@@ -2,53 +2,41 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest<T> where T : ApiResource
+    public class AddRequest<T> : ApiRequest where T : ApiResource2
     {
         [CollectionNotEmpty]
+        [CollectionMemeberValidated]
         [IdBarrier]
-        public IList<T> Resources { get; set; } = new List<T>();
+        public IList<T> Resources { get; } = new List<T>();
 
-        public AddRequest() : base(HttpMethod.Post, null) { }
+        [OnlyForJsonConstructor]
+        public AddRequest() { }
 
-        public AddRequest(string apiKeyName) : base(apiKeyName, HttpMethod.Post, null) { }
-
-        public AddRequest(IEnumerable<T> ress) : this()
+        public AddRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(string apiKeyName, IEnumerable<T> ress) : this(apiKeyName)
-        {
-            Resources.AddRange(ress);
-        }
+        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, null)) { }
 
-        public AddRequest(T res) : this()
-        {
-            Resources.Add(res);
-        }
-
-        public AddRequest(string apiKeyName, T res) : this(apiKeyName)
-        {
-            Resources.Add(res);
-        }
-
-        public void AddResource(params T[] ress)
-        {
-            Resources.AddRange(ress);
-        }
+        public AddRequest(T res) : this(new T[] { res }) { }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(GetType().Name, Resources);
-        }
+            HashCode hash = new HashCode();
 
-        public override string ToDebugInfo()
-        {
-            return $"AddRequest, ApiResourceType:{typeof(T).Name}, Resources:{SerializeUtil.ToJson(Resources)}";
+            hash.Add(base.GetHashCode());
+
+            foreach (T item in Resources)
+            {
+                hash.Add(item);
+            }
+
+            return hash.ToHashCode();
         }
     }
-
 }

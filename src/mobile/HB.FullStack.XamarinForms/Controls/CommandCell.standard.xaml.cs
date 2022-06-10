@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Windows.Input;
 
 using HB.FullStack.XamarinForms.Base;
-using HB.FullStack.XamarinForms.Styles;
+using HB.FullStack.XamarinForms.Fonts;
 
-using Xamarin.CommunityToolkit.Extensions;
 using Xamarin.CommunityToolkit.Markup;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 using static Xamarin.CommunityToolkit.Markup.GridRowsColumns;
 
@@ -122,7 +120,7 @@ namespace HB.FullStack.XamarinForms.Controls
                     .Column(2)
                     .EndExpand()
                     .TextCenterVertical()
-                    .Font("MaterialIcon", Device.GetNamedSize(NamedSize.Medium, typeof(Label)))
+                    .Font(nameof(MaterialFont), Device.GetNamedSize(NamedSize.Medium, typeof(Label)))
                 }
             }.Bind(Grid.MarginProperty, nameof(Margin))
             .Invoke(v => v.GestureRecognizers.Add(new TapGestureRecognizer { }.Invoke(v => v.Tapped += TapGestureRecognizer_Tapped)))

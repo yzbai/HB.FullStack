@@ -18,7 +18,7 @@ namespace HB.FullStack.XamarinForms.Logging
             _minLevel = logLevel;
         }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (!IsEnabled(logLevel))
             {
@@ -57,9 +57,20 @@ namespace HB.FullStack.XamarinForms.Logging
             return logLevel >= _minLevel;
         }
 
-        public IDisposable? BeginScope<TState>(TState state)
+        public IDisposable BeginScope<TState>(TState state)
         {
-            return null;
+            return new LoggerScope();
         }
     }
+
+    public sealed class LoggerScope:IDisposable
+    {
+        public void Dispose()
+        {
+            
+        }
+
+        
+    }
+
 }

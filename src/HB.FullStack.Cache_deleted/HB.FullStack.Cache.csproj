@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="..\..\common.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <LangVersion>Latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -21,16 +21,16 @@ namespace HB.FullStack.EventBus.Abstractions
         /// </summary>
         /// <param name="eventMessage"></param>
         /// <returns>是否发布成功，只有返回true才能确保消息不丢失</returns>
-        /// <exception cref="EventBusException"></exception>
+        
         Task PublishAsync(string eventName, string jsonData);
 
-        /// <exception cref="EventBusException"></exception>
+        
         void Subscribe(string eventName, IEventHandler handler);
 
-        /// <exception cref="EventBusException"></exception>
+        
         Task UnSubscribeAsync(string eventName);
 
-        /// <exception cref="EventBusException"></exception>
+        
         void StartHandle(string eventName);
 
         void Close();

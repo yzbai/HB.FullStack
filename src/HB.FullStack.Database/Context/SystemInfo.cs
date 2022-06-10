@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -17,43 +17,43 @@ namespace HB.FullStack.Database
         /// <summary>
         /// DatabaseName
         /// </summary>
-        /// <exception cref="DatabaseException">Get.</exception>
+
         [NotNull, DisallowNull]
         public string DatabaseName
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.DatabaseName, out string? value))
+                if (_sysDict.TryGetValue(SystemInfoNames.DATABASE_NAME, out string? value))
                 {
                     return value;
                 }
 
-                throw Exceptions.SystemInfoError(cause:"no DatabaseName key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause: "no DatabaseName key in SystemInfoTable");
             }
             private set
             {
-                _sysDict[SystemInfoNames.DatabaseName] = value;
+                _sysDict[SystemInfoNames.DATABASE_NAME] = value;
             }
         }
 
         /// <summary>
         /// Version
         /// </summary>
-        /// <exception cref="DatabaseException">Get.</exception>
+
         public int Version
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.Version, out string? value))
+                if (_sysDict.TryGetValue(SystemInfoNames.VERSION, out string? value))
                 {
                     return Convert.ToInt32(value, GlobalSettings.Culture);
                 }
 
-                throw Exceptions.SystemInfoError(cause:"no Version key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause: "no Version key in SystemInfoTable");
             }
             set
             {
-                _sysDict[SystemInfoNames.Version] = value.ToString(GlobalSettings.Culture);
+                _sysDict[SystemInfoNames.VERSION] = value.ToString(GlobalSettings.Culture);
             }
         }
 

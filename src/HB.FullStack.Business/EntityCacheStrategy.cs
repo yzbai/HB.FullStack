@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Cache;
 using HB.FullStack.Common;
 using HB.FullStack.Database;
@@ -19,7 +21,8 @@ namespace HB.FullStack.Repository
         public static async Task<IEnumerable<TEntity>> CacheAsideAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TEntity>>> dbRetrieve,
             IDatabase database, ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TEntity : Entity, new()
         {
-            if (!ICache.IsEntityEnabled<TEntity>())
+
+            if (!cache.IsEntityEnabled<TEntity>())
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
@@ -30,14 +33,14 @@ namespace HB.FullStack.Repository
 
                 if (allExists)
                 {
-                    logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
                     return cachedEntities!;
                 }
             }
-            catch(Exception ex)
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                //有可能实体定义发生改变，导致缓存读取出错
-                logger.LogError2(ex, $"读取缓存出错，缓存可能已经被删除，继续读取数据库，dimensionKeyName:{dimensionKeyName}, dimensionKeyValues:{SerializeUtil.ToJson(dimensionKeyValues)}");
+                logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
             }
 
             //常规做法是先获取锁（参看历史）。
@@ -67,14 +70,14 @@ namespace HB.FullStack.Repository
 
                     if (allExists)
                     {
-                        logger.LogDebug("Cache中全部存在，返回. Entity: {EntityType}", typeof(TEntity).Name);
                         return cachedEntities!;
                     }
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    //有可能实体定义发生改变，导致缓存读取出错
-                    logger.LogError2(ex, $"！！！这里是读取缓存的DoubleCheck，这里不应该出现，缓存可能已经被删除，继续读取数据库，dimensionKeyName:{dimensionKeyName}, dimensionKeyValues:{SerializeUtil.ToJson(dimensionKeyValues)}");
+                    logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
                 }
 
                 IEnumerable<TEntity> entities = await dbRetrieve(database).ConfigureAwait(false);
@@ -83,30 +86,24 @@ namespace HB.FullStack.Repository
                 {
                     UpdateCache(entities, cache);
 
-                    logger.LogInformation($"缓存 Missed. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                    logger.LogCacheMissed(typeof(TEntity).Name, dimensionKeyName, dimensionKeyValues);
                 }
                 else
                 {
-                    logger.LogInformation($"查询到空值. Entity:{typeof(TEntity).Name}, DimensionKeyName:{dimensionKeyName}, DimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}");
+                    logger.LogCacheGetEmpty(typeof(TEntity).Name, dimensionKeyName, dimensionKeyValues);
                 }
 
                 return entities;
             }
             else
             {
-                logger.LogError($"锁未能占用. Entity:{typeof(TEntity).Name}, dimensionKeyName:{dimensionKeyName},dimensionKeyValues:{dimensionKeyValues.ToJoinedString(",")}, Lock Status:{@lock.Status}");
+                logger.LogCacheLockAcquireFailed(typeof(TEntity).Name, dimensionKeyName, dimensionKeyValues, @lock.Status.ToString());
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
 
         }
 
-        /// <summary>
-        /// UpdateCache
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="cache"></param>
-        /// <exception cref="CacheException">Ignore.</exception>
         private static void UpdateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
             #region 普通缓存，加锁的做法
@@ -134,25 +131,24 @@ namespace HB.FullStack.Repository
 
             #region 有版本控制的Cache. 就一句话，爽不爽
 
-            cache.SetEntitiesAsync(entities).Fire();
+            cache.SetEntitiesAsync(entities).SafeFireAndForget(OnException);
 
             #endregion
 
         }
 
-        /// <summary>
-        /// InvalidateCache
-        /// </summary>
-        /// <param name="entities"></param>
-        /// <param name="cache"></param>
-        /// <exception cref="CacheException">Ignore.</exception>
         public static void InvalidateCache<TEntity>(IEnumerable<TEntity> entities, ICache cache) where TEntity : Entity, new()
         {
-            if (ICache.IsEntityEnabled<TEntity>())
+            if (cache.IsEntityEnabled<TEntity>())
             {
-                cache.RemoveEntitiesAsync(entities).Fire();
+                cache.RemoveEntitiesAsync(entities).SafeFireAndForget(OnException);
             }
         }
 
+        private static void OnException(Exception ex)
+        {
+            //TODO: 是否要停用缓存？停机等等。
+            GlobalSettings.Logger.LogCritical(ex, "EntityCacheStrategy 中缓存Update或者Invalidate出错，Cache中可能出现脏数据/旧数据.请重建缓存或其他操作");
+        }
     }
 }

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage
+    x:Class="HB.FullStack.Client.Maui.Controls.Cropper.CropperPage"
+    x:DataType="cropper:CropperViewModel"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.FullStack.Client.Maui.Base"
+    xmlns:cropper="clr-namespace:HB.FullStack.Client.Maui.Controls.Cropper"
+    xmlns:figure="clr-namespace:HB.FullStack.Client.Maui.Figures">
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="0" />
+            </Style>
+        </ResourceDictionary>
+    </base:BasePage.Resources>
+
+    <base:BasePage.Content>
+        <StackLayout
+            BackgroundColor="Black"
+            HorizontalOptions="FillAndExpand"
+            VerticalOptions="FillAndExpand">
+            <figure:SKFigureCanvasView
+                x:Name="FigureCanvas"
+                AutoBringToFront="False"
+                EnableTimeTick="False"
+                Figures="{Binding Figures}"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand" />
+            <Button
+                Command="{Binding RotateCommand}"
+                HorizontalOptions="Start"
+                Text="旋转" />
+            <StackLayout HorizontalOptions="FillAndExpand" Orientation="Horizontal">
+                <Button
+                    Command="{Binding CancelCommand}"
+                    HorizontalOptions="StartAndExpand"
+                    Text="取消" />
+                <Button
+                    Command="{Binding ResetCommand}"
+                    HorizontalOptions="CenterAndExpand"
+                    Text="重来" />
+                <Button
+                    Command="{Binding CropCommand}"
+                    HorizontalOptions="EndAndExpand"
+                    Text="确定" />
+            </StackLayout>
+        </StackLayout>
+    </base:BasePage.Content>
+</base:BasePage>

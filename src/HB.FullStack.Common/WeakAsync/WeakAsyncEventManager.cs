@@ -44,6 +44,7 @@ namespace HB.FullStack.Common
             WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
+#pragma warning disable CA1030 // Use events where appropriate
         public Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs) where TSender : class where TEventArgs : class
         {
             return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, TEventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
@@ -58,6 +59,7 @@ namespace HB.FullStack.Common
         {
             return WeakAsyncEventManagerExecutor.RaiseEventAsync<object, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
         }
+#pragma warning restore CA1030 // Use events where appropriate
     }
 
 

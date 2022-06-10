@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database
@@ -16,10 +15,8 @@ namespace HB.FullStack.Database
 
         Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity;
 
-        /// <exception cref="System.DatabaseException">Ignore.</exception>
         Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
 
-        /// <exception cref="DatabaseException"></exception>
         Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
     }
 
@@ -44,25 +41,24 @@ namespace HB.FullStack.Database
                 dbTransaction.Commit();
                 return Task.CompletedTask;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return Task.FromException(e);
             }
         }
 
-        public static Task RollbackAsync(this DbTransaction dbTransaction, CancellationToken cancellationToken = default)
+        public static Task RollbackAsync(this DbTransaction dbTransaction)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled(cancellationToken);
-            }
-
             try
             {
                 dbTransaction.Rollback();
                 return Task.CompletedTask;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return Task.FromException(e);
             }

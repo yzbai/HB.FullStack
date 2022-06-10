@@ -1,10 +1,16 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.Def;
+using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 
@@ -15,88 +21,73 @@ namespace HB.FullStack.Database
     /// </summary>
     public static class DatabaseClientExtensions
     {
-        /// <summary>
-        /// DeleteAsync
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="whereExpr"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
         public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity, new()
         {
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            EntityDef entityDef = database.EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw Exceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
             }
 
             try
             {
                 WhereExpression<T> where = database.Where(whereExpr).And(t => !t.Deleted);
 
-                var command = DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
+                var command = database.DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
 
                 await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
-
             }
-            catch (Exception ex) when (!(ex is DatabaseException))
+            catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(entityDef.EntityFullName, whereExpr.ToString(), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, whereExpr.ToString(), ex);
             }
         }
 
-        /// <summary>
-        /// AddOrUpdateByIdAsync
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="item"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, TransactionContext? transContext = null) where T : DatabaseEntity, new()
+        public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, string lastUser, TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            EntityDef entityDef = database.EntityDefFactory.GetDef<T>()!;
 
             if (!entityDef.DatabaseWriteable)
             {
-                throw Exceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
             }
 
             try
             {
-                item.LastTime = TimeUtil.UtcNow;
+                DateTimeOffset utcNow = TimeUtil.UtcNow;
+                item.LastUser = lastUser;
+                item.LastTime = utcNow;
+                item.CreateTime = utcNow;
 
                 if (item.Version < 0)
                 {
                     item.Version = 0;
                 }
 
-                var command = DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
+                var command = database.DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
 
                 using var reader = await database.DatabaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
 
-                IList<T> entities = reader.ToEntities<T>(database.EngineType, entityDef);
+                IList<T> entities = reader.ToEntities<T>(database.EngineType, database.EntityDefFactory, entityDef);
 
                 T newItem = entities[0];
 
                 item.CreateTime = newItem.CreateTime;
                 item.Version = newItem.Version;
-                item.LastUser = newItem.LastUser;
             }
-            catch (Exception ex) when (!(ex is DatabaseException))
+            catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw Exceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
         }
 
         /// <summary>
         /// warning: 不改变items！！！！
         /// </summary>
-        /// <exception cref="DatabaseException"></exception>
+
         //public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseEntity, new()
         //{
         //    ThrowIf.NotValid(items, nameof(items));
@@ -135,6 +126,5 @@ namespace HB.FullStack.Database
         //        throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
         //    }
         //}
-
     }
 }

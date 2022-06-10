@@ -1,16 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 
+
 namespace HB.FullStack.Database.Entities
 {
     /// <summary>
     /// 实体定义
     /// </summary>
-    internal class EntityDef
+    public class EntityDef
     {
+        /// <summary>
+        /// 是否是GuidEntity
+        /// </summary>
+        public bool IsIdGuid { get; set; }
+
+        /// <summary>
+        /// 是否是IdLongEntity
+        /// </summary>
+        public bool IsIdLong { get; set; }
+
+        /// <summary>
+        /// 是否是AutoincrementIdEntity
+        /// </summary>
         public bool IsIdAutoIncrement { get; set; }
 
-        public bool IsIdGuid { get; set; }
         /// <summary>
         /// 实体名
         /// </summary>
@@ -56,7 +69,7 @@ namespace HB.FullStack.Database.Entities
         /// <summary>
         /// 属性枚举
         /// </summary>
-        public List<EntityPropertyDef> PropertyDefs { get; } = new List<EntityPropertyDef>();
+        public IList<EntityPropertyDef> PropertyDefs { get; } = new List<EntityPropertyDef>();
 
         public EntityPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
 
@@ -68,6 +81,11 @@ namespace HB.FullStack.Database.Entities
             }
 
             return null;
+        }
+
+        public bool ContainsProperty(string propertyName)
+        {
+            return PropertyDict.ContainsKey(propertyName);
         }
     }
 }

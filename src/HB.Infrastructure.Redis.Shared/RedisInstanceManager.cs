@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.Shared
 {
-    internal static class RedisInstanceManager
+    public static class RedisInstanceManager
     {
         private static ConcurrentDictionary<string, ConnectionMultiplexer> _connectionDict = new ConcurrentDictionary<string, ConnectionMultiplexer>();      //instanceName : RedisConnection
         private static readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
@@ -56,14 +56,15 @@ namespace HB.Infrastructure.Redis.Shared
                     SetConnectionEvents(connection, logger);
 
                     logger.LogInformation($"Redis 链接建立 Connected : {setting.InstanceName}");
-
                 });
 
                 _connectionLock.Release();
 
                 return connection;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 _connectionLock.Release();
 
@@ -82,7 +83,6 @@ namespace HB.Infrastructure.Redis.Shared
             connection.ErrorMessage += (sender, e) =>
             {
                 logger.LogError($"message:{e.Message}, endpoint:{e.EndPoint}");
-
             };
 
             connection.InternalError += (sernder, e) =>
@@ -133,7 +133,9 @@ namespace HB.Infrastructure.Redis.Shared
 
                 return connection;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 _connectionLock.Release();
 

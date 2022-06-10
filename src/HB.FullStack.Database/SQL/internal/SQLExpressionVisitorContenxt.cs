@@ -1,8 +1,9 @@
-﻿#nullable enable
+﻿
 
 using System.Collections.Generic;
 
 using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.SQL
 {
@@ -12,11 +13,9 @@ namespace HB.FullStack.Database.SQL
 
         public string Seperator { get; set; } = " ";
 
-        public int ParamCounter { get; set; }
+        public int ParamCounter { get; private set; }
 
         public string ParamPlaceHolderPrefix { get; set; } = "_";
-
-        public bool IsParameterized { get; set; } = true;
 
         public bool PrefixFieldWithTableName { get; set; } = true;
 
@@ -25,10 +24,15 @@ namespace HB.FullStack.Database.SQL
         public string[]? OrderByStatementBySQLUtilIn_Ins { get; set; }
 
         public EngineType EngineType { get; private set; }
-
+        
         public SQLExpressionVisitorContenxt(EngineType engineType)
         {
             EngineType = engineType;
+        }
+
+        public string GetNextParamPlaceholder()
+        {
+            return ParamPlaceHolderPrefix + ParamCounter++;
         }
 
         public void AddParameter(string key, object value)

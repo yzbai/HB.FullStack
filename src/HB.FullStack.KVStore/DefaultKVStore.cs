@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 using HB.FullStack.KVStore.Engine;
 using HB.FullStack.KVStore.Entities;
 
 namespace HB.FullStack.KVStore
 {
-    internal partial class DefaultKVStore : IKVStore
+    public class DefaultKVStore : IKVStore
     {
         private readonly IKVStoreEngine _engine;
 
@@ -37,8 +36,6 @@ namespace HB.FullStack.KVStore
             }
 
             return builder.ToString();
-
-
         }
 
         public string GetEntityKey<T>(T item) where T : KVStoreEntity, new()
@@ -61,7 +58,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        /// <exception cref="KVStoreException"></exception>
+
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
@@ -75,7 +72,7 @@ namespace HB.FullStack.KVStore
 
                 return MapTupleToEntity<T>(tuples);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: keys, innerException: ex);
             }
@@ -84,7 +81,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        /// <exception cref="KVStoreException"></exception>
+
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
@@ -96,7 +93,7 @@ namespace HB.FullStack.KVStore
 
                 return MapTupleToEntity<T>(tuples);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: null, innerException: ex);
             }
@@ -107,7 +104,7 @@ namespace HB.FullStack.KVStore
         /// </summary>
         public Task AddAsync<T>(T item, string lastUser) where T : KVStoreEntity, new()
         {
-            return AddAsync<T>(new T[] { item }, lastUser);
+            return AddAsync(new T[] { item }, lastUser);
         }
 
         /// <summary>
@@ -117,7 +114,7 @@ namespace HB.FullStack.KVStore
         /// <param name="items"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+
         public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreEntity, new()
         {
             if (!items.Any())
@@ -131,7 +128,6 @@ namespace HB.FullStack.KVStore
 
             try
             {
-
                 foreach (var t in items)
                 {
                     t.LastUser = lastUser;
@@ -151,7 +147,7 @@ namespace HB.FullStack.KVStore
                     t.Version = 0;
                 }
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
             }
@@ -162,7 +158,7 @@ namespace HB.FullStack.KVStore
         /// </summary>
         public Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreEntity, new()
         {
-            return UpdateAsync<T>(new T[] { item }, lastUser);
+            return UpdateAsync(new T[] { item }, lastUser);
         }
 
         /// <summary>
@@ -172,7 +168,7 @@ namespace HB.FullStack.KVStore
         /// <param name="items"></param>
         /// <param name="lastUser"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+
         public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreEntity, new()
         {
             if (!items.Any())
@@ -186,7 +182,6 @@ namespace HB.FullStack.KVStore
 
             try
             {
-
                 IEnumerable<int> originalVersions = items.Select(t => t.Version).ToArray();
 
                 foreach (var t in items)
@@ -198,8 +193,8 @@ namespace HB.FullStack.KVStore
                 await _engine.EntityUpdateAsync(
                     entityDef.KVStoreName,
                     entityDef.EntityType.FullName!,
-                    items.Select(t => GetEntityKey(t, entityDef)),
-                    items.Select(t => SerializeUtil.ToJson(t)),
+                    items.Select(t => GetEntityKey(t, entityDef)).ToList(),
+                    items.Select(t => SerializeUtil.ToJson(t)).ToList(),
                     originalVersions).ConfigureAwait(false);
 
                 //反应Version变化
@@ -208,8 +203,7 @@ namespace HB.FullStack.KVStore
                     t.Version++;
                 }
             }
-
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
             }
@@ -219,20 +213,19 @@ namespace HB.FullStack.KVStore
         /// DeleteAllAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+
         public async Task DeleteAllAsync<T>() where T : KVStoreEntity, new()
         {
             KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
 
             try
             {
-
                 await _engine.EntityDeleteAllAsync(
                    entityDef.KVStoreName,
                    entityDef.EntityType.FullName!
                    ).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, null, ex);
             }
@@ -249,7 +242,7 @@ namespace HB.FullStack.KVStore
         /// <param name="keys"></param>
         /// <param name="versions"></param>
         /// <returns></returns>
-        /// <exception cref="KVStoreException"></exception>
+
         public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : KVStoreEntity, new()
         {
             ThrowIf.NullOrEmpty(versions, nameof(versions));
@@ -263,7 +256,6 @@ namespace HB.FullStack.KVStore
 
             try
             {
-
                 await _engine.EntityDeleteAsync(
                     entityDef.KVStoreName,
                     entityDef.EntityType.FullName!,
@@ -271,7 +263,7 @@ namespace HB.FullStack.KVStore
                     versions
                     ).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!(ex is KVStoreException))
+            catch (Exception ex) when (ex is not KVStoreException)
             {
                 throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, keys: keys, values: versions, innerException: ex);
             }
@@ -297,7 +289,5 @@ namespace HB.FullStack.KVStore
 
             return rt;
         }
-
-
     }
 }

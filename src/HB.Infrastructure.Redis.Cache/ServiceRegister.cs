@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<RedisCacheOptions>(configuration);
 
@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddRedisCache(this IServiceCollection services, Action<RedisCacheOptions> action)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<RedisCacheOptions>(action);
 

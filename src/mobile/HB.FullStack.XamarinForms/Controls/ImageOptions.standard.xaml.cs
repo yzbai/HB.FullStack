@@ -136,7 +136,7 @@ namespace HB.FullStack.XamarinForms.Controls
         /// <summary>
         /// OnSelectedIndexChanged
         /// </summary>
-        /// <exception cref="MobileException"></exception>
+        
         private void OnSelectedIndexChanged()
         {
             if (ItemsSource == null)
@@ -150,7 +150,7 @@ namespace HB.FullStack.XamarinForms.Controls
             }
             else if (SelectedIndex > ItemsSource!.Count - 1)
             {
-                throw MobileExceptions.OutOfRange(selectedIndex: SelectedIndex, cause:"ImageOptions SelectedIndex Out of Range.");
+                throw ClientExceptions.ImageOptionsOutOfRange(selectedIndex: SelectedIndex, cause:"ImageOptions SelectedIndex Out of Range.");
             }
 
             SelectedItem = ItemsSource[SelectedIndex];

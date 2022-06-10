@@ -1,17 +1,24 @@
-﻿#nullable disable
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+#nullable disable
+
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.XamarinForms.Api;
 
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-
 
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -21,28 +28,28 @@ using IOPath = System.IO.Path;
 namespace HB.FullStack.XamarinForms.Controls
 {
     /// <summary>
-    /// 从Xamarin.Forms复制. 
+    /// 从Xamarin.Forms复制.
     /// </summary>
     public sealed class AuthUriImageSource : ImageSource
     {
-        internal const string CacheName = "ImageLoaderCache";
+        internal const string CACHE_NAME = "ImageLoaderCache";
 
         public static readonly BindableProperty UriProperty = BindableProperty.Create(nameof(Uri), typeof(Uri), typeof(AuthUriImageSource), default(Uri),
             propertyChanged: (bindable, oldvalue, newvalue) => ((AuthUriImageSource)bindable).OnUriChanged(), validateValue: (bindable, value) => value == null || ((Uri)value).IsAbsoluteUri);
 
-        static readonly Xamarin.Forms.Internals.IIsolatedStorageFile Store = Device.PlatformServices.GetUserStoreForApplication();
+        private static readonly IIsolatedStorageFile _store = Device.PlatformServices.GetUserStoreForApplication();
 
-        static readonly object s_syncHandle = new object();
-        static readonly Dictionary<string, LockingSemaphore> s_semaphores = new Dictionary<string, LockingSemaphore>();
+        //static readonly object s_syncHandle = new object();
+        private static readonly ConcurrentDictionary<string, LockingSemaphore> _semaphores = new ConcurrentDictionary<string, LockingSemaphore>();
 
-        TimeSpan _cacheValidity = TimeSpan.FromDays(1);
+        private TimeSpan _cacheValidity = TimeSpan.FromDays(1);
 
-        bool _cachingEnabled = true;
+        private bool _cachingEnabled = true;
 
         static AuthUriImageSource()
         {
-            if (!Store.GetDirectoryExistsAsync(CacheName).Result)
-                Store.CreateDirectoryAsync(CacheName).Wait();
+            if (!_store.GetDirectoryExistsAsync(CACHE_NAME).Result)
+                _store.CreateDirectoryAsync(CACHE_NAME).Wait();
         }
 
         public override bool IsEmpty => Uri == null;
@@ -82,15 +89,9 @@ namespace HB.FullStack.XamarinForms.Controls
             set { SetValue(UriProperty, value); }
         }
 
-        /// <summary>
-        /// GetStreamAsync
-        /// </summary>
-        /// <param name="userToken"></param>
-        /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
-        /// <exception cref="Exception"></exception>
+
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public async Task<Stream> GetStreamAsync(CancellationToken userToken = default(CancellationToken))
+        public async Task<Stream> GetStreamAsync(CancellationToken userToken = default)
         {
             OnLoadingStarted();
             userToken.Register(CancellationTokenSource.Cancel);
@@ -122,37 +123,29 @@ namespace HB.FullStack.XamarinForms.Controls
             return $"Uri: {Uri}";
         }
 
-        static string GetCacheKey(Uri uri)
+        private static string GetCacheKey(Uri uri)
         {
             return Device.PlatformServices.GetHash(uri.AbsoluteUri);
         }
 
-#pragma warning disable CA1801 // Review unused parameters
-        async Task<bool> GetHasLocallyCachedCopyAsync(string key, bool checkValidity = true)
-#pragma warning restore CA1801 // Review unused parameters
+        private async Task<bool> GetHasLocallyCachedCopyAsync(string key)
         {
             DateTime now = DateTime.UtcNow;
             DateTime? lastWriteTime = await GetLastWriteTimeUtcAsync(key).ConfigureAwait(false);
             return lastWriteTime.HasValue && now - lastWriteTime.Value < CacheValidity;
         }
 
-        static async Task<DateTime?> GetLastWriteTimeUtcAsync(string key)
+        private static async Task<DateTime?> GetLastWriteTimeUtcAsync(string key)
         {
-            string path = IOPath.Combine(CacheName, key);
-            if (!await Store.GetFileExistsAsync(path).ConfigureAwait(false))
+            string path = IOPath.Combine(CACHE_NAME, key);
+            if (!await _store.GetFileExistsAsync(path).ConfigureAwait(false))
                 return null;
 
-            return (await Store.GetLastWriteTimeAsync(path).ConfigureAwait(false)).UtcDateTime;
+            return (await _store.GetLastWriteTimeAsync(path).ConfigureAwait(false)).UtcDateTime;
         }
 
-        /// <summary>
-        /// GetStreamAsync
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
-        async Task<Stream> GetStreamAsync(Uri uri, CancellationToken cancellationToken = default(CancellationToken))
+
+        private async Task<Stream> GetStreamAsync(Uri uri, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -167,9 +160,11 @@ namespace HB.FullStack.XamarinForms.Controls
                 {
                     stream = await GetStreamCoreAsync(uri, cancellationToken).ConfigureAwait(false);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    Xamarin.Forms.Internals.Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
+                    Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
                     stream = null;
                 }
             }
@@ -177,7 +172,7 @@ namespace HB.FullStack.XamarinForms.Controls
             return stream;
         }
 
-        async Task<Stream> GetStreamAsyncUnchecked(string key, Uri uri, CancellationToken cancellationToken)
+        private async Task<Stream> GetStreamAsyncUnchecked(string key, Uri uri, CancellationToken cancellationToken)
         {
             if (await GetHasLocallyCachedCopyAsync(key).ConfigureAwait(false))
             {
@@ -187,7 +182,7 @@ namespace HB.FullStack.XamarinForms.Controls
                     int backoff;
                     try
                     {
-                        Stream result = await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
+                        Stream result = await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
                         return result;
                     }
                     catch (IOException)
@@ -215,57 +210,75 @@ namespace HB.FullStack.XamarinForms.Controls
             try
             {
                 stream = await GetStreamCoreAsync(uri, cancellationToken).ConfigureAwait(false);
+
                 if (stream == null)
+                {
                     return null;
+                }
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
                 return null;
             }
 
-            if (stream == null || !stream.CanRead)
+            if (!stream.CanRead)
             {
-                stream?.Dispose();
+#if NETSTANDARD2_1
+                await stream.DisposeAsync().ConfigureAwait(false);
+#elif NETSTANDARD2_0
+                stream.Dispose();
+#endif
+
                 return null;
             }
 
             try
             {
-                Stream writeStream = await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
+                Stream writeStream = await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Create, FileAccess.Write).ConfigureAwait(false);
+
                 await stream.CopyToAsync(writeStream, 16384, cancellationToken).ConfigureAwait(false);
+
                 if (writeStream != null)
+                {
+#if NETSTANDARD2_1
+                    await writeStream.DisposeAsync().ConfigureAwait(false);
+#elif NETSTANDARD2_0
                     writeStream.Dispose();
+#endif
+                }
 
+#if NETSTANDARD2_1
+                await stream.DisposeAsync().ConfigureAwait(false);
+#elif NETSTANDARD2_0
                 stream.Dispose();
+#endif
 
-                return await Store.OpenFileAsync(IOPath.Combine(CacheName, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
+                return await _store.OpenFileAsync(IOPath.Combine(CACHE_NAME, key), FileMode.Open, FileAccess.Read).ConfigureAwait(false);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Log.Warning("Image Loading", $"Error getting stream for {Uri}: {ex}");
                 return null;
             }
         }
 
-        /// <summary>
-        /// GetStreamFromCacheAsync
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
-        async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
+
+        private async Task<Stream> GetStreamFromCacheAsync(Uri uri, CancellationToken cancellationToken)
         {
             string key = GetCacheKey(uri);
-            LockingSemaphore sem;
-            lock (s_syncHandle)
-            {
-                if (s_semaphores.ContainsKey(key))
-                    sem = s_semaphores[key];
-                else
-                    s_semaphores.Add(key, sem = new LockingSemaphore(1));
-            }
+            LockingSemaphore sem = _semaphores.GetOrAdd(key, _ => new LockingSemaphore(1));
+            //lock (s_syncHandle)
+            //{
+            //    if (s_semaphores.ContainsKey(key))
+            //        sem = s_semaphores[key];
+            //    else
+            //        s_semaphores.Add(key, sem = new LockingSemaphore(1));
+            //}
 
             try
             {
@@ -291,14 +304,13 @@ namespace HB.FullStack.XamarinForms.Controls
             }
         }
 
-        void OnUriChanged()
+        private void OnUriChanged()
         {
             if (CancellationTokenSource != null)
                 CancellationTokenSource.Cancel();
             OnSourceChanged();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public static Task<Stream> GetStreamCoreAsync(Uri uri, CancellationToken cancellationToken)
         {
             //if (ApiClient == null)
@@ -324,8 +336,7 @@ namespace HB.FullStack.XamarinForms.Controls
             //    }
             //}
 
-            return ApiClient.GetStreamAsync(new ImageUrlRequest(uri.AbsoluteUri));
-
+            return ApiClient.GetStreamAsync(new ImageUrlRequest(uri.AbsoluteUri), cancellationToken);
         }
 
         private static IApiClient _apiClient;
@@ -334,7 +345,7 @@ namespace HB.FullStack.XamarinForms.Controls
         {
             get
             {
-                if(_apiClient == null)
+                if (_apiClient == null)
                 {
                     _apiClient = DependencyService.Resolve<IApiClient>();
                 }
@@ -344,24 +355,22 @@ namespace HB.FullStack.XamarinForms.Controls
         }
     }
 
+
+
     internal class ImageUrlRequest : ApiRequest
     {
         private readonly string _uri;
 
-        public ImageUrlRequest(string uri) : base(HttpMethod.Get, ApiAuthType.Jwt, null, null, null, null)
+        public ImageUrlRequest(string uri) : base(new PlainUrlHttpRequestBuilder(HttpMethodName.Get, true, ApiAuthType.Jwt, uri))
         {
             _uri = uri;
         }
 
-        public override string ToDebugInfo()
+        public override int GetHashCode()
         {
-            return $"ImageUrlRequest Uri:{_uri}";
-        }
-
-        protected override string BuildUrl()
-        {
-            return _uri;
+            return HashCode.Combine(base.GetHashCode(), _uri);
         }
     }
 }
+
 #nullable restore

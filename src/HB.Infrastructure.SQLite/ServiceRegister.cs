@@ -1,7 +1,15 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
 using HB.FullStack.Database.Engine;
 using HB.Infrastructure.SQLite;
+
 using Microsoft.Extensions.Configuration;
+
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -9,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddSQLite(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure<SQLiteOptions>(configuration);
 
@@ -20,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddSQLite(this IServiceCollection services, Action<SQLiteOptions> databaseEngineOptionsSetup)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(databaseEngineOptionsSetup);
 

@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 namespace HB.FullStack.Database.SQL
 {
@@ -6,6 +6,7 @@ namespace HB.FullStack.Database.SQL
     {
         AddEntity,
         UpdateEntity,
+        UpdateFields,
         DeleteEntity,
         SelectEntity,
         Delete,

@@ -8,7 +8,7 @@ namespace HB.FullStack.KVStore
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class KVStoreKeyAttribute : System.Attribute
     {
-        public int Order { get; set; }
+        public int Order { get; }
 
         public KVStoreKeyAttribute(int order = 0)
         {

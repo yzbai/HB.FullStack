@@ -11,82 +11,43 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddIdentity(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.Configure(optionsSetup);
+            AddIdentityCore(services);
 
+            return services;
+        }
+
+        public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
+        {
+            //services.AddOptions();
+
+            services.Configure<IdentityOptions>(configuration);
+
+            AddIdentityCore(services);
+
+            return services;
+        }
+
+        private static void AddIdentityCore(IServiceCollection services)
+        {
             //internal
             services.AddSingleton<UserRepo>();
-            services.AddSingleton<RoleOfUserRepo>();
+            services.AddSingleton<UserRoleRepo>();
             services.AddSingleton<UserClaimRepo>();
             services.AddSingleton<RoleRepo>();
-            services.AddSingleton<UserLoginControlRepo>();
+            services.AddSingleton<LoginControlRepo>();
             services.AddSingleton<SignInTokenRepo>();
+            services.AddSingleton<UserActivityRepo>();
 
             //public interface
             services.AddSingleton<IIdentityService, IdentityService>();
-
-            return services;
         }
 
         public static IServiceCollection AddIdentity(this IServiceCollection services)
         {
             return services.AddIdentity(o => { });
-        }
-
-        /// <summary>
-        /// AddAuthorizationServer
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        /// <exception cref="IdentityException"></exception>
-        public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, Action<AuthorizationServiceOptions> action)
-        {
-            ThrowIfNoIdentityService(services);
-
-            services.AddOptions();
-
-            services.Configure(action);
-
-            services.AddSingleton<IAuthorizationService, AuthorizationService>();
-
-            return services;
-        }
-
-        
-
-        /// <summary>
-        /// AddAuthorizationServer
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
-        /// <returns></returns>
-        /// <exception cref="IdentityException"></exception>
-        public static IServiceCollection AddAuthorizationServer(this IServiceCollection services, IConfiguration configuration)
-        {
-            ThrowIfNoIdentityService(services);
-
-            services.AddOptions();
-
-            services.Configure<AuthorizationServiceOptions>(configuration);
-
-            services.AddSingleton<IAuthorizationService, AuthorizationService>();
-
-            return services;
-        }
-
-        /// <summary>
-        /// ThrowIfNoIdentityService
-        /// </summary>
-        /// <param name="services"></param>
-        /// <exception cref="IdentityException"></exception>
-        private static void ThrowIfNoIdentityService(IServiceCollection services)
-        {
-            if (!services.Any(s => s.ServiceType == typeof(IIdentityService)))
-            {
-                throw Exceptions.ServiceRegisterError(cause:"AuthroizationService需要IdentityService");
-            }
         }
     }
 

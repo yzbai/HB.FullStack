@@ -16,5 +16,6 @@ namespace HB.FullStack.KVStore.Entities
         [CacheKey]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
+        public override string LastUser { get; set; } = string.Empty;
     }
 }

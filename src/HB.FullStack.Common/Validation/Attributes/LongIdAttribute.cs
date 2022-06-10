@@ -4,11 +4,11 @@ using HB.FullStack.Common.Validate;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    public sealed class LongIdAttribute : ValidationAttribute
+    public sealed class LongId2Attribute : ValidationAttribute
     {
         public bool CanBeNull { get; set; } = true;
 
-        public LongIdAttribute()
+        public LongId2Attribute()
         {
             if (string.IsNullOrEmpty(ErrorMessage))
             {

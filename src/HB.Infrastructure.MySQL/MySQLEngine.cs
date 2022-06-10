@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
 {
-    internal class MySQLEngine : IDatabaseEngine
+    public class MySQLEngine : IDatabaseEngine
     {
         #region 自身 & 构建
 
@@ -34,7 +34,6 @@ namespace HB.Infrastructure.MySQL
 
         public IEnumerable<string> DatabaseNames { get; private set; }
 
-        [SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "<Pending>")]
         public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory, ILogger<MySQLEngine> logger)
         {
             try
@@ -51,7 +50,7 @@ namespace HB.Infrastructure.MySQL
             _options = options.Value;
             _logger = logger;
 
-            DatabaseNames = _options.Connections.Select(s => s.DatabaseName);
+            DatabaseNames = _options.Connections.Select(s => s.DatabaseName).ToList();
 
             SetConnectionStrings();
 
@@ -93,9 +92,7 @@ namespace HB.Infrastructure.MySQL
             return _connectionStringDict[dbName + "_0"];
         }
 
-
-#endregion 自身 & 构建
-
+        #endregion 自身 & 构建
 
         [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         private static MySqlCommand CreateTextCommand(EngineCommand engineCommand)
@@ -118,82 +115,81 @@ namespace HB.Infrastructure.MySQL
             return command;
         }
 
-
-#region Command 能力
+        #region Command 能力
 
         /// <summary>
         /// ExecuteCommandNonQueryAsync
         /// </summary>
-        /// <param name="Transaction"></param>
+        /// <param name="trans"></param>
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand)
+
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (Transaction == null)
+            if (trans == null)
             {
                 return await MySQLExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), command).ConfigureAwait(false);
             }
             else
             {
-                return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
+                return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
 
         /// <summary>
         /// ExecuteCommandReaderAsync
         /// </summary>
-        /// <param name="Transaction"></param>
+        /// <param name="trans"></param>
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
+
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (Transaction == null)
+            if (trans == null)
             {
                 return await MySQLExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
             }
             else
             {
-                return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
+                return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
 
         /// <summary>
         /// ExecuteCommandScalarAsync
         /// </summary>
-        /// <param name="Transaction"></param>
+        /// <param name="trans"></param>
         /// <param name="dbName"></param>
         /// <param name="engineCommand"></param>
         /// <param name="useMaster"></param>
         /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? Transaction, string dbName, EngineCommand engineCommand, bool useMaster = false)
+
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (Transaction == null)
+            if (trans == null)
             {
                 return await MySQLExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
             }
             else
             {
-                return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)Transaction, command).ConfigureAwait(false);
+                return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
 
-#endregion Command 能力
+        #endregion Command 能力
 
-#region 事务
+        #region 事务
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
+        [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
@@ -240,6 +236,6 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-#endregion 事务
+        #endregion 事务
     }
 }

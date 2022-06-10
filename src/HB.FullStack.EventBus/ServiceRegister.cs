@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddEventBus(this IServiceCollection services)
         {
-            services.AddOptions();
+            //services.AddOptions();
 
             services.AddSingleton<IEventBus, DefaultEventBus>();
 

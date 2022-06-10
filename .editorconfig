@@ -1,52 +1,159 @@
 ﻿[*.cs]
 
-# 影响上锁的double check
-dotnet_diagnostic.CA1508.severity = none
-
-dotnet_diagnostic.CA1014.severity = none
-
-dotnet_diagnostic.CA1824.severity = none
-
-dotnet_diagnostic.CA1024.severity = none
-
-dotnet_diagnostic.CA1055.severity = none
-dotnet_diagnostic.CA1054.severity = none
-dotnet_diagnostic.CA1056.severity = none
-
-# Avoid uninstantiated internal classe
-dotnet_diagnostic.CA1812.severity = none
-
-#  Identifiers should not contain type names - Visual ...
-dotnet_diagnostic.CA1720.severity = none
-dotnet_diagnostic.CA1707.severity = none
-dotnet_diagnostic.CA1019.severity = none
-dotnet_diagnostic.CA1813.severity = none
-
-# 临时关闭 Do not pass literals as localized parameters
-dotnet_diagnostic.CA1303.severity = none
-
 # Validate arguments of public methods 因为开启了Nullable，确保所有调用被调用项目全是NRT
 dotnet_diagnostic.CA1062.severity = none
 
-#在适用处使用事件
-dotnet_diagnostic.CA1030.severity = none
-
-dotnet_diagnostic.CA2211.severity = none
-dotnet_diagnostic.CA1711.severity = none
-
-# 这条规则目前有bug，只在IList上触发，而对于IEnumerable没反应，且应为BindableProperty的特殊写法，故此先禁用 2020.5.29
+# # 这条规则目前有bug，只在IList上触发，而对于IEnumerable没反应，且应为BindableProperty的特殊写法，故此先禁用 2020.5.29
+# https://github.com/dotnet/runtime/issues/30258
 dotnet_diagnostic.CA2227.severity = none
 
-
-#CA1031：不要捕捉一般异常类型
-dotnet_diagnostic.CA1031.severity = none
-
-
-#CA1032: Implement standard exception constructors
-dotnet_diagnostic.CA1032.severity = none
-
-#CA1716
-dotnet_diagnostic.CA1716.severity = none
+# 标识符不应包含下划线
+dotnet_diagnostic.CA1707.severity = none
 
 # IDE0090: Use 'new(...)'
 dotnet_diagnostic.IDE0090.severity = none
+
+# CA1720: Identifier contains type name
+dotnet_diagnostic.CA1720.severity = none
+
+#CA1812:避免未实例化的内部类
+# 当使用DI的时候，实现类是internal，对外是public
+dotnet_diagnostic.CA1812.severity = none
+
+# CA1716:标识符不应与关键字冲突
+dotnet_diagnostic.CA1716.severity = none
+
+# CA1054:URI 参数不应为字符串
+dotnet_diagnostic.CA1054.severity = none
+dotnet_diagnostic.CA1055.severity = none
+dotnet_diagnostic.CA1056.severity = none
+
+# CA2211:非常量字段不应是可见的  xamarin 的 BindableProperty全是字段
+dotnet_diagnostic.CA2211.severity = none
+
+# CA1024:在适用处使用属性 让人烦躁
+dotnet_diagnostic.CA1024.severity = none
+
+# CA1003: 使用泛型事件处理程序实例
+dotnet_diagnostic.CA1003.severity = none
+[*.cs]
+#### Naming styles ####
+
+# Naming rules
+
+dotnet_naming_rule.const_should_be_pascal_case.severity = warning
+dotnet_naming_rule.const_should_be_pascal_case.symbols = const
+dotnet_naming_rule.const_should_be_pascal_case.style = pascal_case
+
+dotnet_naming_rule.private_or_internal_field_should_be__camelcase.severity = warning
+dotnet_naming_rule.private_or_internal_field_should_be__camelcase.symbols = private_or_internal_field
+dotnet_naming_rule.private_or_internal_field_should_be__camelcase.style = _camelcase
+
+# Symbol specifications
+
+dotnet_naming_symbols.const.applicable_kinds = namespace, property, field, event, parameter, local, class, struct, interface, enum, delegate, method, local_function
+dotnet_naming_symbols.const.applicable_accessibilities = *
+dotnet_naming_symbols.const.required_modifiers = const
+
+dotnet_naming_symbols.private_or_internal_field.applicable_kinds = field
+dotnet_naming_symbols.private_or_internal_field.applicable_accessibilities = internal, private, private_protected
+dotnet_naming_symbols.private_or_internal_field.required_modifiers = 
+
+# Naming styles
+
+dotnet_naming_style.pascal_case.required_prefix = 
+dotnet_naming_style.pascal_case.required_suffix = 
+dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style._camelcase.required_prefix = _
+dotnet_naming_style._camelcase.required_suffix = 
+dotnet_naming_style._camelcase.word_separator = 
+dotnet_naming_style._camelcase.capitalization = camel_case
+csharp_using_directive_placement = outside_namespace:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_prefer_braces = true:silent
+csharp_style_namespace_declarations = block_scoped:silent
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+csharp_indent_labels = one_less_than_current
+csharp_style_prefer_local_over_anonymous_function = true:suggestion
+csharp_prefer_static_local_function = true:suggestion
+csharp_style_conditional_delegate_call = true:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+
+[*.{cs,vb}]
+#### Naming styles ####
+
+# Naming rules
+
+dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
+dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
+dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
+
+dotnet_naming_rule.types_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.types_should_be_pascal_case.symbols = types
+dotnet_naming_rule.types_should_be_pascal_case.style = pascal_case
+
+dotnet_naming_rule.non_field_members_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.non_field_members_should_be_pascal_case.symbols = non_field_members
+dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
+
+# Symbol specifications
+
+dotnet_naming_symbols.interface.applicable_kinds = interface
+dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.interface.required_modifiers = 
+
+dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
+dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.types.required_modifiers = 
+
+dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, method
+dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.non_field_members.required_modifiers = 
+
+# Naming styles
+
+dotnet_naming_style.begins_with_i.required_prefix = I
+dotnet_naming_style.begins_with_i.required_suffix = 
+dotnet_naming_style.begins_with_i.word_separator = 
+dotnet_naming_style.begins_with_i.capitalization = pascal_case
+
+dotnet_naming_style.pascal_case.required_prefix = 
+dotnet_naming_style.pascal_case.required_suffix = 
+dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.pascal_case.required_prefix = 
+dotnet_naming_style.pascal_case.required_suffix = 
+dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_compound_assignment = true:suggestion
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 4
+indent_size = 4
+end_of_line = crlf
+dotnet_style_predefined_type_for_locals_parameters_members = true:silent
+dotnet_diagnostic.CA1724.severity = suggestion
+dotnet_diagnostic.CA1031.severity = suggestion

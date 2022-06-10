@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using System;
 using System.Collections;
@@ -14,94 +14,69 @@ using HB.FullStack.Database.Entities;
 
 namespace HB.FullStack.Database.SQL
 {
-    internal static class SQLExpressionVisitor
-    {
-        /// <summary>
-        /// Visit
-        /// </summary>
-        /// <param name="exp"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        public static object Visit(Expression? exp, SQLExpressionVisitorContenxt context)
+    internal class SQLExpressionVisitor : ISQLExpressionVisitor
+    {       
+        public SQLExpressionVisitor(IEntityDefFactory entityDefFactory)
+        {
+            _entityDefFactory = entityDefFactory;
+        }
+
+        public object Visit(Expression? exp, SQLExpressionVisitorContenxt context)
         {
             if (exp == null) return string.Empty;
 
-            switch (exp.NodeType)
+            return exp.NodeType switch
             {
-                case ExpressionType.Lambda:
-                    return VisitLambda((LambdaExpression)exp, context);
+                ExpressionType.Lambda => VisitLambda((LambdaExpression)exp, context),
+                ExpressionType.MemberAccess => VisitMemberAccess((MemberExpression)exp, context),
+                ExpressionType.Constant => VisitConstant((ConstantExpression)exp),
+                
+                ExpressionType.Add 
+                    or ExpressionType.AddChecked 
+                    or ExpressionType.Subtract 
+                    or ExpressionType.SubtractChecked 
+                    or ExpressionType.Multiply 
+                    or ExpressionType.MultiplyChecked 
+                    or ExpressionType.Divide 
+                    or ExpressionType.Modulo 
+                    or ExpressionType.And 
+                    or ExpressionType.AndAlso 
+                    or ExpressionType.Or 
+                    or ExpressionType.OrElse 
+                    or ExpressionType.LessThan 
+                    or ExpressionType.LessThanOrEqual 
+                    or ExpressionType.GreaterThan 
+                    or ExpressionType.GreaterThanOrEqual 
+                    or ExpressionType.Equal 
+                    or ExpressionType.NotEqual 
+                    or ExpressionType.Coalesce 
+                    or ExpressionType.ArrayIndex 
+                    or ExpressionType.RightShift 
+                    or ExpressionType.LeftShift 
+                    or ExpressionType.ExclusiveOr 
+                    => VisitBinary((BinaryExpression)exp, context),
 
-                case ExpressionType.MemberAccess:
-                    return VisitMemberAccess((MemberExpression)exp, context);
+                ExpressionType.Negate 
+                    or ExpressionType.NegateChecked 
+                    or ExpressionType.Not 
+                    or ExpressionType.Convert 
+                    or ExpressionType.ConvertChecked 
+                    or ExpressionType.ArrayLength 
+                    or ExpressionType.Quote 
+                    or ExpressionType.TypeAs 
+                    => VisitUnary((UnaryExpression)exp, context),
 
-                case ExpressionType.Constant:
-                    return VisitConstant((ConstantExpression)exp);
-
-                case ExpressionType.Add:
-                case ExpressionType.AddChecked:
-                case ExpressionType.Subtract:
-                case ExpressionType.SubtractChecked:
-                case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked:
-                case ExpressionType.Divide:
-                case ExpressionType.Modulo:
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
-                case ExpressionType.Equal:
-                case ExpressionType.NotEqual:
-                case ExpressionType.Coalesce:
-                case ExpressionType.ArrayIndex:
-                case ExpressionType.RightShift:
-                case ExpressionType.LeftShift:
-                case ExpressionType.ExclusiveOr:
-                    return VisitBinary((BinaryExpression)exp, context);
-
-                case ExpressionType.Negate:
-                case ExpressionType.NegateChecked:
-                case ExpressionType.Not:
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.ArrayLength:
-                case ExpressionType.Quote:
-                case ExpressionType.TypeAs:
-                    return VisitUnary((UnaryExpression)exp, context);
-
-                case ExpressionType.Parameter:
-                    return VisitParameter((ParameterExpression)exp);
-
-                case ExpressionType.Call:
-                    return VisitMethodCall((MethodCallExpression)exp, context);
-
-                case ExpressionType.New:
-                    return VisitNew((NewExpression)exp, context);
-
-                case ExpressionType.NewArrayInit:
-                case ExpressionType.NewArrayBounds:
-                    return VisitNewArray((NewArrayExpression)exp, context);
-
-                case ExpressionType.MemberInit:
-                    return VisitMemberInit((MemberInitExpression)exp);
-
-                default:
-                    return exp.ToString();
-            }
+                ExpressionType.Parameter => VisitParameter((ParameterExpression)exp),
+                ExpressionType.Call => VisitMethodCall((MethodCallExpression)exp, context),
+                ExpressionType.New => VisitNew((NewExpression)exp, context),
+                ExpressionType.NewArrayInit or ExpressionType.NewArrayBounds => VisitNewArray((NewArrayExpression)exp, context),
+                ExpressionType.MemberInit => VisitMemberInit((MemberInitExpression)exp),
+                
+                _ => exp.ToString(),
+            };
         }
-
-        /// <summary>
-        /// VisitLambda
-        /// </summary>
-        /// <param name="lambda"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitLambda(LambdaExpression lambda, SQLExpressionVisitorContenxt context)
+        
+        private object VisitLambda(LambdaExpression lambda, SQLExpressionVisitorContenxt context)
         {
             if (lambda.Body.NodeType == ExpressionType.MemberAccess && context.Seperator == " ")
             {
@@ -111,7 +86,7 @@ namespace HB.FullStack.Database.SQL
                 {
                     object r = VisitMemberAccess(m, context);
 
-                    if (!(r is PartialSqlString))
+                    if (r is not PartialSqlString)
                     {
                         return r;
                     }
@@ -127,15 +102,8 @@ namespace HB.FullStack.Database.SQL
             }
             return Visit(lambda.Body, context);
         }
-
-        /// <summary>
-        /// VisitBinary
-        /// </summary>
-        /// <param name="b"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitBinary(BinaryExpression b, SQLExpressionVisitorContenxt context)
+        
+        private object VisitBinary(BinaryExpression b, SQLExpressionVisitorContenxt context)
         {
             object left;
             object right;
@@ -144,6 +112,8 @@ namespace HB.FullStack.Database.SQL
 
             if (operand == "AND" || operand == "OR")
             {
+                //说明是两部分
+                //先求left
                 if (b.Left is MemberExpression m && m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
                 {
                     //left = new PartialSqlString(string.Format(GlobalSettings.Culture, "{0}={1}", VisitMemberAccess(m, context), context.DatabaesEngine.GetDbValueStatement(true, needQuoted: true)));
@@ -154,6 +124,7 @@ namespace HB.FullStack.Database.SQL
                     left = Visit(b.Left, context);
                 }
 
+                //再求right
                 if (b.Right is MemberExpression mm && mm.Expression != null && mm.Expression.NodeType == ExpressionType.Parameter)
                 {
                     right = new PartialSqlString($"{VisitMemberAccess(mm, context)}=1");
@@ -166,7 +137,13 @@ namespace HB.FullStack.Database.SQL
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;
-                    return new PartialSqlString(TypeConvert.TypeValueToDbValueStatement(result, quotedIfNeed: true, context.EngineType));
+
+                    string paramPlaceholder = context.GetNextParamPlaceholder();
+                    object paramValue = TypeConvert.TypeValueToDbValue(result, null, context.EngineType);
+
+                    context.AddParameter(paramPlaceholder, paramValue);
+
+                    return new PartialSqlString(paramPlaceholder);
                 }
 
                 if (left as PartialSqlString == null)
@@ -184,33 +161,40 @@ namespace HB.FullStack.Database.SQL
                 left = Visit(b.Left, context);
                 right = Visit(b.Right, context);
 
-                if(left is EnumMemberAccess enumMemberAccess)
+                if (left is EnumMemberAccess enumMemberAccess)
                 {
                     //将right转为enum对应的字符串
-                    right = Enum.ToObject(enumMemberAccess.EnumType, right).ToString();
+                    right = Enum.ToObject(enumMemberAccess.EnumType, right).ToString()!;
                 }
 
                 if (left as PartialSqlString == null && right as PartialSqlString == null)
                 {
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;
-                    return result;
+
+                    string paramPlaceholder = context.GetNextParamPlaceholder();
+                    object paramValue = TypeConvert.TypeValueToDbValue(result, null, context.EngineType);
+
+                    context.AddParameter(paramPlaceholder, paramValue);
+
+                    return new PartialSqlString(paramPlaceholder);
                 }
                 else if (left as PartialSqlString == null)
                 {
-                    left = TypeConvert.TypeValueToDbValueStatement(left, quotedIfNeed: true, context.EngineType);
+                    string paramPlaceholder = context.GetNextParamPlaceholder();
+                    object paramValue = TypeConvert.TypeValueToDbValue(left, null, context.EngineType);
+
+                    context.AddParameter(paramPlaceholder, paramValue);
+
+                    left = paramPlaceholder;
                 }
                 else if (right as PartialSqlString == null)
                 {
-                    if (!context.IsParameterized /*|| right == null*/)
-                    {
-                        right = TypeConvert.TypeValueToDbValueStatement(right, quotedIfNeed: true, context.EngineType);
-                    }
-                    else
-                    {
-                        string paramPlaceholder = context.ParamPlaceHolderPrefix + context.ParamCounter++;
-                        context.AddParameter(paramPlaceholder, right);
-                        right = paramPlaceholder;
-                    }
+                    string paramPlaceholder = context.GetNextParamPlaceholder();
+                    object paramValue = TypeConvert.TypeValueToDbValue(right, GetPropertyDef(b.Left as MemberExpression), context.EngineType);
+
+                    context.AddParameter(paramPlaceholder, paramValue);
+
+                    right = paramPlaceholder;
                 }
             }
 
@@ -233,15 +217,8 @@ namespace HB.FullStack.Database.SQL
                 _ => new PartialSqlString("(" + left + context.Seperator + operand + context.Seperator + right + ")")
             };
         }
-
-        /// <summary>
-        /// VisitMemberAccess
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitMemberAccess(MemberExpression m, SQLExpressionVisitorContenxt context)
+        
+        private object VisitMemberAccess(MemberExpression m, SQLExpressionVisitorContenxt context)
         {
             if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
@@ -264,9 +241,9 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
 
-                EntityDef entityDef = EntityDefFactory.GetDef(entityType)!;
+                EntityDef entityDef = _entityDefFactory.GetDef(entityType)!;
                 EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
-                    ?? throw Exceptions.EntityError(entityDef.EntityFullName, m.Member.Name, "Lack property definition");
+                    ?? throw DatabaseExceptions.EntityError(entityDef.EntityFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
 
@@ -291,15 +268,8 @@ namespace HB.FullStack.Database.SQL
         {
             return Expression.Lambda(exp).Compile().DynamicInvoke()!;
         }
-
-        /// <summary>
-        /// VisitNew
-        /// </summary>
-        /// <param name="nex"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitNew(NewExpression nex, SQLExpressionVisitorContenxt context)
+        
+        private object VisitNew(NewExpression nex, SQLExpressionVisitorContenxt context)
         {
             // TODO : check !
             var member = Expression.Convert(nex, typeof(object));
@@ -350,15 +320,8 @@ namespace HB.FullStack.Database.SQL
             //    return new PartialSqlString(paramPlaceholder);
             //}
         }
-
-        /// <summary>
-        /// VisitUnary
-        /// </summary>
-        /// <param name="u"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitUnary(UnaryExpression u, SQLExpressionVisitorContenxt context)
+        
+        private object VisitUnary(UnaryExpression u, SQLExpressionVisitorContenxt context)
         {
             switch (u.NodeType)
             {
@@ -366,9 +329,9 @@ namespace HB.FullStack.Database.SQL
                     object o = Visit(u.Operand, context);
 
                     if (o as PartialSqlString == null)
-                        return !((bool)o);
+                        return !(bool)o;
 
-                    if (IsTableField(u.Type, o))
+                    if (IsTableField(u.Type, o, context))
                         o += "=1";
 
                     return new PartialSqlString("NOT (" + o + ")");
@@ -381,15 +344,8 @@ namespace HB.FullStack.Database.SQL
 
             return Visit(u.Operand, context);
         }
-
-        /// <summary>
-        /// VisitMethodCall
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
+       
+        private object VisitMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             if (m.Method.DeclaringType == typeof(SqlStatement))
                 return VisitSqlMethodCall(m, context);
@@ -402,15 +358,8 @@ namespace HB.FullStack.Database.SQL
 
             return Expression.Lambda(m).Compile().DynamicInvoke()!;
         }
-
-        /// <summary>
-        /// VisitExpressionList
-        /// </summary>
-        /// <param name="original"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static List<object> VisitExpressionList(ReadOnlyCollection<Expression> original, SQLExpressionVisitorContenxt context)
+        
+        private List<object> VisitExpressionList(ReadOnlyCollection<Expression> original, SQLExpressionVisitorContenxt context)
         {
             List<object> list = new List<object>();
 
@@ -427,15 +376,8 @@ namespace HB.FullStack.Database.SQL
             }
             return list;
         }
-
-        /// <summary>
-        /// VisitNewArray
-        /// </summary>
-        /// <param name="na"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitNewArray(NewArrayExpression na, SQLExpressionVisitorContenxt context)
+        
+        private object VisitNewArray(NewArrayExpression na, SQLExpressionVisitorContenxt context)
         {
             List<object> exprs = VisitExpressionList(na.Expressions, context);
             StringBuilder r = new StringBuilder();
@@ -446,28 +388,14 @@ namespace HB.FullStack.Database.SQL
 
             return r.ToString();
         }
-
-        /// <summary>
-        /// VisitNewArrayFromExpressionList
-        /// </summary>
-        /// <param name="na"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static List<object> VisitNewArrayFromExpressionList(NewArrayExpression na, SQLExpressionVisitorContenxt context)
+        
+        private List<object> VisitNewArrayFromExpressionList(NewArrayExpression na, SQLExpressionVisitorContenxt context)
         {
             List<object> exprs = VisitExpressionList(na.Expressions, context);
             return exprs;
         }
-
-        /// <summary>
-        /// VisitArrayMethodCall
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitArrayMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
+        
+        private object VisitArrayMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             string statement;
 
@@ -488,13 +416,14 @@ namespace HB.FullStack.Database.SQL
                     object[] inArgs = (object[])getter();
 
                     StringBuilder sIn = new StringBuilder();
+
+                    EntityPropertyDef? propertyDef = GetPropertyDef(m);
+
                     foreach (object e in inArgs)
                     {
                         if (e.GetType().ToString() != "System.Collections.Generic.List`1[System.Object]")
                         {
-                            sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         TypeConvert.TypeValueToDbValueStatement(e, quotedIfNeed: true, context.EngineType));
+                            AddParameter(context, sIn, propertyDef, e);
                         }
                         else
                         {
@@ -502,9 +431,7 @@ namespace HB.FullStack.Database.SQL
 
                             foreach (object el in listArgs)
                             {
-                                sIn.AppendFormat(GlobalSettings.Culture, "{0}{1}",
-                                         sIn.Length > 0 ? "," : "",
-                                         TypeConvert.TypeValueToDbValueStatement(el, quotedIfNeed: true, context.EngineType));
+                                AddParameter(context, sIn, propertyDef, el);
                             }
                         }
                     }
@@ -517,16 +444,22 @@ namespace HB.FullStack.Database.SQL
             }
 
             return new PartialSqlString(statement);
-        }
 
-        /// <summary>
-        /// VisitSqlMethodCall
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitSqlMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
+            static void AddParameter(SQLExpressionVisitorContenxt context, StringBuilder sIn, EntityPropertyDef? propertyDef, object e)
+            {
+                string paramPlaceHoder = context.GetNextParamPlaceholder();
+                object paramValue = propertyDef == null ? e : TypeConvert.TypeValueToDbValue(e, propertyDef, context.EngineType);
+
+                context.AddParameter(paramPlaceHoder, paramValue);
+
+                sIn.AppendFormat(CultureInfo.InvariantCulture,
+                    "{0}{1}",
+                    sIn.Length > 0 ? "," : "",
+                    paramPlaceHoder);
+            }
+        }
+        
+        private object VisitSqlMethodCall(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
             List<object> args = VisitExpressionList(m.Arguments, context);
             object quotedColName = args[0];
@@ -537,26 +470,31 @@ namespace HB.FullStack.Database.SQL
             switch (m.Method.Name)
             {
                 case "In":
-                    UnaryExpression member = Expression.Convert(m.Arguments[2], typeof(object));
-                    Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
-                    Func<object> getter = lambda.Compile();
+                    //UnaryExpression member = Expression.Convert(m.Arguments[2], typeof(object));
+                    //Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(member);
+                    //Func<object> getter = lambda.Compile();
 
-                    IEnumerable inArgs = (IEnumerable)getter();
+                    //IEnumerable inArgs = (IEnumerable)getter();
+
+                    bool returnByOrder = Convert.ToBoolean(args[0], CultureInfo.InvariantCulture);
+                    IEnumerable inArgs = (IEnumerable)args[1];
 
                     List<string> sIn = new List<string>();
+                    TypeInfo collectionTypeInfo = typeof(ICollection).GetTypeInfo();
+                    EntityPropertyDef? propertyDef = m.Arguments[0] is MemberExpression memExp ? GetPropertyDef(memExp) : null;
 
                     foreach (object e in inArgs)
                     {
-                        if (!typeof(ICollection).GetTypeInfo().IsAssignableFrom(e.GetType()))
+                        if (!collectionTypeInfo.IsAssignableFrom(e.GetType()))
                         {
-                            sIn.Add(TypeConvert.TypeValueToDbValueStatement(e, quotedIfNeed: true, context.EngineType));
+                            AddParameter(context, sIn, propertyDef, e);
                         }
                         else
                         {
                             ICollection listArgs = (ICollection)e;
                             foreach (object el in listArgs)
                             {
-                                sIn.Add(TypeConvert.TypeValueToDbValueStatement(el, quotedIfNeed: true, context.EngineType));
+                                AddParameter(context, sIn, propertyDef, el);
                             }
                         }
                     }
@@ -571,7 +509,7 @@ namespace HB.FullStack.Database.SQL
 
                     statement = string.Format(GlobalSettings.Culture, "{0} {1} ({2})", quotedColName, m.Method.Name, joinedSIn);
 
-                    if (Convert.ToBoolean(args[0], GlobalSettings.Culture))
+                    if (returnByOrder)
                     {
                         context.OrderByStatementBySQLUtilIn_Ins = sIn.ToArray();
                         context.OrderByStatementBySQLUtilIn_QuotedColName = quotedColName.ToString();
@@ -609,92 +547,112 @@ namespace HB.FullStack.Database.SQL
             }
 
             return new PartialSqlString(statement);
+
+            static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, EntityPropertyDef? propertyDef, object originValue)
+            {
+                string paramPlaceholder = context.GetNextParamPlaceholder();
+                object paramValue = propertyDef == null ? originValue : TypeConvert.TypeValueToDbValue(originValue, propertyDef, context.EngineType);
+
+                context.AddParameter(paramPlaceholder, paramValue);
+
+                sIn.Add(paramPlaceholder);
+            }
         }
 
         /// <summary>
-        /// VisitColumnAccessMethod
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <exception cref="DatabaseException"></exception>
-        private static object VisitColumnAccessMethod(MethodCallExpression m, SQLExpressionVisitorContenxt context)
+        /// 字符串型Member的字符串操作
+        /// </summary>       
+        private object VisitColumnAccessMethod(MethodCallExpression m, SQLExpressionVisitorContenxt context)
         {
-            #region Mysql,其他数据库可能需要重写
-
-            //TODO: Mysql,其他数据库可能需要重写
             if (m.Method.Name == "StartsWith")
             {
+                //TODO: Mysql,其他数据库可能需要重写
+                if (context.EngineType != Engine.EngineType.MySQL)
+                {
+                    throw DatabaseExceptions.NotSupportYet("目前仅支持StarWith的MySql数据库版本", context.EngineType);
+                }
+
                 List<object> args0 = VisitExpressionList(m.Arguments, context);
                 object quotedColName0 = Visit(m.Object, context);
-                return new PartialSqlString(string.Format(GlobalSettings.Culture, "LEFT( {0},{1})= {2} ", quotedColName0
-                                                          , args0[0].ToString()!.Length,
-                                                          TypeConvert.TypeValueToDbValueStatement(args0[0], quotedIfNeed: true, context.EngineType)));
+
+                EntityPropertyDef? propertyDef = GetPropertyDef(m);
+                string paramPlaceholder = context.GetNextParamPlaceholder();
+                object paramValue = propertyDef == null ?
+                    args0[0] :
+                    TypeConvert.TypeValueToDbValue(args0[0], propertyDef, context.EngineType);
+
+                context.AddParameter(paramPlaceholder, paramValue);
+
+                return new PartialSqlString(string.Format(GlobalSettings.Culture,
+                    "LEFT( {0},{1})= {2} ",
+                    quotedColName0,
+                    args0[0].ToString()!.Length,
+                    paramPlaceholder));
             }
 
-            #endregion Mysql,其他数据库可能需要重写
+            throw DatabaseExceptions.NotSupportYet("暂时还不支持其他操作", context.EngineType);
 
-            List<object> args = VisitExpressionList(m.Arguments, context);
-            object quotedColName = Visit(m.Object, context);
-            string statement;
+            //List<object> args = VisitExpressionList(m.Arguments, context);
+            //object quotedColName = Visit(m.Object, context);
+            //string statement;
 
-            switch (m.Method.Name)
-            {
-                case "Trim":
-                    statement = string.Format(GlobalSettings.Culture, "ltrim(rtrim({0}))", quotedColName);
-                    break;
+            //switch (m.Method.Name)
+            //{
+            //    case "Trim":
+            //        statement = string.Format(GlobalSettings.Culture, "ltrim(rtrim({0}))", quotedColName);
+            //        break;
 
-                case "LTrim":
-                    statement = string.Format(GlobalSettings.Culture, "ltrim({0})", quotedColName);
-                    break;
+            //    case "LTrim":
+            //        statement = string.Format(GlobalSettings.Culture, "ltrim({0})", quotedColName);
+            //        break;
 
-                case "RTrim":
-                    statement = string.Format(GlobalSettings.Culture, "rtrim({0})", quotedColName);
-                    break;
+            //    case "RTrim":
+            //        statement = string.Format(GlobalSettings.Culture, "rtrim({0})", quotedColName);
+            //        break;
 
-                case "ToUpper":
-                    statement = string.Format(GlobalSettings.Culture, "upper({0})", quotedColName);
-                    break;
+            //    case "ToUpper":
+            //        statement = string.Format(GlobalSettings.Culture, "upper({0})", quotedColName);
+            //        break;
 
-                case "ToLower":
-                    statement = string.Format(GlobalSettings.Culture, "lower({0})", quotedColName);
-                    break;
+            //    case "ToLower":
+            //        statement = string.Format(GlobalSettings.Culture, "lower({0})", quotedColName);
+            //        break;
 
-                case "StartsWith":
-                    statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1} ", quotedColName,
-                        SqlHelper.GetQuoted(args[0].ToString()!.ToUpper(GlobalSettings.Culture) + "%"));
-                    break;
+            //    case "StartsWith":
+            //        statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1} ", quotedColName,
+            //            SqlHelper.GetQuoted(args[0].ToString()!.ToUpper(GlobalSettings.Culture) + "%"));
+            //        break;
 
-                case "EndsWith":
-                    statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName,
-                        SqlHelper.GetQuoted("%" + args[0].ToString()!.ToUpper(GlobalSettings.Culture)));
-                    break;
+            //    case "EndsWith":
+            //        statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName,
+            //            SqlHelper.GetQuoted("%" + args[0].ToString()!.ToUpper(GlobalSettings.Culture)));
+            //        break;
 
-                case "Contains":
-                    statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName,
-                        SqlHelper.GetQuoted("%" + args[0].ToString()!.ToUpper(GlobalSettings.Culture) + "%"));
-                    break;
+            //    case "Contains":
+            //        statement = string.Format(GlobalSettings.Culture, "upper({0}) like {1}", quotedColName,
+            //            SqlHelper.GetQuoted("%" + args[0].ToString()!.ToUpper(GlobalSettings.Culture) + "%"));
+            //        break;
 
-                case "Substring":
-                    int startIndex = int.Parse(args[0].ToString()!, GlobalSettings.Culture) + 1;
-                    if (args.Count == 2)
-                    {
-                        int length = int.Parse(args[1].ToString()!, GlobalSettings.Culture);
-                        statement = string.Format(GlobalSettings.Culture, "substring({0} from {1} for {2})",
-                                                  quotedColName,
-                                                  startIndex,
-                                                  length);
-                    }
-                    else
-                        statement = string.Format(GlobalSettings.Culture, "substring({0} from {1})",
-                                         quotedColName,
-                                         startIndex);
-                    break;
+            //    case "Substring":
+            //        int startIndex = int.Parse(args[0].ToString()!, GlobalSettings.Culture) + 1;
+            //        if (args.Count == 2)
+            //        {
+            //            int length = int.Parse(args[1].ToString()!, GlobalSettings.Culture);
+            //            statement = string.Format(GlobalSettings.Culture, "substring({0} from {1} for {2})",
+            //                                      quotedColName,
+            //                                      startIndex,
+            //                                      length);
+            //        }
+            //        else
+            //            statement = string.Format(GlobalSettings.Culture, "substring({0} from {1})",
+            //                             quotedColName,
+            //                             startIndex);
+            //        break;
 
-                default:
-                    throw new NotSupportedException();
-            }
-            return new PartialSqlString(statement);
+            //    default:
+            //        throw new NotSupportedException();
+            //}
+            //return new PartialSqlString(statement);
         }
 
         private static bool IsColumnAccess(MethodCallExpression m)
@@ -739,18 +697,18 @@ namespace HB.FullStack.Database.SQL
             return exp;
         }
 
-        private static bool IsTableField(Type type, object quotedExp)
+        private bool IsTableField(Type type, object quotedExp, SQLExpressionVisitorContenxt context)
         {
             //#if NETSTANDARD2_1
             //            string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "", GlobalSettings.Comparison);
             //#endif
             //#if NETSTANDARD2_0
 #pragma warning disable CA1307 // Specify StringComparison for clarity
-            string name = quotedExp.ToString()!.Replace(SqlHelper.QuotedChar, "");
+            string name = quotedExp.ToString()!.Replace(SqlHelper.QUOTED_CHAR, "");
 #pragma warning restore CA1307 // Specify StringComparison for clarity
-                              //#endif
+            //#endif
 
-            EntityDef? entityDef = EntityDefFactory.GetDef(type);
+            EntityDef? entityDef = _entityDefFactory.GetDef(type);
 
             if (entityDef == null)
             {
@@ -765,6 +723,7 @@ namespace HB.FullStack.Database.SQL
         private static readonly object _trueExpression = new PartialSqlString("(1=1)");
 
         private static readonly object _falseExpression = new PartialSqlString("(1=0)");
+        private readonly IEntityDefFactory _entityDefFactory;
 
         private static bool IsArrayMethod(MethodCallExpression m)
         {
@@ -775,6 +734,16 @@ namespace HB.FullStack.Database.SQL
             }
 
             return false;
+        }
+
+        private EntityPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
+        {
+            return _entityDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetPropertyDef(memberExpression!.Member.Name);
+        }
+
+        private EntityPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)
+        {
+            return GetPropertyDef(methodCallExpression.Object as MemberExpression);
         }
     }
 }

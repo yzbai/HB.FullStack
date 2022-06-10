@@ -13,7 +13,7 @@ namespace HB.FullStack.XamarinForms.Skia
 {
     public class SKSvg2 : IDisposable
     {
-        private SKSvg _svg;
+        private readonly SKSvg _svg;
         private bool _disposedValue;
 
         public bool IsReady { get; private set; }

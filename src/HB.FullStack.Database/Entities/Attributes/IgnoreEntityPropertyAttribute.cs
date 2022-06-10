@@ -5,7 +5,7 @@ using System.Text;
 namespace HB.FullStack.Database.Entities
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class IgnoreEntityPropertyAttribute : Attribute
+    public sealed class IgnoreEntityPropertyAttribute : Attribute
     {
     }
 }

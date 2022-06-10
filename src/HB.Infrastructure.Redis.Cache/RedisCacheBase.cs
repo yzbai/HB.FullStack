@@ -13,20 +13,20 @@ using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Cache
 {
-    internal class RedisCacheBase
+    public class RedisCacheBase
     {
-        protected const int _invalidationVersionExpirySeconds = 60;
+        protected const int INVALIDATION_VERSION_EXPIRY_SECONDS = 60;
 
         private readonly RedisCacheOptions _options;
-        protected readonly ILogger _logger;
 
         private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
         private readonly IDictionary<string, LoadedLuas> _loadedLuaDict = new Dictionary<string, LoadedLuas>();
+        protected ILogger Logger { get; private set; }
 
         public RedisCacheBase(IOptions<RedisCacheOptions> options, ILogger logger)
         {
             _options = options.Value;
-            _logger = logger;
+            Logger = logger;
             _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
 
             InitLoadedLuas();
@@ -54,12 +54,17 @@ namespace HB.Infrastructure.Redis.Cache
         {
             foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
             {
-                IServer server = RedisInstanceManager.GetServer(setting, _logger);
+                IServer server = RedisInstanceManager.GetServer(setting, Logger);
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
+                    LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP),
+                    LoadedCollectionRemoveItemWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_REMOVE_ITEM_WITH_TIMESTAMP),
+                    LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP),
+
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
                     LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP),
-                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH),
+                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP),
+                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
 
                     LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH),
                     LoadedEntitiesGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH_BY_DIMENSION),
@@ -75,13 +80,11 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
-        /// <exception cref="CacheException"></exception>
         protected LoadedLuas GetDefaultLoadLuas()
         {
             return GetLoadedLuas(DefaultInstanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
         protected LoadedLuas GetLoadedLuas(string? instanceName)
         {
             if (string.IsNullOrEmpty(instanceName))
@@ -101,42 +104,38 @@ namespace HB.Infrastructure.Redis.Cache
                 return loadedLuas2;
             }
 
-            throw Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
+            throw CacheExceptions.CacheLoadedLuaNotFound(cacheInstanceName: instanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
         protected async Task<IDatabase> GetDatabaseAsync(string? instanceName)
         {
             instanceName ??= DefaultInstanceName;
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
-                return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
+                return await RedisInstanceManager.GetDatabaseAsync(setting, Logger).ConfigureAwait(false);
             }
 
-            throw Exceptions.InstanceNotFound(instanceName: instanceName);
+            throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
         protected Task<IDatabase> GetDefaultDatabaseAsync()
         {
             return GetDatabaseAsync(DefaultInstanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
         protected IDatabase GetDatabase(string? instanceName)
         {
             instanceName ??= DefaultInstanceName;
 
             if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
             {
-                return RedisInstanceManager.GetDatabase(setting, _logger);
+                return RedisInstanceManager.GetDatabase(setting, Logger);
             }
 
-            throw Exceptions.InstanceNotFound(instanceName);
+            throw CacheExceptions.InstanceNotFound(instanceName);
         }
 
-        /// <exception cref="CacheException"></exception>
         protected IDatabase GetDefaultDatabase()
         {
             return GetDatabase(DefaultInstanceName);
@@ -152,12 +151,11 @@ namespace HB.Infrastructure.Redis.Cache
             return GetRealKey(entityName, dimensionKeyName + dimensionKeyValue);
         }
 
-        /// <exception cref="CacheException"></exception>
         protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
         {
             if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                throw Exceptions.NoSuchDimensionKey(type:entityDef.Name, dimensionKeyName:dimensionKeyName);
+                throw CacheExceptions.NoSuchDimensionKey(typeName: entityDef.Name, dimensionKeyName: dimensionKeyName);
             }
         }
 
@@ -165,12 +163,12 @@ namespace HB.Infrastructure.Redis.Cache
         /// ThrowIfNotCacheEnabled
         /// </summary>
         /// <param name="entityDef"></param>
-        /// <exception cref="CacheException"></exception>
+
         protected static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
         {
             if (!entityDef.IsCacheable)
             {
-                throw Exceptions.NotEnabledForEntity(type:entityDef.Name);
+                throw CacheExceptions.NotEnabledForEntity(entityDef.Name);
             }
         }
 

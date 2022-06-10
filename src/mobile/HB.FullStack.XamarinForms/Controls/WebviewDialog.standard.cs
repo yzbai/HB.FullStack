@@ -1,5 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
 using HB.FullStack.XamarinForms.Base;
+using HB.FullStack.XamarinForms.Navigation;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +16,7 @@ namespace HB.FullStack.XamarinForms.Controls
         private readonly HybridWebView _hybridWebView;
         private readonly ActivityIndicator _indicator;
 
-#pragma warning disable CA1056 // URI-like properties should not be strings
         public string Url { get { return _hybridWebView.Uri; } set { _hybridWebView.Uri = value; _hybridWebView.Reload(); } }
-#pragma warning restore CA1056 // URI-like properties should not be strings
-
 
         public WebviewDialog()
         {
@@ -35,9 +34,9 @@ namespace HB.FullStack.XamarinForms.Controls
             {
                 Text = "返回"
             };
-            retButton.Clicked += (sender, e) =>
+            retButton.Clicked += async (sender, e) =>
             {
-                NavigationService.Current.PopModal();
+                await NavigationManager.Current.GoBackAsync().ConfigureAwait(false);
             };
 
 

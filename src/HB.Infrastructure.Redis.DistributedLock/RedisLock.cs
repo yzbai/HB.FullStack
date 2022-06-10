@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Lock;
 using HB.FullStack.Lock.Distributed;
 
@@ -15,7 +17,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 {
     public class RedisLock : IDistributedLock
     {
-        private const string _prefix = "HBRL_";
+        private const string PREFIX = "HBRL_";
 
         private readonly ILogger _logger;
 
@@ -47,7 +49,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
             foreach (string item in resources)
             {
-                keyResources.Add(_prefix + Options.ApplicationName + item);
+                keyResources.Add(PREFIX + Options.ApplicationName + item);
             }
 
             Resources = keyResources;
@@ -70,12 +72,9 @@ namespace HB.Infrastructure.Redis.DistributedLock
 
         public bool NotUnlockWhenDispose { get; set; }
 
-
         #region Disposable Pattern
 
         private bool _disposedValue;
-
-
 
         protected virtual void Dispose(bool disposing)
         {
@@ -85,15 +84,12 @@ namespace HB.Infrastructure.Redis.DistributedLock
             {
                 if (disposing)
                 {
-#pragma warning disable UnhandledExceptions // Unhandled exception(s)
-                    SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).Fire();
-#pragma warning restore UnhandledExceptions // Unhandled exception(s)
+                    SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger)
+                        .SafeFireAndForget(ex => _logger.LogError(ex, "在Dispose中释放Resource失败。"));
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-
-
 
                 //Resources = null!;
                 ResourceValues = null!;
@@ -108,7 +104,7 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// </summary>
         /// <param name="disposing"></param>
         /// <returns></returns>
-        /// <exception cref="LockException"></exception>
+
         protected virtual async ValueTask DisposeAsync(bool disposing)
         {
             _logger.LogDebug("锁开始Dispose，{Resources}", Resources);
@@ -119,12 +115,10 @@ namespace HB.Infrastructure.Redis.DistributedLock
                 {
                     // TODO: dispose managed state (managed objects)
                     await SingleRedisDistributedLockManager.ReleaseResourceAsync(this, _logger).ConfigureAwait(false);
-
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-
 
                 //Resources = null!;
                 ResourceValues = null!;
@@ -152,11 +146,13 @@ namespace HB.Infrastructure.Redis.DistributedLock
         /// DisposeAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="LockException">Ignore.</exception>
-        public ValueTask DisposeAsync()
+
+        public async ValueTask DisposeAsync()
         {
-            return DisposeAsync(true);
+            await DisposeAsync(true).ConfigureAwait(false);
+            GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

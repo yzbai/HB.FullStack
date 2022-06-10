@@ -18,35 +18,34 @@ namespace HB.Infrastructure.Redis.EventBus
 {
     internal class ConsumeTaskManager : IDisposable
     {
-        private const int _cONSUME_INTERVAL_SECONDS = 5;
-
+        private const int CONSUME_INTERVAL_SECONDS = 5;
 
         /// <summary>
         ///  -- keys = {history_queue, acks_sortedset, queue}
         ///  -- argvs={currentTimestampSeconds, waitSecondsToBeHistory
         /// </summary>
-        private const string _hISTORY_REDIS_SCRIPT = @"
-local rawEvent = redis.call('rpop', KEYS[1]) 
+        private const string HISTORY_REDIS_SCRIPT = @"
+local rawEvent = redis.call('rpop', KEYS[1])
 
 --还没有数据
-if (not rawEvent) then 
-    return 0 
-end 
-local event = cjson.decode(rawEvent) 
-local aliveTime = ARGV[1] - event['Timestamp'] 
-local eid = event['Guid'] 
+if (not rawEvent) then
+    return 0
+end
+local event = cjson.decode(rawEvent)
+local aliveTime = ARGV[1] - event['Timestamp']
+local eid = event['Guid']
 
  --如果太新，就直接放回去，然后返回
-if (aliveTime < ARGV[2] + 0) then 
-    redis.call('rpush', KEYS[1], rawEvent) 
-    return 1 
-end 
+if (aliveTime < ARGV[2] + 0) then
+    redis.call('rpush', KEYS[1], rawEvent)
+    return 1
+end
 
 --如果已存在acks set中，则直接返回
-if (redis.call('zrank', KEYS[2], eid) ~= nil) then 
-    -- 移除acks队列    
-    redis.call('zrem', KEYS[2], eid) 
-    return 2 
+if (redis.call('zrank', KEYS[2], eid) ~= nil) then
+    -- 移除acks队列
+    redis.call('zrem', KEYS[2], eid)
+    return 2
 end
 
 --说明还没有被处理，遗忘了，放回处理队列
@@ -99,12 +98,12 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         {
             IServer server = RedisInstanceManager.GetServer(_instanceSetting, _logger);
 
-            _loadedHistoryLua = server.ScriptLoad(_hISTORY_REDIS_SCRIPT);
+            _loadedHistoryLua = server.ScriptLoad(HISTORY_REDIS_SCRIPT);
         }
 
         private async Task ScanHistoryAsync(CancellationToken cancellationToken)
         {
-
+            //TODO: 考虑使用BlockingCollection
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -131,13 +130,15 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         //还没有数据，等会吧
                         _logger.LogTrace("ScanHistory {InstanceName} 中,还没有数据，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
-                        await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        //await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        Thread.Sleep(10 * 1000);//让出线程
                     }
                     else if (result == 1)
                     {
                         //时间太早，等会再检查
                         _logger.LogTrace("ScanHistory {InstanceName} 中,数据还太新，一会再检查，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
-                        await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        //await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
+                        Thread.Sleep(10 * 1000); //让出线程
                     }
                     else if (result == 2)
                     {
@@ -171,7 +172,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 {
                     _logger.LogError(ex, "Scan History 中出现Redis超时问题. {EventType}", _eventType);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.LogCritical(ex, "Scan History 出现未知问题. {EventType}", _eventType);
                 }
@@ -179,11 +182,6 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
             _logger.LogTrace("History Task For {eventType} Stopped.", _eventType);
         }
-
-        /// <summary>
-        /// CosumeTaskProcedure
-        /// </summary>
-
 
         private async Task CosumeAsync(CancellationToken cancellationToken)
         {
@@ -202,7 +200,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         _logger.LogTrace("ConsumeTask Sleep, {InstanceName}, {eventType}", _instanceSetting.InstanceName, _eventType);
 
-                        await Task.Delay(_cONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
+                        await Task.Delay(CONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
 
                         continue;
                     }
@@ -244,7 +242,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     bool? isExist = await IsAcksExistedAsync(database, AcksSetName, entity.Guid).ConfigureAwait(false);
 
+#pragma warning disable CA1508 // CA1508的bug，应该是无法适应NRT
                     if (isExist == null || isExist.Value)
+#pragma warning restore CA1508 // Avoid dead conditional code
                     {
                         _logger.LogInformation("有EventMessage重复，{eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
 
@@ -258,7 +258,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     {
                         await _eventHandler.HandleAsync(entity.JsonData, cancellationToken).ConfigureAwait(false);
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                     {
                         _logger.LogCritical(ex, "处理消息出错, {_eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
                     }
@@ -277,7 +279,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 {
                     _logger.LogError(ex, "Consume 中出现Redis超时问题. {eventType}", _eventType);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.LogCritical(ex, "Consume 出现未知问题. {eventType}", _eventType);
                 }
@@ -309,15 +313,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
             //寻找小于stopTimestamp的，删除他们
             await database.SortedSetRemoveRangeByScoreAsync(setName, 0, stopTimestamp).ConfigureAwait(false);
-
         }
 
         #endregion
-
-        /// <summary>
-        /// Cancel
-        /// </summary>
-
 
         public async Task CancelAsync()
         {
@@ -344,33 +342,29 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
             _logger.LogTrace("Task For {eventType} Stopped.", _eventType);
         }
 
-        /// <summary>
-        /// Start
-        /// </summary>
-
-
-
+        //TODO: 使用Channel重写
+        //TODO：使用LongTimeTask
+        //TODO: 考虑如果使用asp.net的话，使用IHostedService注入
+        //TODO：考虑怎么优雅的shutdown，比如登记到IHostedApplicationLifetime的Stopped
         public void Start()
         {
             _consumeTask = CosumeAsync(_consumeTaskCTS.Token);
 
-            _consumeTask.Fire();
-
+            _consumeTask.SafeFireAndForget();
 
             _historyTask = ScanHistoryAsync(_historyTaskCTS.Token);
 
-            _historyTask.Fire();
+            _historyTask.SafeFireAndForget();
         }
 
         #region IDisposable Support
+
         private bool _disposedValue; // To detect redundant calls
 
         /// <summary>
         /// Dispose
         /// </summary>
         /// <param name="disposing"></param>
-
-
 
         protected virtual void Dispose(bool disposing)
         {
@@ -411,4 +405,3 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
         #endregion
     }
 }
-

@@ -11,21 +11,14 @@ namespace HB.FullStack.Identity
     /// <summary>
     /// 关联实体：UserClaim
     /// </summary>
-    public class CachedUserClaimsByUserId : CachedItem<IEnumerable<UserClaim>>
+    internal class CachedUserClaimsByUserId : CachedItem<IEnumerable<UserClaim>>
     {
-        private CachedUserClaimsByUserId(params string[] keys) : base(keys)
+        public CachedUserClaimsByUserId(Guid userId) : base(userId)
         {
         }
 
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => null;
-
-        public static CachedUserClaimsByUserId Key(long userId)
-        {
-            CachedUserClaimsByUserId item = new CachedUserClaimsByUserId(userId.ToString(GlobalSettings.Culture));
-
-            return item;
-        }
     }
 }
