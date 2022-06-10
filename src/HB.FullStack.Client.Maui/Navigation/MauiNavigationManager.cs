@@ -105,6 +105,6 @@ namespace HB.FullStack.Client.Maui
             await Shell.Current.Navigation.PushModalAsync(item, Animated).ConfigureAwait(false);
         }
 
-        public bool Animated { get; set; } = false;
+        public bool Animated { get; set; }
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace HB.Infrastructure.Redis.Test
 {
@@ -28,7 +29,8 @@ namespace HB.Infrastructure.Redis.Test
                .AddEnvironmentVariables()
                .SetBasePath(Environment.CurrentDirectory)
                .AddJsonFile("appsettings.json", optional: false)
-               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true);
+               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+               .AddUserSecrets(typeof(HB.FullStack.BaseTest.BC).Assembly, optional: true);
 
             IConfiguration configuration = configurationBuilder.Build();
 

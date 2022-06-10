@@ -44,7 +44,6 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
         /// </summary>
         /// <param name="imageFullPath">本地原始图片路径</param>
         /// <param name="croppedImageFullPath">剪切后的存储位置</param>
-        /// <param name="onSucceed"></param>
         public CropperViewModel(string imageFullPath, string croppedImageFullPath)
         {
             _imageFullPath = imageFullPath;

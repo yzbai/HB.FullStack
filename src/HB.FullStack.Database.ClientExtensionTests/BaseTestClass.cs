@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.Data.Sqlite;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace HB.FullStack.Database.Tests
 {
@@ -28,7 +29,8 @@ namespace HB.FullStack.Database.Tests
                .AddEnvironmentVariables()
                .SetBasePath(Environment.CurrentDirectory)
                .AddJsonFile("appsettings.json", optional: false)
-               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true);
+               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+               .AddUserSecrets(typeof(HB.FullStack.BaseTest.BC).Assembly, optional: true);
 
             IConfiguration Configuration = configurationBuilder.Build();
 

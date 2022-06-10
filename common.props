@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup>
-		<Version>1.2.2-alpha</Version>
+		<Version>2.0.0-alpha</Version>
 		<Product>HB.FullStack</Product>
 		<Authors>yzbai@brlite.com</Authors>
 		<Company>Wuxi Brilliant Technology Company Limited.</Company>
