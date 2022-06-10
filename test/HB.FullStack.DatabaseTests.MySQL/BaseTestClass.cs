@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
@@ -56,7 +57,8 @@ namespace HB.FullStack.DatabaseTests
                .AddEnvironmentVariables()
                .SetBasePath(Environment.CurrentDirectory)
                .AddJsonFile("appsettings.json", optional: false)
-               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true);
+               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+               .AddUserSecrets(typeof(HB.FullStack.BaseTest.BC).Assembly, optional: true);
 
             IConfiguration configuration = configurationBuilder.Build();
 

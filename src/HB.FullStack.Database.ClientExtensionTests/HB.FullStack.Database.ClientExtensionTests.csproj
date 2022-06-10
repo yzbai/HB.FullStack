@@ -5,27 +5,15 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
+
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="appsettings.Development.json" />
-    <None Remove="appsettings.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
@@ -38,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\test\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj" />
     <ProjectReference Include="..\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj" />
     <ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
     <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />

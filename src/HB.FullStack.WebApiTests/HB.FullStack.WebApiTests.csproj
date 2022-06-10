@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\test\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj" />
     <ProjectReference Include="..\HB.FullStack.Http\HB.FullStack.WebApi.csproj" />
   </ItemGroup>
 

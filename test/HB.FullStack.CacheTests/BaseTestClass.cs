@@ -1,5 +1,7 @@
-﻿using HB.FullStack.Cache;
+﻿using HB.FullStack.BaseTest;
+using HB.FullStack.Cache;
 using HB.FullStack.Database;
+using HB.Infrastructure.Redis.Cache;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,9 +47,14 @@ namespace HB.FullStack.CacheTests
                .AddEnvironmentVariables()
                .SetBasePath(Environment.CurrentDirectory)
                .AddJsonFile("appsettings.json", optional: false)
-               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true);
+               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+               .AddUserSecrets(typeof(BC).Assembly, optional:true);
 
             IConfiguration configuration = configurationBuilder.Build();
+
+            //RedisCacheOptions roptions = new RedisCacheOptions();
+
+            //configuration.GetSection("RedisCache").Bind(roptions);
 
             IServiceCollection services = new ServiceCollection();
 
