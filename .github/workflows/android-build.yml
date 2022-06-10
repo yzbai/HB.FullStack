@@ -21,16 +21,9 @@ jobs:
       with:
         dotnet-version: 6.0.x
     
-    - name: setup java
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'microsoft'
-        java-version: '11'
-    
     - name: Install MAUI Workloads
-      run: 
-        dotnet workload install android --ignore-failed-sources
-        dotnet workload install maui --ignore-failed-sources
+      run:
+        dotnet workload install maui
         
     - name: Restore dependencies
       run: dotnet restore HB.FullStack.sln
