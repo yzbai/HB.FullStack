@@ -1,1 +1,39 @@
+name: FullStack-Build
 
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-android:
+
+    runs-on: windows-latest
+    name: Android Build
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v2.1.0
+      with:
+        dotnet-version: 6.0.x
+    
+    - name: setup java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'microsoft'
+        java-version: '11'
+    
+    - name: Install MAUI Workloads
+      run: 
+        dotnet workload install android --ignore-failed-sources
+        dotnet workload install maui --ignore-failed-sources
+        
+    - name: Restore dependencies
+      run: dotnet restore HB.FullStack.sln
+    
+    - name: Build
+      run: dotnet build HB.FullStack.sln --configuration Release --no-restore
