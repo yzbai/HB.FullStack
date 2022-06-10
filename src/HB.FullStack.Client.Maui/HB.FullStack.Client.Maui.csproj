@@ -12,6 +12,7 @@
 		<Nullable>enable</Nullable>
 		<!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />-->
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 
