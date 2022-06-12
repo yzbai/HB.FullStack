@@ -3,7 +3,7 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-publish_to_nuget.ps1
+publish_to_local.ps1
 PublishProfiles/
 *.Development.json
 *.Staging.json
