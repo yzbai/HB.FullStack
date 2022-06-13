@@ -37,7 +37,7 @@ namespace HB.FullStack.Client.Maui.Controls
             };
             retButton.Clicked += async (sender, e) =>
             {
-                await INavigationManager.Current!.GoBackAsync().ConfigureAwait(false);
+                await INavigationManager.Current!.GoBackAsync();
             };
 
 

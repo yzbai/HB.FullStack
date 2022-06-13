@@ -1,0 +1,13 @@
+
+# All files
+[*]
+indent_style = space
+
+# Xml files
+[*.xml]
+indent_size = 2
+
+[*.cs]
+
+# 在client中，不适用ConfigureAWait(false)
+dotnet_diagnostic.CA2007.severity = none

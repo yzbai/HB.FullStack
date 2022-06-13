@@ -20,18 +20,18 @@ namespace HB.FullStack.Common.ApiClient
         {
             try
             {
-                return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
 
             }
             catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.CapthcaNotFound)
             {
                 TCaptchaPopup popup = new TCaptchaPopup();
 
-                var captcha = await popup.ShowAsync().ConfigureAwait(false);
+                var captcha = await popup.ShowAsync();
 
                 request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, captcha!.ToString()!);
 
-                return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
             }
         }
     }

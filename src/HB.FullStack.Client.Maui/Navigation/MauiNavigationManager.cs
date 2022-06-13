@@ -15,26 +15,26 @@ namespace HB.FullStack.Client.Maui
             // TODO: Work out why GoToAsync("..") throws an exception with modal pages
             while (Shell.Current.Navigation.ModalStack.Count > 0)
             {
-                await Shell.Current.Navigation.PopModalAsync().ConfigureAwait(false);
+                await Shell.Current.Navigation.PopModalAsync();
             }
 
-            await GotoAsync("..", parameters).ConfigureAwait(false);
+            await GotoAsync("..", parameters);
         }
 
         public async Task GotoAsync(string uri, IDictionary<string, object?>? parameters = null)
         {
             string fullUri = BuildUri(uri, parameters);
-            await Shell.Current.GoToAsync(fullUri, Animated).ConfigureAwait(false);
+            await Shell.Current.GoToAsync(fullUri, Animated);
         }
 
         public async Task PopAsync()
         {
-            await Shell.Current.Navigation.PopAsync(Animated).ConfigureAwait(false);
+            await Shell.Current.Navigation.PopAsync(Animated);
         }
 
         public async Task PopModalAsync()
         {
-            await Shell.Current.Navigation.PopModalAsync(Animated).ConfigureAwait(false);
+            await Shell.Current.Navigation.PopModalAsync(Animated);
         }
 
         public async Task PushAsync(string pageFullName)
@@ -46,7 +46,7 @@ namespace HB.FullStack.Client.Maui
                 return;
             }
 
-            await Shell.Current.Navigation.PushAsync(page, Animated).ConfigureAwait(false);
+            await Shell.Current.Navigation.PushAsync(page, Animated);
         }
 
         public async Task PushModalAsync(string pageFullName)
@@ -58,7 +58,7 @@ namespace HB.FullStack.Client.Maui
                 return;
             }
 
-            await Shell.Current.Navigation.PushModalAsync(page, Animated).ConfigureAwait(false);
+            await Shell.Current.Navigation.PushModalAsync(page, Animated);
         }
 
         public Task PushAsync(IBaseViewModel baseViewModel)
@@ -92,7 +92,7 @@ namespace HB.FullStack.Client.Maui
                 return;
             }
 
-            await Shell.Current.Navigation.PushAsync(item, Animated).ConfigureAwait(false);
+            await Shell.Current.Navigation.PushAsync(item, Animated);
         }
 
         public async Task PushModalAsync(object page)
@@ -102,7 +102,7 @@ namespace HB.FullStack.Client.Maui
                 return;
             }
 
-            await Shell.Current.Navigation.PushModalAsync(item, Animated).ConfigureAwait(false);
+            await Shell.Current.Navigation.PushModalAsync(item, Animated);
         }
 
         public bool Animated { get; set; }

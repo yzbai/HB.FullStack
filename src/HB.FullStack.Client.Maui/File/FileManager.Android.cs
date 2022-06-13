@@ -25,8 +25,8 @@ namespace HB.FullStack.Client.Maui.File
             {
                 try
                 {
-                    using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName).ConfigureAwait(false);
-                    await UnZipAsync(initDatasStream, PathRoot).ConfigureAwait(false);
+                    using Stream initDatasStream = await FileSystem.OpenAppPackageFileAsync(assetFileName);
+                    await UnZipAsync(initDatasStream, PathRoot);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -50,7 +50,7 @@ namespace HB.FullStack.Client.Maui.File
                 if (!entry.IsDirectory)
                 {
                     string path = Path.Combine(directory, entry.Name!);
-                    await UnZipFileAsync(path, zipInputStream).ConfigureAwait(false);
+                    await UnZipFileAsync(path, zipInputStream);
                 }
 
                 entry = zipInputStream.NextEntry;
@@ -69,10 +69,10 @@ namespace HB.FullStack.Client.Maui.File
 
             while ((len = await zipInputStream.ReadAsync(buffer, 0, 4096).ConfigureAwait(false)) != -1)
             {
-                await bufferedStream.WriteAsync(buffer.AsMemory(0, len)).ConfigureAwait(false);
+                await bufferedStream.WriteAsync(buffer.AsMemory(0, len));
             }
 
-            await bufferedStream.FlushAsync().ConfigureAwait(false);
+            await bufferedStream.FlushAsync();
         }
     }
 }

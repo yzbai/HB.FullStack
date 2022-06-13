@@ -182,7 +182,7 @@ namespace HB.FullStack.Client.Maui.Controls
                 ActionSheetTitle,
                 ActionSheetCancel,
                 null,
-                optionTexts.ToArray()).ConfigureAwait(false);
+                optionTexts.ToArray());
 
             int index = optionTexts.IndexOf(optionText);
 

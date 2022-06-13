@@ -92,5 +92,17 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
+	</ItemGroup>
 	
 </Project>

@@ -71,7 +71,7 @@ namespace HB.FullStack.Client.Maui.Controls
 
         private async void Confirm_Button_Clicked(object? sender, EventArgs e)
         {
-            await INavigationManager.Current!.GoBackAsync().ConfigureAwait(false);
+            await INavigationManager.Current!.GoBackAsync();
         }
     }
 }
