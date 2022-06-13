@@ -49,7 +49,7 @@ namespace HB.FullStack.Client.Maui.File
 
         private async Task<IOss> RentOssClientAsync(string requestDirectory, bool needWrite, bool recheckPermissionForced = false)
         {
-            AliyunStsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryAsync(requestDirectory, needWrite, null, recheckPermissionForced).ConfigureAwait(false);
+            AliyunStsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryAsync(requestDirectory, needWrite, null, recheckPermissionForced);
 
             if (stsToken == null)
             {
@@ -125,14 +125,14 @@ namespace HB.FullStack.Client.Maui.File
 
                 if (!localFullPath.Equals(sourceLocalFullPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    _ = await SaveFileToLocalAsync(stream, localFullPath).ConfigureAwait(false);
+                    _ = await SaveFileToLocalAsync(stream, localFullPath);
                 }
             }
 
             //upload到远程
             //TODO: 检查file extension，以确保符合destDirectory要求，Avatar 允许图片类型
             //可参考FileUtil对文件的检查
-            IOss oss = await RentOssClientAsync(directory, true, recheckPermissionForced).ConfigureAwait(false);
+            IOss oss = await RentOssClientAsync(directory, true, recheckPermissionForced);
 
             try
             {
@@ -147,7 +147,7 @@ namespace HB.FullStack.Client.Maui.File
                     throw Exceptions.AliyunOssPutObjectError(bucketName: _options.AliyunOssBucketName, key: ossKey);
                 }
 
-                await LockNewlyAddedFile(ossKey, GetOssFileExpiryTime(directory)).ConfigureAwait(false);
+                await LockNewlyAddedFile(ossKey, GetOssFileExpiryTime(directory));
             }
             catch (OssException ex)
             {
@@ -195,20 +195,20 @@ namespace HB.FullStack.Client.Maui.File
                     }
 
                     GlobalSettings.Logger.LogDebug("前不久请求过文件，现在还不存在，等待 1秒，再尝试");
-                    await Task.Delay(1000).ConfigureAwait(false);
+                    await Task.Delay(1000);
                 }
 
                 GlobalSettings.Logger.LogDebug("前不久请求过文件，现在还不存在，不再等待，远程获取");
             }
 
-            IOss oss = await RentOssClientAsync(directory, false).ConfigureAwait(false);
+            IOss oss = await RentOssClientAsync(directory, false);
 
             try
             {
                 using OssObject ossObject = oss.GetObject(_options.AliyunOssBucketName, ossKey);
 
                 //覆盖本地
-                string localFullPath = await SaveFileToLocalAsync(ossObject.Content, directory, fileName).ConfigureAwait(false);
+                string localFullPath = await SaveFileToLocalAsync(ossObject.Content, directory, fileName);
 
                 GlobalSettings.Logger.LogDebug("远程文件获取成功，已经保存到本地 {osskey}", ossKey);
 
@@ -231,7 +231,7 @@ namespace HB.FullStack.Client.Maui.File
         {
             //TimeSpan localFileExpiryTime = GetOssFileExpiryTime(Path.GetDirectoryName(ossKey));
 
-            await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, expiryTime).ConfigureAwait(false);
+            await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, expiryTime);
         }
 
         /// <summary>

@@ -42,7 +42,7 @@ namespace HB.FullStack.Client.Maui
             {
                 if (SecurityStorageSupported)
                 {
-                    return await SecureStorage.GetAsync(key).ConfigureAwait(false);
+                    return await SecureStorage.GetAsync(key);
                 }
                 else
                 {
@@ -56,7 +56,7 @@ namespace HB.FullStack.Client.Maui
 
                 SecurityStorageSupported = false;
 
-                return await GetAsync(key).ConfigureAwait(false);
+                return await GetAsync(key);
             }
         }
 
@@ -71,7 +71,7 @@ namespace HB.FullStack.Client.Maui
             {
                 if (SecurityStorageSupported)
                 {
-                    await SecureStorage.SetAsync(key, value).ConfigureAwait(false);
+                    await SecureStorage.SetAsync(key, value);
                 }
                 else
                 {
@@ -85,7 +85,7 @@ namespace HB.FullStack.Client.Maui
 
                 SecurityStorageSupported = false;
 
-                await SetAsync(key, value).ConfigureAwait(false);
+                await SetAsync(key, value);
             }
         }
 

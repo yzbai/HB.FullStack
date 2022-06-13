@@ -81,7 +81,7 @@ namespace HB.FullStack.Client.Maui.Base
 
             if (ViewModel != null)
             {
-                await ViewModel.OnPageDisappearingAsync().ConfigureAwait(false);
+                await ViewModel.OnPageDisappearingAsync();
             }
 
             base.OnDisappearing();

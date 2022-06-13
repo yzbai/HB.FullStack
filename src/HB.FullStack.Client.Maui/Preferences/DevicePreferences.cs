@@ -94,7 +94,7 @@ namespace HB.FullStack.Client.Maui
         {
             if (_deviceAddress.IsNullOrEmpty() || RequestLocker.NoWaitLock(nameof(DevicePreferences), nameof(GetDeviceAddressAsync), TimeSpan.FromSeconds(ADDRESS_REQUEST_INTERVAL_SECONDS)))
             {
-                _deviceAddress = await GetLastKnownAddressAsync().ConfigureAwait(false);
+                _deviceAddress = await GetLastKnownAddressAsync();
             }
 
             return _deviceAddress;
@@ -104,7 +104,7 @@ namespace HB.FullStack.Client.Maui
         {
             try
             {
-                Location? location = await Geolocation.GetLastKnownLocationAsync().ConfigureAwait(false);
+                Location? location = await Geolocation.GetLastKnownLocationAsync();
 
                 if (location != null)
                 {

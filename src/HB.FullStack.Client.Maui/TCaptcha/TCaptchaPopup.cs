@@ -41,7 +41,7 @@ namespace HB.FullStack.Client.Maui.TCaptcha
             }.Fill();
 
             _webView.Source = new HtmlWebViewSource { Html = HTML };
-            _webView.PageFinished += async (sender, e) => await _webView.EvaluateJavaScriptAsync($"showCaptcha(\"{AppId}\")").ConfigureAwait(false);
+            _webView.PageFinished += async (sender, e) => await _webView.EvaluateJavaScriptAsync($"showCaptcha(\"{AppId}\")");
             _webView.OnJavascriptCallCommand = new Command(json => { Close(json?.ToString()); });
 
 

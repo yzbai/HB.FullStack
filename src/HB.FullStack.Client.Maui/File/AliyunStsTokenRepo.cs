@@ -140,7 +140,7 @@ namespace HB.FullStack.Client.Maui.File
                         }
 
                         return true;
-                    }).ConfigureAwait(false);
+                    });
 
                 var machedTokens = FindMatches(requestDirectory, needWritePermission, tokens);
 

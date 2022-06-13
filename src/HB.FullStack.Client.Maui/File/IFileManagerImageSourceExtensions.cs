@@ -38,7 +38,7 @@ namespace System
                 initImageSource,
                 async () =>
                 {
-                    string? fullPath = await fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced).ConfigureAwait(false);
+                    string? fullPath = await fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced);
 
                     return fullPath.IsNullOrEmpty() ? initImageSource : ImageSource.FromFile(fullPath);
                 });
@@ -72,14 +72,14 @@ namespace System
                 initImageSource,
                 async () =>
                 {
-                    string? fileName = await updateFileNameAsyncFunc().ConfigureAwait(false);
+                    string? fileName = await updateFileNameAsyncFunc();
 
                     if (fileName.IsNullOrEmpty())
                     {
                         return initImageSource;
                     }
 
-                    string? fullPath = await fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced).ConfigureAwait(false);
+                    string? fullPath = await fileManager.GetFileFromMixedAsync(directory, fileName, remoteForced);
 
                     return fullPath.IsNullOrEmpty() ? initImageSource : ImageSource.FromFile(fullPath);
                 });

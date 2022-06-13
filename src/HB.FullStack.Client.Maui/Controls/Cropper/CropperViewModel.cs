@@ -115,9 +115,9 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
             using SKBitmap croppedBitmap = _bitmapFigure.Crop(_cropperFrameFigure.CropRect);
 
-            bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath).ConfigureAwait(false);
+            bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath);
 
-            await INavigationManager.Current.GoBackAsync(new Dictionary<string, object?> { { CropperPage.Query_CroppedSucceed, isSucceed } }).ConfigureAwait(false);
+            await INavigationManager.Current.GoBackAsync(new Dictionary<string, object?> { { CropperPage.Query_CroppedSucceed, isSucceed } });
         }
 
         private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPathToSave)
@@ -129,7 +129,7 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
             fullPathToSave = Path.ChangeExtension(fullPathToSave, ".png");
 
-            return await FileUtil.TrySaveFileAsync(data.ToArray(), fullPathToSave).ConfigureAwait(false);
+            return await FileUtil.TrySaveFileAsync(data.ToArray(), fullPathToSave);
         }
 
         private void Rotate()
@@ -139,7 +139,7 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
         private static async Task CancelAsync()
         {
-            await INavigationManager.Current!.GoBackAsync().ConfigureAwait(false);
+            await INavigationManager.Current!.GoBackAsync();
         }
     }
 }

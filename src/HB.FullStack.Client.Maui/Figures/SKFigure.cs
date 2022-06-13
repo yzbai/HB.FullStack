@@ -412,7 +412,7 @@ namespace HB.FullStack.Client.Maui.Figures
         {
             return Task.Run(async () =>
             {
-                await Task.Delay(LONG_TAP_MIN_DURATION_IN_MILLISECONDS).ConfigureAwait(false);
+                await Task.Delay(LONG_TAP_MIN_DURATION_IN_MILLISECONDS);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -427,7 +427,7 @@ namespace HB.FullStack.Client.Maui.Figures
 
                 if (CanvasView != null)
                 {
-                    await CanvasView.Dispatcher.DispatchAsync(() => CanvasView?.InvalidateSurface()).ConfigureAwait(false);
+                    await CanvasView.Dispatcher.DispatchAsync(() => CanvasView?.InvalidateSurface());
                 }
 
             }, cancellationToken);
