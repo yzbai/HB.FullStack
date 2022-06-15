@@ -606,7 +606,7 @@ end
             {
                 return (null, false);
             }
-
+            
             List<TEntity> entities = new List<TEntity>();
 
             foreach (RedisResult item in results)
