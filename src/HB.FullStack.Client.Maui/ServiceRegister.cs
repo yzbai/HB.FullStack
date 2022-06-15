@@ -53,8 +53,10 @@ namespace Microsoft.Maui.Hosting
             services.AddTCaptcha(tCaptchaAppId);
 
             //Initializers
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeService>(_ => new BaseInitializeService(migrations)));
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeScopedService, BaseInitalizeScopedService>());
+            //builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeService>(_ => new BaseInitializeService(migrations)));
+            //builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeScopedService, BaseInitalizeScopedService>());
+            builder.Services.AddTransient<IMauiInitializeService, BaseInitializeService>();
+            builder.Services.AddTransient<IMauiInitializeScopedService, BaseInitalizeScopedService>();
 
             //Handlers
             builder.ConfigureMauiHandlers(handlers =>

@@ -35,7 +35,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="17.0.53" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-		<PackageReference Include="System.Text.Json" Version="6.0.4" />
+		<PackageReference Include="System.Text.Json" Version="6.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />

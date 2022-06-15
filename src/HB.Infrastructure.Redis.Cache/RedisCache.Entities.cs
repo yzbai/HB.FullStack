@@ -357,7 +357,7 @@ end
 
                 List<bool> rts = new List<bool>();
 
-                RedisResult[] results = (RedisResult[])result;
+                RedisResult[] results = (RedisResult[])result!;
 
                 for (int i = 0; i < results.Length; ++i)
                 {
@@ -600,7 +600,7 @@ end
                 return (null, false);
             }
 
-            RedisResult[]? results = (RedisResult[])result;
+            RedisResult[]? results = (RedisResult[])result!;
 
             if (results == null || results.Length == 0)
             {
@@ -611,7 +611,7 @@ end
 
             foreach (RedisResult item in results)
             {
-                TEntity? entity = SerializeUtil.Deserialize<TEntity>((byte[])item);
+                TEntity? entity = SerializeUtil.Deserialize<TEntity>((byte[])item!);
 
                 //因为lua中已经检查过全部存在，所以这里都不为null
                 entities.Add(entity!);

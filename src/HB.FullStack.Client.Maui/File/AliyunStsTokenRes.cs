@@ -5,23 +5,6 @@ using System;
 
 namespace HB.FullStack.Client.Maui.File
 {
-    public class AliyunStsToken : GuidEntity
-    {
-        public Guid UserId { get; set; }
-
-        public string SecurityToken { get; set; } = null!;
-
-        public string AccessKeyId { get; set; } = null!;
-
-        public string AccessKeySecret { get; set; } = null!;
-
-        public DateTimeOffset ExpirationAt { get; set; }
-
-        public string DirectoryRegExp { get; set; } = null!;
-
-        public bool ReadOnly { get; set; }
-    }
-
     public class AliyunStsTokenRes : GuidResource
     {
         public Guid UserId { get; set; }
