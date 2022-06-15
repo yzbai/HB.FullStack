@@ -29,8 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		common.props = common.props
-		README.md = README.md
 		publish_to_local.ps1 = publish_to_local.ps1
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Identity", "src\HB.FullStack.Identity\HB.FullStack.Identity.csproj", "{1045EDFA-1CFE-402D-AA16-A708F58BC50B}"
@@ -91,7 +91,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{5E80
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{D464FAB6-A201-47F0-A73D-6EE3FBA58B95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.BaseTest", "test\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj", "{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.BaseTest", "test\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj", "{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,8 @@
 <Project>
 	<PropertyGroup>
-		<Version>2.0.2-alpha</Version>
+		<VersionSuffix>$(VersionSuffix)</VersionSuffix>
+		<Version>2.0.3</Version>
+		<Version Condition=" '$(VersionSuffix)' != '' ">$(Version)-$(VersionSuffix)</Version>
 		<Product>HB.FullStack</Product>
 		<Authors>yzbai@brlite.com</Authors>
 		<Company>Wuxi Brilliant Technology Company Limited.</Company>
