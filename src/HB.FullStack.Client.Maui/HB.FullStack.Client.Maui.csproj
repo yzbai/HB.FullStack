@@ -54,7 +54,7 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="1.0.0" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="6.0.300" />
+		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="6.0.403" />
 		<PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
 		<PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.1-preview.1" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.1-preview.1" />
@@ -63,7 +63,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+        <PackageReference Include="HB.Infrastructure.Aliyun" Version="2.0.2-alpha" />
 	</ItemGroup>
 
 	<ItemGroup>

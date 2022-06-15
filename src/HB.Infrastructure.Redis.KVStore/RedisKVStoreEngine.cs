@@ -590,9 +590,9 @@ return array";
 
         private static IEnumerable<Tuple<string?, int>> MapResultToStringWithVersion(RedisResult result)
         {
-            RedisResult[] results = (RedisResult[])result;
-            string[] values = (string[])results[0];
-            int[] version = (int[])results[1];
+            RedisResult[] results = (RedisResult[])result!;
+            string[] values = (string[])results[0]!;
+            int[] version = (int[])results[1]!;
 
             List<Tuple<string?, int>> rt = new List<Tuple<string?, int>>();
 
@@ -606,7 +606,7 @@ return array";
 
         private static IEnumerable<Tuple<string?, int>> MapGetAllResultToStringWithVersion(RedisResult result)
         {
-            RedisResult[] results = (RedisResult[])result;
+            RedisResult[] results = (RedisResult[])result!;
             Dictionary<string, RedisResult> values = results[0].ToDictionary();
             Dictionary<string, RedisResult> versions = results[1].ToDictionary();
 

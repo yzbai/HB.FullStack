@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
             FileManagerOptions options = new FileManagerOptions();
             action(options);
 
-            services.ConfigureOptions(options);
+            services.Configure(action);
 
             services.AddSingleton<IFileManager, FileManager>();
             services.AddSingleton<AliyunStsTokenRepo>();
