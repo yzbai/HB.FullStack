@@ -24,6 +24,8 @@ namespace HB.FullStack.Common.ApiClient
 
         public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(20);
 
+        public bool IgnoreSSLErrorCauseOfDebugging { get; set; }
+
         //public AsyncEventHandler<ApiRequest, ApiEventArgs>? OnRequestingAsync { get; set; }
 
         public void AddEndpoint(EndpointSettings endpointSettings)
