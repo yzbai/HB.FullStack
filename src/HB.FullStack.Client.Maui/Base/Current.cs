@@ -32,6 +32,7 @@ namespace System
 #if RELEASE
      "Release";
 #endif
+        
         public static bool IsDebug => Environment == "Debug";
 
         private static IConfiguration? _configuration;

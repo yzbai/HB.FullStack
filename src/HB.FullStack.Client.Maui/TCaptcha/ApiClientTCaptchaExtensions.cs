@@ -11,6 +11,7 @@ using HB.FullStack.Client.Navigation;
 using HB.FullStack.Common.Api;
 
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Devices;
 
 namespace HB.FullStack.Common.ApiClient
 {
