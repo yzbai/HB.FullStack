@@ -178,7 +178,7 @@ namespace HB.FullStack.Client.Maui.File
             TimeSpan localFileExpiryTime = GetOssFileExpiryTime(directory);
 
             //刚请求过,且存在就返回
-            if (!remoteForced && !await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, localFileExpiryTime).ConfigureAwait(false))
+            if (!remoteForced && !await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, localFileExpiryTime))
             {
                 GlobalSettings.Logger.LogDebug("前不久请求过文件 {osskey}", ossKey);
 
@@ -246,7 +246,7 @@ namespace HB.FullStack.Client.Maui.File
 
         public async Task<string?> SaveFileToLocalAsync(byte[] data, string fullPath)
         {
-            if (await FileUtil.TrySaveFileAsync(data, fullPath).ConfigureAwait(false))
+            if (await FileUtil.TrySaveFileAsync(data, fullPath))
             {
                 return fullPath;
             }
@@ -268,7 +268,7 @@ namespace HB.FullStack.Client.Maui.File
 
         public async Task<string> SaveFileToLocalAsync(Stream stream, string fullPath)
         {
-            if (await FileUtil.TrySaveFileAsync(stream, fullPath).ConfigureAwait(false))
+            if (await FileUtil.TrySaveFileAsync(stream, fullPath))
             {
                 return fullPath;
             }

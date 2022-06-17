@@ -11,6 +11,7 @@ namespace Microsoft.Maui.Controls
 {
     public static class ShellExtensions
     {
+        //TODO:使用正则表达式
         public static string GetPageName(this ShellNavigationState state)
         {
             List<char> charLst = new List<char>();

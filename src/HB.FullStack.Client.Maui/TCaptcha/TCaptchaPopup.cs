@@ -16,11 +16,13 @@ namespace HB.FullStack.Client.Maui.TCaptcha
                 <head>
                     <script src=""https://ssl.captcha.qq.com/TCaptcha.js""></script>
                 </head>
-                <body/>
+                <body>
+                    
+                </body>
                 <script>
                     function showCaptcha(appid) {
                         var captcha = new TencentCaptcha(appid, function (res) {
-                            CallCSharp(JSON.stringify(res));
+                            CallCSharp(res);
                         });
                         captcha.show();
                     }
@@ -33,19 +35,13 @@ namespace HB.FullStack.Client.Maui.TCaptcha
         {
             CanBeDismissedByTappingOutsideOfPopup = false;
 
-            Content = new StackLayout
-            {
-                Children = {
-                    new HybridWebView{ }.Fill().Assign(out _webView)
-                }
-            }.Fill();
+            Content = new HybridWebView { Source=new HtmlWebViewSource { Html = HTML} }.Fill().Assign(out _webView);
 
             _webView.Source = new HtmlWebViewSource { Html = HTML };
             _webView.PageFinished += async (sender, e) => await _webView.EvaluateJavaScriptAsync($"showCaptcha(\"{AppId}\")");
             _webView.OnJavascriptCallCommand = new Command(json => { Close(json?.ToString()); });
 
-
-            Size = Currents.PopupSizeConstants.Large;
+            Size = Currents.PopupSizeConstants.Medium;
         }
     }
 }

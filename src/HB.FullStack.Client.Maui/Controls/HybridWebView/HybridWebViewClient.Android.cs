@@ -25,7 +25,7 @@ namespace HB.FullStack.Client.Maui.Controls
             if (_handler.VirtualView is HybridWebView hybrid)
             {
                 //为了使各个平台调用接口统一
-                _ = await hybrid.EvaluateJavaScriptAsync(@"function CallCSharp(data){jsBridge.CallCSharp(data);}").ConfigureAwait(true);
+                _ = await hybrid.EvaluateJavaScriptAsync(@"function CallCSharp(data){jsBridge.CallCSharp(data);}");
 
                 hybrid.OnPageFinished();
             }
