@@ -295,7 +295,7 @@ namespace HB.FullStack.Database.SQL
 
         private static object VisitParameter(ParameterExpression p/*, SQLExpressionVisitorContenxt context*/)
         {
-            //return p.Name;
+            //return p.Code;
             return p.Type;
         }
 
@@ -596,7 +596,7 @@ namespace HB.FullStack.Database.SQL
             //object quotedColName = Visit(m.Object, context);
             //string statement;
 
-            //switch (m.Method.Name)
+            //switch (m.Method.Code)
             //{
             //    case "Trim":
             //        statement = string.Format(GlobalSettings.Culture, "ltrim(rtrim({0}))", quotedColName);

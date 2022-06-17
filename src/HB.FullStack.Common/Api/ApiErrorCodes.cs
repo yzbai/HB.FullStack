@@ -1,72 +1,65 @@
-﻿using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
+﻿using HB.FullStack.Common.Api;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace System
 {
     public static partial class ApiErrorCodes
     {
-        public static ErrorCode NoAuthority { get; } = new ErrorCode(ErrorCodeStartIds.API + 0, nameof(NoAuthority), "");
-        public static ErrorCode AccessTokenExpired { get; } = new ErrorCode(ErrorCodeStartIds.API + 1, nameof(AccessTokenExpired), "");
-        public static ErrorCode ModelValidationError { get; } = new ErrorCode(ErrorCodeStartIds.API + 2, nameof(ModelValidationError), "");
-        public static ErrorCode ApiNotAvailable { get; } = new ErrorCode(ErrorCodeStartIds.API + 3, nameof(ApiNotAvailable), "");
-        public static ErrorCode ApiErrorUnkownFormat { get; } = new ErrorCode(ErrorCodeStartIds.API + 4, nameof(ApiErrorUnkownFormat), "");
-        public static ErrorCode NotApiResourceEntity { get; } = new ErrorCode(ErrorCodeStartIds.API + 5, nameof(NotApiResourceEntity), "");
-        public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(ErrorCodeStartIds.API + 6, nameof(ApiSmsCodeInvalid), "");
-        public static ErrorCode SmsServiceError { get; } = new ErrorCode(ErrorCodeStartIds.API + 7, nameof(SmsServiceError), "");
-        public static ErrorCode CommonResourceTokenNeeded { get; } = new ErrorCode(ErrorCodeStartIds.API + 8, nameof(CommonResourceTokenNeeded), "");
-        public static ErrorCode CommonResourceTokenError { get; } = new ErrorCode(ErrorCodeStartIds.API + 9, nameof(CommonResourceTokenError), "");
-        public static ErrorCode ApiUploadEmptyFile { get; } = new ErrorCode(ErrorCodeStartIds.API + 10, nameof(ApiUploadEmptyFile), "");
-        public static ErrorCode ApiUploadOverSize { get; } = new ErrorCode(ErrorCodeStartIds.API + 11, nameof(ApiUploadOverSize), "");
-        public static ErrorCode ApiUploadWrongType { get; } = new ErrorCode(ErrorCodeStartIds.API + 12, nameof(ApiUploadWrongType), "");
-        public static ErrorCode HttpsRequired { get; } = new ErrorCode(ErrorCodeStartIds.API + 13, nameof(HttpsRequired), "");
-        public static ErrorCode FromExceptionController { get; } = new ErrorCode(ErrorCodeStartIds.API + 14, nameof(FromExceptionController), "");
-        public static ErrorCode ApiCapthaError { get; } = new ErrorCode(ErrorCodeStartIds.API + 15, nameof(ApiCapthaError), "");
-        public static ErrorCode ApiUploadFailed { get; } = new ErrorCode(ErrorCodeStartIds.API + 16, nameof(ApiUploadFailed), "");
-        public static ErrorCode ServerUnKownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 17, nameof(ServerUnKownError), "");
-        public static ErrorCode ClientError { get; } = new ErrorCode(ErrorCodeStartIds.API + 18, nameof(ClientError), "");
-        public static ErrorCode NullReturn { get; } = new ErrorCode(ErrorCodeStartIds.API + 19, nameof(NullReturn), "");
-        public static ErrorCode Timeout { get; } = new ErrorCode(ErrorCodeStartIds.API + 20, nameof(Timeout), "");
-        public static ErrorCode RequestCanceled { get; } = new ErrorCode(ErrorCodeStartIds.API + 21, nameof(RequestCanceled), "");
-        public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(ErrorCodeStartIds.API + 22, nameof(AliyunStsTokenReturnNull), "");
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(ErrorCodeStartIds.API + 23, nameof(AliyunOssPutObjectError), "");
-        public static ErrorCode TokenRefreshError { get; } = new ErrorCode(ErrorCodeStartIds.API + 24, nameof(TokenRefreshError), "");
-        public static ErrorCode UserActivityFilterError { get; } = new ErrorCode(ErrorCodeStartIds.API + 25, nameof(UserActivityFilterError), "");
-        public static ErrorCode FileUpdateRequestCountNotEven { get; } = new ErrorCode(ErrorCodeStartIds.API + 26, nameof(FileUpdateRequestCountNotEven), "");
-        public static ErrorCode LackApiResourceAttribute { get; } = new ErrorCode(ErrorCodeStartIds.API + 27, nameof(LackApiResourceAttribute), "");
-        public static ErrorCode RequestTimeout { get; } = new ErrorCode(ErrorCodeStartIds.API + 28, nameof(RequestTimeout), "");
+        public static ErrorCode NoAuthority { get; } = new ErrorCode(nameof(NoAuthority), "");
+        public static ErrorCode AccessTokenExpired { get; } = new ErrorCode(nameof(AccessTokenExpired), "");
+        public static ErrorCode ModelValidationError { get; } = new ErrorCode(nameof(ModelValidationError), "");
+        public static ErrorCode ApiNotAvailable { get; } = new ErrorCode(nameof(ApiNotAvailable), "");
+        public static ErrorCode ApiErrorUnkownFormat { get; } = new ErrorCode(nameof(ApiErrorUnkownFormat), "");
+        public static ErrorCode NotApiResourceEntity { get; } = new ErrorCode(nameof(NotApiResourceEntity), "");
+        public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(nameof(ApiSmsCodeInvalid), "");
+        public static ErrorCode SmsServiceError { get; } = new ErrorCode(nameof(SmsServiceError), "");
+        public static ErrorCode CommonResourceTokenNeeded { get; } = new ErrorCode(nameof(CommonResourceTokenNeeded), "");
+        public static ErrorCode CommonResourceTokenError { get; } = new ErrorCode(nameof(CommonResourceTokenError), "");
+        public static ErrorCode ApiUploadEmptyFile { get; } = new ErrorCode(nameof(ApiUploadEmptyFile), "");
+        public static ErrorCode ApiUploadOverSize { get; } = new ErrorCode(nameof(ApiUploadOverSize), "");
+        public static ErrorCode ApiUploadWrongType { get; } = new ErrorCode(nameof(ApiUploadWrongType), "");
+        public static ErrorCode HttpsRequired { get; } = new ErrorCode(nameof(HttpsRequired), "");
+        public static ErrorCode FromExceptionController { get; } = new ErrorCode(nameof(FromExceptionController), "");
+        public static ErrorCode ApiCapthaError { get; } = new ErrorCode(nameof(ApiCapthaError), "");
+        public static ErrorCode ApiUploadFailed { get; } = new ErrorCode(nameof(ApiUploadFailed), "");
+        public static ErrorCode ServerUnKownError { get; } = new ErrorCode(nameof(ServerUnKownError), "");
+        public static ErrorCode ClientError { get; } = new ErrorCode(nameof(ClientError), "");
+        public static ErrorCode NullReturn { get; } = new ErrorCode(nameof(NullReturn), "");
+        public static ErrorCode Timeout { get; } = new ErrorCode(nameof(Timeout), "");
+        public static ErrorCode RequestCanceled { get; } = new ErrorCode(nameof(RequestCanceled), "");
+        public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
+        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(nameof(AliyunOssPutObjectError), "");
+        public static ErrorCode TokenRefreshError { get; } = new ErrorCode(nameof(TokenRefreshError), "");
+        public static ErrorCode UserActivityFilterError { get; } = new ErrorCode(nameof(UserActivityFilterError), "");
+        public static ErrorCode FileUpdateRequestCountNotEven { get; } = new ErrorCode(nameof(FileUpdateRequestCountNotEven), "");
+        public static ErrorCode LackApiResourceAttribute { get; } = new ErrorCode(nameof(LackApiResourceAttribute), "");
+        public static ErrorCode RequestTimeout { get; } = new ErrorCode(nameof(RequestTimeout), "");
 
         /// <summary>
         /// 这个Request已经用过一次了
         /// </summary>
-        public static ErrorCode RequestAlreadyUsed { get; } = new ErrorCode(ErrorCodeStartIds.API + 30, nameof(RequestAlreadyUsed), "");
+        public static ErrorCode RequestAlreadyUsed { get; } = new ErrorCode(nameof(RequestAlreadyUsed), "");
 
         /// <summary>
         /// The request failed due to an underlying issue such as network connectivity, DNS failure, server certificate validation or timeout.
         /// </summary>
-        public static ErrorCode RequestUnderlyingIssue { get; } = new ErrorCode(ErrorCodeStartIds.API + 31, nameof(RequestUnderlyingIssue), "");
+        public static ErrorCode RequestUnderlyingIssue { get; } = new ErrorCode(nameof(RequestUnderlyingIssue), "");
 
-        public static ErrorCode HttpResponseDeserializeError { get; } = new ErrorCode(ErrorCodeStartIds.API + 32, nameof(HttpResponseDeserializeError), "");
-        public static ErrorCode ApiClientSendUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 33, nameof(ApiClientSendUnkownError), "");
-        public static ErrorCode ApiClientGetStreamUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 34, nameof(ApiClientGetStreamUnkownError), "");
-        public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.API + 35, nameof(UploadError), "");
-        public static ErrorCode ApiRequestInvalidateError { get; } = new ErrorCode(ErrorCodeStartIds.API + 36, nameof(ApiRequestInvalidateError), "");
-        public static ErrorCode ApiRequestSetJwtError { get; } = new ErrorCode(ErrorCodeStartIds.API + 37, nameof(ApiRequestSetJwtError), "");
-        public static ErrorCode ApiRequestSetApiKeyError { get; } = new ErrorCode(ErrorCodeStartIds.API + 38, nameof(ApiRequestSetApiKeyError), "");
-        public static ErrorCode ApiClientUnkownError { get; } = new ErrorCode(ErrorCodeStartIds.API + 39, nameof(ApiClientUnkownError), "");
-        public static ErrorCode ServerNullReturn { get; } = new ErrorCode(ErrorCodeStartIds.API + 40, nameof(ServerNullReturn), "");
-        public static ErrorCode ArgumentIdsError { get; } = new ErrorCode(ErrorCodeStartIds.API + 41, nameof(ArgumentIdsError), "");
-        public static ErrorCode RequestIntervalFilterError { get; } = new ErrorCode(ErrorCodeStartIds.API + 42, nameof(RequestIntervalFilterError), "");
-        public static ErrorCode CapthcaNotFound { get; } = new ErrorCode(ErrorCodeStartIds.API + 43, nameof(CapthcaNotFound), "");
-        public static ErrorCode CapthcaError { get; } = new ErrorCode(ErrorCodeStartIds.API + 44, nameof(CapthcaError), "");
-        public static ErrorCode NeedOwnerResId { get; } = new ErrorCode(ErrorCodeStartIds.API + 45, nameof(NeedOwnerResId), "");
+        public static ErrorCode HttpResponseDeserializeError { get; } = new ErrorCode(nameof(HttpResponseDeserializeError), "");
+        public static ErrorCode ApiClientSendUnkownError { get; } = new ErrorCode(nameof(ApiClientSendUnkownError), "");
+        public static ErrorCode ApiClientGetStreamUnkownError { get; } = new ErrorCode(nameof(ApiClientGetStreamUnkownError), "");
+        public static ErrorCode UploadError { get; } = new ErrorCode(nameof(UploadError), "");
+        public static ErrorCode ApiRequestInvalidateError { get; } = new ErrorCode(nameof(ApiRequestInvalidateError), "");
+        public static ErrorCode ApiRequestSetJwtError { get; } = new ErrorCode(nameof(ApiRequestSetJwtError), "");
+        public static ErrorCode ApiRequestSetApiKeyError { get; } = new ErrorCode(nameof(ApiRequestSetApiKeyError), "");
+        public static ErrorCode ApiClientUnkownError { get; } = new ErrorCode(nameof(ApiClientUnkownError), "");
+        public static ErrorCode ServerNullReturn { get; } = new ErrorCode(nameof(ServerNullReturn), "");
+        public static ErrorCode ArgumentIdsError { get; } = new ErrorCode(nameof(ArgumentIdsError), "");
+        public static ErrorCode RequestIntervalFilterError { get; } = new ErrorCode(nameof(RequestIntervalFilterError), "");
+        public static ErrorCode CapthcaNotFound { get; } = new ErrorCode(nameof(CapthcaNotFound), "");
+        public static ErrorCode CapthcaError { get; } = new ErrorCode(nameof(CapthcaError), "");
+        public static ErrorCode NeedOwnerResId { get; } = new ErrorCode(nameof(NeedOwnerResId), "");
     }
 
     public static partial class ApiExceptions

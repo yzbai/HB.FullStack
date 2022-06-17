@@ -126,7 +126,7 @@ namespace HB.FullStack.CacheTests
 
             //typeof(Book).GetProperty("Guid").SetValue(book, "123");
             //book.Guid = "12345";
-            //book.Name = "abc";
+            //book.Code = "abc";
             //book.BookID = 222;
 
             await Cache.SetEntityAsync(book).ConfigureAwait(false);

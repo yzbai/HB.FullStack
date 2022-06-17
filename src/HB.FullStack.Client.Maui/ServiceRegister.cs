@@ -10,6 +10,7 @@ using HB.Infrastructure.SQLite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Maui.Devices;
 using Microsoft.Maui.Hosting;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -69,6 +70,10 @@ namespace Microsoft.Maui.Hosting
 
             //controlers
             services.AddSingleton<PopupSizeConstants>();
+
+            //Essentials
+            services.AddSingleton<IDeviceDisplay>(DeviceDisplay.Current);
+            services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
 
             return builder;
         }

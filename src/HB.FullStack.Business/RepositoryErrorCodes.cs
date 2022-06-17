@@ -12,14 +12,14 @@ namespace System
     /// </summary>
     internal static class RepositoryErrorCodes
     {
-        public static ErrorCode CacheKeyNotSet { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 0, nameof(CacheKeyNotSet), "");
-        public static ErrorCode CacheValueNotSet { get;} = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 1, nameof(CacheValueNotSet), "");
-        public static ErrorCode UtcTicksNotSet { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 2, nameof(UtcTicksNotSet), "");
-        public static ErrorCode CacheGetError { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 3, nameof(CacheGetError), "");
-        public static ErrorCode CacheMissed { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 4, nameof(CacheMissed), "");
-        public static ErrorCode CacheGetEmpty { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 5, nameof(CacheGetEmpty), "");
-        public static ErrorCode CacheLockAcquireFailed { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 6, nameof(CacheLockAcquireFailed), "");
-        public static ErrorCode CacheCollectionKeyNotSame { get; } = new ErrorCode(ErrorCodeStartIds.REPOSITORY + 7, name: nameof(CacheCollectionKeyNotSame), "");
+        public static ErrorCode CacheKeyNotSet { get; } = new ErrorCode(nameof(CacheKeyNotSet), "");
+        public static ErrorCode CacheValueNotSet { get; } = new ErrorCode(nameof(CacheValueNotSet), "");
+        public static ErrorCode UtcTicksNotSet { get; } = new ErrorCode(nameof(UtcTicksNotSet), "");
+        public static ErrorCode CacheGetError { get; } = new ErrorCode(nameof(CacheGetError), "");
+        public static ErrorCode CacheMissed { get; } = new ErrorCode(nameof(CacheMissed), "");
+        public static ErrorCode CacheGetEmpty { get; } = new ErrorCode(nameof(CacheGetEmpty), "");
+        public static ErrorCode CacheLockAcquireFailed { get; } = new ErrorCode(nameof(CacheLockAcquireFailed), "");
+        public static ErrorCode CacheCollectionKeyNotSame { get; } = new ErrorCode(nameof(CacheCollectionKeyNotSame), "");
     }
 
     internal static class RepositoryExceptions
@@ -73,7 +73,7 @@ namespace System
 
         public static void LogCacheGetError(this ILogger logger, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception ex)
         {
-            _logCacheGetError(logger, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex); 
+            _logCacheGetError(logger, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheMissed = LoggerMessage.Define<string?, string?, string?>(
@@ -103,7 +103,7 @@ namespace System
 
         public static void LogCacheLockAcquireFailed(this ILogger logger, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, string? lockStatus)
         {
-            _logCacheLockAcquireFailed(logger, typeName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues),lockStatus, null);
+            _logCacheLockAcquireFailed(logger, typeName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), lockStatus, null);
         }
     }
 }
