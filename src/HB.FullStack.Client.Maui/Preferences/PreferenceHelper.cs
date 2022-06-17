@@ -62,7 +62,7 @@ namespace HB.FullStack.Client.Maui
 
         public static string? Get(string key)
         {
-            return JoinableTasks.JoinableTaskFactory.Run(async () => await GetAsync(key).ConfigureAwait(false));
+            return JoinableTasks.JoinableTaskFactory.Run(async () => await GetAsync(key));
         }
 
         static async Task SetAsync(string key, string value)

@@ -93,6 +93,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.BaseTest", "test\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj", "{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.Infrastructure.TencentTests", "test\HB.Infrastructure.TencentTests\HB.Infrastructure.TencentTests.csproj", "{849FBA64-0CD7-4B01-8C51-94267D58B853}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -231,6 +233,10 @@ Global
 		{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{849FBA64-0CD7-4B01-8C51-94267D58B853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{849FBA64-0CD7-4B01-8C51-94267D58B853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{849FBA64-0CD7-4B01-8C51-94267D58B853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{849FBA64-0CD7-4B01-8C51-94267D58B853}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -271,6 +277,7 @@ Global
 		{5EE361A0-F317-46E2-97D9-995204012206} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
 		{D464FAB6-A201-47F0-A73D-6EE3FBA58B95} = {5E80008A-BC90-48B0-A831-3A0B045DB29A}
 		{3D1E7D24-63C2-4B9C-8515-E45EE0F9CB00} = {D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}
+		{849FBA64-0CD7-4B01-8C51-94267D58B853} = {D58B4F51-4143-47FD-9C1E-ECD2A2F4543A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

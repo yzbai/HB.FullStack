@@ -67,7 +67,7 @@ namespace HB.FullStack.Client.Maui.File
             int len;
             byte[] buffer = new byte[4096];
 
-            while ((len = await zipInputStream.ReadAsync(buffer, 0, 4096).ConfigureAwait(false)) != -1)
+            while ((len = await zipInputStream.ReadAsync(buffer, 0, 4096)) != -1)
             {
                 await bufferedStream.WriteAsync(buffer.AsMemory(0, len));
             }

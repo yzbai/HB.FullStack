@@ -78,7 +78,7 @@ namespace HB.FullStack.Client.Maui.File
         /// </summary>
         public async Task<AliyunStsToken?> GetByDirectoryAsync(string requestDirectory, bool needWritePermission, TransactionContext? transactionContext, bool remoteForced = false)
         {
-            if (!await _getStsTokenSemaphore.WaitAsync(TimeSpan.FromSeconds(60)).ConfigureAwait(false))
+            if (!await _getStsTokenSemaphore.WaitAsync(TimeSpan.FromSeconds(60)))
             {
                 throw ClientExceptions.AliyunStsTokenOverTime(casuse: "获取AliyunStsToken失败，超出等待时间", requestDirectory: requestDirectory, needWrite: needWritePermission);
             }

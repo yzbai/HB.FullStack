@@ -97,7 +97,7 @@ namespace System
 
         public static IDispatcher Dispatcher => Page.Dispatcher;
 
-        public static INavigationManager NavigationManager => INavigationManager.Current;
+        public static INavigationManager Navigation => INavigationManager.Current;
 
         private static PopupSizeConstants? _popupSizeConstants;
         public static PopupSizeConstants PopupSizeConstants => _popupSizeConstants ??= Services.GetRequiredService<PopupSizeConstants>();

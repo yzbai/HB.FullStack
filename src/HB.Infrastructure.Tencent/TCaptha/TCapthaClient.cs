@@ -64,9 +64,9 @@ namespace HB.Infrastructure.Tencent
             }
             try
             {
-                int? result = SerializeUtil.FromJsonForProperty<int>(content, "response");
+                string? result = SerializeUtil.FromJsonForProperty<string>(content, "response");
 
-                if (result == 1)
+                if (result == "1")
                 {
                     return true;
                 }

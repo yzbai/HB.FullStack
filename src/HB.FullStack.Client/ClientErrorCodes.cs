@@ -4,24 +4,24 @@ namespace System
 {
     public static class ClientErrorCodes
     {
-        public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 0, nameof(ImageOptionsOutOfRange), "");
-        public static ErrorCode IdBarrierError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 1, nameof(IdBarrierError), "");
-        public static ErrorCode ResourceNotFound { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 2, nameof(ResourceNotFound), "");
-        public static ErrorCode BizError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 3, nameof(BizError), "");
-        public static ErrorCode NotLogined { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 4, nameof(NotLogined), "");
-        public static ErrorCode AliyunStsTokenError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 5, nameof(AliyunStsTokenError), "");
-        public static ErrorCode FileServiceError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 6, nameof(FileServiceError), "");
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 7, nameof(AliyunOssPutObjectError), "");
-        public static ErrorCode LocalFileCopyError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 8, nameof(LocalFileCopyError), "");
-        public static ErrorCode LocalFileSaveError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 9, nameof(LocalFileSaveError), "");
-        public static ErrorCode AliyunStsTokenOverTime { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 10, nameof(AliyunStsTokenOverTime), "");
-        public static ErrorCode SmsCodeValidateError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 11, nameof(SmsCodeValidateError), "");
-        public static ErrorCode NoInternet { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 12, nameof(NoInternet), "");
-        public static ErrorCode UploadError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 13, nameof(UploadError), "");
+        public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(nameof(ImageOptionsOutOfRange), "");
+        public static ErrorCode IdBarrierError { get; } = new ErrorCode(nameof(IdBarrierError), "");
+        public static ErrorCode ResourceNotFound { get; } = new ErrorCode(nameof(ResourceNotFound), "");
+        public static ErrorCode BizError { get; } = new ErrorCode(nameof(BizError), "");
+        public static ErrorCode NotLogined { get; } = new ErrorCode(nameof(NotLogined), "");
+        public static ErrorCode AliyunStsTokenError { get; } = new ErrorCode(nameof(AliyunStsTokenError), "");
+        public static ErrorCode FileServiceError { get; } = new ErrorCode(nameof(FileServiceError), "");
+        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(nameof(AliyunOssPutObjectError), "");
+        public static ErrorCode LocalFileCopyError { get; } = new ErrorCode(nameof(LocalFileCopyError), "");
+        public static ErrorCode LocalFileSaveError { get; } = new ErrorCode(nameof(LocalFileSaveError), "");
+        public static ErrorCode AliyunStsTokenOverTime { get; } = new ErrorCode(nameof(AliyunStsTokenOverTime), "");
+        public static ErrorCode SmsCodeValidateError { get; } = new ErrorCode(nameof(SmsCodeValidateError), "");
+        public static ErrorCode NoInternet { get; } = new ErrorCode(nameof(NoInternet), "");
+        public static ErrorCode UploadError { get; } = new ErrorCode(nameof(UploadError), "");
 
-        public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 14, nameof(DbSimpleLockerNoWaitLockFailed), "");
-        public static ErrorCode UnSupportedEntityType { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 15, nameof(UnSupportedEntityType), "");
-        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 16, nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
+        public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(nameof(DbSimpleLockerNoWaitLockFailed), "");
+        public static ErrorCode UnSupportedEntityType { get; } = new ErrorCode(nameof(UnSupportedEntityType), "");
+        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected { get; } = new ErrorCode(nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
     }
 
     public static class LoggerExtensions
