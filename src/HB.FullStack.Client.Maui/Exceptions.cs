@@ -8,12 +8,9 @@ namespace HB.FullStack.Client.Maui
 {
     public static class ErrorCodes
     {
-        //TODO: fix the error code
-        public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(3, nameof(AliyunStsTokenReturnNull), "");
-        public static ErrorCode NoInternet { get; } = new ErrorCode(3, nameof(NoInternet), "");
-
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(ErrorCodeStartIds.CLIENT + 7, nameof(AliyunOssPutObjectError), "");
-
+        public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
+        public static ErrorCode NoInternet { get; } = new ErrorCode(nameof(NoInternet), "");
+        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(nameof(AliyunOssPutObjectError), "");
     }
 
     public static class Exceptions
