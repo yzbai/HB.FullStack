@@ -4,7 +4,7 @@ namespace HB.Infrastructure.Tencent
 {
     internal static class TencentErrorCodes
     {
-        public static ErrorCode CapthaError { get; set; } = new ErrorCode(ErrorCodeStartIds.TENCENT + 0, nameof(CapthaError), "");
+        public static ErrorCode CapthaError { get; set; } = new ErrorCode(nameof(CapthaError), "");
     }
 
     internal static class Exceptions

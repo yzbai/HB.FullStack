@@ -154,7 +154,7 @@ namespace HB.FullStack.DatabaseTests
                 PublisherEntity entity = testEntities[0];
 
                 entity.Books.Add("New Book2");
-                //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Name = "Yuzhaobai" });
+                //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
 
                 await Db.UpdateAsync(entity, "lastUsre", tContext).ConfigureAwait(false);
 
@@ -278,7 +278,7 @@ namespace HB.FullStack.DatabaseTests
                 PublisherEntity entity = testEntities[0];
 
                 entity.Books.Add("New Book2");
-                //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Name = "Yuzhaobai" });
+                //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
 
                 await Db.UpdateAsync(entity, "lastUsre", transactionContext).ConfigureAwait(false);
 

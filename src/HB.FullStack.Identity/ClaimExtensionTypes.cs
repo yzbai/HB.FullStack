@@ -18,7 +18,7 @@
 
         public const string API_KEY_NAME = "HB.ApiKeyName";
 
-        //public const string Name = ClaimsIdentity.DefaultNameClaimType;
+        //public const string Code = ClaimsIdentity.DefaultNameClaimType;
 
         //public const string IsEmailConfirmed = "HB.Identity.IsEmailConfirmed";
 

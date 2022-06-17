@@ -11,13 +11,13 @@ namespace HB.Infrastructure.Aliyun
     /// </summary>
     internal static class AliyunErrorCodes
     {
-        public static ErrorCode OssError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 0, nameof(OssError), "");
-        public static ErrorCode StsError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 1, nameof(StsError), "");
-        public static ErrorCode SmsSendError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 2, nameof(SmsSendError), "");
-        public static ErrorCode SmsFormatError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 3, nameof(SmsFormatError), "");
-        public static ErrorCode SmsClientError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 4, nameof(SmsClientError), "");
-        public static ErrorCode SmsServerError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 5, nameof(SmsServerError), "");
-        public static ErrorCode SmsCacheError { get; set; } = new ErrorCode(ErrorCodeStartIds.ALIYUN + 6, nameof(SmsCacheError), "");
+        public static ErrorCode OssError { get; set; } = new ErrorCode(nameof(OssError), "");
+        public static ErrorCode StsError { get; set; } = new ErrorCode(nameof(StsError), "");
+        public static ErrorCode SmsSendError { get; set; } = new ErrorCode(nameof(SmsSendError), "");
+        public static ErrorCode SmsFormatError { get; set; } = new ErrorCode(nameof(SmsFormatError), "");
+        public static ErrorCode SmsClientError { get; set; } = new ErrorCode(nameof(SmsClientError), "");
+        public static ErrorCode SmsServerError { get; set; } = new ErrorCode(nameof(SmsServerError), "");
+        public static ErrorCode SmsCacheError { get; set; } = new ErrorCode(nameof(SmsCacheError), "");
     }
 
     internal static class AliyunExceptions

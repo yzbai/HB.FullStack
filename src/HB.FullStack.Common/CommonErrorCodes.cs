@@ -13,21 +13,21 @@ namespace System
 {
     public static partial class CommonErrorCodes
     {
-        public static readonly ErrorCode CertNotInPackage = new ErrorCode(ErrorCodeStartIds.COMMON + 1, nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
-        public static readonly ErrorCode CertNotFound = new ErrorCode(ErrorCodeStartIds.COMMON + 2, nameof(CertNotFound), "没有找到证书");
-        public static readonly ErrorCode IsFileSignatureMatchedError = new ErrorCode(ErrorCodeStartIds.COMMON + 3, nameof(IsFileSignatureMatchedError), "");
-        public static readonly ErrorCode SaveFileError = new ErrorCode(ErrorCodeStartIds.COMMON + 4, nameof(SaveFileError), "");
-        public static readonly ErrorCode ReadFileError = new ErrorCode(ErrorCodeStartIds.COMMON + 5, nameof(ReadFileError), "");
+        public static readonly ErrorCode CertNotInPackage = new ErrorCode( nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
+        public static readonly ErrorCode CertNotFound = new ErrorCode( nameof(CertNotFound), "没有找到证书");
+        public static readonly ErrorCode IsFileSignatureMatchedError = new ErrorCode( nameof(IsFileSignatureMatchedError), "");
+        public static readonly ErrorCode SaveFileError = new ErrorCode( nameof(SaveFileError), "");
+        public static readonly ErrorCode ReadFileError = new ErrorCode( nameof(ReadFileError), "");
 
-        public static readonly ErrorCode HttpResponseDeSerializeJsonError = new ErrorCode(ErrorCodeStartIds.COMMON + 6, nameof(HttpResponseDeSerializeJsonError), "");
+        public static readonly ErrorCode HttpResponseDeSerializeJsonError = new ErrorCode( nameof(HttpResponseDeSerializeJsonError), "");
 
-        public static readonly ErrorCode SerializeLogError = new ErrorCode(ErrorCodeStartIds.COMMON + 7, nameof(SerializeLogError), "");
+        public static readonly ErrorCode SerializeLogError = new ErrorCode( nameof(SerializeLogError), "");
 
-        public static readonly ErrorCode PerformValidateError = new ErrorCode(ErrorCodeStartIds.COMMON + 8, nameof(PerformValidateError), "");
+        public static readonly ErrorCode PerformValidateError = new ErrorCode( nameof(PerformValidateError), "");
 
-        public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode(ErrorCodeStartIds.COMMON + 9, nameof(TryFromJsonWithCollectionCheckError), "");
+        public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode( nameof(TryFromJsonWithCollectionCheckError), "");
 
-        public static readonly ErrorCode EnvironmentVariableError = new ErrorCode(ErrorCodeStartIds.COMMON + 10, nameof(EnvironmentVariableError), "");
+        public static readonly ErrorCode EnvironmentVariableError = new ErrorCode( nameof(EnvironmentVariableError), "");
     }
 
     public static partial class LoggerExtensions

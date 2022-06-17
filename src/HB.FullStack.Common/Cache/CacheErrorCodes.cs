@@ -13,39 +13,39 @@ namespace System
 {
     public static class CacheErrorCodes
     {
-        public static readonly ErrorCode SlidingTimeBiggerThanMaxAlive = new ErrorCode(ErrorCodeStartIds.CACHE + 0, nameof(SlidingTimeBiggerThanMaxAlive), "");
-        public static readonly ErrorCode EntityNotHaveKeyAttribute = new ErrorCode(ErrorCodeStartIds.CACHE + 1, nameof(EntityNotHaveKeyAttribute), "");
-        public static readonly ErrorCode ConvertError = new ErrorCode(ErrorCodeStartIds.CACHE + 2, nameof(ConvertError), "");
-        public static readonly ErrorCode CacheLoadedLuaNotFound = new ErrorCode(ErrorCodeStartIds.CACHE + 3, nameof(CacheLoadedLuaNotFound), "");
-        public static readonly ErrorCode CacheInstanceNotFound = new ErrorCode(ErrorCodeStartIds.CACHE + 4, nameof(CacheInstanceNotFound), "");
-        public static readonly ErrorCode NoSuchDimensionKey = new ErrorCode(ErrorCodeStartIds.CACHE + 5, nameof(NoSuchDimensionKey), "");
-        public static readonly ErrorCode NotEnabledForEntity = new ErrorCode(ErrorCodeStartIds.CACHE + 6, nameof(NotEnabledForEntity), "");
-        public static readonly ErrorCode Unkown = new ErrorCode(ErrorCodeStartIds.CACHE + 7, nameof(Unkown), "");
-        public static readonly ErrorCode NotACacheEntity = new ErrorCode(ErrorCodeStartIds.CACHE + 8, nameof(NotACacheEntity), "");
-        public static readonly ErrorCode UnkownButDeleted = new ErrorCode(ErrorCodeStartIds.CACHE + 9, nameof(UnkownButDeleted), "");
-        public static readonly ErrorCode GetEntitiesErrorButDeleted = new ErrorCode(ErrorCodeStartIds.CACHE + 10, nameof(GetEntitiesErrorButDeleted), "");
-        public static readonly ErrorCode SetEntitiesError = new ErrorCode(ErrorCodeStartIds.CACHE + 11, nameof(SetEntitiesError), "");
+        public static readonly ErrorCode SlidingTimeBiggerThanMaxAlive = new ErrorCode( nameof(SlidingTimeBiggerThanMaxAlive), "");
+        public static readonly ErrorCode EntityNotHaveKeyAttribute = new ErrorCode( nameof(EntityNotHaveKeyAttribute), "");
+        public static readonly ErrorCode ConvertError = new ErrorCode( nameof(ConvertError), "");
+        public static readonly ErrorCode CacheLoadedLuaNotFound = new ErrorCode( nameof(CacheLoadedLuaNotFound), "");
+        public static readonly ErrorCode CacheInstanceNotFound = new ErrorCode( nameof(CacheInstanceNotFound), "");
+        public static readonly ErrorCode NoSuchDimensionKey = new ErrorCode( nameof(NoSuchDimensionKey), "");
+        public static readonly ErrorCode NotEnabledForEntity = new ErrorCode( nameof(NotEnabledForEntity), "");
+        public static readonly ErrorCode Unkown = new ErrorCode( nameof(Unkown), "");
+        public static readonly ErrorCode NotACacheEntity = new ErrorCode( nameof(NotACacheEntity), "");
+        public static readonly ErrorCode UnkownButDeleted = new ErrorCode( nameof(UnkownButDeleted), "");
+        public static readonly ErrorCode GetEntitiesErrorButDeleted = new ErrorCode( nameof(GetEntitiesErrorButDeleted), "");
+        public static readonly ErrorCode SetEntitiesError = new ErrorCode( nameof(SetEntitiesError), "");
 
-        public static readonly ErrorCode RemoveEntitiesError = new ErrorCode(ErrorCodeStartIds.CACHE + 12, nameof(RemoveEntitiesError), "");
+        public static readonly ErrorCode RemoveEntitiesError = new ErrorCode( nameof(RemoveEntitiesError), "");
 
-        public static readonly ErrorCode ForcedRemoveEntitiesError = new ErrorCode(ErrorCodeStartIds.CACHE + 13, nameof(ForcedRemoveEntitiesError), "");
+        public static readonly ErrorCode ForcedRemoveEntitiesError = new ErrorCode( nameof(ForcedRemoveEntitiesError), "");
 
-        public static readonly ErrorCode GetEntitiesError = new ErrorCode(ErrorCodeStartIds.CACHE + 14, nameof(GetEntitiesError), "");
+        public static readonly ErrorCode GetEntitiesError = new ErrorCode( nameof(GetEntitiesError), "");
 
-        public static readonly ErrorCode CacheInvalidationConcurrencyWithEntities = new ErrorCode(ErrorCodeStartIds.CACHE + 15, nameof(CacheInvalidationConcurrencyWithEntities), "");
-        public static readonly ErrorCode CacheInvalidationConcurrencyWithTimestamp = new ErrorCode(ErrorCodeStartIds.CACHE + 16, nameof(CacheInvalidationConcurrencyWithTimestamp), "");
+        public static readonly ErrorCode CacheInvalidationConcurrencyWithEntities = new ErrorCode( nameof(CacheInvalidationConcurrencyWithEntities), "");
+        public static readonly ErrorCode CacheInvalidationConcurrencyWithTimestamp = new ErrorCode( nameof(CacheInvalidationConcurrencyWithTimestamp), "");
 
-        public static readonly ErrorCode CacheUpdateVersionConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 17, nameof(CacheUpdateVersionConcurrency), "");
+        public static readonly ErrorCode CacheUpdateVersionConcurrency = new ErrorCode( nameof(CacheUpdateVersionConcurrency), "");
 
 
-        public static readonly ErrorCode SetError = new ErrorCode(ErrorCodeStartIds.CACHE + 18, nameof(SetError), "");
+        public static readonly ErrorCode SetError = new ErrorCode( nameof(SetError), "");
 
-        public static readonly ErrorCode RemoveError = new ErrorCode(ErrorCodeStartIds.CACHE + 19, nameof(RemoveError), "");
-        public static readonly ErrorCode GetError = new ErrorCode(ErrorCodeStartIds.CACHE + 20, nameof(GetError), "");
+        public static readonly ErrorCode RemoveError = new ErrorCode( nameof(RemoveError), "");
+        public static readonly ErrorCode GetError = new ErrorCode( nameof(GetError), "");
 
-        public static readonly ErrorCode CacheUpdateTimestampConcurrency = new ErrorCode(ErrorCodeStartIds.CACHE + 21, nameof(CacheUpdateTimestampConcurrency), "");
+        public static readonly ErrorCode CacheUpdateTimestampConcurrency = new ErrorCode( nameof(CacheUpdateTimestampConcurrency), "");
 
-        public static readonly ErrorCode RemoveMultipleError = new ErrorCode(ErrorCodeStartIds.CACHE + 19, nameof(RemoveMultipleError), "");
+        public static readonly ErrorCode RemoveMultipleError = new ErrorCode( nameof(RemoveMultipleError), "");
     }
 
     public static class CacheExceptions

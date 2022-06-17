@@ -6,29 +6,29 @@ namespace HB.FullStack.Identity
 {
     internal static class IdentityErrorCodes
     {
-        public static ErrorCode AuthorizationNotFound { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 0, nameof(AuthorizationNotFound), "");
-        public static ErrorCode AuthorizationPasswordWrong { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 1, nameof(AuthorizationPasswordWrong), "");
-        public static ErrorCode AuthorizationTooFrequent { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 2, nameof(AuthorizationTooFrequent), "");
-        public static ErrorCode AuthorizationInvalideAccessToken { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 3, nameof(AuthorizationInvalideAccessToken), "");
-        public static ErrorCode AuthorizationInvalideDeviceId { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 4, nameof(AuthorizationInvalideDeviceId), "");
-        public static ErrorCode AuthorizationInvalideUserId { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 5, nameof(AuthorizationInvalideUserId), "");
-        public static ErrorCode AuthorizationUserSecurityStampChanged { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 6, nameof(AuthorizationUserSecurityStampChanged), "");
-        public static ErrorCode AuthorizationRefreshTokenExpired { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 7, nameof(AuthorizationRefreshTokenExpired), "");
-        public static ErrorCode AuthorizationNoTokenInStore { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 8, nameof(AuthorizationNoTokenInStore), "");
-        public static ErrorCode AuthorizationMobileNotConfirmed { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 9, nameof(AuthorizationMobileNotConfirmed), "");
-        public static ErrorCode AuthorizationEmailNotConfirmed { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 10, nameof(AuthorizationEmailNotConfirmed), "");
-        public static ErrorCode AuthorizationLockedOut { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 11, nameof(AuthorizationLockedOut), "");
-        public static ErrorCode AuthorizationOverMaxFailedCount { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 12, nameof(AuthorizationOverMaxFailedCount), "");
-        public static ErrorCode JwtSigningCertNotFound { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 13, nameof(JwtSigningCertNotFound), "");
-        public static ErrorCode JwtEncryptionCertNotFound { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 14, nameof(JwtEncryptionCertNotFound), "");
-        public static ErrorCode FoundTooMuch { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 15, nameof(FoundTooMuch), "");
-        public static ErrorCode NotFound { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 16, nameof(NotFound), "");
-        public static ErrorCode IdentityNothingConfirmed { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 17, nameof(IdentityNothingConfirmed), "");
-        public static ErrorCode IdentityMobileEmailLoginNameAllNull { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 18, nameof(IdentityMobileEmailLoginNameAllNull), "");
-        public static ErrorCode IdentityAlreadyTaken { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 19, nameof(IdentityAlreadyTaken), "");
-        public static ErrorCode ServiceRegisterError { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 20, nameof(ServiceRegisterError), "");
-        public static ErrorCode TryRemoveRoleFromUserError { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 21, nameof(TryRemoveRoleFromUserError), "");
-        public static ErrorCode AudienceNotFound { get; } = new ErrorCode(ErrorCodeStartIds.IDENTITY + 22, nameof(AudienceNotFound), "");
+        public static ErrorCode AuthorizationNotFound { get; } = new ErrorCode(nameof(AuthorizationNotFound), "");
+        public static ErrorCode AuthorizationPasswordWrong { get; } = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
+        public static ErrorCode AuthorizationTooFrequent { get; } = new ErrorCode(nameof(AuthorizationTooFrequent), "");
+        public static ErrorCode AuthorizationInvalideAccessToken { get; } = new ErrorCode(nameof(AuthorizationInvalideAccessToken), "");
+        public static ErrorCode AuthorizationInvalideDeviceId { get; } = new ErrorCode(nameof(AuthorizationInvalideDeviceId), "");
+        public static ErrorCode AuthorizationInvalideUserId { get; } = new ErrorCode(nameof(AuthorizationInvalideUserId), "");
+        public static ErrorCode AuthorizationUserSecurityStampChanged { get; } = new ErrorCode(nameof(AuthorizationUserSecurityStampChanged), "");
+        public static ErrorCode AuthorizationRefreshTokenExpired { get; } = new ErrorCode(nameof(AuthorizationRefreshTokenExpired), "");
+        public static ErrorCode AuthorizationNoTokenInStore { get; } = new ErrorCode(nameof(AuthorizationNoTokenInStore), "");
+        public static ErrorCode AuthorizationMobileNotConfirmed { get; } = new ErrorCode(nameof(AuthorizationMobileNotConfirmed), "");
+        public static ErrorCode AuthorizationEmailNotConfirmed { get; } = new ErrorCode(nameof(AuthorizationEmailNotConfirmed), "");
+        public static ErrorCode AuthorizationLockedOut { get; } = new ErrorCode(nameof(AuthorizationLockedOut), "");
+        public static ErrorCode AuthorizationOverMaxFailedCount { get; } = new ErrorCode(nameof(AuthorizationOverMaxFailedCount), "");
+        public static ErrorCode JwtSigningCertNotFound { get; } = new ErrorCode(nameof(JwtSigningCertNotFound), "");
+        public static ErrorCode JwtEncryptionCertNotFound { get; } = new ErrorCode(nameof(JwtEncryptionCertNotFound), "");
+        public static ErrorCode FoundTooMuch { get; } = new ErrorCode(nameof(FoundTooMuch), "");
+        public static ErrorCode NotFound { get; } = new ErrorCode(nameof(NotFound), "");
+        public static ErrorCode IdentityNothingConfirmed { get; } = new ErrorCode(nameof(IdentityNothingConfirmed), "");
+        public static ErrorCode IdentityMobileEmailLoginNameAllNull { get; } = new ErrorCode(nameof(IdentityMobileEmailLoginNameAllNull), "");
+        public static ErrorCode IdentityAlreadyTaken { get; } = new ErrorCode(nameof(IdentityAlreadyTaken), "");
+        public static ErrorCode ServiceRegisterError { get; } = new ErrorCode(nameof(ServiceRegisterError), "");
+        public static ErrorCode TryRemoveRoleFromUserError { get; } = new ErrorCode(nameof(TryRemoveRoleFromUserError), "");
+        public static ErrorCode AudienceNotFound { get; } = new ErrorCode(nameof(AudienceNotFound), "");
     }
 
     internal static class IdentityExceptions

@@ -6,16 +6,16 @@ namespace HB.FullStack.WebApi
 {
     public static class WebApiErrorCodes
     {
-        public static ErrorCode DataProtectionCertNotFound { get; set; } = new ErrorCode(ErrorCodeStartIds.WEB_API + 0, nameof(DataProtectionCertNotFound), "");
-        public static ErrorCode JwtEncryptionCertNotFound { get; set; } = new ErrorCode(ErrorCodeStartIds.WEB_API + 1, nameof(JwtEncryptionCertNotFound), "");
-        public static ErrorCode StartupError { get; set; } = new ErrorCode(ErrorCodeStartIds.WEB_API + 2, nameof(StartupError), "");
-        public static ErrorCode DatabaseInitLockError { get; set; } = new ErrorCode(ErrorCodeStartIds.WEB_API + 3, nameof(DatabaseInitLockError), "");
+        public static ErrorCode DataProtectionCertNotFound { get; set; } = new ErrorCode(nameof(DataProtectionCertNotFound), "");
+        public static ErrorCode JwtEncryptionCertNotFound { get; set; } = new ErrorCode(nameof(JwtEncryptionCertNotFound), "");
+        public static ErrorCode StartupError { get; set; } = new ErrorCode(nameof(StartupError), "");
+        public static ErrorCode DatabaseInitLockError { get; set; } = new ErrorCode(nameof(DatabaseInitLockError), "");
 
-        public static ErrorCode ExceptionHandlerPathFeatureNull { get; } = new ErrorCode(ErrorCodeStartIds.API + 32, nameof(ExceptionHandlerPathFeatureNull), "");
+        public static ErrorCode ExceptionHandlerPathFeatureNull { get; } = new ErrorCode(nameof(ExceptionHandlerPathFeatureNull), "");
 
-        public static ErrorCode ServerUnKownNonErrorCodeError { get; } = new ErrorCode(ErrorCodeStartIds.API + 33, nameof(ServerUnKownNonErrorCodeError), "");
+        public static ErrorCode ServerUnKownNonErrorCodeError { get; } = new ErrorCode(nameof(ServerUnKownNonErrorCodeError), "");
 
-        public static ErrorCode GlobalExceptionError { get; } = new ErrorCode(ErrorCodeStartIds.API + 34, nameof(GlobalExceptionError), "");
+        public static ErrorCode GlobalExceptionError { get; } = new ErrorCode(nameof(GlobalExceptionError), "");
     }
 
     public static class WebApiExceptions

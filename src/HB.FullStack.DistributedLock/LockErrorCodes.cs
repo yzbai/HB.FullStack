@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-[assembly:InternalsVisibleTo("HB.Infrastructure.Redis.DistributedLock")]
+[assembly: InternalsVisibleTo("HB.Infrastructure.Redis.DistributedLock")]
 namespace HB.FullStack.Lock
 {
     /// <summary>
@@ -10,8 +10,8 @@ namespace HB.FullStack.Lock
     /// </summary>
     internal static class LockErrorCodes
     {
-        public static ErrorCode DistributedLockUnLockFailed { get; set; } = new ErrorCode(ErrorCodeStartIds.LOCK + 0, nameof(DistributedLockUnLockFailed), "");
-        public static ErrorCode MemoryLockError { get; set; } = new ErrorCode(ErrorCodeStartIds.LOCK + 1, nameof(MemoryLockError), "");
+        public static ErrorCode DistributedLockUnLockFailed { get; set; } = new ErrorCode(nameof(DistributedLockUnLockFailed), "");
+        public static ErrorCode MemoryLockError { get; set; } = new ErrorCode(nameof(MemoryLockError), "");
     }
 
     internal static class LockExceptions
@@ -25,7 +25,7 @@ namespace HB.FullStack.Lock
             return exception;
         }
 
-        internal static Exception DistributedLockUnLockFailed(int threadId, IEnumerable<string> resources, Exception? innerException=null)
+        internal static Exception DistributedLockUnLockFailed(int threadId, IEnumerable<string> resources, Exception? innerException = null)
         {
             LockException exception = new LockException(LockErrorCodes.DistributedLockUnLockFailed, innerException);
 

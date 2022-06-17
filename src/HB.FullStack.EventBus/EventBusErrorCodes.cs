@@ -9,9 +9,9 @@ namespace HB.FullStack.EventBus
     /// </summary>
     internal static class EventBusErrorCodes
     {
-        public static ErrorCode NoHandler { get; } = new ErrorCode(ErrorCodeStartIds.EVENT_BUS + 0, nameof(NoHandler), "");
-        public static ErrorCode HandlerAlreadyExisted { get; } = new ErrorCode(ErrorCodeStartIds.EVENT_BUS + 1, nameof(HandlerAlreadyExisted), "");
-        public static ErrorCode SettingsError { get; } = new ErrorCode(ErrorCodeStartIds.EVENT_BUS + 2, nameof(SettingsError), "");
+        public static ErrorCode NoHandler { get; } = new ErrorCode(nameof(NoHandler), "");
+        public static ErrorCode HandlerAlreadyExisted { get; } = new ErrorCode(nameof(HandlerAlreadyExisted), "");
+        public static ErrorCode SettingsError { get; } = new ErrorCode(nameof(SettingsError), "");
     }
 
     internal static class Exceptions
