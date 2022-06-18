@@ -5,10 +5,11 @@ using System.Net.Http;
 using System.Linq;
 using HB.FullStack.Common.ApiClient;
 using System.Net;
+using System.Globalization;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceRegister
+    public static class ApiClientServiceRegister
     {
         public static IServiceCollection AddApiClient(this IServiceCollection services, Action<ApiClientOptions> action)
         {
@@ -45,21 +46,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
             });
 
-            if (options.IgnoreSSLErrorCauseOfDebugging)
+            if (options.ConfigureHttpMessageHandler != null)
             {
-                httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() =>
-                {
-                    HttpClientHandler handler = new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                        {
-                            if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
-                                return true;
-                            return errors == System.Net.Security.SslPolicyErrors.None;
-                        }
-                    };
-                    return handler;
-                });
+                httpClientBuilder.ConfigurePrimaryHttpMessageHandler(options.ConfigureHttpMessageHandler);
             }
 
             //添加各站点的HttpClient
@@ -82,21 +71,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 //    return p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000));
                 //})
 
-                if (options.IgnoreSSLErrorCauseOfDebugging)
+                if (options.ConfigureHttpMessageHandler != null)
                 {
-                    builder.ConfigurePrimaryHttpMessageHandler(() =>
-                    {
-                        HttpClientHandler handler = new HttpClientHandler
-                        {
-                            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                            {
-                                if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
-                                    return true;
-                                return errors == System.Net.Security.SslPolicyErrors.None;
-                            }
-                        };
-                        return handler;
-                    });
+                    builder.ConfigurePrimaryHttpMessageHandler(options.ConfigureHttpMessageHandler);
                 }
             }
 
