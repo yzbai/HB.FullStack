@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.ApiClient
@@ -24,7 +25,7 @@ namespace HB.FullStack.Common.ApiClient
 
         public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(20);
 
-        public bool IgnoreSSLErrorCauseOfDebugging { get; set; }
+        public Func<HttpMessageHandler>? ConfigureHttpMessageHandler { get; set; }
 
         //public AsyncEventHandler<ApiRequest, ApiEventArgs>? OnRequestingAsync { get; set; }
 
@@ -56,6 +57,20 @@ namespace HB.FullStack.Common.ApiClient
             }
 
             return _apiKeysDict.TryGetValue(name!, out key);
+        }
+
+        public static HttpMessageHandler GetPassLocalSSLHttpMessageHandler()
+        {
+            HttpClientHandler handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                {
+                    if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                        return true;
+                    return errors == System.Net.Security.SslPolicyErrors.None;
+                }
+            };
+            return handler;
         }
     }
 
