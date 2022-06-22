@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Api
     public static class HttpMethodNameExtensions
     {
         //NOTICE: Patch not defined in .net standard 2.0
-        private static readonly HttpMethod _patch = new HttpMethod("Patch");
+        //private static readonly HttpMethod _patch = new HttpMethod("Patch");
 
         public static HttpMethod ToHttpMethod(this HttpMethodName httpMethodName)
         {
@@ -26,7 +26,7 @@ namespace HB.FullStack.Common.Api
                 HttpMethodName.Post => HttpMethod.Post,
                 HttpMethodName.Put => HttpMethod.Put,
                 HttpMethodName.Delete => HttpMethod.Delete,
-                HttpMethodName.Patch => _patch,
+                HttpMethodName.Patch => HttpMethod.Patch,
                 _ => throw new System.NotImplementedException(),
             };
         }

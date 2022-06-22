@@ -65,9 +65,9 @@ namespace HB.FullStack.WebApi
             if (EnvironmentUtil.IsDevelopment())
             {
                 loggerConfiguration
-                    .MinimumLevel.Verbose()
-                    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Debug)
-                    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
+                    .MinimumLevel.Verbose();
+                    //.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Debug)
+                    //.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
             }
             else if (EnvironmentUtil.IsStaging())
             {

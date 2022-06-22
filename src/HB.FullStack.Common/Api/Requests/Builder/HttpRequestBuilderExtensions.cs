@@ -14,7 +14,7 @@ namespace HB.FullStack.Common.Api
         {
             HttpMethod httpMethod = builder.HttpMethod.ToHttpMethod();
 
-            if (builder.NeedHttpMethodOverride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
+            if (builder.NeedHttpMethodOverride /*&& (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete)*/)
             {
                 builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
                 httpMethod = HttpMethod.Post;

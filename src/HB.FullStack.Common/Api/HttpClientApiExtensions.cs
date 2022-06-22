@@ -16,6 +16,10 @@ namespace System.Net.Http
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
             using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
 
+            //using HttpClient tmpClient = new HttpClient { BaseAddress=new Uri("https://192.168.0.109:7021/api/") };
+            //using HttpResponseMessage tmpResponse = await tmpClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+
+
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
             await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);

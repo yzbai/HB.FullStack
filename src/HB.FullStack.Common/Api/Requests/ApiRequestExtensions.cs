@@ -16,7 +16,13 @@ namespace HB.FullStack.Common.Api
 
             //具体传递的数据
             //包括Get的参数也放到body中去
+            
+            //TTTTTTTTTTTTTTTTTTTTTTT
             httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
+
+            //httpRequest.Content
+            //httpRequest.Headers.Add("Accept", "application/json");
+            
 
             if (request is IUploadRequest fileUpdateRequest)
             {
