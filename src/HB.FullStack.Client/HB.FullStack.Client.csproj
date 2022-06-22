@@ -15,12 +15,17 @@
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.6" />
 	</ItemGroup>
   <ItemGroup>
-	  <PackageReference Include="HB.FullStack.Database.ClientExtension" Version="2.0.3-alpha1655476165" />
-	  <PackageReference Include="HB.Infrastructure.IdGen" Version="2.0.3-alpha1655476165" />
-	  <PackageReference Include="HB.Infrastructure.SQLite" Version="2.0.3-alpha1655476165" />
+	  <!--<PackageReference Include="HB.FullStack.Database.ClientExtension" Version="2.0.3-alpha1655515401" />
+	  <PackageReference Include="HB.Infrastructure.IdGen" Version="2.0.3-alpha1655515401" />
+	  <PackageReference Include="HB.Infrastructure.SQLite" Version="2.0.3-alpha1655515401" />-->
   </ItemGroup>
   <ItemGroup>
     <Folder Include="UI\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Database.ClientExtension\HB.FullStack.Database.ClientExtension.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
   </ItemGroup>
 
 </Project>

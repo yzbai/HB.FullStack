@@ -14,13 +14,17 @@ namespace HB.FullStack.Common.Api
 
             //step2: 填充Content，具体数据
 
-            //具体传递的数据
-            //包括Get的参数也放到body中去
-            httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
-
             if (request is IUploadRequest fileUpdateRequest)
             {
                 httpRequest.Content = BuildMultipartContent(fileUpdateRequest);
+            }
+            else
+            {
+                //具体传递的数据
+                //包括Get的参数也放到body中去
+
+                //TODO: 是否应该在Get的情况下，不添加Content
+                httpRequest.Content = new StringContent(SerializeUtil.ToJson(request), Encoding.UTF8, "application/json");
             }
 
             return httpRequest;

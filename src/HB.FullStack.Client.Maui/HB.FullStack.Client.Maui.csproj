@@ -63,7 +63,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
-        <PackageReference Include="HB.Infrastructure.Aliyun" Version="2.0.3-alpha1655476165" />
+		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+        <!--<PackageReference Include="HB.Infrastructure.Aliyun" Version="2.0.3-alpha1655515401" />-->
 	</ItemGroup>
 
 	<ItemGroup>

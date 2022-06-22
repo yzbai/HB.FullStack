@@ -5,7 +5,7 @@ namespace HB.FullStack.Common.Api
 {
     public static class HttpRequestBuilderExtensions
     {
-        private static readonly Version _version20 = new Version(2, 0);
+        //private static readonly Version _version20 = new Version(2, 0);
 
         /// <summary>
         /// 构建HTTP的基本信息
@@ -14,7 +14,7 @@ namespace HB.FullStack.Common.Api
         {
             HttpMethod httpMethod = builder.HttpMethod.ToHttpMethod();
 
-            if (builder.NeedHttpMethodOverride && (httpMethod == HttpMethod.Put || httpMethod == HttpMethod.Delete))
+            if (builder.NeedHttpMethodOverride && (httpMethod != HttpMethod.Get || httpMethod != HttpMethod.Post))
             {
                 builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
                 httpMethod = HttpMethod.Post;
@@ -22,7 +22,8 @@ namespace HB.FullStack.Common.Api
 
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GetUrl())
             {
-                Version = _version20
+                //TODO: 看需要不需要使用http2.0
+                //Version = _version20
             };
 
             foreach (var kv in builder.Headers)
