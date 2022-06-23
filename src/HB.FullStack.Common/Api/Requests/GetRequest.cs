@@ -21,7 +21,7 @@ namespace HB.FullStack.Common.Api.Requests
         /// <summary>
         ///指定的AuthType可以覆盖ApiResourceDef中定义的
         /// </summary>
-        public GetRequest(string? condition, ApiAuthType? authType = null) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, true, condition))
+        public GetRequest(string? condition, ApiAuthType? authType = null) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, condition))
         {
             if(authType != null)
             {

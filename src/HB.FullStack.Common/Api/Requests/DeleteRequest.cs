@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.Api
         {
             Resources.AddRange(ress);
         }
-        public DeleteRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, true, null)) { }
+        public DeleteRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, null)) { }
 
         public DeleteRequest(T res) : this(new T[] { res }) { }
 

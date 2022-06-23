@@ -91,11 +91,16 @@ namespace HB.FullStack.Common.ApiClient
             try
             {
                 //NOTICE: 这里没有必要用using. https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0#httpclient-and-lifetime-management-1
-                HttpClient httpClient = GetHttpClient(request);
+
+                EndpointSettings? endpointSettings = GetEndpointSettings(request);
+
+                HttpClient httpClient = GetHttpClient(endpointSettings);
+
+                HttpMethodOverrideMode httpMethodOverrideMode = endpointSettings?.HttpMethodOverrideMode ?? HttpMethodOverrideMode.None;
 
                 await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.RequestBuilder!.HttpMethod)).ConfigureAwait(false);
 
-                Stream stream = await httpClient.GetStreamAsync(request, cancellationToken).ConfigureAwait(false);
+                Stream stream = await httpClient.GetStreamAsync(request, httpMethodOverrideMode, cancellationToken).ConfigureAwait(false);
 
                 await OnResponsedAsync(stream, new ApiEventArgs(request.RequestId, request.RequestBuilder!.HttpMethod)).ConfigureAwait(false);
 
@@ -105,7 +110,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (request.RequestBuilder!.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, GetEndpoint(request), _tokenProvider).ConfigureAwait(false);
+                    bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, GetEndpointSettings(request), _tokenProvider).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -134,11 +139,15 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                HttpClient httpClient = GetHttpClient(request);
+                EndpointSettings? endpointSettings = GetEndpointSettings(request);
+
+                HttpClient httpClient = GetHttpClient(endpointSettings);
+
+                HttpMethodOverrideMode httpMethodOverrideMode = endpointSettings?.HttpMethodOverrideMode ?? HttpMethodOverrideMode.None;
 
                 await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.RequestBuilder!.HttpMethod)).ConfigureAwait(false);
 
-                TResponse? rt = await httpClient.GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+                TResponse? rt = await httpClient.GetAsync<TResponse>(request, httpMethodOverrideMode, cancellationToken).ConfigureAwait(false);
 
                 await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.RequestBuilder!.HttpMethod)).ConfigureAwait(false);
 
@@ -148,7 +157,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (request.RequestBuilder!.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, GetEndpoint(request), _tokenProvider).ConfigureAwait(false);
+                    bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, GetEndpointSettings(request), _tokenProvider).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -206,11 +215,9 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private HttpClient GetHttpClient(ApiRequest request)
+        private HttpClient GetHttpClient(EndpointSettings? endpointSettings)
         {
-            EndpointSettings? endpoint = GetEndpoint(request);
-
-            string httpClientName = endpoint == null ? ApiClientOptions.NO_BASEURL_HTTPCLIENT_NAME : endpoint.HttpClientName;
+            string httpClientName = endpointSettings == null ? ApiClientOptions.NO_BASEURL_HTTPCLIENT_NAME : endpointSettings.HttpClientName;
 
             HttpClient httpClient = _httpClientFactory.CreateClient(httpClientName);
 
@@ -218,10 +225,11 @@ namespace HB.FullStack.Common.ApiClient
 
             return httpClient;
         }
-        private EndpointSettings? GetEndpoint(ApiRequest request)
+        private EndpointSettings? GetEndpointSettings(ApiRequest request)
         {
             if (request.RequestBuilder is RestfulHttpRequestBuilder defaultBuildInfo)
             {
+                //TODO: 用字典提高效率
                 return _options.Endpoints.FirstOrDefault(e =>
                     e.Name == defaultBuildInfo.EndpointName
                         &&

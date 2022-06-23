@@ -21,7 +21,7 @@ namespace HB.FullStack.Common.Api
             Resources.AddRange(ress);
         }
 
-        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, true, null)) { }
+        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, null)) { }
 
         public AddRequest(T res) : this(new T[] { res }) { }
 

@@ -10,22 +10,36 @@ namespace HB.FullStack.Common.Api
         /// <summary>
         /// 构建HTTP的基本信息
         /// </summary>
-        public static HttpRequestMessage Build(this HttpRequestBuilder builder)
+        public static HttpRequestMessage Build(this HttpRequestBuilder builder, HttpMethodOverrideMode httpMethodOverrideMode)
         {
+            //1. Mthod
             HttpMethod httpMethod = builder.HttpMethod.ToHttpMethod();
 
-            if (builder.NeedHttpMethodOverride && (httpMethod != HttpMethod.Get || httpMethod != HttpMethod.Post))
+            switch (httpMethodOverrideMode)
             {
-                builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
-                httpMethod = HttpMethod.Post;
+                case HttpMethodOverrideMode.None:
+                    break;
+                case HttpMethodOverrideMode.Normal:
+                    if (httpMethod != HttpMethod.Get && httpMethod != HttpMethod.Post)
+                    {
+                        builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
+                        httpMethod = HttpMethod.Post;
+                    }
+                    break;
+                case HttpMethodOverrideMode.All:
+                    builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
+                    httpMethod = HttpMethod.Post;
+                    break;
             }
 
+            //2. url
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GetUrl())
             {
                 //TODO: 看需要不需要使用http2.0
                 //Version = _version20
             };
 
+            //3. headers
             foreach (var kv in builder.Headers)
             {
                 httpRequest.Headers.Add(kv.Key, kv.Value);

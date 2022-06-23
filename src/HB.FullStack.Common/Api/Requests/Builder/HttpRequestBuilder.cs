@@ -15,18 +15,15 @@ namespace HB.FullStack.Common.Api
     {
         public HttpMethodName HttpMethod { get; protected set; }
 
-        public bool NeedHttpMethodOverride { get; protected set; }
-
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
         public ApiAuthType AuthType { get; internal set; }
 
         public string? ApiKeyName { get; set; }
 
-        protected HttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, ApiAuthType apiAuthType, string? apiKeyName = null)
+        protected HttpRequestBuilder(HttpMethodName httpMethod, ApiAuthType apiAuthType, string? apiKeyName = null)
         {
             HttpMethod = httpMethod;
-            NeedHttpMethodOverride = needHttpMethodOveride;
             AuthType = apiAuthType;
             ApiKeyName = apiKeyName;
         }
@@ -70,7 +67,6 @@ namespace HB.FullStack.Common.Api
         {
             HashCode hashCode = new HashCode();
 
-            hashCode.Add(NeedHttpMethodOverride);
             hashCode.Add(AuthType);
             hashCode.Add(ApiKeyName);
             hashCode.Add(HttpMethod);
