@@ -10,15 +10,11 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
-        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
+        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, HttpMethodOverrideMode httpMethodOverrideMode, CancellationToken cancellationToken) where TResponse : class
         {
             //HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
-            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
-
-            //using HttpClient tmpClient = new HttpClient { BaseAddress=new Uri("https://192.168.0.109:7021/api/") };
-            //using HttpResponseMessage tmpResponse = await tmpClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-
+            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage(httpMethodOverrideMode);
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
@@ -47,9 +43,9 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken = default)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, HttpMethodOverrideMode httpMethodOverrideMode, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage();
+            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage(httpMethodOverrideMode);
 
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);

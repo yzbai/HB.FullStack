@@ -17,12 +17,12 @@ namespace HB.Infrastructure.Tencent.TCaptha
     /// <summary>
     /// 验证Http Header中的Captha
     /// </summary>
-    public class CheckTCapthcaFilter : IAsyncActionFilter
+    public class TCapthcaCheckFilter : IAsyncActionFilter
     {
-        private readonly ILogger<CheckTCapthcaFilter> _logger;
+        private readonly ILogger<TCapthcaCheckFilter> _logger;
         private readonly ITCapthaClient _tCapthaClient;
 
-        public CheckTCapthcaFilter(ILogger<CheckTCapthcaFilter> logger, ITCapthaClient tCapthaClient)
+        public TCapthcaCheckFilter(ILogger<TCapthcaCheckFilter> logger, ITCapthaClient tCapthaClient)
         {
             _logger = logger;
             _tCapthaClient = tCapthaClient;

@@ -213,6 +213,21 @@ namespace System
             return string.IsNullOrEmpty(str);
         }
 
+        /// <summary>
+        /// 是否是一个Json字符串
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsJsonString(this string? str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return false;
+            }
+
+            return str.StartsWith('{') && str.EndsWith('}');
+        }
+
         public static bool IsNotNullOrEmpty([ValidatedNotNull][NotNullWhen(true)] this string? str)
         {
             return !string.IsNullOrEmpty(str);

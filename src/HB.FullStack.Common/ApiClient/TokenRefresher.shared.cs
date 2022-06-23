@@ -163,7 +163,6 @@ namespace HB.FullStack.Common.ApiClient
                 string refreshToken)
                 : base(new RestfulHttpRequestBuilder(
                     httpMethod: HttpMethodName.Get,
-                    needHttpMethodOveride: true,
                     apiAuthType: ApiAuthType.None,
                     endPointName: endPointName,
                     apiVersion: apiVersion,

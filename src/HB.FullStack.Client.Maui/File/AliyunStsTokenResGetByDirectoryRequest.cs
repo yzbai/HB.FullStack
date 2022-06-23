@@ -18,7 +18,7 @@ namespace HB.FullStack.Client.Maui.File
         /// </summary>
         public AliyunStsTokenResGetByDirectoryRequest() { }
 
-        public AliyunStsTokenResGetByDirectoryRequest(string directory, string requestUrl) : base(new PlainUrlHttpRequestBuilder(HttpMethodName.Get, true, ApiAuthType.Jwt, requestUrl))
+        public AliyunStsTokenResGetByDirectoryRequest(string directory, string requestUrl) : base(new PlainUrlHttpRequestBuilder(HttpMethodName.Get, ApiAuthType.Jwt, requestUrl))
         {
             Directory = directory;
         }

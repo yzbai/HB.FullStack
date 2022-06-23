@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Maui.Views;
 
 using HB.FullStack.Client;
+using HB.FullStack.Client.Maui;
 using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.TCaptcha;
 using HB.FullStack.Client.Navigation;
@@ -28,15 +29,22 @@ namespace HB.FullStack.Common.ApiClient
             {
                 TCaptchaPopup popup = new TCaptchaPopup();
 
-                var captcha = await popup.ShowAsync();
+                var rt = await popup.ShowAsync();
 
-                request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, captcha!.ToString()!);
+                string? captcha = rt?.ToString();
+
+                if (captcha.IsNullOrEmpty())
+                {
+                    throw Exceptions.TCaptchaErrorReturn(captcha, request);
+                }
+
+                request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, captcha);
 
 
                 //TODO: Windows下 。这里会抛出很神奇的异常：Exception thrown: 'System.ApiException' in System.Private.CoreLib.dll
                 return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
             }
-            
+
         }
     }
 }

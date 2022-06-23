@@ -11,18 +11,16 @@ namespace HB.FullStack.Common.Api
 
         public PlainUrlHttpRequestBuilder(
             HttpMethodName httpMethod,
-            bool needHttpMethodOveride,
             ApiAuthType apiAuthType,
-            string plainUrl) : base(httpMethod, needHttpMethodOveride, apiAuthType)
+            string plainUrl) : base(httpMethod, apiAuthType)
         {
             PlainUrl = plainUrl;
         }
 
         public PlainUrlHttpRequestBuilder(
             HttpMethodName httpMethod,
-            bool needHttpMethodOveride,
             string apiKeyName,
-            string plainUrl) : base(httpMethod, needHttpMethodOveride, ApiAuthType.ApiKey, apiKeyName)
+            string plainUrl) : base(httpMethod, ApiAuthType.ApiKey, apiKeyName)
         {
             PlainUrl = plainUrl;
         }

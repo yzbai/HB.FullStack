@@ -1,4 +1,6 @@
 ﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Api;
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
@@ -25,7 +27,7 @@ namespace HB.FullStack.Common.ApiClient
         [Required]
         public Uri? Url { get; set; }
 
-        public bool NeedHttpMethodOveride { get; set; } = true;
+        public HttpMethodOverrideMode HttpMethodOverrideMode { get; set; }
 
         public JwtEndpointSetting JwtEndpoint { get; set; } = new JwtEndpointSetting();
 

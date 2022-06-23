@@ -48,7 +48,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<ITCapthaClient, TCapthaClient>();
 
-            services.AddScoped<CheckTCapthcaFilter>();
+            services.AddScoped<TCapthcaCheckFilter>();
         }
 
     }
