@@ -14,7 +14,7 @@ using Xamarin.Android.Net;
 
 namespace HB.FullStack.Client.Maui.Platforms
 {
-    public class DebugOnlyHttpMessageHandler : HttpClientHandler //AndroidMessageHandler
+    public class DebugOnlyHttpMessageHandler : AndroidMessageHandler//HttpClientHandler 
     {
         private string _bypassHost;
         public DebugOnlyHttpMessageHandler(string bypassHost)
@@ -27,6 +27,10 @@ namespace HB.FullStack.Client.Maui.Platforms
                 {
                     return true;
                 }
+                else if (cert!.Issuer.Equals($"CN=localhost", GlobalSettings.Comparison))
+                {
+                    return true;
+                }
                 else if (cert.Issuer.Contains("DO_NOT_TRUST_FiddlerRoot", GlobalSettings.Comparison))
                 {
                     return true;
@@ -36,11 +40,11 @@ namespace HB.FullStack.Client.Maui.Platforms
             };
         }
 
-        //protected override IHostnameVerifier? GetSSLHostnameVerifier(HttpsURLConnection connection)
-        //{
-        //    return new AndroidDebugOnlyHostnameVerifier(_bypassHost);
-        //    //return base.GetSSLHostnameVerifier(connection);
-        //}
+        protected override IHostnameVerifier? GetSSLHostnameVerifier(HttpsURLConnection connection)
+        {
+            return new AndroidDebugOnlyHostnameVerifier(_bypassHost);
+            //return base.GetSSLHostnameVerifier(connection);
+        }
     }
 
     public class AndroidDebugOnlyHostnameVerifier : Java.Lang.Object, Javax.Net.Ssl.IHostnameVerifier
@@ -55,6 +59,10 @@ namespace HB.FullStack.Client.Maui.Platforms
         public bool Verify(string? hostname, ISSLSession? session)
         {
             if (hostname == _bypassHost)// && session?.PeerPrincipal?.Name == $"CN={_bypassHost}")
+            {
+                return true;
+            }
+            else if (hostname == "localhost")
             {
                 return true;
             }

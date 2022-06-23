@@ -20,6 +20,10 @@ namespace HB.FullStack.Client.Maui.Platforms
                 {
                     return true;
                 }
+                else if (cert!.Issuer.Equals($"CN=localhost", GlobalSettings.Comparison))
+                {
+                    return true;
+                }
                 else if (cert.Issuer.Contains("DO_NOT_TRUST_FiddlerRoot", GlobalSettings.Comparison))
                 {
                     return true;

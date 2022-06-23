@@ -11,6 +11,7 @@ namespace HB.FullStack.Client.Maui.TCaptcha
     {
         public static string AppId { get; internal set; } = null!;
 
+        //TODO: 添加容灾处理。https://cloud.tencent.com/document/product/1110/72310
         private const string HTML = @"
                 <html>
                 <head>
@@ -35,11 +36,24 @@ namespace HB.FullStack.Client.Maui.TCaptcha
         {
             CanBeDismissedByTappingOutsideOfPopup = false;
 
-            Content = new HybridWebView { Source=new HtmlWebViewSource { Html = HTML} }.Fill().Assign(out _webView);
+            Content = new HybridWebView { Source = new HtmlWebViewSource { Html = HTML } }.Fill().Assign(out _webView);
 
             _webView.Source = new HtmlWebViewSource { Html = HTML };
             _webView.PageFinished += async (sender, e) => await _webView.EvaluateJavaScriptAsync($"showCaptcha(\"{AppId}\")");
-            _webView.OnJavascriptCallCommand = new Command(json => { Close(json?.ToString()); });
+            _webView.OnJavascriptCallCommand = new Command(json =>
+            {
+                string? rt = json?.ToString()?.Trim();
+
+                if (rt.IsJsonString())
+                {
+                    Close(rt);
+                }
+                else
+                {
+                    //没有返回
+                    Close("");
+                }
+            });
 
             Size = Currents.PopupSizeConstants.Medium;
         }

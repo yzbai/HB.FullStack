@@ -16,7 +16,7 @@ namespace HB.Infrastructure.Aliyun
             return Policy
                 .Handle<ClientException>()
                 .WaitAndRetry(
-                    new[] { TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16) },
+                    new[] { TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2) },
                     (exception, timeSpan, retryCount, context) =>
                     {
                         ClientException cex = (ClientException)exception;
