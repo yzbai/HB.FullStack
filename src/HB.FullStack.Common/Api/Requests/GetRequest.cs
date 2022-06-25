@@ -16,7 +16,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetRequest() { }
 
-        public GetRequest(HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
+        public GetRequest(HttpRequestMessageBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
 
         /// <summary>
         ///指定的AuthType可以覆盖ApiResourceDef中定义的

@@ -32,6 +32,9 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string? Parent1ResName { get; set; }
 
+        public string? Parent2ResName { get; set; }
+
+
         private string? _apiKeyName;
 
         public string? ApiKeyName

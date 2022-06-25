@@ -16,7 +16,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public DeleteRequest() { }
 
-        public DeleteRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
+        public DeleteRequest(IEnumerable<T> ress, HttpRequestMessageBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {
             Resources.AddRange(ress);
         }

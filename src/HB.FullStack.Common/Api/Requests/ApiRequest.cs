@@ -12,9 +12,11 @@ namespace HB.FullStack.Common.Api
     {
         /// <summary>
         /// NOTICE: JsonIgnore避免Server端收到。RequestBuilder只对构建Request有用。
+        /// 一个Request包含两部分：1，业务内容（各种业务数据信息）；2，http构建信息
+        /// http构建信息放到RequestBuilder，不被服务端接收
         /// </summary>
         [JsonIgnore]
-        public HttpRequestBuilder? RequestBuilder { get; }
+        public HttpRequestMessageBuilder? RequestBuilder { get; }
 
         /// <summary>
         /// TODO: 防止同一个RequestID两次被处理
@@ -24,7 +26,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         protected ApiRequest() { }
 
-        protected ApiRequest(HttpRequestBuilder requestBuilder)
+        protected ApiRequest(HttpRequestMessageBuilder requestBuilder)
         {
             RequestBuilder = requestBuilder;
         }

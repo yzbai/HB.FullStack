@@ -5,7 +5,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// 强调Url的组件方式是简单的传入。
     /// </summary>
-    public class PlainUrlHttpRequestBuilder : HttpRequestBuilder
+    public class PlainUrlHttpRequestBuilder : HttpRequestMessageBuilder
     {
         public string PlainUrl { get; }
 

@@ -33,7 +33,7 @@ namespace HB.FullStack.Client.Maui.File
 
         //public string PublicUploadDirectory { get; set; } = "public_upload";
         //public string CustomerAvatarDirectory { get; set; } = "customer/avatar";
-        //public string UserTempDirectory { get; set; } = "customer/temp";
+        //public string CurrentUserTempDirectory { get; set; } = "customer/temp";
         //public string CustomerVipDirectory { get; set; } = "customer_vip";
         //public string ThemeDirectory { get; set; } = "theme";
         #endregion

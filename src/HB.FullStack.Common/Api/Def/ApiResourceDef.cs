@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace HB.FullStack.Common.Api
@@ -27,7 +28,13 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string ResName { get; internal set; } = null!;
 
-        public string? Parent1ResName { get;internal set; }
+        public string? Parent1ResName { get; internal set; }
+
+        public string? Parent2ResName { get; internal set; }
+
+        public MethodInfo? Parent1ResIdGetMethod { get; internal set; }
+
+        public MethodInfo? Parent2ResIdGetMethod { get; internal set; }
 
 
         private string? _apiKeyName;

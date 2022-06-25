@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// 强调Url的组建方式Restful Api方式
     /// </summary>
-    public class RestfulHttpRequestBuilder : HttpRequestBuilder
+    public class RestfulHttpRequestBuilder : HttpRequestMessageBuilder
     {
         public string? EndpointName { get; set; }
 
@@ -20,64 +20,17 @@ namespace HB.FullStack.Common.Api
 
         public Guid? ResId { get; set; }
 
-        private IList<ResParent> Parents { get; } = new List<ResParent>();
+        public string? Parent1ResName { get; set; }
 
-        public string? Parent1ResName
-        {
-            get
-            {
-                if (Parents.Any())
-                {
-                    return Parents[0].ResName;
-                }
-                return null;
-            }
-            set
-            {
-                if (value.IsNullOrEmpty())
-                {
-                    return;
-                }
+        public string? Parent1ResId { get; set; }
 
-                if (Parents.Any())
-                {
-                    Parents[0].ResName = value;
-                }
-                else
-                {
-                    AddParent(value, null);
-                }
-            }
-        }
+        public string? Parent2ResName { get; set; }
 
-        public string? Parent1ResId
-        {
-            get
-            {
-                if (Parents.Any())
-                {
-                    return Parents[0].ResId;
-                }
-
-                return null;
-            }
-            set
-            {
-                if (Parents.Any())
-                {
-                    Parents[0].ResId = value;
-                }
-            }
-        }
-
-        public void AddParent(string parentResName, string? parentResId)
-        {
-            Parents.Add(new ResParent { ResName = parentResName, ResId = parentResId });
-        }
+        public string? Parent2ResId { get; set; }
 
         protected sealed override string GetUrlCore()
         {
-            string? parentSegment = GetParentSegment(Parents);
+            string? parentSegment = GetParentSegment();
 
             if (parentSegment == null && ResId == null)
             {
@@ -96,7 +49,7 @@ namespace HB.FullStack.Common.Api
                 return $"{ApiVersion}/{parentSegment}/{ResName}/{ResId}/{Condition}";
             }
 
-            static string? GetParentSegment(IList<ResParent> lst)
+            string? GetParentSegment()
             {
                 if (lst.IsNullOrEmpty())
                 {
@@ -109,8 +62,12 @@ namespace HB.FullStack.Common.Api
                 {
                     stringBuilder.Append(parent.ResName);
                     stringBuilder.Append('/');
-                    stringBuilder.Append(parent.ResId);
-                    stringBuilder.Append('/');
+
+                    if (parent.ResId.IsNotNullOrEmpty())
+                    {
+                        stringBuilder.Append(parent.ResId);
+                        stringBuilder.Append('/');
+                    }
                 }
 
                 return stringBuilder.RemoveLast().ToString();
@@ -127,12 +84,10 @@ namespace HB.FullStack.Common.Api
             hashCode.Add(Condition);
             hashCode.Add(ResName);
             hashCode.Add(ResId);
-
-            foreach (ResParent parent in Parents)
-            {
-                hashCode.Add(parent.ResId);
-                hashCode.Add(parent.ResName);
-            }
+            hashCode.Add(Parent1ResName);
+            hashCode.Add(Parent2ResName);
+            hashCode.Add(Parent1ResId);
+            hashCode.Add(Parent2ResId);
 
             return hashCode.ToHashCode();
         }
@@ -164,12 +119,6 @@ namespace HB.FullStack.Common.Api
             ResName = resName;
             Condition = condition;
         }
-
-        class ResParent
-        {
-            public string ResName { get; set; } = null!;
-            public string? ResId { get; set; }
-        }
     }
 
     public class RestfulHttpRequestBuilder<T> : RestfulHttpRequestBuilder where T : ApiResource2
@@ -191,6 +140,7 @@ namespace HB.FullStack.Common.Api
             ApiKeyName = def.ApiKeyName;
 
             Parent1ResName = def.Parent1ResName;
+            Parent2ResName = def.Parent2ResName;
         }
     }
 }

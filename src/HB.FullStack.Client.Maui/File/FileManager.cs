@@ -73,7 +73,8 @@ namespace HB.FullStack.Client.Maui.File
         }
 
         public static string PathRoot { get; } = FileSystem.AppDataDirectory;
-        public string UserTempDirectory
+        
+        public string CurrentUserTempDirectory
         {
             get
             {
@@ -87,7 +88,7 @@ namespace HB.FullStack.Client.Maui.File
                 else
                 {
                     placeHolder = "{User}";
-                    directoryPath = "UserDatas/{User}/Temp";
+                    directoryPath = "UserDatas" + Path.DirectorySeparatorChar + placeHolder + Path.DirectorySeparatorChar + "Temp";
                 }
 
                 return directoryPath.Replace(placeHolder, _preferenceProvider.UserId.ToString(), StringComparison.InvariantCulture);
@@ -103,7 +104,7 @@ namespace HB.FullStack.Client.Maui.File
         public string GetNewTempFullPath(string fileExtension)
         {
             string tempFileName = GetRandomFileName(fileExtension);
-            return GetLocalFullPath(UserTempDirectory, tempFileName);
+            return GetLocalFullPath(CurrentUserTempDirectory, tempFileName);
         }
 
         ///<summary>
@@ -290,6 +291,7 @@ namespace HB.FullStack.Client.Maui.File
 
         private static string GetRandomFileName(string fileExtension)
         {
+            //TODO:名字太长，缩短
             return $"r{SecurityUtil.CreateUniqueToken()}{fileExtension}";
         }
 

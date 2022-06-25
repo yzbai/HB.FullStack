@@ -16,7 +16,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddRequest() { }
 
-        public AddRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
+        public AddRequest(IEnumerable<T> ress, HttpRequestMessageBuilder httpRequestBuilder) : base(httpRequestBuilder)
         {
             Resources.AddRange(ress);
         }

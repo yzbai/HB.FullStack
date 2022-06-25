@@ -9,9 +9,10 @@ using System.Text;
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
+    /// 一个Request包含两部分：1，业务内容；2，http构建信息
     /// 除内容外构建Request需要的信息
     /// </summary>
-    public abstract class HttpRequestBuilder
+    public abstract class HttpRequestMessageBuilder
     {
         public HttpMethodName HttpMethod { get; protected set; }
 
@@ -21,7 +22,7 @@ namespace HB.FullStack.Common.Api
 
         public string? ApiKeyName { get; set; }
 
-        protected HttpRequestBuilder(HttpMethodName httpMethod, ApiAuthType apiAuthType, string? apiKeyName = null)
+        protected HttpRequestMessageBuilder(HttpMethodName httpMethod, ApiAuthType apiAuthType, string? apiKeyName = null)
         {
             HttpMethod = httpMethod;
             AuthType = apiAuthType;

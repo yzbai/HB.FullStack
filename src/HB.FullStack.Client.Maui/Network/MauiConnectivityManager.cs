@@ -15,6 +15,7 @@ namespace HB.FullStack.Client.Maui.Network
         public MauiConnectivityManager()
         {
             Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+            SetStatus(Connectivity.Current.NetworkAccess);
         }
 
         private void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
@@ -48,7 +49,10 @@ namespace HB.FullStack.Client.Maui.Network
             {
                 Status = NeedSyncAfterReconnected ? ConnectivityStatus.ConnectedSyncing : ConnectivityStatus.ConnectedReady;
             }
-            Status = ConnectivityStatus.Disconnected;
+            else
+            {
+                Status = ConnectivityStatus.Disconnected;
+            }
         }
     }
 }
