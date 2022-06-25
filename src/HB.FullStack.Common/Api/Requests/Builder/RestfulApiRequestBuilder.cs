@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// 强调Url的组建方式Restful Api方式
     /// </summary>
-    public class RestHttpRequestMessageBuilder : HttpRequestMessageBuilder
+    public class RestfulApiRequestBuilder : ApiRequestBuilder
     {
         public string? EndpointName { get; set; }
 
@@ -101,29 +101,13 @@ namespace HB.FullStack.Common.Api
             return hashCode.ToHashCode();
         }
 
-        public RestHttpRequestMessageBuilder(
+        public RestfulApiRequestBuilder(
             HttpMethodName httpMethod,
-            HttpMethodOverrideMode httpMethodOverrideMode,
-            ApiAuthType apiAuthType,
+            ApiRequestAuth auth,
             string? endPointName,
             string? apiVersion,
             string? resName,
-            string? condition) : base(httpMethod, httpMethodOverrideMode, apiAuthType)
-        {
-            EndpointName = endPointName;
-            ApiVersion = apiVersion;
-            ResName = resName;
-            Condition = condition;
-        }
-
-        public RestHttpRequestMessageBuilder(
-            HttpMethodName httpMethod,
-            HttpMethodOverrideMode httpsMethodOverrideMode,
-            string apiKeyName,
-            string? endPointName,
-            string? apiVersion,
-            string? resName,
-            string? condition) : base(httpMethod, httpsMethodOverrideMode, ApiAuthType.ApiKey, apiKeyName)
+            string? condition) : base(httpMethod, auth)
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
@@ -136,10 +120,10 @@ namespace HB.FullStack.Common.Api
     /// 从Res和ApiRequest中收集构建HttpRequestMessage的信息
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RestfulHttpRequestBuilder<T> : RestHttpRequestMessageBuilder where T : ApiResource2
+    public class RestfulApiRequestBuilder<T> : RestfulApiRequestBuilder where T : ApiResource2
     {
-        public RestfulHttpRequestBuilder(ApiRequest apiRequest, HttpMethodOverrideMode httpMethodOverrideMode)
-            : base(apiRequest.HttpMethodName, httpMethodOverrideMode, ApiAuthType.None, null, null, null, apiRequest.Condition)
+        public RestfulApiRequestBuilder(ApiRequest apiRequest)
+            : base(apiRequest.HttpMethodName, apiRequest.Auth, null, null, null, apiRequest.Condition)
         {
             ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
 
@@ -148,11 +132,11 @@ namespace HB.FullStack.Common.Api
                 throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
             }
 
+
+            //From Res Def
             EndpointName = def.EndpointName;
             ApiVersion = def.Version;
-            AuthType = def.AuthType;
             ResName = def.ResName;
-            ApiKeyName = def.ApiKeyName;
 
             Parent1ResName = def.Parent1ResName;
             Parent2ResName = def.Parent2ResName;

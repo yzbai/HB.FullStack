@@ -11,7 +11,7 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
-        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, HttpRequestMessageBuilder httpRequestMessageBuilder, CancellationToken cancellationToken) where TResponse : class
+        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, ApiRequestBuilder httpRequestMessageBuilder, CancellationToken cancellationToken) where TResponse : class
         {
             //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
@@ -44,7 +44,7 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, HttpRequestMessageBuilder httpRequestMessageBuilder, CancellationToken cancellationToken = default)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, ApiRequestBuilder httpRequestMessageBuilder, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage requestMessage = httpRequestMessageBuilder.Build(request);
 

@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.ApiClient
 {
@@ -151,24 +145,21 @@ namespace HB.FullStack.Common.ApiClient
 
         private class RefreshUserTokenRequest : ApiRequest
         {
+            private readonly string? _endPointName;
+            private readonly string? _apiVersion;
+            private readonly string? _resName;
+
             public string AccessToken { get; set; } = null!;
 
             public string RefreshToken { get; set; } = null!;
 
-            public RefreshUserTokenRequest(
-                string? endPointName,
-                string? apiVersion,
-                string? resName,
-                string accessToken,
-                string refreshToken)
-                : base(new RestHttpRequestMessageBuilder(
-                    httpMethod: HttpMethodName.Get,
-                    apiAuthType: ApiAuthType.None,
-                    endPointName: endPointName,
-                    apiVersion: apiVersion,
-                    resName: resName,
-                    condition: "ByRefresh"))
+            public RefreshUserTokenRequest(string? endPointName, string? apiVersion, string? resName, string accessToken, string refreshToken)
+                : base(HttpMethodName.Get, new ApiRequestAuth { AuthType = ApiAuthType.None }, "ByRefresh")
             {
+                _endPointName = endPointName;
+                _apiVersion = apiVersion;
+                _resName = resName;
+
                 AccessToken = accessToken;
                 RefreshToken = refreshToken;
             }
@@ -176,6 +167,17 @@ namespace HB.FullStack.Common.ApiClient
             public override int GetHashCode()
             {
                 return HashCode.Combine(base.GetHashCode(), AccessToken, RefreshToken);
+            }
+
+            protected override ApiRequestBuilder CreateBuilder()
+            {
+                return new RestfulApiRequestBuilder(
+                    httpMethod: HttpMethodName,
+                    auth: Auth,
+                    endPointName: _endPointName,
+                    apiVersion: _apiVersion,
+                    resName: _resName,
+                    condition: Condition);
             }
         }
     }

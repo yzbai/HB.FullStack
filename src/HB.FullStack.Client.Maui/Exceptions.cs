@@ -56,7 +56,7 @@ namespace HB.FullStack.Client.Maui
         {
             MauiException ex = new MauiException(ErrorCodes.TCaptchaErrorReturn);
             ex.Data["Captcha"] = captcha;
-            ex.Data["RequestUrl"] = request.RequestBuilder?.GetUrl();
+            ex.Data["RequestUrl"] = request.GetBuilder().GetUrl();
 
             return ex;
         }

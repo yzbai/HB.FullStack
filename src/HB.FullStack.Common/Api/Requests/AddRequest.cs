@@ -16,12 +16,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddRequest() { }
 
-        public AddRequest(IEnumerable<T> ress, string? condition) : base(HttpMethodName.Post, condition)
+        public AddRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(HttpMethodName.Post, auth, condition)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(T res, string? condition) : this(new T[] { res }, condition) { }
+        public AddRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res }, auth, condition) { }
 
         public override int GetHashCode()
         {
@@ -35,6 +35,11 @@ namespace HB.FullStack.Common.Api
             }
 
             return hash.ToHashCode();
+        }
+
+        protected sealed override ApiRequestBuilder CreateBuilder()
+        {
+            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

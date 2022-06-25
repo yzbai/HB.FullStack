@@ -7,6 +7,8 @@ namespace HB.FullStack.Client.Maui.File
 {
     public class AliyunStsTokenResGetByDirectoryRequest : ApiRequest
     {
+        private readonly string _requestUrl = null!;
+
         /// <summary>
         /// 需求Directory的权限,结尾不带slash
         /// </summary>
@@ -18,14 +20,20 @@ namespace HB.FullStack.Client.Maui.File
         /// </summary>
         public AliyunStsTokenResGetByDirectoryRequest() { }
 
-        public AliyunStsTokenResGetByDirectoryRequest(string directory, string requestUrl) : base(new PlainHttpRequestMessageBuilder(HttpMethodName.Get, ApiAuthType.Jwt, requestUrl))
+        public AliyunStsTokenResGetByDirectoryRequest(string directory, string requestUrl) : base(HttpMethodName.Get, ApiRequestAuth.JWT, null)
         {
             Directory = directory;
+            _requestUrl = requestUrl;
         }
 
         public override int GetHashCode()
         {
             return HashCode.Combine(base.GetHashCode(), Directory);
+        }
+
+        protected override ApiRequestBuilder CreateBuilder()
+        {
+            return new PlainUrlApiRequestBuilder(HttpMethodName, Auth, _requestUrl);
         }
     }
 }

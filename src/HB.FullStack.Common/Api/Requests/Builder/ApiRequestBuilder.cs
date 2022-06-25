@@ -8,27 +8,28 @@ using System.Text;
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
-    /// 一个Request包含两部分：1，业务内容；2，http构建信息
-    /// 除内容外构建Request需要的信息
+    /// 构建一个完整的HttpRequest,需要的信息来自三方面：
+    /// 1. Resource定义，即ApiResourceDef
+    /// 2. ApiResource，即业务数据和参数
+    /// 3. Endpoint Setting，即Server与Client的服务设定
     /// </summary>
-    public abstract class HttpRequestMessageBuilder
+    public abstract class ApiRequestBuilder
     {
         public HttpMethodName HttpMethodName { get; protected set; }
-
-        public HttpMethodOverrideMode HttpMethodOverrideMode { get; protected set; }
+        
+        public ApiRequestAuth Auth { get; protected set; }
+        
+        /// <summary>
+        /// 从 endpoint setting中来
+        /// </summary>
+        public HttpMethodOverrideMode HttpMethodOverrideMode { get; set; }
 
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
-        public ApiAuthType AuthType { get; internal set; }
-
-        public string? ApiKeyName { get; set; }
-
-        protected HttpRequestMessageBuilder(HttpMethodName httpMethodName, HttpMethodOverrideMode httpMethodOverrideMode, ApiAuthType apiAuthType, string? apiKeyName = null)
+        protected ApiRequestBuilder(HttpMethodName httpMethodName, ApiRequestAuth auth, string? apiKeyName = null)
         {
             HttpMethodName = httpMethodName;
-            HttpMethodOverrideMode = httpMethodOverrideMode;
-            AuthType = apiAuthType;
-            ApiKeyName = apiKeyName;
+            Auth = auth;
         }
 
         public void SetJwt(string jwt)
@@ -57,8 +58,7 @@ namespace HB.FullStack.Common.Api
         {
             HashCode hashCode = new HashCode();
 
-            hashCode.Add(AuthType);
-            hashCode.Add(ApiKeyName);
+            hashCode.Add(Auth);
             hashCode.Add(HttpMethodName);
 
             foreach (KeyValuePair<string, string> kv in Headers)
@@ -71,7 +71,7 @@ namespace HB.FullStack.Common.Api
         }
     }
 
-    public static class HttpRequestMessageBuilderExtensions
+    public static class ApiRequestBuilderExtensions
     {
         //private static readonly Version _version20 = new Version(2, 0);
 
@@ -79,8 +79,10 @@ namespace HB.FullStack.Common.Api
         /// 构建HTTP的基本信息
         /// 之所以写成扩展方法的形式，是为了避免HttpRequestBuilder过大。又为了调用方式比静态方法舒服。
         /// </summary>
-        public static HttpRequestMessage Build(this HttpRequestMessageBuilder builder, ApiRequest apiRequest)
+        public static HttpRequestMessage Build(this ApiRequestBuilder builder, ApiRequest apiRequest)
         {
+            //TODO: 思考，ApiRequestBuilder 是否应该包含一个ApiRequest的引用，而使代码看上去更简洁？就不需要apiRequest参数了
+
             //1. Mthod
             HttpMethod httpMethod = builder.HttpMethodName.ToHttpMethod();
 
@@ -133,7 +135,7 @@ namespace HB.FullStack.Common.Api
 
             return httpRequest;
 
-            static string AssembleUrl(HttpRequestMessageBuilder builder)
+            static string AssembleUrl(ApiRequestBuilder builder)
             {
                 string uri = builder.GetUrl();
 

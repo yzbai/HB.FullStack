@@ -322,8 +322,9 @@ namespace HB.FullStack.Client
 
             if (IsInternetConnected(!ClientEntityDef.AllowOfflineWrite))
             {
+                //TODO: 这里的ApiRequestAuth从哪里获得?
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList());
+                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList(), ApiRequestAuth.JWT, null);
 
                 await ApiClient.SendAsync(addRequest).ConfigureAwait(false);
 
@@ -350,7 +351,8 @@ namespace HB.FullStack.Client
 
             if (IsInternetConnected(!ClientEntityDef.AllowOfflineWrite))
             {
-                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity));
+                //TODO: 这里的ApiRequestAuth从哪里获得?
+                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity), ApiRequestAuth.JWT, null);
 
                 await ApiClient.SendAsync(updateRequest).ConfigureAwait(false);
 

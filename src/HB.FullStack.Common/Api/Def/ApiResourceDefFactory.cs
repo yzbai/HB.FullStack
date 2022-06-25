@@ -30,11 +30,9 @@ namespace HB.FullStack.Common.Api
             {
                 EndpointName = attr.EndPointName,
                 Version = attr.Version,
-                AuthType = attr.AuthType,
                 ResName = attr.ResName,
                 Parent1ResName = attr.Parent1ResName,
                 Parent2ResName = attr.Parent2ResName,
-                ApiKeyName = attr.ApiKeyName
             };
 
             if (def.Parent1ResName.IsNotNullOrEmpty())

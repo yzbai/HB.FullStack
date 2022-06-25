@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net.Http;
 using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
@@ -32,7 +28,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UploadRequest() { }
 
-        public UploadRequest(byte[] file, string fileName, string? condition) : base(condition)
+        public UploadRequest(byte[] file, string fileName, ApiRequestAuth auth, string? condition) : base(auth, condition)
         {
             _file = file;
             FileName = fileName;

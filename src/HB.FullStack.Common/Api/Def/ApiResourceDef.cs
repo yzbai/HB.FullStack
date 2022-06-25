@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.Api
         /// <summary>
         /// 用什么验证
         /// </summary>
-        public ApiAuthType AuthType { get; internal set; } = ApiAuthType.None;
+        //public ApiAuthType AuthType { get; internal set; } = ApiAuthType.None;
 
 
         /// <summary>
@@ -37,22 +37,22 @@ namespace HB.FullStack.Common.Api
         public MethodInfo? Parent2ResIdGetMethod { get; internal set; }
 
 
-        private string? _apiKeyName;
-        public string? ApiKeyName
-        {
-            get => _apiKeyName;
-            set
-            {
-                if (value.IsNullOrEmpty())
-                {
-                    return;
-                }
+        //private string? _apiKeyName;
+        //public string? ApiKeyName
+        //{
+        //    get => _apiKeyName;
+        //    set
+        //    {
+        //        if (value.IsNullOrEmpty())
+        //        {
+        //            return;
+        //        }
 
-                _apiKeyName = value;
+        //        _apiKeyName = value;
 
-                AuthType = ApiAuthType.ApiKey;
-            }
-        }
+        //        AuthType = ApiAuthType.ApiKey;
+        //    }
+        //}
 
 
     }

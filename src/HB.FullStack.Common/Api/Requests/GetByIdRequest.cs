@@ -12,9 +12,14 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetByIdRequest() { }
 
-        public GetByIdRequest(Guid id) : base(HttpMethodName.Get, "ById")
+        public GetByIdRequest(Guid id, ApiRequestAuth auth) : base(HttpMethodName.Get, auth, "ById")
         {
             Id = id;
+        }
+
+        protected sealed override ApiRequestBuilder CreateBuilder()
+        {
+            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

@@ -38,10 +38,8 @@ namespace HB.FullStack.Common.ApiClient
                     throw Exceptions.TCaptchaErrorReturn(captcha, request);
                 }
 
-                request.RequestBuilder!.Headers.Add(ApiHeaderNames.Captcha, captcha);
+                request.GetBuilder().Headers.Add(ApiHeaderNames.Captcha, captcha);
 
-
-                //TODO: Windows下 。这里会抛出很神奇的异常：Exception thrown: 'System.ApiException' in System.Private.CoreLib.dll
                 return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
             }
 

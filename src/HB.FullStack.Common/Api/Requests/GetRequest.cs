@@ -16,7 +16,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetRequest() { }
 
-        public GetRequest(string? condition) : base(HttpMethodName.Get, condition) { }
+        public GetRequest(ApiRequestAuth auth, string? condition) : base(HttpMethodName.Get, auth, condition) { }
 
         public override int GetHashCode()
         {
@@ -48,6 +48,11 @@ namespace HB.FullStack.Common.Api.Requests
             orderByBuilder.RemoveLast();
 
             OrderBys = orderByBuilder.ToString();
+        }
+
+        protected sealed override ApiRequestBuilder CreateBuilder()
+        {
+            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

@@ -13,9 +13,14 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetByIdsRequest() { }
 
-        public GetByIdsRequest(params Guid[] ids) : base(HttpMethodName.Get, "ByIds")
+        public GetByIdsRequest(ApiRequestAuth auth, params Guid[] ids) : base(HttpMethodName.Get, auth, "ByIds")
         {
             ids.AddRange(ids);
+        }
+
+        protected sealed override ApiRequestBuilder CreateBuilder()
+        {
+            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

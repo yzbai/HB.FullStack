@@ -1,4 +1,4 @@
-﻿ global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
+﻿global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
 
 using System;
 using System.Text.Json.Serialization;
@@ -10,10 +10,7 @@ namespace HB.FullStack.Common.Api
     /// </summary>
     public abstract class ApiRequest : ValidatableObject
     {
-        /// <summary>
-        /// TODO: 防止同一个RequestID两次被处理
-        /// </summary>
-        public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
+        #region Part of Build Info
 
         /// <summary>
         /// 不需要被服务器端看到
@@ -25,14 +22,28 @@ namespace HB.FullStack.Common.Api
         /// 不需要被服务器端看到
         /// </summary>
         [JsonIgnore]
+        public ApiRequestAuth Auth { get; set; }
+
+        /// <summary>
+        /// 不需要被服务器端看到
+        /// </summary>
+        [JsonIgnore]
         public string? Condition { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// TODO: 防止同一个RequestID两次被处理
+        /// </summary>
+        public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
 
         [OnlyForJsonConstructor]
         protected ApiRequest() { }
 
-        protected ApiRequest(HttpMethodName httpMethodName, string? condition)
+        protected ApiRequest(HttpMethodName httpMethodName, ApiRequestAuth auth, string? condition)
         {
             HttpMethodName = httpMethodName;
+            Auth = auth;
             Condition = condition;
         }
 
@@ -42,6 +53,16 @@ namespace HB.FullStack.Common.Api
         public override int GetHashCode()
         {
             return HashCode.Combine(HttpMethodName, Condition);
+        }
+
+        //NOTICE: 如果多于一个参数，可以另设一个endpoint setting class包含这些由应用指定的参数
+        protected abstract ApiRequestBuilder CreateBuilder();
+
+        private ApiRequestBuilder? _requestBuilder;
+        
+        public ApiRequestBuilder GetBuilder()
+        {
+            return _requestBuilder ??= CreateBuilder();
         }
     }
 }

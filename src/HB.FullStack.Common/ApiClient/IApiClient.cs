@@ -20,9 +20,9 @@ namespace HB.FullStack.Common.ApiClient
 
         JwtEndpointSetting GetDefaultJwtEndpointSetting();
 
-        Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken);
+        //Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken);
 
-        Task<Stream> GetStreamAsync(ApiRequest request);
+        //Task<Stream> GetStreamAsync(ApiRequest request);
 
         Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class;
 

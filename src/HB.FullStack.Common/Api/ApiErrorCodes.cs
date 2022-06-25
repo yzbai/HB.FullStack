@@ -174,14 +174,14 @@ namespace System
             return ex;
         }
 
-        public static Exception ApiRequestSetJwtError(ApiRequest request)
+        public static Exception ApiRequestSetJwtError(ApiRequestBuilder request)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetJwtError);
 
             return ex;
         }
 
-        public static Exception ApiRequestSetApiKeyError(ApiRequest request)
+        public static Exception ApiRequestSetApiKeyError(ApiRequestBuilder requestBuilder)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetApiKeyError);
 
