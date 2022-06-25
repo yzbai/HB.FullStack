@@ -1,4 +1,4 @@
-﻿global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
+﻿ global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
 
 using System;
 using System.Text.Json.Serialization;
@@ -11,24 +11,29 @@ namespace HB.FullStack.Common.Api
     public abstract class ApiRequest : ValidatableObject
     {
         /// <summary>
-        /// NOTICE: JsonIgnore避免Server端收到。RequestBuilder只对构建Request有用。
-        /// 一个Request包含两部分：1，业务内容（各种业务数据信息）；2，http构建信息
-        /// http构建信息放到RequestBuilder，不被服务端接收
-        /// </summary>
-        [JsonIgnore]
-        public HttpRequestMessageBuilder? RequestBuilder { get; }
-
-        /// <summary>
         /// TODO: 防止同一个RequestID两次被处理
         /// </summary>
         public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
 
+        /// <summary>
+        /// 不需要被服务器端看到
+        /// </summary>
+        [JsonIgnore]
+        public HttpMethodName HttpMethodName { get; set; }
+
+        /// <summary>
+        /// 不需要被服务器端看到
+        /// </summary>
+        [JsonIgnore]
+        public string? Condition { get; set; }
+
         [OnlyForJsonConstructor]
         protected ApiRequest() { }
 
-        protected ApiRequest(HttpRequestMessageBuilder requestBuilder)
+        protected ApiRequest(HttpMethodName httpMethodName, string? condition)
         {
-            RequestBuilder = requestBuilder;
+            HttpMethodName = httpMethodName;
+            Condition = condition;
         }
 
         /// <summary>
@@ -36,14 +41,7 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public override int GetHashCode()
         {
-            HashCode hashCode = new HashCode();
-
-            if (RequestBuilder != null)
-            {
-                hashCode.Add(RequestBuilder);
-            }
-
-            return hashCode.ToHashCode();
+            return HashCode.Combine(HttpMethodName, Condition);
         }
     }
 }

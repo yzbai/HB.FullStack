@@ -16,18 +16,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetRequest() { }
 
-        public GetRequest(HttpRequestMessageBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
-
-        /// <summary>
-        ///指定的AuthType可以覆盖ApiResourceDef中定义的
-        /// </summary>
-        public GetRequest(string? condition, ApiAuthType? authType = null) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, condition))
-        {
-            if(authType != null)
-            {
-                RequestBuilder!.AuthType = authType.Value;
-            }
-        }
+        public GetRequest(string? condition) : base(HttpMethodName.Get, condition) { }
 
         public override int GetHashCode()
         {

@@ -1,5 +1,5 @@
 ﻿using HB.FullStack.Common.Api;
-
+using HB.FullStack.Common.ApiClient;
 using Microsoft.Extensions.Options;
 
 using System;
@@ -145,11 +145,11 @@ namespace HB.FullStack.Common.ApiClient
 
                 HttpMethodOverrideMode httpMethodOverrideMode = endpointSettings?.HttpMethodOverrideMode ?? HttpMethodOverrideMode.None;
 
-                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.RequestBuilder!.HttpMethod)).ConfigureAwait(false);
+                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.HttpMethodName)).ConfigureAwait(false);
 
                 TResponse? rt = await httpClient.GetAsync<TResponse>(request, httpMethodOverrideMode, cancellationToken).ConfigureAwait(false);
 
-                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.RequestBuilder!.HttpMethod)).ConfigureAwait(false);
+                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.HttpMethodName)).ConfigureAwait(false);
 
                 return rt;
             }
@@ -187,7 +187,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 case ApiAuthType.ApiKey:
                     {
-                        ThrowIf.NullOrEmpty(request.RequestBuilder!.ApiKeyName, nameof(RestfulHttpRequestBuilder.ApiKeyName));
+                        ThrowIf.NullOrEmpty(request.RequestBuilder!.ApiKeyName, nameof(RestHttpRequestMessageBuilder.ApiKeyName));
 
                         if (_options.TryGetApiKey(request.RequestBuilder!.ApiKeyName, out string? key))
                         {
@@ -227,7 +227,7 @@ namespace HB.FullStack.Common.ApiClient
         }
         private EndpointSettings? GetEndpointSettings(ApiRequest request)
         {
-            if (request.RequestBuilder is RestfulHttpRequestBuilder defaultBuildInfo)
+            if (request.RequestBuilder is RestHttpRequestMessageBuilder defaultBuildInfo)
             {
                 //TODO: 用字典提高效率
                 return _options.Endpoints.FirstOrDefault(e =>

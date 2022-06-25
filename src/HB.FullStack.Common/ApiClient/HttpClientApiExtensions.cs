@@ -2,6 +2,7 @@
 
 using HB.FullStack.Common.Api;
 using System.IO;
+
 using System.Threading;
 
 namespace System.Net.Http
@@ -10,11 +11,11 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
-        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, HttpMethodOverrideMode httpMethodOverrideMode, CancellationToken cancellationToken) where TResponse : class
+        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, HttpRequestMessageBuilder httpRequestMessageBuilder, CancellationToken cancellationToken) where TResponse : class
         {
-            //HttpClient不再 在接受response后主动dispose request content。
+            //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
-            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage(httpMethodOverrideMode);
+            using HttpRequestMessage requestMessage = httpRequestMessageBuilder.Build(request);
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
@@ -43,9 +44,9 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, HttpMethodOverrideMode httpMethodOverrideMode, CancellationToken cancellationToken = default)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, HttpRequestMessageBuilder httpRequestMessageBuilder, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage requestMessage = request.ToHttpRequestMessage(httpMethodOverrideMode);
+            using HttpRequestMessage requestMessage = httpRequestMessageBuilder.Build(request);
 
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);

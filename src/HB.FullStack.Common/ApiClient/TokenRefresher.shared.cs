@@ -161,7 +161,7 @@ namespace HB.FullStack.Common.ApiClient
                 string? resName,
                 string accessToken,
                 string refreshToken)
-                : base(new RestfulHttpRequestBuilder(
+                : base(new RestHttpRequestMessageBuilder(
                     httpMethod: HttpMethodName.Get,
                     apiAuthType: ApiAuthType.None,
                     endPointName: endPointName,

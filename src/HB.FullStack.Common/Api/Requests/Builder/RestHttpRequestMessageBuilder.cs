@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// 强调Url的组建方式Restful Api方式
     /// </summary>
-    public class RestfulHttpRequestBuilder : HttpRequestMessageBuilder
+    public class RestHttpRequestMessageBuilder : HttpRequestMessageBuilder
     {
         public string? EndpointName { get; set; }
 
@@ -28,7 +28,7 @@ namespace HB.FullStack.Common.Api
 
         public string? Parent2ResId { get; set; }
 
-        protected sealed override string GetUrlCore()
+        public sealed override string GetUrl()
         {
             string? parentSegment = GetParentSegment();
 
@@ -51,26 +51,35 @@ namespace HB.FullStack.Common.Api
 
             string? GetParentSegment()
             {
-                if (lst.IsNullOrEmpty())
+                if (Parent1ResName.IsNotNullOrEmpty())
                 {
-                    return null;
-                }
-
-                StringBuilder stringBuilder = new StringBuilder();
-
-                foreach (ResParent parent in lst)
-                {
-                    stringBuilder.Append(parent.ResName);
-                    stringBuilder.Append('/');
-
-                    if (parent.ResId.IsNotNullOrEmpty())
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (Parent1ResId.IsNullOrEmpty())
                     {
-                        stringBuilder.Append(parent.ResId);
-                        stringBuilder.Append('/');
+                        throw new ArgumentNullException(nameof(Parent1ResId));
                     }
+
+                    stringBuilder.Append(Parent1ResName);
+                    stringBuilder.Append('/');
+                    stringBuilder.Append(Parent1ResId);
+
+                    if (Parent2ResName.IsNotNullOrEmpty())
+                    {
+                        if (Parent2ResId.IsNullOrEmpty())
+                        {
+                            throw new ArgumentNullException(nameof(Parent2ResId));
+                        }
+
+                        stringBuilder.Append('/');
+                        stringBuilder.Append(Parent2ResName);
+                        stringBuilder.Append('/');
+                        stringBuilder.Append(Parent2ResId);
+                    }
+
+                    return stringBuilder.ToString();
                 }
 
-                return stringBuilder.RemoveLast().ToString();
+                return null;
             }
         }
 
@@ -92,13 +101,14 @@ namespace HB.FullStack.Common.Api
             return hashCode.ToHashCode();
         }
 
-        public RestfulHttpRequestBuilder(
+        public RestHttpRequestMessageBuilder(
             HttpMethodName httpMethod,
+            HttpMethodOverrideMode httpMethodOverrideMode,
             ApiAuthType apiAuthType,
             string? endPointName,
             string? apiVersion,
             string? resName,
-            string? condition) : base(httpMethod, apiAuthType)
+            string? condition) : base(httpMethod, httpMethodOverrideMode, apiAuthType)
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
@@ -106,13 +116,14 @@ namespace HB.FullStack.Common.Api
             Condition = condition;
         }
 
-        public RestfulHttpRequestBuilder(
+        public RestHttpRequestMessageBuilder(
             HttpMethodName httpMethod,
+            HttpMethodOverrideMode httpsMethodOverrideMode,
             string apiKeyName,
             string? endPointName,
             string? apiVersion,
             string? resName,
-            string? condition) : base(httpMethod, ApiAuthType.ApiKey, apiKeyName)
+            string? condition) : base(httpMethod, httpsMethodOverrideMode, ApiAuthType.ApiKey, apiKeyName)
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
@@ -121,10 +132,14 @@ namespace HB.FullStack.Common.Api
         }
     }
 
-    public class RestfulHttpRequestBuilder<T> : RestfulHttpRequestBuilder where T : ApiResource2
+    /// <summary>
+    /// 从Res和ApiRequest中收集构建HttpRequestMessage的信息
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class RestfulHttpRequestBuilder<T> : RestHttpRequestMessageBuilder where T : ApiResource2
     {
-        public RestfulHttpRequestBuilder(HttpMethodName httpMethod, string? condition)
-            : base(httpMethod, ApiAuthType.None, null, null, null, condition)
+        public RestfulHttpRequestBuilder(ApiRequest apiRequest, HttpMethodOverrideMode httpMethodOverrideMode)
+            : base(apiRequest.HttpMethodName, httpMethodOverrideMode, ApiAuthType.None, null, null, null, apiRequest.Condition)
         {
             ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
 
@@ -141,6 +156,9 @@ namespace HB.FullStack.Common.Api
 
             Parent1ResName = def.Parent1ResName;
             Parent2ResName = def.Parent2ResName;
+
+            Parent1ResId = def.Parent1ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
+            Parent2ResId = def.Parent2ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
         }
     }
 }

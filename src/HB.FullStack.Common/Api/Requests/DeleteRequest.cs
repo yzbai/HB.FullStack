@@ -16,13 +16,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public DeleteRequest() { }
 
-        public DeleteRequest(IEnumerable<T> ress, HttpRequestMessageBuilder httpRequestBuilder) : base(httpRequestBuilder)
+        public DeleteRequest(IEnumerable<T> ress, string? condition) : base(HttpMethodName.Delete, condition)
         {
             Resources.AddRange(ress);
         }
-        public DeleteRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, null)) { }
 
-        public DeleteRequest(T res) : this(new T[] { res }) { }
+        public DeleteRequest(T res, string? condition) : this(new T[] { res }, condition) { }
 
         public override int GetHashCode()
         {

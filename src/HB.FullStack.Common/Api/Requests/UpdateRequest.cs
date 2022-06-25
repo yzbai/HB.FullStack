@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Http;
-using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
@@ -16,12 +14,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UpdateRequest() { }
 
-        public UpdateRequest(IEnumerable<T> ress) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, null))
+        public UpdateRequest(IEnumerable<T> ress, string? condition) : base(HttpMethodName.Put, condition)
         {
             Resources.AddRange(ress);
         }
 
-        public UpdateRequest(T res) : this(new T[] { res }) { }
+        public UpdateRequest(T res, string? condition) : this(new T[] { res }, condition) { }
 
         public override int GetHashCode()
         {
