@@ -20,7 +20,7 @@ namespace HB.FullStack.Client.Maui.File
         /// </summary>
         public AliyunStsTokenResGetByDirectoryRequest() { }
 
-        public AliyunStsTokenResGetByDirectoryRequest(string directory, string requestUrl) : base(HttpMethodName.Get, ApiRequestAuth.JWT, null)
+        public AliyunStsTokenResGetByDirectoryRequest(string directory, string requestUrl) : base(ApiMethodName.Get, ApiRequestAuth.JWT, null)
         {
             Directory = directory;
             _requestUrl = requestUrl;
@@ -31,9 +31,9 @@ namespace HB.FullStack.Client.Maui.File
             return HashCode.Combine(base.GetHashCode(), Directory);
         }
 
-        protected override ApiRequestBuilder CreateBuilder()
+        protected override HttpRequestBuilder CreateHttpRequestBuilder()
         {
-            return new PlainUrlApiRequestBuilder(HttpMethodName, Auth, _requestUrl);
+            return new PlainUrlHttpRequestBuilder(ApiMethodName, Auth, _requestUrl);
         }
     }
 }

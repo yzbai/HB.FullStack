@@ -135,12 +135,6 @@ namespace System
             return ex;
         }
 
-        public static Exception ServerReturnError(ErrorCode errorCode)
-        {
-            ApiException ex = new ApiException(errorCode);
-            return ex;
-        }
-
         internal static Exception FileUpdateRequestCountNotEven()
         {
             ApiException ex = new ApiException(ApiErrorCodes.FileUpdateRequestCountNotEven);
@@ -174,14 +168,14 @@ namespace System
             return ex;
         }
 
-        public static Exception ApiRequestSetJwtError(ApiRequestBuilder request)
+        public static Exception ApiRequestSetJwtError(HttpRequestBuilder request)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetJwtError);
 
             return ex;
         }
 
-        public static Exception ApiRequestSetApiKeyError(ApiRequestBuilder requestBuilder)
+        public static Exception ApiRequestSetApiKeyError(HttpRequestBuilder requestBuilder)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetApiKeyError);
 

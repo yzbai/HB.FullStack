@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UpdateRequest<T> : ApiRequest where T : ApiResource2
+    public class UpdateRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [IdBarrier]
         [CollectionMemeberValidated]
@@ -14,7 +14,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UpdateRequest() { }
 
-        public UpdateRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(HttpMethodName.Put, auth, condition)
+        public UpdateRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(ApiMethodName.Put, auth, condition)
         {
             Resources.AddRange(ress);
         }
@@ -33,11 +33,6 @@ namespace HB.FullStack.Common.Api
             }
 
             return hash.ToHashCode();
-        }
-
-        protected sealed override ApiRequestBuilder CreateBuilder()
-        {
-            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

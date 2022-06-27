@@ -50,7 +50,7 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage,endpointSettings.Challenge).ConfigureAwait(false);
             }
             catch (ErrorCode2Exception ex)
             {

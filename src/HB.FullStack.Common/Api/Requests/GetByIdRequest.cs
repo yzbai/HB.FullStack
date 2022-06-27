@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetByIdRequest<T> : ApiRequest where T : ApiResource2
+    public class GetByIdRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [NoEmptyGuid]
         public Guid Id { get; set; }
@@ -12,14 +12,9 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetByIdRequest() { }
 
-        public GetByIdRequest(Guid id, ApiRequestAuth auth) : base(HttpMethodName.Get, auth, "ById")
+        public GetByIdRequest(Guid id, ApiRequestAuth auth) : base(ApiMethodName.Get, auth, "ById")
         {
             Id = id;
-        }
-
-        protected sealed override ApiRequestBuilder CreateBuilder()
-        {
-            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

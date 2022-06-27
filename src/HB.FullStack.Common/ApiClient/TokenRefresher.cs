@@ -22,7 +22,7 @@ namespace HB.FullStack.Common.ApiClient
                 return false;
             }
 
-            JwtEndpointSetting jwtEndpoint = endpointSettings == null ? apiClient.GetDefaultJwtEndpointSetting() : endpointSettings.JwtEndpoint;
+            JwtEndpointSetting jwtEndpoint = endpointSettings?.JwtEndpoint ?? apiClient.GetDefaultJwtEndpointSetting();
 
             string accessTokenHashKey = SecurityUtil.GetHash(userTokenProvider.AccessToken);
 
@@ -154,7 +154,7 @@ namespace HB.FullStack.Common.ApiClient
             public string RefreshToken { get; set; } = null!;
 
             public RefreshUserTokenRequest(string? endPointName, string? apiVersion, string? resName, string accessToken, string refreshToken)
-                : base(HttpMethodName.Get, new ApiRequestAuth { AuthType = ApiAuthType.None }, "ByRefresh")
+                : base(ApiMethodName.Get, new ApiRequestAuth { AuthType = ApiAuthType.None }, "ByRefresh")
             {
                 _endPointName = endPointName;
                 _apiVersion = apiVersion;
@@ -169,15 +169,15 @@ namespace HB.FullStack.Common.ApiClient
                 return HashCode.Combine(base.GetHashCode(), AccessToken, RefreshToken);
             }
 
-            protected override ApiRequestBuilder CreateBuilder()
+            protected override HttpRequestBuilder CreateHttpRequestBuilder()
             {
-                return new RestfulApiRequestBuilder(
-                    httpMethod: HttpMethodName,
+                return new RestfulHttpRequestBuilder(
+                    apiMethodName: ApiMethodName,
                     auth: Auth,
+                    condition: Condition,
                     endPointName: _endPointName,
                     apiVersion: _apiVersion,
-                    resName: _resName,
-                    condition: Condition);
+                    resName: _resName);
             }
         }
     }

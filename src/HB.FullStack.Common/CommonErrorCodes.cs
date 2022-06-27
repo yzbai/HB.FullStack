@@ -21,7 +21,9 @@ namespace System
 
         public static readonly ErrorCode HttpResponseDeSerializeJsonError = new ErrorCode( nameof(HttpResponseDeSerializeJsonError), "");
 
-        public static readonly ErrorCode SerializeLogError = new ErrorCode( nameof(SerializeLogError), "");
+        public static readonly ErrorCode SerializeLogError = new ErrorCode( nameof(SerializeLogError), "序列化出错");
+
+        public static readonly ErrorCode UnSerializeLogError = new ErrorCode(nameof(UnSerializeLogError), "反序列化出错");
 
         public static readonly ErrorCode PerformValidateError = new ErrorCode( nameof(PerformValidateError), "");
 
@@ -30,6 +32,8 @@ namespace System
         public static readonly ErrorCode EnvironmentVariableError = new ErrorCode( nameof(EnvironmentVariableError), "");
     }
 
+    //TODO: 也把其他的Exceptions类改造成这样
+    //TODO: Source Generator
     public static partial class LoggerExtensions
     {
         private static readonly Action<ILogger, string?, Exception?> _logCerNotInPackage = LoggerMessage.Define<string?>(
@@ -90,6 +94,16 @@ namespace System
         public static void LogSerializeLogError(this ILogger logger, string? typeName, Exception ex)
         {
             _logSerializeLogError(logger, typeName, ex);
+        }
+
+        private static readonly Action<ILogger, string?, Exception> _logUnSerializeLogError = LoggerMessage.Define<string?>(
+            LogLevel.Error,
+            CommonErrorCodes.UnSerializeLogError.ToEventId(),
+            "反序列化Json出错. Json={Json}");
+
+        public static void LogUnSerializeLogError(this ILogger logger, string? json, Exception ex)
+        {
+            _logUnSerializeLogError(logger, json, ex);
         }
 
         private static readonly Action<ILogger, string?, Exception> _logPerformValidateError = LoggerMessage.Define<string?>(

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetRequest<T> : ApiRequest where T : ApiResource2
+    public class GetRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         public int? Page { get; set; }
 
@@ -16,7 +16,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetRequest() { }
 
-        public GetRequest(ApiRequestAuth auth, string? condition) : base(HttpMethodName.Get, auth, condition) { }
+        public GetRequest(ApiRequestAuth auth, string? condition) : base(ApiMethodName.Get, auth, condition) { }
 
         public override int GetHashCode()
         {
@@ -48,11 +48,6 @@ namespace HB.FullStack.Common.Api.Requests
             orderByBuilder.RemoveLast();
 
             OrderBys = orderByBuilder.ToString();
-        }
-
-        protected sealed override ApiRequestBuilder CreateBuilder()
-        {
-            return new RestfulApiRequestBuilder<T>(this);
         }
     }
 }

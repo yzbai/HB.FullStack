@@ -73,14 +73,14 @@ namespace HB.FullStack.Client.Maui.File
         }
 
         public static string PathRoot { get; } = FileSystem.AppDataDirectory;
-        
+
         public string CurrentUserTempDirectory
         {
             get
             {
                 string? directoryPath;
                 string? placeHolder;
-                if(_directories.TryGetValue(USER_TEMP_DIRECTORY_NAME, out DirectoryDescription? directoryInfo))
+                if (_directories.TryGetValue(USER_TEMP_DIRECTORY_NAME, out DirectoryDescription? directoryInfo))
                 {
                     placeHolder = directoryInfo.UserPlaceHolder;
                     directoryPath = directoryInfo.DirectoryPath;
@@ -186,7 +186,7 @@ namespace HB.FullStack.Client.Maui.File
                 //TODO: 思考，这里有一种，第一个线程已经取锁成功，去下载图片，还没下完，第二个进来一看，以为已经取好了，结果没有
                 string fullPath = GetLocalFullPath(directory, fileName);
 
-                int tryCount = 5;
+                int tryCount = 3;
 
                 while (tryCount-- > 0)
                 {
@@ -196,16 +196,17 @@ namespace HB.FullStack.Client.Maui.File
                     }
 
                     GlobalSettings.Logger.LogDebug("前不久请求过文件，现在还不存在，等待 1秒，再尝试");
-                    await Task.Delay(1000);
+                    await Task.Delay(100);
                 }
 
                 GlobalSettings.Logger.LogDebug("前不久请求过文件，现在还不存在，不再等待，远程获取");
             }
 
-            IOss oss = await RentOssClientAsync(directory, false);
-
+            IOss oss = null!;
             try
             {
+                oss = await RentOssClientAsync(directory, false);
+
                 using OssObject ossObject = oss.GetObject(_options.AliyunOssBucketName, ossKey);
 
                 //覆盖本地

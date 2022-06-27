@@ -8,13 +8,13 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// 强调Url的组建方式Restful Api方式
     /// </summary>
-    public class RestfulApiRequestBuilder : ApiRequestBuilder
+    public class RestfulHttpRequestBuilder : HttpRequestBuilder
     {
+        #region 由Resource决定, 即ApiResourceAttribute, Parent1ResIdAttribute, Parent2ResIdAttribute
+
         public string? EndpointName { get; set; }
 
         public string? ApiVersion { get; set; }
-
-        public string? Condition { get; set; }
 
         public string? ResName { get; set; }
 
@@ -27,6 +27,8 @@ namespace HB.FullStack.Common.Api
         public string? Parent2ResName { get; set; }
 
         public string? Parent2ResId { get; set; }
+
+        #endregion
 
         public sealed override string GetUrl()
         {
@@ -101,48 +103,20 @@ namespace HB.FullStack.Common.Api
             return hashCode.ToHashCode();
         }
 
-        public RestfulApiRequestBuilder(
-            HttpMethodName httpMethod,
+        /// <summary>
+        /// 需要的最小化信息
+        /// </summary>
+        public RestfulHttpRequestBuilder(
+            ApiMethodName apiMethodName,
             ApiRequestAuth auth,
+            string? condition,
             string? endPointName,
             string? apiVersion,
-            string? resName,
-            string? condition) : base(httpMethod, auth)
+            string? resName) : base(apiMethodName, auth, condition)
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
             ResName = resName;
-            Condition = condition;
-        }
-    }
-
-    /// <summary>
-    /// 从Res和ApiRequest中收集构建HttpRequestMessage的信息
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class RestfulApiRequestBuilder<T> : RestfulApiRequestBuilder where T : ApiResource2
-    {
-        public RestfulApiRequestBuilder(ApiRequest apiRequest)
-            : base(apiRequest.HttpMethodName, apiRequest.Auth, null, null, null, apiRequest.Condition)
-        {
-            ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
-
-            if (def == null)
-            {
-                throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
-            }
-
-
-            //From Res Def
-            EndpointName = def.EndpointName;
-            ApiVersion = def.Version;
-            ResName = def.ResName;
-
-            Parent1ResName = def.Parent1ResName;
-            Parent2ResName = def.Parent2ResName;
-
-            Parent1ResId = def.Parent1ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
-            Parent2ResId = def.Parent2ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
         }
     }
 }

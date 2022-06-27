@@ -4,6 +4,9 @@ using HB.FullStack.Common.Api;
 using System.IO;
 
 using System.Threading;
+using Microsoft.Net.Http.Headers;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace System.Net.Http
 {
@@ -11,15 +14,15 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResponseType = typeof(EmptyResponse);
 
-        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, ApiRequestBuilder httpRequestMessageBuilder, CancellationToken cancellationToken) where TResponse : class
+        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
         {
             //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
-            using HttpRequestMessage requestMessage = httpRequestMessageBuilder.Build(request);
+            using HttpRequestMessage requestMessage = request.HttpRequestBuilder.Build(request);
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, request.HttpRequestBuilder.EndpointSettings.Challenge).ConfigureAwait(false);
 
             if (typeof(TResponse) == _emptyResponseType)
             {
@@ -27,7 +30,7 @@ namespace System.Net.Http
             }
             else
             {
-                (bool success, TResponse? response) = await responseMessage.TryDeserializeJsonAsync<TResponse>().ConfigureAwait(false);
+                (bool success, TResponse? response) = await responseMessage.TryDeserializeJsonContentAsync<TResponse>().ConfigureAwait(false);
 
                 if (!success)
                 {
@@ -44,14 +47,14 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, ApiRequestBuilder httpRequestMessageBuilder, CancellationToken cancellationToken = default)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage requestMessage = httpRequestMessageBuilder.Build(request);
+            using HttpRequestMessage requestMessage = request.HttpRequestBuilder.Build(request);
 
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, request.HttpRequestBuilder.EndpointSettings.Challenge).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);
@@ -82,21 +85,45 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task ThrowIfNotSuccessedAsync(HttpResponseMessage responseMessage)
+        public static async Task ThrowIfNotSuccessedAsync(HttpResponseMessage responseMessage, string challenge)
         {
             if (responseMessage.IsSuccessStatusCode)
             {
                 return;
             }
 
+            //开始处理错误
+
+            //401, 解析Header
+            if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                if (responseMessage.Headers.TryGetValues(HeaderNames.WWWAuthenticate, out IEnumerable<string>? headValues) && headValues.Count() == 1)
+                {
+                    string authenticate = headValues.First();
+
+                    if (authenticate.StartsWith(challenge, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        authenticate = authenticate.Substring(challenge.Length + 1);
+
+                        if (SerializeUtil.TryFromJson(authenticate, out ErrorCode? authErrorCode))
+                        {
+                            if (authErrorCode != null)
+                            {
+                                throw new ApiException(authErrorCode);
+                            }
+                        }
+                    }
+                }
+            }
+
             //TODO: 可以处理404等ProblemDetails的返回
-            (bool success, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonAsync<ErrorCode>().ConfigureAwait(false);
+            (bool success, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonContentAsync<ErrorCode>().ConfigureAwait(false);
 
             //responseMessage.Dispose();
 
             if (success && errorCode != null)
             {
-                throw ApiExceptions.ServerReturnError(errorCode);
+                throw new ApiException(errorCode);
             }
             else
             {
