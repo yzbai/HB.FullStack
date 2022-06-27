@@ -169,16 +169,18 @@ namespace System
                 {
                     SerializeUtil.Configure(options.JsonSerializerOptions);
                 })
-                .ConfigureApiBehaviorOptions((Action<ApiBehaviorOptions>)(apiBehaviorOptions =>
+                .ConfigureApiBehaviorOptions(apiBehaviorOptions =>
                 {
                     apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
                     {
-                        return new BadRequestObjectResult(ApiErrorCodes.ModelValidationError)
+                        ErrorCode errorCode = ApiErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
+
+                        return new BadRequestObjectResult(errorCode)
                         {
                             ContentTypes = { "application/problem+json" }
                         };
                     };
-                }))
+                })
                 .PartManager.ApplicationParts.Add(new AssemblyPart(httpFrameworkAssembly));
 
             return services;

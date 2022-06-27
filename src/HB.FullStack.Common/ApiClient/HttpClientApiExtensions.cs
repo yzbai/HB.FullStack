@@ -18,11 +18,11 @@ namespace System.Net.Http
         {
             //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
-            using HttpRequestMessage requestMessage = request.HttpRequestBuilder.Build(request);
+            using HttpRequestMessage requestMessage = request.GetHttpRequestBuilder().Build(request);
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, request.HttpRequestBuilder.EndpointSettings.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
 
             if (typeof(TResponse) == _emptyResponseType)
             {
@@ -49,12 +49,12 @@ namespace System.Net.Http
 
         public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage requestMessage = request.HttpRequestBuilder.Build(request);
+            using HttpRequestMessage requestMessage = request.GetHttpRequestBuilder().Build(request);
 
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, request.HttpRequestBuilder.EndpointSettings.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);

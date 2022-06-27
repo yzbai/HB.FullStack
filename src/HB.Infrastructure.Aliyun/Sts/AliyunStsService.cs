@@ -16,8 +16,43 @@ namespace HB.Infrastructure.Aliyun.Sts
 {
     public class AliyunStsService : IAliyunStsService
     {
-        private const string OSS_WRITE_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\", \"oss:DeleteObject\",\"oss:ListParts\",\"oss:AbortMultipartUpload\",\"oss:PutObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
-        private const string OSS_READ_POLICY_TEMPLATE = "{{\"Statement\": [{{\"Action\": [\"oss:ListObjects\", \"oss:GetObject\"],\"Effect\": \"Allow\",\"Resource\": [\"acs:oss:*:*:{0}/{1}\"]}}],\"Version\": \"1\"}}";
+        private const string OSS_WRITE_POLICY_TEMPLATE = @"
+{{
+    ""Statement"": 
+    [
+        {{
+            ""Action"": 
+            [
+                ""oss:ListObjects"", ""oss:GetObject"", ""oss:DeleteObject"",""oss:ListParts"",""oss:AbortMultipartUpload"",""oss:PutObject""
+            ],
+            ""Effect"": ""Allow"",
+            ""Resource"": 
+            [
+                ""acs:oss:*:*:{0}/{1}""
+            ]
+        }}
+    ],    
+    ""Version"": ""1""
+}}";
+
+        private const string OSS_READ_POLICY_TEMPLATE = @"
+{{
+    ""Statement"": 
+    [
+        {{
+            ""Action"": 
+            [
+                ""oss:ListObjects"", ""oss:GetObject""
+            ],
+            ""Effect"": ""Allow"",
+            ""Resource"": 
+            [
+                ""acs:oss:*:*:{0}/{1}""
+            ]
+        }}
+    ],
+    ""Version"": ""1""
+}}";
 
         private readonly AliyunStsOptions _options;
         private readonly IAcsClient _acsClient;
@@ -60,7 +95,28 @@ namespace HB.Infrastructure.Aliyun.Sts
                 return null;
             }
 
-            string policy = string.Format(GlobalSettings.Culture, readOnly ? OSS_READ_POLICY_TEMPLATE : OSS_WRITE_POLICY_TEMPLATE, bucketName, directory.IsNullOrEmpty() ? "*" : directory + "/*");
+            string policy = string.Format(
+                GlobalSettings.Culture,
+                readOnly ? OSS_READ_POLICY_TEMPLATE : OSS_WRITE_POLICY_TEMPLATE,
+                bucketName,
+                directory.IsNullOrEmpty() ? "*" : directory + "/*");
+
+            //            string policy = @"
+            //{
+            //    ""Statement"": [
+            //        {
+            //            ""Action"": ""oss:GetObject"",
+            //            ""Effect"": ""Allow"",
+            //            ""Resource"": [
+
+            //                ""acs:oss:*:*:mycolorfultime-private-dev/public/*""
+            //            ]
+            //        }
+            //    ],
+            //    ""Version"": ""1""
+            //}";
+
+            //""acs: oss: *:*:mycolorfultime -private-dev"",
 
             AssumeRoleRequest request = new AssumeRoleRequest
             {

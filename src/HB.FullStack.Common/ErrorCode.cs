@@ -71,4 +71,12 @@ namespace System
             return !(left == right);
         }
     }
+
+    public static class ErrorCodeExtensions
+    {
+        public static ErrorCode WithMessage(this ErrorCode errorCode, string? messsage)
+        {
+            return new ErrorCode(errorCode.Code, messsage ?? errorCode.Message);
+        }
+    }
 }

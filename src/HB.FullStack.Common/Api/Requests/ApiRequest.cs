@@ -14,8 +14,10 @@ namespace HB.FullStack.Common.Api
 
         private HttpRequestBuilder? _requestBuilder;
 
-        [JsonIgnore]
-        public HttpRequestBuilder HttpRequestBuilder => _requestBuilder ??= CreateHttpRequestBuilder();
+        public HttpRequestBuilder GetHttpRequestBuilder()
+        {
+            return _requestBuilder ??= CreateHttpRequestBuilder();
+        }
 
         protected abstract HttpRequestBuilder CreateHttpRequestBuilder();
 

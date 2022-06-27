@@ -298,7 +298,7 @@ namespace HB.FullStack.Client.Maui.File
 
         private static string GetOssKey(string directory, string fileName)
         {
-            return Path.Combine(directory, fileName);
+            return $"{directory}/{fileName}";
         }
 
         class OssClientPoolPolicy : IPooledObjectPolicy<IOss>

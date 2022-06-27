@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Api;
-
 namespace HB.FullStack.Common.ApiClient
 {
     public static class TokenRefresher
@@ -60,21 +58,23 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (userTokenProvider.RefreshToken.IsNotNullOrEmpty())
                 {
-                    RefreshUserTokenRequest refreshRequest = new RefreshUserTokenRequest(
-                        jwtEndpoint.EndpointName!,
-                        jwtEndpoint.Version!,
-                        jwtEndpoint.ResName!,
+                    BearerTokenResGetByRefreshRequest refreshRequest = new BearerTokenResGetByRefreshRequest(
+                        jwtEndpoint,
+                        userTokenProvider.UserId!.Value,
                         userTokenProvider.AccessToken,
-                        userTokenProvider.RefreshToken);
+                        userTokenProvider.RefreshToken,
+                        userTokenProvider.DeviceId,
+                        userTokenProvider.DeviceVersion,
+                        userTokenProvider.DeviceInfos);
 
-                    AccessTokenResource? resource = await apiClient.GetAsync<AccessTokenResource>(refreshRequest).ConfigureAwait(false);
+                    BearerTokenRes? res = await apiClient.GetAsync<BearerTokenRes>(refreshRequest).ConfigureAwait(false);
 
-                    if (resource != null)
+                    if (res != null)
                     {
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        OnRefreshSucceed(resource, userTokenProvider);
+                        OnRefreshSucceed(res, userTokenProvider);
 
                         return true;
                     }
@@ -104,81 +104,21 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private static void OnRefreshSucceed(AccessTokenResource resource, IPreferenceProvider userTokenProvider)
+        private static void OnRefreshSucceed(BearerTokenRes res, IPreferenceProvider userTokenProvider)
         {
             userTokenProvider.OnTokenFetched(
-                resource.UserId,
-                resource.CreatedTime,
-                resource.Mobile,
-                resource.Email,
-                resource.LoginName,
-                resource.AccessToken,
-                resource.RefreshToken);
+                res.UserId,
+                res.CreatedTime,
+                res.Mobile,
+                res.Email,
+                res.LoginName,
+                res.AccessToken,
+                res.RefreshToken);
         }
 
         private static void OnRefreshFailed(IPreferenceProvider userTokenProvider)
         {
             userTokenProvider.OnTokenRefreshFailed();
-        }
-
-        private class AccessTokenResource : ApiResource2
-        {
-            public Guid UserId { get; set; }
-
-            public string? Mobile { get; set; }
-
-            public string? LoginName { get; set; }
-
-            public string? Email { get; set; }
-
-            public DateTimeOffset CreatedTime { get; set; }
-
-            public string AccessToken { get; set; } = null!;
-
-            public string RefreshToken { get; set; } = null!;
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(nameof(AccessTokenResource), AccessToken, RefreshToken, UserId, Mobile, LoginName, Email, CreatedTime);
-            }
-        }
-
-        private class RefreshUserTokenRequest : ApiRequest
-        {
-            private readonly string? _endPointName;
-            private readonly string? _apiVersion;
-            private readonly string? _resName;
-
-            public string AccessToken { get; set; } = null!;
-
-            public string RefreshToken { get; set; } = null!;
-
-            public RefreshUserTokenRequest(string? endPointName, string? apiVersion, string? resName, string accessToken, string refreshToken)
-                : base(ApiMethodName.Get, new ApiRequestAuth { AuthType = ApiAuthType.None }, "ByRefresh")
-            {
-                _endPointName = endPointName;
-                _apiVersion = apiVersion;
-                _resName = resName;
-
-                AccessToken = accessToken;
-                RefreshToken = refreshToken;
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(base.GetHashCode(), AccessToken, RefreshToken);
-            }
-
-            protected override HttpRequestBuilder CreateHttpRequestBuilder()
-            {
-                return new RestfulHttpRequestBuilder(
-                    apiMethodName: ApiMethodName,
-                    auth: Auth,
-                    condition: Condition,
-                    endPointName: _endPointName,
-                    apiVersion: _apiVersion,
-                    resName: _resName);
-            }
         }
     }
 }

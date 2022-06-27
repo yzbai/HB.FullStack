@@ -38,7 +38,7 @@ namespace HB.FullStack.Common.ApiClient
                     throw Exceptions.TCaptchaErrorReturn(captcha, request);
                 }
 
-                request.HttpRequestBuilder.Headers.Add(ApiHeaderNames.Captcha, captcha);
+                request.GetHttpRequestBuilder().Headers.Add(ApiHeaderNames.Captcha, captcha);
 
                 return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
             }

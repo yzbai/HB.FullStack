@@ -124,7 +124,7 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiRequestInvalidateError(request, request.GetValidateErrorMessage());
             }
 
-            HttpRequestBuilder requestBuilder = request.HttpRequestBuilder;
+            HttpRequestBuilder requestBuilder = request.GetHttpRequestBuilder();
             EndpointSettings? endpointSettings = GetEndpointSettings(requestBuilder);
             HttpClient httpClient = GetHttpClient(endpointSettings);
 
