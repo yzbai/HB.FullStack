@@ -13,8 +13,6 @@ namespace HB.FullStack.Common.Files
         /// </summary>
         public string TopDirectory { get; set; } = null!;
 
-        public string Regex { get; set; } = null!;
-
         public bool ReadOnly { get; set; } = true;
 
         public IList<string> AllowedUserLevels { get; set; } = new List<string>();
@@ -23,5 +21,11 @@ namespace HB.FullStack.Common.Files
         /// 服务器端根据此来设定Sts的有效期
         /// </summary>
         public TimeSpan ExpiryTime { get; set; } = TimeSpan.FromHours(1);
+
+        public bool ContainsPlaceHoder { get; set; }
+
+        public string? PlaceHolderName { get; set; }
+
+        public bool IsUserPrivate { get; set; }
     }
 }

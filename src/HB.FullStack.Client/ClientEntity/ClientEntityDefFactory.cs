@@ -17,6 +17,7 @@ namespace HB.FullStack.Client.ClientEntity
         public static ClientEntityDef? Get<T>() where T : Entity
         {
             Type type = typeof(T);
+
             if (_clientEntityDefs.TryGetValue(type, out ClientEntityDef? def))
             {
                 return def;

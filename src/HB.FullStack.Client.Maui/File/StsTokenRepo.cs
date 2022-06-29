@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.Network;
+using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Files;
 using HB.FullStack.Database;
@@ -15,31 +16,29 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Client.Maui.File
 {
-    public class AliyunStsTokenRepo : BaseRepo<AliyunStsToken, AliyunStsTokenRes>
+    public class StsTokenRepo : BaseRepo<StsToken, StsTokenRes>
     {
-        private readonly ILogger<AliyunStsTokenRepo> _logger;
+        private readonly ILogger<StsTokenRepo> _logger;
         private readonly FileManagerOptions _fileManagerOptions;
         private static readonly SemaphoreSlim _getStsTokenSemaphore = new SemaphoreSlim(1, 1);
 
-        private readonly Dictionary<(string, bool), AliyunStsToken?> _cachedAliyunStsTokenDict = new Dictionary<(string, bool), AliyunStsToken?>();
+        private readonly Dictionary<(string, bool), StsToken?> _cachedAliyunStsTokenDict = new Dictionary<(string, bool), StsToken?>();
 
         private IDictionary<string, DirectoryPermission> _directoryPermissions = null!;
-        private IDictionary<string, DirectoryDescription> _directoryDescriptions = null!;
 
-        public AliyunStsTokenRepo(ILogger<AliyunStsTokenRepo> logger, IOptions<FileManagerOptions> fileManagerOptions, IDatabase database, IApiClient apiClient, IPreferenceProvider preferenceProvider, ConnectivityManager connectivityManager) : base(logger, database, apiClient, preferenceProvider, connectivityManager)
+        public StsTokenRepo(ILogger<StsTokenRepo> logger, IOptions<FileManagerOptions> fileManagerOptions, IDatabase database, IApiClient apiClient, IPreferenceProvider preferenceProvider, ConnectivityManager connectivityManager) : base(logger, database, apiClient, preferenceProvider, connectivityManager)
         {
             _logger = logger;
             _fileManagerOptions = fileManagerOptions.Value;
 
             _directoryPermissions = _fileManagerOptions.DirectoryPermissions.ToDictionary(p => p.PermissionName);
-            _directoryDescriptions = _fileManagerOptions.Directories.ToDictionary(p => p.DirectoryName);
         }
 
-        protected override AliyunStsToken ToEntity(AliyunStsTokenRes res) => AliyunStsTokenResMapper.ToAliyunStsToken(res);
+        protected override StsToken ToEntity(StsTokenRes res) => StsTokenResMapper.ToStsToken(res);
 
-        protected override AliyunStsTokenRes ToResource(AliyunStsToken entity) => AliyunStsTokenResMapper.ToAliyunStsTokenRes(entity);
+        protected override StsTokenRes ToResource(StsToken entity) => StsTokenResMapper.ToStsTokenRes(entity);
 
-        public async Task<AliyunStsToken?> GetByDirectoryPermissionNameAsync(string directoryPermissionName, bool needWritePermission, TransactionContext? transactionContext, bool remoteForced = false)
+        public async Task<StsToken?> GetByDirectoryPermissionNameAsync(string directoryPermissionName, bool needWritePermission, bool user Specified, TransactionContext? transactionContext, bool remoteForced = false)
         {
             if (!await _getStsTokenSemaphore.WaitAsync(TimeSpan.FromSeconds(60)))
             {
@@ -57,7 +56,7 @@ namespace HB.FullStack.Client.Maui.File
 
             try
             {
-                if (_cachedAliyunStsTokenDict.TryGetValue((directoryPermissionName, needWritePermission), out AliyunStsToken? cachedToken))
+                if (_cachedAliyunStsTokenDict.TryGetValue((directoryPermissionName, needWritePermission), out StsToken? cachedToken))
                 {
                     if (cachedToken == null)
                     {
@@ -84,21 +83,16 @@ namespace HB.FullStack.Client.Maui.File
 
                 Guid userId = PreferenceProvider.UserId!.Value;
 
-                AliyunStsToken? token = await GetFirstOrDefaultAsync(
-                    where: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,
-                    request: new AliyunStsTokenResGetByDirectoryPermissionNameRequest(directoryPermissionName, _fileManagerOptions.AliyunStsTokenRequestUrl),
+                StsToken? token = await GetFirstOrDefaultAsync(
+                    localWhere: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,
+                    remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(directoryPermissionName, _fileManagerOptions.AliyunStsTokenRequestUrl, ApiRequestAuth.JWT),
                     transactionContext: transactionContext,
                     getMode: RepoGetMode.Mixed,
                     ifUseLocalData: (_, tokens) =>
                     {
-                        AliyunStsToken? token = tokens.FirstOrDefault();
+                        StsToken? token = tokens.FirstOrDefault();
 
-                        if (token == null)
-                        {
-                            return false;
-                        }
-
-                        return !token.IsExpired();
+                        return token != null && !token.IsExpired();
                     });
 
                 _cachedAliyunStsTokenDict[(directoryPermissionName, needWritePermission)] = token;

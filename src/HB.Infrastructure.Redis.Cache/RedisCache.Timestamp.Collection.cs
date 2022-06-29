@@ -123,7 +123,7 @@ return data[3]";
 
                 return (byte[]?)result;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(GetFromCollectionAsync));
 
@@ -219,7 +219,7 @@ return data[3]";
 
                 return false;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(SetToCollectionAsync));
 
@@ -280,7 +280,7 @@ return data[3]";
 
                 return deletedSum / 2 == itemKeys.Count();
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveFromCollectionAsync));
 

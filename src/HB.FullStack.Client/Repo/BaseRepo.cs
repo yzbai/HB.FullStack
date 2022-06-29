@@ -132,13 +132,15 @@ namespace HB.FullStack.Client
         #region 查询
 
         protected async Task<IEnumerable<TEntity>> GetAsync(
-            Expression<Func<TEntity, bool>> where,
-            ApiRequest request,
+            Expression<Func<TEntity, bool>> localWhere,
+            ApiRequest remoteRequest,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
             IfUseLocalData<TEntity>? ifUseLocalData = null)
         {
             EnsureNotSyncing();
+
+            //TODO: await Syncing();
 
             if (ClientEntityDef.NeedLogined)
             {
@@ -147,7 +149,7 @@ namespace HB.FullStack.Client
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
@@ -156,15 +158,15 @@ namespace HB.FullStack.Client
                 return locals;
             }
 
-            return await SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
+            return await SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
         }
 
         /// <summary>
         /// 先返回本地初始值，再更新为服务器值
         /// </summary>
         protected async Task<ObservableTask<IEnumerable<TEntity>>> GetObservableTaskAsync(
-            Expression<Func<TEntity, bool>> where,
-            ApiRequest request,
+            Expression<Func<TEntity, bool>> localWhere,
+            ApiRequest remoteRequest,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.Mixed,
             IfUseLocalData<TEntity>? ifUseLocalData = null,
@@ -178,7 +180,7 @@ namespace HB.FullStack.Client
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
@@ -188,28 +190,28 @@ namespace HB.FullStack.Client
 
             return new ObservableTask<IEnumerable<TEntity>>(
                 locals,
-                () => SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
+                () => SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
                 onException,
                 continueOnCapturedContext);
         }
 
         protected async Task<TEntity?> GetFirstOrDefaultAsync(
-            Expression<Func<TEntity, bool>> where,
-            ApiRequest request,
+            Expression<Func<TEntity, bool>> localWhere,
+            ApiRequest remoteRequest,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
             IfUseLocalData<TEntity>? ifUseLocalData = null)
         {
             EnsureNotSyncing();
 
-            IEnumerable<TEntity> entities = await GetAsync(where, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
+            IEnumerable<TEntity> entities = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
             return entities.FirstOrDefault();
         }
 
         protected async Task<ObservableTask<TEntity?>> GetFirstOrDefaultObservableTaskAsync(
-            Expression<Func<TEntity, bool>> where,
-            ApiRequest request,
+            Expression<Func<TEntity, bool>> localWhere,
+            ApiRequest remoteRequest,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.Mixed,
             IfUseLocalData<TEntity>? ifUseLocalData = null,
@@ -223,7 +225,7 @@ namespace HB.FullStack.Client
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await Database.RetrieveAsync(where, null).ConfigureAwait(false);
+            IEnumerable<TEntity> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
@@ -238,23 +240,23 @@ namespace HB.FullStack.Client
 
             return new ObservableTask<TEntity?>(
                 locals.FirstOrDefault(),
-                async () => (await SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
+                async () => (await SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
                 onException,
                 continueOnCapturedContext);
         }
 
         private async Task<IEnumerable<TEntity>> SyncGetAsync(
-            IEnumerable<TEntity> locals,
-            ApiRequest request,
+            IEnumerable<TEntity> localEntities,
+            ApiRequest remoteRequest,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
             IfUseLocalData<TEntity> ifUseLocalData)
         {
             //如果不强制远程，并且满足使用本地数据条件
-            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(request, locals))
+            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(remoteRequest, localEntities))
             {
                 _logger.LogDebug("本地数据可用，返回本地, Type:{type}", typeof(TEntity).Name);
-                return locals;
+                return localEntities;
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
@@ -264,11 +266,11 @@ namespace HB.FullStack.Client
 
                 ConnectivityManager.OnOfflineDataReaded();
 
-                return locals;
+                return localEntities;
             }
 
             //获取远程
-            IEnumerable<TRes>? ress = await ApiClient.GetAsync<IEnumerable<TRes>>(request).ConfigureAwait(false);
+            IEnumerable<TRes>? ress = await ApiClient.GetAsync<IEnumerable<TRes>>(remoteRequest).ConfigureAwait(false);
 
             IEnumerable<TEntity> remotes = ress!.Select(r => ToEntity(r)).ToList();
 
@@ -299,10 +301,9 @@ namespace HB.FullStack.Client
         /// <summary>
         /// 本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
         /// </summary>
-        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> locals)
+        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> localEntities)
         {
-            DateTimeOffset now = TimeUtil.UtcNow;
-            return locals.Any() && locals.All(t => now - t.LastTime < ClientEntityDef.ExpiryTime);
+            return localEntities.Any() && localEntities.All(t => TimeUtil.UtcNow - t.LastTime < ClientEntityDef.ExpiryTime);
         }
 
         #endregion

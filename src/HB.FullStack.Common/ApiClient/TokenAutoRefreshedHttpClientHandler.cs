@@ -94,7 +94,7 @@ namespace HB.FullStack.Common.ApiClient
 
             return _options.Endpoints.FirstOrDefault(endpoint =>
             {
-                return authority.StartsWith(endpoint.Url!.Authority, StringComparison.InvariantCultureIgnoreCase);
+                return authority.StartsWith(endpoint.Url!.Authority, StringComparison.OrdinalIgnoreCase);
             });
         }
     }

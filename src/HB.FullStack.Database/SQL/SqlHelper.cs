@@ -452,7 +452,7 @@ namespace HB.FullStack.Database.SQL
                 int length = 0;
 
 #if NETSTANDARD2_1 || NET6_0_OR_GREATER
-                if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains('(', StringComparison.InvariantCulture))
+                if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains('(', StringComparison.Ordinal))
 #endif
 #if NETSTANDARD2_0
                 if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains("("))

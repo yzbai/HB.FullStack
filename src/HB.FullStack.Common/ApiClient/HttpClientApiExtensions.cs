@@ -101,7 +101,7 @@ namespace System.Net.Http
                 {
                     string authenticate = headValues.First();
 
-                    if (authenticate.StartsWith(challenge, StringComparison.InvariantCultureIgnoreCase))
+                    if (authenticate.StartsWith(challenge, StringComparison.OrdinalIgnoreCase))
                     {
                         authenticate = authenticate.Substring(challenge.Length + 1);
 

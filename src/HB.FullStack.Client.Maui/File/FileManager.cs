@@ -12,6 +12,7 @@ using Aliyun.OSS.Common.Authentication;
 using HB.FullStack.Client.File;
 using HB.FullStack.Client.KeyValue;
 using HB.FullStack.Client.Network;
+using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
@@ -23,17 +24,15 @@ namespace HB.FullStack.Client.Maui.File
 {
     public partial class FileManager : IFileManager
     {
-        public const string USER_TEMP_DIRECTORY_NAME = "UserTempDirectory";
-
         private readonly ILogger _logger;
         private readonly IPreferenceProvider _preferenceProvider;
         private readonly DbSimpleLocker _dbLocker;
-        private readonly AliyunStsTokenRepo _aliyunStsTokenRepo;
+        private readonly StsTokenRepo _aliyunStsTokenRepo;
         private readonly FileManagerOptions _options;
         private Dictionary<string, DirectoryDescription> _directories;
         private readonly ObjectPool<IOss> _ossPool;
 
-        public FileManager(ILogger<FileManager> logger, IOptions<FileManagerOptions> options, IPreferenceProvider preferenceProvider, DbSimpleLocker dbLocker, AliyunStsTokenRepo aliyunStsTokenRepo)
+        public FileManager(ILogger<FileManager> logger, IOptions<FileManagerOptions> options, IPreferenceProvider preferenceProvider, DbSimpleLocker dbLocker, StsTokenRepo aliyunStsTokenRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -47,15 +46,17 @@ namespace HB.FullStack.Client.Maui.File
             _directories = _options.Directories.ToDictionary(d => d.DirectoryName);
         }
 
-        private async Task<IOss> RentOssClientAsync(string requestDirectory, bool needWrite, bool recheckPermissionForced = false)
+        private async Task<IOss> RentOssClientAsync(string directoryPermissionName, bool needWrite, bool recheckPermissionForced = false)
         {
-            AliyunStsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryAsync(requestDirectory, needWrite, null, recheckPermissionForced);
+            StsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(directoryPermissionName, needWrite, null, recheckPermissionForced);
 
             if (stsToken == null)
             {
                 _logger.LogDebug("得到空的 AliyunStsToken, Upload Avatar");
                 throw Exceptions.AliyunStsTokenReturnNull();
             }
+
+            //TODO: 可以进一步抽象，把OssProvider做出来
 
             IOss oss = _ossPool.Get();
 
@@ -80,6 +81,7 @@ namespace HB.FullStack.Client.Maui.File
             {
                 string? directoryPath;
                 string? placeHolder;
+
                 if (_directories.TryGetValue(USER_TEMP_DIRECTORY_NAME, out DirectoryDescription? directoryInfo))
                 {
                     placeHolder = directoryInfo.UserPlaceHolder;
@@ -96,7 +98,7 @@ namespace HB.FullStack.Client.Maui.File
         }
 
         [return: NotNullIfNotNull("fileName")]
-        public string? GetLocalFullPath(string directory, string fileName)
+        public string? GetLocalFullPath(DirectoryDescription directory, string fileName)
         {
             return Path.Combine(PathRoot, directory, fileName);
         }

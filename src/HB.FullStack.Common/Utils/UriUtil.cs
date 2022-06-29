@@ -25,7 +25,7 @@ namespace System
             }
             else
             {
-                int index = urlStr.IndexOf("?", StringComparison.InvariantCulture);
+                int index = urlStr.IndexOf("?", StringComparison.Ordinal);
 
                 string oldQuery = index > 0 ? urlStr.Substring(index + 1) : "";
 

@@ -305,7 +305,7 @@ end
 
                 return MapGetEntitiesRedisResult<TEntity>(result);
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(GetEntitiesAsync));
 
@@ -377,7 +377,7 @@ end
 
                 return rts;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(SetEntitiesAsync));
 
@@ -408,7 +408,7 @@ end
             {
                 await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray(), redisValues.ToArray()).ConfigureAwait(false);
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(RemoveEntitiesAsync));
 
@@ -439,7 +439,7 @@ end
             {
                 await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray(), redisValues.ToArray()).ConfigureAwait(false);
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(entityDef.CacheInstanceName, entityDef.Name, nameof(ForcedRemoveEntitiesAsync));
 

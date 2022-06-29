@@ -1,10 +1,12 @@
-﻿namespace HB.FullStack.Client.Maui.File
+﻿using HB.FullStack.Common.ApiClient;
+
+namespace HB.FullStack.Client.Maui.File
 {
-    public static class AliyunStsTokenResMapper
+    public static class StsTokenResMapper
     {
-        public static AliyunStsToken ToAliyunStsToken(AliyunStsTokenRes obj)
+        public static StsToken ToStsToken(StsTokenRes obj)
         {
-            return new AliyunStsToken
+            return new StsToken
             {
                 Id = obj.Id,
                 Version = obj.Version,
@@ -16,14 +18,14 @@
                 AccessKeyId = obj.AccessKeyId,
                 AccessKeySecret = obj.AccessKeySecret,
                 ExpirationAt = obj.ExpirationAt,
-                DirectoryPermissionName = obj.DirectoryRegExp,
+                DirectoryPermissionName = obj.DirectoryPermissionName,
                 ReadOnly = obj.ReadOnly
             };
         }
 
-        public static AliyunStsTokenRes ToAliyunStsTokenRes(AliyunStsToken obj)
+        public static StsTokenRes ToStsTokenRes(StsToken obj)
         {
-            return new AliyunStsTokenRes
+            return new StsTokenRes
             {
                 Id = obj.Id,
                 Version = obj.Version,
@@ -35,7 +37,7 @@
                 AccessKeyId = obj.AccessKeyId,
                 AccessKeySecret = obj.AccessKeySecret,
                 ExpirationAt = obj.ExpirationAt,
-                DirectoryRegExp = obj.DirectoryRegExp,
+                DirectoryPermissionName = obj.DirectoryPermissionName,
                 ReadOnly = obj.ReadOnly
             };
         }

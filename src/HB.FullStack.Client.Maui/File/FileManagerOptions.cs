@@ -22,13 +22,11 @@ namespace HB.FullStack.Client.Maui.File
 
         public string AliyunStsTokenRequestUrl { get; set; } = null!;
 
-        public TimeSpan AliyunStsTokenExpiryTime { get; set; } = TimeSpan.FromHours(1);
-
         #endregion
 
         #region Directory
 
-        public TimeSpan DefaultFileExpiryTime { get; set; } = TimeSpan.FromHours(1);
+        public TimeSpan DefaultDirectoryExpiryTime { get; set; } = TimeSpan.FromHours(1);
 
         public IList<DirectoryDescription> Directories { get; set; } = new List<DirectoryDescription>();
 

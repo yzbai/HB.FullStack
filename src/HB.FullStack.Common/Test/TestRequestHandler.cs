@@ -40,8 +40,8 @@ namespace HB.FullStack.Common.Test
         {
             var regexString = Regex.Escape(url).Replace(@"\{", "{");
 
-            regexString += regexString.EndsWith("/", StringComparison.InvariantCulture) ? "?" : "/?";
-            regexString = (regexString.StartsWith("/", StringComparison.InvariantCulture) ? "^" : "^/") + regexString;
+            regexString += regexString.EndsWith("/", StringComparison.Ordinal) ? "?" : "/?";
+            regexString = (regexString.StartsWith("/", StringComparison.Ordinal) ? "^" : "^/") + regexString;
 
             var regex = new Regex(@"{(.*?)}");
 

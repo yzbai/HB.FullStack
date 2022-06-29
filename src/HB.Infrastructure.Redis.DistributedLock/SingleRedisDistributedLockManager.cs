@@ -208,7 +208,7 @@ return 1";
 
 				return rt == 1 ? DistributedLockStatus.Acquired : DistributedLockStatus.Failed;
 			}
-			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
 			{
 				logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -263,7 +263,7 @@ return 1";
 
 				redisLock.ExtendCount++;
 			}
-			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
 			{
 				logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -334,7 +334,7 @@ return 1";
 					throw LockExceptions.DistributedLockUnLockFailed(threadId: Environment.CurrentManagedThreadId, resources: redisLock.Resources);
 				}
 			}
-			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+			catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
 			{
 				InitLoadedLuas(redisLock.Options.ConnectionSetting, logger);
 

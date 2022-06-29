@@ -153,7 +153,7 @@ namespace System
                 if (_collectionType.IsAssignableFrom(targetType))
                 {
                     //target is collection
-                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.InvariantCulture))
+                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.Ordinal))
                     {
                         target = FromJson<T>(jsonString);
                         return true;
@@ -178,7 +178,7 @@ namespace System
                 }
                 else
                 {
-                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.InvariantCulture))
+                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.Ordinal))
                     {
                         Type genericType = typeof(IEnumerable<>).MakeGenericType(targetType);
 

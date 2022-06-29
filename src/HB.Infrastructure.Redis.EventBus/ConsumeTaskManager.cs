@@ -155,7 +155,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                         //出错
                     }
                 }
-                catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+                catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
                 {
                     _logger.LogError(ex, "NOSCRIPT, will try again.");
 
