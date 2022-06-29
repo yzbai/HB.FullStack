@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client.File;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Files;
 
 using Microsoft.Maui.Controls;
 
@@ -11,7 +12,7 @@ namespace System
 {
     public static class IFileManagerImageSourceExtensions
     {
-        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, string directory, string? fileName, string defaultFileName, bool remoteForced = false)
+        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, Directory2 directory, string? fileName, string defaultFileName, bool remoteForced = false)
         {
             ImageSource? initImageSource = null;
 
@@ -44,7 +45,12 @@ namespace System
                 });
         }
 
-        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, string directory, string? initFileName, Func<Task<string?>> updateFileNameAsyncFunc, string defaultFileName, bool remoteForced = false)
+        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager,
+            Directory2 directory, 
+            string? initFileName,
+            Func<Task<string?>> updateFileNameAsyncFunc, 
+            string defaultFileName, 
+            bool remoteForced = false)
         {
             ImageSource? initImageSource = null;
 

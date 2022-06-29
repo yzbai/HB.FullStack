@@ -188,7 +188,7 @@ return array";
 
                 return MapResultToStringWithVersion(result);
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -245,7 +245,7 @@ return array";
 
                 return MapGetAllResultToStringWithVersion(result);
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -306,7 +306,7 @@ return array";
                     throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityJsons, errorCode: error);
                 }
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -384,7 +384,7 @@ return array";
                     throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityJsons, errorCode: error);
                 }
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 
@@ -466,7 +466,7 @@ return array";
                     throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityVersions, errorCode: error);
                 }
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 _logger.LogError(ex, "NOSCRIPT, will try again.");
 

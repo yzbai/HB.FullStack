@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class DeleteRequest<T> : ApiRequest where T : ApiResource2
+    public class DeleteRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
@@ -16,13 +16,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public DeleteRequest() { }
 
-        public DeleteRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
+        public DeleteRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(ApiMethodName.Delete, auth, condition)
         {
             Resources.AddRange(ress);
         }
-        public DeleteRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Delete, null)) { }
 
-        public DeleteRequest(T res) : this(new T[] { res }) { }
+        public DeleteRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res }, auth, condition) { }
 
         public override int GetHashCode()
         {

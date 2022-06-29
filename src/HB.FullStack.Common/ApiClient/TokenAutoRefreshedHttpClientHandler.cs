@@ -50,7 +50,7 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage).ConfigureAwait(false);
+                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage,endpointSettings.Challenge).ConfigureAwait(false);
             }
             catch (ErrorCode2Exception ex)
             {
@@ -94,7 +94,7 @@ namespace HB.FullStack.Common.ApiClient
 
             return _options.Endpoints.FirstOrDefault(endpoint =>
             {
-                return authority.StartsWith(endpoint.Url!.Authority, StringComparison.InvariantCultureIgnoreCase);
+                return authority.StartsWith(endpoint.Url!.Authority, StringComparison.OrdinalIgnoreCase);
             });
         }
     }

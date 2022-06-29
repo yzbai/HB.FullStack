@@ -5,11 +5,11 @@ using System;
 namespace HB.FullStack.Client.Maui.File
 {
     [ClientEntity(
-      expirySeconds: 3600,
+      expirySeconds: int.MaxValue, //由StsToken.ExpirationAt业务逻辑决定
       needLogined: true,
       allowOfflineRead: false,
       allowOfflineWrite: false)]
-    public class AliyunStsToken : GuidEntity
+    public class StsToken : GuidEntity
     {
         public Guid UserId { get; set; }
 
@@ -21,8 +21,18 @@ namespace HB.FullStack.Client.Maui.File
 
         public DateTimeOffset ExpirationAt { get; set; }
 
-        public string DirectoryRegExp { get; set; } = null!;
+        public string DirectoryPermissionName { get; set; } = null!;
 
         public bool ReadOnly { get; set; }
+    }
+
+    public static class StsTokenExtensions
+    {
+        private static TimeSpan _gapTime = TimeSpan.FromMinutes(1);
+
+        public static bool IsExpired(this StsToken token)
+        {
+            return token.ExpirationAt - TimeUtil.UtcNow < _gapTime;
+        }
     }
 }

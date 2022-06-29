@@ -21,7 +21,7 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         public string Arn { get; set; } = null!;
 
-        public string DirectoryRegExp { get; set; } = null!;
+        public string DirectoryPermissionName { get; set; } = null!;
 
         public bool ReadOnly { get; set; }
 

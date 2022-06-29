@@ -11,7 +11,13 @@ namespace HB.FullStack.Common.Api
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]
     public class UploadServerSideRequest<T> : UpdateRequest<T> where T : ApiResource2
     {
-        public UploadServerSideRequest() : base(Array.Empty<T>()) { }
+
+        public UploadServerSideRequest()
+        {
+
+        }
+
+        public UploadServerSideRequest(ApiRequestAuth auth, string? condition) : base(Array.Empty<T>(), auth, condition) { }
 
 
         [Required]

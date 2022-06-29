@@ -10,9 +10,9 @@ namespace System
     {
         [NotNull] public static CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
 
-        [NotNull] public static StringComparison Comparison { get; set; } = StringComparison.InvariantCulture;
+        [NotNull] public static StringComparison Comparison { get; set; } = StringComparison.Ordinal;
 
-        [NotNull] public static StringComparison ComparisonIgnoreCase { get; set; } = StringComparison.InvariantCultureIgnoreCase;
+        [NotNull] public static StringComparison ComparisonIgnoreCase { get; set; } = StringComparison.OrdinalIgnoreCase;
 
         public static ILogger Logger { get; set; } = null!;
 

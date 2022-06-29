@@ -112,7 +112,7 @@ return data[3]";
 
                 return (byte[]?)result;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(GetAsync));
 
@@ -192,7 +192,7 @@ return data[3]";
 
                 return false;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(SetAsync));
 
@@ -238,7 +238,7 @@ return data[3]";
 
                 return (int)redisResult == 1;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
 
@@ -290,7 +290,7 @@ return data[3]";
 
                 return deletedSum == keys.Length;
             }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.InvariantCulture))
+            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
                 Logger.LogLuaScriptNotLoaded(null, null, nameof(RemoveAsync));
 

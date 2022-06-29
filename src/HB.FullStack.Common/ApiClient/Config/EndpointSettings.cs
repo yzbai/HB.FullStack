@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.ApiClient
         /// 产品名，一般为站点类名
         /// </summary>
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; } = null!;
 
         /// <summary>
         /// 版本
@@ -29,7 +29,12 @@ namespace HB.FullStack.Common.ApiClient
 
         public HttpMethodOverrideMode HttpMethodOverrideMode { get; set; }
 
-        public JwtEndpointSetting JwtEndpoint { get; set; } = new JwtEndpointSetting();
+        /// <summary>
+        /// Gets or sets the challenge to put in the "WWW-Authenticate" header.
+        /// </summary>
+        public string Challenge { get; set; } = "Bearer";
+
+        public JwtEndpointSetting? JwtEndpoint { get; set; }
 
 
         [JsonIgnore]

@@ -229,10 +229,10 @@ namespace HB.FullStack.Database.Entities
             };
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
-            propertyDef.SetMethod = ReflectUtil.GetPropertySetterMethod(propertyInfo, entityDef.EntityType)
+            propertyDef.SetMethod = propertyInfo.GetSetterMethod(entityDef.EntityType)
                 ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
 
-            propertyDef.GetMethod = ReflectUtil.GetPropertyGetterMethod(propertyInfo, entityDef.EntityType)
+            propertyDef.GetMethod = propertyInfo.GetGetterMethod(entityDef.EntityType)
                 ?? throw DatabaseExceptions.EntityError(type: entityDef.EntityFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
 
             propertyDef.IsIndexNeeded = propertyAttribute.NeedIndex;

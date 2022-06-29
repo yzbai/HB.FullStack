@@ -59,7 +59,11 @@ namespace Microsoft.Extensions.DependencyInjection
 #if NET5_0_OR_GREATER
                     httpClient.DefaultRequestVersion = HttpVersion.Version20;
 #endif
-                    httpClient.BaseAddress = endpoint.Url;
+                    if (endpoint.Url != null)
+                    {
+                        httpClient.BaseAddress = endpoint.Url;
+                    }
+
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
                 });

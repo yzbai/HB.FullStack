@@ -18,11 +18,6 @@ namespace HB.FullStack.Common.Api
         public string Version { get; }
 
         /// <summary>
-        /// 验证方式
-        /// </summary>
-        public ApiAuthType AuthType { get; private set; }
-
-        /// <summary>
         /// 什么名字
         /// </summary>
         public string ResName { get; }
@@ -32,30 +27,12 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string? Parent1ResName { get; set; }
 
-        private string? _apiKeyName;
+        public string? Parent2ResName { get; set; }
 
-        public string? ApiKeyName
-        {
-            get => _apiKeyName;
-            set
-            {
-                if(value.IsNullOrEmpty())
-                {
-                    return;
-                }
-
-                _apiKeyName = value;
-
-                AuthType = ApiAuthType.ApiKey;
-            }
-        }
-
-
-        public ApiResourceAttribute(string endPointName, string version, ApiAuthType authType, string resName)
+        public ApiResourceAttribute(string endPointName, string version, string resName)
         {
             EndPointName = endPointName;
             Version = version;
-            AuthType = authType;
             ResName = resName;
         }
     }

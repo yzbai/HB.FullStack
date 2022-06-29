@@ -32,3 +32,9 @@ namespace System
         }
     }
 }
+/*
+//NOTICE: 几个过期时间
+1. ClientEntity 过期时间， 放在ClientEntityDef里
+2. StsToken 过期时间， 存储在StsToken里
+3，DirectoryDescription过期时间，由客户端自己决定
+*/

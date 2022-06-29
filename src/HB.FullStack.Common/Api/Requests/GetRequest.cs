@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetRequest<T> : ApiRequest where T : ApiResource2
+    public class GetRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         public int? Page { get; set; }
 
@@ -16,18 +16,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetRequest() { }
 
-        public GetRequest(HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder) { }
-
-        /// <summary>
-        ///指定的AuthType可以覆盖ApiResourceDef中定义的
-        /// </summary>
-        public GetRequest(string? condition, ApiAuthType? authType = null) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Get, condition))
-        {
-            if(authType != null)
-            {
-                RequestBuilder!.AuthType = authType.Value;
-            }
-        }
+        public GetRequest(ApiRequestAuth auth, string? condition) : base(ApiMethodName.Get, auth, condition) { }
 
         public override int GetHashCode()
         {

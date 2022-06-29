@@ -10,7 +10,7 @@ namespace System.Net.Http
         /// <typeparam name="T"></typeparam>
         /// <param name="responseMessage"></param>
         /// <returns></returns>
-        public static async Task<(bool, T?)> TryDeserializeJsonAsync<T>(this HttpResponseMessage responseMessage) where T : class
+        public static async Task<(bool, T?)> TryDeserializeJsonContentAsync<T>(this HttpResponseMessage responseMessage) where T : class
         {
             string? mediaType = responseMessage.Content.Headers.ContentType?.MediaType;
 

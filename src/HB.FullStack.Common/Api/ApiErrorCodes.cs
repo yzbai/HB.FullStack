@@ -12,7 +12,7 @@ namespace System
         public static ErrorCode ApiNotAvailable { get; } = new ErrorCode(nameof(ApiNotAvailable), "");
         public static ErrorCode ApiErrorUnkownFormat { get; } = new ErrorCode(nameof(ApiErrorUnkownFormat), "");
         public static ErrorCode NotApiResourceEntity { get; } = new ErrorCode(nameof(NotApiResourceEntity), "");
-        public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(nameof(ApiSmsCodeInvalid), "");
+        public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(nameof(ApiSmsCodeInvalid), "短信验证码错误。");
         public static ErrorCode SmsServiceError { get; } = new ErrorCode(nameof(SmsServiceError), "");
         public static ErrorCode CommonResourceTokenNeeded { get; } = new ErrorCode(nameof(CommonResourceTokenNeeded), "");
         public static ErrorCode CommonResourceTokenError { get; } = new ErrorCode(nameof(CommonResourceTokenError), "");
@@ -60,6 +60,10 @@ namespace System
         public static ErrorCode CapthcaNotFound { get; } = new ErrorCode(nameof(CapthcaNotFound), "");
         public static ErrorCode CapthcaError { get; } = new ErrorCode(nameof(CapthcaError), "");
         public static ErrorCode NeedOwnerResId { get; } = new ErrorCode(nameof(NeedOwnerResId), "");
+
+        public static ErrorCode LackParent1ResIdAttribute { get; } = new ErrorCode(nameof(LackParent1ResIdAttribute), "因为制定了Parent1ResName，但缺少Parent1ResIdAttribute");
+
+        public static ErrorCode LackParent2ResIdAttribute { get; } = new ErrorCode(nameof(LackParent2ResIdAttribute), "因为制定了Parent2ResName，但缺少Parent2ResIdAttribute");
     }
 
     public static partial class ApiExceptions
@@ -131,12 +135,6 @@ namespace System
             return ex;
         }
 
-        public static Exception ServerReturnError(ErrorCode errorCode)
-        {
-            ApiException ex = new ApiException(errorCode);
-            return ex;
-        }
-
         internal static Exception FileUpdateRequestCountNotEven()
         {
             ApiException ex = new ApiException(ApiErrorCodes.FileUpdateRequestCountNotEven);
@@ -170,14 +168,14 @@ namespace System
             return ex;
         }
 
-        public static Exception ApiRequestSetJwtError(ApiRequest request)
+        public static Exception ApiRequestSetJwtError(HttpRequestBuilder request)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetJwtError);
 
             return ex;
         }
 
-        public static Exception ApiRequestSetApiKeyError(ApiRequest request)
+        public static Exception ApiRequestSetApiKeyError(HttpRequestBuilder requestBuilder)
         {
             ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetApiKeyError);
 
@@ -207,6 +205,24 @@ namespace System
             ApiException ex = new ApiException(ApiErrorCodes.NeedOwnerResId);
 
             ex.Data["ResName"] = resName;
+
+            return ex;
+        }
+
+        internal static Exception LackParent1ResAttribute(Type type)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.LackParent1ResIdAttribute);
+
+            ex.Data["ResName"] = type.FullName;
+
+            return ex;
+        }
+
+        internal static Exception LackParent2ResAttribute(Type type)
+        {
+            ApiException ex = new ApiException(ApiErrorCodes.LackParent2ResIdAttribute);
+
+            ex.Data["ResName"] = type.FullName;
 
             return ex;
         }

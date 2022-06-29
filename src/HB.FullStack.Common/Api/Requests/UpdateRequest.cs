@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Http;
-using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UpdateRequest<T> : ApiRequest where T : ApiResource2
+    public class UpdateRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [IdBarrier]
         [CollectionMemeberValidated]
@@ -16,12 +14,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UpdateRequest() { }
 
-        public UpdateRequest(IEnumerable<T> ress) : base(new RestfulHttpRequestBuilder<T>(HttpMethodName.Put, null))
+        public UpdateRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(ApiMethodName.Put, auth, condition)
         {
             Resources.AddRange(ress);
         }
 
-        public UpdateRequest(T res) : this(new T[] { res }) { }
+        public UpdateRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res },auth, condition) { }
 
         public override int GetHashCode()
         {

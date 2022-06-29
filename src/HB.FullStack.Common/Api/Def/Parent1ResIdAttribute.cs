@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Common.Api
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class ResourceOwnerIdAttribute : Attribute
+    public sealed class Parent1ResIdAttribute : Attribute
     {
         
     }

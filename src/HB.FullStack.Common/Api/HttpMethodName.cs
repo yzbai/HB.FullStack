@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Common.Api
 {
-    public enum HttpMethodName
+    public enum ApiMethodName
     {
         None = 0,
         Get = 1,
@@ -17,30 +17,30 @@ namespace HB.FullStack.Common.Api
         //NOTICE: Patch not defined in .net standard 2.0
         //private static readonly HttpMethod _patch = new HttpMethod("Patch");
 
-        public static HttpMethod ToHttpMethod(this HttpMethodName httpMethodName)
+        public static HttpMethod ToHttpMethod(this ApiMethodName apiMethodName)
         {
-            return httpMethodName switch
+            return apiMethodName switch
             {
-                HttpMethodName.None => throw new System.NotImplementedException(),
-                HttpMethodName.Get => HttpMethod.Get,
-                HttpMethodName.Post => HttpMethod.Post,
-                HttpMethodName.Put => HttpMethod.Put,
-                HttpMethodName.Delete => HttpMethod.Delete,
-                HttpMethodName.Patch => HttpMethod.Patch,
+                ApiMethodName.None => throw new System.NotImplementedException(),
+                ApiMethodName.Get => HttpMethod.Get,
+                ApiMethodName.Post => HttpMethod.Post,
+                ApiMethodName.Put => HttpMethod.Put,
+                ApiMethodName.Delete => HttpMethod.Delete,
+                ApiMethodName.Patch => HttpMethod.Patch,
                 _ => throw new System.NotImplementedException(),
             };
         }
 
-        public static string ToHttpMethodString(this HttpMethodName httpMethodName)
+        public static string ToHttpMethodString(this ApiMethodName httpMethodName)
         {
             return httpMethodName switch
             {
-                HttpMethodName.None => throw new System.NotImplementedException(),
-                HttpMethodName.Get => "Get",
-                HttpMethodName.Post => "Post",
-                HttpMethodName.Put => "Put",
-                HttpMethodName.Delete => "Delete",
-                HttpMethodName.Patch => "Patch",
+                ApiMethodName.None => throw new System.NotImplementedException(),
+                ApiMethodName.Get => "Get",
+                ApiMethodName.Post => "Post",
+                ApiMethodName.Put => "Put",
+                ApiMethodName.Delete => "Delete",
+                ApiMethodName.Patch => "Patch",
                 _ => throw new System.NotImplementedException(),
             };
         }

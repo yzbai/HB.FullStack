@@ -73,6 +73,23 @@ namespace System
             return jsonString.IsNullOrEmpty() ? default : JsonSerializer.Deserialize<T>(jsonString, _jsonSerializerOptions);
         }
 
+        public static bool TryFromJson<T>(string? jsonString, out T? obj)
+        {
+            try
+            {
+                obj = FromJson<T>(jsonString);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.Logger?.LogUnSerializeLogError(jsonString, ex);
+
+                obj = default;
+                return false;
+            }
+        }
+
         public static async Task<object?> FromJsonAsync(Type dataType, Stream responseStream)
         {
             return await JsonSerializer.DeserializeAsync(responseStream, dataType, _jsonSerializerOptions).ConfigureAwait(false);
@@ -136,7 +153,7 @@ namespace System
                 if (_collectionType.IsAssignableFrom(targetType))
                 {
                     //target is collection
-                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.InvariantCulture))
+                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.Ordinal))
                     {
                         target = FromJson<T>(jsonString);
                         return true;
@@ -161,7 +178,7 @@ namespace System
                 }
                 else
                 {
-                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.InvariantCulture))
+                    if (jsonString != null && jsonString.StartsWith("[", StringComparison.Ordinal))
                     {
                         Type genericType = typeof(IEnumerable<>).MakeGenericType(targetType);
 

@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Test
 
         public TestRequestHandler(
             string url,
-            HttpMethodName httpMethod,
+            ApiMethodName httpMethod,
             Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction
         )
         {
@@ -29,7 +29,7 @@ namespace HB.FullStack.Common.Test
         }
 
         public TestRequestHandler(string url, Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction)
-            : this(url, HttpMethodName.None, handlerAction) { }
+            : this(url, ApiMethodName.None, handlerAction) { }
 
         string Url { get; }
         string HttpMethod { get; }
@@ -40,8 +40,8 @@ namespace HB.FullStack.Common.Test
         {
             var regexString = Regex.Escape(url).Replace(@"\{", "{");
 
-            regexString += regexString.EndsWith("/", StringComparison.InvariantCulture) ? "?" : "/?";
-            regexString = (regexString.StartsWith("/", StringComparison.InvariantCulture) ? "^" : "^/") + regexString;
+            regexString += regexString.EndsWith("/", StringComparison.Ordinal) ? "?" : "/?";
+            regexString = (regexString.StartsWith("/", StringComparison.Ordinal) ? "^" : "^/") + regexString;
 
             var regex = new Regex(@"{(.*?)}");
 

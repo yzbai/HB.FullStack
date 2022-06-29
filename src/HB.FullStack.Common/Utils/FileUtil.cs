@@ -239,5 +239,17 @@ namespace System
 
             throw new FileLoadException();
         }
+
+        public static string GetRandomFileName(string fileExtension)
+        {
+            if (fileExtension.StartsWith('.'))
+            {
+                return $"{Path.GetRandomFileName()}{fileExtension}";
+            }
+            else
+            {
+                return $"{Path.GetRandomFileName()}.{fileExtension}";
+            }
+        }
     }
 }

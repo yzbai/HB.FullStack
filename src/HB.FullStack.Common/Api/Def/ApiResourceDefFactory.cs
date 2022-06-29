@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace HB.FullStack.Common.Api
@@ -20,15 +21,45 @@ namespace HB.FullStack.Common.Api
             //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取.并且Configuration可以覆盖Attribute设置
             var attr = type.GetCustomAttribute<ApiResourceAttribute>();
 
-            return attr == null ? null : new ApiResourceDef
+            if (attr == null)
+            {
+                return null;
+            }
+
+            ApiResourceDef def = new ApiResourceDef
             {
                 EndpointName = attr.EndPointName,
                 Version = attr.Version,
-                AuthType = attr.AuthType,
                 ResName = attr.ResName,
                 Parent1ResName = attr.Parent1ResName,
-                ApiKeyName = attr.ApiKeyName
+                Parent2ResName = attr.Parent2ResName,
             };
+
+            if (def.Parent1ResName.IsNotNullOrEmpty())
+            {
+                MethodInfo? getter = type.GetGetterMethodByAttribute<Parent1ResIdAttribute>();
+                
+                if(getter == null)
+                {
+                    throw ApiExceptions.LackParent1ResAttribute(type);
+                }
+
+                def.Parent1ResIdGetMethod = getter;
+            }
+
+            if (def.Parent2ResName.IsNotNullOrEmpty())
+            {
+                MethodInfo? getter = type.GetGetterMethodByAttribute<Parent2ResIdAttribute>();
+
+                if (getter == null)
+                {
+                    throw ApiExceptions.LackParent2ResAttribute(type);
+                }
+
+                def.Parent2ResIdGetMethod = getter;
+            }
+
+            return def;
         }
 
         public static void Register<T>(ApiResourceDef def) where T : ApiResource2

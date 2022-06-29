@@ -27,11 +27,11 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(action);
 
             services.AddSingleton<IFileManager, FileManager>();
-            services.AddSingleton<AliyunStsTokenRepo>();
+            services.AddSingleton<StsTokenRepo>();
 
-            ClientEntityDefFactory.Register<AliyunStsToken>(new ClientEntityDef
+            ClientEntityDefFactory.Register<StsToken>(new ClientEntityDef
             {
-                ExpiryTime = options.AliyunStsTokenExpiryTime,
+                ExpiryTime = TimeSpan.MaxValue,
                 AllowOfflineRead = false,
                 AllowOfflineWrite = false,
                 NeedLogined = true

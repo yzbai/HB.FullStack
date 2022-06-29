@@ -1,11 +1,14 @@
-﻿using HB.FullStack.Common.Api;
-using HB.FullStack.Database.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using System;
+using HB.FullStack.Common.Api;
 
-namespace HB.FullStack.Client.Maui.File
+namespace HB.FullStack.Common.ApiClient
 {
-    public class AliyunStsTokenRes : GuidResource
+    public class StsTokenRes : GuidResource
     {
         public Guid UserId { get; set; }
 
@@ -20,13 +23,14 @@ namespace HB.FullStack.Client.Maui.File
         /// <summary>
         /// 修正后的Directory,比如请求/a/b/c的权限，返回了/a的权限，即权限扩大
         /// </summary>
-        public string DirectoryRegExp { get; set; } = null!;
+        public string DirectoryPermissionName { get; set; } = null!;
 
         public bool ReadOnly { get; set; }
 
         protected override int GetChildHashCode()
         {
-            return HashCode.Combine(UserId, SecurityToken, AccessKeyId, AccessKeySecret, ExpirationAt, DirectoryRegExp, ReadOnly);
+            return HashCode.Combine(UserId, SecurityToken, AccessKeyId, AccessKeySecret, ExpirationAt, DirectoryPermissionName, ReadOnly);
         }
     }
+
 }

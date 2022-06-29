@@ -19,6 +19,11 @@ namespace HB.FullStack.Common.ApiClient
 
         public JwtEndpointSetting DefaultJwtEndpoint { get; set; } = null!;
 
+        /// <summary>
+        /// 没有指定Endpoint的apiRequest使用的配置，比如plainurl那些request
+        /// </summary>
+        public string DefaultEndpointName { get; set; } = null!;
+
         public IList<EndpointSettings> Endpoints { get; set; } = new List<EndpointSettings>();
 
         public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();

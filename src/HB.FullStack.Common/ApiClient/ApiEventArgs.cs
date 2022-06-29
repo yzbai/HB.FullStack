@@ -8,9 +8,9 @@ namespace HB.FullStack.Common.ApiClient
     public class ApiEventArgs : EventArgs
     {
         public string RequestId { get; }
-        public HttpMethodName RequestHttpMethod { get;}
+        public ApiMethodName RequestHttpMethod { get;}
 
-        public ApiEventArgs(string requestId, HttpMethodName requestHttpMethod)
+        public ApiEventArgs(string requestId, ApiMethodName requestHttpMethod)
         {
             RequestId = requestId;
             RequestHttpMethod = requestHttpMethod;

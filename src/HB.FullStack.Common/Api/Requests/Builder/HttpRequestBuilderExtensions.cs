@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net.Http;
+using System.Text;
 
 namespace HB.FullStack.Common.Api
 {
@@ -9,13 +13,16 @@ namespace HB.FullStack.Common.Api
 
         /// <summary>
         /// 构建HTTP的基本信息
+        /// 之所以写成扩展方法的形式，是为了避免HttpRequestBuilder过大。又为了调用方式比静态方法舒服。
         /// </summary>
-        public static HttpRequestMessage Build(this HttpRequestBuilder builder, HttpMethodOverrideMode httpMethodOverrideMode)
+        public static HttpRequestMessage Build(this HttpRequestBuilder builder, ApiRequest apiRequest)
         {
-            //1. Mthod
-            HttpMethod httpMethod = builder.HttpMethod.ToHttpMethod();
+            //TODO: 思考，HttpRequestBuilder 是否应该包含一个ApiRequest的引用，而使代码看上去更简洁？就不需要apiRequest参数了
 
-            switch (httpMethodOverrideMode)
+            //1. Mthod
+            HttpMethod httpMethod = builder.ApiMethodName.ToHttpMethod();
+
+            switch (builder.EndpointSettings.HttpMethodOverrideMode)
             {
                 case HttpMethodOverrideMode.None:
                     break;
@@ -33,7 +40,7 @@ namespace HB.FullStack.Common.Api
             }
 
             //2. url
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GetUrl())
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, AssembleUrl(builder))
             {
                 //TODO: 看需要不需要使用http2.0
                 //Version = _version20
@@ -45,65 +52,55 @@ namespace HB.FullStack.Common.Api
                 httpRequest.Headers.Add(kv.Key, kv.Value);
             }
 
+            //4, contents
+            if (apiRequest is IUploadRequest fileUpdateRequest)
+            {
+                httpRequest.Content = BuildMultipartContent(fileUpdateRequest);
+            }
+            else if (httpRequest.Method == HttpMethod.Get)
+            {
+                //TODO: Implement this
+                throw new NotImplementedException("还没有实现Http Get 把参数都放到Query中去，请先使用HttpMethodOverrideMode=ALL");
+            }
+            else
+            {
+                //具体传递的数据
+                //包括Get的参数也放到body中去
+                httpRequest.Content = new StringContent(SerializeUtil.ToJson(apiRequest), Encoding.UTF8, "application/json");
+            }
+
             return httpRequest;
         }
+
+        private static string AssembleUrl(HttpRequestBuilder builder)
+        {
+            string uri = builder.GetUrl();
+
+            IDictionary<string, string?> parameters = new Dictionary<string, string?>
+                {
+                    { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
+                    { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)}
+                };
+
+            return UriUtil.AddQuerys(uri, parameters);
+        }
+
+        [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "关于Dispose：MultipartFormDataContent Dipose的时候，会把子content Dipose掉。 而HttpRequestMessage Dispose的时候，会把他的Content Dispose掉")]
+        private static MultipartFormDataContent BuildMultipartContent(IUploadRequest fileRequest)
+        {
+            MultipartFormDataContent content = new MultipartFormDataContent();
+
+            string httpContentName = fileRequest.HttpContentName;
+            byte[] file = fileRequest.GetFile();
+            string fileName = fileRequest.FileName;
+
+            ByteArrayContent byteArrayContent = new ByteArrayContent(file);
+            content.Add(byteArrayContent, httpContentName, fileName);
+
+            content.Add(new StringContent(SerializeUtil.ToJson(fileRequest), Encoding.UTF8, "application/json"));
+
+            return content;
+        }
     }
-
-    //public class RestfulHttpRequestBuilder<TParent, T> : RestfulHttpRequestBuilder where T : ApiResource2 where TParent : ApiResource2
-    //{
-    //    public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, ApiAuthType apiAuthType, Guid parentId, string? condition)
-    //        : base(httpMethod, needHttpMethodOveride, apiAuthType, null, null, null, condition)
-    //    {
-    //        SetByApiResourceDef(parentId);
-    //    }
-
-    //    public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, string apiKeyName, Guid parentId, string? condition)
-    //        : base(httpMethod, needHttpMethodOveride, apiKeyName, null, null, null, condition)
-    //    {
-    //        SetByApiResourceDef(parentId);
-    //    }
-
-    //    private void SetByApiResourceDef(Guid parentId)
-    //    {
-    //        ApiResourceDef def = ApiResourceDefFactory.Get<T>();
-
-    //        EndpointName = def.EndpointName;
-    //        ApiVersion = def.Version;
-    //        ResName = def.ResName;
-
-    //        ApiResourceDef paretnDef = ApiResourceDefFactory.Get<TParent>();
-
-    //        AddParent(paretnDef.ResName, parentId.ToString());
-    //    }
-    //}
-
-    //public class RestfulHttpRequestBuilder<TParent1, TParent2, T> : RestfulHttpRequestBuilder where T : ApiResource2 where TParent1 : ApiResource2 where TParent2 : ApiResource2
-    //{
-    //    public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, ApiAuthType apiAuthType, Guid parent1Id, Guid parent2Id, string? condition)
-    //        : base(httpMethod, needHttpMethodOveride, apiAuthType, null, null, null, condition)
-    //    {
-    //        SetByApiResourceDef(parent1Id, parent2Id);
-    //    }
-
-    //    public RestfulHttpRequestBuilder(HttpMethodName httpMethod, bool needHttpMethodOveride, string apiKeyName, Guid parent1Id, Guid parent2Id, string? condition)
-    //        : base(httpMethod, needHttpMethodOveride, apiKeyName, null, null, null, condition)
-    //    {
-    //        SetByApiResourceDef(parent1Id, parent2Id);
-    //    }
-
-    //    private void SetByApiResourceDef(Guid parent1Id, Guid parent2Id)
-    //    {
-    //        ApiResourceDef def = ApiResourceDefFactory.Get<T>();
-
-    //        EndpointName = def.EndpointName;
-    //        ApiVersion = def.Version;
-    //        ResName = def.ResName;
-
-    //        ApiResourceDef parent1Def = ApiResourceDefFactory.Get<TParent1>();
-    //        ApiResourceDef parent2Def = ApiResourceDefFactory.Get<TParent2>();
-
-    //        AddParent(parent1Def.ResName, parent1Id.ToString());
-    //        AddParent(parent2Def.ResName, parent2Id.ToString());
-    //    }
-    //}
 }

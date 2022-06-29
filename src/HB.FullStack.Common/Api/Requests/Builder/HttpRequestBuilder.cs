@@ -2,35 +2,47 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
-    /// 除内容外构建Request需要的信息
+    /// 构建一个完整的HttpRequest,需要的信息来自三方面：
+    /// 1. Resource定义，即ApiResourceDef
+    /// 2. ApiResource，即业务数据和参数
+    /// 3. Endpoint Setting，即Server与Client的服务设定
     /// </summary>
     public abstract class HttpRequestBuilder
     {
-        public HttpMethodName HttpMethod { get; protected set; }
+        #region 由Endpoint决定
+
+        public HttpEndpointSettings EndpointSettings { get; } = new HttpEndpointSettings();
+
+        #endregion
+
+        #region 由 request决定
+
+        public ApiMethodName ApiMethodName { get; protected set; }
+
+        public ApiRequestAuth Auth { get; protected set; }
+
+        public string? Condition { get; set; }
+
+        #endregion
 
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
-        public ApiAuthType AuthType { get; internal set; }
-
-        public string? ApiKeyName { get; set; }
-
-        protected HttpRequestBuilder(HttpMethodName httpMethod, ApiAuthType apiAuthType, string? apiKeyName = null)
+        protected HttpRequestBuilder(ApiMethodName apiMethodName, ApiRequestAuth auth, string? condition)
         {
-            HttpMethod = httpMethod;
-            AuthType = apiAuthType;
-            ApiKeyName = apiKeyName;
+            ApiMethodName = apiMethodName;
+            Auth = auth;
+            Condition = condition;
         }
 
         public void SetJwt(string jwt)
         {
-            Headers[ApiHeaderNames.Authorization] = "Bearer " + jwt;
+            Headers[ApiHeaderNames.Authorization] = $"{EndpointSettings.Challenge} {jwt}";
         }
 
         public void SetApiKey(string apiKey)
@@ -48,28 +60,15 @@ namespace HB.FullStack.Common.Api
             Headers[ApiHeaderNames.DEVICE_VERSION] = deviceVersion;
         }
 
-        public string GetUrl()
-        {
-            string uri = GetUrlCore();
-
-            IDictionary<string, string?> parameters = new Dictionary<string, string?>
-            {
-                { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
-                { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)}
-            };
-
-            return UriUtil.AddQuerys(uri, parameters);
-        }
-
-        protected abstract string GetUrlCore();
+        public abstract string GetUrl();
 
         public override int GetHashCode()
         {
             HashCode hashCode = new HashCode();
 
-            hashCode.Add(AuthType);
-            hashCode.Add(ApiKeyName);
-            hashCode.Add(HttpMethod);
+            hashCode.Add(Auth);
+            hashCode.Add(ApiMethodName);
+            hashCode.Add(Condition);
 
             foreach (KeyValuePair<string, string> kv in Headers)
             {

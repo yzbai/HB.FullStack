@@ -48,7 +48,7 @@ namespace System
             return type.GetConstructor(Type.EmptyTypes);
         }
 
-        public static MethodInfo? GetPropertySetterMethod(PropertyInfo propertyInfo, Type type)
+        public static MethodInfo? GetSetterMethod(this PropertyInfo propertyInfo, Type type)
         {
             if (propertyInfo.DeclaringType == type) return propertyInfo.GetSetMethod(true);
 
@@ -61,9 +61,12 @@ namespace System
                    null)?.GetSetMethod(true);
         }
 
-        public static MethodInfo? GetPropertyGetterMethod(PropertyInfo propertyInfo, Type type)
+        public static MethodInfo? GetGetterMethod(this PropertyInfo propertyInfo, Type type)
         {
-            if (propertyInfo.DeclaringType == type) return propertyInfo.GetGetMethod(true);
+            if (propertyInfo.DeclaringType == type)
+            {
+                return propertyInfo.GetGetMethod(true);
+            }
 
             return propertyInfo.DeclaringType?.GetProperty(
                    propertyInfo.Name,
@@ -74,7 +77,30 @@ namespace System
                    null)?.GetGetMethod(true);
         }
 
-        public static Func<object, object> CreateGetValueDeleagte(Type declareType, string propertyName)
+        public static MethodInfo? GetGetterMethodByAttribute<T>(this Type type) where T:Attribute
+        {
+            PropertyInfo? propertyInfo = type.GetPropertyInfoByAttribute<T>();
+
+            if(propertyInfo == null) return null;
+
+            return propertyInfo.GetGetterMethod(type);
+        }
+
+        public static MethodInfo? GetSetterMethodByAttribute<T>(this Type type) where T : Attribute
+        {
+            PropertyInfo? propertyInfo = type.GetPropertyInfoByAttribute<T>();
+
+            if (propertyInfo == null) return null;
+
+            return propertyInfo.GetSetterMethod(type);
+        }
+
+        public static PropertyInfo? GetPropertyInfoByAttribute<T>(this Type type) where  T: Attribute
+        {
+            return type.GetProperties().Where(p => p.GetCustomAttribute<T>() != null).FirstOrDefault();
+        }
+
+        public static Func<object, object> CreateGetValueDeleagte(this Type declareType, string propertyName)
         {
             // (object instance) => (object)((declaringType)instance).propertyName
 
@@ -85,7 +111,7 @@ namespace System
             return Expression.Lambda<Func<Object, Object>>(body_return, param_instance).Compile();
         }
 
-        public static Action<object, object> CreateSetValueDelagate(PropertyInfo property)
+        public static Action<object, object> CreateSetValueDelagate(this PropertyInfo property)
         {
             // (object instance, object value) => 
             //     ((instanceType)instance).Set_XXX((propertyType)value)
@@ -101,7 +127,7 @@ namespace System
             return Expression.Lambda<Action<object, object>>(body_call, param_instance, param_value).Compile();
         }
 
-        public static Func<object, object> CreateGetterEmit(PropertyInfo property)
+        public static Func<object, object> CreateGetterEmit(this PropertyInfo property)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
@@ -128,7 +154,7 @@ namespace System
             return (Func<object, object>)dm.CreateDelegate(typeof(Func<object, object>));
         }
 
-        public static Action<object, object> CreatePropertySetter(PropertyInfo property)
+        public static Action<object, object> CreatePropertySetter(this PropertyInfo property)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));

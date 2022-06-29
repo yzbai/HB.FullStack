@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest where T : ApiResource2
+    public class AddRequest<T> : ApiRequest<T> where T : ApiResource2
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
@@ -16,14 +16,12 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddRequest() { }
 
-        public AddRequest(IEnumerable<T> ress, HttpRequestBuilder httpRequestBuilder) : base(httpRequestBuilder)
+        public AddRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(ApiMethodName.Post, auth, condition)
         {
             Resources.AddRange(ress);
         }
 
-        public AddRequest(IEnumerable<T> ress) : this(ress, new RestfulHttpRequestBuilder<T>(HttpMethodName.Post, null)) { }
-
-        public AddRequest(T res) : this(new T[] { res }) { }
+        public AddRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res }, auth, condition) { }
 
         public override int GetHashCode()
         {

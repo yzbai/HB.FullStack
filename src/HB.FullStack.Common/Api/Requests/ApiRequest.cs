@@ -6,15 +6,44 @@ using System.Text.Json.Serialization;
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
-    /// 只强调数据
+    /// ApiRequest包含两部分，一是必须由每个Request决定的构建信息，二是业务数据
     /// </summary>
     public abstract class ApiRequest : ValidatableObject
     {
+        #region Builder
+
+        private HttpRequestBuilder? _requestBuilder;
+
+        public HttpRequestBuilder GetHttpRequestBuilder()
+        {
+            return _requestBuilder ??= CreateHttpRequestBuilder();
+        }
+
+        protected abstract HttpRequestBuilder CreateHttpRequestBuilder();
+
+        #endregion
+
+        #region 由每个Request决定的构建信息
+
         /// <summary>
-        /// NOTICE: JsonIgnore避免Server端收到。RequestBuilder只对构建Request有用。
+        /// 不需要被服务器端看到
         /// </summary>
         [JsonIgnore]
-        public HttpRequestBuilder? RequestBuilder { get; }
+        public ApiMethodName ApiMethodName { get; set; }
+
+        /// <summary>
+        /// 不需要被服务器端看到
+        /// </summary>
+        [JsonIgnore]
+        public ApiRequestAuth Auth { get; set; }
+
+        /// <summary>
+        /// 不需要被服务器端看到
+        /// </summary>
+        [JsonIgnore]
+        public string? Condition { get; set; }
+
+        #endregion
 
         /// <summary>
         /// TODO: 防止同一个RequestID两次被处理
@@ -24,9 +53,11 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         protected ApiRequest() { }
 
-        protected ApiRequest(HttpRequestBuilder requestBuilder)
+        protected ApiRequest(ApiMethodName apiMethodName, ApiRequestAuth auth, string? condition)
         {
-            RequestBuilder = requestBuilder;
+            ApiMethodName = apiMethodName;
+            Auth = auth;
+            Condition = condition;
         }
 
         /// <summary>
@@ -34,14 +65,48 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public override int GetHashCode()
         {
-            HashCode hashCode = new HashCode();
+            return HashCode.Combine(ApiMethodName, Auth, Condition);
+        }
+    }
 
-            if (RequestBuilder != null)
+    public abstract class ApiRequest<T> : ApiRequest where T : ApiResource2
+    {
+        [OnlyForJsonConstructor]
+        protected ApiRequest() { }
+
+        protected ApiRequest(ApiMethodName apiMethodName, ApiRequestAuth auth, string? condition) : base(apiMethodName, auth, condition) { }
+
+        protected sealed override HttpRequestBuilder CreateHttpRequestBuilder()
+        {
+            return CreateRestfulHttpRequestBuilder(this);
+        }
+
+        /// <summary>
+        /// 参数都是由ApiRequest决定的
+        /// </summary>
+        private static RestfulHttpRequestBuilder CreateRestfulHttpRequestBuilder(ApiRequest<T> apiRequest)
+        {
+            RestfulHttpRequestBuilder builder = new RestfulHttpRequestBuilder(apiRequest.ApiMethodName, apiRequest.Auth, apiRequest.Condition, null, null, null);
+
+            ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
+
+            if (def == null)
             {
-                hashCode.Add(RequestBuilder);
+                throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
             }
 
-            return hashCode.ToHashCode();
+            //From Res Def
+            builder.EndpointName = def.EndpointName;
+            builder.ApiVersion = def.Version;
+            builder.ResName = def.ResName;
+
+            builder.Parent1ResName = def.Parent1ResName;
+            builder.Parent2ResName = def.Parent2ResName;
+
+            builder.Parent1ResId = def.Parent1ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
+            builder.Parent2ResId = def.Parent2ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
+
+            return builder;
         }
     }
 }

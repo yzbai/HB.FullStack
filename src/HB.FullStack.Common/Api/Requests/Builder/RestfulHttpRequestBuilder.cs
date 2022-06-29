@@ -10,74 +10,29 @@ namespace HB.FullStack.Common.Api
     /// </summary>
     public class RestfulHttpRequestBuilder : HttpRequestBuilder
     {
+        #region 由Resource决定, 即ApiResourceAttribute, Parent1ResIdAttribute, Parent2ResIdAttribute
+
         public string? EndpointName { get; set; }
 
         public string? ApiVersion { get; set; }
-
-        public string? Condition { get; set; }
 
         public string? ResName { get; set; }
 
         public Guid? ResId { get; set; }
 
-        private IList<ResParent> Parents { get; } = new List<ResParent>();
+        public string? Parent1ResName { get; set; }
 
-        public string? Parent1ResName
+        public string? Parent1ResId { get; set; }
+
+        public string? Parent2ResName { get; set; }
+
+        public string? Parent2ResId { get; set; }
+
+        #endregion
+
+        public sealed override string GetUrl()
         {
-            get
-            {
-                if (Parents.Any())
-                {
-                    return Parents[0].ResName;
-                }
-                return null;
-            }
-            set
-            {
-                if (value.IsNullOrEmpty())
-                {
-                    return;
-                }
-
-                if (Parents.Any())
-                {
-                    Parents[0].ResName = value;
-                }
-                else
-                {
-                    AddParent(value, null);
-                }
-            }
-        }
-
-        public string? Parent1ResId
-        {
-            get
-            {
-                if (Parents.Any())
-                {
-                    return Parents[0].ResId;
-                }
-
-                return null;
-            }
-            set
-            {
-                if (Parents.Any())
-                {
-                    Parents[0].ResId = value;
-                }
-            }
-        }
-
-        public void AddParent(string parentResName, string? parentResId)
-        {
-            Parents.Add(new ResParent { ResName = parentResName, ResId = parentResId });
-        }
-
-        protected sealed override string GetUrlCore()
-        {
-            string? parentSegment = GetParentSegment(Parents);
+            string? parentSegment = GetParentSegment();
 
             if (parentSegment == null && ResId == null)
             {
@@ -96,24 +51,37 @@ namespace HB.FullStack.Common.Api
                 return $"{ApiVersion}/{parentSegment}/{ResName}/{ResId}/{Condition}";
             }
 
-            static string? GetParentSegment(IList<ResParent> lst)
+            string? GetParentSegment()
             {
-                if (lst.IsNullOrEmpty())
+                if (Parent1ResName.IsNotNullOrEmpty())
                 {
-                    return null;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (Parent1ResId.IsNullOrEmpty())
+                    {
+                        throw new ArgumentNullException(nameof(Parent1ResId));
+                    }
+
+                    stringBuilder.Append(Parent1ResName);
+                    stringBuilder.Append('/');
+                    stringBuilder.Append(Parent1ResId);
+
+                    if (Parent2ResName.IsNotNullOrEmpty())
+                    {
+                        if (Parent2ResId.IsNullOrEmpty())
+                        {
+                            throw new ArgumentNullException(nameof(Parent2ResId));
+                        }
+
+                        stringBuilder.Append('/');
+                        stringBuilder.Append(Parent2ResName);
+                        stringBuilder.Append('/');
+                        stringBuilder.Append(Parent2ResId);
+                    }
+
+                    return stringBuilder.ToString();
                 }
 
-                StringBuilder stringBuilder = new StringBuilder();
-
-                foreach (ResParent parent in lst)
-                {
-                    stringBuilder.Append(parent.ResName);
-                    stringBuilder.Append('/');
-                    stringBuilder.Append(parent.ResId);
-                    stringBuilder.Append('/');
-                }
-
-                return stringBuilder.RemoveLast().ToString();
+                return null;
             }
         }
 
@@ -127,70 +95,28 @@ namespace HB.FullStack.Common.Api
             hashCode.Add(Condition);
             hashCode.Add(ResName);
             hashCode.Add(ResId);
-
-            foreach (ResParent parent in Parents)
-            {
-                hashCode.Add(parent.ResId);
-                hashCode.Add(parent.ResName);
-            }
+            hashCode.Add(Parent1ResName);
+            hashCode.Add(Parent2ResName);
+            hashCode.Add(Parent1ResId);
+            hashCode.Add(Parent2ResId);
 
             return hashCode.ToHashCode();
         }
 
+        /// <summary>
+        /// 需要的最小化信息
+        /// </summary>
         public RestfulHttpRequestBuilder(
-            HttpMethodName httpMethod,
-            ApiAuthType apiAuthType,
+            ApiMethodName apiMethodName,
+            ApiRequestAuth auth,
+            string? condition,
             string? endPointName,
             string? apiVersion,
-            string? resName,
-            string? condition) : base(httpMethod, apiAuthType)
+            string? resName) : base(apiMethodName, auth, condition)
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
             ResName = resName;
-            Condition = condition;
-        }
-
-        public RestfulHttpRequestBuilder(
-            HttpMethodName httpMethod,
-            string apiKeyName,
-            string? endPointName,
-            string? apiVersion,
-            string? resName,
-            string? condition) : base(httpMethod, ApiAuthType.ApiKey, apiKeyName)
-        {
-            EndpointName = endPointName;
-            ApiVersion = apiVersion;
-            ResName = resName;
-            Condition = condition;
-        }
-
-        class ResParent
-        {
-            public string ResName { get; set; } = null!;
-            public string? ResId { get; set; }
-        }
-    }
-
-    public class RestfulHttpRequestBuilder<T> : RestfulHttpRequestBuilder where T : ApiResource2
-    {
-        public RestfulHttpRequestBuilder(HttpMethodName httpMethod, string? condition)
-            : base(httpMethod, ApiAuthType.None, null, null, null, condition)
-        {
-            ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
-
-            if (def == null)
-            {
-                throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
-            }
-
-            EndpointName = def.EndpointName;
-            ApiVersion = def.Version;
-            AuthType = def.AuthType;
-            ResName = def.ResName;
-            ApiKeyName = def.ApiKeyName;
-
-            Parent1ResName = def.Parent1ResName;
         }
     }
 }
