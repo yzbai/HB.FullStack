@@ -4,6 +4,8 @@ namespace System
 {
     public static class ClientErrorCodes
     {
+        public static ErrorCode NoSuchDirectory { get; } = new ErrorCode(nameof(NoSuchDirectory), "");
+
         public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(nameof(ImageOptionsOutOfRange), "");
         public static ErrorCode IdBarrierError { get; } = new ErrorCode(nameof(IdBarrierError), "");
         public static ErrorCode ResourceNotFound { get; } = new ErrorCode(nameof(ResourceNotFound), "");
@@ -79,12 +81,12 @@ namespace System
             return ex;
         }
 
-        public static Exception FileServiceError(string fileName, string directory, string cause, Exception innerException)
+        public static Exception FileServiceError(string fileName, string directoryName, string cause, Exception innerException)
         {
             ClientException ex = new ClientException(ClientErrorCodes.FileServiceError, innerException);
 
             ex.Data["FileName"] = fileName;
-            ex.Data["Directory"] = directory;
+            ex.Data["DirectoryName"] = directoryName;
             ex.Data["Cause"] = cause;
 
             return ex;
@@ -167,6 +169,13 @@ namespace System
         {
             ClientException ex = new ClientException(ClientErrorCodes.OperationInvalidCauseofSyncingAfterReconnected);
 
+            return ex;
+        }
+
+        public static Exception NoSuchDirectory(string directoryName)
+        {
+            ClientException ex = new ClientException(ClientErrorCodes.NoSuchDirectory);
+            ex.Data["DirectoryName"] = directoryName;
             return ex;
         }
     }

@@ -26,9 +26,7 @@ namespace HB.FullStack.Client.Maui.File
 
         #region Directory
 
-        public TimeSpan DefaultDirectoryExpiryTime { get; set; } = TimeSpan.FromHours(1);
-
-        public IList<DirectoryDescription> Directories { get; set; } = new List<DirectoryDescription>();
+        public IList<DirectoryDescription> DirectoryDescriptions { get; set; } = new List<DirectoryDescription>();
 
         public IList<DirectoryPermission> DirectoryPermissions { get; set; } = new List<DirectoryPermission>(); 
 

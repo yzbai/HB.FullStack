@@ -11,7 +11,6 @@ using Aliyun.OSS.Common.Authentication;
 
 using HB.FullStack.Client.File;
 using HB.FullStack.Client.KeyValue;
-using HB.FullStack.Client.Network;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
@@ -43,12 +42,12 @@ namespace HB.FullStack.Client.Maui.File
             OssClientPoolPolicy poolPolicy = new OssClientPoolPolicy(_options.AliyunOssEndpoint);
             _ossPool = new DefaultObjectPool<IOss>(poolPolicy, 4);
 
-            _directories = _options.Directories.ToDictionary(d => d.DirectoryName);
+            _directories = _options.DirectoryDescriptions.ToDictionary(d => d.DirectoryName);
         }
 
-        private async Task<IOss> RentOssClientAsync(string directoryPermissionName, bool needWrite, bool recheckPermissionForced = false)
+        private async Task<IOss> RentOssClientAsync(string directoryPermissionName, bool needWrite, string? placeHolderValue, bool recheckPermissionForced = false)
         {
-            StsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(directoryPermissionName, needWrite, null, recheckPermissionForced);
+            StsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(directoryPermissionName, needWrite, placeHolderValue, null, recheckPermissionForced);
 
             if (stsToken == null)
             {
@@ -75,44 +74,40 @@ namespace HB.FullStack.Client.Maui.File
 
         public static string PathRoot { get; } = FileSystem.AppDataDirectory;
 
-        public string CurrentUserTempDirectory
+        private DirectoryDescription GetDirectoryDescription(Directory2 directory)
         {
-            get
+            if(_directories.TryGetValue(directory.DirectoryName, out DirectoryDescription? directoryDescription))
             {
-                string? directoryPath;
-                string? placeHolder;
-
-                if (_directories.TryGetValue(USER_TEMP_DIRECTORY_NAME, out DirectoryDescription? directoryInfo))
-                {
-                    placeHolder = directoryInfo.UserPlaceHolder;
-                    directoryPath = directoryInfo.DirectoryPath;
-                }
-                else
-                {
-                    placeHolder = "{User}";
-                    directoryPath = "UserDatas" + Path.DirectorySeparatorChar + placeHolder + Path.DirectorySeparatorChar + "Temp";
-                }
-
-                return directoryPath.Replace(placeHolder, _preferenceProvider.UserId.ToString(), StringComparison.InvariantCulture);
+                return directoryDescription;
             }
+
+            throw ClientExceptions.NoSuchDirectory(directory.DirectoryName);
         }
 
         [return: NotNullIfNotNull("fileName")]
-        public string? GetLocalFullPath(DirectoryDescription directory, string fileName)
+        public string? GetLocalFullPath(Directory2 directory, string fileName)
         {
-            return Path.Combine(PathRoot, directory, fileName);
+            DirectoryDescription description = GetDirectoryDescription(directory);
+
+            if (description.IsPathContainsPlaceHolder && directory.PlaceHolderValue.IsNullOrEmpty())
+            {
+                throw new ArgumentException(nameof(directory.PlaceHolderValue));
+            }
+
+            return Path.Combine(PathRoot, description.GetPath(directory.PlaceHolderValue), fileName);
         }
 
         public string GetNewTempFullPath(string fileExtension)
         {
             string tempFileName = GetRandomFileName(fileExtension);
-            return GetLocalFullPath(CurrentUserTempDirectory, tempFileName);
+            //return GetLocalFullPath(CurrentUserTempDirectory, tempFileName);
+            return Path.Combine(PathRoot, "temp", tempFileName);
         }
 
         ///<summary>
         ///返回本地fullpath
         ///</summary>
-        public async Task<string> SetFileToMixedAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false)
+        public async Task<string> SetFileToMixedAsync(string sourceLocalFullPath, Directory2 directory, string fileName, bool recheckPermissionForced = false)
         {
             //TODO: 先检查网络连接
 
@@ -123,19 +118,21 @@ namespace HB.FullStack.Client.Maui.File
 
             //首先拷贝到本地
             string localFullPath = GetLocalFullPath(directory, fileName);
-            using (Stream stream = System.IO.File.Open(sourceLocalFullPath, FileMode.Open))
-            {
 
-                if (!localFullPath.Equals(sourceLocalFullPath, StringComparison.OrdinalIgnoreCase))
+            if (!localFullPath.Equals(sourceLocalFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                using (Stream stream = System.IO.File.Open(sourceLocalFullPath, FileMode.Open))
                 {
                     _ = await SaveFileToLocalAsync(stream, localFullPath);
                 }
             }
 
+            DirectoryDescription description = GetDirectoryDescription(directory); 
+
             //upload到远程
             //TODO: 检查file extension，以确保符合destDirectory要求，Avatar 允许图片类型
             //可参考FileUtil对文件的检查
-            IOss oss = await RentOssClientAsync(directory, true, recheckPermissionForced);
+            IOss oss = await RentOssClientAsync(description.DirectoryPermissionName, true, directory.PlaceHolderValue, recheckPermissionForced);
 
             try
             {
@@ -150,7 +147,7 @@ namespace HB.FullStack.Client.Maui.File
                     throw Exceptions.AliyunOssPutObjectError(bucketName: _options.AliyunOssBucketName, key: ossKey);
                 }
 
-                await LockNewlyAddedFile(ossKey, GetOssFileExpiryTime(directory));
+                await LockNewlyAddedFile(ossKey, description.ExpiryTime);
             }
             catch (OssException ex)
             {
@@ -175,10 +172,11 @@ namespace HB.FullStack.Client.Maui.File
         /// <summary>
         /// 返回本地FullPath
         /// </summary>
-        public async Task<string> GetFileFromMixedAsync(string directory, string fileName, bool remoteForced = false)
+        public async Task<string> GetFileFromMixedAsync(Directory2 directory, string fileName, bool remoteForced = false)
         {
             string ossKey = GetOssKey(directory, fileName);
-            TimeSpan localFileExpiryTime = GetOssFileExpiryTime(directory);
+            DirectoryDescription description = GetDirectoryDescription(directory);
+            TimeSpan localFileExpiryTime = description.ExpiryTime;
 
             //刚请求过,且存在就返回
             if (!remoteForced && !await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, localFileExpiryTime))
@@ -207,7 +205,7 @@ namespace HB.FullStack.Client.Maui.File
             IOss oss = null!;
             try
             {
-                oss = await RentOssClientAsync(directory, false);
+                oss = await RentOssClientAsync(description.DirectoryPermissionName, false, directory.PlaceHolderValue, remoteForced);
 
                 using OssObject ossObject = oss.GetObject(_options.AliyunOssBucketName, ossKey);
 
@@ -221,7 +219,7 @@ namespace HB.FullStack.Client.Maui.File
             catch (Exception ex)
             {
                 //TODO:  处理这里, HttpRequrestException
-                throw ClientExceptions.FileServiceError(fileName: fileName, directory: directory, cause: "Oss获取文件出错", innerException: ex);
+                throw ClientExceptions.FileServiceError(fileName: fileName, directoryName: directory.DirectoryName, cause: "Oss获取文件出错", innerException: ex);
             }
             finally
             {
@@ -229,19 +227,15 @@ namespace HB.FullStack.Client.Maui.File
             }
         }
 
-
-
         private async Task LockNewlyAddedFile(string ossKey, TimeSpan expiryTime)
         {
-            //TimeSpan localFileExpiryTime = GetOssFileExpiryTime(Path.GetDirectoryName(ossKey));
-
             await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, expiryTime);
         }
 
         /// <summary>
         /// 返回Null表示失败
         /// </summary>
-        public Task<string?> SaveFileToLocalAsync(byte[] data, string directory, string fileName)
+        public Task<string?> SaveFileToLocalAsync(byte[] data, Directory2 directory, string fileName)
         {
             string fullPath = GetLocalFullPath(directory, fileName);
 
@@ -264,7 +258,7 @@ namespace HB.FullStack.Client.Maui.File
         /// <summary>
         /// 返回Null表示失败
         /// </summary>
-        public Task<string> SaveFileToLocalAsync(Stream stream, string directory, string fileName)
+        public Task<string> SaveFileToLocalAsync(Stream stream, Directory2 directory, string fileName)
         {
             string fullPath = GetLocalFullPath(directory, fileName);
             return SaveFileToLocalAsync(stream, fullPath);
@@ -282,25 +276,16 @@ namespace HB.FullStack.Client.Maui.File
             }
         }
 
-        private TimeSpan GetOssFileExpiryTime(string directory)
-        {
-            if (_directories.TryGetValue(directory, out DirectoryDescription? directoryInfo))
-            {
-                return directoryInfo.ExpiryTime;
-            }
-
-            return _options.DefaultFileExpiryTime;
-        }
-
         private static string GetRandomFileName(string fileExtension)
         {
             //TODO:名字太长，缩短
             return $"r{SecurityUtil.CreateUniqueToken()}{fileExtension}";
         }
 
-        private static string GetOssKey(string directory, string fileName)
+        private string GetOssKey(Directory2 directory, string fileName)
         {
-            return $"{directory}/{fileName}";
+            DirectoryDescription description = GetDirectoryDescription(directory);
+            return $"{description.GetPath(directory.PlaceHolderValue)}/{fileName}";
         }
 
         class OssClientPoolPolicy : IPooledObjectPolicy<IOss>
