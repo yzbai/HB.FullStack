@@ -1,11 +1,14 @@
-﻿using HB.FullStack.Common.Api;
-using HB.FullStack.Database.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using System;
+using HB.FullStack.Common.Api;
 
-namespace HB.FullStack.Client.Maui.File
+namespace HB.FullStack.Common.ApiClient
 {
-    public class AliyunStsTokenRes : GuidResource
+    public class StsTokenRes : GuidResource
     {
         public Guid UserId { get; set; }
 
@@ -29,4 +32,5 @@ namespace HB.FullStack.Client.Maui.File
             return HashCode.Combine(UserId, SecurityToken, AccessKeyId, AccessKeySecret, ExpirationAt, DirectoryPermissionName, ReadOnly);
         }
     }
+
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using HB.FullStack.Common.Files;
+
+using Microsoft.Extensions.Options;
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,7 @@ namespace HB.FullStack.Client.Maui.File
         //[ApiResource(Endpoints.MAIN_API, Versions.V1, ApiAuthType.Jwt, Names.AliyunStsTokens)]
 
         #region Aliyun
+
         public string AliyunOssEndpoint { get; set; } = "oss-cn-hangzhou.aliyuncs.com";
 
         public string AliyunOssBucketName { get; set; } = null!;
@@ -29,34 +32,11 @@ namespace HB.FullStack.Client.Maui.File
 
         public IList<DirectoryDescription> Directories { get; set; } = new List<DirectoryDescription>();
 
-        //public string PublicDirectory { get; set; } = "public";
+        public IList<DirectoryPermission> DirectoryPermissions { get; set; } = new List<DirectoryPermission>(); 
 
-        //public string PublicUploadDirectory { get; set; } = "public_upload";
-        //public string CustomerAvatarDirectory { get; set; } = "customer/avatar";
-        //public string CurrentUserTempDirectory { get; set; } = "customer/temp";
-        //public string CustomerVipDirectory { get; set; } = "customer_vip";
-        //public string ThemeDirectory { get; set; } = "theme";
         #endregion
 
         public FileManagerOptions Value => this;
-
-    }
-
-    public class DirectoryDescription
-    {
-        public string DirectoryName { get; set; } = null!;
-
-        public string DirectoryPath { get; set; } = null!;
-
-        /// <summary>
-        /// path中可以出现UsrePlaceHolder，后期进行替换
-        /// </summary>
-        public string UserPlaceHolder { get; set; } = "{User}";
-
-        public bool NeedUserPlace { get; set; } = true;
-
-        public TimeSpan ExpiryTime { get; set; } = TimeSpan.FromHours(1);
-
 
     }
 }

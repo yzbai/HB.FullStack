@@ -79,7 +79,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             return "User" + userId.ToString();
         }
 
-        public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly)
+        public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly, double expirySeconds)
         {
             if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())
             {
@@ -101,29 +101,17 @@ namespace HB.Infrastructure.Aliyun.Sts
                 bucketName,
                 directory.IsNullOrEmpty() ? "*" : directory + "/*");
 
-            //            string policy = @"
-            //{
-            //    ""Statement"": [
-            //        {
-            //            ""Action"": ""oss:GetObject"",
-            //            ""Effect"": ""Allow"",
-            //            ""Resource"": [
 
-            //                ""acs:oss:*:*:mycolorfultime-private-dev/public/*""
-            //            ]
-            //        }
-            //    ],
-            //    ""Version"": ""1""
-            //}";
-
-            //""acs: oss: *:*:mycolorfultime -private-dev"",
+            //TODO: 如果一秒内有100个请求Sts的，是返回同一个Sts，还是向阿里云请求100个
+            //方法：要不公用，要不就ratelimit，可以简单加一个sempha
+            //https://help.aliyun.com/document_detail/39744.htm?spm=a2c4g.11186623.0.0.1e0e5d7anw8GO7
 
             AssumeRoleRequest request = new AssumeRoleRequest
             {
                 AcceptFormat = FormatType.JSON,
                 RoleArn = assumedRole.Arn,
                 RoleSessionName = GetRoleSessionName(userId),
-                DurationSeconds = assumedRole.ExpireSeconds,
+                DurationSeconds = (long)(expirySeconds > assumedRole.MaxExpireSeconds ? assumedRole.MaxExpireSeconds : expirySeconds),
                 Policy = policy
             };
 

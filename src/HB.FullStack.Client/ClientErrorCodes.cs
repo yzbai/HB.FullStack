@@ -118,12 +118,12 @@ namespace System
             return ex;
         }
 
-        public static Exception AliyunStsTokenOverTime(string casuse, string requestDirectory, bool needWrite)
+        public static Exception AliyunStsTokenOverTime(string casuse, string directoryPermissionName, bool needWrite)
         {
             ClientException ex = new ClientException(ClientErrorCodes.AliyunStsTokenOverTime);
 
             ex.Data["Cause"] = casuse;
-            ex.Data["RequestDirectory"] = requestDirectory;
+            ex.Data["DirectoryPermissionName"] = directoryPermissionName;
             ex.Data["NeedWrite"] = needWrite.ToString();
 
             return ex;

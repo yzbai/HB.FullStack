@@ -136,7 +136,7 @@ namespace HB.FullStack.Client
             ApiRequest request,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            IfUseLocalData<TEntity>? whetherUseLocalData = null)
+            IfUseLocalData<TEntity>? ifUseLocalData = null)
         {
             EnsureNotSyncing();
 
@@ -156,7 +156,7 @@ namespace HB.FullStack.Client
                 return locals;
             }
 
-            return await SyncGetAsync(locals, request, transactionContext, getMode, whetherUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
+            return await SyncGetAsync(locals, request, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
         }
 
         /// <summary>

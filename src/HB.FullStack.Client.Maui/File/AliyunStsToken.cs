@@ -21,8 +21,18 @@ namespace HB.FullStack.Client.Maui.File
 
         public DateTimeOffset ExpirationAt { get; set; }
 
-        public string DirectoryRegExp { get; set; } = null!;
+        public string DirectoryPermissionName { get; set; } = null!;
 
         public bool ReadOnly { get; set; }
+    }
+
+    public static class AliyunStsTokenExtensions
+    {
+        private static TimeSpan _gapTime = TimeSpan.FromMinutes(1);
+
+        public static bool IsExpired(this AliyunStsToken token)
+        {
+            return token.ExpirationAt - TimeUtil.UtcNow < _gapTime;
+        }
     }
 }

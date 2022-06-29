@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Files;
 
 namespace HB.FullStack.Client.File
 {
@@ -15,21 +16,21 @@ namespace HB.FullStack.Client.File
         /// 本地和远程同时
         /// 返回本地 FullPath
         /// </summary>
-        Task<string> GetFileFromMixedAsync(string directory, string fileName, bool remoteForced = false);
+        Task<string> GetFileFromMixedAsync(DirectoryDescription directory, string fileName, bool remoteForced = false);
 
         /// <summary>
         /// 本地和远程同时
         /// 返回Local FullPath
         /// </summary>
-        Task<string> SetFileToMixedAsync(string sourceLocalFullPath, string directory, string fileName, bool recheckPermissionForced = false);
+        Task<string> SetFileToMixedAsync(string sourceLocalFullPath, DirectoryDescription directory, string fileName, bool recheckPermissionForced = false);
 
         #region Local
 
-        string GetLocalFullPath(string directory, string fileName);
+        string GetLocalFullPath(DirectoryDescription directory, string fileName);
         string GetNewTempFullPath(string fileExtension);
-        Task<string?> SaveFileToLocalAsync(byte[] data, string directory, string fileName);
+        Task<string?> SaveFileToLocalAsync(byte[] data, DirectoryDescription directory, string fileName);
         Task<string?> SaveFileToLocalAsync(byte[] data, string fullPath);
-        Task<string> SaveFileToLocalAsync(Stream stream, string directory, string fileName);
+        Task<string> SaveFileToLocalAsync(Stream stream, DirectoryDescription directory, string fileName);
         Task<string> SaveFileToLocalAsync(Stream stream, string fullPath);
         Task UnzipAssetZipAsync(string? assetFileName);
 
