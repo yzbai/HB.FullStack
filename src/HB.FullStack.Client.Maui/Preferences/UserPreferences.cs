@@ -160,6 +160,8 @@ namespace HB.FullStack.Client.Maui
             }
         }
 
+        //TODO: 思考：如果ApiClient里为每一个Endpoint设置不同的JwtEndpoint，那么accesToken和Refresh Token是不是也会有多个？
+
         public static string AccessToken
         {
             get

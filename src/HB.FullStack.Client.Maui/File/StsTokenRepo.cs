@@ -91,11 +91,12 @@ namespace HB.FullStack.Client.Maui.File
                     }
                 }
 
+                //TODO: 这里是否要求登陆？
                 Guid userId = PreferenceProvider.UserId!.Value;
 
                 StsToken? token = await GetFirstOrDefaultAsync(
                     localWhere: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,
-                    remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(ApiRequestAuth.JWT, _fileManagerOptions.AliyunStsTokenRequestUrl, directoryPermissionName, placeHolderValue),
+                    remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(ApiRequestAuth.JWT, _fileManagerOptions.AliyunStsTokenRequestUrl, directoryPermissionName, placeHolderValue, !needWritePermission),
                     transactionContext: transactionContext,
                     getMode: RepoGetMode.Mixed,
                     ifUseLocalData: (_, tokens) =>

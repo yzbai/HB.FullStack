@@ -17,7 +17,10 @@ namespace HB.FullStack.Common.ApiClient
 
         public ApiClientOptions Value => this;
 
-        public JwtEndpointSetting DefaultJwtEndpoint { get; set; } = null!;
+        /// <summary>
+        /// 用于用户login的Jwt
+        /// </summary>
+        public JwtEndpointSetting LoginJwtEndpoint { get; set; } = null!;
 
         /// <summary>
         /// 没有指定Endpoint的apiRequest使用的配置，比如plainurl那些request

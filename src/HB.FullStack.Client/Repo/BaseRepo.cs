@@ -142,6 +142,7 @@ namespace HB.FullStack.Client
 
             //TODO: await Syncing();
 
+            //TODO: 是否应该由ClientEntity来决定需要login？或者由业务决定
             if (ClientEntityDef.NeedLogined)
             {
                 _logger.LogDebug("检查Logined, Type:{type}", typeof(TEntity).Name);

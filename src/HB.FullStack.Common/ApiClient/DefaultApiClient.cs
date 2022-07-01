@@ -34,9 +34,9 @@ namespace HB.FullStack.Common.ApiClient
             GlobalApiClientAccessor.ApiClient = this;
         }
 
-        public JwtEndpointSetting GetDefaultJwtEndpointSetting()
+        public JwtEndpointSetting GetLoginJwtEndpointSetting()
         {
-            return _options.DefaultJwtEndpoint;
+            return _options.LoginJwtEndpoint;
         }
 
         public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting

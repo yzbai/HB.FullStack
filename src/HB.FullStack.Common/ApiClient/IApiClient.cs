@@ -18,7 +18,7 @@ namespace HB.FullStack.Common.ApiClient
 
         event AsyncEventHandler<object, ApiEventArgs> Responsed;
 
-        JwtEndpointSetting GetDefaultJwtEndpointSetting();
+        JwtEndpointSetting GetLoginJwtEndpointSetting();
 
         //Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken);
 

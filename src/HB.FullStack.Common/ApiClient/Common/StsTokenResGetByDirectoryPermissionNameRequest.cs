@@ -16,23 +16,25 @@ namespace HB.FullStack.Common.ApiClient
         public string DirectoryPermissionName { get; set; } = null!;
 
         public string? RegexPlaceHolderValue { get; set; }
+        public bool ReadOnly { get; set; }
 
         /// <summary>
         /// OnlyForJsonConstructor
         /// </summary>
         public StsTokenResGetByDirectoryPermissionNameRequest() { }
 
-        public StsTokenResGetByDirectoryPermissionNameRequest(ApiRequestAuth auth, string requestUrl, string directoryPermissionName, string? regexPlaceHolderValue) : base(ApiMethodName.Get, auth, null)
+        public StsTokenResGetByDirectoryPermissionNameRequest(ApiRequestAuth auth, string requestUrl, string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly) : base(ApiMethodName.Get, auth, null)
         {
             DirectoryPermissionName = directoryPermissionName;
             _requestUrl = requestUrl;
 
             RegexPlaceHolderValue = regexPlaceHolderValue;
+            ReadOnly = readOnly;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), DirectoryPermissionName, RegexPlaceHolderValue);
+            return HashCode.Combine(base.GetHashCode(), DirectoryPermissionName, RegexPlaceHolderValue, ReadOnly);
         }
 
         protected override HttpRequestBuilder CreateHttpRequestBuilder()

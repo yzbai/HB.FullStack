@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api.Requests;
 
 using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class BearerTokenResGetBySmsRequest : GetRequest<BearerTokenRes>
+    public class BearerTokenResGetBySmsRequest : ApiRequest
     {
+        private readonly JwtEndpointSetting _jwtEndpointSetting = null!;
+
         [Required]
         [Mobile]
         public string Mobile { get; set; } = null!;
@@ -37,9 +33,11 @@ namespace HB.FullStack.Common.ApiClient
         /// </summary>
         public BearerTokenResGetBySmsRequest() { }
 
-        public BearerTokenResGetBySmsRequest(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
-            : base(ApiRequestAuth.NONE, "BySms")
+        public BearerTokenResGetBySmsRequest(JwtEndpointSetting jwtEndpointSetting, string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
+            : base(ApiMethodName.Get, ApiRequestAuth.NONE, "BySms")
         {
+            _jwtEndpointSetting = jwtEndpointSetting;
+
             Mobile = mobile;
             SmsCode = smsCode;
             SignToWhere = signToWhere;
@@ -51,6 +49,11 @@ namespace HB.FullStack.Common.ApiClient
         public override int GetHashCode()
         {
             return HashCode.Combine(base.GetHashCode(), Mobile, SmsCode, SignToWhere, DeviceId, DeviceVersion);
+        }
+
+        protected override HttpRequestBuilder CreateHttpRequestBuilder()
+        {
+            return new RestfulHttpRequestBuilder(ApiMethodName, Auth, Condition, _jwtEndpointSetting.EndpointName, _jwtEndpointSetting.Version, _jwtEndpointSetting.ResName);
         }
     }
 }

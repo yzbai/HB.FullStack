@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.ApiClient
                 return false;
             }
 
-            JwtEndpointSetting jwtEndpoint = endpointSettings?.JwtEndpoint ?? apiClient.GetDefaultJwtEndpointSetting();
+            JwtEndpointSetting jwtEndpoint = endpointSettings?.JwtEndpoint ?? apiClient.GetLoginJwtEndpointSetting();
 
             string accessTokenHashKey = SecurityUtil.GetHash(userTokenProvider.AccessToken);
 

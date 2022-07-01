@@ -19,6 +19,7 @@ namespace HB.FullStack.Common.Api
         private static ApiResourceDef? CreateResourceDef(Type type)
         {
             //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取.并且Configuration可以覆盖Attribute设置
+
             var attr = type.GetCustomAttribute<ApiResourceAttribute>();
 
             if (attr == null)
