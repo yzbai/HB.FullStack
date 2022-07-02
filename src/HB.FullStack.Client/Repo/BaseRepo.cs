@@ -281,6 +281,11 @@ namespace HB.FullStack.Client
             //检查同步. 比如：离线创建的数据，现在联线，本地数据反而是新的。
             //多客户端：version相同，但lastuser不同。根据时间合并
 
+            //单设备在线
+            //单设备离线
+            //多设备在线
+            //多设备离线
+
             //情况：
             //1，（本地离线产生新数据）同一id数据，lastuser相同，local version 大于 remote version，使用本地更新远程
             //2，（多客户端）同一id数据，local version 等于 remote version，lastuser不同，按lasttime判断使用谁，如果local lasttime更大，使用本地更新远程，否则远程覆盖本地
