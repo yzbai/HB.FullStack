@@ -27,14 +27,14 @@ namespace HB.FullStack.CommonTests.ApiClient
             PreferenceProvider.OnTokenFetched(userId: Guid.NewGuid(), userCreateTime: DateTimeOffset.Now, mobile: null, email: null, loginName: null, accessToken: Guid.NewGuid().ToString(), refreshToken: Guid.NewGuid().ToString());
 
             TestHttpServer httpServer = StartHttpServer(
-                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", HttpMethodName.Get, (request, response, parameters) =>
+                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", ApiMethodName.Get, (request, response, parameters) =>
                 {
                     using StreamReader streamReader = new StreamReader(request.InputStream);
                     string requestJson = streamReader.ReadToEnd();
 
                     GetBookByNameRequest getBookByNameRequest = SerializeUtil.FromJson<GetBookByNameRequest>(requestJson);
 
-                    Assert.IsNull(getBookByNameRequest.RequestBuilder);
+                    //Assert.IsNull(getBookByNameRequest.RequestBuilder);
 
                     BookRes res = new BookRes { Title = "T", Name = getBookByNameRequest.Name, Price = 12.123 };
 
@@ -66,7 +66,7 @@ namespace HB.FullStack.CommonTests.ApiClient
         [JsonConstructor]
         public GetBookByNameRequest() { }
 
-        public GetBookByNameRequest(string name) : base("ByName")
+        public GetBookByNameRequest(string name) : base( ApiRequestAuth.JWT, "ByName")
         {
             Name = name;
         }

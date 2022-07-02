@@ -298,9 +298,9 @@ namespace HB.FullStack.Database
                 parameters.AddRange(entity.ToParameters(entityDef, engineType, _entityDefFactory, number));
 
 #if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(engineType), engineType)}");
+                innerBuilder.Append(CultureInfo.InvariantCulture, $"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
 #elif NETSTANDARD2_1
-                innerBuilder.Append($"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(engineType), engineType)}");
+                innerBuilder.Append($"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
 #endif
 
                 number++;
@@ -335,9 +335,9 @@ namespace HB.FullStack.Database
 
                 parameters.AddRange(entity.ToParameters(entityDef, engineType, _entityDefFactory, number));
 #if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(engineType), engineType)}");
+                innerBuilder.Append(CultureInfo.InvariantCulture, $"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
 #elif NETSTANDARD2_1
-                innerBuilder.Append($"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundChanges_Statement(engineType), engineType)}");
+                innerBuilder.Append($"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
 #endif
 
                 number++;
@@ -414,9 +414,8 @@ namespace HB.FullStack.Database
         #region AddOrUpdate
 
         /// <summary>
-        /// 只在客户端开放，因为不检查Version就update
+        /// 只在客户端开放，因为不检查Version就update. 且Version不变,不增长
         /// </summary>
-
         public EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(

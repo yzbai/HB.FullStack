@@ -289,9 +289,13 @@ namespace HB.FullStack.Client
             //Case
             //1，第一个客户端，离线，疯狂update一条数据，将version变很大，然后第二个客户端在线，过了很久，update了同一条数据。现在第一个客户端在线，get这条数据
 
+            //TODO: 这里不管不顾，直接用远程覆盖，是否要比较一下localEntities和remotes. Version的大小
+            //如果本地Version大
+            //如果本地Version小
             foreach (TEntity entity in remotes)
             {
-                await Database.AddOrUpdateByIdAsync(entity, "", transactionContext).ConfigureAwait(false);
+                //TODO: Reset一遍，覆盖本地？
+                await Database.SetByIdAsync(entity, transactionContext).ConfigureAwait(false);
             }
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{type}", typeof(TEntity).Name);
@@ -335,13 +339,14 @@ namespace HB.FullStack.Client
             }
             else
             {
+                throw new NotImplementedException();
                 //允许脱网下写操作
 
                 //Local
-                await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
+                //await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
 
                 //Record History
-                await Database.BatchAddAsync(GetOfflineHistories(entities, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
+                //await Database.BatchAddAsync(GetOfflineHistories(entities, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
             }
         }
 
@@ -356,14 +361,15 @@ namespace HB.FullStack.Client
                 //TODO: 这里的ApiRequestAuth从哪里获得?
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity), ApiRequestAuth.JWT, null);
 
+                //如果Version不对，会返回NotFount ErrorCode
                 await ApiClient.SendAsync(updateRequest).ConfigureAwait(false);
 
                 await Database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
-                //允许脱网下写操作
-                throw new NotSupportedException();
+                //TODO: 允许脱网下写操作
+                throw new NotImplementedException();
             }
         }
 

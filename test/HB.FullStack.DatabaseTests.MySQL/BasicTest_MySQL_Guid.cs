@@ -28,6 +28,53 @@ namespace HB.FullStack.DatabaseTests
     public class BasicTest_MySQL_Guid : BaseTestClass
     {
         [TestMethod]
+        public async Task Test_Version_Error()
+        {
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            Guid_BookEntity? book1 = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+            Guid_BookEntity? book2 = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+
+            //update book1
+            book1!.Name = "Update Book1";
+            await Db.UpdateAsync(book1, "test", null);
+
+            //update book2
+            book2!.Name = "Update book2";
+            await Db.UpdateAsync(book2, "tester", null);
+
+
+
+        }
+
+        /// <summary>
+        /// //NOTICE: 在sqlite下，重复update，返回1.即matched
+        /// //NOTICE: 在mysql下，重复update，返回1，即mactched
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Test_Repeate_Update_Return()
+        {
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+            book.Id = new Guid("cd5bda08-e5e2-409f-89c5-bea1ae49f2a0");
+
+            await Db.AddAsync(book, "tester", null);
+
+            Guid_BookEntity? book1 = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+
+            int rt = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand($"update tb_guid_bookentity set Name='Update_xxx' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0')"));
+
+            int rt2 = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand($"update tb_guid_bookentity set Name='Update_xxx' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0')"));
+
+            int rt3 = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand($"update tb_guid_bookentity set Name='Update_xxx' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0')"));
+        }
+
+        [TestMethod]
         public async Task Guid_Test_01_Batch_Add_PublisherEntityAsync()
         {
             IList<Guid_PublisherEntity> publishers = Mocker.Guid_GetPublishers();

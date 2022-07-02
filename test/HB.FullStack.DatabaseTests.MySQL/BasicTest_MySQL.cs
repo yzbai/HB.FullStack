@@ -489,7 +489,8 @@ namespace HB.FullStack.DatabaseTests
             Assert.IsTrue(publisherEntities.Any() && publisherEntities.All(p => p.Type == PublisherType.Big));
         }
 
-        //TODO: 考虑这个
+        //NOTICE: 在重复update时，即值不发生改变。默认useAffectedRows=false，即update返回matched的数量。 而useAffectedRows=true，则返回真正发生过改变的数量。
+        //应该保持useAffectedRows=false
         //[TestMethod]
         //[DataRow(true, "server=127.0.0.1;port=3306;user=admin;password=_admin;Db=test_db;SslMode=None;")]
         //[DataRow(false, "server=127.0.0.1;port=3306;user=admin;password=_admin;Db=test_db;SslMode=None;")]

@@ -146,15 +146,6 @@ namespace HB.Infrastructure.SQLite
 
         #region Comand NonQuery
 
-
-
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
@@ -162,27 +153,11 @@ namespace HB.Infrastructure.SQLite
             return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandNonQueryAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
-
-
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
         
         private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, SqliteCommand command)
         {

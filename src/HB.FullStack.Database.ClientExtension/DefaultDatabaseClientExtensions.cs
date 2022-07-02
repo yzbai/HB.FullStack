@@ -44,7 +44,10 @@ namespace HB.FullStack.Database
             }
         }
 
-        public static async Task AddOrUpdateByIdAsync<T>(this IDatabase database, T item, string lastUser, TransactionContext? transContext = null) where T : DatabaseEntity, new()
+        /// <summary>
+        /// AddOrUpdate,即reset，不改变version
+        /// </summary>
+        public static async Task SetByIdAsync<T>(this IDatabase database, T item, /*string lastUser, */TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -57,10 +60,10 @@ namespace HB.FullStack.Database
 
             try
             {
-                DateTimeOffset utcNow = TimeUtil.UtcNow;
-                item.LastUser = lastUser;
-                item.LastTime = utcNow;
-                item.CreateTime = utcNow;
+                //DateTimeOffset utcNow = TimeUtil.UtcNow;
+                //item.LastUser = lastUser;
+                //item.LastTime = utcNow;
+                //item.CreateTime = utcNow;
 
                 if (item.Version < 0)
                 {

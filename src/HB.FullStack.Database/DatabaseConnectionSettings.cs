@@ -14,6 +14,7 @@ namespace HB.FullStack.Database
         [DisallowNull, NotNull]
         public string DatabaseName { get; set; } = null!;
 
+        //TODO: 确保useAffectedRows=false
         [DisallowNull, NotNull]
         public string ConnectionString { get; set; } = null!;
 

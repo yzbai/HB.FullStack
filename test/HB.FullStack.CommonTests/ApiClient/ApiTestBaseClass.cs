@@ -31,17 +31,20 @@ namespace HB.FullStack.CommonTests.ApiClient
                 {
                     options.HttpClientTimeout = TimeSpan.FromSeconds(100);
 
-                    options.DefaultJwtEndpoint = new JwtEndpointSetting {
+                    options.LoginJwtEndpoint = new JwtEndpointSetting
+                    {
                         EndpointName = ApiEndpointName,
                         ResName = JwtRes,
                         Version = ApiVersion
                     };
 
-                    options.Endpoints.Add(new EndpointSettings {
+                    options.Endpoints.Add(new EndpointSettings
+                    {
                         Name = ApiEndpointName,
                         Version = ApiVersion,
                         Url = new Uri($"http://localhost:{Port}/api/"),
-                        JwtEndpoint = new JwtEndpointSetting {
+                        JwtEndpoint = new JwtEndpointSetting
+                        {
                             EndpointName = ApiEndpointName,
                             ResName = JwtRes,
                             Version = ApiVersion

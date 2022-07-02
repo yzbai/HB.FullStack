@@ -22,9 +22,9 @@ namespace HB.FullStack.Database
     public interface IDatabase : IDatabaseWriter, IDatabaseReader
     {
         /// <summary>
-        /// 必须加分布式锁进行。
+        /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        Task InitializeAsync(IEnumerable<Migration>? migrations = null);
+        Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null);
 
         EngineType EngineType { get; }
 

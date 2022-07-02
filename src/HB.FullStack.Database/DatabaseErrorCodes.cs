@@ -157,6 +157,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
+        //TODO: 当因为Version过旧，而引发的NotFound，并不能细化到是Version问题，有可能是id不存在等等。
         internal static Exception NotFound(string type, string item, string? cause)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotFound);

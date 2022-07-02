@@ -76,8 +76,9 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
+        /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task InitializeAsync(IEnumerable<Migration>? migrations = null)
+        public async Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
@@ -90,14 +91,18 @@ namespace HB.FullStack.Database
                 _logger.LogInformation("Database Auto Create Tables Finished.");
             }
 
+            bool migrationExecuted = false;
+
             if (migrations != null && migrations.Any())
             {
-                await MigarateAsync(migrations).ConfigureAwait(false);
+                migrationExecuted = await MigarateAsync(migrations).ConfigureAwait(false);
 
                 _logger.LogInformation("Database Migarate Finished.");
             }
 
             _logger.LogInformation("数据初始化成功！");
+
+            return migrationExecuted;
         }
 
         private async Task AutoCreateTablesIfBrandNewAsync(bool addDropStatement, IEnumerable<Migration>? initializeMigrations)
@@ -171,12 +176,19 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task MigarateAsync(IEnumerable<Migration> migrations)
+        /// <summary>
+        /// 返回是否真正执行过Migration
+        /// </summary>
+        /// <param name="migrations"></param>
+        /// <returns></returns>
+        private async Task<bool> MigarateAsync(IEnumerable<Migration> migrations)
         {
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
             {
                 throw DatabaseExceptions.MigrateError("", "Migraion NewVersion <= OldVersion");
             }
+
+            bool migrationExecuted = false;
 
             foreach (string databaseName in _databaseEngine.DatabaseNames)
             {
@@ -184,6 +196,7 @@ namespace HB.FullStack.Database
 
                 try
                 {
+
                     SystemInfo? sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
 
                     if (sys!.Version < _databaseSettings.Version)
@@ -210,6 +223,7 @@ namespace HB.FullStack.Database
                         foreach (Migration migration in curOrderedMigrations!)
                         {
                             await ApplyMigration(databaseName, transactionContext, migration).ConfigureAwait(false);
+                            migrationExecuted = true;
                         }
 
                         await UpdateSystemVersionAsync(sys.DatabaseName, _databaseSettings.Version, transactionContext.Transaction).ConfigureAwait(false);
@@ -229,6 +243,8 @@ namespace HB.FullStack.Database
                     throw DatabaseExceptions.MigrateError(databaseName, "", ex);
                 }
             }
+
+            return migrationExecuted;
         }
 
         private async Task ApplyMigration(string databaseName, TransactionContext transactionContext, Migration migration)

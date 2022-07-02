@@ -285,7 +285,15 @@ namespace HB.FullStack.Client.Maui.File
         private string GetOssKey(Directory2 directory, string fileName)
         {
             DirectoryDescription description = GetDirectoryDescription(directory);
-            return $"{description.GetPath(directory.PlaceHolderValue)}/{fileName}";
+
+            string directoryPath = description.GetPath(directory.PlaceHolderValue);
+
+            if(Path.DirectorySeparatorChar == '\\')
+            {
+                directoryPath = directoryPath.Replace('\\', '/');
+            }
+
+            return $"{directoryPath}/{fileName}";
         }
 
         class OssClientPoolPolicy : IPooledObjectPolicy<IOss>

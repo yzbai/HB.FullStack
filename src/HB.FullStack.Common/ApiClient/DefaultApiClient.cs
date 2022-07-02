@@ -166,6 +166,12 @@ namespace HB.FullStack.Common.ApiClient
                         return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
+                else if (requestBuilder.Auth.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AuthorizationNoTokenInStore)
+                {
+                    //TODO: 重新登陆， 客户端应该针对Authroization开头的ErrorCode进行相应处理
+                }
+
+                //ApiErrorCodes.SmsCacheError
 
                 throw;
             }
@@ -178,12 +184,12 @@ namespace HB.FullStack.Common.ApiClient
         public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyResponse>(request, cancellationToken);
 
         public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
-        
+
         private static void ApplyEndpointSettings(HttpRequestBuilder requestBuilder, EndpointSettings? endpointSettings)
         {
             requestBuilder.EndpointSettings.HttpMethodOverrideMode = endpointSettings?.HttpMethodOverrideMode ?? HttpMethodOverrideMode.None;
 
-            if (endpointSettings!= null && endpointSettings.Challenge.IsNotNullOrEmpty())
+            if (endpointSettings != null && endpointSettings.Challenge.IsNotNullOrEmpty())
             {
                 requestBuilder.EndpointSettings.Challenge = endpointSettings.Challenge;
             }

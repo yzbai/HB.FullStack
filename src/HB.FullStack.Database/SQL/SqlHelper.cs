@@ -18,7 +18,7 @@ namespace HB.FullStack.Database.SQL
     {
         /// <summary>
         /// 只用于客户端，IdGenEntity上,
-        /// 没有Version检查
+        /// 没有Version检查, Version不增长
         /// </summary>
         /// <returns></returns>
         public static string CreateAddOrUpdateSql(EntityDef entityDef, EngineType engineType, bool returnId, int number = 0)
@@ -58,7 +58,8 @@ namespace HB.FullStack.Database.SQL
 
             EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
-            updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1"));
+            //updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1"));
+            updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName}"));
 
             if (returnId)
             {
@@ -347,15 +348,15 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
-        public static string FoundChanges_Statement(EngineType databaseEngineType)
+        public static string FoundMatchedRows_Statement(EngineType databaseEngineType)
         {
             return databaseEngineType switch
             {
-                //found_rows()返回的查询语句的结果
-                //row_count表示修改时找到的条数
-                //默认下UserAffectRows=false，两者相同。当UserAffectedRow=true时，row_count()只会返回真正修改的行数，找到但值相同没有修改的不算
-                EngineType.MySQL => $"row_count()", // $" found_rows() ",
-                EngineType.SQLite => $" changes() ",
+                //found_rows()返回匹配到的
+                //row_count() 返回真正被修改的
+                
+                EngineType.MySQL => " found_rows() ",//$"row_count()", // $" found_rows() ",
+                EngineType.SQLite => $" changes() ",//sqlite不返回真正受影响的，只返回匹配的
                 _ => "",
             };
         }

@@ -25,6 +25,54 @@ namespace HB.FullStack.DatabaseTests
     public class BasicTest_Sqlite : BaseTestClass
     {
         [TestMethod]
+        public async Task Test_Version_Error()
+        {
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            Guid_BookEntity? book1 = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+            Guid_BookEntity? book2 = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+
+            //update book1
+            book1!.Name = "Update Book1";
+            await Db.UpdateAsync(book1, "test", null);
+
+            //update book2
+            book2!.Name = "Update book2";
+            await Db.UpdateAsync(book2, "tester", null);
+
+
+            
+        }
+
+        /// <summary>
+        /// //NOTICE: 在sqlite下，重复update，返回1.即matched
+        /// //NOTICE: 在mysql下，重复update，返回1，即mactched
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Test_Repeate_Update_Return()
+        {
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            Guid_BookEntity? book1 = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+
+
+
+            int rt = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand($"update tb_Guid_BookEntity set Name='Update_xxx' where Id = '{book.Id}'"));
+
+            int rt2 = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand($"update tb_Guid_BookEntity set Name='Update_xxx' where Id = '{book.Id}'"));
+
+            int rt3 = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand($"update tb_Guid_BookEntity set Name='Update_xxx' where Id = '{book.Id}'"));
+        }
+
+        [TestMethod]
         public async Task Test_1_Batch_Add_PublisherEntityAsync()
         {
             IList<PublisherEntity_Client> publishers = Mocker.GetPublishers_Client();

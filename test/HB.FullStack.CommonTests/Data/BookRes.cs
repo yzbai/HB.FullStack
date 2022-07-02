@@ -9,7 +9,7 @@ using System;
 namespace HB.FullStack.CommonTests.Data
 {
 
-    [ApiResource(ApiEndpointName, ApiVersion, ApiAuthType.Jwt, nameof(BookRes))]
+    [ApiResource(ApiEndpointName, ApiVersion, nameof(BookRes))]
     public class BookRes : ApiResource2
     {
         public string Name { get; set; }

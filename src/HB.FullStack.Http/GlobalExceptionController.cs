@@ -26,7 +26,6 @@ namespace HB.FullStack.WebApi
 
         [AllowAnonymous]
         [Route("GlobalException")]
-        [HttpGet]
         public async Task<IActionResult> ExceptionAsync()
         {
             IExceptionHandlerPathFeature? exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();

@@ -9,9 +9,9 @@ namespace HB.FullStack.Database
     public class EngineCommand
     {
 
-        public EngineCommand(string sql, IList<KeyValuePair<string, object>>? parameters = null)
+        public EngineCommand(string commandText, IList<KeyValuePair<string, object>>? parameters = null)
         {
-            CommandText = sql;
+            CommandText = commandText;
             Parameters = parameters;
         }
 

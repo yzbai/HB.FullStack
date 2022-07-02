@@ -186,7 +186,14 @@ namespace System
             return services;
         }
 
-        public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
+        /// <summary>
+        /// 返回是否有Migration被执行
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="lockManager"></param>
+        /// <param name="migrations"></param>
+        /// <returns></returns>
+        public static async Task<bool> InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
             GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
 
@@ -204,7 +211,7 @@ namespace System
 
                 GlobalSettings.Logger.LogDebug($"获取了初始化数据库的锁:{database.DatabaseNames.ToJoinedString(",")}");
 
-                await database.InitializeAsync(migrations).ConfigureAwait(false);
+                return await database.InitializeAsync(migrations).ConfigureAwait(false);
             }
             finally
             {

@@ -6,21 +6,8 @@ namespace HB.FullStack.Identity
 {
     internal static class IdentityErrorCodes
     {
-        public static ErrorCode AuthorizationNotFound { get; } = new ErrorCode(nameof(AuthorizationNotFound), "");
-        public static ErrorCode AuthorizationPasswordWrong { get; } = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
-        public static ErrorCode AuthorizationTooFrequent { get; } = new ErrorCode(nameof(AuthorizationTooFrequent), "");
-        public static ErrorCode AuthorizationInvalideAccessToken { get; } = new ErrorCode(nameof(AuthorizationInvalideAccessToken), "");
-        public static ErrorCode AuthorizationInvalideDeviceId { get; } = new ErrorCode(nameof(AuthorizationInvalideDeviceId), "");
-        public static ErrorCode AuthorizationInvalideUserId { get; } = new ErrorCode(nameof(AuthorizationInvalideUserId), "");
-        public static ErrorCode AuthorizationUserSecurityStampChanged { get; } = new ErrorCode(nameof(AuthorizationUserSecurityStampChanged), "");
-        public static ErrorCode AuthorizationRefreshTokenExpired { get; } = new ErrorCode(nameof(AuthorizationRefreshTokenExpired), "");
-        public static ErrorCode AuthorizationNoTokenInStore { get; } = new ErrorCode(nameof(AuthorizationNoTokenInStore), "");
-        public static ErrorCode AuthorizationMobileNotConfirmed { get; } = new ErrorCode(nameof(AuthorizationMobileNotConfirmed), "");
-        public static ErrorCode AuthorizationEmailNotConfirmed { get; } = new ErrorCode(nameof(AuthorizationEmailNotConfirmed), "");
-        public static ErrorCode AuthorizationLockedOut { get; } = new ErrorCode(nameof(AuthorizationLockedOut), "");
-        public static ErrorCode AuthorizationOverMaxFailedCount { get; } = new ErrorCode(nameof(AuthorizationOverMaxFailedCount), "");
-        public static ErrorCode JwtSigningCertNotFound { get; } = new ErrorCode(nameof(JwtSigningCertNotFound), "");
-        public static ErrorCode JwtEncryptionCertNotFound { get; } = new ErrorCode(nameof(JwtEncryptionCertNotFound), "");
+      
+        
         public static ErrorCode FoundTooMuch { get; } = new ErrorCode(nameof(FoundTooMuch), "");
         public static ErrorCode NotFound { get; } = new ErrorCode(nameof(NotFound), "");
         public static ErrorCode IdentityNothingConfirmed { get; } = new ErrorCode(nameof(IdentityNothingConfirmed), "");
@@ -35,7 +22,7 @@ namespace HB.FullStack.Identity
     {
         internal static Exception AuthorizationNotFound(SignInContext signInContext)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationNotFound);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationNotFound);
             exception.Data["Context"] = signInContext;
 
             return exception;
@@ -43,7 +30,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationPasswordWrong(SignInContext signInContext)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationPasswordWrong);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationPasswordWrong);
             exception.Data["Context"] = signInContext;
 
             return exception;
@@ -51,7 +38,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationTooFrequent(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationTooFrequent);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationTooFrequent);
             exception.Data["Context"] = context;
 
             return exception;
@@ -59,7 +46,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationInvalideAccessToken(RefreshContext context, Exception innerException)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationInvalideAccessToken, innerException);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationInvalideAccessToken, innerException);
             exception.Data["Context"] = context;
 
             return exception;
@@ -67,7 +54,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationInvalideAccessToken(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationInvalideAccessToken);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationInvalideAccessToken);
             exception.Data["Context"] = context;
 
             return exception;
@@ -75,7 +62,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationInvalideDeviceId(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationInvalideDeviceId);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationInvalideDeviceId);
             exception.Data["Context"] = context;
 
             return exception;
@@ -93,7 +80,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationInvalideUserId(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationInvalideUserId);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationInvalideUserId);
             exception.Data["Context"] = context;
 
             return exception;
@@ -101,7 +88,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationNoTokenInStore(string cause)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationNoTokenInStore);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationNoTokenInStore);
             exception.Data["Cause"] = cause;
 
             return exception;
@@ -109,14 +96,14 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationRefreshTokenExpired()
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationRefreshTokenExpired);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationRefreshTokenExpired);
 
             return exception;
         }
 
         internal static Exception AuthorizationUserSecurityStampChanged(string cause)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationUserSecurityStampChanged);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationUserSecurityStampChanged);
             exception.Data["Cause"] = cause;
 
             return exception;
@@ -124,7 +111,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationMobileNotConfirmed(Guid userId)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationMobileNotConfirmed);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationMobileNotConfirmed);
             exception.Data["UserId"] = userId;
 
             return exception;
@@ -132,7 +119,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationEmailNotConfirmed(Guid userId)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationEmailNotConfirmed);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationEmailNotConfirmed);
             exception.Data["UserId"] = userId;
 
             return exception;
@@ -140,7 +127,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationLockedOut(DateTimeOffset? lockoutEndDate, Guid userId)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationLockedOut);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationLockedOut);
             exception.Data["UserId"] = userId;
             exception.Data["LockoutEndDate"] = lockoutEndDate;
 
@@ -149,7 +136,7 @@ namespace HB.FullStack.Identity
 
         internal static Exception AuthorizationOverMaxFailedCount(Guid userId)
         {
-            IdentityException exception = new IdentityException(IdentityErrorCodes.AuthorizationOverMaxFailedCount);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationOverMaxFailedCount);
             exception.Data["UserId"] = userId;
 
             return exception;
