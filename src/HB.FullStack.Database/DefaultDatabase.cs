@@ -994,6 +994,9 @@ namespace HB.FullStack.Database
             }
         }
 
+        /// <summary>
+        /// version + 1 every time
+        /// </summary>
         public async Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
@@ -1052,6 +1055,7 @@ namespace HB.FullStack.Database
         #endregion
 
         #region 批量更改(Write)
+
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
