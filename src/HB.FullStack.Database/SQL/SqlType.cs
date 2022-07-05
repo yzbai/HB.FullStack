@@ -6,7 +6,8 @@ namespace HB.FullStack.Database.SQL
     {
         AddEntity,
         UpdateEntity,
-        UpdateFields,
+        UpdateFieldsUsingVersionCompare,
+        UpdateFieldsUsingOldNewCompare,
         DeleteEntity,
         SelectEntity,
         Delete,

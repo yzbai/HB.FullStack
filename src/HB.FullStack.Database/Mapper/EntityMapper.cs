@@ -8,6 +8,7 @@ using System.Data;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Entities;
 using HB.FullStack.Database.Engine;
+using System.Linq;
 
 namespace HB.FullStack.Database.Mapper
 {
@@ -104,13 +105,9 @@ namespace HB.FullStack.Database.Mapper
 
         #endregion
 
-        #region ToParameters(ToDb)
+        #region EntityToParameters(ToDb)
 
-        private static readonly ConcurrentDictionary<string, Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]>> _toParametersFuncDict = new ConcurrentDictionary<string, Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]>>();
-
-        //private static readonly object _toParameterFuncDictLocker = new object();
-
-        public static IList<KeyValuePair<string, object>> ToParametersUsingReflection<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
+        public static IList<KeyValuePair<string, object>> EntityToParametersUsingReflection<T>(this T entity, EntityDef entityDef, EngineType engineType, int number = 0) where T : DatabaseEntity, new()
         {
             if (entity.Version < 0)
             {
@@ -129,7 +126,42 @@ namespace HB.FullStack.Database.Mapper
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToParameters(EntityDef entityDef, EngineType engineType, Dictionary<string, object?> propertyValues, int number = 0)
+        private static readonly ConcurrentDictionary<string, Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]>> _entiryToParametersFuncDict =
+            new ConcurrentDictionary<string, Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]>>();
+
+        /// <summary>
+        /// EntityToParameters. number为属性名的后缀数字
+        /// </summary>
+        public static IList<KeyValuePair<string, object>> EntityToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, IEntityDefFactory entityDefFactory, int number = 0) where T : DatabaseEntity, new()
+        {
+            if (entity.Version < 0)
+            {
+                throw DatabaseExceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+            }
+
+            Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedEntityToParametersFunc(entityDef, engineType);
+
+            return func(entityDefFactory, entity, number);
+        }
+
+        private static Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]> GetCachedEntityToParametersFunc(EntityDef entityDef, EngineType engineType)
+        {
+            string key = GetKey(entityDef, engineType);
+
+            return _entiryToParametersFuncDict.GetOrAdd(key, _ => EntityMapperDelegateCreator.CreateEntityToParametersDelegate(entityDef, engineType));
+
+            static string GetKey(EntityDef entityDef, EngineType engineType)
+            {
+                return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_EntityToParameters";
+            }
+        }
+
+        #endregion
+
+        #region PropertyValuesToParameters
+
+        public static IList<KeyValuePair<string, object>> PropertyValuesToParametersUsingReflection(
+            EntityDef entityDef, EngineType engineType, IDictionary<string, object?> propertyValues, string parameterNameSuffix = "0")
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(propertyValues.Count);
 
@@ -143,51 +175,35 @@ namespace HB.FullStack.Database.Mapper
                 }
 
                 parameters.Add(new KeyValuePair<string, object>(
-                    $"{propertyDef.DbParameterizedName}_{number}",
+                    $"{propertyDef.DbParameterizedName}_{parameterNameSuffix}",
                     TypeConvert.TypeValueToDbValue(kv.Value, propertyDef, engineType)));
             }
 
             return parameters;
         }
 
-        /// <summary>
-        /// ToParameters. number为属性名的后缀数字
-        /// </summary>
-        public static IList<KeyValuePair<string, object>> ToParameters<T>(this T entity, EntityDef entityDef, EngineType engineType, IEntityDefFactory entityDefFactory, int number = 0) where T : DatabaseEntity, new()
+        private static readonly ConcurrentDictionary<string, Func<IEntityDefFactory, object?[], string, KeyValuePair<string, object>[]>> _propertyValuesToParametersFuncDict =
+            new ConcurrentDictionary<string, Func<IEntityDefFactory, object?[], string, KeyValuePair<string, object>[]>>();
+
+        private static Func<IEntityDefFactory, object?[], string, KeyValuePair<string, object>[]> GetCachedPropertyValuesToParametersFunc(
+            EntityDef entityDef, EngineType engineType, IList<string> propertyNames)
         {
-            if (entity.Version < 0)
+            string key = GetKey(entityDef, engineType, propertyNames);
+
+            return _propertyValuesToParametersFuncDict.GetOrAdd(key, _ => EntityMapperDelegateCreator.CreatePropertyValuesToParametersDelegate(entityDef, engineType, propertyNames));
+
+            static string GetKey(EntityDef entityDef, EngineType engineType, IList<string> names)
             {
-                throw DatabaseExceptions.EntityVersionError(type: entityDef.EntityFullName, version: entity.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
             }
-
-            Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedToParametersFunc(entityDef, engineType);
-
-            return func(entityDefFactory, entity, number);
         }
 
-        private static Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]> GetCachedToParametersFunc(EntityDef entityDef, EngineType engineType)
+        public static KeyValuePair<string, object>[] PropertyValuesToParameters(
+            EntityDef entityDef, EngineType engineType, IEntityDefFactory entityDefFactory, IList<string> propertyNames, IList<object?> propertyValues, string parameterNameSuffix = "0")
         {
-            string key = GetKey(entityDef, engineType);
+            Func<IEntityDefFactory, object?[], string, KeyValuePair<string, object>[]> func = GetCachedPropertyValuesToParametersFunc(entityDef, engineType, propertyNames);
 
-            return _toParametersFuncDict.GetOrAdd(key, _ => EntityMapperDelegateCreator.CreateToParametersDelegate(entityDef, engineType));
-
-            //if (!_toParametersFuncDict.ContainsKey(key))
-            //{
-            //    lock (_toParameterFuncDictLocker)
-            //    {
-            //        if (!_toParametersFuncDict.ContainsKey(key))
-            //        {
-            //            _toParametersFuncDict[key] = EntityMapperDelegateCreator.CreateToParametersDelegate(entityDef, engineType);
-            //        }
-            //    }
-            //}
-
-            //return _toParametersFuncDict[key];
-
-            static string GetKey(EntityDef entityDef, EngineType engineType)
-            {
-                return $"{engineType}_{entityDef.DatabaseName}_{entityDef.TableName}_ToParameters";
-            }
+            return func(entityDefFactory, propertyValues.ToArray(), parameterNameSuffix);
         }
 
         #endregion

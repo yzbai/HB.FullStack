@@ -43,6 +43,15 @@ namespace HB.FullStack.Database
         EngineCommand CreateSystemVersionUpdateCommand(EngineType engineType, string databaseName, int version);
         EngineCommand CreateTableCreateCommand(EngineType engineType, EntityDef entityDef, bool addDropStatement, int varcharDefaultLength);
         EngineCommand CreateUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new();
-        EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, int version, string lastUser, IDictionary<string, object?> propertyValues2);
+        
+        /// <summary>
+        /// Version版本的乐观锁
+        /// </summary>
+        EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, int updateToVersion, string lastUser, IList<string> propertyNames, IList<object?> propertyValues);
+
+        /// <summary>
+        /// 新旧值版本的乐观锁
+        /// </summary>
+        EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues);
     }
 }

@@ -5,6 +5,8 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Entities;
 
+using Microsoft.Extensions.Primitives;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -142,7 +144,10 @@ namespace HB.FullStack.Database.SQL
             return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where};";
         }
 
-        public static string CreateUpdateFieldsSql(EntityDef entityDef, IEnumerable<string> propertyNames, int number = 0)
+        /// <summary>
+        /// 使用Version乐观锁的Update-Fields。行粒度。
+        /// </summary>
+        public static string CreateUpdateFieldsUsingVersionCompareSql(EntityDef entityDef, IEnumerable<string> propertyNames, int number = 0)
         {
             StringBuilder args = new StringBuilder();
 
@@ -172,8 +177,48 @@ namespace HB.FullStack.Database.SQL
             EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
+
+            //TODO: 这里可能有些问题，只能保证updateVersion比之前Version大一
             where.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND "));
+
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0"));
+
+            return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}";
+        }
+
+        /// <summary>
+        /// 使用新旧值比较乐观锁的update-fields.field粒度
+        /// </summary>
+        public static string CreateUpdateFieldsUsingOldNewCompareSql(EntityDef entityDef, IEnumerable<string> propertyNames, string oldSuffix = "old", string newSuffix = "new", int number = 0)
+        {
+            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
+            EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
+            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+            EntityPropertyDef lastUserProperty = entityDef.GetPropertyDef(nameof(Entity.LastUser))!;
+            EntityPropertyDef lastTimeProperty = entityDef.GetPropertyDef(nameof(Entity.LastTime))!;
+
+            StringBuilder args = new StringBuilder();
+            StringBuilder where = new StringBuilder();
+
+            args.Append(Invariant($" {versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1 "));
+            args.Append(Invariant($",{lastUserProperty.DbReservedName}={lastUserProperty.DbParameterizedName}_{newSuffix}_{number}"));
+            args.Append(Invariant($",{lastTimeProperty.DbReservedName}={lastTimeProperty.DbParameterizedName}_{newSuffix}_{number}"));
+
+            where.Append(Invariant($" {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} "));
+            where.Append(Invariant($" AND {deletedProperty.DbReservedName}=0 "));
+
+            foreach (string propertyName in propertyNames)
+            {
+                EntityPropertyDef? propertyDef = entityDef.GetPropertyDef(propertyName);
+
+                if (propertyDef == null)
+                {
+                    throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
+                }
+
+                args.Append(Invariant($",{propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{newSuffix}_{number}"));
+                where.Append(Invariant($" AND  {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{oldSuffix}_{number}"));
+            }
 
             return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}";
         }
@@ -354,7 +399,7 @@ namespace HB.FullStack.Database.SQL
             {
                 //found_rows()返回匹配到的
                 //row_count() 返回真正被修改的
-                
+
                 EngineType.MySQL => " found_rows() ",//$"row_count()", // $" found_rows() ",
                 EngineType.SQLite => $" changes() ",//sqlite不返回真正受影响的，只返回匹配的
                 _ => "",

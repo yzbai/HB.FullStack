@@ -8,6 +8,7 @@ using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 using System;
 using System.Collections.Generic;
@@ -800,7 +801,7 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.NotFound(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
                 }
                 else
                 {
@@ -841,13 +842,13 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        ///  修改，建议每次修改前先select，并放置在一个事务中。
-        ///  版本控制，如果item中Version未赋值，会无法更改
-        ///  反应Version变化
-        /// </summary>
-        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
+            if (item.Version >= updateToVersion)
+            {
+                throw DatabaseExceptions.UpdateVersionError(originalVersion: item.Version, updateToVersion: updateToVersion, item: item);
+            }
+
             ThrowIf.NotValid(item, nameof(item));
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -856,9 +857,12 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, item, entityDef);
 
+            int oldVersion = item.Version;
+
             try
             {
-                PrepareItem(item, lastUser);
+
+                PrepareItem(item, updateToVersion, lastUser);
 
                 EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, entityDef, item);
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
@@ -869,7 +873,18 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(item), "");
+                    //TODO: 这里返回0，一般是因为version不匹配，单也有可能是Id不存在，或者Deleted=1.
+                    //可以改造SqlHelper中的update语句为如下，进行一般改造，排除上述可能。
+                    //在原始的update语句，比如：update tb_userdirectorypermission set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5b35-b123-2d4f-876c-6ee360db28c1') and Deleted = 0 and Version='0';
+                    //后面select found_rows(), count(1) as 'exits' from tb_userdirectorypermission where Id = uuid_to_bin('08da5b35-b123-2d4f-876c-6ee360db28c1') and Deleted = 0;
+                    //然后使用Reader读取，通过两个值进行判断。
+                    //如果found_rows=1，正常返回
+                    //如果found_rows=0, exists = 1, version冲突
+                    //如果found_rows=0, exists = 0, 已删除
+
+                    //不存在和Version冲突，统称为冲突，所以不用改，反正后续业务为了解决冲突也会重新select什么的，到时候可以判定是已经删掉了还是version冲突
+
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(item), "");
                 }
 
                 throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, SerializeUtil.ToJson(item));
@@ -878,7 +893,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItem(item);
+                    RestoreItem(item, oldVersion);
                 }
 
                 throw;
@@ -887,27 +902,42 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItem(item);
+                    RestoreItem(item, oldVersion);
                 }
 
                 throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
             }
 
-            static void PrepareItem(T item, string lastUser)
+            static void PrepareItem(T item, int updateToVersion, string lastUser)
             {
                 item.LastUser = lastUser;
                 item.LastTime = TimeUtil.UtcNow;
-                item.Version++;
+                item.Version = updateToVersion;
             }
 
-            static void RestoreItem(T item)
+            static void RestoreItem(T item, int oldVersion)
             {
-                item.Version--;
+                item.Version = oldVersion;
             }
         }
 
-        public async Task UpdateFieldsAsync<T>(object id, int version, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        /// <summary>
+        ///  修改，建议每次修改前先select，并放置在一个事务中。
+        ///  版本控制，如果item中Version未赋值，会无法更改
+        ///  反应Version变化
+        /// </summary>
+        public Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
+            return UpdateAsync(item, item.Version + 1, lastUser, transContext);
+        }
+
+        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        {
+            if (propertyValues.Count <= 0)
+            {
+                return;
+            }
+
             if (id is long longId && longId <= 0)
             {
                 throw DatabaseExceptions.LongIdShouldBePositive(longId);
@@ -918,14 +948,9 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            if (version < 0)
+            if (curVersion < 0)
             {
-                throw DatabaseExceptions.VersionShouldBePositive(version);
-            }
-
-            if (propertyValues.Count <= 0)
-            {
-                throw DatabaseExceptions.UpdatePropertiesCountShouldBePositive();
+                throw DatabaseExceptions.VersionShouldBePositive(curVersion);
             }
 
             EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
@@ -936,7 +961,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, version + 1, lastUser, propertyValues);
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, curVersion + 1, lastUser, propertyValues);
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
@@ -945,21 +970,69 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", "");
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用Version版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", "");
                 }
-
-                throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}");
+                else
+                {
+                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyValues)}");
+                }
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{version}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", ex);
+            }
+        }
+
+        public async Task UpdateFieldsAsync<T>(object id, string lastUser, IDictionary<string, (object?, object?)> propertyOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        {
+            if (propertyOldNewValues.Count <= 0)
+            {
+                return;
+            }
+
+            if (id is long longId && longId <= 0)
+            {
+                throw DatabaseExceptions.LongIdShouldBePositive(longId);
+            }
+
+            if (id is Guid guid && guid.IsEmpty())
+            {
+                throw DatabaseExceptions.GuidShouldNotEmpty();
+            }
+
+            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+
+            ThrowIfNotWriteable(entityDef);
+
+            TruncateLastUser(ref lastUser, id);
+
+            try
+            {
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, lastUser, propertyOldNewValues);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+
+                if (rows == 1)
+                {
+                    return;
+                }
+                else if (rows == 0)
+                {
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyOldNewValues)}", "");
+                }
+                else
+                {
+                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyOldNewValues)}");
+                }
+            }
+            catch (Exception ex) when (ex is not DatabaseException)
+            {
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyOldNewValues)}", ex);
             }
         }
 
         #endregion
 
         #region 批量更改(Write)
-
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
@@ -1111,7 +1184,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                        throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), "BatchUpdate");
                     }
 
                     count++;
@@ -1119,7 +1192,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1202,7 +1275,7 @@ namespace HB.FullStack.Database
 
                     if (affected != 1)
                     {
-                        throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
+                        throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
                     }
 
                     count++;
@@ -1210,7 +1283,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw DatabaseExceptions.NotFound(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)

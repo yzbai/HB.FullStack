@@ -45,6 +45,37 @@ namespace HB.FullStack.DatabaseTests
             }
         }
 
+        /// <summary>
+        /// //NOTICE: Mysql执行多条语句的时候，ExecuteCommandReader只返回最后一个结果。Sqlite同样
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Test_Mult_SQL_Return_With_Reader()
+        {
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            string sql = $@"
+update tb_guid_bookentity set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Deleted = 0 and Version='10';
+select count(1) from tb_guid_bookentity where Id = '{book.Id}' and Deleted = 0;
+";
+            using IDataReader reader = await Db.DatabaseEngine.ExecuteCommandReaderAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand(sql), true);
+
+            List<string?> rt = new List<string?>();
+
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    rt.Add(reader.GetValue(i)?.ToString());
+                }
+            }
+
+            Assert.AreEqual(rt.Count, 1);
+        }
+
         [TestMethod]
         public async Task Test_2_Batch_Update_PublisherEntityAsync()
         {

@@ -1,5 +1,6 @@
 ﻿
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -37,12 +38,6 @@ namespace System
         //    //return Convert.ToBase64String(md5Bytes);
         //}
 
-        /// <summary>
-        /// GetHash
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-
         public static string GetHash(string item)
         {
             using SHA256 sha256Obj = SHA256.Create();
@@ -51,11 +46,10 @@ namespace System
             return Convert.ToBase64String(hashBytes);
         }
 
-        /// <summary>
-        /// GetHash
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
+        public static string GetHash(IList<string> lst)
+        {
+            return GetHash(lst.ToJoinedString(null));
+        }
 
         public static string GetHash<T>([DisallowNull] T item) where T : class
         {

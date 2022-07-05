@@ -253,12 +253,13 @@ namespace System
 
         #endregion Extensions
 
-        public static StringBuilder RemoveLast(this StringBuilder stringBuilder)
+        public static StringBuilder RemoveLast(this StringBuilder stringBuilder, int lengthToRemve = 1)
         {
-            if (stringBuilder.Length > 0)
+            if (stringBuilder.Length >= lengthToRemve)
             {
-                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+                stringBuilder.Remove(stringBuilder.Length - lengthToRemve, lengthToRemve);
             }
+
             return stringBuilder;
         }
     }

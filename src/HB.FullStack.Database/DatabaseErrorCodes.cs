@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 
 using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Entities;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
 [assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]
@@ -24,7 +25,7 @@ namespace HB.FullStack.Database
         public static ErrorCode MigrateError { get; } = new ErrorCode( nameof(MigrateError), "");
         public static ErrorCode FoundTooMuch { get; } = new ErrorCode( nameof(FoundTooMuch), "");
         public static ErrorCode DatabaseNotWriteable { get; } = new ErrorCode( nameof(DatabaseNotWriteable), "");
-        public static ErrorCode NotFound { get; } = new ErrorCode( nameof(NotFound), "");
+        public static ErrorCode ConcurrencyConflict { get; } = new ErrorCode( nameof(ConcurrencyConflict), "");
         public static ErrorCode TransactionError { get; } = new ErrorCode( nameof(TransactionError), "");
         public static ErrorCode SystemInfoError { get; } = new ErrorCode( nameof(SystemInfoError), "");
         public static ErrorCode NotSupported { get; } = new ErrorCode( nameof(NotSupported), "");
@@ -43,6 +44,7 @@ namespace HB.FullStack.Database
 
         public static ErrorCode EntityVersionError { get; } = new ErrorCode( nameof(EntityVersionError), "");
         public static ErrorCode NotInitializedYet { get; } = new ErrorCode( nameof(NotInitializedYet), "");
+        public static ErrorCode UpdateVersionError { get; } = new ErrorCode(nameof(UpdateVersionError), "");
     }
 
     internal static class DatabaseExceptions
@@ -157,10 +159,9 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        //TODO: 当因为Version过旧，而引发的NotFound，并不能细化到是Version问题，有可能是id不存在等等。
-        internal static Exception NotFound(string type, string item, string? cause)
+        internal static Exception ConcurrencyConflict(string type, string item, string? cause)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotFound);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ConcurrencyConflict);
 
             exception.Data["Type"] = type;
             exception.Data["item"] = item;
@@ -325,6 +326,17 @@ namespace HB.FullStack.Database
         internal static Exception NotInitializedYet()
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NotInitializedYet);
+            return exception;
+        }
+
+        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DatabaseEntity, new()
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UpdateVersionError);
+
+            exception.Data["OriginalVersion"] = originalVersion;
+            exception.Data["UpdateToVersion"] = updateToVersion;
+            exception.Data["Item"] = SerializeUtil.ToJson(item);
+
             return exception;
         }
     }

@@ -74,6 +74,38 @@ namespace HB.FullStack.DatabaseTests
                 new EngineCommand($"update tb_guid_bookentity set Name='Update_xxx' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0')"));
         }
 
+        /// <summary>
+        /// //NOTICE: Mysql执行多条语句的时候，ExecuteCommandReader只返回最后一个结果。
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Test_Mult_SQL_Return_With_Reader()
+        {
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+            book.Id = new Guid("cd5bda08-e5e2-409f-89c5-bea1ae49f2a0");
+
+            await Db.AddAsync(book, "tester", null);
+
+            string sql = @"
+update tb_guid_bookentity set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0 and Version='10';
+select count(1) from tb_guid_bookentity where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0;
+";
+            using IDataReader reader = await Db.DatabaseEngine.ExecuteCommandReaderAsync(null, Db.DatabaseNames.First(),
+                new EngineCommand(sql), true);
+
+            List<string?> rt = new List<string?>();
+
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    rt.Add(reader.GetValue(i)?.ToString());
+                }
+            }
+
+            Assert.AreEqual(rt.Count, 1);
+        }
+
         [TestMethod]
         public async Task Guid_Test_01_Batch_Add_PublisherEntityAsync()
         {
@@ -622,9 +654,9 @@ namespace HB.FullStack.DatabaseTests
             Guid_PublisherEntity publisherEntity = Mocker.Guid_MockOnePublisherEntity();
             publisherEntity.Version = 0;
 
-            var emit_results = publisherEntity.ToParameters(Db.EntityDefFactory.GetDef<Guid_PublisherEntity>()!, EngineType.MySQL, Db.EntityDefFactory, 1);
+            var emit_results = publisherEntity.EntityToParameters(Db.EntityDefFactory.GetDef<Guid_PublisherEntity>()!, EngineType.MySQL, Db.EntityDefFactory, 1);
 
-            var reflect_results = publisherEntity.ToParametersUsingReflection(Db.EntityDefFactory.GetDef<Guid_PublisherEntity>()!, EngineType.MySQL, 1);
+            var reflect_results = publisherEntity.EntityToParametersUsingReflection(Db.EntityDefFactory.GetDef<Guid_PublisherEntity>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results, reflect_results, EngineType.MySQL);
 
@@ -635,9 +667,9 @@ namespace HB.FullStack.DatabaseTests
                 Version = 0
             };
 
-            IList<KeyValuePair<string, object>>? emit_results2 = publisherEntity2.ToParameters(Db.EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, Db.EntityDefFactory, 1);
+            IList<KeyValuePair<string, object>>? emit_results2 = publisherEntity2.EntityToParameters(Db.EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, Db.EntityDefFactory, 1);
 
-            var reflect_results2 = publisherEntity2.ToParametersUsingReflection(Db.EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
+            var reflect_results2 = publisherEntity2.EntityToParametersUsingReflection(Db.EntityDefFactory.GetDef<Guid_PublisherEntity2>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results2, reflect_results2, EngineType.MySQL);
 
@@ -648,9 +680,9 @@ namespace HB.FullStack.DatabaseTests
                 Version = 0
             };
 
-            var emit_results3 = publisherEntity3.ToParameters(Db.EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, Db.EntityDefFactory, 1);
+            var emit_results3 = publisherEntity3.EntityToParameters(Db.EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, Db.EntityDefFactory, 1);
 
-            var reflect_results3 = publisherEntity3.ToParametersUsingReflection(Db.EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, 1);
+            var reflect_results3 = publisherEntity3.EntityToParametersUsingReflection(Db.EntityDefFactory.GetDef<Guid_PublisherEntity3>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results3, reflect_results3, EngineType.MySQL);
         }
@@ -672,7 +704,7 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Restart();
             foreach (var entity in entities)
             {
-                _ = entity.ToParameters(def!, EngineType.MySQL, Db.EntityDefFactory);
+                _ = entity.EntityToParameters(def!, EngineType.MySQL, Db.EntityDefFactory);
             }
             stopwatch.Stop();
 
@@ -681,7 +713,7 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Restart();
             foreach (var entity in entities)
             {
-                _ = entity.ToParametersUsingReflection(def!, EngineType.MySQL);
+                _ = entity.EntityToParametersUsingReflection(def!, EngineType.MySQL);
             }
             stopwatch.Stop();
 

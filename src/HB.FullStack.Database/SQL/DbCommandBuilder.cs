@@ -41,7 +41,8 @@ namespace HB.FullStack.Database
                 {
                     SqlType.AddEntity => SqlHelper.CreateAddEntitySql(entityDefs[0], engineType, true),
                     SqlType.UpdateEntity => SqlHelper.CreateUpdateEntitySql(entityDefs[0]),
-                    SqlType.UpdateFields => SqlHelper.CreateUpdateFieldsSql(entityDefs[0], propertyNames!),
+                    SqlType.UpdateFieldsUsingVersionCompare => SqlHelper.CreateUpdateFieldsUsingVersionCompareSql(entityDefs[0], propertyNames!),
+                    SqlType.UpdateFieldsUsingOldNewCompare => SqlHelper.CreateUpdateFieldsUsingOldNewCompareSql(entityDefs[0], propertyNames!),
                     SqlType.DeleteEntity => SqlHelper.CreateDeleteEntitySql(entityDefs[0]),
                     SqlType.SelectEntity => SqlHelper.CreateSelectEntitySql(entityDefs),
                     SqlType.Delete => SqlHelper.CreateDeleteSql(entityDefs[0]),
@@ -185,35 +186,65 @@ namespace HB.FullStack.Database
         {
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.AddEntity, new EntityDef[] { entityDef }),
-                entity.ToParameters(entityDef, engineType, _entityDefFactory));
+                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
         }
 
         public EngineCommand CreateUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.UpdateEntity, new EntityDef[] { entityDef }),
-                entity.ToParameters(entityDef, engineType, _entityDefFactory));
+                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
         }
 
-        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, int version, string lastUser, IDictionary<string, object?> propertyValues2)
+        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, int updateToVersion, string lastUser,
+            IList<string> propertyNames, IList<object?> propertyValues)
         {
-            Dictionary<string, object?> propertyValues = new Dictionary<string, object?>(propertyValues2)
-            {
-                [nameof(LongIdEntity.Id)] = id,
-                [nameof(Entity.Version)] = version,
-                [nameof(Entity.LastUser)] = lastUser
-            };
+            propertyNames.Add(nameof(LongIdEntity.Id));
+            propertyNames.Add(nameof(Entity.Version));
+            propertyNames.Add(nameof(Entity.LastUser));
+            propertyNames.Add(nameof(Entity.LastTime));
+
+            propertyValues.Add(id);
+            propertyValues.Add(updateToVersion);
+            propertyValues.Add(lastUser);
+            propertyValues.Add(TimeUtil.UtcNow);
 
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.UpdateFields, new EntityDef[] { entityDef }, propertyValues.Select(kv => kv.Key).ToList()),
-                EntityMapper.ToParameters(entityDef, engineType, propertyValues));
+                GetCachedSql(engineType, SqlType.UpdateFieldsUsingVersionCompare, new EntityDef[] { entityDef }, propertyNames),
+                EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, propertyValues));
+        }
+
+        private const string OldPropertyValueSuffix = "old";
+        private const string NewPropertyValueSuffix = "new";
+
+        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues,
+            IList<object?> newPropertyValues)
+        {
+            string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new EntityDef[] { entityDef }, propertyNames);
+
+            var oldParameters = EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0));
+
+            propertyNames.Add(nameof(LongIdEntity.Id));
+            propertyNames.Add(nameof(Entity.LastUser));
+            propertyNames.Add(nameof(Entity.LastTime));
+
+            newPropertyValues.Add(id);
+            newPropertyValues.Add(lastUser);
+            newPropertyValues.Add(TimeUtil.UtcNow);
+
+            var newParameters = EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, newPropertyValues, $"{NewPropertyValueSuffix}_0");
+
+            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
+            parameters.AddRange(newParameters);
+
+            return new EngineCommand(sql, parameters);
         }
 
         public EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
         {
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.DeleteEntity, new EntityDef[] { entityDef }),
-                entity.ToParameters(entityDef, engineType, _entityDefFactory));
+                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
         }
 
         public EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, WhereExpression<T> whereExpression) where T : DatabaseEntity, new()
@@ -241,7 +272,7 @@ namespace HB.FullStack.Database
             {
                 string addCommandText = SqlHelper.CreateAddEntitySql(entityDef, engineType, false, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
 
                 innerBuilder.Append(addCommandText);
 
@@ -295,7 +326,7 @@ namespace HB.FullStack.Database
             {
                 string updateCommandText = SqlHelper.CreateUpdateEntitySql(entityDef, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
 
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
@@ -333,7 +364,7 @@ namespace HB.FullStack.Database
             {
                 string deleteCommandText = SqlHelper.CreateDeleteEntitySql(entityDef, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
 #elif NETSTANDARD2_1
@@ -420,7 +451,7 @@ namespace HB.FullStack.Database
         {
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.AddOrUpdateEntity, new EntityDef[] { entityDef }),
-                entity.ToParameters(entityDef, engineType, _entityDefFactory));
+                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
         }
 
         /// <summary>
@@ -446,7 +477,7 @@ namespace HB.FullStack.Database
             {
                 string addOrUpdateCommandText = SqlHelper.CreateAddOrUpdateSql(entityDef, engineType, false, number);
 
-                parameters.AddRange(entity.ToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
 
                 innerBuilder.Append(addOrUpdateCommandText);
 

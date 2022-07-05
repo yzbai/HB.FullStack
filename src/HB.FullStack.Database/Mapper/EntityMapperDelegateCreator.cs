@@ -22,9 +22,16 @@ namespace HB.FullStack.Database.Mapper
     internal static class EntityMapperDelegateCreator
     {
         /// <summary>
+        /// 得到一个将 数据库行 转为Entity 的 delegate
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
-        public static Func<IEntityDefFactory, IDataReader, object> CreateToEntityDelegate(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
+        public static Func<IEntityDefFactory, IDataReader, object> CreateToEntityDelegate(
+            EntityDef def,
+            IDataReader reader,
+            int startIndex,
+            int length,
+            bool returnNullIfFirstNull,
+            EngineType engineType)
         {
             DynamicMethod dm = new DynamicMethod("ToEntity" + Guid.NewGuid().ToString(), def.EntityType, new[] { typeof(IEntityDefFactory), typeof(IDataReader) }, true);
             ILGenerator il = dm.GetILGenerator();
@@ -35,6 +42,16 @@ namespace HB.FullStack.Database.Mapper
             return (Func<IEntityDefFactory, IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="def"></param>
+        /// <param name="reader"></param>
+        /// <param name="startIndex">这一数据行，从那一列开始算</param>
+        /// <param name="length">列数，即字段数</param>
+        /// <param name="returnNullIfFirstNull"></param>
+        /// <param name="engineType"></param>
+        /// <param name="il"></param>
         private static void EmitEntityMapper(EntityDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
         {
             try
@@ -254,9 +271,15 @@ namespace HB.FullStack.Database.Mapper
             }
         }
 
-        public static Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]> CreateToParametersDelegate(EntityDef entityDef, EngineType engineType)
+        /// <summary>
+        /// 得到一个将 (IEntityDefFactory,Entity,parameter_num_suffix)转换为键值对的delegate
+        /// </summary>
+        /// <param name="entityDef"></param>
+        /// <param name="engineType"></param>
+        /// <returns></returns>
+        public static Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]> CreateEntityToParametersDelegate(EntityDef entityDef, EngineType engineType)
         {
-            DynamicMethod dm = new DynamicMethod("ToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IEntityDefFactory), typeof(object), typeof(int) }, true);
+            DynamicMethod dm = new DynamicMethod("EntityToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IEntityDefFactory), typeof(object), typeof(int) }, true);
             ILGenerator il = dm.GetILGenerator();
 
             LocalBuilder array = il.DeclareLocal(typeof(KeyValuePair<string, object>[]));
@@ -288,15 +311,15 @@ namespace HB.FullStack.Database.Mapper
                 Label nullLabel = il.DefineLabel();
                 Label finishLabel = il.DefineLabel();
 
-                il.Emit(OpCodes.Ldloc, array);//[array]
+                il.Emit(OpCodes.Ldloc, array);//[rtArray]
 
                 il.Emit(OpCodes.Ldstr, $"{propertyDef.DbParameterizedName!}_");
 
                 il.Emit(OpCodes.Ldloc, numberLocal);
 
-                il.EmitCall(OpCodes.Call, _getStringConcatMethod, null);//[array][key]
+                il.EmitCall(OpCodes.Call, _getStringConcatMethod, null);//[rtArray][key]
 
-                il.Emit(OpCodes.Ldloc, entityLocal);//[array][key][entity]
+                il.Emit(OpCodes.Ldloc, entityLocal);//[rtArray][key][entity]
 
                 if (propertyDef.Type.IsValueType)
                 {
@@ -308,37 +331,37 @@ namespace HB.FullStack.Database.Mapper
                     il.EmitCall(OpCodes.Callvirt, propertyDef.GetMethod, null);
                 }
 
-                //[array][key][property_value_obj]
+                //[rtArray][key][property_value_obj]
 
                 #region TypeValue To DbValue
 
                 //判断是否是null
-                il.Emit(OpCodes.Dup);//[array][key][property_value_obj][property_value_obj]
-                il.Emit(OpCodes.Brfalse_S, nullLabel);//[array][key][property_value_obj]
+                il.Emit(OpCodes.Dup);//[rtArray][key][property_value_obj][property_value_obj]
+                il.Emit(OpCodes.Brfalse_S, nullLabel);//[rtArray][key][property_value_obj]
 
                 if (propertyDef.TypeConverter != null)
                 {
-                    il.Emit(OpCodes.Stloc, tmpObj);//[array][key]
+                    il.Emit(OpCodes.Stloc, tmpObj);//[rtArray][key]
 
-                    il.Emit(OpCodes.Ldarg_0); //[array][key][IEntityDefFactory]
+                    il.Emit(OpCodes.Ldarg_0); //[rtArray][key][IEntityDefFactory]
 
-                    il.Emit(OpCodes.Ldloc, entityTypeLocal);//[array][key][IEntityDefFactory][entityType]
+                    il.Emit(OpCodes.Ldloc, entityTypeLocal);//[rtArray][key][IEntityDefFactory][entityType]
                     //emiter.LoadLocal(entityTypeLocal);
 
-                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[array][key][IEntityDefFactory][entityType][propertyName]
-                    il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);//[array][key][typeconverter]
+                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[rtArray][key][IEntityDefFactory][entityType][propertyName]
+                    il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);//[rtArray][key][typeconverter]
 
                     il.Emit(OpCodes.Ldloc, tmpObj);
                     //emiter.LoadLocal(tmpObj);
-                    //[array][key][typeconveter][property_value_obj]
+                    //[rtArray][key][typeconveter][property_value_obj]
                     il.Emit(OpCodes.Ldtoken, propertyDef.Type);
                     //emiter.LoadConstant(propertyDef.Type);
                     il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
                     //emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
-                    //[array][key][typeconveter][property_value_obj][property_type]
+                    //[rtArray][key][typeconveter][property_value_obj][property_type]
                     il.EmitCall(OpCodes.Callvirt, _getTypeConverterTypeValueToDbValueMethod, null);
                     //emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
-                    //[array][key][db_value]
+                    //[rtArray][key][db_value]
                 }
                 else
                 {
@@ -352,7 +375,7 @@ namespace HB.FullStack.Database.Mapper
                     {
                         il.Emit(OpCodes.Stloc, tmpObj);
                         //emiter.StoreLocal(tmpObj);
-                        //[array][key]
+                        //[rtArray][key]
 
                         il.Emit(OpCodes.Ldtoken, trueType);
                         //emiter.LoadConstant(trueType);
@@ -367,17 +390,17 @@ namespace HB.FullStack.Database.Mapper
                         //emiter.LoadConstant((int)engineType);
                         il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);
                         //emiter.Call(EntityMapperDelegateCreator._getGlobalTypeConverterMethod);
-                        //[array][key][typeconverter]
+                        //[rtArray][key][typeconverter]
 
                         il.Emit(OpCodes.Ldloc, tmpObj);
                         //emiter.LoadLocal(tmpObj);
-                        //[array][key][typeconverter][property_value_obj]
+                        //[rtArray][key][typeconverter][property_value_obj]
                         il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
                         //emiter.LoadLocal(tmpTrueTypeLocal);
-                        //[array][key][typeconverter][property_value_obj][true_type]
+                        //[rtArray][key][typeconverter][property_value_obj][true_type]
                         il.EmitCall(OpCodes.Callvirt, _getTypeConverterTypeValueToDbValueMethod, null);
                         //emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
-                        //[array][key][db_value]
+                        //[rtArray][key][db_value]
                     }
                     else
                     {
@@ -399,15 +422,15 @@ namespace HB.FullStack.Database.Mapper
 
                 il.MarkLabel(nullLabel);
                 //emiter.MarkLabel(nullLabel);
-                //[array][key][property_value_obj]
+                //[rtArray][key][property_value_obj]
 
                 il.Emit(OpCodes.Pop);
                 //emiter.Pop();
-                //[array][key]
+                //[rtArray][key]
 
                 il.Emit(OpCodes.Ldsfld, _dbNullValueFiled);
                 //emiter.LoadField(typeof(DBNull).GetField("Value"));
-                //[array][key][DBNull]
+                //[rtArray][key][DBNull]
 
                 //il.Emit(OpCodes.Br_S, finishLabel);
                 ////emiter.Branch(finishLabel);
@@ -421,15 +444,15 @@ namespace HB.FullStack.Database.Mapper
 
                 il.Emit(OpCodes.Newobj, kvCtor);
                 //emiter.NewObject(kvCtor);
-                //[array][kv]
+                //[rtArray][kv]
 
                 il.Emit(OpCodes.Box, typeof(KeyValuePair<string, object>));
                 //emiter.Box<KeyValuePair<string, object>>();
-                //[array][kv_obj]
+                //[rtArray][kv_obj]
 
                 EmitInt32(il, index);
                 //emiter.LoadConstant(index);
-                //[array][kv_obj][index]
+                //[rtArray][kv_obj][index]
 
                 il.EmitCall(OpCodes.Call, _getArraySetValueMethod, null);
                 //emiter.Call(typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) }));
@@ -438,7 +461,7 @@ namespace HB.FullStack.Database.Mapper
             }
 
             il.Emit(OpCodes.Ldloc, array);
-            //emiter.LoadLocal(array);
+            //emiter.LoadLocal(rtArray);
 
             il.Emit(OpCodes.Ret);
             //emiter.Return();
@@ -446,6 +469,233 @@ namespace HB.FullStack.Database.Mapper
             Type funType = Expression.GetFuncType(typeof(IEntityDefFactory), typeof(object), typeof(int), typeof(KeyValuePair<string, object>[]));
 
             return (Func<IEntityDefFactory, object, int, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
+
+            //return emiter.CreateDelegate();
+        }
+
+        /// <summary>
+        /// 固定了PropertyNames的顺序，做cache时，要做顺序
+        /// </summary>
+        /// <param name="entityDef"></param>
+        /// <param name="engineType"></param>
+        /// <param name="propertyNames"></param>
+        /// <returns></returns>
+        public static Func<IEntityDefFactory, object?[], string, KeyValuePair<string, object>[]> CreatePropertyValuesToParametersDelegate(EntityDef entityDef, EngineType engineType, IList<string> propertyNames)
+        {
+            DynamicMethod dm = new DynamicMethod(
+                "PropertyValuesToParameters" + Guid.NewGuid().ToString(),
+                typeof(KeyValuePair<string, object>[]),
+                new[]
+                {
+                    typeof(IEntityDefFactory),
+                    typeof(object?[]), //propertyValues
+                    typeof(string) //parameterNameSuffix
+                },
+                true);
+
+            ILGenerator il = dm.GetILGenerator();
+
+            LocalBuilder rtArray = il.DeclareLocal(typeof(KeyValuePair<string, object>[]));
+            LocalBuilder tmpObj = il.DeclareLocal(typeof(object));
+            LocalBuilder entityTypeLocal = il.DeclareLocal(typeof(Type));
+            LocalBuilder tmpTrueTypeLocal = il.DeclareLocal(typeof(Type));
+            //LocalBuilder entityLocal = il.DeclareLocal(entityDef.EntityType);
+            LocalBuilder propertyValues = il.DeclareLocal(typeof(object?[]));
+            LocalBuilder parameterSuffixLocal = il.DeclareLocal(typeof(string));
+
+            //il.Emit(OpCodes.Ldarg_1);
+            //il.Emit(OpCodes.Unbox_Any, entityDef.EntityType);
+            //il.Emit(OpCodes.Stloc, entityLocal);
+
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Stloc, propertyValues);
+
+            il.Emit(OpCodes.Ldarg_2);
+            //il.Emit(OpCodes.Box, typeof(string));
+            il.Emit(OpCodes.Stloc, parameterSuffixLocal);
+
+            il.Emit(OpCodes.Ldtoken, entityDef.EntityType);
+            il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+            il.Emit(OpCodes.Stloc, entityTypeLocal);
+
+            EmitInt32(il, propertyNames.Count);
+            il.Emit(OpCodes.Newarr, typeof(KeyValuePair<string, object>));
+            il.Emit(OpCodes.Stloc, rtArray);
+
+            int index = 0;
+            foreach (string propertyName in propertyNames)
+            {
+                EntityPropertyDef? propertyDef = entityDef.GetPropertyDef(propertyName);
+
+                if (propertyDef == null)
+                {
+                    throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
+                }
+
+                Label nullLabel = il.DefineLabel();
+                Label finishLabel = il.DefineLabel();
+
+                il.Emit(OpCodes.Ldloc, rtArray);//[rtArray]
+
+                il.Emit(OpCodes.Ldstr, $"{propertyDef.DbParameterizedName!}_");
+
+                il.Emit(OpCodes.Ldloc, parameterSuffixLocal);
+
+                il.EmitCall(OpCodes.Call, _getStringConcatMethod, null);//[rtArray][key]
+
+                il.Emit(OpCodes.Ldloc, propertyValues);//[rtArray][key][propetyValues]
+
+                EmitInt32(il, index); //[rtArray][key][propetyValues][index]
+
+                il.EmitCall(OpCodes.Call, _getArrayGetValueMethod, null); //[rtArray][key][property_value_obj]
+
+                //if (propertyDef.Type.IsValueType)
+                //{
+                //    il.EmitCall(OpCodes.Call, propertyDef.GetMethod, null);
+                //    il.Emit(OpCodes.Box, propertyDef.Type);
+                //}
+                //else
+                //{
+                //    il.EmitCall(OpCodes.Callvirt, propertyDef.GetMethod, null);
+                //}
+
+                //[rtArray][key][property_value_obj]
+
+                #region TypeValue To DbValue
+
+                //判断是否是null
+                il.Emit(OpCodes.Dup);//[rtArray][key][property_value_obj][property_value_obj]
+                il.Emit(OpCodes.Brfalse_S, nullLabel);//[rtArray][key][property_value_obj]
+
+                if (propertyDef.TypeConverter != null)
+                {
+                    il.Emit(OpCodes.Stloc, tmpObj);//[rtArray][key]
+
+                    il.Emit(OpCodes.Ldarg_0); //[rtArray][key][IEntityDefFactory]
+
+                    il.Emit(OpCodes.Ldloc, entityTypeLocal);//[rtArray][key][IEntityDefFactory][entityType]
+                    //emiter.LoadLocal(entityTypeLocal);
+
+                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[rtArray][key][IEntityDefFactory][entityType][propertyName]
+                    il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);//[rtArray][key][typeconverter]
+
+                    il.Emit(OpCodes.Ldloc, tmpObj);//[rtArray][key][typeconveter][property_value_obj]
+
+                    il.Emit(OpCodes.Ldtoken, propertyDef.Type);
+                    //emiter.LoadConstant(propertyDef.Type);
+                    il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                    //emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
+                    //[rtArray][key][typeconveter][property_value_obj][property_type]
+                    il.EmitCall(OpCodes.Callvirt, _getTypeConverterTypeValueToDbValueMethod, null);
+                    //emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
+                    //[rtArray][key][db_value]
+                }
+                else
+                {
+                    Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
+
+                    //查看全局TypeConvert
+
+                    ITypeConverter? globalConverter = TypeConvert.GetGlobalTypeConverter(trueType, engineType);
+
+                    if (globalConverter != null)
+                    {
+                        il.Emit(OpCodes.Stloc, tmpObj);
+                        //emiter.StoreLocal(tmpObj);
+                        //[rtArray][key]
+
+                        il.Emit(OpCodes.Ldtoken, trueType);
+                        //emiter.LoadConstant(trueType);
+                        il.EmitCall(OpCodes.Call, _getTypeFromHandleMethod, null);
+                        //emiter.Call(EntityMapperDelegateCreator._getTypeFromHandleMethod);
+                        il.Emit(OpCodes.Stloc, tmpTrueTypeLocal);
+                        //emiter.StoreLocal(tmpTrueTypeLocal);
+                        il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
+                        //emiter.LoadLocal(tmpTrueTypeLocal);
+
+                        EmitInt32(il, (int)engineType);
+                        //emiter.LoadConstant((int)engineType);
+                        il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);
+                        //emiter.Call(EntityMapperDelegateCreator._getGlobalTypeConverterMethod);
+                        //[rtArray][key][typeconverter]
+
+                        il.Emit(OpCodes.Ldloc, tmpObj);
+                        //emiter.LoadLocal(tmpObj);
+                        //[rtArray][key][typeconverter][property_value_obj]
+                        il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
+                        //emiter.LoadLocal(tmpTrueTypeLocal);
+                        //[rtArray][key][typeconverter][property_value_obj][true_type]
+                        il.EmitCall(OpCodes.Callvirt, _getTypeConverterTypeValueToDbValueMethod, null);
+                        //emiter.CallVirtual(typeof(ITypeConverter).GetMethod(nameof(ITypeConverter.TypeValueToDbValue)));
+                        //[rtArray][key][db_value]
+                    }
+                    else
+                    {
+                        //默认
+                        if (trueType.IsEnum)
+                        {
+                            il.EmitCall(OpCodes.Callvirt, _getObjectToStringMethod, null);
+                            //emiter.CallVirtual(_getObjectToStringMethod);
+                        }
+                    }
+                }
+
+                il.Emit(OpCodes.Br_S, finishLabel);
+                ////emiter.Branch(finishLabel);
+
+                #endregion
+
+                #region If Null
+
+                il.MarkLabel(nullLabel);
+                //emiter.MarkLabel(nullLabel);
+                //[rtArray][key][property_value_obj]
+
+                il.Emit(OpCodes.Pop);
+                //emiter.Pop();
+                //[rtArray][key]
+
+                il.Emit(OpCodes.Ldsfld, _dbNullValueFiled);
+                //emiter.LoadField(typeof(DBNull).GetField("Value"));
+                //[rtArray][key][DBNull]
+
+                //il.Emit(OpCodes.Br_S, finishLabel);
+                ////emiter.Branch(finishLabel);
+
+                #endregion
+
+                il.MarkLabel(finishLabel);
+                ////emiter.MarkLabel(finishLabel);
+
+                var kvCtor = typeof(KeyValuePair<string, object>).GetConstructor(new Type[] { typeof(string), typeof(object) })!;
+
+                il.Emit(OpCodes.Newobj, kvCtor);
+                //emiter.NewObject(kvCtor);
+                //[rtArray][kv]
+
+                il.Emit(OpCodes.Box, typeof(KeyValuePair<string, object>));
+                //emiter.Box<KeyValuePair<string, object>>();
+                //[rtArray][kv_obj]
+
+                EmitInt32(il, index);
+                //emiter.LoadConstant(index);
+                //[rtArray][kv_obj][index]
+
+                il.EmitCall(OpCodes.Call, _getArraySetValueMethod, null);
+                //emiter.Call(typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) }));
+
+                index++;
+            }
+
+            il.Emit(OpCodes.Ldloc, rtArray);
+            //emiter.LoadLocal(rtArray);
+
+            il.Emit(OpCodes.Ret);
+            //emiter.Return();
+
+            Type funType = Expression.GetFuncType(typeof(IEntityDefFactory), typeof(object?[]), typeof(string), typeof(KeyValuePair<string, object>[]));
+
+            return (Func<IEntityDefFactory, object?[], string, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
 
             //return emiter.CreateDelegate();
         }
@@ -607,5 +857,6 @@ namespace HB.FullStack.Database.Mapper
         private static readonly FieldInfo _dbNullValueFiled = typeof(DBNull).GetField("Value")!;
 
         private static readonly MethodInfo _getArraySetValueMethod = typeof(Array).GetMethod(nameof(Array.SetValue), new Type[] { typeof(object), typeof(int) })!;
+        private static readonly MethodInfo _getArrayGetValueMethod = typeof(Array).GetMethod(nameof(Array.GetValue), new Type[] { typeof(int) })!;
     }
 }

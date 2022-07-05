@@ -75,12 +75,19 @@ namespace HB.FullStack.Database.Entities
 
         public EntityPropertyDef? GetPropertyDef(string propertyName)
         {
-            if (PropertyDict.ContainsKey(propertyName))
+            if (PropertyDict.TryGetValue(propertyName, out EntityPropertyDef? propertyDef))
             {
-                return PropertyDict[propertyName];
+                return propertyDef;
             }
 
             return null;
+
+            //if (PropertyDict.ContainsKey(propertyName))
+            //{
+            //    return PropertyDict[propertyName];
+            //}
+
+            //return null;
         }
 
         public bool ContainsProperty(string propertyName)
