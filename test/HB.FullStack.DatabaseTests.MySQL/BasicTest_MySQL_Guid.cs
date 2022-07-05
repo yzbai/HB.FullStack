@@ -28,6 +28,93 @@ namespace HB.FullStack.DatabaseTests
     public class BasicTest_MySQL_Guid : BaseTestClass
     {
         [TestMethod]
+        public async Task Test_Update_Fields_By_Compare_Version()
+        {
+            //Add
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            //update-fields
+
+            List<(string, object?)> toUpdate = new List<(string, object?)>();
+
+            toUpdate.Add((nameof(Guid_BookEntity.Price), 123456.789));
+            toUpdate.Add((nameof(Guid_BookEntity.Name), "TTTTTXXXXTTTTT"));
+
+            await Db.UpdateFieldsAsync<Guid_BookEntity>(book.Id, book.Version, "UPDATE_FIELDS_VERSION", toUpdate, null);
+
+            Guid_BookEntity? updatedBook = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+
+            Assert.IsNotNull(updatedBook);
+
+            Assert.IsTrue(updatedBook.Version == book.Version + 1);
+            Assert.IsTrue(updatedBook.Price == 123456.789);
+            Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
+            Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");
+            Assert.IsTrue(updatedBook.LastTime > book.LastTime);
+
+            //应该抛出冲突异常
+            try
+            {
+                await Db.UpdateFieldsAsync<Guid_BookEntity>(book.Id, book.Version, "UPDATE_FIELDS_VERSION", toUpdate, null);
+            }
+            catch (DatabaseException ex)
+            {
+                Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
+
+                if (ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                {
+                    throw ex;
+                }
+            }
+
+        }
+
+        [TestMethod]
+        public async Task Test_Update_Fields_By_Compare_OldNewValues()
+        {
+            //Add
+            Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            //update-fields
+
+            List<(string, object?, object?)> toUpdate = new List<(string, object?, object?)>();
+
+            toUpdate.Add((nameof(Guid_BookEntity.Price), book.Price, 123456.789));
+            toUpdate.Add((nameof(Guid_BookEntity.Name), book.Name, "TTTTTXXXXTTTTT"));
+
+            await Db.UpdateFieldsAsync<Guid_BookEntity>(book.Id, "UPDATE_FIELDS_VERSION", toUpdate, null);
+
+            Guid_BookEntity? updatedBook = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
+
+            Assert.IsNotNull(updatedBook);
+
+            Assert.IsTrue(updatedBook.Version == book.Version + 1);
+            Assert.IsTrue(updatedBook.Price == 123456.789);
+            Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
+            Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");
+            Assert.IsTrue(updatedBook.LastTime > book.LastTime);
+
+            //应该抛出冲突异常
+            try
+            {
+                await Db.UpdateFieldsAsync<Guid_BookEntity>(book.Id, "UPDATE_FIELDS_VERSION", toUpdate, null);
+            }
+            catch (DatabaseException ex)
+            {
+                Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
+
+                if (ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task Test_Version_Error()
         {
             Guid_BookEntity book = Mocker.Guid_GetBooks(1).First();
