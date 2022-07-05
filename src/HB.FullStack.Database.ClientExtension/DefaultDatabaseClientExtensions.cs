@@ -45,7 +45,7 @@ namespace HB.FullStack.Database
         }
 
         /// <summary>
-        /// AddOrUpdate,即reset，不改变version
+        /// AddOrUpdate,即override，不改变version
         /// </summary>
         public static async Task SetByIdAsync<T>(this IDatabase database, T item, /*string lastUser, */TransactionContext? transContext = null) where T : DatabaseEntity, new()
         {

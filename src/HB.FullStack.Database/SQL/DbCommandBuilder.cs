@@ -222,7 +222,7 @@ namespace HB.FullStack.Database
         {
             string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new EntityDef[] { entityDef }, propertyNames);
 
-            var oldParameters = EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0));
+            var oldParameters = EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0");
 
             propertyNames.Add(nameof(LongIdEntity.Id));
             propertyNames.Add(nameof(Entity.LastUser));

@@ -20,11 +20,11 @@ namespace HB.FullStack.Database.Tests
             var lst = Mocker.GetCExtEntities(1);
             CExtEntity entity = lst[0];
 
-            await Db.AddOrUpdateByIdAsync(entity, "", null);
+            await Db.SetByIdAsync(entity, null);
 
             Assert.AreEqual(entity.Version, 0);
 
-            await Db.AddOrUpdateByIdAsync(entity, "", null);
+            await Db.SetByIdAsync(entity, null);
 
             Assert.AreEqual(entity.Version, 1);
         }

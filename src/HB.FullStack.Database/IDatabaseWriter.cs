@@ -28,13 +28,13 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version自动加1. 通过version来实现行粒度的乐观锁
         /// </summary>
-        Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new();
+        Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : DatabaseEntity, new();
 
         /// <summary>
         /// Version自动加1，通过比较oldvalue来实现字段力度乐观锁
         /// </summary>
-        /// <param name="propertyOldNewValues">属性名-（oldvalue-newvalue）</param>
-        Task UpdateFieldsAsync<T>(object id, string lastUser, IDictionary<string, (object?, object?)> propertyOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new();
+        /// <param name="propertyOldNewValues">(propertyName-oldvalue-newvalue）</param>
+        Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new();
 
         Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new();
 

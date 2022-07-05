@@ -931,9 +931,12 @@ namespace HB.FullStack.Database
             return UpdateAsync(item, item.Version + 1, lastUser, transContext);
         }
 
-        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IDictionary<string, object?> propertyValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        /// <summary>
+        /// version + 1 every time
+        /// </summary>
+        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            if (propertyValues.Count <= 0)
+            if (propertyNameValues.Count <= 0)
             {
                 return;
             }
@@ -961,7 +964,15 @@ namespace HB.FullStack.Database
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, curVersion + 1, lastUser, propertyValues);
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
+                    EngineType,
+                    entityDef,
+                    id,
+                    curVersion + 1,
+                    lastUser,
+                    propertyNameValues.Select(t => t.Item1).ToList(),
+                    propertyNameValues.Select(t => t.Item2).ToList());
+
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
@@ -970,22 +981,22 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用Version版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", "");
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用Version版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyValues)}");
+                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyValues)}", ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
             }
         }
 
-        public async Task UpdateFieldsAsync<T>(object id, string lastUser, IDictionary<string, (object?, object?)> propertyOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
-            if (propertyOldNewValues.Count <= 0)
+            if (propertyNameOldNewValues.Count <= 0)
             {
                 return;
             }
@@ -1008,7 +1019,15 @@ namespace HB.FullStack.Database
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(EngineType, entityDef, id, lastUser, propertyOldNewValues);
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
+                    EngineType, 
+                    entityDef, 
+                    id, 
+                    lastUser, 
+                    propertyNameOldNewValues.Select(t=>t.Item1).ToList(),
+                    propertyNameOldNewValues.Select(t=>t.Item2).ToList(),
+                    propertyNameOldNewValues.Select(t=>t.Item3).ToList());
+
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
@@ -1017,16 +1036,16 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyOldNewValues)}", "");
+                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyOldNewValues)}");
+                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyOldNewValues)}", ex);
+                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", ex);
             }
         }
 
