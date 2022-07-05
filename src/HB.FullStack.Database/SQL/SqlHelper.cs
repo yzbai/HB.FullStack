@@ -189,7 +189,7 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 使用新旧值比较乐观锁的update-fields.field粒度
         /// </summary>
-        public static string CreateUpdateFieldsUsingOldNewCompareSql(EntityDef entityDef, IEnumerable<string> propertyNames, string oldSuffix = "old", string newSuffix = "new", int number = 0)
+        public static string CreateUpdateFieldsUsingOldNewCompareSql(EntityDef entityDef, EngineType engineType, IEnumerable<string> propertyNames, string oldSuffix = "old", string newSuffix = "new", int number = 0)
         {
             EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
             EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
@@ -220,7 +220,8 @@ namespace HB.FullStack.Database.SQL
                 where.Append(Invariant($" AND  {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{oldSuffix}_{number}"));
             }
 
-            return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}";
+            //TODO: 还是要查验一下found_rows的并发
+            return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}; SELECT {FoundMatchedRows_Statement(engineType)}, {versionProperty.DbReservedName} FROM {entityDef.DbTableReservedName} WHERE {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} AND {deletedProperty.DbReservedName}=0 ";
         }
 
         public static string CreateDeleteEntitySql(EntityDef entityDef, int number = 0)
@@ -401,7 +402,7 @@ namespace HB.FullStack.Database.SQL
                 //row_count() 返回真正被修改的
 
                 EngineType.MySQL => " found_rows() ",//$"row_count()", // $" found_rows() ",
-                EngineType.SQLite => $" changes() ",//sqlite不返回真正受影响的，只返回匹配的
+                EngineType.SQLite => " changes() ",//sqlite不返回真正受影响的，只返回匹配的
                 _ => "",
             };
         }

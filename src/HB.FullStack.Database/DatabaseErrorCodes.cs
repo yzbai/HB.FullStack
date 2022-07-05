@@ -59,6 +59,16 @@ namespace HB.FullStack.Database
             return exception;
         }
 
+        internal static Exception ExecuterError(string commandText, string cause, Exception? innerException = null)
+        {
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ExecuterError, innerException);
+
+            exception.Data["Cause"] = cause;
+            exception.Data["CommandText"] = commandText;
+
+            return exception;
+        }
+
         internal static Exception ExecuterError(string commandText, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ExecuterError, innerException);

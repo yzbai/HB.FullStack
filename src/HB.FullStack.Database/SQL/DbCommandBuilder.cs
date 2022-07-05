@@ -42,7 +42,7 @@ namespace HB.FullStack.Database
                     SqlType.AddEntity => SqlHelper.CreateAddEntitySql(entityDefs[0], engineType, true),
                     SqlType.UpdateEntity => SqlHelper.CreateUpdateEntitySql(entityDefs[0]),
                     SqlType.UpdateFieldsUsingVersionCompare => SqlHelper.CreateUpdateFieldsUsingVersionCompareSql(entityDefs[0], propertyNames!),
-                    SqlType.UpdateFieldsUsingOldNewCompare => SqlHelper.CreateUpdateFieldsUsingOldNewCompareSql(entityDefs[0], propertyNames!),
+                    SqlType.UpdateFieldsUsingOldNewCompare => SqlHelper.CreateUpdateFieldsUsingOldNewCompareSql(entityDefs[0], engineType, propertyNames!),
                     SqlType.DeleteEntity => SqlHelper.CreateDeleteEntitySql(entityDefs[0]),
                     SqlType.SelectEntity => SqlHelper.CreateSelectEntitySql(entityDefs),
                     SqlType.Delete => SqlHelper.CreateDeleteSql(entityDefs[0]),

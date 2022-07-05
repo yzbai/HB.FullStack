@@ -86,13 +86,14 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookEntity.Price), book.Price, 123456.789));
             toUpdate.Add((nameof(Guid_BookEntity.Name), book.Name, "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookEntity>(book.Id, "UPDATE_FIELDS_VERSION", toUpdate, null);
+            int newVersion = await Db.UpdateFieldsAsync<Guid_BookEntity>(book.Id, "UPDATE_FIELDS_VERSION", toUpdate, null);
+
 
             Guid_BookEntity? updatedBook = await Db.ScalarAsync<Guid_BookEntity>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
-            Assert.IsTrue(updatedBook.Version == book.Version + 1);
+            Assert.IsTrue(updatedBook.Version == newVersion);
             Assert.IsTrue(updatedBook.Price == 123456.789);
             Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
             Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");

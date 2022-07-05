@@ -389,9 +389,9 @@ namespace HB.FullStack.Database
 
             try
             {
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType, fromCondition, whereCondition, selectDef);
+                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType, fromCondition, whereCondition, selectDef);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
 
                 return reader.ToEntities<TSelect>(_databaseEngine.EngineType, EntityDefFactory, selectDef);
             }
@@ -415,7 +415,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                var command = DbCommandBuilder.CreateRetrieveCommand(EngineType, entityDef, fromCondition, whereCondition);
+                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(EngineType, entityDef, fromCondition, whereCondition);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
                 return reader.ToEntities<T>(_databaseEngine.EngineType, EntityDefFactory, entityDef);
@@ -440,7 +440,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                var command = DbCommandBuilder.CreateCountCommand(EngineType, fromCondition, whereCondition);
+                EngineCommand command = DbCommandBuilder.CreateCountCommand(EngineType, fromCondition, whereCondition);
                 object? countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
                 return Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
@@ -996,12 +996,13 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// version + 1 every time
+        /// 返回新的Version
         /// </summary>
-        public async Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task<int> UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
             {
-                return;
+                throw new ArgumentException("数量为空", nameof(propertyNameOldNewValues));
             }
 
             if (id is long longId && longId <= 0)
@@ -1023,27 +1024,38 @@ namespace HB.FullStack.Database
             try
             {
                 EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
-                    EngineType, 
-                    entityDef, 
-                    id, 
-                    lastUser, 
-                    propertyNameOldNewValues.Select(t=>t.Item1).ToList(),
-                    propertyNameOldNewValues.Select(t=>t.Item2).ToList(),
-                    propertyNameOldNewValues.Select(t=>t.Item3).ToList());
+                    EngineType,
+                    entityDef,
+                    id,
+                    lastUser,
+                    propertyNameOldNewValues.Select(t => t.Item1).ToList(),
+                    propertyNameOldNewValues.Select(t => t.Item2).ToList(),
+                    propertyNameOldNewValues.Select(t => t.Item3).ToList());
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+                using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
 
-                if (rows == 1)
+                if (reader.Read())
                 {
-                    return;
-                }
-                else if (rows == 0)
-                {
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
+                    int matchedRows = reader.GetInt32(0);
+                    int newVersion = reader.GetInt32(1);
+
+                    if (matchedRows == 1)
+                    {
+                        return newVersion;
+                    }
+                    else if (matchedRows == 0)
+                    {
+                        throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
+                    }
+                    else
+                    {
+                        throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
+                    }
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
+                    //imposibble here
+                    throw DatabaseExceptions.ExecuterError(command.CommandText, "IDataReader读不出数据了，完蛋了！");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
