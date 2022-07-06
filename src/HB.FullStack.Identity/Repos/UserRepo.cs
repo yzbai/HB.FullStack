@@ -27,6 +27,8 @@ namespace HB.FullStack.Identity
         {
             EntityUpdating += (sender, args) =>
             {
+                //NOTICE: SecurityStamp主要用来加盐，每次User实体改动，SecurityStamp改动提高安全性
+                //从另一个角度提供了类似Version/timestamp的作用
                 sender.SecurityStamp = SecurityUtil.CreateUniqueToken();
                 return Task.CompletedTask;
             };
