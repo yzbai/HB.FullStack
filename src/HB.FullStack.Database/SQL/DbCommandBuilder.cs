@@ -199,10 +199,10 @@ namespace HB.FullStack.Database
         public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser,
             IList<string> propertyNames, IList<object?> propertyValues)
         {
-            propertyNames.Add(nameof(LongIdModel.Id));
-            propertyNames.Add(nameof(Model.Version));
-            propertyNames.Add(nameof(Model.LastUser));
-            propertyNames.Add(nameof(Model.LastTime));
+            propertyNames.Add(nameof(LongIdDatabaseModel.Id));
+            propertyNames.Add(nameof(DatabaseModel.Version));
+            propertyNames.Add(nameof(DatabaseModel.LastUser));
+            propertyNames.Add(nameof(DatabaseModel.LastTime));
 
             propertyValues.Add(id);
             propertyValues.Add(updateToVersion);
@@ -224,9 +224,9 @@ namespace HB.FullStack.Database
 
             var oldParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0");
 
-            propertyNames.Add(nameof(LongIdModel.Id));
-            propertyNames.Add(nameof(Model.LastUser));
-            propertyNames.Add(nameof(Model.LastTime));
+            propertyNames.Add(nameof(LongIdDatabaseModel.Id));
+            propertyNames.Add(nameof(DatabaseModel.LastUser));
+            propertyNames.Add(nameof(DatabaseModel.LastTime));
 
             newPropertyValues.Add(id);
             newPropertyValues.Add(lastUser);

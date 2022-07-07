@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache.CacheModels
 {
     public class CacheModelDef
     {

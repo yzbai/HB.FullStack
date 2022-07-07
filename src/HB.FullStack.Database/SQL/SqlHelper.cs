@@ -50,7 +50,7 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                if (propertyDef.Name == nameof(Model.Version) || propertyDef.Name == nameof(Model.CreateTime))
+                if (propertyDef.Name == nameof(DatabaseModel.Version) /*|| propertyDef.Name == nameof(Model.CreateTime)*/)
                 {
                     continue;
                 }
@@ -58,7 +58,7 @@ namespace HB.FullStack.Database.SQL
                 updatePairs.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
             }
 
-            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Version))!;
 
             //updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1"));
             updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName}"));
@@ -121,7 +121,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
-                if (propertyDef.IsPrimaryKey || propertyDef.Name == nameof(Model.CreateTime))
+                if (propertyDef.IsPrimaryKey /*|| propertyDef.Name == nameof(Model.CreateTime)*/)
                 {
                     continue;
                 }
@@ -134,8 +134,8 @@ namespace HB.FullStack.Database.SQL
             StringBuilder where = new StringBuilder();
 
             DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
-            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Version))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND "));
@@ -153,7 +153,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                if (propertyName == nameof(Model.CreateTime) || propertyName == nameof(LongIdModel.Id))
+                if (/*propertyName == nameof(Model.CreateTime) || */propertyName == nameof(LongIdDatabaseModel.Id))
                 {
                     continue;
                 }
@@ -173,8 +173,8 @@ namespace HB.FullStack.Database.SQL
             StringBuilder where = new StringBuilder();
 
             DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
-            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Version))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
 
@@ -192,10 +192,10 @@ namespace HB.FullStack.Database.SQL
         public static string CreateUpdateFieldsUsingOldNewCompareSql(DatabaseModelDef modelDef, EngineType engineType, IEnumerable<string> propertyNames, string oldSuffix = "old", string newSuffix = "new", int number = 0)
         {
             DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
-            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
-            DatabaseModelPropertyDef lastUserProperty = modelDef.GetPropertyDef(nameof(Model.LastUser))!;
-            DatabaseModelPropertyDef lastTimeProperty = modelDef.GetPropertyDef(nameof(Model.LastTime))!;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Version))!;
+            DatabaseModelPropertyDef lastUserProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.LastUser))!;
+            DatabaseModelPropertyDef lastTimeProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.LastTime))!;
 
             StringBuilder args = new StringBuilder();
             StringBuilder where = new StringBuilder();
@@ -250,8 +250,8 @@ namespace HB.FullStack.Database.SQL
 
         public static string CreateDeleteSql(DatabaseModelDef modelDef)
         {
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
-            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Version))!;
 
             return $"update {modelDef.DbTableReservedName} set {versionProperty.DbReservedName}={versionProperty.DbReservedName}+1, {deletedProperty.DbReservedName}=1";
         }

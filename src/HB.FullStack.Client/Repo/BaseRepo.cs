@@ -82,7 +82,7 @@ namespace HB.FullStack.Client
         }
     }
 
-    public abstract class BaseRepo<TModel, TRes> : BaseRepo where TModel : DatabaseModel, new() where TRes : ApiResource
+    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DatabaseModel, new() where TRes : ApiResource
     {
         private readonly ILogger _logger;
         private readonly DatabaseModelDef _modelDef = null!;
@@ -388,7 +388,7 @@ namespace HB.FullStack.Client
                 {
                     OfflineHistory history = new OfflineHistory
                     {
-                        ModelId = (model as LongIdModel)!.Id.ToString(CultureInfo.InvariantCulture),
+                        ModelId = (model as LongIdDatabaseModel)!.Id.ToString(CultureInfo.InvariantCulture),
                         ModelFullName = _modelDef.ModelFullName,
                         Operation = dbOperation,
                         OperationTime = model.LastTime,
@@ -404,7 +404,7 @@ namespace HB.FullStack.Client
                 {
                     OfflineHistory history = new OfflineHistory
                     {
-                        ModelId = (model as GuidModel)!.Id.ToString(),
+                        ModelId = (model as GuidDatabaseModel)!.Id.ToString(),
                         ModelFullName = _modelDef.ModelFullName,
                         Operation = dbOperation,
                         OperationTime = model.LastTime,

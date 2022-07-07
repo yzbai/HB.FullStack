@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Reflection;
 
-using HB.FullStack.Common;
-
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache.CacheModels
 {
     public static class CacheModelDefFactory
     {
@@ -13,10 +10,10 @@ namespace HB.FullStack.Cache
 
         //private static readonly object _lockObj = new object();
 
-        public static CacheModelDef Get<TModel>() where TModel : Model, new()
+        public static CacheModelDef Get<TModel>()
         {
             return _defDict.GetOrAdd(typeof(TModel), type => CreateModelDef(type));
-            
+
             //Type modelType = typeof(TModel);
 
             //if (!_defDict.ContainsKey(modelType))
@@ -33,7 +30,7 @@ namespace HB.FullStack.Cache
             //return _defDict[modelType];
 
         }
-        
+
         private static CacheModelDef CreateModelDef(Type modelType)
         {
             CacheModelDef def = new()
@@ -54,9 +51,9 @@ namespace HB.FullStack.Cache
 
             def.CacheInstanceName = cacheModelAttribute.CacheInstanceName;
 
-            def.SlidingTime = cacheModelAttribute.SlidingSeconds == -1 ? null : (TimeSpan?)TimeSpan.FromSeconds(cacheModelAttribute.SlidingSeconds);
+            def.SlidingTime = cacheModelAttribute.SlidingSeconds == -1 ? null : TimeSpan.FromSeconds(cacheModelAttribute.SlidingSeconds);
 
-            def.AbsoluteTimeRelativeToNow = cacheModelAttribute.MaxAliveSeconds == -1 ? null : (TimeSpan?)TimeSpan.FromSeconds(cacheModelAttribute.MaxAliveSeconds);
+            def.AbsoluteTimeRelativeToNow = cacheModelAttribute.MaxAliveSeconds == -1 ? null : TimeSpan.FromSeconds(cacheModelAttribute.MaxAliveSeconds);
 
             if (def.SlidingTime > def.AbsoluteTimeRelativeToNow)
             {

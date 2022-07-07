@@ -248,7 +248,7 @@ namespace System
             return o;
         }
 
-        public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class, ISupportValidate
+        public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class, IValidatableObject
         {
             if (o == null)
                 throw new ArgumentNullException($"Parameter:{ paramName}");

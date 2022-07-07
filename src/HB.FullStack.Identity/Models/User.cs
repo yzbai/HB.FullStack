@@ -10,8 +10,7 @@ namespace HB.FullStack.Identity.Models
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
-
-    public class User : GuidModel
+    public class User : GuidDatabaseModel
     {
         [Required]
         [Guid32String(NotNull = true)]
@@ -25,7 +24,7 @@ namespace HB.FullStack.Identity.Models
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [ModelProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
+        [DatabaseModelProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -33,32 +32,29 @@ namespace HB.FullStack.Identity.Models
         /// 唯一
         /// </summary>
         [Mobile]
-        [ModelProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
+        [DatabaseModelProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [ModelProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
+        [DatabaseModelProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
         public string? Email { get; set; }
 
         /// <summary>
         /// "手机号码是否验证"
         /// </summary>
-
         public bool MobileConfirmed { get; set; }
 
         /// <summary>
         /// "邮箱是否验证"
         /// </summary>
-
         public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// "Two Factor"
         /// </summary>
-
         public bool TwoFactorEnabled { get; set; }
 
         public User()

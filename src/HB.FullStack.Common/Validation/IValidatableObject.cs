@@ -8,7 +8,7 @@ namespace HB.FullStack.Common
     /// <summary>
     /// 内建验证机制接口
     /// </summary>
-    public interface ISupportValidate
+    public interface IValidatableObject
     {
         /// <summary>
         /// 是否通过验证

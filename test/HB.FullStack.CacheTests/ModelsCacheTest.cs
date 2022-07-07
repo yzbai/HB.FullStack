@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
-
+using HB.FullStack.Common.Cache.CacheModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

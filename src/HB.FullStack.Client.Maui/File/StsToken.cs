@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.Maui.File
       needLogined: true,
       allowOfflineRead: false,
       allowOfflineWrite: false)]
-    public class StsToken : GuidModel
+    public class StsToken : GuidDatabaseModel
     {
         public Guid UserId { get; set; }
 

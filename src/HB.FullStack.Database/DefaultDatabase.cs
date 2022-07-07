@@ -70,7 +70,7 @@ namespace HB.FullStack.Database
             VarcharDefaultLength = _databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : _databaseSettings.DefaultVarcharLength;
 
 
-            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(Model.Deleted), _databaseEngine.EngineType);
+            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(DatabaseModel.Deleted), _databaseEngine.EngineType);
         }
 
         #region Initialize
@@ -491,17 +491,17 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : LongIdModel, new()
+            where T : LongIdDatabaseModel, new()
         {
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(LongIdModel.Id), EngineType)}={{0}}", id);
+            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(LongIdDatabaseModel.Id), EngineType)}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
-            where T : GuidModel, new()
+            where T : GuidDatabaseModel, new()
         {
-            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidModel.Id), EngineType)}={{0}}", guid);
+            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidDatabaseModel.Id), EngineType)}={{0}}", guid);
             WhereExpression<T> where = Where<T>(t => t.Id == id);
 
             return ScalarAsync(where, transContext);
@@ -737,7 +737,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IsIdAutoIncrement)
                 {
-                    ((AutoIncrementIdModel)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                    ((AutoIncrementIdDatabaseModel)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
             }
             catch (DatabaseException ex)
@@ -765,7 +765,7 @@ namespace HB.FullStack.Database
                 item.Version = 0;
                 item.LastUser = lastUser;
                 item.LastTime = utcNow;
-                item.CreateTime = utcNow;
+                //item.CreateTime = utcNow;
             }
 
             static void RestoreItem(T item)
@@ -1116,21 +1116,21 @@ namespace HB.FullStack.Database
 
                     foreach (var item in items)
                     {
-                        ((AutoIncrementIdModel)(object)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
+                        ((AutoIncrementIdDatabaseModel)(object)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
                     }
                 }
                 else if (modelDef.IsIdGuid)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((GuidModel)(object)item).Id);
+                        newIds.Add(((GuidDatabaseModel)(object)item).Id);
                     }
                 }
                 else if (modelDef.IsIdLong)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((LongIdModel)(object)item).Id);
+                        newIds.Add(((LongIdDatabaseModel)(object)item).Id);
                     }
                 }
 
@@ -1164,7 +1164,7 @@ namespace HB.FullStack.Database
                     item.Version = 0;
                     item.LastUser = lastUser;
                     item.LastTime = utcNow;
-                    item.CreateTime = utcNow;
+                    //item.CreateTime = utcNow;
                 }
             }
 
@@ -1375,7 +1375,7 @@ namespace HB.FullStack.Database
         {
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
-                object id = modelDef.IsIdLong ? ((LongIdModel)(object)item).Id : modelDef.IsIdGuid ? ((GuidModel)(object)item).Id : "None";
+                object id = modelDef.IsIdLong ? ((LongIdDatabaseModel)(object)item).Id : modelDef.IsIdGuid ? ((GuidDatabaseModel)(object)item).Id : "None";
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
                 lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);

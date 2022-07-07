@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Common;
-
+using HB.FullStack.Common.Cache.CacheModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -282,7 +282,7 @@ end
             Logger.LogInformation($"RedisCache初始化完成");
         }
 
-        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : Model, new()
+        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
 
@@ -334,7 +334,7 @@ end
             }
         }
 
-        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : Model, new()
+        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
 
@@ -391,7 +391,7 @@ end
             }
         }
 
-        public async Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TModel : Model, new()
+        public async Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TModel : ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
             ThrowIfNotCacheEnabled(modelDef);
@@ -422,7 +422,7 @@ end
             }
         }
 
-        private async Task ForcedRemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : Model, new()
+        private async Task ForcedRemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
             ThrowIfNotCacheEnabled(modelDef);
@@ -453,7 +453,7 @@ end
             }
         }
 
-        private byte[] AddRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : Model, new()
+        private byte[] AddRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
         {
             byte[] loadedScript;
 
@@ -489,7 +489,7 @@ end
             return loadedScript;
         }
 
-        private byte[] AddForcedRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : Model, new()
+        private byte[] AddForcedRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
         {
             byte[] loadedScript;
 
@@ -549,7 +549,7 @@ end
             return loadedScript;
         }
 
-        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : Model, new()
+        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
         {
             /// keys: model1_idKey, model1_dimensionkey1, model1_dimensionkey2, model1_dimensionkey3, model2_idKey, model2_dimensionkey1, model2_dimensionkey2, model2_dimensionkey3
             /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_version, model1_dimensionKeyJoinedString, model2_data, model2_version, model2_dimensionKeyJoinedString
@@ -593,7 +593,7 @@ end
             }
         }
 
-        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : Model, new()
+        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ICacheModel, new()
         {
             if (result.IsNull)
             {

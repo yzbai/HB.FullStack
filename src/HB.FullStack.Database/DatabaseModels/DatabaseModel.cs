@@ -2,21 +2,29 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Cache.CacheModels;
 using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DatabaseModels
 {
-    public abstract class DatabaseModel : Model
+    public abstract class DatabaseModel : Model, ICacheModel
     {
-        public override string LastUser { get; set; } = string.Empty;
+        public int Version { get; set; } = -1;
+
+        public string LastUser { get; set; } = string.Empty;
+
+        public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
+
+        public bool Deleted { get; /*internal*/ set; }
     }
 
-    public abstract class LongIdModel : DatabaseModel
+    public abstract class LongIdDatabaseModel : DatabaseModel
     {
+        [DatabaseModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
-    public abstract class AutoIncrementIdModel : LongIdModel
+    public abstract class AutoIncrementIdDatabaseModel : LongIdDatabaseModel
     {
         [AutoIncrementPrimaryKey]
         [DatabaseModelProperty(0)]
@@ -24,7 +32,7 @@ namespace HB.FullStack.Database.DatabaseModels
         public override long Id { get; set; } = -1;
     }
 
-    public abstract class FlackIdModel : LongIdModel
+    public abstract class FlackIdDatabaseModel : LongIdDatabaseModel
     {
         [PrimaryKey]
         [DatabaseModelProperty(0)]
@@ -33,8 +41,9 @@ namespace HB.FullStack.Database.DatabaseModels
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 
-    public abstract class GuidModel : DatabaseModel
+    public abstract class GuidDatabaseModel : DatabaseModel
     {
+        [DatabaseModelProperty(0)]
         [NoEmptyGuid]
         [PrimaryKey]
         [CacheKey]

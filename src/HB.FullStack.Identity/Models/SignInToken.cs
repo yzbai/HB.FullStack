@@ -5,14 +5,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class SignInToken : GuidModel
+    public class SignInToken : GuidDatabaseModel
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [Required]
-        [ModelProperty(NotNull = true, NeedIndex = true)]
+        [DatabaseModelProperty(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
         public DateTimeOffset? ExpireAt { get; set; }
@@ -24,13 +24,13 @@ namespace HB.FullStack.Identity.Models
         #region Device
 
         [Required]
-        [ModelProperty(NotNull = true, NeedIndex = true)]
+        [DatabaseModelProperty(NotNull = true, NeedIndex = true)]
         public string DeviceId { get; set; } = default!;
 
-        [ModelProperty(NotNull = true)]
+        [DatabaseModelProperty(NotNull = true)]
         public string DeviceVersion { get; set; } = default!;
 
-        [ModelProperty(NotNull = true)]
+        [DatabaseModelProperty(NotNull = true)]
         public string DeviceIp { get; set; } = default!;
 
         #endregion

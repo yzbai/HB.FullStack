@@ -16,7 +16,7 @@ namespace HB.FullStack.Common
     /// 内建验证机制。
     /// 不能应对嵌套的类的验证
     /// </summary>
-    public class ValidatableObject : ISupportValidate
+    public class ValidatableObject : IValidatableObject
     {
         [MessagePack.IgnoreMember]
         private IList<ValidationResult>? _validateResults;

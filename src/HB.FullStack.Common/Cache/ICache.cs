@@ -1,6 +1,7 @@
 ﻿
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Cache.CacheModels;
 
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -36,17 +37,17 @@ namespace HB.FullStack.Cache
         //    return modelDef.IsCacheable;
         //}
 
-        Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : Model, new();
+        Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TCacheModel : ICacheModel, new();
 
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
         /// </summary>
-        Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TModel : Model, new();
+        Task RemoveModelsAsync<TCacheModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TCacheModel : ICacheModel, new();
 
         /// <summary>
         /// 返回是否成功更新。false是数据版本小于缓存中的
         /// </summary>
-        Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : Model, new();
+        Task<IEnumerable<bool>> SetModelsAsync<TCacheModel>(IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : ICacheModel, new();
 
         #endregion
 
@@ -89,9 +90,9 @@ namespace HB.FullStack.Cache
     /// </summary>
     public static class ICacheExtensions
     {
-        public static bool IsModelEnabled<TModel>(this ICache cache) where TModel:Model, new()
+        public static bool IsModelEnabled<TCacheModel>(this ICache cache) where TCacheModel : ICacheModel, new()
         {
-            CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
+            CacheModelDef modelDef = CacheModelDefFactory.Get<TCacheModel>();
 
             return modelDef.IsCacheable;
         }

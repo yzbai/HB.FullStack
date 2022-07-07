@@ -5,16 +5,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class UserClaim : GuidModel
+    public class UserClaim : GuidDatabaseModel
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
-        [ModelProperty(NotNull = true)]
+        [DatabaseModelProperty(NotNull = true)]
         public string ClaimType { get; set; } = default!;
 
-        [ModelProperty(MaxLength = LengthConventions.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
+        [DatabaseModelProperty(MaxLength = LengthConventions.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
         public string ClaimValue { get; set; } = default!;
 
         public bool AddToJwt { get; set; }

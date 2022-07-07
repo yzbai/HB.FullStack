@@ -17,27 +17,12 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             _database = database;
         }
 
-        /// <summary>
-        /// AddIdBarrierAsync
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="serverId"></param>
-        /// <returns></returns>
-        
         public async Task AddIdBarrierAsync(long clientId, long serverId)
         {
             IdBarrier idBarrier = new IdBarrier { ClientId = clientId, ServerId = serverId };
 
             await _database.AddAsync(idBarrier, "", null).ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// AddIdBarrierAsync
-        /// </summary>
-        /// <param name="clientIds"></param>
-        /// <param name="servierIds"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
         
         public async Task AddIdBarrierAsync(IList<long> clientIds, IEnumerable<long> servierIds, TransactionContext transactionContext)
         {

@@ -1,8 +1,9 @@
-﻿using HB.FullStack.Identity.Models;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Identity.Models;
 
 namespace HB.FullStack.Identity
 {
-    public class UserAccessResult
+    public class UserAccessResult : Model
     {
         public string AccessToken { get; set; }
 

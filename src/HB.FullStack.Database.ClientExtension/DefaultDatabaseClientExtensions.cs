@@ -78,7 +78,7 @@ namespace HB.FullStack.Database
 
                 T newItem = models[0];
 
-                item.CreateTime = newItem.CreateTime;
+                //item.CreateTime = newItem.CreateTime;
                 item.Version = newItem.Version;
             }
             catch (Exception ex) when (ex is not DatabaseException)

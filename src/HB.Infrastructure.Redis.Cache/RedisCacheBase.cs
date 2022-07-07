@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using HB.FullStack.Cache;
+using HB.FullStack.Common.Cache.CacheModels;
 using HB.Infrastructure.Redis.Shared;
 
 using Microsoft.Extensions.Logging;

@@ -11,20 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace HB.FullStack.Common
 {
-    public abstract class Model : ValidatableObject
-    {
-        public int Version { get; set; } = -1;
+    public interface IModel : IValidatableObject { }
 
-        public abstract string LastUser { get; set; }
-
-        /// <summary>
-        /// UTC 时间
-        /// </summary>
-
-        public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
-
-        public DateTimeOffset CreateTime { get; /*internal*/ set; } = TimeUtil.UtcNow;
-
-        public bool Deleted { get; /*internal*/ set; }
-    }
+    public class Model : ValidatableObject, IModel { }
 }

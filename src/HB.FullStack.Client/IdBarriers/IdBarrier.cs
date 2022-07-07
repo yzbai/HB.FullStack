@@ -7,7 +7,7 @@ using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.XamarinForms.IdBarriers
 {
-    public class IdBarrier : AutoIncrementIdModel
+    public class IdBarrier : AutoIncrementIdDatabaseModel
     {
         [DatabaseModelProperty(NeedIndex = true, Unique = true)]
         public long ClientId { get; set; } = -1;

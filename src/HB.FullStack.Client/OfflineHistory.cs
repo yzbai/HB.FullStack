@@ -18,7 +18,7 @@ namespace HB.FullStack.Client
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    public class OfflineHistory : AutoIncrementIdModel
+    public class OfflineHistory : AutoIncrementIdDatabaseModel
     {
         public string ModelId { get; set; } = null!;
 

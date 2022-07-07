@@ -9,6 +9,7 @@ using AsyncAwaitBestPractices;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Cache.CacheModels;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
 
@@ -19,7 +20,7 @@ namespace HB.FullStack.Repository
     internal static class ModelCacheStrategy
     {
         public static async Task<IEnumerable<TModel>> CacheAsideAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TModel>>> dbRetrieve,
-            IDatabase database, ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TModel : Model, new()
+            IDatabase database, ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TModel : ICacheModel, new()
         {
 
             if (!cache.IsModelEnabled<TModel>())
@@ -104,7 +105,7 @@ namespace HB.FullStack.Repository
 
         }
 
-        private static void UpdateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : Model, new()
+        private static void UpdateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ICacheModel, new()
         {
             #region 普通缓存，加锁的做法
             //using IDistributedLock distributedLock = await _lockManager.LockModelsAsync(models, OccupiedTime, PatienceTime).ConfigureAwait(false);
@@ -137,7 +138,7 @@ namespace HB.FullStack.Repository
 
         }
 
-        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : Model, new()
+        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ICacheModel, new()
         {
             if (cache.IsModelEnabled<TModel>())
             {

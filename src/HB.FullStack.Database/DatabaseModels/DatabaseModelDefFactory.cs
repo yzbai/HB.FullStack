@@ -166,9 +166,9 @@ namespace HB.FullStack.Database.DatabaseModels
 
             DatabaseModelDef modelDef = new DatabaseModelDef
             {
-                IsIdAutoIncrement = modelType.IsSubclassOf(typeof(AutoIncrementIdModel)),
-                IsIdGuid = modelType.IsSubclassOf(typeof(GuidModel)),
-                IsIdLong = modelType.IsSubclassOf(typeof(LongIdModel)),
+                IsIdAutoIncrement = modelType.IsSubclassOf(typeof(AutoIncrementIdDatabaseModel)),
+                IsIdGuid = modelType.IsSubclassOf(typeof(GuidDatabaseModel)),
+                IsIdLong = modelType.IsSubclassOf(typeof(LongIdDatabaseModel)),
                 ModelType = modelType,
                 ModelFullName = modelType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
@@ -197,7 +197,7 @@ namespace HB.FullStack.Database.DatabaseModels
                         modelPropertyAttribute = new DatabaseModelPropertyAttribute();
                     }
 
-                    if (info.Name == nameof(Model.LastUser))
+                    if (info.Name == nameof(DatabaseModel.LastUser))
                     {
                         modelPropertyAttribute.MaxLength = DefaultLengthConventions.MAX_LAST_USER_LENGTH;
                     }
