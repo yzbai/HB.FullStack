@@ -7,9 +7,9 @@ namespace HB.FullStack.Identity
     {
         string JsonWebKeySetJson { get; }
 
-        Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
+        Task<UserToken> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
 
-        Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser);
+        Task<UserToken> SignInAsync(SignInContext context, string lastUser);
 
         Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
 

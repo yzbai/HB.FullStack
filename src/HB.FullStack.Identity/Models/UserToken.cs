@@ -3,7 +3,7 @@ using HB.FullStack.Identity.Models;
 
 namespace HB.FullStack.Identity
 {
-    public class UserAccessResult : Model
+    public class UserToken : Model
     {
         public string AccessToken { get; set; }
 
@@ -11,7 +11,7 @@ namespace HB.FullStack.Identity
 
         public User CurrentUser { get; set; }
 
-        public UserAccessResult(string accessToken, string refreshToken, User currentUser)
+        public UserToken(string accessToken, string refreshToken, User currentUser)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;

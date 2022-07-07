@@ -88,7 +88,7 @@ namespace HB.FullStack.Identity
 
         public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
-        public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
+        public async Task<UserToken> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
@@ -182,7 +182,7 @@ namespace HB.FullStack.Identity
                 //构造 Jwt
                 string jwt = await ConstructJwtAsync(user, signInToken, context.SignToWhere, transactionContext).ConfigureAwait(false);
 
-                UserAccessResult result = new UserAccessResult
+                UserToken result = new UserToken
                 (
                     accessToken: jwt,
                     refreshToken: signInToken.RefreshToken,
@@ -208,7 +208,7 @@ namespace HB.FullStack.Identity
             }
         }
 
-        public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
+        public async Task<UserToken> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
@@ -309,7 +309,7 @@ namespace HB.FullStack.Identity
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new UserAccessResult(accessToken, signInToken.RefreshToken, user);
+                return new UserToken(accessToken, signInToken.RefreshToken, user);
             }
             catch
             {

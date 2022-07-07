@@ -13,16 +13,16 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IPreferenceProvider userTokenProvider)
+        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IPreferenceProvider preferenceProvider)
         {
-            if (userTokenProvider.AccessToken.IsNullOrEmpty())
+            if (preferenceProvider.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
             JwtEndpointSetting jwtEndpoint = endpointSettings?.JwtEndpoint ?? apiClient.GetLoginJwtEndpointSetting();
 
-            string accessTokenHashKey = SecurityUtil.GetHash(userTokenProvider.AccessToken);
+            string accessTokenHashKey = SecurityUtil.GetHash(preferenceProvider.AccessToken);
 
             //这个AccessToken不久前刷新过
             if (!_requestLimiter.NoWaitLock(nameof(RefreshAccessTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(jwtEndpoint.RefreshIntervalSeconds)))
@@ -56,25 +56,25 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                if (userTokenProvider.RefreshToken.IsNotNullOrEmpty())
+                if (preferenceProvider.RefreshToken.IsNotNullOrEmpty())
                 {
                     BearerTokenResGetByRefreshRequest refreshRequest = new BearerTokenResGetByRefreshRequest(
                         jwtEndpoint,
-                        userTokenProvider.UserId!.Value,
-                        userTokenProvider.AccessToken,
-                        userTokenProvider.RefreshToken,
-                        userTokenProvider.DeviceId,
-                        userTokenProvider.DeviceVersion,
-                        userTokenProvider.DeviceInfos);
+                        preferenceProvider.UserId!.Value,
+                        preferenceProvider.AccessToken,
+                        preferenceProvider.RefreshToken,
+                        preferenceProvider.DeviceId,
+                        preferenceProvider.DeviceVersion,
+                        preferenceProvider.DeviceInfos);
 
-                    BearerTokenRes? res = await apiClient.GetAsync<BearerTokenRes>(refreshRequest).ConfigureAwait(false);
+                    UserTokenRes? res = await apiClient.GetAsync<UserTokenRes>(refreshRequest).ConfigureAwait(false);
 
                     if (res != null)
                     {
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        OnRefreshSucceed(res, userTokenProvider);
+                        OnRefreshSucceed(res, preferenceProvider);
 
                         return true;
                     }
@@ -84,7 +84,7 @@ namespace HB.FullStack.Common.ApiClient
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed(userTokenProvider);
+                OnRefreshFailed(preferenceProvider);
 
                 return false;
             }
@@ -94,7 +94,7 @@ namespace HB.FullStack.Common.ApiClient
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed(userTokenProvider);
+                OnRefreshFailed(preferenceProvider);
 
                 throw;
             }
@@ -104,9 +104,9 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private static void OnRefreshSucceed(BearerTokenRes res, IPreferenceProvider userTokenProvider)
+        private static void OnRefreshSucceed(UserTokenRes res, IPreferenceProvider preferenceProvider)
         {
-            userTokenProvider.OnTokenFetched(
+            preferenceProvider.OnTokenFetched(
                 res.UserId,
                 res.CreatedTime,
                 res.Mobile,
@@ -116,9 +116,9 @@ namespace HB.FullStack.Common.ApiClient
                 res.RefreshToken);
         }
 
-        private static void OnRefreshFailed(IPreferenceProvider userTokenProvider)
+        private static void OnRefreshFailed(IPreferenceProvider preferenceProvider)
         {
-            userTokenProvider.OnTokenRefreshFailed();
+            preferenceProvider.OnTokenRefreshFailed();
         }
     }
 }
