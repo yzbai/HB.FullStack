@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,7 @@ namespace HB.FullStack.WebApi
 {
     public static class SerilogHelper
     {
-        private const string LogFilePathTemplate = "logs/MyColorfulTime.MainApi_{0}_Id.log";
+        private const string LogFilePathTemplate = "logs/{0}_{1}_Id.log";
         private const string LogOutputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}]  {Message:lj} [{SourceContext}] [{Properties:j}] {NewLine}{Exception}";
 
         private static SerilogLoggerFactory? _loggerFactory;
@@ -58,7 +59,11 @@ namespace HB.FullStack.WebApi
 
         private static LoggerConfiguration CreateLoggerConfiguration()
         {
-            string logFilePath = string.Format(CultureInfo.InvariantCulture, LogFilePathTemplate, EnvironmentUtil.MachineId.GetValueOrDefault());
+            string logFilePath = string.Format(
+                CultureInfo.InvariantCulture, 
+                LogFilePathTemplate,
+                Assembly.GetEntryAssembly()?.FullName ?? "UnKown",
+                EnvironmentUtil.MachineId.GetValueOrDefault());
 
             LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
 

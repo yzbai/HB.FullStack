@@ -149,7 +149,7 @@ namespace System
                 });
         }
 
-        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
+        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool autoAddAuthorizeFilter = true)
         {
             Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
 
@@ -158,12 +158,15 @@ namespace System
             services
                 .AddControllers(options =>
                 {
-                    //need authenticated by default. no need add [Authorize] everywhere
-                    AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                    options.Filters.Add(new AuthorizeFilter(policy));
+                    if (autoAddAuthorizeFilter)
+                    {
+                        //need authenticated by default. no need add [Authorize] everywhere
+                        AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                        options.Filters.Add(new AuthorizeFilter(policy));
 
-                    //options.Filters
-                    options.Filters.AddService<UserActivityFilter>();
+                        //options.Filters
+                        options.Filters.AddService<UserActivityFilter>();
+                    }
                 })
                 .AddJsonOptions(options =>
                 {

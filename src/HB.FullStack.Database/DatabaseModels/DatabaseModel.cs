@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.DatabaseModels
     public abstract class AutoIncrementIdModel : LongIdModel
     {
         [AutoIncrementPrimaryKey]
-        [ModelProperty(0)]
+        [DatabaseModelProperty(0)]
         [CacheKey]
         public override long Id { get; set; } = -1;
     }
@@ -27,7 +27,7 @@ namespace HB.FullStack.Database.DatabaseModels
     public abstract class FlackIdModel : LongIdModel
     {
         [PrimaryKey]
-        [ModelProperty(0)]
+        [DatabaseModelProperty(0)]
         [CacheKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Identity;
 using HB.FullStack.WebApi;
 using HB.FullStack.WebApi.Filters;
 using HB.FullStack.WebApi.Security;
@@ -28,9 +29,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<ICommonResourceTokenService, CommonResourceTokenService>();
 
-            //UserActivity
-            services.AddScoped<UserActivityFilter>();
-
+            if (services.Where(d => d.ServiceType == typeof(IIdentityService)).Any())
+            {
+                services.AddScoped<UserActivityFilter>();
+            }
 
             services.AddScoped<CheckCommonResourceTokenFilter>();
         }
