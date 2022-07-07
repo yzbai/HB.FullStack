@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Identity.Entities;
+using HB.FullStack.Identity.Models;
 using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -14,7 +14,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
-    public class UserRoleRepo : DbEntityRepository<UserRole>
+    public class UserRoleRepo : ModelRepository<UserRole>
     {
         public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }

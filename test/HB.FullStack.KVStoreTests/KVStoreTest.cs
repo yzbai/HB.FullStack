@@ -15,14 +15,14 @@ namespace HB.FullStack.KVStoreTests
     [TestClass]
     public class KVStoreTest : BaseTestClass
     {
-        private readonly UserEntity _userEntity1 = new UserEntity()
+        private readonly UserModel _userModel1 = new UserModel()
         {
             UserName = "22222222222",
             Activated = true,
             Type = UserType.Admin
         };
 
-        private readonly UserEntity _userEntity2 = new UserEntity()
+        private readonly UserModel _userModel2 = new UserModel()
         {
             UserName = "333333333",
             Activated = true,
@@ -32,27 +32,27 @@ namespace HB.FullStack.KVStoreTests
         [TestMethod]
         public async Task AddAndFetchAsync()
         {
-            UserEntity? fetched = await KVStore.GetAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
+            UserModel? fetched = await KVStore.GetAsync<UserModel>(_userModel1.Guid).ConfigureAwait(false);
 
             Assert.IsTrue(fetched == null);
 
-            await KVStore.AddAsync(_userEntity1, "xx").ConfigureAwait(false);
+            await KVStore.AddAsync(_userModel1, "xx").ConfigureAwait(false);
 
-            UserEntity? fetchedAgain = await KVStore.GetAsync<UserEntity>(_userEntity1.Guid).ConfigureAwait(false);
+            UserModel? fetchedAgain = await KVStore.GetAsync<UserModel>(_userModel1.Guid).ConfigureAwait(false);
 
-            Assert.IsTrue(Equals(_userEntity1, fetchedAgain!));
+            Assert.IsTrue(Equals(_userModel1, fetchedAgain!));
         }
 
         [TestMethod]
         public async Task AddAndUpdateAsync()
         {
-            UserEntity? fetched = await KVStore.GetAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
+            UserModel? fetched = await KVStore.GetAsync<UserModel>(_userModel2.Guid).ConfigureAwait(false);
 
             if (fetched == null)
             {
-                await KVStore.AddAsync(_userEntity2, "xxx").ConfigureAwait(false);
+                await KVStore.AddAsync(_userModel2, "xxx").ConfigureAwait(false);
 
-                fetched = await KVStore.GetAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
+                fetched = await KVStore.GetAsync<UserModel>(_userModel2.Guid).ConfigureAwait(false);
 
                 Assert.IsTrue(fetched != null);
             }
@@ -61,14 +61,14 @@ namespace HB.FullStack.KVStoreTests
 
             await KVStore.UpdateAsync(fetched, "xxx").ConfigureAwait(false);
 
-            UserEntity? fetchedAgain = await KVStore.GetAsync<UserEntity>(_userEntity2.Guid).ConfigureAwait(false);
+            UserModel? fetchedAgain = await KVStore.GetAsync<UserModel>(_userModel2.Guid).ConfigureAwait(false);
 
             Assert.IsTrue(condition: fetched.Version == fetchedAgain!.Version);
 
-            await KVStore.DeleteAsync<UserEntity>(_userEntity2.Guid, fetchedAgain.Version).ConfigureAwait(false);
+            await KVStore.DeleteAsync<UserModel>(_userModel2.Guid, fetchedAgain.Version).ConfigureAwait(false);
         }
 
-        public static bool Equals([AllowNull] UserEntity x, [AllowNull] UserEntity y)
+        public static bool Equals([AllowNull] UserModel x, [AllowNull] UserModel y)
         {
             if (x == null && y == null) { return true; }
             if (x == null && y != null) { return false; }

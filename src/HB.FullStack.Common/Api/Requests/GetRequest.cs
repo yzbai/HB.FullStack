@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class GetRequest<T> : ApiRequest<T> where T : ApiResource
     {
         public int? Page { get; set; }
 

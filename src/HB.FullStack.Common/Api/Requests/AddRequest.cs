@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class AddRequest<T> : ApiRequest<T> where T : ApiResource
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]

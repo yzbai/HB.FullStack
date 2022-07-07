@@ -14,25 +14,25 @@ namespace System
     public static class CacheErrorCodes
     {
         public static readonly ErrorCode SlidingTimeBiggerThanMaxAlive = new ErrorCode( nameof(SlidingTimeBiggerThanMaxAlive), "");
-        public static readonly ErrorCode EntityNotHaveKeyAttribute = new ErrorCode( nameof(EntityNotHaveKeyAttribute), "");
+        public static readonly ErrorCode ModelNotHaveKeyAttribute = new ErrorCode( nameof(ModelNotHaveKeyAttribute), "");
         public static readonly ErrorCode ConvertError = new ErrorCode( nameof(ConvertError), "");
         public static readonly ErrorCode CacheLoadedLuaNotFound = new ErrorCode( nameof(CacheLoadedLuaNotFound), "");
         public static readonly ErrorCode CacheInstanceNotFound = new ErrorCode( nameof(CacheInstanceNotFound), "");
         public static readonly ErrorCode NoSuchDimensionKey = new ErrorCode( nameof(NoSuchDimensionKey), "");
-        public static readonly ErrorCode NotEnabledForEntity = new ErrorCode( nameof(NotEnabledForEntity), "");
+        public static readonly ErrorCode NotEnabledForModel = new ErrorCode( nameof(NotEnabledForModel), "");
         public static readonly ErrorCode Unkown = new ErrorCode( nameof(Unkown), "");
-        public static readonly ErrorCode NotACacheEntity = new ErrorCode( nameof(NotACacheEntity), "");
+        public static readonly ErrorCode NotACacheModel = new ErrorCode( nameof(NotACacheModel), "");
         public static readonly ErrorCode UnkownButDeleted = new ErrorCode( nameof(UnkownButDeleted), "");
-        public static readonly ErrorCode GetEntitiesErrorButDeleted = new ErrorCode( nameof(GetEntitiesErrorButDeleted), "");
-        public static readonly ErrorCode SetEntitiesError = new ErrorCode( nameof(SetEntitiesError), "");
+        public static readonly ErrorCode GetModelsErrorButDeleted = new ErrorCode( nameof(GetModelsErrorButDeleted), "");
+        public static readonly ErrorCode SetModelsError = new ErrorCode( nameof(SetModelsError), "");
 
-        public static readonly ErrorCode RemoveEntitiesError = new ErrorCode( nameof(RemoveEntitiesError), "");
+        public static readonly ErrorCode RemoveModelsError = new ErrorCode( nameof(RemoveModelsError), "");
 
-        public static readonly ErrorCode ForcedRemoveEntitiesError = new ErrorCode( nameof(ForcedRemoveEntitiesError), "");
+        public static readonly ErrorCode ForcedRemoveModelsError = new ErrorCode( nameof(ForcedRemoveModelsError), "");
 
-        public static readonly ErrorCode GetEntitiesError = new ErrorCode( nameof(GetEntitiesError), "");
+        public static readonly ErrorCode GetModelsError = new ErrorCode( nameof(GetModelsError), "");
 
-        public static readonly ErrorCode CacheInvalidationConcurrencyWithEntities = new ErrorCode( nameof(CacheInvalidationConcurrencyWithEntities), "");
+        public static readonly ErrorCode CacheInvalidationConcurrencyWithModels = new ErrorCode( nameof(CacheInvalidationConcurrencyWithModels), "");
         public static readonly ErrorCode CacheInvalidationConcurrencyWithTimestamp = new ErrorCode( nameof(CacheInvalidationConcurrencyWithTimestamp), "");
 
         public static readonly ErrorCode CacheUpdateVersionConcurrency = new ErrorCode( nameof(CacheUpdateVersionConcurrency), "");
@@ -59,9 +59,9 @@ namespace System
             return exception;
         }
 
-        public static CacheException CacheEntityNotHaveKeyAttribute(string? type)
+        public static CacheException CacheModelNotHaveKeyAttribute(string? type)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.EntityNotHaveKeyAttribute);
+            CacheException exception = new CacheException(CacheErrorCodes.ModelNotHaveKeyAttribute);
 
             exception.Data["Type"] = type;
 
@@ -88,9 +88,9 @@ namespace System
             return exception;
         }
 
-        public static CacheException GetEntitiesErrorButDeleted(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception innerException)
+        public static CacheException GetModelsErrorButDeleted(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception innerException)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.GetEntitiesErrorButDeleted, innerException);
+            CacheException exception = new CacheException(CacheErrorCodes.GetModelsErrorButDeleted, innerException);
 
             exception.Data["CacheInstanceName"] = cacheInstanceName;
             exception.Data["TypeName"] = typeName;
@@ -137,22 +137,22 @@ namespace System
             return exception;
         }
 
-        public static CacheException NotEnabledForEntity(string typeName)
+        public static CacheException NotEnabledForModel(string typeName)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.NotEnabledForEntity);
+            CacheException exception = new CacheException(CacheErrorCodes.NotEnabledForModel);
 
             exception.Data["TypeName"] = typeName;
 
             return exception;
         }
 
-        public static CacheException SetEntitiesError(string? cacheInstanceName, string? typeName, IEnumerable entities, Exception ex)
+        public static CacheException SetModelsError(string? cacheInstanceName, string? typeName, IEnumerable models, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.SetEntitiesError, ex);
+            CacheException exception = new CacheException(CacheErrorCodes.SetModelsError, ex);
 
             exception.Data["CacheInstanceName"] = cacheInstanceName;
             exception.Data["TypeName"] = typeName;
-            exception.Data["Values"] = SerializeUtil.ToJson(entities);
+            exception.Data["Values"] = SerializeUtil.ToJson(models);
 
             return exception;
         }
@@ -168,9 +168,9 @@ namespace System
             return exception;
         }
 
-        public static CacheException RemoveEntitiesError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable updatedVersions, Exception ex)
+        public static CacheException RemoveModelsError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable updatedVersions, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.RemoveEntitiesError, ex);
+            CacheException exception = new CacheException(CacheErrorCodes.RemoveModelsError, ex);
 
             exception.Data["CacheInstanceName"] = cacheInstanceName;
             exception.Data["TypeName"] = typeName;
@@ -181,9 +181,9 @@ namespace System
             return exception;
         }
 
-        public static CacheException ForcedRemoveEntitiesError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception ex)
+        public static CacheException ForcedRemoveModelsError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.ForcedRemoveEntitiesError, ex);
+            CacheException exception = new CacheException(CacheErrorCodes.ForcedRemoveModelsError, ex);
 
             exception.Data["CacheInstanceName"] = cacheInstanceName;
             exception.Data["TypeName"] = typeName;

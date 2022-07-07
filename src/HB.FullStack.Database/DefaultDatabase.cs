@@ -3,7 +3,7 @@
 using HB.FullStack.Common;
 using HB.FullStack.Common.Extensions;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 
@@ -37,7 +37,7 @@ namespace HB.FullStack.Database
         private readonly ILogger _logger;
         private readonly string _deletedPropertyReservedName;
 
-        public IEntityDefFactory EntityDefFactory { get; }
+        public IDatabaseModelDefFactory ModelDefFactory { get; }
         public IDbCommandBuilder DbCommandBuilder { get; }
 
         public EngineType EngineType { get; }
@@ -47,7 +47,7 @@ namespace HB.FullStack.Database
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
-            IEntityDefFactory entityDefFactory,
+            IDatabaseModelDefFactory modelDefFactory,
             IDbCommandBuilder commandBuilder,
             ITransaction transaction,
             ILogger<DefaultDatabase> logger)
@@ -59,7 +59,7 @@ namespace HB.FullStack.Database
 
             _databaseSettings = databaseEngine.DatabaseSettings;
             _databaseEngine = databaseEngine;
-            EntityDefFactory = entityDefFactory;
+            ModelDefFactory = modelDefFactory;
             DbCommandBuilder = commandBuilder;
             _transaction = transaction;
             _logger = logger;
@@ -70,7 +70,7 @@ namespace HB.FullStack.Database
             VarcharDefaultLength = _databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : _databaseSettings.DefaultVarcharLength;
 
 
-            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(Entity.Deleted), _databaseEngine.EngineType);
+            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(Model.Deleted), _databaseEngine.EngineType);
         }
 
         #region Initialize
@@ -160,7 +160,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private Task<int> CreateTableAsync(EntityDef def, TransactionContext transContext, bool addDropStatement)
+        private Task<int> CreateTableAsync(DatabaseModelDef def, TransactionContext transContext, bool addDropStatement)
         {
             var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, addDropStatement, VarcharDefaultLength);
 
@@ -171,9 +171,9 @@ namespace HB.FullStack.Database
 
         private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext, bool addDropStatement)
         {
-            foreach (EntityDef entityDef in EntityDefFactory.GetAllDefsByDatabase(databaseName))
+            foreach (DatabaseModelDef modelDef in ModelDefFactory.GetAllDefsByDatabase(databaseName))
             {
-                await CreateTableAsync(entityDef, transactionContext, addDropStatement).ConfigureAwait(false);
+                await CreateTableAsync(modelDef, transactionContext, addDropStatement).ConfigureAwait(false);
             }
         }
 
@@ -341,20 +341,20 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : DatabaseEntity, new() => DbCommandBuilder.From<T>(EngineType);
+        public FromExpression<T> From<T>() where T : DatabaseModel, new() => DbCommandBuilder.From<T>(EngineType);
 
-        public WhereExpression<T> Where<T>() where T : DatabaseEntity, new() => DbCommandBuilder.Where<T>(EngineType);
+        public WhereExpression<T> Where<T>() where T : DatabaseModel, new() => DbCommandBuilder.Where<T>(EngineType);
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new() => DbCommandBuilder.Where<T>(EngineType, sqlFilter, filterParams);
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DatabaseModel, new() => DbCommandBuilder.Where<T>(EngineType, sqlFilter, filterParams);
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseEntity, new() => DbCommandBuilder.Where(EngineType, predicate);
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DatabaseModel, new() => DbCommandBuilder.Where(EngineType, predicate);
 
         #endregion
 
         #region 单表查询 From, Where
 
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -372,18 +372,18 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, TransactionContext? transContext = null)
-            where TSelect : DatabaseEntity, new()
-            where TFrom : DatabaseEntity, new()
-            where TWhere : DatabaseEntity, new()
+            where TSelect : DatabaseModel, new()
+            where TFrom : DatabaseModel, new()
+            where TWhere : DatabaseModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<TWhere>();
             }
 
-            EntityDef selectDef = EntityDefFactory.GetDef<TSelect>()!;
-            EntityDef fromDef = EntityDefFactory.GetDef<TFrom>()!;
-            EntityDef whereDef = EntityDefFactory.GetDef<TWhere>()!;
+            DatabaseModelDef selectDef = ModelDefFactory.GetDef<TSelect>()!;
+            DatabaseModelDef fromDef = ModelDefFactory.GetDef<TFrom>()!;
+            DatabaseModelDef whereDef = ModelDefFactory.GetDef<TWhere>()!;
 
             whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
@@ -393,60 +393,60 @@ namespace HB.FullStack.Database
 
                 using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
 
-                return reader.ToEntities<TSelect>(_databaseEngine.EngineType, EntityDefFactory, selectDef);
+                return reader.ToModels<TSelect>(_databaseEngine.EngineType, ModelDefFactory, selectDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: selectDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: selectDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+            whereCondition.And($"{modelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(EngineType, entityDef, fromCondition, whereCondition);
+                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(EngineType, modelDef, fromCondition, whereCondition);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToEntities<T>(_databaseEngine.EngineType, EntityDefFactory, entityDef);
+                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                return reader.ToModels<T>(_databaseEngine.EngineType, ModelDefFactory, modelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            whereCondition.And($"{entityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+            whereCondition.And($"{modelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
             try
             {
                 EngineCommand command = DbCommandBuilder.CreateCountCommand(EngineType, fromCondition, whereCondition);
-                object? countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                object? countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, modelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
                 return Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: entityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
@@ -455,7 +455,7 @@ namespace HB.FullStack.Database
         #region 单表查询, Where
 
         public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
 
@@ -463,25 +463,25 @@ namespace HB.FullStack.Database
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             return CountAsync(null, condition, transContext);
         }
 
         public Task<long> CountAsync<T>(TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             return CountAsync<T>(null, null, transContext);
         }
@@ -491,23 +491,23 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : LongIdEntity, new()
+            where T : LongIdModel, new()
         {
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(LongIdEntity.Id), EngineType)}={{0}}", id);
+            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(LongIdModel.Id), EngineType)}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
-            where T : GuidEntity, new()
+            where T : GuidModel, new()
         {
-            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidEntity.Id), EngineType)}={{0}}", guid);
+            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(GuidModel.Id), EngineType)}={{0}}", guid);
             WhereExpression<T> where = Where<T>(t => t.Id == id);
 
             return ScalarAsync(where, transContext);
         }
 
-        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -515,7 +515,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr).AddOrderAndLimits(page, perPage, orderBy);
 
@@ -523,7 +523,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -535,24 +535,24 @@ namespace HB.FullStack.Database
         /// 根据给出的外键值获取 page从0开始
         /// </summary>
         public async Task<IEnumerable<T>> RetrieveByForeignKeyAsync<T>(Expression<Func<T, object>> foreignKeyExp, object foreignKeyValue, TransactionContext? transactionContext, int? page, int? perPage, string? orderBy)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            EntityPropertyDef? foreignKeyProperty = entityDef.GetPropertyDef(foreignKeyName);
+            DatabaseModelPropertyDef? foreignKeyProperty = modelDef.GetPropertyDef(foreignKeyName);
 
             if (foreignKeyProperty == null || !foreignKeyProperty.IsForeignKey)
             {
-                throw DatabaseExceptions.NoSuchForeignKey(entityDef.EntityFullName, foreignKeyName);
+                throw DatabaseExceptions.NoSuchForeignKey(modelDef.ModelFullName, foreignKeyName);
             }
 
             Type foreignKeyValueType = foreignKeyValue.GetType();
 
             if (foreignKeyValueType != typeof(long) && foreignKeyValueType != typeof(Guid))
             {
-                throw DatabaseExceptions.KeyValueNotLongOrGuid(entityDef.EntityFullName, foreignKeyName, foreignKeyValue, foreignKeyValueType.FullName);
+                throw DatabaseExceptions.KeyValueNotLongOrGuid(modelDef.ModelFullName, foreignKeyName, foreignKeyValue, foreignKeyValueType.FullName);
             }
 
             WhereExpression<T> where = Where<T>($"{foreignKeyName}={{0}}", foreignKeyValue)
@@ -566,31 +566,31 @@ namespace HB.FullStack.Database
         #region 双表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget : DatabaseEntity, new()
+            where TSource : DatabaseModel, new()
+            where TTarget : DatabaseModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<TSource>();
             }
 
-            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>()!;
-            EntityDef targetEntityDef = EntityDefFactory.GetDef<TTarget>()!;
+            DatabaseModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
+            DatabaseModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>()!;
 
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{targetModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And<TTarget>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
 
@@ -598,26 +598,26 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
             }
 
             try
             {
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(EngineType, fromCondition, whereCondition, sourceEntityDef, targetEntityDef);
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToEntities<TSource, TTarget>(_databaseEngine.EngineType, EntityDefFactory, sourceEntityDef, targetEntityDef);
+                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(EngineType, fromCondition, whereCondition, sourceModelDef, targetModelDef);
+                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceModelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                return reader.ToModels<TSource, TTarget>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget : DatabaseEntity, new()
+            where TSource : DatabaseModel, new()
+            where TTarget : DatabaseModel, new()
         {
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -639,33 +639,33 @@ namespace HB.FullStack.Database
         #region 三表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget1 : DatabaseEntity, new()
-            where TTarget2 : DatabaseEntity, new()
+            where TSource : DatabaseModel, new()
+            where TTarget1 : DatabaseModel, new()
+            where TTarget2 : DatabaseModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<TSource>();
             }
 
-            EntityDef sourceEntityDef = EntityDefFactory.GetDef<TSource>()!;
-            EntityDef targetEntityDef1 = EntityDefFactory.GetDef<TTarget1>()!;
-            EntityDef targetEntityDef2 = EntityDefFactory.GetDef<TTarget2>()!;
+            DatabaseModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
+            DatabaseModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>()!;
+            DatabaseModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>()!;
 
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetEntityDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{targetModelDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And<TTarget2>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
 
@@ -673,27 +673,27 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceEntityDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetEntityDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
             }
 
             try
             {
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(EngineType, fromCondition, whereCondition, sourceEntityDef, targetEntityDef1, targetEntityDef2);
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceEntityDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToEntities<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, EntityDefFactory, sourceEntityDef, targetEntityDef1, targetEntityDef2);
+                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(EngineType, fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
+                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceModelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                return reader.ToModels<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: sourceEntityDef.EntityFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
             }
         }
 
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DatabaseEntity, new()
-            where TTarget1 : DatabaseEntity, new()
-            where TTarget2 : DatabaseEntity, new()
+            where TSource : DatabaseModel, new()
+            where TTarget1 : DatabaseModel, new()
+            where TTarget2 : DatabaseModel, new()
         {
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -717,27 +717,27 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
         /// </summary>
-        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, item, entityDef);
+            TruncateLastUser(ref lastUser, item, modelDef);
 
             try
             {
                 PrepareItem(item, lastUser);
 
-                var command = DbCommandBuilder.CreateAddCommand(EngineType, entityDef, item);
+                var command = DbCommandBuilder.CreateAddCommand(EngineType, modelDef, item);
 
-                object? rt = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
+                object? rt = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, modelDef.DatabaseName!, command, true).ConfigureAwait(false);
 
-                if (entityDef.IsIdAutoIncrement)
+                if (modelDef.IsIdAutoIncrement)
                 {
-                    ((AutoIncrementIdEntity)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                    ((AutoIncrementIdModel)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
             }
             catch (DatabaseException ex)
@@ -756,7 +756,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw DatabaseExceptions.UnKown(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, item: SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -777,23 +777,23 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>
-        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, item, entityDef);
+            TruncateLastUser(ref lastUser, item, modelDef);
 
             try
             {
                 PrepareItem(item, lastUser);
 
-                var command = DbCommandBuilder.CreateDeleteCommand(EngineType, entityDef, item);
+                var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, item);
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -801,11 +801,11 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(type: entityDef.EntityFullName, item: SerializeUtil.ToJson(item), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(type: modelDef.ModelFullName, item: SerializeUtil.ToJson(item), "");
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, item: SerializeUtil.ToJson(item));
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, item: SerializeUtil.ToJson(item));
                 }
             }
             catch (DatabaseException ex)
@@ -824,7 +824,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item);
                 }
 
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, string lastUser)
@@ -842,7 +842,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             if (item.Version >= updateToVersion)
             {
@@ -851,11 +851,11 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(item, nameof(item));
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, item, entityDef);
+            TruncateLastUser(ref lastUser, item, modelDef);
 
             int oldVersion = item.Version;
 
@@ -864,8 +864,8 @@ namespace HB.FullStack.Database
 
                 PrepareItem(item, updateToVersion, lastUser);
 
-                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, entityDef, item);
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, modelDef, item);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -884,10 +884,10 @@ namespace HB.FullStack.Database
 
                     //不存在和Version冲突，统称为冲突，所以不用改，反正后续业务为了解决冲突也会重新select什么的，到时候可以判定是已经删掉了还是version冲突
 
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(item), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(item), "");
                 }
 
-                throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, SerializeUtil.ToJson(item));
+                throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, SerializeUtil.ToJson(item));
             }
             catch (DatabaseException ex)
             {
@@ -905,7 +905,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item, oldVersion);
                 }
 
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
 
             static void PrepareItem(T item, int updateToVersion, string lastUser)
@@ -926,7 +926,7 @@ namespace HB.FullStack.Database
         ///  版本控制，如果item中Version未赋值，会无法更改
         ///  反应Version变化
         /// </summary>
-        public Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             return UpdateAsync(item, item.Version + 1, lastUser, transContext);
         }
@@ -934,7 +934,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// version + 1 every time
         /// </summary>
-        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             if (propertyNameValues.Count <= 0)
             {
@@ -956,9 +956,9 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.VersionShouldBePositive(curVersion);
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
             TruncateLastUser(ref lastUser, id);
 
@@ -966,14 +966,14 @@ namespace HB.FullStack.Database
             {
                 EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
                     EngineType,
-                    entityDef,
+                    modelDef,
                     id,
                     curVersion + 1,
                     lastUser,
                     propertyNameValues.Select(t => t.Item1).ToList(),
                     propertyNameValues.Select(t => t.Item2).ToList());
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -981,16 +981,16 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用Version版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Version版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
             }
         }
 
@@ -998,7 +998,7 @@ namespace HB.FullStack.Database
         /// version + 1 every time
         /// 返回新的Version
         /// </summary>
-        public async Task<int> UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task<int> UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
             {
@@ -1015,9 +1015,9 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
             TruncateLastUser(ref lastUser, id);
 
@@ -1025,14 +1025,14 @@ namespace HB.FullStack.Database
             {
                 EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
                     EngineType,
-                    entityDef,
+                    modelDef,
                     id,
                     lastUser,
                     propertyNameOldNewValues.Select(t => t.Item1).ToList(),
                     propertyNameOldNewValues.Select(t => t.Item2).ToList(),
                     propertyNameOldNewValues.Select(t => t.Item3).ToList());
 
-                using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
+                using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName!, command, true).ConfigureAwait(false);
 
                 if (reader.Read())
                 {
@@ -1045,11 +1045,11 @@ namespace HB.FullStack.Database
                     }
                     else if (matchedRows == 0)
                     {
-                        throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
+                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
                     }
                     else
                     {
-                        throw DatabaseExceptions.FoundTooMuch(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
+                        throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
                     }
                 }
                 else
@@ -1060,7 +1060,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", ex);
             }
         }
 
@@ -1071,7 +1071,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1085,11 +1085,11 @@ namespace HB.FullStack.Database
                 return new List<object>();
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, items, entityDef);
+            TruncateLastUser(ref lastUser, items, modelDef);
 
             try
             {
@@ -1097,15 +1097,15 @@ namespace HB.FullStack.Database
 
                 IList<object> newIds = new List<object>();
 
-                var command = DbCommandBuilder.CreateBatchAddCommand(EngineType, entityDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchAddCommand(EngineType, modelDef, items, transContext == null);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext?.Transaction,
-                    entityDef.DatabaseName!,
+                    modelDef.DatabaseName!,
                     command,
                     true).ConfigureAwait(false);
 
-                if (entityDef.IsIdAutoIncrement)
+                if (modelDef.IsIdAutoIncrement)
                 {
                     while (reader.Read())
                     {
@@ -1116,21 +1116,21 @@ namespace HB.FullStack.Database
 
                     foreach (var item in items)
                     {
-                        ((AutoIncrementIdEntity)(object)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
+                        ((AutoIncrementIdModel)(object)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
                     }
                 }
-                else if (entityDef.IsIdGuid)
+                else if (modelDef.IsIdGuid)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((GuidEntity)(object)item).Id);
+                        newIds.Add(((GuidModel)(object)item).Id);
                     }
                 }
-                else if (entityDef.IsIdLong)
+                else if (modelDef.IsIdLong)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((LongIdEntity)(object)item).Id);
+                        newIds.Add(((LongIdModel)(object)item).Id);
                     }
                 }
 
@@ -1152,7 +1152,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1180,7 +1180,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1194,20 +1194,20 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, items, entityDef);
+            TruncateLastUser(ref lastUser, items, modelDef);
 
             try
             {
                 PrepareItems(items, lastUser);
 
-                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, entityDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, modelDef, items, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext?.Transaction,
-                    entityDef.DatabaseName!,
+                    modelDef.DatabaseName!,
                     command,
                     true).ConfigureAwait(false);
 
@@ -1219,7 +1219,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "BatchUpdate");
                     }
 
                     count++;
@@ -1227,7 +1227,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1246,7 +1246,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1271,7 +1271,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
-        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseEntity, new()
+        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1285,20 +1285,20 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfNotWriteable(entityDef);
+            ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, items, entityDef);
+            TruncateLastUser(ref lastUser, items, modelDef);
 
             try
             {
                 PrepareItems(items, lastUser);
 
-                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, entityDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, modelDef, items, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext?.Transaction,
-                    entityDef.DatabaseName!,
+                    modelDef.DatabaseName!,
                     command,
                     true).ConfigureAwait(false);
 
@@ -1310,7 +1310,7 @@ namespace HB.FullStack.Database
 
                     if (affected != 1)
                     {
-                        throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
+                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), $"not found the {count}th data item");
                     }
 
                     count++;
@@ -1318,7 +1318,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(entityDef.EntityFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "");
                 }
             }
             catch (DatabaseException ex)
@@ -1337,7 +1337,7 @@ namespace HB.FullStack.Database
                     RestoreItems(items);
                 }
 
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(items), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
 
             static void PrepareItems(IEnumerable<T> items, string lastUser)
@@ -1363,19 +1363,19 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        private static void ThrowIfNotWriteable(EntityDef entityDef)
+        private static void ThrowIfNotWriteable(DatabaseModelDef modelDef)
         {
-            if (!entityDef.DatabaseWriteable)
+            if (!modelDef.DatabaseWriteable)
             {
-                throw DatabaseExceptions.NotWriteable(type: entityDef.EntityFullName, database: entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DatabaseName);
             }
         }
 
-        private void TruncateLastUser<T>(ref string lastUser, T item, EntityDef entityDef) where T : DatabaseEntity, new()
+        private void TruncateLastUser<T>(ref string lastUser, T item, DatabaseModelDef modelDef) where T : DatabaseModel, new()
         {
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
-                object id = entityDef.IsIdLong ? ((LongIdEntity)(object)item).Id : entityDef.IsIdGuid ? ((GuidEntity)(object)item).Id : "None";
+                object id = modelDef.IsIdLong ? ((LongIdModel)(object)item).Id : modelDef.IsIdGuid ? ((GuidModel)(object)item).Id : "None";
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
                 lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);
@@ -1392,11 +1392,11 @@ namespace HB.FullStack.Database
             }
         }
 
-        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, EntityDef entityDef) where T : DatabaseEntity, new()
+        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, DatabaseModelDef modelDef) where T : DatabaseModel, new()
         {
             foreach (T item in items)
             {
-                TruncateLastUser(ref lastUser, item, entityDef);
+                TruncateLastUser(ref lastUser, item, modelDef);
             }
         }
     }

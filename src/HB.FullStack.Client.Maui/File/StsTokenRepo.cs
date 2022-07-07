@@ -34,9 +34,9 @@ namespace HB.FullStack.Client.Maui.File
             _directoryPermissions = _fileManagerOptions.DirectoryPermissions.ToDictionary(p => p.PermissionName);
         }
 
-        protected override StsToken ToEntity(StsTokenRes res) => StsTokenResMapper.ToStsToken(res);
+        protected override StsToken ToModel(StsTokenRes res) => StsTokenResMapper.ToStsToken(res);
 
-        protected override StsTokenRes ToResource(StsToken entity) => StsTokenResMapper.ToStsTokenRes(entity);
+        protected override StsTokenRes ToResource(StsToken model) => StsTokenResMapper.ToStsTokenRes(model);
 
         public async Task<StsToken?> GetByDirectoryPermissionNameAsync(string directoryPermissionName, bool needWritePermission, string? placeHolderValue, TransactionContext? transactionContext, bool remoteForced = false)
         {

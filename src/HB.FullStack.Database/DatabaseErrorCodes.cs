@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
 [assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]
@@ -18,7 +18,7 @@ namespace HB.FullStack.Database
         public static ErrorCode ExecuterError { get; } = new ErrorCode( nameof(ExecuterError), "");
         public static ErrorCode Unkown { get; } = new ErrorCode( nameof(Unkown), "");
         public static ErrorCode UseDateTimeOffsetOnly { get; } = new ErrorCode( nameof(UseDateTimeOffsetOnly), "");
-        public static ErrorCode EntityError { get; } = new ErrorCode( nameof(EntityError), "");
+        public static ErrorCode ModelError { get; } = new ErrorCode( nameof(ModelError), "");
         public static ErrorCode MapperError { get; } = new ErrorCode( nameof(MapperError), "");
         public static ErrorCode SqlError { get; } = new ErrorCode( nameof(SqlError), "");
         public static ErrorCode DatabaseTableCreateError { get; } = new ErrorCode( nameof(DatabaseTableCreateError), "");
@@ -40,9 +40,9 @@ namespace HB.FullStack.Database
         public static ErrorCode NoSuchProperty { get; } = new ErrorCode( nameof(NoSuchProperty), "");
         public static ErrorCode KeyValueNotLongOrGuid { get; } = new ErrorCode( nameof(KeyValueNotLongOrGuid), "");
 
-        public static ErrorCode EntityHasNotSupportedPropertyType { get; } = new ErrorCode( nameof(EntityHasNotSupportedPropertyType), "");
+        public static ErrorCode ModelHasNotSupportedPropertyType { get; } = new ErrorCode( nameof(ModelHasNotSupportedPropertyType), "");
 
-        public static ErrorCode EntityVersionError { get; } = new ErrorCode( nameof(EntityVersionError), "");
+        public static ErrorCode ModelVersionError { get; } = new ErrorCode( nameof(ModelVersionError), "");
         public static ErrorCode NotInitializedYet { get; } = new ErrorCode( nameof(NotInitializedYet), "");
         public static ErrorCode UpdateVersionError { get; } = new ErrorCode(nameof(UpdateVersionError), "");
     }
@@ -206,9 +206,9 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception EntityHasNotSupportedPropertyType(string type, string? propertyTypeName, string propertyName)
+        internal static Exception ModelHasNotSupportedPropertyType(string type, string? propertyTypeName, string propertyName)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityHasNotSupportedPropertyType);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ModelHasNotSupportedPropertyType);
 
             exception.Data["Type"] = type;
             exception.Data["PropertyTypeName"] = propertyTypeName;
@@ -217,9 +217,9 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception EntityError(string? type, string propertyName, string cause)
+        internal static Exception ModelError(string? type, string propertyName, string cause)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ModelError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = cause;
@@ -228,9 +228,9 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception EntityVersionError(string type, int version, string cause)
+        internal static Exception ModelVersionError(string type, int version, string cause)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.EntityVersionError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ModelVersionError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = "Version Error. - " + cause;
@@ -305,27 +305,27 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception NoSuchForeignKey(string entityFullName, string foreignKeyName)
+        internal static Exception NoSuchForeignKey(string modelFullName, string foreignKeyName)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NoSuchForeignKey);
-            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ModelFullName"] = modelFullName;
             exception.Data["ForeignKeyName"] = foreignKeyName;
 
             return exception;
         }
 
-        internal static Exception NoSuchProperty(string entityFullName, string propertyName)
+        internal static Exception NoSuchProperty(string modelFullName, string propertyName)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.NoSuchProperty);
-            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ModelFullName"] = modelFullName;
             exception.Data["PropertyName"] = propertyName;
             return exception;
         }
 
-        internal static Exception KeyValueNotLongOrGuid(string entityFullName, string foreignKeyName, object? foreignKeyValue, string? foreignKeyType)
+        internal static Exception KeyValueNotLongOrGuid(string modelFullName, string foreignKeyName, object? foreignKeyValue, string? foreignKeyType)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.KeyValueNotLongOrGuid);
-            exception.Data["EntityFullName"] = entityFullName;
+            exception.Data["ModelFullName"] = modelFullName;
             exception.Data["ForeignKeyName"] = foreignKeyName;
             exception.Data["ForeignKeyValue"] = foreignKeyValue?.ToString();
             exception.Data["ForeignKeyType"] = foreignKeyType;
@@ -339,7 +339,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DatabaseEntity, new()
+        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DatabaseModel, new()
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UpdateVersionError);
 

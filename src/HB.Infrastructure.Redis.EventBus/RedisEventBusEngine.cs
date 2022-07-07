@@ -51,9 +51,9 @@ namespace HB.Infrastructure.Redis.EventBus
 
             IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger).ConfigureAwait(false);
 
-            EventMessageEntity entity = new EventMessageEntity(eventName, jsonData);
+            EventMessageModel model = new EventMessageModel(eventName, jsonData);
 
-            await database.ListLeftPushAsync(QueueName(entity.EventName), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
+            await database.ListLeftPushAsync(QueueName(model.EventName), SerializeUtil.ToJson(model)).ConfigureAwait(false);
         }
 
         /// <summary>

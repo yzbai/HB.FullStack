@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Identity.Entities;
+﻿using HB.FullStack.Identity.Models;
 using HB.FullStack.Database;
 using HB.FullStack.Database.SQL;
 using System;
@@ -13,7 +13,7 @@ using HB.FullStack.Lock.Memory;
 
 namespace HB.FullStack.Identity
 {
-    public class SignInTokenRepo : DbEntityRepository<SignInToken>
+    public class SignInTokenRepo : ModelRepository<SignInToken>
     {
         public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }

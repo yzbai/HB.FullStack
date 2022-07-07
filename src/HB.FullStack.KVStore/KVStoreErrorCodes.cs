@@ -18,7 +18,7 @@ namespace HB.FullStack.KVStore
         public static ErrorCode NoSuchInstance { get; set; } = new ErrorCode(nameof(NoSuchInstance), "");
         public static ErrorCode KVStoreExistAlready { get; set; } = new ErrorCode(nameof(KVStoreExistAlready), "");
         public static ErrorCode KVStoreVersionNotMatched { get; set; } = new ErrorCode(nameof(KVStoreVersionNotMatched), "");
-        public static ErrorCode NoEntitySchemaFound { get; set; } = new ErrorCode(nameof(NoEntitySchemaFound), "");
+        public static ErrorCode NoModelSchemaFound { get; set; } = new ErrorCode(nameof(NoModelSchemaFound), "");
         public static ErrorCode LackKVStoreKeyAttributeError { get; set; } = new ErrorCode(nameof(LackKVStoreKeyAttributeError), "");
         public static ErrorCode VersionsKeysNotEqualError { get; set; } = new ErrorCode(nameof(VersionsKeysNotEqualError), "");
         public static ErrorCode UnKown { get; set; } = new ErrorCode(nameof(UnKown), "");
@@ -26,9 +26,9 @@ namespace HB.FullStack.KVStore
 
     internal static class Exceptions
     {
-        internal static Exception NoEntitySchemaFound(string? type)
+        internal static Exception NoModelSchemaFound(string? type)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoEntitySchemaFound);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoModelSchemaFound);
 
             exception.Data["Type"] = type;
 

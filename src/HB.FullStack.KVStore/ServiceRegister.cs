@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 using HB.FullStack.KVStore.Engine;
-using HB.FullStack.KVStore.Entities;
+using HB.FullStack.KVStore.KVStoreModels;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

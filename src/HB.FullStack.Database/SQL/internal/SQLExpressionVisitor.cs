@@ -10,15 +10,15 @@ using System.Reflection;
 using System.Text;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Database.SQL
 {
     internal class SQLExpressionVisitor : ISQLExpressionVisitor
     {       
-        public SQLExpressionVisitor(IEntityDefFactory entityDefFactory)
+        public SQLExpressionVisitor(IDatabaseModelDefFactory modelDefFactory)
         {
-            _entityDefFactory = entityDefFactory;
+            _modelDefFactory = modelDefFactory;
         }
 
         public object Visit(Expression? exp, SQLExpressionVisitorContenxt context)
@@ -223,7 +223,7 @@ namespace HB.FullStack.Database.SQL
             if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter || m.Expression.NodeType == ExpressionType.Convert))
             {
                 string memberName = m.Member.Name;
-                Type entityType = m.Expression.Type;
+                Type modelType = m.Expression.Type;
 
                 if (m.Expression.NodeType == ExpressionType.Convert)
                 {
@@ -231,7 +231,7 @@ namespace HB.FullStack.Database.SQL
 
                     if (obj is Type type)
                     {
-                        entityType = type;
+                        modelType = type;
                     }
                     else
                     {
@@ -241,15 +241,15 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
 
-                EntityDef entityDef = _entityDefFactory.GetDef(entityType)!;
-                EntityPropertyDef propertyDef = entityDef.GetPropertyDef(m.Member.Name)
-                    ?? throw DatabaseExceptions.EntityError(entityDef.EntityFullName, m.Member.Name, "Lack property definition");
+                DatabaseModelDef modelDef = _modelDefFactory.GetDef(modelType)!;
+                DatabaseModelPropertyDef propertyDef = modelDef.GetPropertyDef(m.Member.Name)
+                    ?? throw DatabaseExceptions.ModelError(modelDef.ModelFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
 
-                if (context.PrefixFieldWithTableName && !string.IsNullOrEmpty(entityDef.DbTableReservedName))
+                if (context.PrefixFieldWithTableName && !string.IsNullOrEmpty(modelDef.DbTableReservedName))
                 {
-                    prefix = entityDef.DbTableReservedName + ".";
+                    prefix = modelDef.DbTableReservedName + ".";
                 }
 
                 if (propertyDef.Type.IsEnum)
@@ -417,7 +417,7 @@ namespace HB.FullStack.Database.SQL
 
                     StringBuilder sIn = new StringBuilder();
 
-                    EntityPropertyDef? propertyDef = GetPropertyDef(m);
+                    DatabaseModelPropertyDef? propertyDef = GetPropertyDef(m);
 
                     foreach (object e in inArgs)
                     {
@@ -445,7 +445,7 @@ namespace HB.FullStack.Database.SQL
 
             return new PartialSqlString(statement);
 
-            static void AddParameter(SQLExpressionVisitorContenxt context, StringBuilder sIn, EntityPropertyDef? propertyDef, object e)
+            static void AddParameter(SQLExpressionVisitorContenxt context, StringBuilder sIn, DatabaseModelPropertyDef? propertyDef, object e)
             {
                 string paramPlaceHoder = context.GetNextParamPlaceholder();
                 object paramValue = propertyDef == null ? e : TypeConvert.TypeValueToDbValue(e, propertyDef, context.EngineType);
@@ -481,7 +481,7 @@ namespace HB.FullStack.Database.SQL
 
                     List<string> sIn = new List<string>();
                     TypeInfo collectionTypeInfo = typeof(ICollection).GetTypeInfo();
-                    EntityPropertyDef? propertyDef = m.Arguments[0] is MemberExpression memExp ? GetPropertyDef(memExp) : null;
+                    DatabaseModelPropertyDef? propertyDef = m.Arguments[0] is MemberExpression memExp ? GetPropertyDef(memExp) : null;
 
                     foreach (object e in inArgs)
                     {
@@ -548,7 +548,7 @@ namespace HB.FullStack.Database.SQL
 
             return new PartialSqlString(statement);
 
-            static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, EntityPropertyDef? propertyDef, object originValue)
+            static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, DatabaseModelPropertyDef? propertyDef, object originValue)
             {
                 string paramPlaceholder = context.GetNextParamPlaceholder();
                 object paramValue = propertyDef == null ? originValue : TypeConvert.TypeValueToDbValue(originValue, propertyDef, context.EngineType);
@@ -575,7 +575,7 @@ namespace HB.FullStack.Database.SQL
                 List<object> args0 = VisitExpressionList(m.Arguments, context);
                 object quotedColName0 = Visit(m.Object, context);
 
-                EntityPropertyDef? propertyDef = GetPropertyDef(m);
+                DatabaseModelPropertyDef? propertyDef = GetPropertyDef(m);
                 string paramPlaceholder = context.GetNextParamPlaceholder();
                 object paramValue = propertyDef == null ?
                     args0[0] :
@@ -708,14 +708,14 @@ namespace HB.FullStack.Database.SQL
 #pragma warning restore CA1307 // Specify StringComparison for clarity
             //#endif
 
-            EntityDef? entityDef = _entityDefFactory.GetDef(type);
+            DatabaseModelDef? modelDef = _modelDefFactory.GetDef(type);
 
-            if (entityDef == null)
+            if (modelDef == null)
             {
                 return false;
             }
 
-            EntityPropertyDef? property = entityDef.GetPropertyDef(name);
+            DatabaseModelPropertyDef? property = modelDef.GetPropertyDef(name);
 
             return property != null;
         }
@@ -723,7 +723,7 @@ namespace HB.FullStack.Database.SQL
         private static readonly object _trueExpression = new PartialSqlString("(1=1)");
 
         private static readonly object _falseExpression = new PartialSqlString("(1=0)");
-        private readonly IEntityDefFactory _entityDefFactory;
+        private readonly IDatabaseModelDefFactory _modelDefFactory;
 
         private static bool IsArrayMethod(MethodCallExpression m)
         {
@@ -736,12 +736,12 @@ namespace HB.FullStack.Database.SQL
             return false;
         }
 
-        private EntityPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
+        private DatabaseModelPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
         {
-            return _entityDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetPropertyDef(memberExpression!.Member.Name);
+            return _modelDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetPropertyDef(memberExpression!.Member.Name);
         }
 
-        private EntityPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)
+        private DatabaseModelPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)
         {
             return GetPropertyDef(methodCallExpression.Object as MemberExpression);
         }

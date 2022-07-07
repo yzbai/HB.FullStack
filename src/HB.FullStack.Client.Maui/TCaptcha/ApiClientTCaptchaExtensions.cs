@@ -18,7 +18,7 @@ namespace HB.FullStack.Common.ApiClient
 {
     public static class ApiClientTCaptchaExtensions
     {
-        public static async Task<T?> GetWithTCaptchaCheckAsync<T>(this IApiClient apiClient, ApiRequest request, CancellationToken? cancellationToken = null) where T : ApiResource2
+        public static async Task<T?> GetWithTCaptchaCheckAsync<T>(this IApiClient apiClient, ApiRequest request, CancellationToken? cancellationToken = null) where T : ApiResource
         {
             try
             {

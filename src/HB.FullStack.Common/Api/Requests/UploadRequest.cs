@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// PUT /Ver/ResoruceCollection
     /// </summary>
-    public class UploadRequest<T> : UpdateFieldsRequest<T>, IUploadRequest where T : ApiResource2
+    public class UploadRequest<T> : UpdateFieldsRequest<T>, IUploadRequest where T : ApiResource
     {
         private readonly byte[]? _file;
 

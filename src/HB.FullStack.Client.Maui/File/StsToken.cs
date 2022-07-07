@@ -1,15 +1,15 @@
-﻿using HB.FullStack.Database.Entities;
+﻿using HB.FullStack.Database.DatabaseModels;
 
 using System;
 
 namespace HB.FullStack.Client.Maui.File
 {
-    [ClientEntity(
+    [ClientModel(
       expirySeconds: int.MaxValue, //由StsToken.ExpirationAt业务逻辑决定
       needLogined: true,
       allowOfflineRead: false,
       allowOfflineWrite: false)]
-    public class StsToken : GuidEntity
+    public class StsToken : GuidModel
     {
         public Guid UserId { get; set; }
 

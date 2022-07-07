@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Client.KeyValue
 {
-    public class KV : GuidEntity
+    public class KV : GuidModel
     {
         public string Key { get; set; } = null!;
 

@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Identity.Entities;
+﻿using HB.FullStack.Identity.Models;
 using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Identity
 {
-    public class RoleRepo : DbEntityRepository<Role>
+    public class RoleRepo : ModelRepository<Role>
     {
         public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }

@@ -66,14 +66,14 @@ namespace HB.Infrastructure.Redis.Cache
                     LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP),
                     LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
 
-                    LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH),
-                    LoadedEntitiesGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH_BY_DIMENSION),
-                    LoadedEntitiesSetLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_SET),
-                    LoadedEntitiesRemoveLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE),
-                    LoadedEntitiesRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE_BY_DIMENSION),
+                    LoadedModelsGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH),
+                    LoadedModelsGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH_BY_DIMENSION),
+                    LoadedModelsSetLua = server.ScriptLoad(RedisCache.LUA_MODELS_SET),
+                    LoadedModelsRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE),
+                    LoadedModelsRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION),
 
-                    LoadedEntitiesForcedRemoveLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE_FORECED_NO_VERSION),
-                    LoadedEntitiesForcedRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE_BY_DIMENSION_FORCED_NO_VERSION),
+                    LoadedModelsForcedRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_FORECED_NO_VERSION),
+                    LoadedModelsForcedRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION),
                 };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;
@@ -141,34 +141,34 @@ namespace HB.Infrastructure.Redis.Cache
             return GetDatabase(DefaultInstanceName);
         }
 
-        protected string GetRealKey(string entityName, string key)
+        protected string GetRealKey(string modelName, string key)
         {
-            return _options.ApplicationName + entityName + key;
+            return _options.ApplicationName + modelName + key;
         }
 
-        protected string GetEntityDimensionKey(string entityName, string dimensionKeyName, string dimensionKeyValue)
+        protected string GetModelDimensionKey(string modelName, string dimensionKeyName, string dimensionKeyValue)
         {
-            return GetRealKey(entityName, dimensionKeyName + dimensionKeyValue);
+            return GetRealKey(modelName, dimensionKeyName + dimensionKeyValue);
         }
 
-        protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
+        protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheModelDef modelDef)
         {
-            if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
+            if (!modelDef.Dimensions.Any(p => p.Name == dimensionKeyName))
             {
-                throw CacheExceptions.NoSuchDimensionKey(typeName: entityDef.Name, dimensionKeyName: dimensionKeyName);
+                throw CacheExceptions.NoSuchDimensionKey(typeName: modelDef.Name, dimensionKeyName: dimensionKeyName);
             }
         }
 
         /// <summary>
         /// ThrowIfNotCacheEnabled
         /// </summary>
-        /// <param name="entityDef"></param>
+        /// <param name="modelDef"></param>
 
-        protected static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
+        protected static void ThrowIfNotCacheEnabled(CacheModelDef modelDef)
         {
-            if (!entityDef.IsCacheable)
+            if (!modelDef.IsCacheable)
             {
-                throw CacheExceptions.NotEnabledForEntity(entityDef.Name);
+                throw CacheExceptions.NotEnabledForModel(modelDef.Name);
             }
         }
 

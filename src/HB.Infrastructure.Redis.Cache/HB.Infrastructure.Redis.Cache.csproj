@@ -12,9 +12,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="RedisCache.Entity.cs" />
-  </ItemGroup>
+ 
 
   <ItemGroup>
     <PackageReference Include="Polly" Version="7.2.3" />

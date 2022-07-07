@@ -16,11 +16,11 @@ namespace HB.FullStack.Database
         public bool AutomaticCreateTable { get; set; } = true;
 
         /// <summary>
-        /// 指定包含Entity的Assemblies，不再包含其他的
+        /// 指定包含Model的Assemblies，不再包含其他的
         /// </summary>
         public IList<string> Assemblies { get; set; } = new List<string>();
 
-        public IList<EntitySetting> EntitySettings { get; set; } = new List<EntitySetting>();
+        public IList<DatabaseModelSetting> ModelSettings { get; set; } = new List<DatabaseModelSetting>();
 
         public int MaxBatchNumber { get; set; } = 500;
 

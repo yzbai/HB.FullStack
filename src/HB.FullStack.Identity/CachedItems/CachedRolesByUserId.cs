@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Identity.Entities;
+﻿using HB.FullStack.Identity.Models;
 using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 

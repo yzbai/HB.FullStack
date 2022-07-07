@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Extensions;
 using HB.FullStack.Database;
-using HB.FullStack.Identity.Entities;
+using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Distributed;
 
 using Microsoft.Extensions.Logging;
@@ -30,7 +30,7 @@ namespace HB.FullStack.Identity
         private readonly UserClaimRepo _userClaimRepo;
         private readonly LoginControlRepo _userLoginControlRepo;
         private readonly RoleRepo _roleRepo;
-        private readonly UserActivityRepo _userActivityEntityRepo;
+        private readonly UserActivityRepo _userActivityModelRepo;
         private readonly UserRoleRepo _userRoleRepo;
 
         //Jwt Signing
@@ -57,7 +57,7 @@ namespace HB.FullStack.Identity
             LoginControlRepo userLoginControlRepo,
             RoleRepo roleRepo,
             UserRoleRepo userRoleRepo,
-            UserActivityRepo userActivityEntityRepo)
+            UserActivityRepo userActivityModelRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -72,7 +72,7 @@ namespace HB.FullStack.Identity
             _roleRepo = roleRepo;
             _userRoleRepo = userRoleRepo;
 
-            _userActivityEntityRepo = userActivityEntityRepo;
+            _userActivityModelRepo = userActivityModelRepo;
 
             InitializeCredencials();
 
@@ -710,7 +710,7 @@ namespace HB.FullStack.Identity
                 url = url[..MAX_URL_LENGTH];
             }
 
-            UserActivity entity = new UserActivity
+            UserActivity model = new UserActivity
             {
                 SignInTokenId = signInTokenId,
                 UserId = userId,
@@ -723,7 +723,7 @@ namespace HB.FullStack.Identity
                 ResultError = resultError
             };
 
-            await _userActivityEntityRepo.AddAsync(entity, "", null).ConfigureAwait(false);
+            await _userActivityModelRepo.AddAsync(model, "", null).ConfigureAwait(false);
         }
 
         #endregion

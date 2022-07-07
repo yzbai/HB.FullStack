@@ -8,7 +8,7 @@ using HB.FullStack.Common.ApiClient;
 
 namespace HB.FullStack.Client
 {
-    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource2
+    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource
     {
         public TokenAutoRefreshedHttpClientHandler TokenAutoRefreshedHttpClientHandler { get; }
 

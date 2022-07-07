@@ -3,7 +3,7 @@
 using HB.FullStack.Common;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 
 using Microsoft.Extensions.Primitives;
 
@@ -19,18 +19,18 @@ namespace HB.FullStack.Database.SQL
     internal static class SqlHelper
     {
         /// <summary>
-        /// 只用于客户端，IdGenEntity上,
+        /// 只用于客户端，IdGenModel上,
         /// 没有Version检查, Version不增长
         /// </summary>
         /// <returns></returns>
-        public static string CreateAddOrUpdateSql(EntityDef entityDef, EngineType engineType, bool returnId, int number = 0)
+        public static string CreateAddOrUpdateSql(DatabaseModelDef modelDef, EngineType engineType, bool returnId, int number = 0)
         {
             StringBuilder addArgs = new StringBuilder();
             StringBuilder selectArgs = new StringBuilder();
             StringBuilder addValues = new StringBuilder();
             StringBuilder updatePairs = new StringBuilder();
 
-            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (returnId)
                 {
@@ -50,7 +50,7 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                if (propertyDef.Name == nameof(Entity.Version) || propertyDef.Name == nameof(Entity.CreateTime))
+                if (propertyDef.Name == nameof(Model.Version) || propertyDef.Name == nameof(Model.CreateTime))
                 {
                     continue;
                 }
@@ -58,7 +58,7 @@ namespace HB.FullStack.Database.SQL
                 updatePairs.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
             }
 
-            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
 
             //updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName} + 1"));
             updatePairs.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbReservedName}"));
@@ -71,31 +71,31 @@ namespace HB.FullStack.Database.SQL
             addValues.RemoveLast();
             addArgs.RemoveLast();
 
-            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
+            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
 
-            string sql = $"insert into {entityDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(engineType, primaryKeyProperty)} {updatePairs};";
+            string sql = $"insert into {modelDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(engineType, primaryKeyProperty)} {updatePairs};";
 
             if (returnId)
             {
-                if (entityDef.IsIdAutoIncrement)
+                if (modelDef.IsIdAutoIncrement)
                 {
-                    sql += $"select {selectArgs} from {entityDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(engineType)};";
+                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(engineType)};";
                 }
                 else
                 {
-                    sql += $"select {selectArgs} from {entityDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {primaryKeyProperty.DbParameterizedName}_{number};";
+                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {primaryKeyProperty.DbParameterizedName}_{number};";
                 }
             }
 
             return sql;
         }
 
-        public static string CreateAddEntitySql(EntityDef entityDef, EngineType engineType, bool returnId, int number = 0)
+        public static string CreateAddModelSql(DatabaseModelDef modelDef, EngineType engineType, bool returnId, int number = 0)
         {
             StringBuilder args = new StringBuilder();
             StringBuilder values = new StringBuilder();
 
-            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (propertyDef.IsAutoIncrementPrimaryKey)
                 {
@@ -110,18 +110,18 @@ namespace HB.FullStack.Database.SQL
             args.RemoveLast();
             values.RemoveLast();
 
-            string returnIdStatement = returnId && entityDef.IsIdAutoIncrement ? $"select {GetLastInsertIdStatement(engineType)};" : string.Empty;
+            string returnIdStatement = returnId && modelDef.IsIdAutoIncrement ? $"select {GetLastInsertIdStatement(engineType)};" : string.Empty;
 
-            return $"insert into {entityDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
+            return $"insert into {modelDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
         }
 
-        public static string CreateUpdateEntitySql(EntityDef entityDef, int number = 0)
+        public static string CreateUpdateModelSql(DatabaseModelDef modelDef, int number = 0)
         {
             StringBuilder args = new StringBuilder();
 
-            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
-                if (propertyDef.IsPrimaryKey || propertyDef.Name == nameof(Entity.CreateTime))
+                if (propertyDef.IsPrimaryKey || propertyDef.Name == nameof(Model.CreateTime))
                 {
                     continue;
                 }
@@ -133,36 +133,36 @@ namespace HB.FullStack.Database.SQL
 
             StringBuilder where = new StringBuilder();
 
-            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
-            EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
-            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{versionProperty.DbReservedName}={versionProperty.DbParameterizedName}_{number} - 1 AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0"));
 
-            return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where};";
+            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
         }
 
         /// <summary>
         /// 使用Version乐观锁的Update-Fields。行粒度。
         /// </summary>
-        public static string CreateUpdateFieldsUsingVersionCompareSql(EntityDef entityDef, IEnumerable<string> propertyNames, int number = 0)
+        public static string CreateUpdateFieldsUsingVersionCompareSql(DatabaseModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
         {
             StringBuilder args = new StringBuilder();
 
             foreach (string propertyName in propertyNames)
             {
-                if (propertyName == nameof(Entity.CreateTime) || propertyName == nameof(LongIdEntity.Id))
+                if (propertyName == nameof(Model.CreateTime) || propertyName == nameof(LongIdModel.Id))
                 {
                     continue;
                 }
 
-                EntityPropertyDef? propertyDef = entityDef.GetPropertyDef(propertyName);
+                DatabaseModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
 
                 if (propertyDef == null)
                 {
-                    throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
+                    throw DatabaseExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
                 }
 
                 args.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
@@ -172,9 +172,9 @@ namespace HB.FullStack.Database.SQL
 
             StringBuilder where = new StringBuilder();
 
-            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
-            EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
-            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
 
@@ -183,19 +183,19 @@ namespace HB.FullStack.Database.SQL
 
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0"));
 
-            return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}";
+            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where}";
         }
 
         /// <summary>
         /// 使用新旧值比较乐观锁的update-fields.field粒度
         /// </summary>
-        public static string CreateUpdateFieldsUsingOldNewCompareSql(EntityDef entityDef, EngineType engineType, IEnumerable<string> propertyNames, string oldSuffix = "old", string newSuffix = "new", int number = 0)
+        public static string CreateUpdateFieldsUsingOldNewCompareSql(DatabaseModelDef modelDef, EngineType engineType, IEnumerable<string> propertyNames, string oldSuffix = "old", string newSuffix = "new", int number = 0)
         {
-            EntityPropertyDef primaryKeyProperty = entityDef.PrimaryKeyPropertyDef;
-            EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
-            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
-            EntityPropertyDef lastUserProperty = entityDef.GetPropertyDef(nameof(Entity.LastUser))!;
-            EntityPropertyDef lastTimeProperty = entityDef.GetPropertyDef(nameof(Entity.LastTime))!;
+            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
+            DatabaseModelPropertyDef lastUserProperty = modelDef.GetPropertyDef(nameof(Model.LastUser))!;
+            DatabaseModelPropertyDef lastTimeProperty = modelDef.GetPropertyDef(nameof(Model.LastTime))!;
 
             StringBuilder args = new StringBuilder();
             StringBuilder where = new StringBuilder();
@@ -209,11 +209,11 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                EntityPropertyDef? propertyDef = entityDef.GetPropertyDef(propertyName);
+                DatabaseModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
 
                 if (propertyDef == null)
                 {
-                    throw DatabaseExceptions.PropertyNotFound(entityDef.EntityFullName, propertyName);
+                    throw DatabaseExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
                 }
 
                 args.Append(Invariant($",{propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{newSuffix}_{number}"));
@@ -221,23 +221,23 @@ namespace HB.FullStack.Database.SQL
             }
 
             //TODO: 还是要查验一下found_rows的并发
-            return $"UPDATE {entityDef.DbTableReservedName} SET {args} WHERE {where}; SELECT {FoundMatchedRows_Statement(engineType)}, {versionProperty.DbReservedName} FROM {entityDef.DbTableReservedName} WHERE {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} AND {deletedProperty.DbReservedName}=0 ";
+            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where}; SELECT {FoundMatchedRows_Statement(engineType)}, {versionProperty.DbReservedName} FROM {modelDef.DbTableReservedName} WHERE {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} AND {deletedProperty.DbReservedName}=0 ";
         }
 
-        public static string CreateDeleteEntitySql(EntityDef entityDef, int number = 0)
+        public static string CreateDeleteModelSql(DatabaseModelDef modelDef, int number = 0)
         {
-            return CreateUpdateEntitySql(entityDef, number);
+            return CreateUpdateModelSql(modelDef, number);
         }
 
-        public static string CreateSelectEntitySql(params EntityDef[] entityDefs)
+        public static string CreateSelectModelSql(params DatabaseModelDef[] modelDefs)
         {
             StringBuilder builder = new StringBuilder("SELECT ");
 
-            foreach (EntityDef entityDef in entityDefs)
+            foreach (DatabaseModelDef modelDef in modelDefs)
             {
-                string DbTableReservedName = entityDef.DbTableReservedName;
+                string DbTableReservedName = modelDef.DbTableReservedName;
 
-                foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+                foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
                 {
                     builder.Append(Invariant($"{DbTableReservedName}.{propertyDef.DbReservedName},"));
                 }
@@ -248,12 +248,12 @@ namespace HB.FullStack.Database.SQL
             return builder.ToString();
         }
 
-        public static string CreateDeleteSql(EntityDef entityDef)
+        public static string CreateDeleteSql(DatabaseModelDef modelDef)
         {
-            EntityPropertyDef deletedProperty = entityDef.GetPropertyDef(nameof(Entity.Deleted))!;
-            EntityPropertyDef versionProperty = entityDef.GetPropertyDef(nameof(Entity.Version))!;
+            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(Model.Deleted))!;
+            DatabaseModelPropertyDef versionProperty = modelDef.GetPropertyDef(nameof(Model.Version))!;
 
-            return $"update {entityDef.DbTableReservedName} set {versionProperty.DbReservedName}={versionProperty.DbReservedName}+1, {deletedProperty.DbReservedName}=1";
+            return $"update {modelDef.DbTableReservedName} set {versionProperty.DbReservedName}={versionProperty.DbReservedName}+1, {deletedProperty.DbReservedName}=1";
         }
 
         /// <summary>
@@ -313,7 +313,7 @@ namespace HB.FullStack.Database.SQL
             return _needQuotedTypes.Contains(type);
         }
 
-        public static bool IsDbFieldNeedLength(EntityPropertyDef propertyDef, EngineType engineType)
+        public static bool IsDbFieldNeedLength(DatabaseModelPropertyDef propertyDef, EngineType engineType)
         {
             DbType dbType = TypeConvert.TypeToDbType(propertyDef, engineType);
 
@@ -442,12 +442,12 @@ namespace HB.FullStack.Database.SQL
             throw new NotSupportedException();
         }
 
-        public static string SQLite_Table_Create_Statement(EntityDef entityDef, bool addDropStatement)
+        public static string SQLite_Table_Create_Statement(DatabaseModelDef modelDef, bool addDropStatement)
         {
             StringBuilder propertyInfoSql = new StringBuilder();
             StringBuilder indexSqlBuilder = new StringBuilder();
 
-            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, EngineType.SQLite);
 
@@ -467,27 +467,27 @@ namespace HB.FullStack.Database.SQL
                 //索引
                 if (!propertyDef.IsUnique && !propertyDef.IsAutoIncrementPrimaryKey && (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded))
                 {
-                    indexSqlBuilder.Append(Invariant($" create index {entityDef.TableName}_{propertyDef.Name}_index on {entityDef.DbTableReservedName} ({propertyDef.DbReservedName}); "));
+                    indexSqlBuilder.Append(Invariant($" create index {modelDef.TableName}_{propertyDef.Name}_index on {modelDef.DbTableReservedName} ({propertyDef.DbReservedName}); "));
                 }
             }
 
             propertyInfoSql.Remove(propertyInfoSql.Length - 1, 1);
 
-            string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;
+            string dropStatement = addDropStatement ? $"Drop table if exists {modelDef.DbTableReservedName};" : string.Empty;
 
-            string tableCreateSql = $"{dropStatement} CREATE TABLE {entityDef.DbTableReservedName} ({propertyInfoSql});{indexSqlBuilder}";
+            string tableCreateSql = $"{dropStatement} CREATE TABLE {modelDef.DbTableReservedName} ({propertyInfoSql});{indexSqlBuilder}";
 
             return tableCreateSql;
         }
 
-        public static string MySQL_Table_Create_Statement(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength)
+        public static string MySQL_Table_Create_Statement(DatabaseModelDef modelDef, bool addDropStatement, int varcharDefaultLength)
         {
             StringBuilder propertySqlBuilder = new StringBuilder();
             StringBuilder indexSqlBuilder = new StringBuilder();
 
-            EntityPropertyDef? primaryKeyPropertyDef = null;
+            DatabaseModelPropertyDef? primaryKeyPropertyDef = null;
 
-            foreach (EntityPropertyDef propertyDef in entityDef.PropertyDefs)
+            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (propertyDef.IsPrimaryKey)
                 {
@@ -522,7 +522,7 @@ namespace HB.FullStack.Database.SQL
 
                 if (length >= DefaultLengthConventions.MAX_MEDIUM_TEXT_LENGTH)
                 {
-                    throw DatabaseExceptions.EntityError(propertyDef.EntityDef.EntityFullName, propertyDef.Name, "字段长度太长");
+                    throw DatabaseExceptions.ModelError(propertyDef.ModelDef.ModelFullName, propertyDef.Name, "字段长度太长");
                 }
 
                 //if (propertyDef.IsLengthFixed )
@@ -546,25 +546,25 @@ namespace HB.FullStack.Database.SQL
 
             if (primaryKeyPropertyDef == null)
             {
-                throw DatabaseExceptions.EntityError(entityDef.EntityFullName, "", "no primary key");
+                throw DatabaseExceptions.ModelError(modelDef.ModelFullName, "", "no primary key");
             }
 
-            string dropStatement = addDropStatement ? $"Drop table if exists {entityDef.DbTableReservedName};" : string.Empty;
+            string dropStatement = addDropStatement ? $"Drop table if exists {modelDef.DbTableReservedName};" : string.Empty;
 
-            return $"{dropStatement} create table {entityDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
+            return $"{dropStatement} create table {modelDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
         }
 
-        public static string GetTableCreateSql(EntityDef entityDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)
+        public static string GetTableCreateSql(DatabaseModelDef modelDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)
         {
             return engineType switch
             {
-                EngineType.MySQL => MySQL_Table_Create_Statement(entityDef, addDropStatement, varcharDefaultLength),
-                EngineType.SQLite => SQLite_Table_Create_Statement(entityDef, addDropStatement),
+                EngineType.MySQL => MySQL_Table_Create_Statement(modelDef, addDropStatement, varcharDefaultLength),
+                EngineType.SQLite => SQLite_Table_Create_Statement(modelDef, addDropStatement),
                 _ => throw new NotSupportedException()
             };
         }
 
-        public static string OnDuplicateKeyUpdateStatement(EngineType engineType, EntityPropertyDef primaryDef)
+        public static string OnDuplicateKeyUpdateStatement(EngineType engineType, DatabaseModelPropertyDef primaryDef)
         {
             return engineType switch
             {

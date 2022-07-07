@@ -13,15 +13,15 @@ using HB.FullStack.Database;
 using Microsoft;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using Microsoft.VisualStudio.Threading;
 using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Client.ClientEntity;
+using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.Network;
 
 namespace HB.FullStack.Client
 {
-    public delegate bool IfUseLocalData<TEntity>(ApiRequest request, IEnumerable<TEntity> entities) where TEntity : DatabaseEntity, new();
+    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DatabaseModel, new();
 
     public abstract class BaseRepo
     {
@@ -66,11 +66,11 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string entityName)
+        protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string modelName)
         {
             if (obj == null)
             {
-                throw ApiExceptions.ServerNullReturn(parameter: entityName);
+                throw ApiExceptions.ServerNullReturn(parameter: modelName);
             }
         }
 
@@ -82,14 +82,14 @@ namespace HB.FullStack.Client
         }
     }
 
-    public abstract class BaseRepo<TEntity, TRes> : BaseRepo where TEntity : DatabaseEntity, new() where TRes : ApiResource2
+    public abstract class BaseRepo<TModel, TRes> : BaseRepo where TModel : DatabaseModel, new() where TRes : ApiResource
     {
         private readonly ILogger _logger;
-        private readonly EntityDef _entityDef = null!;
+        private readonly DatabaseModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
 
-        protected ClientEntityDef ClientEntityDef { get; set; }
+        protected ClientModelDef ClientModelDef { get; set; }
 
         protected BaseRepo(
             ILogger logger,
@@ -99,25 +99,25 @@ namespace HB.FullStack.Client
             ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
             _logger = logger;
-            _entityDef = database.EntityDefFactory.GetDef<TEntity>()!;
+            _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
 
             Database = database;
 
-            ClientEntityDef? clientEntityDef = ClientEntityDefFactory.Get<TEntity>();
+            ClientModelDef? clientModelDef = ClientModelDefFactory.Get<TModel>();
 
-            if (clientEntityDef == null)
+            if (clientModelDef == null)
             {
-                clientEntityDef = CreateDefaultClientEntityDef();
+                clientModelDef = CreateDefaultClientModelDef();
             }
 
-            ClientEntityDef = clientEntityDef;
+            ClientModelDef = clientModelDef;
 
             //NOTICE: Move this to options?
-            static ClientEntityDef CreateDefaultClientEntityDef()
+            static ClientModelDef CreateDefaultClientModelDef()
             {
-                return new ClientEntityDef
+                return new ClientModelDef
                 {
-                    ExpiryTime = TimeSpan.FromSeconds(ClientEntityAttribute.DefaultExpirySeconds),
+                    ExpiryTime = TimeSpan.FromSeconds(ClientModelAttribute.DefaultExpirySeconds),
                     NeedLogined = true,
                     AllowOfflineRead = true,
                     AllowOfflineWrite = false
@@ -125,37 +125,37 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected abstract TEntity ToEntity(TRes res);
+        protected abstract TModel ToModel(TRes res);
 
-        protected abstract TRes ToResource(TEntity entity);
+        protected abstract TRes ToResource(TModel model);
 
         #region 查询
 
-        protected async Task<IEnumerable<TEntity>> GetAsync(
-            Expression<Func<TEntity, bool>> localWhere,
+        protected async Task<IEnumerable<TModel>> GetAsync(
+            Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            IfUseLocalData<TEntity>? ifUseLocalData = null)
+            IfUseLocalData<TModel>? ifUseLocalData = null)
         {
             EnsureNotSyncing();
 
             //TODO: await Syncing();
 
-            //TODO: 是否应该由ClientEntity来决定需要login？或者由业务决定
-            if (ClientEntityDef.NeedLogined)
+            //TODO: 是否应该由ClientModel来决定需要login？或者由业务决定
+            if (ClientModelDef.NeedLogined)
             {
-                _logger.LogDebug("检查Logined, Type:{type}", typeof(TEntity).Name);
+                _logger.LogDebug("检查Logined, Type:{type}", typeof(TModel).Name);
 
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
+            IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                _logger.LogDebug("本地强制模式，返回, Type:{type}", typeof(TEntity).Name);
+                _logger.LogDebug("本地强制模式，返回, Type:{type}", typeof(TModel).Name);
                 return locals;
             }
 
@@ -165,73 +165,73 @@ namespace HB.FullStack.Client
         /// <summary>
         /// 先返回本地初始值，再更新为服务器值
         /// </summary>
-        protected async Task<ObservableTask<IEnumerable<TEntity>>> GetObservableTaskAsync(
-            Expression<Func<TEntity, bool>> localWhere,
+        protected async Task<ObservableTask<IEnumerable<TModel>>> GetObservableTaskAsync(
+            Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.Mixed,
-            IfUseLocalData<TEntity>? ifUseLocalData = null,
+            IfUseLocalData<TModel>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
             EnsureNotSyncing();
 
-            if (ClientEntityDef.NeedLogined)
+            if (ClientModelDef.NeedLogined)
             {
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
+            IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                return new ObservableTask<IEnumerable<TEntity>>(locals, null, onException, continueOnCapturedContext);
+                return new ObservableTask<IEnumerable<TModel>>(locals, null, onException, continueOnCapturedContext);
             }
 
-            return new ObservableTask<IEnumerable<TEntity>>(
+            return new ObservableTask<IEnumerable<TModel>>(
                 locals,
                 () => SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
                 onException,
                 continueOnCapturedContext);
         }
 
-        protected async Task<TEntity?> GetFirstOrDefaultAsync(
-            Expression<Func<TEntity, bool>> localWhere,
+        protected async Task<TModel?> GetFirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            IfUseLocalData<TEntity>? ifUseLocalData = null)
+            IfUseLocalData<TModel>? ifUseLocalData = null)
         {
             EnsureNotSyncing();
 
-            IEnumerable<TEntity> entities = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
+            IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
-            return entities.FirstOrDefault();
+            return models.FirstOrDefault();
         }
 
-        protected async Task<ObservableTask<TEntity?>> GetFirstOrDefaultObservableTaskAsync(
-            Expression<Func<TEntity, bool>> localWhere,
+        protected async Task<ObservableTask<TModel?>> GetFirstOrDefaultObservableTaskAsync(
+            Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext = null,
             RepoGetMode getMode = RepoGetMode.Mixed,
-            IfUseLocalData<TEntity>? ifUseLocalData = null,
+            IfUseLocalData<TModel>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
             EnsureNotSyncing();
 
-            if (ClientEntityDef.NeedLogined)
+            if (ClientModelDef.NeedLogined)
             {
                 EnsureLogined();
             }
 
-            IEnumerable<TEntity> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
+            IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                return new ObservableTask<TEntity?>(locals.FirstOrDefault(), null, onException, continueOnCapturedContext);
+                return new ObservableTask<TModel?>(locals.FirstOrDefault(), null, onException, continueOnCapturedContext);
             }
 
             if (ifUseLocalData == null)
@@ -239,43 +239,43 @@ namespace HB.FullStack.Client
                 ifUseLocalData = DefaultIfUseLocalData;
             }
 
-            return new ObservableTask<TEntity?>(
+            return new ObservableTask<TModel?>(
                 locals.FirstOrDefault(),
                 async () => (await SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false)).FirstOrDefault(),
                 onException,
                 continueOnCapturedContext);
         }
 
-        private async Task<IEnumerable<TEntity>> SyncGetAsync(
-            IEnumerable<TEntity> localEntities,
+        private async Task<IEnumerable<TModel>> SyncGetAsync(
+            IEnumerable<TModel> localModels,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext,
             RepoGetMode getMode,
-            IfUseLocalData<TEntity> ifUseLocalData)
+            IfUseLocalData<TModel> ifUseLocalData)
         {
             //如果不强制远程，并且满足使用本地数据条件
-            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(remoteRequest, localEntities))
+            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(remoteRequest, localModels))
             {
-                _logger.LogDebug("本地数据可用，返回本地, Type:{type}", typeof(TEntity).Name);
-                return localEntities;
+                _logger.LogDebug("本地数据可用，返回本地, Type:{type}", typeof(TModel).Name);
+                return localModels;
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!IsInternetConnected(!ClientEntityDef.AllowOfflineRead))
+            if (!IsInternetConnected(!ClientModelDef.AllowOfflineRead))
             {
-                _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TEntity).Name);
+                _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TModel).Name);
 
                 ConnectivityManager.OnOfflineDataReaded();
 
-                return localEntities;
+                return localModels;
             }
 
             //获取远程
             IEnumerable<TRes>? ress = await ApiClient.GetAsync<IEnumerable<TRes>>(remoteRequest).ConfigureAwait(false);
 
-            IEnumerable<TEntity> remotes = ress!.Select(r => ToEntity(r)).ToList();
+            IEnumerable<TModel> remotes = ress!.Select(r => ToModel(r)).ToList();
 
-            _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TEntity).Name);
+            _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TModel).Name);
 
             //TODO:
             //检查同步. 比如：离线创建的数据，现在联线，本地数据反而是新的。
@@ -294,16 +294,16 @@ namespace HB.FullStack.Client
             //Case
             //1，第一个客户端，离线，疯狂update一条数据，将version变很大，然后第二个客户端在线，过了很久，update了同一条数据。现在第一个客户端在线，get这条数据
 
-            //TODO: 这里不管不顾，直接用远程覆盖，是否要比较一下localEntities和remotes. Version的大小
+            //TODO: 这里不管不顾，直接用远程覆盖，是否要比较一下localModels和remotes. Version的大小
             //如果本地Version大
             //如果本地Version小
-            foreach (TEntity entity in remotes)
+            foreach (TModel model in remotes)
             {
                 //TODO: Reset一遍，覆盖本地？
-                await Database.SetByIdAsync(entity, transactionContext).ConfigureAwait(false);
+                await Database.SetByIdAsync(model, transactionContext).ConfigureAwait(false);
             }
 
-            _logger.LogDebug("重新添加远程数据到本地数据库, Type:{type}", typeof(TEntity).Name);
+            _logger.LogDebug("重新添加远程数据到本地数据库, Type:{type}", typeof(TModel).Name);
 
             return remotes;
         }
@@ -311,36 +311,36 @@ namespace HB.FullStack.Client
         /// <summary>
         /// 本地数据不为空且不过期，或者，本地数据为空但最近刚请求过，返回本地
         /// </summary>
-        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TEntity> localEntities)
+        private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TModel> localModels)
         {
-            return localEntities.Any() && localEntities.All(t => TimeUtil.UtcNow - t.LastTime < ClientEntityDef.ExpiryTime);
+            return localModels.Any() && localModels.All(t => TimeUtil.UtcNow - t.LastTime < ClientModelDef.ExpiryTime);
         }
 
         #endregion
 
         #region 更改
 
-        public async Task AddAsync(IEnumerable<TEntity> entities, TransactionContext transactionContext)
+        public async Task AddAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
             EnsureNotSyncing();
 
-            ThrowIf.NotValid(entities, nameof(entities));
+            ThrowIf.NotValid(models, nameof(models));
 
-            if (!entities.Any())
+            if (!models.Any())
             {
                 return;
             }
 
-            if (IsInternetConnected(!ClientEntityDef.AllowOfflineWrite))
+            if (IsInternetConnected(!ClientModelDef.AllowOfflineWrite))
             {
                 //TODO: 这里的ApiRequestAuth从哪里获得?
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>(entities.Select(k => ToResource(k)).ToList(), ApiRequestAuth.JWT, null);
+                AddRequest<TRes> addRequest = new AddRequest<TRes>(models.Select(k => ToResource(k)).ToList(), ApiRequestAuth.JWT, null);
 
                 await ApiClient.SendAsync(addRequest).ConfigureAwait(false);
 
                 //Local
-                await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
+                await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
@@ -348,28 +348,28 @@ namespace HB.FullStack.Client
                 //允许脱网下写操作
 
                 //Local
-                //await Database.BatchAddAsync(entities, "", transactionContext).ConfigureAwait(false);
+                //await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
 
                 //Record History
-                //await Database.BatchAddAsync(GetOfflineHistories(entities, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
+                //await Database.BatchAddAsync(GetOfflineHistories(models, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
             }
         }
 
-        public async Task UpdateAsync(TEntity entity, TransactionContext transactionContext)
+        public async Task UpdateAsync(TModel model, TransactionContext transactionContext)
         {
             EnsureNotSyncing();
 
-            ThrowIf.NotValid(entity, nameof(entity));
+            ThrowIf.NotValid(model, nameof(model));
 
-            if (IsInternetConnected(!ClientEntityDef.AllowOfflineWrite))
+            if (IsInternetConnected(!ClientModelDef.AllowOfflineWrite))
             {
                 //TODO: 这里的ApiRequestAuth从哪里获得?
-                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(entity), ApiRequestAuth.JWT, null);
+                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(model), ApiRequestAuth.JWT, null);
 
                 //如果Version不对，会返回NotFount ErrorCode
                 await ApiClient.SendAsync(updateRequest).ConfigureAwait(false);
 
-                await Database.UpdateAsync(entity, "", transactionContext).ConfigureAwait(false);
+                await Database.UpdateAsync(model, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
@@ -378,36 +378,36 @@ namespace HB.FullStack.Client
             }
         }
 
-        private List<OfflineHistory> GetOfflineHistories(IEnumerable<TEntity> entities, DbOperation dbOperation)
+        private List<OfflineHistory> GetOfflineHistories(IEnumerable<TModel> models, DbOperation dbOperation)
         {
-            List<OfflineHistory> histories = new List<OfflineHistory>(entities.Count());
+            List<OfflineHistory> histories = new List<OfflineHistory>(models.Count());
 
-            if (_entityDef.IsIdLong)
+            if (_modelDef.IsIdLong)
             {
-                foreach (TEntity entity in entities)
+                foreach (TModel model in models)
                 {
                     OfflineHistory history = new OfflineHistory
                     {
-                        EntityId = (entity as LongIdEntity)!.Id.ToString(CultureInfo.InvariantCulture),
-                        EntityFullName = _entityDef.EntityFullName,
+                        ModelId = (model as LongIdModel)!.Id.ToString(CultureInfo.InvariantCulture),
+                        ModelFullName = _modelDef.ModelFullName,
                         Operation = dbOperation,
-                        OperationTime = entity.LastTime,
+                        OperationTime = model.LastTime,
                         Handled = false
                     };
 
                     histories.Add(history);
                 }
             }
-            else if (_entityDef.IsIdGuid)
+            else if (_modelDef.IsIdGuid)
             {
-                foreach (TEntity entity in entities)
+                foreach (TModel model in models)
                 {
                     OfflineHistory history = new OfflineHistory
                     {
-                        EntityId = (entity as GuidEntity)!.Id.ToString(),
-                        EntityFullName = _entityDef.EntityFullName,
+                        ModelId = (model as GuidModel)!.Id.ToString(),
+                        ModelFullName = _modelDef.ModelFullName,
                         Operation = dbOperation,
-                        OperationTime = entity.LastTime,
+                        OperationTime = model.LastTime,
                         Handled = false
                     };
 
@@ -416,7 +416,7 @@ namespace HB.FullStack.Client
             }
             else
             {
-                throw ClientExceptions.UnSupportedEntityType(_entityDef.EntityFullName);
+                throw ClientExceptions.UnSupportedModelType(_modelDef.ModelFullName);
             }
 
             return histories;

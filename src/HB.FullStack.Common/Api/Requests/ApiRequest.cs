@@ -69,7 +69,7 @@ namespace HB.FullStack.Common.Api
         }
     }
 
-    public abstract class ApiRequest<T> : ApiRequest where T : ApiResource2
+    public abstract class ApiRequest<T> : ApiRequest where T : ApiResource
     {
         [OnlyForJsonConstructor]
         protected ApiRequest() { }

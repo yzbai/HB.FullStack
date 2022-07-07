@@ -5,7 +5,7 @@
  */
 
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -34,7 +34,7 @@ namespace HB.FullStack.Database
 
         internal IDatabaseEngine DatabaseEngine { get; }
 
-        internal IEntityDefFactory EntityDefFactory { get; }
+        internal IDatabaseModelDefFactory ModelDefFactory { get; }
 
         internal IDbCommandBuilder DbCommandBuilder { get; }
     }

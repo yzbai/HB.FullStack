@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Api
     /// 更新几个字段
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class UpdateFieldsRequest<T> : ApiRequest<T> where T : ApiResource2
+    public abstract class UpdateFieldsRequest<T> : ApiRequest<T> where T : ApiResource
     {
         [OnlyForJsonConstructor]
         protected UpdateFieldsRequest() { }

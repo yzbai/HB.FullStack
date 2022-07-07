@@ -3,7 +3,7 @@ using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
@@ -11,12 +11,12 @@ namespace HB.FullStack.Database
     public class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly IEntityDefFactory _entityDefFactory;
+        private readonly IDatabaseModelDefFactory _modelDefFactory;
 
-        public DefaultTransaction(IDatabaseEngine datbaseEngine, IEntityDefFactory entityDefFactory)
+        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDatabaseModelDefFactory modelDefFactory)
         {
             _databaseEngine = datbaseEngine;
-            _entityDefFactory = entityDefFactory;
+            _modelDefFactory = modelDefFactory;
         }
 
         #region 事务
@@ -28,11 +28,11 @@ namespace HB.FullStack.Database
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseEntity
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseModel
         {
-            EntityDef entityDef = _entityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = _modelDefFactory.GetDef<T>()!;
 
-            return BeginTransactionAsync(entityDef.DatabaseName!, isolationLevel);
+            return BeginTransactionAsync(modelDef.DatabaseName!, isolationLevel);
         }
 
         public async Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)

@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Identity.Entities;
+﻿using HB.FullStack.Identity.Models;
 using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
@@ -18,14 +18,14 @@ using System.Collections;
 namespace HB.FullStack.Identity
 {
     /// <summary>
-    /// 所有的User这个Entity的增删改查都要经过这里
+    /// 所有的User这个Model的增删改查都要经过这里
     /// </summary>
-    public class UserRepo : DbEntityRepository<User>
+    public class UserRepo : ModelRepository<User>
     {
         public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
-            EntityUpdating += (sender, args) =>
+            ModelUpdating += (sender, args) =>
             {
                 //NOTICE: SecurityStamp主要用来加盐，每次User实体改动，SecurityStamp改动提高安全性
                 //从另一个角度提供了类似Version/timestamp的作用

@@ -2,7 +2,7 @@
 
 using HB.FullStack.Common;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 
@@ -21,32 +21,32 @@ namespace HB.FullStack.Database
 {
     internal class DbCommandBuilder : IDbCommandBuilder
     {
-        private readonly IEntityDefFactory _entityDefFactory;
+        private readonly IDatabaseModelDefFactory _modelDefFactory;
         private readonly ISQLExpressionVisitor _expressionVisitor;
         private readonly ConcurrentDictionary<string, string> _commandTextCache = new ConcurrentDictionary<string, string>();
 
-        public DbCommandBuilder(IEntityDefFactory entityDefFactory, ISQLExpressionVisitor expressionVisitor)
+        public DbCommandBuilder(IDatabaseModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
         {
-            _entityDefFactory = entityDefFactory;
+            _modelDefFactory = modelDefFactory;
             _expressionVisitor = expressionVisitor;
         }
 
-        private string GetCachedSql(EngineType engineType, SqlType commandTextType, EntityDef[] entityDefs, IEnumerable<string>? propertyNames = null)
+        private string GetCachedSql(EngineType engineType, SqlType commandTextType, DatabaseModelDef[] modelDefs, IEnumerable<string>? propertyNames = null)
         {
-            string cacheKey = GetCommandTextCacheKey(commandTextType, entityDefs, propertyNames);
+            string cacheKey = GetCommandTextCacheKey(commandTextType, modelDefs, propertyNames);
 
             if (!_commandTextCache.TryGetValue(cacheKey, out string? commandText))
             {
                 commandText = commandTextType switch
                 {
-                    SqlType.AddEntity => SqlHelper.CreateAddEntitySql(entityDefs[0], engineType, true),
-                    SqlType.UpdateEntity => SqlHelper.CreateUpdateEntitySql(entityDefs[0]),
-                    SqlType.UpdateFieldsUsingVersionCompare => SqlHelper.CreateUpdateFieldsUsingVersionCompareSql(entityDefs[0], propertyNames!),
-                    SqlType.UpdateFieldsUsingOldNewCompare => SqlHelper.CreateUpdateFieldsUsingOldNewCompareSql(entityDefs[0], engineType, propertyNames!),
-                    SqlType.DeleteEntity => SqlHelper.CreateDeleteEntitySql(entityDefs[0]),
-                    SqlType.SelectEntity => SqlHelper.CreateSelectEntitySql(entityDefs),
-                    SqlType.Delete => SqlHelper.CreateDeleteSql(entityDefs[0]),
-                    SqlType.AddOrUpdateEntity => SqlHelper.CreateAddOrUpdateSql(entityDefs[0], engineType, true),
+                    SqlType.AddModel => SqlHelper.CreateAddModelSql(modelDefs[0], engineType, true),
+                    SqlType.UpdateModel => SqlHelper.CreateUpdateModelSql(modelDefs[0]),
+                    SqlType.UpdateFieldsUsingVersionCompare => SqlHelper.CreateUpdateFieldsUsingVersionCompareSql(modelDefs[0], propertyNames!),
+                    SqlType.UpdateFieldsUsingOldNewCompare => SqlHelper.CreateUpdateFieldsUsingOldNewCompareSql(modelDefs[0], engineType, propertyNames!),
+                    SqlType.DeleteModel => SqlHelper.CreateDeleteModelSql(modelDefs[0]),
+                    SqlType.SelectModel => SqlHelper.CreateSelectModelSql(modelDefs),
+                    SqlType.Delete => SqlHelper.CreateDeleteSql(modelDefs[0]),
+                    SqlType.AddOrUpdateModel => SqlHelper.CreateAddOrUpdateSql(modelDefs[0], engineType, true),
                     _ => throw new NotSupportedException(),
                 };
 
@@ -55,13 +55,13 @@ namespace HB.FullStack.Database
 
             return commandText;
 
-            static string GetCommandTextCacheKey(SqlType textType, EntityDef[] entityDefs, IEnumerable<string>? propertyNames)
+            static string GetCommandTextCacheKey(SqlType textType, DatabaseModelDef[] modelDefs, IEnumerable<string>? propertyNames)
             {
-                StringBuilder builder = new StringBuilder(entityDefs[0].DatabaseName);
+                StringBuilder builder = new StringBuilder(modelDefs[0].DatabaseName);
 
-                foreach (EntityDef entityDef in entityDefs)
+                foreach (DatabaseModelDef modelDef in modelDefs)
                 {
-                    builder.Append(entityDef.TableName);
+                    builder.Append(modelDef.TableName);
                     builder.Append('_');
                 }
 
@@ -82,87 +82,87 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>(EngineType engineType) where T : DatabaseEntity, new()
+        public FromExpression<T> From<T>(EngineType engineType) where T : DatabaseModel, new()
         {
-            return new FromExpression<T>(engineType, _entityDefFactory, _expressionVisitor);
+            return new FromExpression<T>(engineType, _modelDefFactory, _expressionVisitor);
         }
 
-        public WhereExpression<T> Where<T>(EngineType engineType) where T : DatabaseEntity, new()
+        public WhereExpression<T> Where<T>(EngineType engineType) where T : DatabaseModel, new()
         {
-            return new WhereExpression<T>(engineType, _entityDefFactory, _expressionVisitor);
+            return new WhereExpression<T>(engineType, _modelDefFactory, _expressionVisitor);
         }
 
-        public WhereExpression<T> Where<T>(EngineType engineType, string sqlFilter, params object[] filterParams) where T : DatabaseEntity, new()
+        public WhereExpression<T> Where<T>(EngineType engineType, string sqlFilter, params object[] filterParams) where T : DatabaseModel, new()
         {
-            return new WhereExpression<T>(engineType, _entityDefFactory, _expressionVisitor).Where(sqlFilter, filterParams);
+            return new WhereExpression<T>(engineType, _modelDefFactory, _expressionVisitor).Where(sqlFilter, filterParams);
         }
 
-        public WhereExpression<T> Where<T>(EngineType engineType, Expression<Func<T, bool>> predicate) where T : DatabaseEntity, new()
+        public WhereExpression<T> Where<T>(EngineType engineType, Expression<Func<T, bool>> predicate) where T : DatabaseModel, new()
         {
-            return new WhereExpression<T>(engineType, _entityDefFactory, _expressionVisitor).Where(predicate);
+            return new WhereExpression<T>(engineType, _modelDefFactory, _expressionVisitor).Where(predicate);
         }
 
         #endregion
 
         #region 查询
 
-        public EngineCommand CreateRetrieveCommand<T>(EngineType engineType, EntityDef entityDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
-            where T : DatabaseEntity, new()
+        public EngineCommand CreateRetrieveCommand<T>(EngineType engineType, DatabaseModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
+            where T : DatabaseModel, new()
         {
-            return AssembleRetrieveCommand(GetCachedSql(engineType, SqlType.SelectEntity, new EntityDef[] { entityDef }), fromCondition, whereCondition, engineType);
+            return AssembleRetrieveCommand(GetCachedSql(engineType, SqlType.SelectModel, new DatabaseModelDef[] { modelDef }), fromCondition, whereCondition, engineType);
         }
 
         public EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
-            where T : DatabaseEntity, new()
+            where T : DatabaseModel, new()
         {
             return AssembleRetrieveCommand("SELECT COUNT(1) ", fromCondition, whereCondition, engineType);
         }
 
-        public EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
-            where T1 : DatabaseEntity, new()
-            where T2 : DatabaseEntity, new()
+        public EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DatabaseModelDef[] returnModelDefs)
+            where T1 : DatabaseModel, new()
+            where T2 : DatabaseModel, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(engineType, SqlType.SelectEntity, returnEntityDefs),
+                GetCachedSql(engineType, SqlType.SelectModel, returnModelDefs),
                 fromCondition,
                 whereCondition,
                 engineType);
         }
 
-        public EngineCommand CreateRetrieveCommand<T1, T2, T3>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params EntityDef[] returnEntityDefs)
-            where T1 : DatabaseEntity, new()
-            where T2 : DatabaseEntity, new()
-            where T3 : DatabaseEntity, new()
+        public EngineCommand CreateRetrieveCommand<T1, T2, T3>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DatabaseModelDef[] returnModelDefs)
+            where T1 : DatabaseModel, new()
+            where T2 : DatabaseModel, new()
+            where T3 : DatabaseModel, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(engineType, SqlType.SelectEntity, returnEntityDefs),
+                GetCachedSql(engineType, SqlType.SelectModel, returnModelDefs),
                 fromCondition,
                 whereCondition,
                 engineType);
         }
 
-        public EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType engineType, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params EntityDef[] returnEntityDefs)
-            where TSelect : DatabaseEntity, new()
-            where TFrom : DatabaseEntity, new()
-            where TWhere : DatabaseEntity, new()
+        public EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType engineType, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params DatabaseModelDef[] returnModelDefs)
+            where TSelect : DatabaseModel, new()
+            where TFrom : DatabaseModel, new()
+            where TWhere : DatabaseModel, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(engineType, SqlType.SelectEntity, returnEntityDefs),
+                GetCachedSql(engineType, SqlType.SelectModel, returnModelDefs),
                 fromCondition,
                 whereCondition,
                 engineType);
         }
 
         private EngineCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectText, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, EngineType engineType)
-            where TFrom : DatabaseEntity, new()
-            where TWhere : DatabaseEntity, new()
+            where TFrom : DatabaseModel, new()
+            where TWhere : DatabaseModel, new()
         {
             string sql = selectText;
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
 
             if (fromCondition == null)
             {
-                fromCondition = new FromExpression<TFrom>(engineType, _entityDefFactory, _expressionVisitor);
+                fromCondition = new FromExpression<TFrom>(engineType, _modelDefFactory, _expressionVisitor);
             }
 
             sql += fromCondition.ToStatement();
@@ -182,27 +182,27 @@ namespace HB.FullStack.Database
 
         #region 更改
 
-        public EngineCommand CreateAddCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
+        public EngineCommand CreateAddCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.AddEntity, new EntityDef[] { entityDef }),
-                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
+                GetCachedSql(engineType, SqlType.AddModel, new DatabaseModelDef[] { modelDef }),
+                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 
-        public EngineCommand CreateUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
+        public EngineCommand CreateUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.UpdateEntity, new EntityDef[] { entityDef }),
-                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
+                GetCachedSql(engineType, SqlType.UpdateModel, new DatabaseModelDef[] { modelDef }),
+                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 
-        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, int updateToVersion, string lastUser,
+        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser,
             IList<string> propertyNames, IList<object?> propertyValues)
         {
-            propertyNames.Add(nameof(LongIdEntity.Id));
-            propertyNames.Add(nameof(Entity.Version));
-            propertyNames.Add(nameof(Entity.LastUser));
-            propertyNames.Add(nameof(Entity.LastTime));
+            propertyNames.Add(nameof(LongIdModel.Id));
+            propertyNames.Add(nameof(Model.Version));
+            propertyNames.Add(nameof(Model.LastUser));
+            propertyNames.Add(nameof(Model.LastTime));
 
             propertyValues.Add(id);
             propertyValues.Add(updateToVersion);
@@ -210,29 +210,29 @@ namespace HB.FullStack.Database
             propertyValues.Add(TimeUtil.UtcNow);
 
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.UpdateFieldsUsingVersionCompare, new EntityDef[] { entityDef }, propertyNames),
-                EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, propertyValues));
+                GetCachedSql(engineType, SqlType.UpdateFieldsUsingVersionCompare, new DatabaseModelDef[] { modelDef }, propertyNames),
+                ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues));
         }
 
         private const string OldPropertyValueSuffix = "old";
         private const string NewPropertyValueSuffix = "new";
 
-        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, EntityDef entityDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues,
+        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues,
             IList<object?> newPropertyValues)
         {
-            string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new EntityDef[] { entityDef }, propertyNames);
+            string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new DatabaseModelDef[] { modelDef }, propertyNames);
 
-            var oldParameters = EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0");
+            var oldParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0");
 
-            propertyNames.Add(nameof(LongIdEntity.Id));
-            propertyNames.Add(nameof(Entity.LastUser));
-            propertyNames.Add(nameof(Entity.LastTime));
+            propertyNames.Add(nameof(LongIdModel.Id));
+            propertyNames.Add(nameof(Model.LastUser));
+            propertyNames.Add(nameof(Model.LastTime));
 
             newPropertyValues.Add(id);
             newPropertyValues.Add(lastUser);
             newPropertyValues.Add(TimeUtil.UtcNow);
 
-            var newParameters = EntityMapper.PropertyValuesToParameters(entityDef, engineType, _entityDefFactory, propertyNames, newPropertyValues, $"{NewPropertyValueSuffix}_0");
+            var newParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, newPropertyValues, $"{NewPropertyValueSuffix}_0");
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
             parameters.AddRange(newParameters);
@@ -240,25 +240,25 @@ namespace HB.FullStack.Database
             return new EngineCommand(sql, parameters);
         }
 
-        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
+        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.DeleteEntity, new EntityDef[] { entityDef }),
-                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
+                GetCachedSql(engineType, SqlType.DeleteModel, new DatabaseModelDef[] { modelDef }),
+                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 
-        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, EntityDef entityDef, WhereExpression<T> whereExpression) where T : DatabaseEntity, new()
+        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, WhereExpression<T> whereExpression) where T : DatabaseModel, new()
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
 
-            string sql = GetCachedSql(engineType, SqlType.Delete, new EntityDef[] { entityDef }) + whereExpression.ToStatement(engineType);
+            string sql = GetCachedSql(engineType, SqlType.Delete, new DatabaseModelDef[] { modelDef }) + whereExpression.ToStatement(engineType);
 
             return new EngineCommand(sql, whereExpression.GetParameters());
         }
 
-        public EngineCommand CreateBatchAddCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
+        public EngineCommand CreateBatchAddCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
         {
-            ThrowIf.Empty(entities, nameof(entities));
+            ThrowIf.Empty(models, nameof(models));
 
             StringBuilder innerBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
@@ -266,13 +266,13 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            bool isIdAutoIncrement = entityDef.IsIdAutoIncrement;
+            bool isIdAutoIncrement = modelDef.IsIdAutoIncrement;
 
-            foreach (T entity in entities)
+            foreach (T model in models)
             {
-                string addCommandText = SqlHelper.CreateAddEntitySql(entityDef, engineType, false, number);
+                string addCommandText = SqlHelper.CreateAddModelSql(modelDef, engineType, false, number);
 
-                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
 
                 innerBuilder.Append(addCommandText);
 
@@ -313,20 +313,20 @@ namespace HB.FullStack.Database
             return new EngineCommand(commandTextBuilder.ToString(), parameters);
         }
 
-        public EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
+        public EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
         {
-            ThrowIf.Empty(entities, nameof(entities));
+            ThrowIf.Empty(models, nameof(models));
 
             StringBuilder innerBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            foreach (T entity in entities)
+            foreach (T model in models)
             {
-                string updateCommandText = SqlHelper.CreateUpdateEntitySql(entityDef, number);
+                string updateCommandText = SqlHelper.CreateUpdateModelSql(modelDef, number);
 
-                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
 
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
@@ -351,20 +351,20 @@ namespace HB.FullStack.Database
             return new EngineCommand(commandText, parameters);
         }
 
-        public EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
+        public EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
         {
-            ThrowIf.Empty(entities, nameof(entities));
+            ThrowIf.Empty(models, nameof(models));
 
             StringBuilder innerBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            foreach (T entity in entities)
+            foreach (T model in models)
             {
-                string deleteCommandText = SqlHelper.CreateDeleteEntitySql(entityDef, number);
+                string deleteCommandText = SqlHelper.CreateDeleteModelSql(modelDef, number);
 
-                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
 #elif NETSTANDARD2_1
@@ -393,9 +393,9 @@ namespace HB.FullStack.Database
         #region Management
 
 
-        public EngineCommand CreateTableCreateCommand(EngineType engineType, EntityDef entityDef, bool addDropStatement, int varcharDefaultLength)
+        public EngineCommand CreateTableCreateCommand(EngineType engineType, DatabaseModelDef modelDef, bool addDropStatement, int varcharDefaultLength)
         {
-            string sql = SqlHelper.GetTableCreateSql(entityDef, addDropStatement, varcharDefaultLength, engineType);
+            string sql = SqlHelper.GetTableCreateSql(modelDef, addDropStatement, varcharDefaultLength, engineType);
 
             return new EngineCommand(sql);
         }
@@ -447,25 +447,25 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update. 且Version不变,不增长
         /// </summary>
-        public EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, T entity) where T : DatabaseEntity, new()
+        public EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.AddOrUpdateEntity, new EntityDef[] { entityDef }),
-                entity.EntityToParameters(entityDef, engineType, _entityDefFactory));
+                GetCachedSql(engineType, SqlType.AddOrUpdateModel, new DatabaseModelDef[] { modelDef }),
+                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 
         /// <summary>
-        /// 只在客户端开放，因为不检查Version就update，并且无法更新entities
+        /// 只在客户端开放，因为不检查Version就update，并且无法更新models
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="engineType"></param>
-        /// <param name="entityDef"></param>
-        /// <param name="entities"></param>
+        /// <param name="modelDef"></param>
+        /// <param name="models"></param>
         /// <returns></returns>
 
-        public EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, EntityDef entityDef, IEnumerable<T> entities, bool needTrans) where T : DatabaseEntity, new()
+        public EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
         {
-            ThrowIf.Empty(entities, nameof(entities));
+            ThrowIf.Empty(models, nameof(models));
 
             StringBuilder innerBuilder = new StringBuilder();
             //string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
@@ -473,11 +473,11 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            foreach (T entity in entities)
+            foreach (T model in models)
             {
-                string addOrUpdateCommandText = SqlHelper.CreateAddOrUpdateSql(entityDef, engineType, false, number);
+                string addOrUpdateCommandText = SqlHelper.CreateAddOrUpdateSql(modelDef, engineType, false, number);
 
-                parameters.AddRange(entity.EntityToParameters(entityDef, engineType, _entityDefFactory, number));
+                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
 
                 innerBuilder.Append(addOrUpdateCommandText);
 

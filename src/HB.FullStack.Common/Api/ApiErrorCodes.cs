@@ -11,7 +11,6 @@ namespace System
         public static ErrorCode ModelValidationError { get; } = new ErrorCode(nameof(ModelValidationError), "");
         public static ErrorCode ApiNotAvailable { get; } = new ErrorCode(nameof(ApiNotAvailable), "");
         public static ErrorCode ApiErrorUnkownFormat { get; } = new ErrorCode(nameof(ApiErrorUnkownFormat), "");
-        public static ErrorCode NotApiResourceEntity { get; } = new ErrorCode(nameof(NotApiResourceEntity), "");
         public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(nameof(ApiSmsCodeInvalid), "短信验证码错误。");
         public static ErrorCode SmsServiceError { get; } = new ErrorCode(nameof(SmsServiceError), "");
         public static ErrorCode CommonResourceTokenNeeded { get; } = new ErrorCode(nameof(CommonResourceTokenNeeded), "");

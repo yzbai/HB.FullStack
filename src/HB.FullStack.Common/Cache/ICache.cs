@@ -18,7 +18,7 @@ namespace HB.FullStack.Cache
 {
     /// <summary>
     /// string,int,generic 都可以存储空值
-    /// Entity操作不可以
+    /// Model操作不可以
     /// </summary>
     public interface ICache
     {
@@ -26,27 +26,27 @@ namespace HB.FullStack.Cache
 
         void Dispose();
 
-        #region Entities
+        #region Models
 
         //NOTICE: 因为.net standard 2.0 不支持static member in interface，所以定义了ICacheExtensions
-        //static bool IsEntityEnabled<TEntity>() where TEntity : Entity, new()
+        //static bool IsModelEnabled<TModel>() where TModel : Model, new()
         //{
-        //    CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+        //    CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
 
-        //    return entityDef.IsCacheable;
+        //    return modelDef.IsCacheable;
         //}
 
-        Task<(IEnumerable<TEntity>?, bool)> GetEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TEntity : Entity, new();
+        Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : Model, new();
 
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
         /// </summary>
-        Task RemoveEntitiesAsync<TEntity>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TEntity : Entity, new();
+        Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TModel : Model, new();
 
         /// <summary>
         /// 返回是否成功更新。false是数据版本小于缓存中的
         /// </summary>
-        Task<IEnumerable<bool>> SetEntitiesAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken token = default) where TEntity : Entity, new();
+        Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : Model, new();
 
         #endregion
 
@@ -89,11 +89,11 @@ namespace HB.FullStack.Cache
     /// </summary>
     public static class ICacheExtensions
     {
-        public static bool IsEntityEnabled<TEntity>(this ICache cache) where TEntity:Entity, new()
+        public static bool IsModelEnabled<TModel>(this ICache cache) where TModel:Model, new()
         {
-            CacheEntityDef entityDef = CacheEntityDefFactory.Get<TEntity>();
+            CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
 
-            return entityDef.IsCacheable;
+            return modelDef.IsCacheable;
         }
     }
 }

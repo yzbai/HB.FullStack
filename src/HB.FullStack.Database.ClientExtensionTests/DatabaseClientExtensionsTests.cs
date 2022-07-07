@@ -17,24 +17,24 @@ namespace HB.FullStack.Database.Tests
         [TestMethod()]
         public async Task AddOrUpdateByIdAsyncTestAsync()
         {
-            var lst = Mocker.GetCExtEntities(1);
-            CExtEntity entity = lst[0];
+            var lst = Mocker.GetCExtModels(1);
+            CExtModel model = lst[0];
 
-            await Db.SetByIdAsync(entity, null);
+            await Db.SetByIdAsync(model, null);
 
-            Assert.AreEqual(entity.Version, 0);
+            Assert.AreEqual(model.Version, 0);
 
-            await Db.SetByIdAsync(entity, null);
+            await Db.SetByIdAsync(model, null);
 
-            Assert.AreEqual(entity.Version, 1);
+            Assert.AreEqual(model.Version, 1);
         }
 
         [TestMethod()]
         public async Task DeleteAsyncTestAsync()
         {
-            var lst = Mocker.GetCExtEntities();
+            var lst = Mocker.GetCExtModels();
 
-            var trans = await Trans.BeginTransactionAsync<CExtEntity>().ConfigureAwait(false);
+            var trans = await Trans.BeginTransactionAsync<CExtModel>().ConfigureAwait(false);
 
             try
             {
@@ -48,9 +48,9 @@ namespace HB.FullStack.Database.Tests
                 throw;
             }
 
-            await Db.DeleteAsync<CExtEntity>(e => SqlStatement.In(e.Id, false, lst.Select(e => (object)e.Id).ToArray())).ConfigureAwait(false);
+            await Db.DeleteAsync<CExtModel>(e => SqlStatement.In(e.Id, false, lst.Select(e => (object)e.Id).ToArray())).ConfigureAwait(false);
 
-            long count = await Db.CountAsync<CExtEntity>(e => SqlStatement.In(e.Id, true, lst.Select(e => (object)e.Id).ToArray()), null).ConfigureAwait(false);
+            long count = await Db.CountAsync<CExtModel>(e => SqlStatement.In(e.Id, true, lst.Select(e => (object)e.Id).ToArray()), null).ConfigureAwait(false);
 
             Assert.AreEqual(count, 0);
         }

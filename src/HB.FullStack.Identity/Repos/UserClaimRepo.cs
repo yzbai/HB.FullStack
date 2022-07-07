@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using HB.FullStack.Identity.Entities;
+using HB.FullStack.Identity.Models;
 using System;
 using HB.FullStack.Repository;
 using HB.FullStack.Cache;
@@ -11,7 +11,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
-    public class UserClaimRepo : DbEntityRepository<UserClaim>
+    public class UserClaimRepo : ModelRepository<UserClaim>
     {
  
 

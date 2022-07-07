@@ -18,8 +18,8 @@ namespace HB.Infrastructure.Redis.KVStore
     public class RedisKVStoreEngine : IKVStoreEngine
     {
         /// <summary>
-        /// keys:entityNameKey, entityVersionKey
-        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
+        /// keys:modelNameKey, modelVersionKey
+        /// argv:3(model_number), model1_key, model2_key, model3_key, model1_value, model2_value, model3_value
         /// </summary>
         private const string LUA_BATCH_ADD = @"
 local count = tonumber(ARGV[1])
@@ -36,8 +36,8 @@ end
 return 1";
 
         /// <summary>
-        /// keys:entityNameKey, entityVersionKey
-        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value, entity1_version, entity2_version, entity3_version
+        /// keys:modelNameKey, modelVersionKey
+        /// argv:3(model_number), model1_key, model2_key, model3_key, model1_value, model2_value, model3_value, model1_version, model2_version, model3_version
         /// </summary>
         private const string LUA_BATCH_UPDATE = @"
 local count = tonumber(ARGV[1])
@@ -53,8 +53,8 @@ end
 return 1";
 
         /// <summary>
-        /// keys:entityNameKey, entityVersionKey
-        /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_version, entity2_version, entity3_version
+        /// keys:modelNameKey, modelVersionKey
+        /// argv:3(model_number), model1_key, model2_key, model3_key, model1_version, model2_version, model3_version
         /// </summary>
         private const string LUA_BATCH_DELETE = @"
 local count=tonumber(ARGV[1])
@@ -73,8 +73,8 @@ return 1
 ";
 
         /// <summary>
-        /// keys:entityNameKey, entityVersionKey
-        /// argv:entity1_key, entity2_key, entity3_key
+        /// keys:modelNameKey, modelVersionKey
+        /// argv:model1_key, model2_key, model3_key
         /// </summary>
         private const string LUA_BATCH_GET = @"
 local array={{}}
@@ -84,7 +84,7 @@ return array
 ";
 
         /// <summary>
-        /// keys:entityNameKey, entityVersionKey
+        /// keys:modelNameKey, modelVersionKey
         /// </summary>
         private const string LUA_GET_ALL = @"
 local array={{}}
@@ -157,16 +157,16 @@ return array";
         }
 
         /// <summary>
-        /// EntityGetAsync
+        /// ModelGetAsync
         /// </summary>
         /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
+        /// <param name="modelName"></param>
+        /// <param name="modelKeys"></param>
         /// <returns></returns>
 
-        public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys)
+        public async Task<IEnumerable<Tuple<string?, int>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys)
         {
-            if (!entityKeys.Any())
+            if (!modelKeys.Any())
             {
                 return new List<Tuple<string?, int>>();
             }
@@ -174,7 +174,7 @@ return array";
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareEntityGetRedisInfo(entityName, entityKeys, redisKeys, redisValues);
+            PrepareModelGetRedisInfo(modelName, modelKeys, redisKeys, redisValues);
 
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchGetLua;
@@ -194,54 +194,54 @@ return array";
 
                 InitLoadedLuas();
 
-                return await EntityGetAsync(storeName, entityName, entityKeys).ConfigureAwait(false);
+                return await ModelGetAsync(storeName, modelName, modelKeys).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(type: entityName, innerException: ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(type: entityName, innerException: ex);
+                throw Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(type: entityName, innerException: ex);
+                throw Exceptions.Unkown(type: modelName, innerException: ex);
             }
         }
 
-        private void PrepareEntityGetRedisInfo(string entityName, IEnumerable<string> entityKeys, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private void PrepareModelGetRedisInfo(string modelName, IEnumerable<string> modelKeys, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
-            redisKeys.Add(EntityNameKey(entityName));
-            redisKeys.Add(EntityVersionNameKey(entityName));
+            redisKeys.Add(ModelNameKey(modelName));
+            redisKeys.Add(ModelVersionNameKey(modelName));
 
-            foreach (string entityKey in entityKeys)
+            foreach (string modelKey in modelKeys)
             {
-                redisValues.Add(entityKey);
+                redisValues.Add(modelKey);
             }
         }
 
         /// <summary>
-        /// EntityGetAllAsync
+        /// ModelGetAllAsync
         /// </summary>
         /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
+        /// <param name="modelName"></param>
         /// <returns></returns>
 
-        public async Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName)
+        public async Task<IEnumerable<Tuple<string?, int>>> ModelGetAllAsync(string storeName, string modelName)
         {
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedGetAllLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
 
-            PrepareEntityGetAllRedisInfo(entityName, redisKeys);
+            PrepareModelGetAllRedisInfo(modelName, redisKeys);
 
             try
             {
                 RedisResult result = await db.ScriptEvaluateAsync(
                     loadedScript,
-                    new RedisKey[] { EntityNameKey(entityName), EntityVersionNameKey(entityName) }).ConfigureAwait(false);
+                    new RedisKey[] { ModelNameKey(modelName), ModelVersionNameKey(modelName) }).ConfigureAwait(false);
 
                 return MapGetAllResultToStringWithVersion(result);
             }
@@ -251,45 +251,45 @@ return array";
 
                 InitLoadedLuas();
 
-                return await EntityGetAllAsync(storeName, entityName).ConfigureAwait(false);
+                return await ModelGetAllAsync(storeName, modelName).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(type: entityName, innerException: ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(type: entityName, innerException: ex);
+                throw Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(entityName, ex);
+                throw Exceptions.Unkown(modelName, ex);
             }
         }
 
-        private void PrepareEntityGetAllRedisInfo(string entityName, List<RedisKey> redisKeys)
+        private void PrepareModelGetAllRedisInfo(string modelName, List<RedisKey> redisKeys)
         {
-            redisKeys.Add(EntityNameKey(entityName));
-            redisKeys.Add(EntityVersionNameKey(entityName));
+            redisKeys.Add(ModelNameKey(modelName));
+            redisKeys.Add(ModelVersionNameKey(modelName));
         }
 
         /// <summary>
-        /// EntityAddAsync
+        /// ModelAddAsync
         /// </summary>
         /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <param name="entityJsons"></param>
+        /// <param name="modelName"></param>
+        /// <param name="modelKeys"></param>
+        /// <param name="modelJsons"></param>
         /// <returns></returns>
 
-        public async Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons)
+        public async Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareEntityAddRedisInfo(entityName, entityKeys, entityJsons, redisKeys, redisValues);
+            PrepareModelAddRedisInfo(modelName, modelKeys, modelJsons, redisKeys, redisValues);
 
             try
             {
@@ -303,7 +303,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityJsons, errorCode: error);
+                    throw Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -312,61 +312,61 @@ return array";
 
                 InitLoadedLuas();
 
-                await EntityAddAsync(storeName, entityName, entityKeys, entityJsons).ConfigureAwait(false);
+                await ModelAddAsync(storeName, modelName, modelKeys, modelJsons).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
+                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(entityName, storeName, entityKeys, ex);
+                throw Exceptions.Unkown(modelName, storeName, modelKeys, ex);
             }
         }
 
-        private void PrepareEntityAddRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private void PrepareModelAddRedisInfo(string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
-            /// keys:entityNameKey, entityVersionKey
-            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value
+            /// keys:modelNameKey, modelVersionKey
+            /// argv:3(model_number), model1_key, model2_key, model3_key, model1_value, model2_value, model3_value
 
-            redisKeys.Add(EntityNameKey(entityName));
-            redisKeys.Add(EntityVersionNameKey(entityName));
+            redisKeys.Add(ModelNameKey(modelName));
+            redisKeys.Add(ModelVersionNameKey(modelName));
 
-            redisValues.Add(entityKeys.Count());
+            redisValues.Add(modelKeys.Count());
 
-            foreach (string entityKey in entityKeys)
+            foreach (string modelKey in modelKeys)
             {
-                redisValues.Add(entityKey);
+                redisValues.Add(modelKey);
             }
 
-            foreach (string? json in entityJsons)
+            foreach (string? json in modelJsons)
             {
                 redisValues.Add(json);
             }
         }
 
         /// <summary>
-        /// EntityUpdateAsync
+        /// ModelUpdateAsync
         /// </summary>
         /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <param name="entityJsons"></param>
-        /// <param name="entityVersions"></param>
+        /// <param name="modelName"></param>
+        /// <param name="modelKeys"></param>
+        /// <param name="modelJsons"></param>
+        /// <param name="modelVersions"></param>
         /// <returns></returns>
 
-        public async Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions)
+        public async Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<int> modelVersions)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareEntityUpdateRedisInfo(entityName, entityKeys, entityJsons, entityVersions, redisKeys, redisValues);
+            PrepareModelUpdateRedisInfo(modelName, modelKeys, modelJsons, modelVersions, redisKeys, redisValues);
 
             try
             {
@@ -381,7 +381,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityJsons, errorCode: error);
+                    throw Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -390,65 +390,65 @@ return array";
 
                 InitLoadedLuas();
 
-                await EntityUpdateAsync(storeName, entityName, entityKeys, entityJsons, entityVersions).ConfigureAwait(false);
+                await ModelUpdateAsync(storeName, modelName, modelKeys, modelJsons, modelVersions).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
+                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(entityName, ex);
+                throw Exceptions.Unkown(modelName, ex);
             }
         }
 
-        private void PrepareEntityUpdateRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private void PrepareModelUpdateRedisInfo(string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<int> modelVersions, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
-            /// keys:entityNameKey, entityVersionKey
-            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_value, entity2_value, entity3_value, entity1_version, entity2_version, entity3_version
+            /// keys:modelNameKey, modelVersionKey
+            /// argv:3(model_number), model1_key, model2_key, model3_key, model1_value, model2_value, model3_value, model1_version, model2_version, model3_version
 
-            redisKeys.Add(EntityNameKey(entityName));
-            redisKeys.Add(EntityVersionNameKey(entityName));
+            redisKeys.Add(ModelNameKey(modelName));
+            redisKeys.Add(ModelVersionNameKey(modelName));
 
-            redisValues.Add(entityKeys.Count());
+            redisValues.Add(modelKeys.Count());
 
-            foreach (string entityKey in entityKeys)
+            foreach (string modelKey in modelKeys)
             {
-                redisValues.Add(entityKey);
+                redisValues.Add(modelKey);
             }
 
-            foreach (string? json in entityJsons)
+            foreach (string? json in modelJsons)
             {
                 redisValues.Add(json);
             }
 
-            foreach (int version in entityVersions)
+            foreach (int version in modelVersions)
             {
                 redisValues.Add(version);
             }
         }
 
         /// <summary>
-        /// EntityDeleteAsync
+        /// ModelDeleteAsync
         /// </summary>
         /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <param name="entityVersions"></param>
+        /// <param name="modelName"></param>
+        /// <param name="modelKeys"></param>
+        /// <param name="modelVersions"></param>
         /// <returns></returns>
 
-        public async Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions)
+        public async Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<int> modelVersions)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareEntityDeleteRedisInfo(entityName, entityKeys, entityVersions, redisKeys, redisValues);
+            PrepareModelDeleteRedisInfo(modelName, modelKeys, modelVersions, redisKeys, redisValues);
 
             try
             {
@@ -463,7 +463,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: entityName, storeName: storeName, keys: entityKeys, values: entityVersions, errorCode: error);
+                    throw Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelVersions, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -472,69 +472,69 @@ return array";
 
                 InitLoadedLuas();
 
-                await EntityDeleteAsync(storeName, entityName, entityKeys, entityVersions).ConfigureAwait(false);
+                await ModelDeleteAsync(storeName, modelName, modelKeys, modelVersions).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
+                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(entityName, ex);
+                throw Exceptions.Unkown(modelName, ex);
             }
         }
 
-        private void PrepareEntityDeleteRedisInfo(string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        private void PrepareModelDeleteRedisInfo(string modelName, IEnumerable<string> modelKeys, IEnumerable<int> modelVersions, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
-            /// keys:entityNameKey, entityVersionKey
-            /// argv:3(entity_number), entity1_key, entity2_key, entity3_key, entity1_version, entity2_version, entity3_version
+            /// keys:modelNameKey, modelVersionKey
+            /// argv:3(model_number), model1_key, model2_key, model3_key, model1_version, model2_version, model3_version
             ///
-            redisKeys.Add(EntityNameKey(entityName));
-            redisKeys.Add(EntityVersionNameKey(entityName));
+            redisKeys.Add(ModelNameKey(modelName));
+            redisKeys.Add(ModelVersionNameKey(modelName));
 
-            redisValues.Add(entityKeys.Count());
+            redisValues.Add(modelKeys.Count());
 
-            foreach (string entityKey in entityKeys)
+            foreach (string modelKey in modelKeys)
             {
-                redisValues.Add(entityKey);
+                redisValues.Add(modelKey);
             }
 
-            foreach (int version in entityVersions)
+            foreach (int version in modelVersions)
             {
                 redisValues.Add(version);
             }
         }
 
         /// <summary>
-        /// EntityDeleteAllAsync
+        /// ModelDeleteAllAsync
         /// </summary>
         /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
+        /// <param name="modelName"></param>
         /// <returns></returns>
 
-        public async Task<bool> EntityDeleteAllAsync(string storeName, string entityName)
+        public async Task<bool> ModelDeleteAllAsync(string storeName, string modelName)
         {
             try
             {
                 IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
 
-                return await db.KeyDeleteAsync(EntityNameKey(entityName)).ConfigureAwait(false);
+                return await db.KeyDeleteAsync(ModelNameKey(modelName)).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(entityName, ex);
+                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(entityName, ex);
+                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(entityName, ex);
+                throw Exceptions.Unkown(modelName, ex);
             }
         }
 
@@ -562,14 +562,14 @@ return array";
             throw Exceptions.NoSuchInstance(instanceName: instanceName);
         }
 
-        private string EntityNameKey(string entityName)
+        private string ModelNameKey(string modelName)
         {
-            return _options.ApplicationName + entityName;
+            return _options.ApplicationName + modelName;
         }
 
-        private string EntityVersionNameKey(string entityName)
+        private string ModelVersionNameKey(string modelName)
         {
-            return _options.ApplicationName + entityName + "_V";
+            return _options.ApplicationName + modelName + "_V";
         }
 
         private static ErrorCode MapResultToErrorCode(RedisResult redisResult)

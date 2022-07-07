@@ -10,7 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 
@@ -21,41 +21,41 @@ namespace HB.FullStack.Database
     /// </summary>
     public static class DatabaseClientExtensions
     {
-        public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseEntity, new()
+        public static async Task DeleteAsync<T>(this IDatabase database, Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : DatabaseModel, new()
         {
-            EntityDef entityDef = database.EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = database.ModelDefFactory.GetDef<T>()!;
 
-            if (!entityDef.DatabaseWriteable)
+            if (!modelDef.DatabaseWriteable)
             {
-                throw DatabaseExceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(modelDef.ModelFullName, modelDef.DatabaseName);
             }
 
             try
             {
                 WhereExpression<T> where = database.Where(whereExpr).And(t => !t.Deleted);
 
-                var command = database.DbCommandBuilder.CreateDeleteCommand(database.EngineType, entityDef, where);
+                var command = database.DbCommandBuilder.CreateDeleteCommand(database.EngineType, modelDef, where);
 
-                await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, entityDef.DatabaseName!, command).ConfigureAwait(false);
+                await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, whereExpr.ToString(), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, whereExpr.ToString(), ex);
             }
         }
 
         /// <summary>
         /// AddOrUpdate,即override，不改变version
         /// </summary>
-        public static async Task SetByIdAsync<T>(this IDatabase database, T item, /*string lastUser, */TransactionContext? transContext = null) where T : DatabaseEntity, new()
+        public static async Task SetByIdAsync<T>(this IDatabase database, T item, /*string lastUser, */TransactionContext? transContext = null) where T : DatabaseModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            EntityDef entityDef = database.EntityDefFactory.GetDef<T>()!;
+            DatabaseModelDef modelDef = database.ModelDefFactory.GetDef<T>()!;
 
-            if (!entityDef.DatabaseWriteable)
+            if (!modelDef.DatabaseWriteable)
             {
-                throw DatabaseExceptions.NotWriteable(entityDef.EntityFullName, entityDef.DatabaseName);
+                throw DatabaseExceptions.NotWriteable(modelDef.ModelFullName, modelDef.DatabaseName);
             }
 
             try
@@ -70,20 +70,20 @@ namespace HB.FullStack.Database
                     item.Version = 0;
                 }
 
-                var command = database.DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, entityDef, item);
+                var command = database.DbCommandBuilder.CreateAddOrUpdateCommand(database.EngineType, modelDef, item);
 
-                using var reader = await database.DatabaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, entityDef.DatabaseName!, command, true).ConfigureAwait(false);
+                using var reader = await database.DatabaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName!, command, true).ConfigureAwait(false);
 
-                IList<T> entities = reader.ToEntities<T>(database.EngineType, database.EntityDefFactory, entityDef);
+                IList<T> models = reader.ToModels<T>(database.EngineType, database.ModelDefFactory, modelDef);
 
-                T newItem = entities[0];
+                T newItem = models[0];
 
                 item.CreateTime = newItem.CreateTime;
                 item.Version = newItem.Version;
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(entityDef.EntityFullName, SerializeUtil.ToJson(item), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
         }
 
@@ -91,7 +91,7 @@ namespace HB.FullStack.Database
         /// warning: 不改变items！！！！
         /// </summary>
 
-        //public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseEntity, new()
+        //public static async Task BatchAddOrUpdateByIdAsync<T>(this IDatabase database, IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseModel, new()
         //{
         //    ThrowIf.NotValid(items, nameof(items));
 
@@ -100,11 +100,11 @@ namespace HB.FullStack.Database
         //        return;
         //    }
 
-        //    EntityDef entityDef = EntityDefFactory.GetDef<T>()!;
+        //    DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-        //    if (!entityDef.DatabaseWriteable)
+        //    if (!modelDef.DatabaseWriteable)
         //    {
-        //        throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{entityDef.EntityFullName}, Items:{SerializeUtil.ToJson(items)}");
+        //        throw new DatabaseException(DatabaseErrorCode.DatabaseNotWriteable, $"Type:{modelDef.ModelFullName}, Items:{SerializeUtil.ToJson(items)}");
         //    }
 
         //    try
@@ -119,14 +119,14 @@ namespace HB.FullStack.Database
         //            }
         //        }
 
-        //        var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, entityDef, items, transContext == null);
+        //        var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(database.EngineType, modelDef, items, transContext == null);
 
-        //        await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, entityDef.DatabaseName, command).ConfigureAwait(false);
+        //        await database.DatabaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName, command).ConfigureAwait(false);
         //    }
         //    catch (Exception ex) when (!(ex is DatabaseException))
         //    {
         //        string detail = $"Items:{SerializeUtil.ToJson(items)}";
-        //        throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{entityDef.EntityFullName}, {detail}", ex);
+        //        throw new DatabaseException(DatabaseErrorCode.DatabaseError, $"Type:{modelDef.ModelFullName}, {detail}", ex);
         //    }
         //}
     }

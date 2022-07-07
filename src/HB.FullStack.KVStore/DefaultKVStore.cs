@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.KVStore.Engine;
-using HB.FullStack.KVStore.Entities;
+using HB.FullStack.KVStore.KVStoreModels;
 
 namespace HB.FullStack.KVStore
 {
@@ -16,18 +16,18 @@ namespace HB.FullStack.KVStore
         public DefaultKVStore(IKVStoreEngine kvstoreEngine)
         {
             _engine = kvstoreEngine;
-            EntityDefFactory.Initialize(kvstoreEngine);
+            KVStoreModelDefFactory.Initialize(kvstoreEngine);
         }
 
-        private static string GetEntityKey<T>(T item, KVStoreEntityDef entityDef) where T : KVStoreEntity, new()
+        private static string GetModelKey<T>(T item, KVStoreModelDef modelDef) where T : KVStoreModel, new()
         {
             StringBuilder builder = new StringBuilder();
 
-            int count = entityDef.KeyPropertyInfos.Count;
+            int count = modelDef.KeyPropertyInfos.Count;
 
             for (int i = 0; i < count; ++i)
             {
-                builder.Append(entityDef.KeyPropertyInfos[i].GetValue(item));
+                builder.Append(modelDef.KeyPropertyInfos[i].GetValue(item));
 
                 if (i != count - 1)
                 {
@@ -38,17 +38,17 @@ namespace HB.FullStack.KVStore
             return builder.ToString();
         }
 
-        public string GetEntityKey<T>(T item) where T : KVStoreEntity, new()
+        public string GetModelKey<T>(T item) where T : KVStoreModel, new()
         {
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
-            return GetEntityKey(item, entityDef);
+            return GetModelKey(item, modelDef);
         }
 
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        public async Task<T?> GetAsync<T>(string key) where T : KVStoreEntity, new()
+        public async Task<T?> GetAsync<T>(string key) where T : KVStoreModel, new()
         {
             IEnumerable<T?> ts = await GetAsync<T>(new string[] { key }).ConfigureAwait(false);
 
@@ -59,22 +59,22 @@ namespace HB.FullStack.KVStore
         /// 反应Version变化
         /// </summary>
 
-        public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new()
         {
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
             try
             {
-                IEnumerable<Tuple<string?, int>> tuples = await _engine.EntityGetAsync(
-                    entityDef.KVStoreName,
-                    entityDef.EntityType.FullName!,
+                IEnumerable<Tuple<string?, int>> tuples = await _engine.ModelGetAsync(
+                    modelDef.KVStoreName,
+                    modelDef.ModelType.FullName!,
                     keys).ConfigureAwait(false);
 
-                return MapTupleToEntity<T>(tuples);
+                return MapTupleToModel<T>(tuples);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: keys, innerException: ex);
+                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.KVStoreName, key: keys, innerException: ex);
             }
         }
 
@@ -82,27 +82,27 @@ namespace HB.FullStack.KVStore
         /// 反应Version变化
         /// </summary>
 
-        public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreEntity, new()
+        public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreModel, new()
         {
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
             try
             {
-                IEnumerable<Tuple<string?, int>> tuples = await _engine.EntityGetAllAsync(
-                    entityDef.KVStoreName,
-                    entityDef.EntityType.FullName!).ConfigureAwait(false);
+                IEnumerable<Tuple<string?, int>> tuples = await _engine.ModelGetAllAsync(
+                    modelDef.KVStoreName,
+                    modelDef.ModelType.FullName!).ConfigureAwait(false);
 
-                return MapTupleToEntity<T>(tuples);
+                return MapTupleToModel<T>(tuples);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: entityDef.KVStoreName, key: null, innerException: ex);
+                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.KVStoreName, key: null, innerException: ex);
             }
         }
 
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        public Task AddAsync<T>(T item, string lastUser) where T : KVStoreEntity, new()
+        public Task AddAsync<T>(T item, string lastUser) where T : KVStoreModel, new()
         {
             return AddAsync(new T[] { item }, lastUser);
         }
@@ -115,7 +115,7 @@ namespace HB.FullStack.KVStore
         /// <param name="lastUser"></param>
         /// <returns></returns>
 
-        public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreEntity, new()
+        public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
             {
@@ -124,7 +124,7 @@ namespace HB.FullStack.KVStore
 
             ThrowIf.NotValid(items, nameof(items));
 
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
             try
             {
@@ -134,10 +134,10 @@ namespace HB.FullStack.KVStore
                     t.LastTime = TimeUtil.UtcNow;
                 }
 
-                await _engine.EntityAddAsync(
-                    entityDef.KVStoreName,
-                    entityDef.EntityType.FullName!,
-                    items.Select(t => GetEntityKey(t, entityDef)),
+                await _engine.ModelAddAsync(
+                    modelDef.KVStoreName,
+                    modelDef.ModelType.FullName!,
+                    items.Select(t => GetModelKey(t, modelDef)),
                     items.Select(t => SerializeUtil.ToJson(t))
                     ).ConfigureAwait(false);
 
@@ -149,14 +149,14 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
+                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, items, ex);
             }
         }
 
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        public Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreEntity, new()
+        public Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreModel, new()
         {
             return UpdateAsync(new T[] { item }, lastUser);
         }
@@ -169,7 +169,7 @@ namespace HB.FullStack.KVStore
         /// <param name="lastUser"></param>
         /// <returns></returns>
 
-        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreEntity, new()
+        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
             {
@@ -178,7 +178,7 @@ namespace HB.FullStack.KVStore
 
             ThrowIf.NotValid(items, nameof(items));
 
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
             try
             {
@@ -190,10 +190,10 @@ namespace HB.FullStack.KVStore
                     t.LastTime = TimeUtil.UtcNow;
                 }
 
-                await _engine.EntityUpdateAsync(
-                    entityDef.KVStoreName,
-                    entityDef.EntityType.FullName!,
-                    items.Select(t => GetEntityKey(t, entityDef)).ToList(),
+                await _engine.ModelUpdateAsync(
+                    modelDef.KVStoreName,
+                    modelDef.ModelType.FullName!,
+                    items.Select(t => GetModelKey(t, modelDef)).ToList(),
                     items.Select(t => SerializeUtil.ToJson(t)).ToList(),
                     originalVersions).ConfigureAwait(false);
 
@@ -205,7 +205,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, items, ex);
+                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, items, ex);
             }
         }
 
@@ -214,24 +214,24 @@ namespace HB.FullStack.KVStore
         /// </summary>
         /// <returns></returns>
 
-        public async Task DeleteAllAsync<T>() where T : KVStoreEntity, new()
+        public async Task DeleteAllAsync<T>() where T : KVStoreModel, new()
         {
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
             try
             {
-                await _engine.EntityDeleteAllAsync(
-                   entityDef.KVStoreName,
-                   entityDef.EntityType.FullName!
+                await _engine.ModelDeleteAllAsync(
+                   modelDef.KVStoreName,
+                   modelDef.ModelType.FullName!
                    ).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, null, ex);
+                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, null, ex);
             }
         }
 
-        public Task DeleteAsync<T>(string key, int version) where T : KVStoreEntity, new()
+        public Task DeleteAsync<T>(string key, int version) where T : KVStoreModel, new()
         {
             return DeleteAsync<T>(new string[] { key }, new int[] { version });
         }
@@ -243,7 +243,7 @@ namespace HB.FullStack.KVStore
         /// <param name="versions"></param>
         /// <returns></returns>
 
-        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : KVStoreEntity, new()
+        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : KVStoreModel, new()
         {
             ThrowIf.NullOrEmpty(versions, nameof(versions));
 
@@ -252,24 +252,24 @@ namespace HB.FullStack.KVStore
                 throw Exceptions.VersionsKeysNotEqualError();
             }
 
-            KVStoreEntityDef entityDef = EntityDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
             try
             {
-                await _engine.EntityDeleteAsync(
-                    entityDef.KVStoreName,
-                    entityDef.EntityType.FullName!,
+                await _engine.ModelDeleteAsync(
+                    modelDef.KVStoreName,
+                    modelDef.ModelType.FullName!,
                     keys,
                     versions
                     ).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(entityDef.EntityType.FullName, entityDef.KVStoreName, keys: keys, values: versions, innerException: ex);
+                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, keys: keys, values: versions, innerException: ex);
             }
         }
 
-        private static IEnumerable<T?> MapTupleToEntity<T>(IEnumerable<Tuple<string?, int>> tuples) where T : KVStoreEntity, new()
+        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<string?, int>> tuples) where T : KVStoreModel, new()
         {
             List<T?> rt = new List<T?>();
 

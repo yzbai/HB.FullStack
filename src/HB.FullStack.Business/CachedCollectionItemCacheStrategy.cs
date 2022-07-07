@@ -42,23 +42,23 @@ namespace HB.FullStack.Repository
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
                 UtcNowTicks now = TimeUtil.UtcNowTicks;
 
-                // 如果TResult是集合类型，可能会存入空集合。而在EntityCache中是不会存入空集合的。
-                //这样设计是合理的，因为EntityCache是按Entity角度，存入的Entity会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
+                // 如果TResult是集合类型，可能会存入空集合。而在ModelCache中是不会存入空集合的。
+                //这样设计是合理的，因为ModelCache是按Model角度，存入的Model会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
                 {
                     UpdateCache(cacheCollectionItem.Value(dbRt).Timestamp(now), cache);
-                    logger.LogInformation($"缓存 Missed. Entity:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
+                    logger.LogInformation($"缓存 Missed. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
                 }
                 else
                 {
-                    logger.LogInformation($"查询到空值. Entity:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
+                    logger.LogInformation($"查询到空值. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
                 }
 
                 return dbRt;
             }
             else
             {
-                logger.LogCritical($"锁未能占用. Entity:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}, Lock Status:{@lock.Status}");
+                logger.LogCritical($"锁未能占用. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}, Lock Status:{@lock.Status}");
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }

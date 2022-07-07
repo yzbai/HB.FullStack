@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetByIdRequest<T> : ApiRequest<T> where T : ApiResource2
+    public class GetByIdRequest<T> : ApiRequest<T> where T : ApiResource
     {
         [NoEmptyGuid]
         public Guid Id { get; set; }

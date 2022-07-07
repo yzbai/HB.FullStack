@@ -10,7 +10,7 @@ namespace HB.FullStack.CommonTests.Data
 {
 
     [ApiResource(ApiEndpointName, ApiVersion, nameof(BookRes))]
-    public class BookRes : ApiResource2
+    public class BookRes : ApiResource
     {
         public string Name { get; set; }
 

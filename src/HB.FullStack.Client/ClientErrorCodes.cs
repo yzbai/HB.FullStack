@@ -22,7 +22,7 @@ namespace System
         public static ErrorCode UploadError { get; } = new ErrorCode(nameof(UploadError), "");
 
         public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(nameof(DbSimpleLockerNoWaitLockFailed), "");
-        public static ErrorCode UnSupportedEntityType { get; } = new ErrorCode(nameof(UnSupportedEntityType), "");
+        public static ErrorCode UnSupportedModelType { get; } = new ErrorCode(nameof(UnSupportedModelType), "");
         public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected { get; } = new ErrorCode(nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
     }
 
@@ -156,11 +156,11 @@ namespace System
             return ex;
         }
 
-        internal static Exception UnSupportedEntityType(string? entityFullName)
+        internal static Exception UnSupportedModelType(string? modelFullName)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.UnSupportedEntityType);
+            ClientException ex = new ClientException(ClientErrorCodes.UnSupportedModelType);
 
-            ex.Data["FullName"] = entityFullName;
+            ex.Data["FullName"] = modelFullName;
 
             return ex;
         }

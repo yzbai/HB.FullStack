@@ -3,7 +3,7 @@ using ClassLibrary1;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
@@ -28,11 +28,11 @@ namespace HB.FullStack.DatabaseTests
     public class BasicTest_MySQL : BaseTestClass
     {
         [TestMethod]
-        public async Task Test_1_Batch_Add_PublisherEntityAsync()
+        public async Task Test_1_Batch_Add_PublisherModelAsync()
         {
-            IList<PublisherEntity> publishers = Mocker.GetPublishers();
+            IList<PublisherModel> publishers = Mocker.GetPublishers();
 
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
@@ -49,22 +49,22 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_2_Batch_Update_PublisherEntityAsync()
+        public async Task Test_2_Batch_Update_PublisherModelAsync()
         {
-            TransactionContext transContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IEnumerable<PublisherEntity> lst = await Db.RetrieveAllAsync<PublisherEntity>(transContext).ConfigureAwait(false);
+                IEnumerable<PublisherModel> lst = await Db.RetrieveAllAsync<PublisherModel>(transContext).ConfigureAwait(false);
 
                 for (int i = 0; i < lst.Count(); i += 2)
                 {
-                    PublisherEntity entity = lst.ElementAt(i);
-                    //entity.Guid = Guid.NewGuid().ToString();
-                    entity.Type = PublisherType.Online;
-                    entity.Name = "Name_xxx";
-                    entity.Books = new List<string>() { "xxx", "tttt" };
-                    entity.BookAuthors = new Dictionary<string, Author>()
+                    PublisherModel model = lst.ElementAt(i);
+                    //model.Guid = Guid.NewGuid().ToString();
+                    model.Type = PublisherType.Online;
+                    model.Name = "Name_xxx";
+                    model.Books = new List<string>() { "xxx", "tttt" };
+                    model.BookAuthors = new Dictionary<string, Author>()
                     {
                     { "Cat", new Author() { Mobile="111", Name="BB" } },
                     { "Dog", new Author() { Mobile="222", Name="sx" } }
@@ -84,13 +84,13 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_3_Batch_Delete_PublisherEntityAsync()
+        public async Task Test_3_Batch_Delete_PublisherModelAsync()
         {
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<PublisherEntity> lst = (await Db.RetrieveAllAsync<PublisherEntity>(transactionContext, 1, 100).ConfigureAwait(false)).ToList();
+                IList<PublisherModel> lst = (await Db.RetrieveAllAsync<PublisherModel>(transactionContext, 1, 100).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
@@ -108,21 +108,21 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_4_Add_PublisherEntityAsync()
+        public async Task Test_4_Add_PublisherModelAsync()
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<PublisherEntity> lst = new List<PublisherEntity>();
+                IList<PublisherModel> lst = new List<PublisherModel>();
 
                 for (int i = 0; i < 10; ++i)
                 {
-                    PublisherEntity entity = Mocker.MockOnePublisherEntity();
+                    PublisherModel model = Mocker.MockOnePublisherModel();
 
-                    await Db.AddAsync(entity, "lastUsre", tContext).ConfigureAwait(false);
+                    await Db.AddAsync(model, "lastUsre", tContext).ConfigureAwait(false);
 
-                    lst.Add(entity);
+                    lst.Add(model);
                 }
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
@@ -138,27 +138,27 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_5_Update_PublisherEntityAsync()
+        public async Task Test_5_Update_PublisherModelAsync()
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<PublisherEntity> testEntities = (await Db.RetrieveAllAsync<PublisherEntity>(tContext, 0, 1).ConfigureAwait(false)).ToList();
+                IList<PublisherModel> testModels = (await Db.RetrieveAllAsync<PublisherModel>(tContext, 0, 1).ConfigureAwait(false)).ToList();
 
-                if (testEntities.Count == 0)
+                if (testModels.Count == 0)
                 {
-                    throw new Exception("No Entity to update");
+                    throw new Exception("No Model to update");
                 }
 
-                PublisherEntity entity = testEntities[0];
+                PublisherModel model = testModels[0];
 
-                entity.Books.Add("New Book2");
-                //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
+                model.Books.Add("New Book2");
+                //model.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
 
-                await Db.UpdateAsync(entity, "lastUsre", tContext).ConfigureAwait(false);
+                await Db.UpdateAsync(model, "lastUsre", tContext).ConfigureAwait(false);
 
-                PublisherEntity? stored = await Db.ScalarAsync<PublisherEntity>(entity.Id, tContext).ConfigureAwait(false);
+                PublisherModel? stored = await Db.ScalarAsync<PublisherModel>(model.Id, tContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
 
@@ -174,20 +174,20 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_6_Delete_PublisherEntityAsync()
+        public async Task Test_6_Delete_PublisherModelAsync()
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<PublisherEntity> testEntities = (await Db.RetrieveAllAsync<PublisherEntity>(tContext).ConfigureAwait(false)).ToList();
+                IList<PublisherModel> testModels = (await Db.RetrieveAllAsync<PublisherModel>(tContext).ConfigureAwait(false)).ToList();
 
-                foreach (var entity in testEntities)
+                foreach (var model in testModels)
                 {
-                    await Db.DeleteAsync(entity, "lastUsre", tContext).ConfigureAwait(false);
+                    await Db.DeleteAsync(model, "lastUsre", tContext).ConfigureAwait(false);
                 }
 
-                long count = await Db.CountAsync<PublisherEntity>(tContext).ConfigureAwait(false);
+                long count = await Db.CountAsync<PublisherModel>(tContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
 
@@ -204,11 +204,11 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_8_LastTimeTestAsync()
         {
-            PublisherEntity item = Mocker.MockOnePublisherEntity();
+            PublisherModel item = Mocker.MockOnePublisherModel();
 
             await Db.AddAsync(item, "xx", null).ConfigureAwait(false);
 
-            var fetched = await Db.ScalarAsync<PublisherEntity>(item.Id, null).ConfigureAwait(false);
+            var fetched = await Db.ScalarAsync<PublisherModel>(item.Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(item.LastTime, fetched!.LastTime);
 
@@ -216,23 +216,23 @@ namespace HB.FullStack.DatabaseTests
 
             await Db.UpdateAsync(fetched, "xxx", null).ConfigureAwait(false);
 
-            fetched = await Db.ScalarAsync<PublisherEntity>(item.Id, null).ConfigureAwait(false);
+            fetched = await Db.ScalarAsync<PublisherModel>(item.Id, null).ConfigureAwait(false);
 
             //await Db.AddOrUpdateAsync(item, "ss", null);
 
-            fetched = await Db.ScalarAsync<PublisherEntity>(item.Id, null).ConfigureAwait(false);
+            fetched = await Db.ScalarAsync<PublisherModel>(item.Id, null).ConfigureAwait(false);
 
             //Batch
 
             var items = Mocker.GetPublishers();
 
-            TransactionContext trans = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext trans = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
                 await Db.BatchAddAsync(items, "xx", trans).ConfigureAwait(false);
 
-                var results = await Db.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
+                var results = await Db.RetrieveAsync<PublisherModel>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await Db.BatchUpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
@@ -240,7 +240,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await Db.BatchAddAsync(items2, "xx", trans).ConfigureAwait(false);
 
-                results = await Db.RetrieveAsync<PublisherEntity>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
+                results = await Db.RetrieveAsync<PublisherModel>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await Db.BatchUpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
@@ -259,36 +259,36 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_9_UpdateLastTimeTestAsync()
         {
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
             //TransactionContext? transactionContext = null;
 
             try
             {
-                PublisherEntity item = Mocker.MockOnePublisherEntity();
+                PublisherModel item = Mocker.MockOnePublisherModel();
 
                 await Db.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                IList<PublisherEntity> testEntities = (await Db.RetrieveAllAsync<PublisherEntity>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
+                IList<PublisherModel> testModels = (await Db.RetrieveAllAsync<PublisherModel>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
 
-                if (testEntities.Count == 0)
+                if (testModels.Count == 0)
                 {
-                    throw new Exception("No Entity to update");
+                    throw new Exception("No Model to update");
                 }
 
-                PublisherEntity entity = testEntities[0];
+                PublisherModel model = testModels[0];
 
-                entity.Books.Add("New Book2");
-                //entity.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
+                model.Books.Add("New Book2");
+                //model.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
 
-                await Db.UpdateAsync(entity, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.UpdateAsync(model, "lastUsre", transactionContext).ConfigureAwait(false);
 
-                PublisherEntity? stored = await Db.ScalarAsync<PublisherEntity>(entity.Id, transactionContext).ConfigureAwait(false);
+                PublisherModel? stored = await Db.ScalarAsync<PublisherModel>(model.Id, transactionContext).ConfigureAwait(false);
 
-                item = Mocker.MockOnePublisherEntity();
+                item = Mocker.MockOnePublisherModel();
 
                 await Db.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                var fetched = await Db.ScalarAsync<PublisherEntity>(item.Id, transactionContext).ConfigureAwait(false);
+                var fetched = await Db.ScalarAsync<PublisherModel>(item.Id, transactionContext).ConfigureAwait(false);
 
                 Assert.AreEqual(item.LastTime, fetched!.LastTime);
 
@@ -306,17 +306,17 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_EntityMapperAsync()
+        public async Task Test_ModelMapperAsync()
         {
             GlobalSettings.Logger.LogDebug($"Process,{Environment.ProcessId}");
 
             #region
 
-            var publisher3 = new PublisherEntity3();
+            var publisher3 = new PublisherModel3();
 
             await Db.AddAsync(publisher3, "sss", null).ConfigureAwait(false);
 
-            var stored3 = await Db.ScalarAsync<PublisherEntity3>(publisher3.Id, null).ConfigureAwait(false);
+            var stored3 = await Db.ScalarAsync<PublisherModel3>(publisher3.Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
 
@@ -326,12 +326,12 @@ namespace HB.FullStack.DatabaseTests
 
             var publishers2 = Mocker.GetPublishers2();
 
-            foreach (PublisherEntity2 publisher in publishers2)
+            foreach (PublisherModel2 publisher in publishers2)
             {
                 await Db.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
             }
 
-            PublisherEntity2? publisher2 = await Db.ScalarAsync<PublisherEntity2>(publishers2[0].Id, null).ConfigureAwait(false);
+            PublisherModel2? publisher2 = await Db.ScalarAsync<PublisherModel2>(publishers2[0].Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publishers2[0]));
 
@@ -341,23 +341,23 @@ namespace HB.FullStack.DatabaseTests
 
             var publishers = Mocker.GetPublishers();
 
-            foreach (PublisherEntity publisher in publishers)
+            foreach (PublisherModel publisher in publishers)
             {
                 await Db.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
             }
 
-            PublisherEntity? publisher1 = await Db.ScalarAsync<PublisherEntity>(publishers[0].Id, null).ConfigureAwait(false);
+            PublisherModel? publisher1 = await Db.ScalarAsync<PublisherModel>(publishers[0].Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
             #endregion
         }
 
         [TestMethod]
-        public async Task Test_EntityMapperPerformanceAsync()
+        public async Task Test_ModelMapperPerformanceAsync()
         {
             var books = Mocker.GetBooks(50);
 
-            var trans = await Trans.BeginTransactionAsync<BookEntity>().ConfigureAwait(false);
+            var trans = await Trans.BeginTransactionAsync<BookModel>().ConfigureAwait(false);
 
             try
             {
@@ -384,19 +384,19 @@ namespace HB.FullStack.DatabaseTests
             {
                 await mySqlConnection.OpenAsync().ConfigureAwait(false);
 
-                using MySqlCommand command0 = new MySqlCommand("select * from tb_bookentity limit 10000", mySqlConnection);
+                using MySqlCommand command0 = new MySqlCommand("select * from tb_bookmodel limit 10000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
-                List<BookEntity> list1 = new List<BookEntity>();
-                List<BookEntity> list2 = new List<BookEntity>();
-                List<BookEntity> list3 = new List<BookEntity>();
+                List<BookModel> list1 = new List<BookModel>();
+                List<BookModel> list2 = new List<BookModel>();
+                List<BookModel> list3 = new List<BookModel>();
 
                 int len = reader0.FieldCount;
-                EntityPropertyDef[] propertyDefs = new EntityPropertyDef[len];
+                DatabaseModelPropertyDef[] propertyDefs = new DatabaseModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                EntityDef definition = Db.EntityDefFactory.GetDef<BookEntity>()!;
+                DatabaseModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -404,10 +404,10 @@ namespace HB.FullStack.DatabaseTests
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IEntityDefFactory, IDataReader, object> mapper1 = EntityMapperDelegateCreator.CreateToEntityDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
+                Func<IDatabaseModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
-                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookEntity), reader0);
+                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookModel), reader0);
 
                 Stopwatch stopwatch1 = new Stopwatch();
                 Stopwatch stopwatch2 = new Stopwatch();
@@ -417,24 +417,24 @@ namespace HB.FullStack.DatabaseTests
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(Db.EntityDefFactory, reader0);
+                    object obj1 = mapper1(Db.ModelDefFactory, reader0);
 
-                    list1.Add((BookEntity)obj1);
+                    list1.Add((BookModel)obj1);
                     stopwatch1.Stop();
 
                     stopwatch2.Start();
                     object obj2 = mapper2(reader0);
 
-                    list2.Add((BookEntity)obj2);
+                    list2.Add((BookModel)obj2);
                     stopwatch2.Stop();
 
                     stopwatch3.Start();
 
-                    BookEntity item = new BookEntity();
+                    BookModel item = new BookModel();
 
                     for (int i = 0; i < len; ++i)
                     {
-                        EntityPropertyDef property = propertyDefs[i];
+                        DatabaseModelPropertyDef property = propertyDefs[i];
 
                         object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, EngineType.MySQL);
 
@@ -467,9 +467,9 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_10_Enum_TestAsync()
         {
-            IList<PublisherEntity> publishers = Mocker.GetPublishers();
+            IList<PublisherModel> publishers = Mocker.GetPublishers();
 
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherEntity>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
@@ -484,9 +484,9 @@ namespace HB.FullStack.DatabaseTests
                 throw;
             }
 
-            IEnumerable<PublisherEntity> publisherEntities = await Db.RetrieveAsync<PublisherEntity>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
+            IEnumerable<PublisherModel> publisherModels = await Db.RetrieveAsync<PublisherModel>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
 
-            Assert.IsTrue(publisherEntities.Any() && publisherEntities.All(p => p.Type == PublisherType.Big));
+            Assert.IsTrue(publisherModels.Any() && publisherModels.All(p => p.Type == PublisherType.Big));
         }
 
         //NOTICE: 在重复update时，即值不发生改变。默认useAffectedRows=false，即update返回matched的数量。 而useAffectedRows=true，则返回真正发生过改变的数量。

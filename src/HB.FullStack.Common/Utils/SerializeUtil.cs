@@ -43,24 +43,24 @@ namespace System
             //jsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         }
 
-        [return: NotNullIfNotNull("entity")]
-        public static string? ToJson(object? entity)
+        [return: NotNullIfNotNull("model")]
+        public static string? ToJson(object? model)
         {
-            return JsonSerializer.Serialize(entity, _jsonSerializerOptions);
+            return JsonSerializer.Serialize(model, _jsonSerializerOptions);
         }
 
-        public static bool TryToJson(object? entity, out string? json)
+        public static bool TryToJson(object? model, out string? json)
         {
             try
             {
-                json = ToJson(entity);
+                json = ToJson(model);
                 return true;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogSerializeLogError(entity?.GetType().FullName, ex);
+                GlobalSettings.Logger?.LogSerializeLogError(model?.GetType().FullName, ex);
 
                 json = null;
                 return false;

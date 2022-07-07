@@ -17,43 +17,43 @@ namespace HB.FullStack.CommonTests
             string emptyStr = string.Empty;
             string emptyCollectionStr = "[]";
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out TestEntity? entity));
-            Assert.IsNull(entity);
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out TestModel? model));
+            Assert.IsNull(model);
 
-            SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out IEnumerable<TestEntity>? entities);
-            Assert.IsTrue(entities != null && !entities.Any());
+            SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out IEnumerable<TestModel>? models);
+            Assert.IsTrue(models != null && !models.Any());
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out TestEntity? entity1));
-            Assert.IsNull(entity1);
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out TestModel? model1));
+            Assert.IsNull(model1);
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out IEnumerable<TestEntity>? entities1));
-            Assert.IsTrue(entities1 != null && !entities1.Any());
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out IEnumerable<TestModel>? models1));
+            Assert.IsTrue(models1 != null && !models1.Any());
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out TestEntity? entity2));
-            Assert.IsNull(entity2);
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out TestModel? model2));
+            Assert.IsNull(model2);
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out IEnumerable<TestEntity>? entities2));
-            Assert.IsTrue(entities2 != null && !entities2.Any());
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out IEnumerable<TestModel>? models2));
+            Assert.IsTrue(models2 != null && !models2.Any());
         }
 
         [TestMethod()]
         public void TryFromJsonWithCollectionCheckTest1()
         {
-            TestEntity testEntity1 = new TestEntity { Name = "123", Values = new List<string> { "1", "2" } };
-            TestEntity testEntity2 = new TestEntity { Name = "123", Values = new List<string> { "1", "2" } };
-            TestEntity testEntity3 = new TestEntity { Name = "123", Values = new List<string> { "1", "2" } };
+            TestModel testModel1 = new TestModel { Name = "123", Values = new List<string> { "1", "2" } };
+            TestModel testModel2 = new TestModel { Name = "123", Values = new List<string> { "1", "2" } };
+            TestModel testModel3 = new TestModel { Name = "123", Values = new List<string> { "1", "2" } };
 
-            IEnumerable<TestEntity> oneList = new List<TestEntity> { testEntity1 };
-            IEnumerable<TestEntity> moreLst = new List<TestEntity> { testEntity1, testEntity2, testEntity3 };
+            IEnumerable<TestModel> oneList = new List<TestModel> { testModel1 };
+            IEnumerable<TestModel> moreLst = new List<TestModel> { testModel1, testModel2, testModel3 };
 
-            string itemJson = SerializeUtil.ToJson(testEntity1);
+            string itemJson = SerializeUtil.ToJson(testModel1);
             string oneCollectionJson = SerializeUtil.ToJson(oneList);
             string moreCollectionJson = SerializeUtil.ToJson(moreLst);
 
             //item - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out TestEntity? entity))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out TestModel? model))
             {
-                Assert.AreEqual(SerializeUtil.ToJson(entity), SerializeUtil.ToJson(testEntity1));
+                Assert.AreEqual(SerializeUtil.ToJson(model), SerializeUtil.ToJson(testModel1));
             }
             else
             {
@@ -61,9 +61,9 @@ namespace HB.FullStack.CommonTests
             }
 
             //item - collection
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out IEnumerable<TestEntity>? entities))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out IEnumerable<TestModel>? models))
             {
-                Assert.AreEqual(SerializeUtil.ToJson(entities), SerializeUtil.ToJson(oneList));
+                Assert.AreEqual(SerializeUtil.ToJson(models), SerializeUtil.ToJson(oneList));
             }
             else
             {
@@ -71,9 +71,9 @@ namespace HB.FullStack.CommonTests
             }
 
             //collection - collection
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out IEnumerable<TestEntity>? entities2))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out IEnumerable<TestModel>? models2))
             {
-                Assert.AreEqual(SerializeUtil.ToJson(entities2), SerializeUtil.ToJson(moreLst));
+                Assert.AreEqual(SerializeUtil.ToJson(models2), SerializeUtil.ToJson(moreLst));
             }
             else
             {
@@ -81,9 +81,9 @@ namespace HB.FullStack.CommonTests
             }
 
             //oneCollection - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(oneCollectionJson, out TestEntity? entity1))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(oneCollectionJson, out TestModel? model1))
             {
-                Assert.AreEqual(SerializeUtil.ToJson(entity1), SerializeUtil.ToJson(testEntity1));
+                Assert.AreEqual(SerializeUtil.ToJson(model1), SerializeUtil.ToJson(testModel1));
             }
             else
             {
@@ -91,7 +91,7 @@ namespace HB.FullStack.CommonTests
             }
 
             //moreCollection - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out TestEntity? _))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out TestModel? _))
             {
                 Assert.Fail("moreCollection - item failed");
             }

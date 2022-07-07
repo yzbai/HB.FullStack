@@ -191,7 +191,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 {
                     long now = TimeUtil.UtcNowUnixTimeSeconds;
 
-                    //1, Get Entity
+                    //1, Get Model
                     IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
                     RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);
@@ -205,31 +205,31 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                         continue;
                     }
 
-                    EventMessageEntity? entity = SerializeUtil.FromJson<EventMessageEntity>(redisValue);
+                    EventMessageModel? model = SerializeUtil.FromJson<EventMessageModel>(redisValue);
 
-                    if (entity == null)
+                    if (model == null)
                     {
-                        _logger.LogCritical("有空EventMessageEntity, {eventType}, {value}", _eventType, redisValue);
+                        _logger.LogCritical("有空EventMessageModel, {eventType}, {value}", _eventType, redisValue);
                         continue;
                     }
 
                     using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
-                        "eBusC_" + entity.Guid,
+                        "eBusC_" + model.Guid,
                         TimeSpan.FromSeconds(_options.EventBusConsumerAckTimeoutSeconds),
                         false,
                         cancellationToken).ConfigureAwait(false);
 
                     if (!distributedLock.IsAcquired)
                     {
-                        //竟然有人在检查entity.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
+                        //竟然有人在检查model.Guid,好了，这下肯定有人在处理了，任务结束。哪怕那个人没处理成功，也没事，等着history吧。
                         continue;
                     }
 
                     //2, 过期检查
 
-                    if (now - entity.Timestamp > _eventBusEventMessageExpiredSeconds)
+                    if (now - model.Timestamp > _eventBusEventMessageExpiredSeconds)
                     {
-                        _logger.LogCritical("有EventMessage过期，{eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
+                        _logger.LogCritical("有EventMessage过期，{eventType}, {model}", _eventType, SerializeUtil.ToJson(model));
 
                         await distributedLock.DisposeAsync().ConfigureAwait(false);
 
@@ -240,33 +240,33 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     string AcksSetName = RedisEventBusEngine.AcksSetName(_eventType);
 
-                    bool? isExist = await IsAcksExistedAsync(database, AcksSetName, entity.Guid).ConfigureAwait(false);
+                    bool? isExist = await IsAcksExistedAsync(database, AcksSetName, model.Guid).ConfigureAwait(false);
 
 #pragma warning disable CA1508 // CA1508的bug，应该是无法适应NRT
                     if (isExist == null || isExist.Value)
 #pragma warning restore CA1508 // Avoid dead conditional code
                     {
-                        _logger.LogInformation("有EventMessage重复，{eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
+                        _logger.LogInformation("有EventMessage重复，{eventType}, {model}", _eventType, SerializeUtil.ToJson(model));
 
                         await distributedLock.DisposeAsync().ConfigureAwait(false);
 
                         continue;
                     }
 
-                    //4, Handle Entity
+                    //4, Handle Model
                     try
                     {
-                        await _eventHandler.HandleAsync(entity.JsonData, cancellationToken).ConfigureAwait(false);
+                        await _eventHandler.HandleAsync(model.JsonData, cancellationToken).ConfigureAwait(false);
                     }
 #pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                     {
-                        _logger.LogCritical(ex, "处理消息出错, {_eventType}, {entity}", _eventType, SerializeUtil.ToJson(entity));
+                        _logger.LogCritical(ex, "处理消息出错, {_eventType}, {model}", _eventType, SerializeUtil.ToJson(model));
                     }
 
                     //5, Acks
-                    await AddAcksAsync(now, database, AcksSetName, entity.Guid, entity.Timestamp).ConfigureAwait(false);
+                    await AddAcksAsync(now, database, AcksSetName, model.Guid, model.Timestamp).ConfigureAwait(false);
 
                     _logger.LogTrace("Consume Task For {eventType} Stopped.", _eventType);
                 }
@@ -300,9 +300,9 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
             return true;
         }
 
-        private async Task AddAcksAsync(long now, IDatabase database, string setName, string entityGuid, long entityTimestamp)
+        private async Task AddAcksAsync(long now, IDatabase database, string setName, string modelGuid, long modelTimestamp)
         {
-            await database.SortedSetAddAsync(setName, entityGuid, entityTimestamp, CommandFlags.None).ConfigureAwait(false);
+            await database.SortedSetAddAsync(setName, modelGuid, modelTimestamp, CommandFlags.None).ConfigureAwait(false);
 
             await ClearExpiredAcksAsync(now, database, setName).ConfigureAwait(false);
         }

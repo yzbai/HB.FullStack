@@ -6,7 +6,7 @@ using System.Data;
 using System.Globalization;
 using System.Reflection;
 
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.Common;
@@ -111,9 +111,9 @@ namespace HB.FullStack.Database.Converter
         }
 
         /// <summary>
-        /// 将DataReader.GetValue(i)得到的数据库值，转换为Entity的Type值. 逻辑同EntityMapperCreator一致
+        /// 将DataReader.GetValue(i)得到的数据库值，转换为Model的Type值. 逻辑同ModelMapperCreator一致
         /// </summary>
-        public static object? DbValueToTypeValue(object dbValue, EntityPropertyDef propertyDef, EngineType engineType) //Type targetType)
+        public static object? DbValueToTypeValue(object dbValue, DatabaseModelPropertyDef propertyDef, EngineType engineType) //Type targetType)
         {
             Type dbValueType = dbValue.GetType();
 
@@ -170,7 +170,7 @@ namespace HB.FullStack.Database.Converter
         /// <summary>
         /// propertyDef为null，则不考虑这个属性自定义的TypeConverter
         /// </summary>
-        public static object TypeValueToDbValue(object? typeValue, EntityPropertyDef? propertyDef, EngineType engineType)
+        public static object TypeValueToDbValue(object? typeValue, DatabaseModelPropertyDef? propertyDef, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -216,7 +216,7 @@ namespace HB.FullStack.Database.Converter
             }
 
             Type type = typeValue.GetType();
-            EntityPropertyDef propertyDef = new EntityPropertyDef
+            DatabaseModelPropertyDef propertyDef = new DatabaseModelPropertyDef
             {
                 Type = type,
                 NullableUnderlyingType = Nullable.GetUnderlyingType(type),
@@ -244,7 +244,7 @@ namespace HB.FullStack.Database.Converter
             return SqlHelper.GetQuoted(statement);
         }
 
-        public static DbType TypeToDbType(EntityPropertyDef propertyDef, EngineType engineType)
+        public static DbType TypeToDbType(DatabaseModelPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
             if (propertyDef.TypeConverter != null)
@@ -268,10 +268,10 @@ namespace HB.FullStack.Database.Converter
                 return DbType.String;
             }
 
-            throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DatabaseExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
-        public static string TypeToDbTypeStatement(EntityPropertyDef propertyDef, EngineType engineType)
+        public static string TypeToDbTypeStatement(DatabaseModelPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义
             if (propertyDef.TypeConverter != null)
@@ -294,7 +294,7 @@ namespace HB.FullStack.Database.Converter
             {
                 return GetGlobalConverterInfo(typeof(string), engineType)!.Statement;
             }
-            throw DatabaseExceptions.EntityHasNotSupportedPropertyType(type: propertyDef.EntityDef.EntityFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DatabaseExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static ITypeConverter? GetGlobalTypeConverter(Type trueType, EngineType engineType)

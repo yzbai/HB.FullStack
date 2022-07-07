@@ -11,7 +11,7 @@ namespace HB.FullStack.Common.Api
     {
         private static readonly ConcurrentDictionary<Type, ApiResourceDef?> _defDict = new ConcurrentDictionary<Type, ApiResourceDef?>();
 
-        public static ApiResourceDef? Get<T>() where T : ApiResource2
+        public static ApiResourceDef? Get<T>() where T : ApiResource
         {
             return _defDict.GetOrAdd(typeof(T), t => CreateResourceDef(t));
         }
@@ -63,7 +63,7 @@ namespace HB.FullStack.Common.Api
             return def;
         }
 
-        public static void Register<T>(ApiResourceDef def) where T : ApiResource2
+        public static void Register<T>(ApiResourceDef def) where T : ApiResource
         {
             _ = _defDict.AddOrUpdate(typeof(T), def, (_, _) => def);
         }

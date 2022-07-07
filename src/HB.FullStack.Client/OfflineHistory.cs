@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Database.Entities;
+﻿using HB.FullStack.Database.DatabaseModels;
 
 using System;
 using System.Collections.Generic;
@@ -18,11 +18,11 @@ namespace HB.FullStack.Client
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    public class OfflineHistory : AutoIncrementIdEntity
+    public class OfflineHistory : AutoIncrementIdModel
     {
-        public string EntityId { get; set; } = null!;
+        public string ModelId { get; set; } = null!;
 
-        public string EntityFullName { get; set; } = null!;
+        public string ModelFullName { get; set; } = null!;
 
         public DbOperation Operation { get; set; }
 

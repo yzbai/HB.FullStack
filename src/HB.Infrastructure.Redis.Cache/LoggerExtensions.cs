@@ -18,51 +18,51 @@ namespace HB.Infrastructure.Redis.Cache
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logLuaScriptNotLoaded = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
             CacheErrorCodes.CacheLoadedLuaNotFound.ToEventId(),
-            "Redis没有加载LuaScript。将要加载并重试。CacheInstance={CacheInstance}, EntityName={EntityName}, Method={Method}");
+            "Redis没有加载LuaScript。将要加载并重试。CacheInstance={CacheInstance}, ModelName={ModelName}, Method={Method}");
 
-        public static void LogLuaScriptNotLoaded(this ILogger logger, string? cacheInstance, string? entityName, string? method)
+        public static void LogLuaScriptNotLoaded(this ILogger logger, string? cacheInstance, string? modelName, string? method)
         {
-            _logLuaScriptNotLoaded(logger, cacheInstance, entityName, method, null);
+            _logLuaScriptNotLoaded(logger, cacheInstance, modelName, method, null);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logGetEntitiesError = LoggerMessage.Define<string?, string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logGetModelsError = LoggerMessage.Define<string?, string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.GetEntitiesError.ToEventId(),
-            "分析这个GetEntitiesAsync.情况1，程序中实体改了. CacheInstance={CacheInstance}, EntityName={EntityName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
+            CacheErrorCodes.GetModelsError.ToEventId(),
+            "分析这个GetModelsAsync.情况1，程序中实体改了. CacheInstance={CacheInstance}, ModelName={ModelName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
 
-        public static void LogGetEntitiesError(this ILogger logger, string? cacheInstance, string? entityName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
+        public static void LogGetModelsError(this ILogger logger, string? cacheInstance, string? modelName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
         {
-            _logGetEntitiesError(logger, cacheInstance, entityName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
+            _logGetModelsError(logger, cacheInstance, modelName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
         private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logForcedRemoveError = LoggerMessage.Define<string?, string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.ForcedRemoveEntitiesError.ToEventId(),
-            "在强制删除中出错. CacheInstance={CacheInstance}, EntityName={EntityName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
+            CacheErrorCodes.ForcedRemoveModelsError.ToEventId(),
+            "在强制删除中出错. CacheInstance={CacheInstance}, ModelName={ModelName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
 
-        public static void LogForcedRemoveError(this ILogger logger, string? cacheInstance, string? entityName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
+        public static void LogForcedRemoveError(this ILogger logger, string? cacheInstance, string? modelName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
         {
-            _logForcedRemoveError(logger, cacheInstance, entityName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
+            _logForcedRemoveError(logger, cacheInstance, modelName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithEntities = LoggerMessage.Define<string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithModels = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.CacheInvalidationConcurrencyWithEntities.ToEventId(),
-            "检测到，Cache Invalidation Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, EntityName={EntityName}, Object={Object}");
+            CacheErrorCodes.CacheInvalidationConcurrencyWithModels.ToEventId(),
+            "检测到，Cache Invalidation Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, ModelName={ModelName}, Object={Object}");
 
-        public static void LogCacheInvalidationConcurrencyWithEntities(this ILogger logger, string? cacheInstance, string? entityName, object? obj)
+        public static void LogCacheInvalidationConcurrencyWithModels(this ILogger logger, string? cacheInstance, string? modelName, object? obj)
         {
-            _logCacheInvalidationConcurrencyWithEntities(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
+            _logCacheInvalidationConcurrencyWithModels(logger, cacheInstance, modelName, SerializeUtil.ToJson(obj), null);
         }
 
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateVersionConcurrency = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
             CacheErrorCodes.CacheUpdateVersionConcurrency.ToEventId(),
-            "检测到，Cache Update Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, EntityName={EntityName}, Object={Object}");
+            "检测到，Cache Update Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, ModelName={ModelName}, Object={Object}");
 
-        public static void LogCacheUpdateVersionConcurrency(this ILogger logger, string? cacheInstance, string? entityName, object? obj)
+        public static void LogCacheUpdateVersionConcurrency(this ILogger logger, string? cacheInstance, string? modelName, object? obj)
         {
-            _logCacheUpdateVersionConcurrency(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
+            _logCacheUpdateVersionConcurrency(logger, cacheInstance, modelName, SerializeUtil.ToJson(obj), null);
         }
 
         private static readonly Action<ILogger, string?, Exception?> _logCacheGetError = LoggerMessage.Define<string?>(
