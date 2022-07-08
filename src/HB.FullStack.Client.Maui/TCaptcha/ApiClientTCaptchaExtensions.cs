@@ -10,6 +10,8 @@ using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.TCaptcha;
 using HB.FullStack.Client.Navigation;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Requests;
+using HB.FullStack.Common.Api.Resources;
 
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;

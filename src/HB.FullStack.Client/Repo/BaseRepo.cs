@@ -18,6 +18,7 @@ using Microsoft.VisualStudio.Threading;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.Network;
+using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Client
 {
@@ -82,7 +83,7 @@ namespace HB.FullStack.Client
         }
     }
 
-    public abstract class BaseRepo<TModel, TRes> : BaseRepo where TModel : DatabaseModel, new() where TRes : ApiResource
+    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DatabaseModel//, new() where TRes : ApiResource
     {
         private readonly ILogger _logger;
         private readonly DatabaseModelDef _modelDef = null!;
@@ -125,9 +126,9 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected abstract TModel ToModel(TRes res);
+        //protected abstract TModel ToModel(TRes res);
 
-        protected abstract TRes ToResource(TModel model);
+        //protected abstract TRes ToResource(TModel model);
 
         #region 查询
 

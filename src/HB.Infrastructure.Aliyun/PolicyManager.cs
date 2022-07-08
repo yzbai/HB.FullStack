@@ -11,12 +11,12 @@ namespace HB.Infrastructure.Aliyun
 {
     public static class PolicyManager
     {
-        public static RetryPolicy Default(ILogger logger)
+        public static AsyncRetryPolicy SendSmsRetryPolicy(ILogger logger)
         {
             return Policy
                 .Handle<ClientException>()
-                .WaitAndRetry(
-                    new[] { TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2) },
+                .WaitAndRetryAsync(
+                    new[] { TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30) },
                     (exception, timeSpan, retryCount, context) =>
                     {
                         ClientException cex = (ClientException)exception;

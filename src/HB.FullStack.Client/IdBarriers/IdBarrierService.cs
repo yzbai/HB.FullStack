@@ -10,6 +10,8 @@ using HB.FullStack.Database;
 using HB.FullStack.Common;
 using HB.FullStack.Common.ApiClient;
 using System.Net.Http;
+using HB.FullStack.Common.Api.Requests;
+using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.XamarinForms.IdBarriers
 {

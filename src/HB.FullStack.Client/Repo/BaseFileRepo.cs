@@ -4,6 +4,7 @@ using System.Net.Http;
 using HB.FullStack.Client.Network;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Resources;
 using HB.FullStack.Common.ApiClient;
 
 namespace HB.FullStack.Client

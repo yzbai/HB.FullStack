@@ -119,11 +119,11 @@ namespace HB.FullStack.Common.Api
             string? condition,
             string? endPointName,
             string? apiVersion,
-            string? resName) : base(apiMethodName, auth, condition)
+            string? controllerModelName) : base(apiMethodName, auth, condition)
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
-            ModelName = resName;
+            ModelName = controllerModelName;
         }
     }
 }

@@ -31,14 +31,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
         }
 
-        //TODO: 等待阿里云增加异步方法
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <returns></returns>
-
-        public void SendValidationCode(string mobile/*, out string smsCode*/)
+        public async Task SendValidationCodeAsync(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
@@ -63,13 +56,22 @@ namespace HB.Infrastructure.Aliyun.Sms
 
             try
             {
-                CommonResponse response = PolicyManager.Default(_logger).Execute(() => { return _client.GetCommonResponse(request); });
+                CommonResponse response = await PolicyManager
+                    .SendSmsRetryPolicy(_logger)
+                    .ExecuteAsync(async () =>
+                    {
+                        return await _client.GetCommonResponseAsync(request).ConfigureAwait(false);
+                    }).ConfigureAwait(false);
 
                 SendResult? sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
 
                 if (sendResult != null && sendResult.IsSuccessful())
                 {
-                    SetSmsCodeToCache(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes);
+                    SetSmsCodeToCacheAsync(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes)
+                        .SafeFireAndForget(ex =>
+                        {
+                            _logger.LogCritical(ex, "Aliyun Sms 服务在使用缓存时出错，有可能缓存不可用。");
+                        });
                 }
                 else
                 {
@@ -96,15 +98,16 @@ namespace HB.Infrastructure.Aliyun.Sms
         }
 
 #if DEBUG
-        public void SendValidationCode(string mobile, string smsCode, int expiryMinutes)
+        public async Task SendValidationCodeAsync(string mobile, string smsCode, int expiryMinutes)
         {
             try
             {
-                SetSmsCodeToCache(mobile, smsCode, expiryMinutes);
+                await SetSmsCodeToCacheAsync(mobile, smsCode, expiryMinutes).ConfigureAwait(false);
+
             }
             catch (CacheException ex)
             {
-                throw AliyunExceptions.SmsCacheError("", ex);
+                throw AliyunExceptions.SmsCacheError("在设置SmsCode缓存时出错，请查看缓存可用性!", ex);
             }
         }
 
@@ -129,20 +132,16 @@ namespace HB.Infrastructure.Aliyun.Sms
             }
         }
 
-        private void SetSmsCodeToCache(string mobile, string cachedSmsCode, int expireMinutes)
+        private Task SetSmsCodeToCacheAsync(string mobile, string cachedSmsCode, int expireMinutes)
         {
-            _cache.SetStringAsync(
+            return _cache.SetStringAsync(
                         GetCachedKey(mobile),
                         cachedSmsCode,
                         TimeUtil.UtcNowTicks,
                         new DistributedCacheEntryOptions()
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
-                        })
-                .SafeFireAndForget(ex =>
-                {
-                    _logger.LogCritical(ex, "Aliyun Sms 服务在使用缓存时出错，有可能缓存不可用。");
-                });
+                        });
         }
 
         private Task<string?> GetSmsCodeFromCacheAsync(string mobile)

@@ -8,7 +8,7 @@ using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.Api
 {
-    public class DeleteRequest<T> : ApiRequest<T> where T : ApiResource
+    public sealed class DeleteRequest<T> : ApiRequest<T> where T : ApiResource
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
