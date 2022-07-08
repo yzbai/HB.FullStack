@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.ApiClient
 {

@@ -14,4 +14,8 @@ namespace HB.FullStack.Common
     public interface IModel : IValidatableObject { }
 
     public class Model : ValidatableObject, IModel { }
+
+    public interface IDTO : IValidatableObject { }
+
+    public class DTO : ValidatableObject, IDTO { }
 }

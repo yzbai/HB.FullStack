@@ -11,16 +11,14 @@ namespace HB.FullStack.Common.ApiClient
         [Required]
         public string? EndpointName { get; set; }
 
-        [Required]
-        public string? ResName { get; set; }
-
         /// <summary>
         /// 刷新token的站点版本
         /// </summary>
         [Required]
         public string? Version { get; set; }
 
-
+        [Required]
+        public string? ControllerModelName { get; set; }
 
         public int RefreshIntervalSeconds { get; set; } = 300;
 

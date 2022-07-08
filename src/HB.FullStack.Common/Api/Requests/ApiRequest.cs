@@ -2,13 +2,15 @@
 
 using System;
 using System.Text.Json.Serialization;
+using HB.FullStack.Common.Api.Requests;
+using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// ApiRequest包含两部分，一是必须由每个Request决定的构建信息，二是业务数据
     /// </summary>
-    public abstract class ApiRequest : ValidatableObject
+    public abstract class ApiRequest : DTO
     {
         #region Builder
 
@@ -25,21 +27,12 @@ namespace HB.FullStack.Common.Api
 
         #region 由每个Request决定的构建信息
 
-        /// <summary>
-        /// 不需要被服务器端看到
-        /// </summary>
         [JsonIgnore]
         public ApiMethodName ApiMethodName { get; set; }
 
-        /// <summary>
-        /// 不需要被服务器端看到
-        /// </summary>
         [JsonIgnore]
         public ApiRequestAuth Auth { get; set; }
 
-        /// <summary>
-        /// 不需要被服务器端看到
-        /// </summary>
         [JsonIgnore]
         public string? Condition { get; set; }
 
@@ -88,23 +81,23 @@ namespace HB.FullStack.Common.Api
         {
             RestfulHttpRequestBuilder builder = new RestfulHttpRequestBuilder(apiRequest.ApiMethodName, apiRequest.Auth, apiRequest.Condition, null, null, null);
 
-            ApiResourceDef? def = ApiResourceDefFactory.Get<T>();
+            ApiResourceBinding? binding = ApiResourceBindingFactory.Get<T>();
 
-            if (def == null)
+            if (binding == null)
             {
                 throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
             }
 
             //From Res Def
-            builder.EndpointName = def.EndpointName;
-            builder.ApiVersion = def.Version;
-            builder.ResName = def.ResName;
+            builder.EndpointName = binding.EndpointName;
+            builder.ApiVersion = binding.Version;
+            builder.ModelName = binding.ControllerModelName;
 
-            builder.Parent1ResName = def.Parent1ResName;
-            builder.Parent2ResName = def.Parent2ResName;
+            //builder.Parent1ModelName = binding.Parent1ModelName;
+            //builder.Parent2ModelName = binding.Parent2ModelName;
 
-            builder.Parent1ResId = def.Parent1ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
-            builder.Parent2ResId = def.Parent2ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
+            //builder.Parent1ModelId = binding.Parent1ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
+            //builder.Parent2ModelId = binding.Parent2ResIdGetMethod?.Invoke(apiRequest, null)?.ToString();
 
             return builder;
         }

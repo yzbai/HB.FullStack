@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json.Serialization;
+using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.Api.Requests
 {

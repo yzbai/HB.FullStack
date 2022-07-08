@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class BearerTokenResGetByRefreshRequest : ApiRequest
+    public class UserTokenResGetByRefreshRequest : ApiRequest
     {
         private readonly JwtEndpointSetting _jwtEndpointSetting = null!;
 
@@ -30,9 +31,9 @@ namespace HB.FullStack.Common.ApiClient
         /// <summary>
         /// Only for Deserialization
         /// </summary>
-        public BearerTokenResGetByRefreshRequest() { }
+        public UserTokenResGetByRefreshRequest() { }
 
-        public BearerTokenResGetByRefreshRequest(
+        public UserTokenResGetByRefreshRequest(
             JwtEndpointSetting jwtEndpointSetting,
             Guid userId,
             string accessToken,
@@ -58,7 +59,7 @@ namespace HB.FullStack.Common.ApiClient
 
         protected override HttpRequestBuilder CreateHttpRequestBuilder()
         {
-            return new RestfulHttpRequestBuilder(ApiMethodName, Auth, Condition, _jwtEndpointSetting.EndpointName, _jwtEndpointSetting.Version, _jwtEndpointSetting.ResName);
+            return new RestfulHttpRequestBuilder(ApiMethodName, Auth, Condition, _jwtEndpointSetting.EndpointName, _jwtEndpointSetting.Version, _jwtEndpointSetting.ControllerModelName);
         }
     }
 }

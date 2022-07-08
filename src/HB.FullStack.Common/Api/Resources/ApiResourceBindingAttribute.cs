@@ -5,7 +5,7 @@ using System;
 namespace HB.FullStack.Common.Api
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ApiResourceAttribute : Attribute
+    public sealed class ApiResourceBindingAttribute : Attribute
     {
         /// <summary>
         /// 资源在哪里
@@ -18,22 +18,22 @@ namespace HB.FullStack.Common.Api
         public string Version { get; }
 
         /// <summary>
-        /// 什么名字
+        /// 即从哪个Controller来获取。也是Model的名字，这个Resource的主要Model来源,归谁管
         /// </summary>
-        public string ResName { get; }
+        public string ControllerModelName { get; }
 
         /// <summary>
         /// 属于谁的子资源
         /// </summary>
-        public string? Parent1ResName { get; set; }
+        //public string? Parent1ModelName { get; set; }
 
-        public string? Parent2ResName { get; set; }
+        //public string? Parent2ModelName { get; set; }
 
-        public ApiResourceAttribute(string endPointName, string version, string resName)
+        public ApiResourceBindingAttribute(string endPointName, string version, string controllerModelName)
         {
             EndPointName = endPointName;
             Version = version;
-            ResName = resName;
+            ControllerModelName = controllerModelName;
         }
     }
 }

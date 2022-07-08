@@ -7,97 +7,97 @@ using HB.FullStack.Database.DatabaseModels;
 namespace HB.FullStack.DatabaseTests
 {
 
-    public class A : FlackIdModel
+    public class A : FlackIdDatabaseModel
     {
 
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class B : FlackIdModel
+    public class B : FlackIdDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class AB : FlackIdModel
+    public class AB : FlackIdDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public long AId { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public long BId { get; set; } = default!;
     }
 
 
-    public class C : FlackIdModel
+    public class C : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public long AId { get; set; } = default!;
     }
 
-    public class A_Client : FlackIdModel
+    public class A_Client : FlackIdDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class B_Client : FlackIdModel
+    public class B_Client : FlackIdDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class AB_Client : FlackIdModel
+    public class AB_Client : FlackIdDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public long AId { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public long BId { get; set; } = default!;
     }
 
 
-    public class C_Client : FlackIdModel
+    public class C_Client : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public long AId { get; set; } = default!;
     }
 
-    public class Guid_A : GuidModel
+    public class Guid_A : GuidDatabaseModel
     {
 
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class Guid_B : GuidModel
+    public class Guid_B : GuidDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class Guid_AB : GuidModel
+    public class Guid_AB : GuidDatabaseModel
     {
 
         public Guid Guid_AId { get; set; }
@@ -106,48 +106,48 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_C : GuidModel
+    public class Guid_C : GuidDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public Guid Guid_AId { get; set; }
     }
 
-    public class Guid_A_Client : GuidModel
+    public class Guid_A_Client : GuidDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class Guid_B_Client : GuidModel
+    public class Guid_B_Client : GuidDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
     }
 
 
-    public class Guid_AB_Client : GuidModel
+    public class Guid_AB_Client : GuidDatabaseModel
     {
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public Guid Guid_AId { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public Guid Guid_BId { get; set; } = default!;
     }
 
 
-    public class Guid_C_Client : GuidModel
+    public class Guid_C_Client : GuidDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public Guid Guid_AId { get; set; } = default!;
     }
 }

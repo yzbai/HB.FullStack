@@ -75,7 +75,7 @@ namespace HB.FullStack.Common.ApiClient
                 request.Headers.Add("Authorization", "Bearer " + tokenProvider.AccessToken);
             }
 
-            //Url
+            //BaseUrl
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
             {
                 { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
@@ -94,7 +94,7 @@ namespace HB.FullStack.Common.ApiClient
 
             return _options.Endpoints.FirstOrDefault(endpoint =>
             {
-                return authority.StartsWith(endpoint.Url!.Authority, StringComparison.OrdinalIgnoreCase);
+                return authority.StartsWith(endpoint.BaseUrl!.Authority, StringComparison.OrdinalIgnoreCase);
             });
         }
     }

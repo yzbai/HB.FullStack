@@ -58,7 +58,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (preferenceProvider.RefreshToken.IsNotNullOrEmpty())
                 {
-                    BearerTokenResGetByRefreshRequest refreshRequest = new BearerTokenResGetByRefreshRequest(
+                    UserTokenResGetByRefreshRequest refreshRequest = new UserTokenResGetByRefreshRequest(
                         jwtEndpoint,
                         preferenceProvider.UserId!.Value,
                         preferenceProvider.AccessToken,

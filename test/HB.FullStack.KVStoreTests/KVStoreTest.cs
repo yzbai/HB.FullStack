@@ -76,7 +76,7 @@ namespace HB.FullStack.KVStoreTests
 
             return x!.Guid == y!.Guid
                 && x.UserName == y.UserName
-                && x.CreateTime == y.CreateTime
+                //&& x.CreateTime == y.CreateTime
                 && x.Activated == y.Activated
                 && x.Type == y.Type;
         }

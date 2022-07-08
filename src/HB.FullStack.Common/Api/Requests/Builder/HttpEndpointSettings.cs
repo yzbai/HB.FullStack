@@ -1,4 +1,6 @@
-﻿namespace HB.FullStack.Common.Api
+﻿using HB.FullStack.Common.Api.Requests;
+
+namespace HB.FullStack.Common.Api
 {
     public class HttpEndpointSettings
     {

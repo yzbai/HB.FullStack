@@ -217,7 +217,7 @@ namespace HB.FullStack.Client.Maui.Figures
 
             SKPoint curLocation = ToCurrentCoordinatePoint(canvasLocation);
 
-            //BaseApplication.LogDebug($"开始处理Touch Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+            //BaseApplication.LogDebug($"开始处理Touch Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
 
             switch (args.ActionType)
             {
@@ -239,7 +239,7 @@ namespace HB.FullStack.Client.Maui.Figures
                         };
 
                         _fingerTouchInfos.Add(args.Id, figureTouchInfo);
-                        //BaseApplication.LogDebug($"加入FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+                        //BaseApplication.LogDebug($"加入FingerTouchInfo Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
 
                         if (EnableLongTap)
                         {
@@ -311,7 +311,7 @@ namespace HB.FullStack.Client.Maui.Figures
                 case SKTouchAction.Exited:
                 case SKTouchAction.Released:
                     {
-                        //BaseApplication.LogDebug($"进入Exitted,Released. Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+                        //BaseApplication.LogDebug($"进入Exitted,Released. Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
 
                         if (ResumeResponseTimeTickAfterTouch)
                         {
@@ -326,7 +326,7 @@ namespace HB.FullStack.Client.Maui.Figures
                         if (touchInfo.LongPressHappend || touchInfo.IsOver)
                         {
                             //LongTap已经发生
-                            //BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+                            //BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
                             _fingerTouchInfos.Remove(args.Id);
                             return;
                         }
@@ -350,14 +350,14 @@ namespace HB.FullStack.Client.Maui.Figures
                             OnTwoFingerDragged(touchInfo);
                         }
 
-                        //BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+                        //BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
                         _fingerTouchInfos.Remove(args.Id);
 
                         break;
                     }
                 case SKTouchAction.Cancelled:
                     {
-                        //BaseApplication.LogDebug($"进入Cancelled. Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+                        //BaseApplication.LogDebug($"进入Cancelled. Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
                         if (ResumeResponseTimeTickAfterTouch)
                         {
                             CanResponseTimeTick = true;
@@ -377,7 +377,7 @@ namespace HB.FullStack.Client.Maui.Figures
                             OnCancelled(figureTouchInfo);
                         }
 
-                        //BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().Name}, Events: {SerializeUtil.ToJson(args)}");
+                        //BaseApplication.LogDebug($"移除FingerTouchInfo Figure: {this.GetType().EndpointName}, Events: {SerializeUtil.ToJson(args)}");
                         _fingerTouchInfos.Remove(args.Id);
 
                         break;

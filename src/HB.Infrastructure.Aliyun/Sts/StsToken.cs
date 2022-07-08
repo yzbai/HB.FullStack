@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using HB.FullStack.Common;
+
 namespace HB.Infrastructure.Aliyun.Sts
 {
-    public class AliyunStsToken
+    public class StsToken : Model
     {
         public string RequestId { get; set; } = null!;
 

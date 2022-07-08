@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common.Api.Requests
 {
     public enum HttpMethodOverrideMode
     {

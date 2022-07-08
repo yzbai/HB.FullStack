@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace System
+namespace HB.FullStack.Common.Api.Requests
 {
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class IdBarrierAttribute : Attribute

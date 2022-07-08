@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common.Api.Resources
 {
-    public abstract class ApiResource : ValidatableObject
+    /// <summary>
+    /// One kind of Data Transfer Objects. Mainly using on net.
+    /// </summary>
+    public abstract class ApiResource : DTO
     {
         [Range(0, int.MaxValue)]
         public int Version { get; set; } = -1;

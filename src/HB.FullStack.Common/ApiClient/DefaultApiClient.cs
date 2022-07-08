@@ -1,6 +1,6 @@
 ﻿using HB.FullStack.Common.Api;
-using HB.FullStack.Common.ApiClient;
-
+using HB.FullStack.Common.Api.Requests;
+using HB.FullStack.Common.Api.Resources;
 using Microsoft.Extensions.Options;
 
 using System;
@@ -181,7 +181,7 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyResponse>(request, cancellationToken);
+        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyApiResource>(request, cancellationToken);
 
         public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
 
@@ -252,7 +252,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 //TODO: 用字典提高效率
                 endpointSettings = _options.Endpoints.FirstOrDefault(e =>
-                    e.Name == restfulApiRequestBuilder.EndpointName
+                    e.EndpointName == restfulApiRequestBuilder.EndpointName
                         &&
                     (
                         e.Version == restfulApiRequestBuilder.ApiVersion
@@ -263,7 +263,7 @@ namespace HB.FullStack.Common.ApiClient
 
             if (endpointSettings == null && _options.DefaultEndpointName.IsNotNullOrEmpty())
             {
-                endpointSettings = _options.Endpoints.FirstOrDefault(e => e.Name == _options.DefaultEndpointName);
+                endpointSettings = _options.Endpoints.FirstOrDefault(e => e.EndpointName == _options.DefaultEndpointName);
             }
 
             return endpointSettings;

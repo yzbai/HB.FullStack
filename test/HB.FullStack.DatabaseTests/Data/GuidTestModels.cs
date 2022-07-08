@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Tests.Mocker
 {
-    public class User : GuidModel
+    public class User : GuidDatabaseModel
     {
         public string Name { get; set; } = null!;
 
 
     }
 
-    public class UserProfile : GuidModel
+    public class UserProfile : GuidDatabaseModel
     {
         [ForeignKey(typeof(User), true)]
         public Guid UserId { get; set; }

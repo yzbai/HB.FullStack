@@ -18,34 +18,34 @@ namespace HB.Infrastructure.Aliyun.Sts
     {
         private const string OSS_WRITE_POLICY_TEMPLATE = @"
 {{
-    ""Statement"": 
+    ""Statement"":
     [
         {{
-            ""Action"": 
+            ""Action"":
             [
                 ""oss:ListObjects"", ""oss:GetObject"", ""oss:DeleteObject"",""oss:ListParts"",""oss:AbortMultipartUpload"",""oss:PutObject""
             ],
             ""Effect"": ""Allow"",
-            ""Resource"": 
+            ""Resource"":
             [
                 ""acs:oss:*:*:{0}/{1}""
             ]
         }}
-    ],    
+    ],
     ""Version"": ""1""
 }}";
 
         private const string OSS_READ_POLICY_TEMPLATE = @"
 {{
-    ""Statement"": 
+    ""Statement"":
     [
         {{
-            ""Action"": 
+            ""Action"":
             [
                 ""oss:ListObjects"", ""oss:GetObject""
             ],
             ""Effect"": ""Allow"",
-            ""Resource"": 
+            ""Resource"":
             [
                 ""acs:oss:*:*:{0}/{1}""
             ]
@@ -79,7 +79,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             return "User" + userId.ToString();
         }
 
-        public AliyunStsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly, double expirySeconds)
+        public StsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly, double expirySeconds)
         {
             if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())
             {
@@ -119,7 +119,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             {
                 AssumeRoleResponse assumedRoleResponse = _acsClient.GetAcsResponse(request);
 
-                AliyunStsToken stsToken = new AliyunStsToken
+                StsToken stsToken = new StsToken
                 {
                     RequestId = assumedRoleResponse.RequestId,
                     SecurityToken = assumedRoleResponse.Credentials.SecurityToken,

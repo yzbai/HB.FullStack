@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
+using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.Api
 {
@@ -40,7 +41,7 @@ namespace HB.FullStack.Common.Api
             }
 
             //2. url
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, AssembleUrl(builder))
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.AssembleUrl())
             {
                 //TODO: 看需要不需要使用http2.0
                 //Version = _version20
@@ -72,7 +73,7 @@ namespace HB.FullStack.Common.Api
             return httpRequest;
         }
 
-        private static string AssembleUrl(HttpRequestBuilder builder)
+        public static string AssembleUrl(this HttpRequestBuilder builder)
         {
             string uri = builder.GetUrl();
 

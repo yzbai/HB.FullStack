@@ -50,7 +50,7 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                if (propertyDef.Name == nameof(DatabaseModel.Version) /*|| propertyDef.Name == nameof(Model.CreateTime)*/)
+                if (propertyDef.Name == nameof(DatabaseModel.Version) /*|| propertyDef.EndpointName == nameof(Model.CreateTime)*/)
                 {
                     continue;
                 }
@@ -121,7 +121,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
-                if (propertyDef.IsPrimaryKey /*|| propertyDef.Name == nameof(Model.CreateTime)*/)
+                if (propertyDef.IsPrimaryKey /*|| propertyDef.EndpointName == nameof(Model.CreateTime)*/)
                 {
                     continue;
                 }

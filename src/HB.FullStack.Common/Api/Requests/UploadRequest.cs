@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.Api
 {

@@ -39,7 +39,7 @@ namespace HB.FullStack.Common.ApiClient
 
         public void AddEndpoint(EndpointSettings endpointSettings)
         {
-            if (!Endpoints.Any(e => e.Name!.Equals(endpointSettings.Name, GlobalSettings.ComparisonIgnoreCase)
+            if (!Endpoints.Any(e => e.EndpointName!.Equals(endpointSettings.EndpointName, GlobalSettings.ComparisonIgnoreCase)
             && e.Version!.Equals(endpointSettings.Version, GlobalSettings.ComparisonIgnoreCase)))
             {
                 Endpoints.Add(endpointSettings);

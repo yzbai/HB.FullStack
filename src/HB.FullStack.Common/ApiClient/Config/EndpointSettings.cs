@@ -1,6 +1,5 @@
 ﻿using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
-
+using HB.FullStack.Common.Api.Requests;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
@@ -13,7 +12,7 @@ namespace HB.FullStack.Common.ApiClient
         /// 产品名，一般为站点类名
         /// </summary>
         [Required]
-        public string Name { get; set; } = null!;
+        public string EndpointName { get; set; } = null!;
 
         /// <summary>
         /// 版本
@@ -25,7 +24,7 @@ namespace HB.FullStack.Common.ApiClient
         /// url地址
         /// </summary>
         [Required]
-        public Uri? Url { get; set; }
+        public Uri? BaseUrl { get; set; }
 
         public HttpMethodOverrideMode HttpMethodOverrideMode { get; set; }
 
@@ -38,6 +37,6 @@ namespace HB.FullStack.Common.ApiClient
 
 
         [JsonIgnore]
-        public string HttpClientName => $"{Name}_{Version}";
+        public string HttpClientName => $"{EndpointName}_{Version}";
     }
 }

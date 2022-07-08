@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.Api
 {
@@ -16,74 +17,80 @@ namespace HB.FullStack.Common.Api
 
         public string? ApiVersion { get; set; }
 
-        public string? ResName { get; set; }
-
-        public Guid? ResId { get; set; }
-
-        public string? Parent1ResName { get; set; }
-
-        public string? Parent1ResId { get; set; }
-
-        public string? Parent2ResName { get; set; }
-
-        public string? Parent2ResId { get; set; }
+        public string? ModelName { get; set; }
 
         #endregion
 
-        public sealed override string GetUrl()
+        //#region 由Request决定
+
+        //public Guid? ModelId { get; set; }
+
+        //public string? Parent1ModelName { get; set; }
+
+        //public string? Parent1ModelId { get; set; }
+
+        //public string? Parent2ModelName { get; set; }
+
+        //public string? Parent2ModelId { get; set; }
+
+        //#endregion
+
+        public override string GetUrl()
         {
-            string? parentSegment = GetParentSegment();
+            return Condition.IsNullOrEmpty()? $"{ApiVersion}/{ModelName}" : $"{ApiVersion}/{ModelName}/{Condition}";
 
-            if (parentSegment == null && ResId == null)
-            {
-                return $"{ApiVersion}/{ResName}/{Condition}";
-            }
-            else if (parentSegment == null && ResId != null)
-            {
-                return $"{ApiVersion}/{ResName}/{ResId}/{Condition}";
-            }
-            else if (parentSegment != null && ResId == null)
-            {
-                return $"{ApiVersion}/{parentSegment}/{ResName}/{Condition}";
-            }
-            else //if(parentSegment != null && ResId != null)
-            {
-                return $"{ApiVersion}/{parentSegment}/{ResName}/{ResId}/{Condition}";
-            }
+            //string? parentSegment = GetParentSegment();
 
-            string? GetParentSegment()
-            {
-                if (Parent1ResName.IsNotNullOrEmpty())
-                {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    if (Parent1ResId.IsNullOrEmpty())
-                    {
-                        throw new ArgumentNullException(nameof(Parent1ResId));
-                    }
-
-                    stringBuilder.Append(Parent1ResName);
-                    stringBuilder.Append('/');
-                    stringBuilder.Append(Parent1ResId);
-
-                    if (Parent2ResName.IsNotNullOrEmpty())
-                    {
-                        if (Parent2ResId.IsNullOrEmpty())
-                        {
-                            throw new ArgumentNullException(nameof(Parent2ResId));
-                        }
-
-                        stringBuilder.Append('/');
-                        stringBuilder.Append(Parent2ResName);
-                        stringBuilder.Append('/');
-                        stringBuilder.Append(Parent2ResId);
-                    }
-
-                    return stringBuilder.ToString();
-                }
-
-                return null;
-            }
+            //if (parentSegment == null && ModelId == null)
+            //{
+            //    return $"{ApiVersion}/{ModelName}/{Condition}";
+            //}
+            //else if (parentSegment == null && ModelId != null)
+            //{
+            //    return $"{ApiVersion}/{ModelName}/{ModelId}/{Condition}";
+            //}
+            //else if (parentSegment != null && ModelId == null)
+            //{
+            //    return $"{ApiVersion}/{parentSegment}/{ModelName}/{Condition}";
+            //}
+            //else //if(parentSegment != null && ModelId != null)
+            //{
+            //    return $"{ApiVersion}/{parentSegment}/{ModelName}/{ModelId}/{Condition}";
+            //}
         }
+
+        //string? GetParentSegment()
+        //{
+        //    if (Parent1ModelName.IsNotNullOrEmpty())
+        //    {
+        //        StringBuilder stringBuilder = new StringBuilder();
+        //        if (Parent1ModelId.IsNullOrEmpty())
+        //        {
+        //            throw new ArgumentNullException(nameof(Parent1ModelId));
+        //        }
+
+        //        stringBuilder.Append(Parent1ModelName);
+        //        stringBuilder.Append('/');
+        //        stringBuilder.Append(Parent1ModelId);
+
+        //        if (Parent2ModelName.IsNotNullOrEmpty())
+        //        {
+        //            if (Parent2ModelId.IsNullOrEmpty())
+        //            {
+        //                throw new ArgumentNullException(nameof(Parent2ModelId));
+        //            }
+
+        //            stringBuilder.Append('/');
+        //            stringBuilder.Append(Parent2ModelName);
+        //            stringBuilder.Append('/');
+        //            stringBuilder.Append(Parent2ModelId);
+        //        }
+
+        //        return stringBuilder.ToString();
+        //    }
+
+        //    return null;
+        //}
 
         public override int GetHashCode()
         {
@@ -93,12 +100,12 @@ namespace HB.FullStack.Common.Api
             hashCode.Add(EndpointName);
             hashCode.Add(ApiVersion);
             hashCode.Add(Condition);
-            hashCode.Add(ResName);
-            hashCode.Add(ResId);
-            hashCode.Add(Parent1ResName);
-            hashCode.Add(Parent2ResName);
-            hashCode.Add(Parent1ResId);
-            hashCode.Add(Parent2ResId);
+            hashCode.Add(ModelName);
+            //hashCode.Add(ModelId);
+            //hashCode.Add(Parent1ModelName);
+            //hashCode.Add(Parent2ModelName);
+            //hashCode.Add(Parent1ModelId);
+            //hashCode.Add(Parent2ModelId);
 
             return hashCode.ToHashCode();
         }
@@ -116,7 +123,7 @@ namespace HB.FullStack.Common.Api
         {
             EndpointName = endPointName;
             ApiVersion = apiVersion;
-            ResName = resName;
+            ModelName = resName;
         }
     }
 }

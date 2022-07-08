@@ -5,10 +5,13 @@ using System.Text;
 
 namespace HB.FullStack.Common.Api
 {
-    public class ApiResourceDef
+    /// <summary>
+    /// 本质是解决ApiResource的来源问题，与谁binding,哪个Model是这个Dto的根
+    /// </summary>
+    public class ApiResourceBinding
     {
         /// <summary>
-        /// 在哪里取
+        /// 站点
         /// </summary>
         public string EndpointName { get; internal set; } = null!;
 
@@ -17,24 +20,19 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string Version { get; internal set; } = null!;
 
-        /// <summary>
-        /// 用什么验证
-        /// </summary>
-        //public ApiAuthType AuthType { get; internal set; } = ApiAuthType.None;
-
 
         /// <summary>
-        /// 取什么
+        /// 即从哪个Controller来获取。也是Model的名字，这个Resource的主要Model来源,归谁管
         /// </summary>
-        public string ResName { get; internal set; } = null!;
+        public string ControllerModelName { get; internal set; } = null!;
 
-        public string? Parent1ResName { get; internal set; }
+        //public string? Parent1ModelName { get; internal set; }
 
-        public string? Parent2ResName { get; internal set; }
+        //public string? Parent2ModelName { get; internal set; }
 
-        public MethodInfo? Parent1ResIdGetMethod { get; internal set; }
+        //public MethodInfo? Parent1ResIdGetMethod { get; internal set; }
 
-        public MethodInfo? Parent2ResIdGetMethod { get; internal set; }
+        //public MethodInfo? Parent2ResIdGetMethod { get; internal set; }
 
 
         //private string? _apiKeyName;

@@ -82,7 +82,7 @@ namespace HB.FullStack.Client
         }
     }
 
-    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DatabaseModel, new() where TRes : ApiResource
+    public abstract class BaseRepo<TModel, TRes> : BaseRepo where TModel : DatabaseModel, new() where TRes : ApiResource
     {
         private readonly ILogger _logger;
         private readonly DatabaseModelDef _modelDef = null!;

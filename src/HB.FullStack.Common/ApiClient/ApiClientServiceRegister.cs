@@ -59,9 +59,9 @@ namespace Microsoft.Extensions.DependencyInjection
 #if NET5_0_OR_GREATER
                     httpClient.DefaultRequestVersion = HttpVersion.Version20;
 #endif
-                    if (endpoint.Url != null)
+                    if (endpoint.BaseUrl != null)
                     {
-                        httpClient.BaseAddress = endpoint.Url;
+                        httpClient.BaseAddress = endpoint.BaseUrl;
                     }
 
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");

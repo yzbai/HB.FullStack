@@ -1,6 +1,4 @@
-﻿
-using HB.FullStack.Common.Api;
-
+﻿using HB.FullStack.Common.Api.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;

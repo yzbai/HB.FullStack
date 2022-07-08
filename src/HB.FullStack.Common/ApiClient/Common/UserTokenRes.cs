@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.ApiClient
 {

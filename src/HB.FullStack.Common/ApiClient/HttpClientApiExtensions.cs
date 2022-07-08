@@ -7,14 +7,15 @@ using System.Threading;
 using Microsoft.Net.Http.Headers;
 using System.Collections.Generic;
 using System.Linq;
+using HB.FullStack.Common.Api.Resources;
 
 namespace System.Net.Http
 {
     public static class HttpClientApiExtensions
     {
-        private static readonly Type _emptyResponseType = typeof(EmptyResponse);
+        private static readonly Type _emptyResourceType = typeof(EmptyApiResource);
 
-        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
+        public static async Task<TResource?> GetAsync<TResource>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResource : class
         {
             //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
@@ -24,13 +25,13 @@ namespace System.Net.Http
 
             await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
 
-            if (typeof(TResponse) == _emptyResponseType)
+            if (typeof(TResource) == _emptyResourceType)
             {
-                return (TResponse)(object)EmptyResponse.Value;
+                return (TResource)(object)EmptyApiResource.Value;
             }
             else
             {
-                (bool success, TResponse? response) = await responseMessage.TryDeserializeJsonContentAsync<TResponse>().ConfigureAwait(false);
+                (bool success, TResource? response) = await responseMessage.TryDeserializeJsonContentAsync<TResource>().ConfigureAwait(false);
 
                 if (!success)
                 {

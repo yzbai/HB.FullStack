@@ -10,201 +10,201 @@ using System.Text;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public class PublisherModel3 : FlackIdModel
+    public class PublisherModel3 : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int Integer { get; set; } = 999;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public float Float { get; set; } = 1.9877f;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = "Name";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name2 { get; set; } = "Name2";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name3 { get; set; } = "xxxx";
     }
 
-    public class Guid_PublisherModel3 : GuidModel
+    public class Guid_PublisherModel3 : GuidDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int Integer { get; set; } = 999;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public float Float { get; set; } = 1.9877f;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = "Name";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name2 { get; set; } = "Name2";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name3 { get; set; } = "xxxx";
     }
 
-    public class PublisherModel2 : FlackIdModel
+    public class PublisherModel2 : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int Integer { get; set; } = 999;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public float Float { get; set; } = 1.9877f;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; } = "Name2";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } //= "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; } = PublisherType.Big;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; } = 12121221;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
 
-    public class Guid_PublisherModel2 : GuidModel
+    public class Guid_PublisherModel2 : GuidDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int Integer { get; set; } = 999;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public float Float { get; set; } = 1.9877f;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; } = "Name2";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } //= "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; } = PublisherType.Big;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; } = 12121221;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
 
-    public class PublisherModel : FlackIdModel
+    public class PublisherModel : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [ModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; } = 111;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } = "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
-    public class Guid_PublisherModel : GuidModel
+    public class Guid_PublisherModel : GuidDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [ModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; } = 111;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } = "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
@@ -222,144 +222,144 @@ namespace HB.FullStack.DatabaseTests
         public string Mobile { get; set; } = default!;
     }
 
-    public class PublisherModel3_Client : FlackIdModel
+    public class PublisherModel3_Client : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int Integer { get; set; } = 999;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public float Float { get; set; } = 1.9877f;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = "Name";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name2 { get; set; } = "Name2";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name3 { get; set; } = "xxxx";
     }
 
-    public class PublisherModel2_Client : FlackIdModel
+    public class PublisherModel2_Client : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int Integer { get; set; } = 999;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public float Float { get; set; } = 1.9877f;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; } = "Name2";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } //= "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; } = PublisherType.Big;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; } = 12121221;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
 
-    public class PublisherModel_Client : FlackIdModel
+    public class PublisherModel_Client : FlackIdDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [ModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; } = 111;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } = "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
-    public class Guid_PublisherModel_Client : GuidModel
+    public class Guid_PublisherModel_Client : GuidDatabaseModel
     {
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string Name { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [ModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [ModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DatabaseModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType Type { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public int? Number1 { get; set; } = 111;
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public PublisherType? Type3 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name2 { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public string? Name3 { get; set; } = "xxxx";
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? DDD { get; set; }
 
-        [ModelProperty]
+        [DatabaseModelProperty]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 }

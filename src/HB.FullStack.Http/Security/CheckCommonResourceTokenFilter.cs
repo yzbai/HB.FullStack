@@ -8,6 +8,7 @@ using HB.FullStack.Common.Api;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.WebApi.Security;
 using Microsoft.Extensions.Primitives;
+using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.WebApi.Filters
 {

@@ -1,4 +1,6 @@
-﻿namespace System
+﻿using System;
+
+namespace HB.FullStack.Common.Api.Requests
 {
     public static class ApiHeaderNames
     {
