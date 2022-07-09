@@ -3,7 +3,7 @@ using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class StsTokenRes : GuidResource
+    public class StsTokenRes : ApiResource
     {
         public Guid UserId { get; set; }
 
@@ -22,10 +22,10 @@ namespace HB.FullStack.Common.ApiClient
 
         public bool ReadOnly { get; set; }
 
-        protected override int GetChildHashCode()
-        {
-            return HashCode.Combine(UserId, SecurityToken, AccessKeyId, AccessKeySecret, ExpirationAt, DirectoryPermissionName, ReadOnly);
-        }
+        //protected override int GetChildHashCode()
+        //{
+        //    return HashCode.Combine(UserId, SecurityToken, AccessKeyId, AccessKeySecret, ExpirationAt, DirectoryPermissionName, ReadOnly);
+        //}
     }
 
 }

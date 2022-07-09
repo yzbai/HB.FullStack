@@ -742,6 +742,8 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
+                //TODO:捕捉主键冲突而无法添加，即重复请求了
+
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
                     RestoreItem(item);

@@ -58,7 +58,6 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new()
         {
             KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
@@ -81,7 +80,6 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreModel, new()
         {
             KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
@@ -110,11 +108,6 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="items"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-
         public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
@@ -164,11 +157,6 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// 反应Version变化
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="items"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-
         public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
@@ -209,11 +197,6 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        /// <summary>
-        /// DeleteAllAsync
-        /// </summary>
-        /// <returns></returns>
-
         public async Task DeleteAllAsync<T>() where T : KVStoreModel, new()
         {
             KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
@@ -235,13 +218,6 @@ namespace HB.FullStack.KVStore
         {
             return DeleteAsync<T>(new string[] { key }, new int[] { version });
         }
-
-        /// <summary>
-        /// DeleteAsync
-        /// </summary>
-        /// <param name="keys"></param>
-        /// <param name="versions"></param>
-        /// <returns></returns>
 
         public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : KVStoreModel, new()
         {
