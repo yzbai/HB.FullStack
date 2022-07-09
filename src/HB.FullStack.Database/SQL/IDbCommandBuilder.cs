@@ -18,7 +18,7 @@ namespace HB.FullStack.Database
         WhereExpression<T> Where<T>(EngineType engineType, Expression<Func<T, bool>> predicate) where T : DatabaseModel, new();
 
         EngineCommand CreateAddCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new();
-        EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new();
+        EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, bool returnModel) where T : DatabaseModel, new();
         EngineCommand CreateBatchAddCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
         EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
         EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
@@ -47,11 +47,11 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version版本的乐观锁
         /// </summary>
-        EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser, IList<string> propertyNames, IList<object?> propertyValues);
+        EngineCommand CreateUpdateFieldsUsingVersionCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser, IList<string> propertyNames, IList<object?> propertyValues);
 
         /// <summary>
         /// 新旧值版本的乐观锁
         /// </summary>
-        EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues);
+        EngineCommand CreateUpdateFieldsUsingOldNewCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues);
     }
 }

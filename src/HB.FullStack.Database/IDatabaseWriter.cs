@@ -18,31 +18,30 @@ namespace HB.FullStack.Database
         /// </summary>
         Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
 
-        Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new();
 
         /// <summary>
         /// Version自动加1
         /// </summary>
-        Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new();
 
         /// <summary>
         /// Version自动加1. 通过version来实现行粒度的乐观锁
         /// </summary>
-        Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : ServerDatabaseModel, new();
 
         /// <summary>
         /// Version自动加1，通过比较oldvalue来实现字段力度乐观锁.
-        /// 返回新的Version
         /// </summary>
         /// <param name="propertyOldNewValues">(propertyName-oldvalue-newvalue）</param>
-        Task<int> UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseModel, new();
 
         Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
 
-        Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new();
 
-        Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new();
 
-        Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new();
+        Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new();
     }
 }

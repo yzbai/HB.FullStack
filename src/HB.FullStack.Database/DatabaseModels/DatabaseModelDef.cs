@@ -9,6 +9,8 @@ namespace HB.FullStack.Database.DatabaseModels
     /// </summary>
     public class DatabaseModelDef
     {
+        public bool IsServerDatabaseModel { get; set; }
+
         /// <summary>
         /// 是否是GuidModel
         /// </summary>

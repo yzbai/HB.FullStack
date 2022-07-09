@@ -31,7 +31,7 @@ namespace HB.FullStack.Database
             _expressionVisitor = expressionVisitor;
         }
 
-        private string GetCachedSql(EngineType engineType, SqlType commandTextType, DatabaseModelDef[] modelDefs, IEnumerable<string>? propertyNames = null)
+        private string GetCachedSql(EngineType engineType, SqlType commandTextType, DatabaseModelDef[] modelDefs, IEnumerable<string>? propertyNames = null,bool addOrUpdateReturnModel = false)
         {
             string cacheKey = GetCommandTextCacheKey(commandTextType, modelDefs, propertyNames);
 
@@ -46,7 +46,7 @@ namespace HB.FullStack.Database
                     SqlType.DeleteModel => SqlHelper.CreateDeleteModelSql(modelDefs[0]),
                     SqlType.SelectModel => SqlHelper.CreateSelectModelSql(modelDefs),
                     SqlType.Delete => SqlHelper.CreateDeleteSql(modelDefs[0]),
-                    SqlType.AddOrUpdateModel => SqlHelper.CreateAddOrUpdateSql(modelDefs[0], engineType, true),
+                    SqlType.AddOrUpdateModel => SqlHelper.CreateAddOrUpdateSql(modelDefs[0], engineType, addOrUpdateReturnModel),
                     _ => throw new NotSupportedException(),
                 };
 
@@ -196,14 +196,18 @@ namespace HB.FullStack.Database
                 model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 
-        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser,
+        public EngineCommand CreateUpdateFieldsUsingVersionCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser,
             IList<string> propertyNames, IList<object?> propertyValues)
         {
             propertyNames.Add(nameof(LongIdDatabaseModel.Id));
-            propertyNames.Add(nameof(DatabaseModel.Version));
-            propertyNames.Add(nameof(DatabaseModel.LastUser));
-            propertyNames.Add(nameof(DatabaseModel.LastTime));
 
+            if (modelDef.IsServerDatabaseModel)
+            {
+                propertyNames.Add(nameof(ServerDatabaseModel.Version));
+                propertyNames.Add(nameof(ServerDatabaseModel.LastUser));
+                propertyNames.Add(nameof(ServerDatabaseModel.LastTime));
+            }
+            
             propertyValues.Add(id);
             propertyValues.Add(updateToVersion);
             propertyValues.Add(lastUser);
@@ -217,7 +221,7 @@ namespace HB.FullStack.Database
         private const string OldPropertyValueSuffix = "old";
         private const string NewPropertyValueSuffix = "new";
 
-        public EngineCommand CreateUpdateFieldsCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues,
+        public EngineCommand CreateUpdateFieldsUsingOldNewCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues,
             IList<object?> newPropertyValues)
         {
             string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new DatabaseModelDef[] { modelDef }, propertyNames);
@@ -225,8 +229,12 @@ namespace HB.FullStack.Database
             var oldParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0");
 
             propertyNames.Add(nameof(LongIdDatabaseModel.Id));
-            propertyNames.Add(nameof(DatabaseModel.LastUser));
-            propertyNames.Add(nameof(DatabaseModel.LastTime));
+
+            if (modelDef.IsServerDatabaseModel)
+            {
+                propertyNames.Add(nameof(ServerDatabaseModel.LastUser));
+                propertyNames.Add(nameof(ServerDatabaseModel.LastTime));
+            }
 
             newPropertyValues.Add(id);
             newPropertyValues.Add(lastUser);
@@ -447,10 +455,10 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update. 且Version不变,不增长
         /// </summary>
-        public EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
+        public EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, bool returnModel) where T : DatabaseModel, new()
         {
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.AddOrUpdateModel, new DatabaseModelDef[] { modelDef }),
+                GetCachedSql(engineType, SqlType.AddOrUpdateModel, new DatabaseModelDef[] { modelDef }, null, returnModel),
                 model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 

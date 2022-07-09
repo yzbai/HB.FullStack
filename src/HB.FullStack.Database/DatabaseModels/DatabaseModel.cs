@@ -7,48 +7,11 @@ using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DatabaseModels
 {
-    public abstract class DatabaseModel : Model, ICacheModel
+    public abstract class DatabaseModel : Model
     {
-        public int Version { get; set; } = -1;
-
-        public string LastUser { get; set; } = string.Empty;
-
-        public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
-
+        /// <summary>
+        /// 不是真正的删除，而是用Deleted=1表示删除。
+        /// </summary>
         public bool Deleted { get; /*internal*/ set; }
-    }
-
-    public abstract class LongIdDatabaseModel : DatabaseModel
-    {
-        [DatabaseModelProperty(0)]
-        public abstract long Id { get; set; }
-    }
-
-    public abstract class AutoIncrementIdDatabaseModel : LongIdDatabaseModel
-    {
-        [AutoIncrementPrimaryKey]
-        [DatabaseModelProperty(0)]
-        [CacheKey]
-        public override long Id { get; set; } = -1;
-    }
-
-    public abstract class FlackIdDatabaseModel : LongIdDatabaseModel
-    {
-        [PrimaryKey]
-        [DatabaseModelProperty(0)]
-        [CacheKey]
-        [LongId2]
-        public override long Id { get; set; } = StaticIdGen.GetId();
-    }
-
-    public abstract class GuidDatabaseModel : DatabaseModel
-    {
-        [DatabaseModelProperty(0)]
-        [NoEmptyGuid]
-        [PrimaryKey]
-        [CacheKey]
-        public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
-
-        //TODO: 这里是按AsBinary来生成的，在不同的数据库需要不同的生成
     }
 }

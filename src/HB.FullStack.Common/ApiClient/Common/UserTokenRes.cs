@@ -29,9 +29,9 @@ namespace HB.FullStack.Common.ApiClient
         [Required]
         public string RefreshToken { get; set; } = null!;
 
-        protected override int GetChildHashCode()
-        {
-            return HashCode.Combine(UserId, Mobile, LoginName, LoginName, Email, CreatedTime, AccessToken, RefreshToken);
-        }
+        //protected override int GetChildHashCode()
+        //{
+        //    return HashCode.Combine(UserId, Mobile, LoginName, LoginName, Email, CreatedTime, AccessToken, RefreshToken);
+        //}
     }
 }

@@ -349,5 +349,15 @@ namespace HB.FullStack.Database
 
             return exception;
         }
+
+        internal static Exception DatabaseNotWritable(string modelName, string itemJson)
+        {
+            DatabaseException ex = new DatabaseException(DatabaseErrorCodes.DatabaseNotWriteable);
+
+            ex.Data["ModelName"] = modelName;
+            ex.Data["Item"] = itemJson;
+
+            return ex;
+        }
     }
 }

@@ -166,14 +166,17 @@ namespace HB.FullStack.Database.DatabaseModels
 
             DatabaseModelDef modelDef = new DatabaseModelDef
             {
-                IsIdAutoIncrement = modelType.IsSubclassOf(typeof(AutoIncrementIdDatabaseModel)),
-                IsIdGuid = modelType.IsSubclassOf(typeof(GuidDatabaseModel)),
-                IsIdLong = modelType.IsSubclassOf(typeof(LongIdDatabaseModel)),
                 ModelType = modelType,
                 ModelFullName = modelType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
-                TableName = dbSchema.TableName
+                TableName = dbSchema.TableName,
+                
+                IsServerDatabaseModel = typeof(ServerDatabaseModel).IsAssignableFrom(modelType),
+                IsIdAutoIncrement = typeof(AutoIncrementIdDatabaseModel).IsAssignableFrom(modelType) || typeof(ClientAutoIncrementIdDatabaseModel).IsAssignableFrom(modelType),
+                IsIdGuid = typeof(GuidDatabaseModel).IsAssignableFrom(modelType) || typeof(ClientGuidDatabaseModel).IsAssignableFrom(modelType),
+                IsIdLong = typeof(LongIdDatabaseModel).IsAssignableFrom( modelType) || typeof(ClientLongIdDatabaseModel).IsAssignableFrom(modelType)
             };
+
             modelDef.DbTableReservedName = SqlHelper.GetReserved(modelDef.TableName!, engineType);
             modelDef.DatabaseWriteable = !dbSchema.ReadOnly;
 
@@ -197,7 +200,7 @@ namespace HB.FullStack.Database.DatabaseModels
                         modelPropertyAttribute = new DatabaseModelPropertyAttribute();
                     }
 
-                    if (info.Name == nameof(DatabaseModel.LastUser))
+                    if (info.Name == nameof(ServerDatabaseModel.LastUser))
                     {
                         modelPropertyAttribute.MaxLength = DefaultLengthConventions.MAX_LAST_USER_LENGTH;
                     }

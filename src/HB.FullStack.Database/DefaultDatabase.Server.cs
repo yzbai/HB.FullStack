@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
     /// 乐观锁用在写操作上，交由各个数据库执行者实施，Version方式。
     /// 批量操作，采用事务方式，也交由各个数据库执行者实施。
     /// </summary>
-    public sealed class DefaultDatabase : IDatabase
+    public sealed partial class DefaultDatabase : IDatabase
     {
         private readonly DatabaseCommonSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
@@ -180,8 +180,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 返回是否真正执行过Migration
         /// </summary>
-        /// <param name="migrations"></param>
-        /// <returns></returns>
         private async Task<bool> MigarateAsync(IEnumerable<Migration> migrations)
         {
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
@@ -270,10 +268,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 检查是否依次提供了不中断的Migration
         /// </summary>
-        /// <param name="startVersion"></param>
-        /// <param name="endVersion"></param>
-        /// <param name="curOrderedMigrations"></param>
-        /// <returns></returns>
         private static bool CheckMigrations(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
         {
             int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
@@ -729,7 +723,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                PrepareItem(item, lastUser);
+                PrepareItem(item, modelDef, lastUser);
 
                 var command = DbCommandBuilder.CreateAddCommand(EngineType, modelDef, item);
 
@@ -746,7 +740,7 @@ namespace HB.FullStack.Database
 
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItem(item);
+                    RestoreItem(item, modelDef);
                 }
 
                 throw;
@@ -755,24 +749,32 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItem(item);
+                    RestoreItem(item, modelDef);
                 }
 
                 throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, item: SerializeUtil.ToJson(item), ex);
             }
 
-            static void PrepareItem(T item, string lastUser)
+            static void PrepareItem(T item, DatabaseModelDef modelDef, string lastUser)
             {
-                DateTimeOffset utcNow = TimeUtil.UtcNow;
-                item.Version = 0;
-                item.LastUser = lastUser;
-                item.LastTime = utcNow;
-                //item.CreateTime = utcNow;
+                if (modelDef.IsServerDatabaseModel)
+                {
+                    DateTimeOffset utcNow = TimeUtil.UtcNow;
+                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
+                    serverItem.Version = 0;
+                    serverItem.LastUser = lastUser;
+                    serverItem.LastTime = utcNow;
+                    //item.CreateTime = utcNow;
+                }
             }
 
-            static void RestoreItem(T item)
+            static void RestoreItem(T item, DatabaseModelDef modelDef)
             {
-                item.Version = -1;
+                if (modelDef.IsServerDatabaseModel)
+                {
+                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
+                    serverItem.Version = -1;
+                }
             }
         }
 
@@ -791,7 +793,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                PrepareItem(item, lastUser);
+                PrepareItem(item, modelDef, lastUser);
 
                 var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, item);
 
@@ -814,7 +816,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItem(item);
+                    RestoreItem(item, modelDef);
                 }
 
                 throw;
@@ -823,28 +825,38 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItem(item);
+                    RestoreItem(item, modelDef);
                 }
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
 
-            static void PrepareItem(T item, string lastUser)
+            static void PrepareItem(T item, DatabaseModelDef modelDef, string lastUser)
             {
-                item.Deleted = true;
-                item.Version++;
-                item.LastUser = lastUser;
-                item.LastTime = TimeUtil.UtcNow;
+                if (modelDef.IsServerDatabaseModel)
+                {
+                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
+
+                    serverItem.Deleted = true;
+                    serverItem.Version++;
+                    serverItem.LastUser = lastUser;
+                    serverItem.LastTime = TimeUtil.UtcNow;
+                }
             }
 
-            static void RestoreItem(T item)
+            static void RestoreItem(T item, DatabaseModelDef modelDef)
             {
-                item.Deleted = false;
-                item.Version--;
+                if (modelDef.IsServerDatabaseModel)
+                {
+                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
+
+                    item.Deleted = false;
+                    serverItem.Version--;
+                }
             }
         }
 
-        public async Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
+        public async Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (item.Version >= updateToVersion)
             {
@@ -928,7 +940,7 @@ namespace HB.FullStack.Database
         ///  版本控制，如果item中Version未赋值，会无法更改
         ///  反应Version变化
         /// </summary>
-        public Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
+        public Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             return UpdateAsync(item, item.Version + 1, lastUser, transContext);
         }
@@ -936,7 +948,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// version + 1 every time
         /// </summary>
-        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : DatabaseModel, new()
+        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (propertyNameValues.Count <= 0)
             {
@@ -966,7 +978,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsUsingVersionCompareCommand(
                     EngineType,
                     modelDef,
                     id,
@@ -998,9 +1010,9 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// version + 1 every time
-        /// 返回新的Version
         /// </summary>
-        public async Task<int> UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext) where T : DatabaseModel, new()
+        public async Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext)
+            where T : DatabaseModel, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
             {
@@ -1025,7 +1037,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsCommand(
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsUsingOldNewCompareCommand(
                     EngineType,
                     modelDef,
                     id,
@@ -1034,30 +1046,19 @@ namespace HB.FullStack.Database
                     propertyNameOldNewValues.Select(t => t.Item2).ToList(),
                     propertyNameOldNewValues.Select(t => t.Item3).ToList());
 
-                using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName!, command, true).ConfigureAwait(false);
+                int matchedRows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
-                if (reader.Read())
+                if (matchedRows == 1)
                 {
-                    int matchedRows = reader.GetInt32(0);
-                    int newVersion = reader.GetInt32(1);
-
-                    if (matchedRows == 1)
-                    {
-                        return newVersion;
-                    }
-                    else if (matchedRows == 0)
-                    {
-                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
-                    }
-                    else
-                    {
-                        throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
-                    }
+                    return;
+                }
+                else if (matchedRows == 0)
+                {
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
                 }
                 else
                 {
-                    //imposibble here
-                    throw DatabaseExceptions.ExecuterError(command.CommandText, "IDataReader读不出数据了，完蛋了！");
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
@@ -1073,7 +1074,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
+        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1182,7 +1183,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
+        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1273,7 +1274,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchDeleteAsync, 反应version的变化
         /// </summary>
-        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
+        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {

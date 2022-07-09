@@ -109,9 +109,9 @@ namespace HB.FullStack.Database.Mapper
 
         public static IList<KeyValuePair<string, object>> ModelToParametersUsingReflection<T>(this T model, DatabaseModelDef modelDef, EngineType engineType, int number = 0) where T : DatabaseModel, new()
         {
-            if (model.Version < 0)
+            if (model is ServerDatabaseModel serverModel && serverModel.Version < 0)
             {
-                throw DatabaseExceptions.ModelVersionError(type: modelDef.ModelFullName, version: model.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DatabaseExceptions.ModelVersionError(type: modelDef.ModelFullName, version: serverModel.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(modelDef.FieldCount);
@@ -134,9 +134,9 @@ namespace HB.FullStack.Database.Mapper
         /// </summary>
         public static IList<KeyValuePair<string, object>> ModelToParameters<T>(this T model, DatabaseModelDef modelDef, EngineType engineType, IDatabaseModelDefFactory modelDefFactory, int number = 0) where T : DatabaseModel, new()
         {
-            if (model.Version < 0)
+            if (model is ServerDatabaseModel serverModel && serverModel.Version < 0)
             {
-                throw DatabaseExceptions.ModelVersionError(type: modelDef.ModelFullName, version: model.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DatabaseExceptions.ModelVersionError(type: modelDef.ModelFullName, version: serverModel.Version, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             Func<IDatabaseModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef, engineType);
