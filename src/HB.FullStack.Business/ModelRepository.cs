@@ -27,21 +27,22 @@ namespace HB.FullStack.Repository
     /// Service里面不要出现_database.Update / _database.Delete,全部由Repo来调用
     /// Cache Strategy : Cache Aside
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
+    /// Cache架构策略可以参考笔记
     /// </summary>
     /// <typeparam name="TDatabaseModel"></typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1003:Use generic event handler instances", Justification = "<Pending>")]
-    public abstract class ModelRepository<TDatabaseModel> where TDatabaseModel : DatabaseModel, new()
+    public abstract class ModelRepository<TDatabaseModel> where TDatabaseModel : ServerDatabaseModel, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
         protected ILogger Logger { get; }
-        protected ICache Cache { get; }
+        protected IModelCache Cache { get; }
         private IDatabase Database { get; }
 
         protected IDatabaseReader DbReader => Database;
 
         private IMemoryLockManager MemoryLockManager { get; }
 
-        protected ModelRepository(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        protected ModelRepository(ILogger logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
         {
             Logger = logger;
             Cache = cache;

@@ -16,11 +16,11 @@ namespace HB.FullStack.KVStore.KVStoreModels
         [CacheKey]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
-        public int Version { get; set; } = -1;
+        public long Timestamp { get; set; } = -1;
 
         public string LastUser { get; set; } = string.Empty;
 
-        public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
+        //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
 
         //public DateTimeOffset CreateTime { get; /*internal*/ set; } = TimeUtil.UtcNow;
 

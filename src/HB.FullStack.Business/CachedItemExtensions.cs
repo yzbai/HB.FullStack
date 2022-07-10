@@ -12,14 +12,14 @@ namespace HB.FullStack.Repository
 {
     public static class CachedItemExtensions
     {
-        public static Task<TResult?> GetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task<TResult?> GetAsync<TResult>(this IModelCache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
 
             return cache.GetAsync<TResult>(cachedItem.CacheKey, cancellationToken);
         }
 
-        public static Task SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task SetAsync<TResult>(this IModelCache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
             ThrowOnNullCacheValue(cachedItem);
@@ -37,7 +37,7 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, CachedItem cachedItem)
+        public static Task<bool> RemoveAsync(this IModelCache cache, CachedItem cachedItem)
         {
             ThrowOnEmptyCacheKey(cachedItem);
             ThrowOnEmptyUtcTicks(cachedItem);
@@ -45,7 +45,7 @@ namespace HB.FullStack.Repository
             return cache.RemoveAsync(cachedItem.CacheKey, cachedItem.UtcTicks);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
+        public static Task<bool> RemoveAsync(this IModelCache cache, IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
         {
             return cache.RemoveAsync(cachedItems.Select(item => item.CacheKey).ToArray(), utcNowTicks);
         }

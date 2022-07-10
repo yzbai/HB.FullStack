@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Cache
 {
-    public static class ICacheModelsExtensions
+    public static class IModelCacheExtensions
     {
-        public static Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : ICacheModel, new()
+        public static Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TCacheModel>();
             string dimensionKeyName = modelDef.KeyProperty.Name;
@@ -20,7 +20,7 @@ namespace HB.FullStack.Cache
             return cache.GetModelsAsync<TCacheModel>(dimensionKeyName, dimensionKeyValues, token);
         }
 
-        public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TCacheModel : ICacheModel, new()
+        public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
         {
             (IEnumerable<TCacheModel>? results, bool exist) = await cache.GetModelsAsync<TCacheModel>(dimensionKeyName, new object[] { dimensionKeyValue }, token).ConfigureAwait(false);
 
@@ -32,11 +32,13 @@ namespace HB.FullStack.Cache
             return (default, false);
         }
 
-        public static Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ICacheModel, new()
+        public static Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TCacheModel>();
 
             string dimensionKeyName = modelDef.KeyProperty.Name;
+            
+            //TODO: 应该是类似TypeValueToDbValue那样进行转换
             string dimensionKeyValue = modelDef.KeyProperty.GetValue(model)!.ToString()!;
 
             return cache.GetModelAsync<TCacheModel>(dimensionKeyName, dimensionKeyValue, token);
@@ -45,7 +47,7 @@ namespace HB.FullStack.Cache
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
         /// </summary>      
-        public static Task RemoveModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : ICacheModel, new()
+        public static Task RemoveModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
         {
             if (!models.Any())
             {
@@ -55,17 +57,16 @@ namespace HB.FullStack.Cache
             CacheModelDef modelDef = CacheModelDefFactory.Get<TCacheModel>();
             string dimensionKeyName = modelDef.KeyProperty.Name;
             IEnumerable<string> dimensionKeyValues = models.Select(e => modelDef.KeyProperty.GetValue(e)!.ToString()!).ToList();
-            IEnumerable<int> updatedVersions = models.Select(e => e.Version).ToList();
 
-            return cache.RemoveModelsAsync<TCacheModel>(dimensionKeyName, dimensionKeyValues, updatedVersions, token);
+            return cache.RemoveModelsAsync<TCacheModel>(dimensionKeyName, dimensionKeyValues, token);
         }
 
         /// <summary>
         /// 只能放在数据库Updated之后，因为version需要update之后的version
         /// </summary>
-        public static Task RemoveModelAsync<TCacheModel>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, int updatedVersion, CancellationToken token = default) where TCacheModel : ICacheModel, new()
+        public static Task RemoveModelAsync<TCacheModel>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
         {
-            return cache.RemoveModelsAsync<TCacheModel>(dimensionKeyName, new object[] { dimensionKeyValue }, new int[] { updatedVersion }, token);
+            return cache.RemoveModelsAsync<TCacheModel>(dimensionKeyName, new object[] { dimensionKeyValue }, token);
         }
 
         /// <summary>
@@ -78,13 +79,13 @@ namespace HB.FullStack.Cache
             string dimensionKeyName = modelDef.KeyProperty.Name;
             string dimensionKeyValue = modelDef.KeyProperty.GetValue(model)!.ToString()!;
 
-            return cache.RemoveModelAsync<TCacheModel>(dimensionKeyName, dimensionKeyValue, model.Version, token);
+            return cache.RemoveModelAsync<TCacheModel>(dimensionKeyName, dimensionKeyValue, token);
         }
 
         /// <summary>
         /// 返回是否成功更新。false是数据版本小于缓存中的
         /// </summary>
-        public static async Task<bool> SetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ICacheModel, new()
+        public static async Task<bool> SetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
         {
             IEnumerable<bool> results = await cache.SetModelsAsync<TCacheModel>(new TCacheModel[] { model }, token).ConfigureAwait(false);
 

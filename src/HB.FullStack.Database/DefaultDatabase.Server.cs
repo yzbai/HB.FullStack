@@ -54,7 +54,7 @@ namespace HB.FullStack.Database
         {
             if (databaseEngine.DatabaseSettings.Version < 0)
             {
-                throw DatabaseExceptions.VersionShouldBePositive(databaseEngine.DatabaseSettings.Version);
+                throw DatabaseExceptions.TimestampShouldBePositive(databaseEngine.DatabaseSettings.Version);
             }
 
             _databaseSettings = databaseEngine.DatabaseSettings;
@@ -721,9 +721,20 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, item, modelDef);
 
+            long oldTimestamp = -1;
+            string oldLastUser = "";
+
             try
             {
-                PrepareItem(item, modelDef, lastUser);
+                //Prepare
+                if (item is ServerDatabaseModel serverModel)
+                {
+                    oldTimestamp = serverModel.Timestamp;
+                    oldLastUser = serverModel.LastUser;
+
+                    serverModel.Timestamp = TimeUtil.UtcNowTicks;
+                    serverModel.LastUser = lastUser;
+                }
 
                 var command = DbCommandBuilder.CreateAddCommand(EngineType, modelDef, item);
 
@@ -740,7 +751,7 @@ namespace HB.FullStack.Database
 
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItem(item, modelDef);
+                    RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
                 throw;
@@ -749,31 +760,18 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItem(item, modelDef);
+                    RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
                 throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, item: SerializeUtil.ToJson(item), ex);
             }
 
-            static void PrepareItem(T item, DatabaseModelDef modelDef, string lastUser)
+            static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
             {
-                if (modelDef.IsServerDatabaseModel)
+                if (item is ServerDatabaseModel serverModel)
                 {
-                    DateTimeOffset utcNow = TimeUtil.UtcNow;
-                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
-                    serverItem.Version = 0;
-                    serverItem.LastUser = lastUser;
-                    serverItem.LastTime = utcNow;
-                    //item.CreateTime = utcNow;
-                }
-            }
-
-            static void RestoreItem(T item, DatabaseModelDef modelDef)
-            {
-                if (modelDef.IsServerDatabaseModel)
-                {
-                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
-                    serverItem.Version = -1;
+                    serverModel.Timestamp = oldTimestamp;
+                    serverModel.LastUser = oldLastUser;
                 }
             }
         }
@@ -791,11 +789,22 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, item, modelDef);
 
+            long oldTimestamp = -1;
+            string oldLastUser = "";
+
             try
             {
-                PrepareItem(item, modelDef, lastUser);
+                if (item is ServerDatabaseModel serverModel)
+                {
+                    oldTimestamp = serverModel.Timestamp;
+                    oldLastUser = serverModel.LastUser;
 
-                var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, item);
+                    serverModel.Deleted = true;
+                    serverModel.Timestamp = TimeUtil.UtcNowTicks;
+                    serverModel.LastUser = lastUser;
+                }
+
+                var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, item, oldTimestamp);
 
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
@@ -816,7 +825,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItem(item, modelDef);
+                    RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
                 throw;
@@ -825,44 +834,25 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItem(item, modelDef);
+                    RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
 
-            static void PrepareItem(T item, DatabaseModelDef modelDef, string lastUser)
+            static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
             {
-                if (modelDef.IsServerDatabaseModel)
+                if (item is ServerDatabaseModel serverModel)
                 {
-                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
-
-                    serverItem.Deleted = true;
-                    serverItem.Version++;
-                    serverItem.LastUser = lastUser;
-                    serverItem.LastTime = TimeUtil.UtcNow;
-                }
-            }
-
-            static void RestoreItem(T item, DatabaseModelDef modelDef)
-            {
-                if (modelDef.IsServerDatabaseModel)
-                {
-                    ServerDatabaseModel serverItem = ((ServerDatabaseModel)(object)item);
-
-                    item.Deleted = false;
-                    serverItem.Version--;
+                    serverModel.Deleted = false;
+                    serverModel.Timestamp = oldTimestamp;
+                    serverModel.LastUser = oldLastUser;
                 }
             }
         }
 
-        public async Task UpdateAsync<T>(T item, int updateToVersion, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
+        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DatabaseModel, new()
         {
-            if (item.Version >= updateToVersion)
-            {
-                throw DatabaseExceptions.UpdateVersionError(originalVersion: item.Version, updateToVersion: updateToVersion, item: item);
-            }
-
             ThrowIf.NotValid(item, nameof(item));
 
             DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
@@ -871,14 +861,23 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, item, modelDef);
 
-            int oldVersion = item.Version;
+            long oldTimestamp = -1;
+            string oldLastUser = "";
 
             try
             {
+                //Prepare
+                if (item is ServerDatabaseModel serverModel)
+                {
+                    oldTimestamp = serverModel.Timestamp;
+                    oldLastUser = serverModel.LastUser;
 
-                PrepareItem(item, updateToVersion, lastUser);
+                    serverModel.Timestamp = TimeUtil.UtcNowTicks;
+                    serverModel.LastUser = lastUser;
+                }
 
-                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, modelDef, item);
+                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, modelDef, item, oldTimestamp);
+
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
                 if (rows == 1)
@@ -907,7 +906,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItem(item, oldVersion);
+                    RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
                 throw;
@@ -916,39 +915,23 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItem(item, oldVersion);
+                    RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
 
-            static void PrepareItem(T item, int updateToVersion, string lastUser)
+            static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
             {
-                item.LastUser = lastUser;
-                item.LastTime = TimeUtil.UtcNow;
-                item.Version = updateToVersion;
-            }
-
-            static void RestoreItem(T item, int oldVersion)
-            {
-                item.Version = oldVersion;
+                if (item is ServerDatabaseModel serverModel)
+                {
+                    serverModel.Timestamp = oldTimestamp;
+                    serverModel.LastUser = oldLastUser;
+                }
             }
         }
 
-        /// <summary>
-        ///  修改，建议每次修改前先select，并放置在一个事务中。
-        ///  版本控制，如果item中Version未赋值，会无法更改
-        ///  反应Version变化
-        /// </summary>
-        public Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
-        {
-            return UpdateAsync(item, item.Version + 1, lastUser, transContext);
-        }
-
-        /// <summary>
-        /// version + 1 every time
-        /// </summary>
-        public async Task UpdateFieldsAsync<T>(object id, int curVersion, string lastUser, IList<(string, object?)> propertyNameValues, TransactionContext? transContext) where T : ServerDatabaseModel, new()
+        public async Task UpdateFieldsAsync<T>(object id, IList<(string, object?)> propertyNameValues, long curTimestamp, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (propertyNameValues.Count <= 0)
             {
@@ -965,9 +948,9 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            if (curVersion < 0)
+            if (curTimestamp <= 0)
             {
-                throw DatabaseExceptions.VersionShouldBePositive(curVersion);
+                throw DatabaseExceptions.TimestampShouldBePositive(curTimestamp);
             }
 
             DatabaseModelDef modelDef = ModelDefFactory.GetDef<T>()!;
@@ -978,14 +961,15 @@ namespace HB.FullStack.Database
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsUsingVersionCompareCommand(
-                    EngineType,
-                    modelDef,
-                    id,
-                    curVersion + 1,
-                    lastUser,
-                    propertyNameValues.Select(t => t.Item1).ToList(),
-                    propertyNameValues.Select(t => t.Item2).ToList());
+                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsUsingTimestampCompareCommand(
+                    engineType: EngineType,
+                    modelDef: modelDef,
+                    id: id,
+                    oldTimestamp: curTimestamp,
+                    newTimestamp: TimeUtil.UtcNowTicks,
+                    lastUser: lastUser,
+                    propertyNames: propertyNameValues.Select(t => t.Item1).ToList(),
+                    propertyValues: propertyNameValues.Select(t => t.Item2).ToList());
 
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
@@ -995,23 +979,20 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Version版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Timestamp版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, curTimestamp:{curTimestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, curTimestamp:{curTimestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, version:{curVersion}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, curTimestamp:{curTimestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
             }
         }
 
-        /// <summary>
-        /// version + 1 every time
-        /// </summary>
-        public async Task UpdateFieldsAsync<T>(object id, string lastUser, IList<(string, object?, object?)> propertyNameOldNewValues, TransactionContext? transContext)
+        public async Task UpdateFieldsAsync<T>(object id, IList<(string, object?, object?)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext)
             where T : DatabaseModel, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
@@ -1041,6 +1022,7 @@ namespace HB.FullStack.Database
                     EngineType,
                     modelDef,
                     id,
+                    TimeUtil.UtcNowTicks,
                     lastUser,
                     propertyNameOldNewValues.Select(t => t.Item1).ToList(),
                     propertyNameOldNewValues.Select(t => t.Item2).ToList(),
@@ -1094,9 +1076,13 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, items, modelDef);
 
+            List<long> oldTimestamps = new List<long>();
+            List<string?> oldLastUsers = new List<string?>();
+
             try
             {
-                PrepareItems(items, lastUser);
+                //Prepare
+                PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers);
 
                 IList<object> newIds = new List<object>();
 
@@ -1143,7 +1129,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItems(items);
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers);
                 }
 
                 throw;
@@ -1152,31 +1138,35 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItems(items);
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers);
                 }
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
 
-            static void PrepareItems(IEnumerable<T> items, string lastUser)
-            {
-                DateTimeOffset utcNow = TimeUtil.UtcNow;
 
-                foreach (var item in items)
-                {
-                    item.Version = 0;
-                    item.LastUser = lastUser;
-                    item.LastTime = utcNow;
-                    //item.CreateTime = utcNow;
-                }
+        }
+
+        private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers) where T : ServerDatabaseModel, new()
+        {
+            long timestamp = TimeUtil.UtcNowTicks;
+
+            foreach (var item in items)
+            {
+                oldTimestamps.Add(item.Timestamp);
+                oldLastUsers.Add(item.LastUser);
+
+                item.Timestamp = timestamp;
+                item.LastUser = lastUser;
             }
+        }
 
-            static void RestoreItems(IEnumerable<T> items)
+        private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers) where T : ServerDatabaseModel, new()
+        {
+            for (int i = 0; i < items.Count(); ++i)
             {
-                foreach (var item in items)
-                {
-                    item.Version = -1;
-                }
+                items.ElementAt(i).Timestamp = oldTimestamps[i];
+                items.ElementAt(i).LastUser = oldLastUsers[i] ?? "";
             }
         }
 
@@ -1203,9 +1193,12 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, items, modelDef);
 
+            List<long> oldTimestamps = new List<long>();
+            List<string?> oldLastUsers = new List<string?>();
+
             try
             {
-                PrepareItems(items, lastUser);
+                PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers);
 
                 var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, modelDef, items, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
@@ -1237,7 +1230,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItems(items);
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers);
                 }
 
                 throw;
@@ -1246,34 +1239,13 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItems(items);
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers);
                 }
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
-
-            static void PrepareItems(IEnumerable<T> items, string lastUser)
-            {
-                foreach (var item in items)
-                {
-                    item.Version++;
-                    item.LastUser = lastUser;
-                    item.LastTime = TimeUtil.UtcNow;
-                }
-            }
-
-            static void RestoreItems(IEnumerable<T> items)
-            {
-                foreach (var item in items)
-                {
-                    item.Version--;
-                }
-            }
         }
 
-        /// <summary>
-        /// BatchDeleteAsync, 反应version的变化
-        /// </summary>
         public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
@@ -1294,9 +1266,12 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser, items, modelDef);
 
+            List<long> oldTimestamps = new List<long>();
+            List<string?> oldLastUsers = new List<string?>();
+
             try
             {
-                PrepareItems(items, lastUser);
+                PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers);
 
                 var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, modelDef, items, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
@@ -1328,7 +1303,7 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
                 {
-                    RestoreItems(items);
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers);
                 }
 
                 throw;
@@ -1337,30 +1312,10 @@ namespace HB.FullStack.Database
             {
                 if (transContext != null)
                 {
-                    RestoreItems(items);
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers);
                 }
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
-            }
-
-            static void PrepareItems(IEnumerable<T> items, string lastUser)
-            {
-                foreach (var item in items)
-                {
-                    item.Version++;
-                    item.Deleted = true;
-                    item.LastUser = lastUser;
-                    item.LastTime = TimeUtil.UtcNow;
-                }
-            }
-
-            static void RestoreItems(IEnumerable<T> items)
-            {
-                foreach (var item in items)
-                {
-                    item.Version--;
-                    item.Deleted = false;
-                }
             }
         }
 

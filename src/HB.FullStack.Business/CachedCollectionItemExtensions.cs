@@ -12,14 +12,14 @@ namespace HB.FullStack.Repository
 {
     public static class CachedCollectionItemExtensions
     {
-        public static Task<TResult?> GetAsync<TResult>(this ICache cache, CachedCollectionItem<TResult> cachedCollectionItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task<TResult?> GetAsync<TResult>(this IModelCache cache, CachedCollectionItem<TResult> cachedCollectionItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedCollectionItem);
 
             return cache.GetFromCollectionAsync<TResult>(cachedCollectionItem.CollectionKey, cachedCollectionItem.ItemKey, cancellationToken);
         }
 
-        public static Task SetAsync<TResult>(this ICache cache, CachedCollectionItem<TResult> cachedCollectionItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task SetAsync<TResult>(this IModelCache cache, CachedCollectionItem<TResult> cachedCollectionItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedCollectionItem);
             ThrowOnNullCacheValue(cachedCollectionItem);
@@ -38,7 +38,7 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, CachedCollectionItem cachedCollectionItem, CancellationToken cancellationToken = default)
+        public static Task<bool> RemoveAsync(this IModelCache cache, CachedCollectionItem cachedCollectionItem, CancellationToken cancellationToken = default)
         {
             ThrowOnEmptyCacheKey(cachedCollectionItem);
             ThrowOnEmptyUtcTicks(cachedCollectionItem);
@@ -46,7 +46,7 @@ namespace HB.FullStack.Repository
             return cache.RemoveFromCollectionAsync(cachedCollectionItem.CollectionKey, cachedCollectionItem.ItemKey, cachedCollectionItem.UtcTicks, cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
+        public static Task<bool> RemoveAsync(this IModelCache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
         {
             if (!cachedCollectionItems.Any())
             {
@@ -70,7 +70,7 @@ namespace HB.FullStack.Repository
             return cache.RemoveFromCollectionAsync(collectionKey, cachedCollectionItems.Select(item => item.ItemKey).ToList(), utcTicks, cancellationToken);
         }
 
-        public static Task<bool> RemoveCollectionAsync(this ICache cache, CachedCollectionItem cachedCollectionItem)
+        public static Task<bool> RemoveCollectionAsync(this IModelCache cache, CachedCollectionItem cachedCollectionItem)
         {
             return cache.RemoveCollectionAsync(cachedCollectionItem.CollectionKey);
         }

@@ -12,27 +12,25 @@ namespace HB.FullStack.KVStore.Engine
 
         void Close();
 
+        
         /// <summary>
-        /// 
+        /// 返回 modelJson - timestamp
         /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="modelName"></param>
-        /// <param name="modelKeys"></param>
-        /// <returns></returns>
-        
-        Task<IEnumerable<Tuple<string?, int>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys);
+        Task<IEnumerable<Tuple<string?, long>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys);
+
+        /// <summary>
+        /// 返回 modelJson - timestamp
+        /// </summary>
+        Task<IEnumerable<Tuple<string?, long>>> ModelGetAllAsync(string storeName, string modelName);
 
         
-        Task<IEnumerable<Tuple<string?, int>>> ModelGetAllAsync(string storeName, string modelName);
+        Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, long newTimestamp);
 
         
-        Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons);
+        Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, long newTimestamp);
 
         
-        Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<int> modelVersions);
-
-        
-        Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<int> modelVersions);
+        Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps);
 
         
         Task<bool> ModelDeleteAllAsync(string storeName, string modelName);

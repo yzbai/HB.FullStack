@@ -6,7 +6,7 @@ namespace HB.FullStack.Database.SQL
     {
         AddModel,
         UpdateModel,
-        UpdateFieldsUsingVersionCompare,
+        UpdateFieldsUsingTimestampCompare,
         UpdateFieldsUsingOldNewCompare,
         DeleteModel,
         SelectModel,

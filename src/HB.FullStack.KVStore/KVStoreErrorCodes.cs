@@ -17,7 +17,7 @@ namespace HB.FullStack.KVStore
         public static ErrorCode KVStoreError { get; set; } = new ErrorCode(nameof(KVStoreError), "");
         public static ErrorCode NoSuchInstance { get; set; } = new ErrorCode(nameof(NoSuchInstance), "");
         public static ErrorCode KVStoreExistAlready { get; set; } = new ErrorCode(nameof(KVStoreExistAlready), "");
-        public static ErrorCode KVStoreVersionNotMatched { get; set; } = new ErrorCode(nameof(KVStoreVersionNotMatched), "");
+        public static ErrorCode KVStoreTimestampNotMatched { get; set; } = new ErrorCode(nameof(KVStoreTimestampNotMatched), "");
         public static ErrorCode NoModelSchemaFound { get; set; } = new ErrorCode(nameof(NoModelSchemaFound), "");
         public static ErrorCode LackKVStoreKeyAttributeError { get; set; } = new ErrorCode(nameof(LackKVStoreKeyAttributeError), "");
         public static ErrorCode VersionsKeysNotEqualError { get; set; } = new ErrorCode(nameof(VersionsKeysNotEqualError), "");

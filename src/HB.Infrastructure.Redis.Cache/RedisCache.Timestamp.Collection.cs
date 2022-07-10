@@ -23,7 +23,7 @@ namespace HB.Infrastructure.Redis.Cache
         // ARGV[1] = absolute-expiration - unix time seconds as long (null for none)
         // ARGV[2] = sliding-expiration - seconds  as long (null for none)
         // ARGV[3] = ttl seconds 当前过期要设置的过期时间，由上面两个推算
-        // ARGV[4] = utcNowTicks
+        // ARGV[4] = timestamp
         // ARGV[5] = 3 (数据的个数)
 
         // ARGV[6] = key1_data
@@ -46,13 +46,13 @@ local dataNum = tonumber(ARGV[5])
 for j=1, dataNum do
     local minTimestamp = redis.call('get', minTS..KEYS[j+1])
 
-    if(minTimestamp and tonumber(minTimestamp)>tonumber(ARGV[4])) then
+    if(minTimestamp and tonumber(minTimestamp)>=tonumber(ARGV[4])) then
         error = 8
     end
 
     if(error == 0) then
         local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1]..'__ts__')
-        if(cachedTimestamp and tonumber(cachedTimestamp) > tonumber(ARGV[4])) then
+        if(cachedTimestamp and tonumber(cachedTimestamp) >= tonumber(ARGV[4])) then
             error = 90000
         end
     end
@@ -150,7 +150,7 @@ return data[3]";
             }
         }
 
-        public async Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public async Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
@@ -188,7 +188,7 @@ return data[3]";
                 redisValues[0] = absoluteExpireUnixSeconds ?? -1;
                 redisValues[1] = slideSeconds ?? -1;
                 redisValues[2] = GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds) ?? -1;
-                redisValues[3] = utcTicks.Ticks;
+                redisValues[3] = timestamp;
                 redisValues[4] = itemCount;
 
                 for (int i = 0; i < itemCount; ++i)
@@ -210,11 +210,11 @@ return data[3]";
                 }
                 else if (rt < 90000)
                 {
-                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(collectionKey, utcTicks, options);
+                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(collectionKey, timestamp, options);
                 }
                 else
                 {
-                    Logger.LogCacheUpdateTimestampConcurrency(collectionKey, utcTicks, options);
+                    Logger.LogCacheUpdateTimestampConcurrency(collectionKey, timestamp, options);
                 }
 
                 return false;
@@ -225,15 +225,15 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await SetToCollectionAsync(collectionKey, itemKeys, itemValues, utcTicks, options, token).ConfigureAwait(false);
+                return await SetToCollectionAsync(collectionKey, itemKeys, itemValues, timestamp, options, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.SetError(collectionKey, utcTicks, options, ex);
+                throw CacheExceptions.SetError(collectionKey, timestamp, options, ex);
             }
         }
 
-        public async Task<bool> RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, UtcNowTicks utcTicks, CancellationToken token = default)
+        public async Task<bool> RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, long timestamp, CancellationToken token = default)
         {
             //TODO: 测试这个
 
@@ -266,8 +266,8 @@ return data[3]";
                     RedisValue[] redisValues = new RedisValue[]
                     {
                         group.Length,
-                        utcTicks.Ticks,
-                        INVALIDATION_VERSION_EXPIRY_SECONDS
+                        timestamp,
+                        MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS
                     };
 
                     RedisResult redisResult = await database.ScriptEvaluateAsync(
@@ -286,11 +286,11 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await RemoveFromCollectionAsync(collectionKey, itemKeys, utcTicks, token).ConfigureAwait(false);
+                return await RemoveFromCollectionAsync(collectionKey, itemKeys, timestamp, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveMultipleError(collectionKey, itemKeys, utcTicks, ex);
+                throw CacheExceptions.RemoveMultipleError(collectionKey, itemKeys, timestamp, ex);
             }
         }
 

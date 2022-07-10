@@ -17,7 +17,7 @@ namespace HB.FullStack.Repository
     {          
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
-            ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
+            IModelCache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
             where TResult : class
         {
             //Cache First
@@ -66,18 +66,18 @@ namespace HB.FullStack.Repository
             }
         }
         
-        public static void InvalidateCache(CachedItem cachedItem, ICache cache)
+        public static void InvalidateCache(CachedItem cachedItem, IModelCache cache)
         {
             cache.RemoveAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
 
-        private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
+        private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, IModelCache cache) where TResult : class
         {
             cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
-        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, ICache cache)
+        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, IModelCache cache)
         {
             cache.RemoveAsync(cachedItems, utcNowTicks).SafeFireAndForget(OnException);
         }

@@ -45,9 +45,6 @@ namespace HB.FullStack.KVStore
             return GetModelKey(item, modelDef);
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public async Task<T?> GetAsync<T>(string key) where T : KVStoreModel, new()
         {
             IEnumerable<T?> ts = await GetAsync<T>(new string[] { key }).ConfigureAwait(false);
@@ -55,16 +52,13 @@ namespace HB.FullStack.KVStore
             return ts.Any() ? ts.ElementAt(0) : null;
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new()
         {
             KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
 
             try
             {
-                IEnumerable<Tuple<string?, int>> tuples = await _engine.ModelGetAsync(
+                IEnumerable<Tuple<string?, long>> tuples = await _engine.ModelGetAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
                     keys).ConfigureAwait(false);
@@ -77,15 +71,12 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreModel, new()
         {
             KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
             try
             {
-                IEnumerable<Tuple<string?, int>> tuples = await _engine.ModelGetAllAsync(
+                IEnumerable<Tuple<string?, long>> tuples = await _engine.ModelGetAllAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!).ConfigureAwait(false);
 
@@ -97,17 +88,11 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public Task AddAsync<T>(T item, string lastUser) where T : KVStoreModel, new()
         {
             return AddAsync(new T[] { item }, lastUser);
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
@@ -121,42 +106,34 @@ namespace HB.FullStack.KVStore
 
             try
             {
+                long newTimestamp = TimeUtil.UtcNowTicks;
+
                 foreach (var t in items)
                 {
+                    t.Timestamp = newTimestamp;
                     t.LastUser = lastUser;
-                    t.LastTime = TimeUtil.UtcNow;
                 }
 
                 await _engine.ModelAddAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
                     items.Select(t => GetModelKey(t, modelDef)),
-                    items.Select(t => SerializeUtil.ToJson(t))
+                    items.Select(t => SerializeUtil.ToJson(t)),
+                    newTimestamp
                     ).ConfigureAwait(false);
-
-                //version 变化
-                foreach (var t in items)
-                {
-                    t.Version = 0;
-                }
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
+                //TODO: 要像数据库那样Restore吗？
                 throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, items, ex);
             }
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreModel, new()
         {
             return UpdateAsync(new T[] { item }, lastUser);
         }
 
-        /// <summary>
-        /// 反应Version变化
-        /// </summary>
         public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
@@ -170,12 +147,13 @@ namespace HB.FullStack.KVStore
 
             try
             {
-                IEnumerable<int> originalVersions = items.Select(t => t.Version).ToArray();
+                IEnumerable<long> originalVersions = items.Select(t => t.Timestamp).ToArray();
+                long newTimestamp = TimeUtil.UtcNowTicks;
 
                 foreach (var t in items)
                 {
+                    t.Timestamp = newTimestamp;
                     t.LastUser = lastUser;
-                    t.LastTime = TimeUtil.UtcNow;
                 }
 
                 await _engine.ModelUpdateAsync(
@@ -183,13 +161,7 @@ namespace HB.FullStack.KVStore
                     modelDef.ModelType.FullName!,
                     items.Select(t => GetModelKey(t, modelDef)).ToList(),
                     items.Select(t => SerializeUtil.ToJson(t)).ToList(),
-                    originalVersions).ConfigureAwait(false);
-
-                //反应Version变化
-                foreach (var t in items)
-                {
-                    t.Version++;
-                }
+                    originalVersions, newTimestamp).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
@@ -214,16 +186,16 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        public Task DeleteAsync<T>(string key, int version) where T : KVStoreModel, new()
+        public Task DeleteAsync<T>(string key, long timestamp) where T : KVStoreModel, new()
         {
-            return DeleteAsync<T>(new string[] { key }, new int[] { version });
+            return DeleteAsync<T>(new string[] { key }, new long[] { timestamp });
         }
 
-        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<int> versions) where T : KVStoreModel, new()
+        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : KVStoreModel, new()
         {
-            ThrowIf.NullOrEmpty(versions, nameof(versions));
+            ThrowIf.NullOrEmpty(timestamps, nameof(timestamps));
 
-            if (keys.Count() != versions.Count())
+            if (keys.Count() != timestamps.Count())
             {
                 throw Exceptions.VersionsKeysNotEqualError();
             }
@@ -236,16 +208,16 @@ namespace HB.FullStack.KVStore
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
                     keys,
-                    versions
+                    timestamps
                     ).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, keys: keys, values: versions, innerException: ex);
+                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, keys: keys, values: timestamps, innerException: ex);
             }
         }
 
-        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<string?, int>> tuples) where T : KVStoreModel, new()
+        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<string?, long>> tuples) where T : KVStoreModel, new()
         {
             List<T?> rt = new List<T?>();
 
@@ -258,7 +230,7 @@ namespace HB.FullStack.KVStore
                 }
                 else
                 {
-                    item.Version = t.Item2;
+                    item.Timestamp = t.Item2;
                     rt.Add(item);
                 }
             }

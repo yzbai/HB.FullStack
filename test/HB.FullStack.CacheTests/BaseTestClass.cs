@@ -33,7 +33,7 @@ namespace HB.FullStack.CacheTests
 
         public static IDatabase Db { get; set; } = null!;
 
-        public static ICache Cache { get; set; } = null!;
+        public static IModelCache Cache { get; set; } = null!;
         public static ConnectionMultiplexer RedisConnection { get; private set; } = null!;
         public static int DatabaseNumber { get; private set; }
         public static string ApplicationName { get; private set; } = null!;
@@ -101,7 +101,7 @@ namespace HB.FullStack.CacheTests
             DbName = dbName;
             Db = database;
 
-            Cache = serviceProvider.GetRequiredService<ICache>();
+            Cache = serviceProvider.GetRequiredService<IModelCache>();
             RedisConnection = ConnectionMultiplexer.Connect(configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
             DatabaseNumber = Convert.ToInt32(configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
             ApplicationName = configuration["RedisCache:ApplicationName"];

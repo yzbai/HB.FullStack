@@ -8,6 +8,7 @@ namespace HB.FullStack.Common.Cache.CacheModels
 {
     public interface ICacheModel : IModel
     {
-        int Version { get; set; }
+        //int Version { get; set; }
+        public long Timestamp { get; set; }
     }
 }

@@ -42,19 +42,19 @@ namespace HB.FullStack.Database
 
         public static ErrorCode ModelHasNotSupportedPropertyType { get; } = new ErrorCode( nameof(ModelHasNotSupportedPropertyType), "");
 
-        public static ErrorCode ModelVersionError { get; } = new ErrorCode( nameof(ModelVersionError), "");
+        public static ErrorCode ModelTimestampError { get; } = new ErrorCode( nameof(ModelTimestampError), "");
         public static ErrorCode NotInitializedYet { get; } = new ErrorCode( nameof(NotInitializedYet), "");
         public static ErrorCode UpdateVersionError { get; } = new ErrorCode(nameof(UpdateVersionError), "");
     }
 
     internal static class DatabaseExceptions
     {
-        internal static Exception VersionShouldBePositive(int wrongVersion)
+        internal static Exception TimestampShouldBePositive(long timestamp)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.SystemInfoError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ModelTimestampError);
 
-            exception.Data["WrongVersion"] = wrongVersion;
-            exception.Data["Cause"] = "Version Should Be Positive";
+            exception.Data["WrongTimestamp"] = timestamp;
+            exception.Data["Cause"] = "Timestamp Should Be Positive";
 
             return exception;
         }
@@ -228,13 +228,13 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception ModelVersionError(string type, int version, string cause)
+        internal static Exception ModelVersionError(string type, long timestamp, string cause)
         {
-            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ModelVersionError);
+            DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ModelTimestampError);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = "Version Error. - " + cause;
-            exception.Data["Version"] = version;
+            exception.Data["Timestamp"] = timestamp;
 
             return exception;
         }

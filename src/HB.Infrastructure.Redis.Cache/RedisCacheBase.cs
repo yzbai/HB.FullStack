@@ -14,7 +14,7 @@ namespace HB.Infrastructure.Redis.Cache
 {
     public class RedisCacheBase
     {
-        protected const int INVALIDATION_VERSION_EXPIRY_SECONDS = 60;
+        protected const int MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS = 60;
 
         private readonly RedisCacheOptions _options;
 
@@ -61,18 +61,20 @@ namespace HB.Infrastructure.Redis.Cache
                     LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP),
 
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
-                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP),
-                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP),
+                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP_2),
+                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP_2),
                     LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
 
                     LoadedModelsGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH),
                     LoadedModelsGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH_BY_DIMENSION),
                     LoadedModelsSetLua = server.ScriptLoad(RedisCache.LUA_MODELS_SET),
-                    LoadedModelsRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE),
-                    LoadedModelsRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION),
+                    //LoadedModelsRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE),
+                    LoadedModelsRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_2),
+                    //LoadedModelsRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION),
+                    LoadedModelsRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION_2),
 
-                    LoadedModelsForcedRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_FORECED_NO_VERSION),
-                    LoadedModelsForcedRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION),
+                    //LoadedModelsForcedRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_FORECED_NO_VERSION),
+                    //LoadedModelsForcedRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION),
                 };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;

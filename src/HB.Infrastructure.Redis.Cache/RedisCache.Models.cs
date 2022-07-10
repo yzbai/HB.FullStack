@@ -21,17 +21,21 @@ namespace HB.Infrastructure.Redis.Cache
     /// Model in Redis:
     ///
     ///                                 |------ abexp    :  value
-    /// Id------------------------------|------ slidexp  :  value        //same as IDistributed way
+    /// Id------------------------------|
     ///                                 |------ data     :  jsonString
+    ///                                 |------ dim      :  keyName
+    ///                                 |------ timestamp 
     ///
     ///
     ///                                 |------- DimensionKeyValue_1   :  Id
     /// ModelName_DimensionKeyName-----|......
     ///                                 |------- DimensionKeyValue_n   :  Id
+    ///                                 
+    /// _minTS..Id ---------------------| 锁，保证model被删除后的一段时间内，没有比这个小的历史版本写到缓存里
     ///
     /// 所以ModelName_DimensionKeyName 这个key是一个索引key
     /// </summary>
-    public partial class RedisCache : RedisCacheBase, ICache
+    public partial class RedisCache : RedisCacheBase, FullStack.Cache.IModelCache
     {
         /// <summary>
         /// keys:id1, id2, id3
@@ -84,7 +88,6 @@ return array
         /// ARGV:3(model_count), sldexp, nowInUnixSeconds
         /// </summary>
         public const string LUA_MODELS_GET_AND_REFRESH_BY_DIMENSION = @"
-
 local number = tonumber(ARGV[1])
 local existCount = redis.call('exists', unpack(KEYS))
 if (existCount ~= number) then
@@ -133,9 +136,10 @@ end
 return array";
 
         /// <summary>
+        /// _minTS设置timestamp最小值锁。说明历史上最小的timestamp，比这个小的，版本不对，就不用写了。
         /// 返回0为未更新，返回1为更新
         /// keys: model1_idKey, model1_dimensionkey1, model1_dimensionkey2, model1_dimensionkey3, model2_idKey, model2_dimensionkey1, model2_dimensionkey2, model2_dimensionkey3
-        /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_version, model1_dimensionKeyJoinedString, model2_data, model2_version, model2_dimensionKeyJoinedString
+        /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_timestamp, model1_dimensionKeyJoinedString, model2_data, model2_timestamp, model2_dimensionKeyJoinedString
         /// </summary>
         public const string LUA_MODELS_SET = @"
 local modelNum = tonumber(ARGV[3])
@@ -145,14 +149,14 @@ for j=1, modelNum do
     rt[j]=0
     local keyIndex= 1 + (j-1) *(dimNum+1)
 
-    local minVersion = redis.call('get', '_minV'..KEYS[keyIndex])
+    local minTimestamp = redis.call('get', '_minTS'..KEYS[keyIndex])
 
-    if ((not minVersion) or tonumber(minVersion)<= tonumber(ARGV[6+(j-1)*3])) then
+    if ((not minTimestamp) or tonumber(minTimestamp)< tonumber(ARGV[6+(j-1)*3])) then
 
-        local cached=redis.call('hget', KEYS[keyIndex], 'version')
+        local cached=redis.call('hget', KEYS[keyIndex], 'timestamp')
         if((not cached) or tonumber(cached)< tonumber(ARGV[6+(j-1) * 3])) then
 
-            redis.call('hmset', KEYS[keyIndex],'absexp',ARGV[1],'data',ARGV[5+(j-1)*3], 'version', ARGV[6+(j-1)*3], 'dim', ARGV[7+(j-1)*3])
+            redis.call('hmset', KEYS[keyIndex],'absexp',ARGV[1],'data',ARGV[5+(j-1)*3], 'timestamp', ARGV[6+(j-1)*3], 'dim', ARGV[7+(j-1)*3])
 
             if(ARGV[2]~='-1') then
                 redis.call('expire',KEYS[keyIndex], ARGV[2])
@@ -175,33 +179,91 @@ for j=1, modelNum do
 end
 return rt";
 
+        //        /// <summary>
+        //        /// 删除，并设置最小timestamp锁
+        //        /// keys: idKey1, idKey2, idKey3
+        //        /// argv: 3(model_num), invalidationKey_expire_seconds, updated_timestamp_value1, updated_timestamp_value2, updated_timestamp_value3
+        //        /// </summary>
+        //        public const string LUA_MODELS_REMOVE = @"
+        //local modelNum = tonumber(ARGV[1])
+        //for j=1, modelNum do
+
+        //    redis.call('set', '_minTS'..KEYS[j], ARGV[j+2], 'EX', ARGV[2])
+
+        //    local data=redis.call('hget', KEYS[j], 'dim')
+
+        //    redis.call('del', KEYS[j])
+
+        //    if(data and data~='') then
+        //        for i in string.gmatch(data, '%S+') do
+        //            redis.call('del', i)
+        //        end
+        //    end
+        //end
+        //";
+
         /// <summary>
+        /// 删除，并设置最小timestamp锁
         /// keys: idKey1, idKey2, idKey3
-        /// argv: 3(model_num), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
+        /// argv: 3(model_num), invalidationKey_expire_seconds
+        /// 需要SET_MODEL时，新的timestamp>_minTS,而不是大于等于
         /// </summary>
-        public const string LUA_MODELS_REMOVE = @"
+        public const string LUA_MODELS_REMOVE_2 = @"
 local modelNum = tonumber(ARGV[1])
 for j=1, modelNum do
 
-    redis.call('set', '_minV'..KEYS[j], ARGV[j+2], 'EX', ARGV[2])
+    local data=redis.call('hmget', KEYS[j], 'dim','timestamp')
 
-    local data=redis.call('hget', KEYS[j], 'dim')
+    redis.call('set', '_minTS'..KEYS[j], data[2], 'EX', ARGV[2])
 
     redis.call('del', KEYS[j])
 
-    if(data and data~='') then
-        for i in string.gmatch(data, '%S+') do
+    local dim=data[1]
+
+    if(dim and dim ~= '') then
+        for i in string.gmatch(dim, '%S+') do
             redis.call('del', i)
         end
     end
 end
 ";
 
+        //        /// <summary>
+        //        /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
+        //        /// argv: 3(model_count), invalidationKey_expire_seconds, updated_timestamp_value1, updated_timestamp_value2, updated_timestamp_value3
+        //        /// </summary>
+        //        public const string LUA_MODELS_REMOVE_BY_DIMENSION = @"
+        //local modelNum = tonumber(ARGV[1])
+
+        //for j = 1, modelNum do
+        //    local id = redis.call('get',KEYS[j])
+
+        //    if (id) then
+
+        //        redis.call('set', '_minTS'..id, ARGV[j+2], 'EX', ARGV[2])
+
+        //        local data= redis.call('hget',id, 'dim')
+
+        //        if (not data) then
+        //            redis.call('del', KEYS[1])
+        //        else
+        //            redis.call('del',id)
+
+        //            if (data~='') then
+        //                for i in string.gmatch(data, '%S+') do
+        //                    redis.call('del', i)
+        //                end
+        //            end
+        //        end
+        //    end
+        //end
+        //";
+
         /// <summary>
         /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
-        /// argv: 3(model_count), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
+        /// argv: 3(model_count), invalidationKey_expire_seconds
         /// </summary>
-        public const string LUA_MODELS_REMOVE_BY_DIMENSION = @"
+        public const string LUA_MODELS_REMOVE_BY_DIMENSION_2 = @"
 local modelNum = tonumber(ARGV[1])
 
 for j = 1, modelNum do
@@ -209,16 +271,17 @@ for j = 1, modelNum do
 
     if (id) then
 
-        redis.call('set', '_minV'..id, ARGV[j+2], 'EX', ARGV[2])
-
-        local data= redis.call('hget',id, 'dim')
+        local data= redis.call('hmget',id, 'dim', 'timestamp')
 
         if (not data) then
             redis.call('del', KEYS[1])
         else
             redis.call('del',id)
-
-            if (data~='') then
+            redis.call('set', '_minTS'..id, data[2], 'EX', ARGV[2])
+            
+            local dim = data[1]
+            
+            if (dim and dim ~= '') then
                 for i in string.gmatch(data, '%S+') do
                     redis.call('del', i)
                 end
@@ -228,71 +291,79 @@ for j = 1, modelNum do
 end
 ";
 
-        /// <summary>
-        /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
-        /// argv: 3(model_count)
-        /// </summary>
-        public const string LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION = @"
-local modelNum = tonumber(ARGV[1])
+//        /// <summary>
+//        /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
+//        /// argv: 3(model_count)
+//        /// </summary>
+//        public const string LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION = @"
+//local modelNum = tonumber(ARGV[1])
 
-for j = 1, modelNum do
-    local id = redis.call('get',KEYS[j])
+//for j = 1, modelNum do
+//    local id = redis.call('get',KEYS[j])
 
-    if (id) then
+//    if (id) then
 
-        local data= redis.call('hget',id, 'dim')
+//        local data= redis.call('hget',id, 'dim')
 
-        if (not data) then
-            redis.call('del', KEYS[1])
-        else
-            redis.call('del',id)
+//        if (not data) then
+//            redis.call('del', KEYS[1])
+//        else
+//            redis.call('del',id)
 
-            if (data~='') then
-                for i in string.gmatch(data, '%S+') do
-                    redis.call('del', i)
-                end
-            end
-        end
-    end
-end
-";
+//            if (data~='') then
+//                for i in string.gmatch(data, '%S+') do
+//                    redis.call('del', i)
+//                end
+//            end
+//        end
+//    end
+//end
+//";
 
-        /// <summary>
-        /// keys: idKey1, idKey2, idKey3
-        /// argv: 3(model_num)
-        /// </summary>
-        public const string LUA_MODELS_REMOVE_FORECED_NO_VERSION = @"
-local modelNum = tonumber(ARGV[1])
-for j=1, modelNum do
+//        /// <summary>
+//        /// keys: idKey1, idKey2, idKey3
+//        /// argv: 3(model_num)
+//        /// </summary>
+//        public const string LUA_MODELS_REMOVE_FORECED_NO_VERSION = @"
+//local modelNum = tonumber(ARGV[1])
+//for j=1, modelNum do
 
-    local data=redis.call('hget', KEYS[j], 'dim')
+//    local data=redis.call('hget', KEYS[j], 'dim')
 
-    redis.call('del', KEYS[j])
+//    redis.call('del', KEYS[j])
 
-    if(data and data~='') then
-        for i in string.gmatch(data, '%S+') do
-            redis.call('del', i)
-        end
-    end
-end
-";
+//    if(data and data~='') then
+//        for i in string.gmatch(data, '%S+') do
+//            redis.call('del', i)
+//        end
+//    end
+//end
+//";
 
         public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
         {
             Logger.LogInformation($"RedisCache初始化完成");
         }
 
-        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : ICacheModel, new()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TModel"></typeparam>
+        /// <param name="keyName">可以是primaryKey，也可以是dimensionKey</param>
+        /// <param name="keyValues"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
 
-            ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
+            ThrowIf.Null(keyValues, nameof(keyValues));
             ThrowIfNotCacheEnabled(modelDef);
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            byte[] loadedScript = AddGetModelsRedisInfo(dimensionKeyName, dimensionKeyValues, modelDef, redisKeys, redisValues);
+            byte[] loadedScript = AddGetModelsRedisInfo(keyName, keyValues, modelDef, redisKeys, redisValues);
 
             IDatabase database = await GetDatabaseAsync(modelDef.CacheInstanceName).ConfigureAwait(false);
 
@@ -311,17 +382,17 @@ end
 
                 InitLoadedLuas();
 
-                return await GetModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+                return await GetModelsAsync<TModel>(keyName, keyValues, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                Logger.LogGetModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+                Logger.LogGetModelsError(modelDef.CacheInstanceName, modelDef.Name, keyName, keyValues, ex);
 
                 AggregateException? aggregateException = null;
 
                 try
                 {
-                    await ForcedRemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+                    await RemoveModelsAsync<TModel>(keyName, keyValues, token).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex2)
@@ -330,11 +401,11 @@ end
                     aggregateException = new AggregateException(ex, ex2);
                 }
 
-                throw (Exception?)aggregateException ?? CacheExceptions.GetModelsErrorButDeleted(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+                throw (Exception?)aggregateException ?? CacheExceptions.GetModelsErrorButDeleted(modelDef.CacheInstanceName, modelDef.Name, keyName, keyValues, ex);
             }
         }
 
-        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : ICacheModel, new()
+        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
 
@@ -391,7 +462,7 @@ end
             }
         }
 
-        public async Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CancellationToken token = default) where TModel : ICacheModel, new()
+        public async Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
             ThrowIfNotCacheEnabled(modelDef);
@@ -400,7 +471,7 @@ end
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            byte[] loadedScript = AddRemoveModelsRedisInfo<TModel>(dimensionKeyName, dimensionKeyValues, updatedVersions, modelDef, redisKeys, redisValues);
+            byte[] loadedScript = AddRemoveModelsRedisInfo<TModel>(dimensionKeyName, dimensionKeyValues, modelDef, redisKeys, redisValues);
 
             IDatabase database = await GetDatabaseAsync(modelDef.CacheInstanceName).ConfigureAwait(false);
 
@@ -414,46 +485,46 @@ end
 
                 InitLoadedLuas();
 
-                await RemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, updatedVersions, token).ConfigureAwait(false);
+                await RemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, updatedVersions, ex);
+                throw CacheExceptions.RemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
             }
         }
 
-        private async Task ForcedRemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : ICacheModel, new()
-        {
-            CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
-            ThrowIfNotCacheEnabled(modelDef);
-            ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
+        //private async Task ForcedRemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : IModelCache, new()
+        //{
+        //    CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
+        //    ThrowIfNotCacheEnabled(modelDef);
+        //    ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
 
-            List<RedisKey> redisKeys = new List<RedisKey>();
-            List<RedisValue> redisValues = new List<RedisValue>();
+        //    List<RedisKey> redisKeys = new List<RedisKey>();
+        //    List<RedisValue> redisValues = new List<RedisValue>();
 
-            byte[] loadedScript = AddForcedRemoveModelsRedisInfo<TModel>(dimensionKeyName, dimensionKeyValues, modelDef, redisKeys, redisValues);
+        //    byte[] loadedScript = AddForcedRemoveModelsRedisInfo<TModel>(dimensionKeyName, dimensionKeyValues, modelDef, redisKeys, redisValues);
 
-            IDatabase database = await GetDatabaseAsync(modelDef.CacheInstanceName).ConfigureAwait(false);
+        //    IDatabase database = await GetDatabaseAsync(modelDef.CacheInstanceName).ConfigureAwait(false);
 
-            try
-            {
-                await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray(), redisValues.ToArray()).ConfigureAwait(false);
-            }
-            catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
-            {
-                Logger.LogLuaScriptNotLoaded(modelDef.CacheInstanceName, modelDef.Name, nameof(ForcedRemoveModelsAsync));
+        //    try
+        //    {
+        //        await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray(), redisValues.ToArray()).ConfigureAwait(false);
+        //    }
+        //    catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
+        //    {
+        //        Logger.LogLuaScriptNotLoaded(modelDef.CacheInstanceName, modelDef.Name, nameof(ForcedRemoveModelsAsync));
 
-                InitLoadedLuas();
+        //        InitLoadedLuas();
 
-                await ForcedRemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw CacheExceptions.ForcedRemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
-            }
-        }
+        //        await ForcedRemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw CacheExceptions.ForcedRemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+        //    }
+        //}
 
-        private byte[] AddRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable<int> updatedVersions, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
+        private byte[] AddRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             byte[] loadedScript;
 
@@ -479,55 +550,55 @@ end
             /// argv: 3(model_count), invalidationKey_expire_seconds, updated_version_value1, updated_version_value2, updated_version_value3
 
             redisValues.Add(redisKeys.Count);
-            redisValues.Add(INVALIDATION_VERSION_EXPIRY_SECONDS);
+            redisValues.Add(MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS);
 
-            foreach (int updatedVersion in updatedVersions)
-            {
-                redisValues.Add(updatedVersion);
-            }
-
-            return loadedScript;
-        }
-
-        private byte[] AddForcedRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
-        {
-            byte[] loadedScript;
-
-            if (modelDef.KeyProperty.Name == dimensionKeyName)
-            {
-                foreach (object dimensionKeyValue in dimensionKeyValues)
-                {
-                    redisKeys.Add(GetRealKey(modelDef.Name, dimensionKeyValue.ToString()!));
-                }
-
-                loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsForcedRemoveLua;
-            }
-            else
-            {
-                foreach (object dimensionKeyValue in dimensionKeyValues)
-                {
-                    redisKeys.Add(GetModelDimensionKey(modelDef.Name, dimensionKeyName, dimensionKeyValue.ToString()!));
-                }
-
-                loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsForcedRemoveByDimensionLua;
-            }
-
-            /// argv: 3(model_count)
-
-            redisValues.Add(redisKeys.Count);
+            //foreach (int updatedTimestamp in updatedTimestamps)
+            //{
+            //    redisValues.Add(updatedTimestamp);
+            //}
 
             return loadedScript;
         }
 
-        private byte[] AddGetModelsRedisInfo(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+        //private byte[] AddForcedRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : IModelCache, new()
+        //{
+        //    byte[] loadedScript;
+
+        //    if (modelDef.KeyProperty.Name == dimensionKeyName)
+        //    {
+        //        foreach (object dimensionKeyValue in dimensionKeyValues)
+        //        {
+        //            redisKeys.Add(GetRealKey(modelDef.Name, dimensionKeyValue.ToString()!));
+        //        }
+
+        //        loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsForcedRemoveLua;
+        //    }
+        //    else
+        //    {
+        //        foreach (object dimensionKeyValue in dimensionKeyValues)
+        //        {
+        //            redisKeys.Add(GetModelDimensionKey(modelDef.Name, dimensionKeyName, dimensionKeyValue.ToString()!));
+        //        }
+
+        //        loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsForcedRemoveByDimensionLua;
+        //    }
+
+        //    /// argv: 3(model_count)
+
+        //    redisValues.Add(redisKeys.Count);
+
+        //    return loadedScript;
+        //}
+
+        private byte[] AddGetModelsRedisInfo(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues)
         {
             byte[] loadedScript;
 
-            if (modelDef.KeyProperty.Name == dimensionKeyName)
+            if (modelDef.KeyProperty.Name == keyName)
             {
                 loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsGetAndRefreshLua;
 
-                foreach (object dk in dimensionKeyValues)
+                foreach (object dk in keyValues)
                 {
                     redisKeys.Add(GetRealKey(modelDef.Name, dk.ToString()!));
                 }
@@ -536,9 +607,9 @@ end
             {
                 loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsGetAndRefreshByDimensionLua;
 
-                foreach (object dk in dimensionKeyValues)
+                foreach (object dk in keyValues)
                 {
-                    redisKeys.Add(GetModelDimensionKey(modelDef.Name, dimensionKeyName, dk.ToString()!));
+                    redisKeys.Add(GetModelDimensionKey(modelDef.Name, keyName, dk.ToString()!));
                 }
             }
 
@@ -549,10 +620,10 @@ end
             return loadedScript;
         }
 
-        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
+        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             /// keys: model1_idKey, model1_dimensionkey1, model1_dimensionkey2, model1_dimensionkey3, model2_idKey, model2_dimensionkey1, model2_dimensionkey2, model2_dimensionkey3
-            /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_version, model1_dimensionKeyJoinedString, model2_data, model2_version, model2_dimensionKeyJoinedString
+            /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_timestamp, model1_dimensionKeyJoinedString, model2_data, model2_timestamp, model2_dimensionKeyJoinedString
 
             DateTimeOffset? absulteExpireTime = modelDef.AbsoluteTimeRelativeToNow != null ? TimeUtil.UtcNow + modelDef.AbsoluteTimeRelativeToNow : null;
             long? absoluteExpireUnixSeconds = absulteExpireTime?.ToUnixTimeSeconds();
@@ -588,12 +659,12 @@ end
                 byte[] data = SerializeUtil.Serialize(model);
 
                 redisValues.Add(data);
-                redisValues.Add(model.Version);
+                redisValues.Add(model.Timestamp);
                 redisValues.Add(joinedDimensinKeyBuilder.ToString());
             }
         }
 
-        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ICacheModel, new()
+        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             if (result.IsNull)
             {

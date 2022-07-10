@@ -15,7 +15,7 @@ namespace HB.FullStack.Repository
     {
         public static async Task<TResult?> CacheAsideAsync<TResult>(
             CachedCollectionItem<TResult> cacheCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
-            ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
+            IModelCache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
             where TResult : class
         {
 
@@ -64,22 +64,22 @@ namespace HB.FullStack.Repository
             }
         }
 
-        public static void InvalidateCache(CachedCollectionItem cachedCollectionItem, ICache cache)
+        public static void InvalidateCache(CachedCollectionItem cachedCollectionItem, IModelCache cache)
         {
             cache.RemoveAsync(cachedCollectionItem).SafeFireAndForget(OnException);
         }
 
-        private static void UpdateCache<TResult>(CachedCollectionItem<TResult> cachedItem, ICache cache) where TResult : class
+        private static void UpdateCache<TResult>(CachedCollectionItem<TResult> cachedItem, IModelCache cache) where TResult : class
         {
             cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
-        internal static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, ICache cache)
+        internal static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, IModelCache cache)
         {
             cache.RemoveAsync(cachedCollectionItems).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCacheCollection(string collectionKey, ICache cache)
+        public static void InvalidateCacheCollection(string collectionKey, IModelCache cache)
         {
             cache.RemoveCollectionAsync(collectionKey).SafeFireAndForget(OnException);
         }

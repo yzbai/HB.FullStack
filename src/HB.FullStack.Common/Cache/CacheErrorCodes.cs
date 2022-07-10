@@ -157,18 +157,18 @@ namespace System
             return exception;
         }
 
-        public static Exception SetError(string key, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, Exception ex)
+        public static Exception SetError(string key, long timestamp, DistributedCacheEntryOptions options, Exception ex)
         {
             CacheException exception = new CacheException(CacheErrorCodes.SetError, ex);
 
             exception.Data["Key"] = key;
-            exception.Data["UtcNowTicks"] = utcTicks.Ticks;
+            exception.Data["Timestamp"] = timestamp;
             exception.Data["Option"] = SerializeUtil.ToJson(options);
 
             return exception;
         }
 
-        public static CacheException RemoveModelsError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, IEnumerable updatedVersions, Exception ex)
+        public static CacheException RemoveModelsError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception ex)
         {
             CacheException exception = new CacheException(CacheErrorCodes.RemoveModelsError, ex);
 
@@ -176,7 +176,6 @@ namespace System
             exception.Data["TypeName"] = typeName;
             exception.Data["DimensionKeyName"] = dimensionKeyName;
             exception.Data["DimensionKeyValues"] = SerializeUtil.ToJson(dimensionKeyValues);
-            exception.Data["UpdatedVersions"] = SerializeUtil.ToJson(updatedVersions);
 
             return exception;
         }
@@ -193,33 +192,32 @@ namespace System
             return exception;
         }
 
-        public static Exception RemoveError(string key, UtcNowTicks utcTicks, Exception ex)
+        public static Exception RemoveError(string key, Exception ex)
         {
             CacheException exception = new CacheException(CacheErrorCodes.RemoveError, ex);
 
             exception.Data["Key"] = key;
-            exception.Data["UtcNowTicks"] = utcTicks.Ticks;
 
             return exception;
         }
 
-        public static Exception RemoveMultipleError(string collectionKey, IEnumerable<string> keys, UtcNowTicks utcTicks, Exception ex)
+        public static Exception RemoveMultipleError(string collectionKey, IEnumerable<string> keys, long utcTicks, Exception ex)
         {
             CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
 
             exception.Data["CollectionKey"] = collectionKey;
             exception.Data["Keys"] = keys.ToJoinedString(",");
-            exception.Data["UtcNowTicks"] = utcTicks.Ticks;
+            exception.Data["UtcNowTicks"] = utcTicks;
 
             return exception;
         }
 
-        public static Exception RemoveMultipleError(IEnumerable<string> keys, UtcNowTicks utcTicks, Exception ex)
+        public static Exception RemoveMultipleError(IEnumerable<string> keys, long utcTicks, Exception ex)
         {
             CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
 
             exception.Data["Keys"] = keys.ToJoinedString(",");
-            exception.Data["UtcNowTicks"] = utcTicks.Ticks;
+            exception.Data["UtcNowTicks"] = utcTicks;
 
             return exception;
         }

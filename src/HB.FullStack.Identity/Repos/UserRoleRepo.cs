@@ -16,7 +16,7 @@ namespace HB.FullStack.Identity
 {
     public class UserRoleRepo : ModelRepository<UserRole>
     {
-        public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)

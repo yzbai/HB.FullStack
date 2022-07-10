@@ -24,8 +24,8 @@ namespace HB.FullStack.Database
         EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
         EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
         EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DatabaseModel, new();
-        EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new();
-        EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, WhereExpression<T> whereExpression) where T : DatabaseModel, new();
+        EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, long oldTimestamp) where T : DatabaseModel, new();
+        EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, WhereExpression<T> whereExpression) where T : ClientDatabaseModel, new();
         EngineCommand CreateIsTableExistCommand(EngineType engineType, string databaseName, string tableName);
         EngineCommand CreateRetrieveCommand<T>(EngineType engineType, DatabaseModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DatabaseModel, new();
         EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DatabaseModelDef[] returnModelDefs)
@@ -42,16 +42,16 @@ namespace HB.FullStack.Database
         EngineCommand CreateSystemInfoRetrieveCommand(EngineType engineType);
         EngineCommand CreateSystemVersionUpdateCommand(EngineType engineType, string databaseName, int version);
         EngineCommand CreateTableCreateCommand(EngineType engineType, DatabaseModelDef modelDef, bool addDropStatement, int varcharDefaultLength);
-        EngineCommand CreateUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new();
-        
+        EngineCommand CreateUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, long oldTimestamp) where T : DatabaseModel, new();
+
         /// <summary>
         /// Version版本的乐观锁
         /// </summary>
-        EngineCommand CreateUpdateFieldsUsingVersionCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser, IList<string> propertyNames, IList<object?> propertyValues);
+        EngineCommand CreateUpdateFieldsUsingTimestampCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, long oldTimestamp, long newTimestamp, string lastUser, IList<string> propertyNames, IList<object?> propertyValues);
 
         /// <summary>
         /// 新旧值版本的乐观锁
         /// </summary>
-        EngineCommand CreateUpdateFieldsUsingOldNewCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues);
+        EngineCommand CreateUpdateFieldsUsingOldNewCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, long newTimestamp, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues);
     }
 }

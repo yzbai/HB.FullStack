@@ -19,9 +19,9 @@ namespace HB.Infrastructure.Aliyun.Sms
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;
         private readonly ILogger _logger;
-        private readonly ICache _cache;
+        private readonly IModelCache _cache;
 
-        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, ICache cache)
+        public AliyunSmsService(IOptions<AliyunSmsOptions> options, ILogger<AliyunSmsService> logger, IModelCache cache)
         {
             _options = options.Value;
             _logger = logger;

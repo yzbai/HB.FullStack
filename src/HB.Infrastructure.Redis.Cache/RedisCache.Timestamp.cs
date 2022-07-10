@@ -21,17 +21,17 @@ namespace HB.Infrastructure.Redis.Cache
         // ARGV[2] = sliding-expiration - seconds  as long (null for none)
         // ARGV[3] = ttl seconds 当前过期要设置的过期时间，由上面两个推算
         // ARGV[4] = data - byte[]
-        // ARGV[5] = utcTicks
+        // ARGV[5] = timestamp
         // this order should not change LUA script depends on it
         public const string LUA_SET_WITH_TIMESTAMP = @"
 local minTimestamp = redis.call('get', '_minTS'..KEYS[1])
 
-if(minTimestamp and tonumber(minTimestamp)>tonumber(ARGV[5])) then
+if(minTimestamp and tonumber(minTimestamp)>=tonumber(ARGV[5])) then
     return 8
 end
 
 local cachedTimestamp = redis.call('hget', KEYS[1], 'timestamp')
-if(cachedTimestamp and tonumber(cachedTimestamp)>tonumber(ARGV[5])) then
+if(cachedTimestamp and tonumber(cachedTimestamp)>=tonumber(ARGV[5])) then
     return 9
 end
 
@@ -45,27 +45,29 @@ return 1";
 
         /// <summary>
         /// keys: key
-        /// argv:utcTicks, invalidationKey_expire_seconds
+        /// argv:invalidationKey_expire_seconds
         /// </summary>
-        public const string LUA_REMOVE_WITH_TIMESTAMP = @"
-redis.call('set', '_minTS'..KEYS[1], ARGV[1], 'EX', ARGV[2])
+        public const string LUA_REMOVE_WITH_TIMESTAMP_2 = @"
+local timestamp = redis.call('hget',KEYS[1], 'timestamp')
+redis.call('set', '_minTS'..KEYS[1], timestamp, 'EX', ARGV[1])
 return redis.call('del', KEYS[1])
 ";
 
         /// <summary>
         /// keys: key1, key2, key3
-        /// argv: key_count, utcTicks, invalidationKey_expire_seconds
+        /// argv: key_count, invalidationKey_expire_seconds
         /// </summary>
-        public const string LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP = @"
+        public const string LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP_2 = @"
 local number=tonumber(ARGV[1])
 for i=1,number do
-    redis.call('set', '_minTS'..KEYS[i], ARGV[2], 'EX', ARGV[3])
+    local timestamp = redis.call('hget', KEYS[i], 'timestamp')
+    redis.call('set', '_minTS'..KEYS[i], timestamp, 'EX', ARGV[2])
 end
 return redis.call('del', unpack(KEYS))";
 
         /// <summary>
         /// keys:key
-        /// argv:utcTicks
+        /// argv:now_timestamp
         /// </summary>
         public const string LUA_GET_AND_REFRESH_WITH_TIMESTAMP = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data')
@@ -89,12 +91,6 @@ end
 
 return data[3]";
 
-        /// <summary>
-        /// GetAsync
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
@@ -128,7 +124,7 @@ return data[3]";
 
                 try
                 {
-                    await RemoveAsync(key, TimeUtil.UtcNowTicks, token).ConfigureAwait(false);
+                    await RemoveAsync(key, token).ConfigureAwait(false);
                 }
                 catch (Exception ex2)
                 {
@@ -140,16 +136,9 @@ return data[3]";
         }
 
         /// <summary>
-        /// SetAsync
+        /// timestamp即ICacheModel.Timestamp
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="utcTicks"></param>
-        /// <param name="options"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-
-        public async Task<bool> SetAsync(string key, byte[] value, UtcNowTicks utcTicks, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public async Task<bool> SetAsync(string key, byte[] value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
@@ -172,7 +161,7 @@ return data[3]";
                         slideSeconds??-1,
                         GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds)??-1,
                         value,
-                        utcTicks.Ticks
+                        timestamp
                     }).ConfigureAwait(false);
 
                 int rt = (int)redisResult;
@@ -183,11 +172,11 @@ return data[3]";
                 }
                 else if (rt == 8)
                 {
-                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(key, utcTicks, options);
+                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(key, timestamp, options);
                 }
                 else if (rt == 9)
                 {
-                    Logger.LogCacheUpdateTimestampConcurrency(key, utcTicks, options);
+                    Logger.LogCacheUpdateTimestampConcurrency(key, timestamp, options);
                 }
 
                 return false;
@@ -198,23 +187,18 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await SetAsync(key, value, utcTicks, options, token).ConfigureAwait(false);
+                return await SetAsync(key, value, timestamp, options, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.SetError(key, utcTicks, options, ex);
+                throw CacheExceptions.SetError(key, timestamp, options, ex);
             }
         }
 
         /// <summary>
         /// 返回是否找到了
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="timestampInUnixMilliseconds"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-
-        public async Task<bool> RemoveAsync(string key, UtcNowTicks utcTicks, CancellationToken token = default)
+        public async Task<bool> RemoveAsync(string key, CancellationToken token = default)
         {
             if (key == null)
             {
@@ -230,11 +214,8 @@ return data[3]";
                 RedisResult redisResult = await database.ScriptEvaluateAsync(
                     GetDefaultLoadLuas().LoadedRemoveWithTimestampLua,
                     new RedisKey[] { GetRealKey("", key) },
-                    new RedisValue[]
-                    {
-                        utcTicks.Ticks,
-                        INVALIDATION_VERSION_EXPIRY_SECONDS
-                    }).ConfigureAwait(false);
+                    new RedisValue[] { MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS }
+                    ).ConfigureAwait(false);
 
                 return (int)redisResult == 1;
             }
@@ -244,15 +225,15 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await RemoveAsync(key, utcTicks, token).ConfigureAwait(false);
+                return await RemoveAsync(key, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveError(key, utcTicks, ex);
+                throw CacheExceptions.RemoveError(key, ex);
             }
         }
 
-        public async Task<bool> RemoveAsync(string[] keys, UtcNowTicks utcTicks, CancellationToken token = default)
+        public async Task<bool> RemoveAsync(string[] keys, long timestamp, CancellationToken token = default)
         {
             //TODO: 测试这个
             if (keys.IsNullOrEmpty())
@@ -281,8 +262,7 @@ return data[3]";
                         new RedisValue[]
                         {
                             group.Length,
-                            utcTicks.Ticks,
-                            INVALIDATION_VERSION_EXPIRY_SECONDS
+                            MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS
                         }).ConfigureAwait(false);
 
                     deletedSum += (int)redisResult;
@@ -296,15 +276,15 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await RemoveAsync(keys, utcTicks, token).ConfigureAwait(false);
+                return await RemoveAsync(keys, timestamp, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveMultipleError(keys, utcTicks, ex);
+                throw CacheExceptions.RemoveMultipleError(keys, timestamp, ex);
             }
         }
 
-        public Task RemoveByKeyPrefixAsync(string keyPrefix, UtcNowTicks utcTikcs, CancellationToken token = default)
+        public Task RemoveByKeyPrefixAsync(string keyPrefix, long timestamp, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

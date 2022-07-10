@@ -31,7 +31,7 @@ namespace HB.FullStack.Database
             _expressionVisitor = expressionVisitor;
         }
 
-        private string GetCachedSql(EngineType engineType, SqlType commandTextType, DatabaseModelDef[] modelDefs, IEnumerable<string>? propertyNames = null,bool addOrUpdateReturnModel = false)
+        private string GetCachedSql(EngineType engineType, SqlType commandTextType, DatabaseModelDef[] modelDefs, IEnumerable<string>? propertyNames = null, bool addOrUpdateReturnModel = false)
         {
             string cacheKey = GetCommandTextCacheKey(commandTextType, modelDefs, propertyNames);
 
@@ -41,7 +41,7 @@ namespace HB.FullStack.Database
                 {
                     SqlType.AddModel => SqlHelper.CreateAddModelSql(modelDefs[0], engineType, true),
                     SqlType.UpdateModel => SqlHelper.CreateUpdateModelSql(modelDefs[0]),
-                    SqlType.UpdateFieldsUsingVersionCompare => SqlHelper.CreateUpdateFieldsUsingVersionCompareSql(modelDefs[0], propertyNames!),
+                    SqlType.UpdateFieldsUsingTimestampCompare => SqlHelper.CreateUpdateFieldsUsingTimestampCompareSql(modelDefs[0], propertyNames!),
                     SqlType.UpdateFieldsUsingOldNewCompare => SqlHelper.CreateUpdateFieldsUsingOldNewCompareSql(modelDefs[0], engineType, propertyNames!),
                     SqlType.DeleteModel => SqlHelper.CreateDeleteModelSql(modelDefs[0]),
                     SqlType.SelectModel => SqlHelper.CreateSelectModelSql(modelDefs),
@@ -189,58 +189,73 @@ namespace HB.FullStack.Database
                 model.ModelToParameters(modelDef, engineType, _modelDefFactory));
         }
 
-        public EngineCommand CreateUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
+        public EngineCommand CreateUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, long oldTimestamp) where T : DatabaseModel, new()
         {
+            var paramters = model.ModelToParameters(modelDef, engineType, _modelDefFactory);
+
+            if (modelDef.IsServerDatabaseModel)
+            {
+                DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
+                paramters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0 ", oldTimestamp));
+            }
+
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.UpdateModel, new DatabaseModelDef[] { modelDef }),
-                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
+                paramters);
         }
 
-        public EngineCommand CreateUpdateFieldsUsingVersionCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, int updateToVersion, string lastUser,
+        /// <summary>
+        /// 针对ServerDatabaseModel
+        /// </summary>
+        public EngineCommand CreateUpdateFieldsUsingTimestampCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, long oldTimestamp, long newTimestamp, string lastUser,
             IList<string> propertyNames, IList<object?> propertyValues)
         {
             propertyNames.Add(nameof(LongIdDatabaseModel.Id));
+            propertyValues.Add(id);
 
             if (modelDef.IsServerDatabaseModel)
             {
-                propertyNames.Add(nameof(ServerDatabaseModel.Version));
+                propertyNames.Add(nameof(ServerDatabaseModel.Timestamp));
+                propertyValues.Add(newTimestamp);
+
                 propertyNames.Add(nameof(ServerDatabaseModel.LastUser));
-                propertyNames.Add(nameof(ServerDatabaseModel.LastTime));
+                propertyValues.Add(lastUser);
             }
-            
-            propertyValues.Add(id);
-            propertyValues.Add(updateToVersion);
-            propertyValues.Add(lastUser);
-            propertyValues.Add(TimeUtil.UtcNow);
+
+            IList<KeyValuePair<string, object>> parameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues);
+
+            if (modelDef.IsServerDatabaseModel)
+            {
+                DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
+                parameters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0 ", oldTimestamp));
+            }
 
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.UpdateFieldsUsingVersionCompare, new DatabaseModelDef[] { modelDef }, propertyNames),
-                ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues));
+                GetCachedSql(engineType, SqlType.UpdateFieldsUsingTimestampCompare, new DatabaseModelDef[] { modelDef }, propertyNames),
+                parameters);
         }
 
-        private const string OldPropertyValueSuffix = "old";
-        private const string NewPropertyValueSuffix = "new";
 
-        public EngineCommand CreateUpdateFieldsUsingOldNewCompareCommand(EngineType engineType, DatabaseModelDef modelDef, object id, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues,
-            IList<object?> newPropertyValues)
+        public EngineCommand CreateUpdateFieldsUsingOldNewCompareCommand(EngineType engineType, DatabaseModelDef modelDef,
+            object id, long newTimestamp, string lastUser, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)
         {
             string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new DatabaseModelDef[] { modelDef }, propertyNames);
 
-            var oldParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{OldPropertyValueSuffix}_0");
+            var oldParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
 
             propertyNames.Add(nameof(LongIdDatabaseModel.Id));
+            newPropertyValues.Add(id);
 
             if (modelDef.IsServerDatabaseModel)
             {
+                propertyNames.Add(nameof(ServerDatabaseModel.Timestamp));
+                newPropertyValues.Add(newTimestamp);
+
                 propertyNames.Add(nameof(ServerDatabaseModel.LastUser));
-                propertyNames.Add(nameof(ServerDatabaseModel.LastTime));
+                newPropertyValues.Add(lastUser);
             }
 
-            newPropertyValues.Add(id);
-            newPropertyValues.Add(lastUser);
-            newPropertyValues.Add(TimeUtil.UtcNow);
-
-            var newParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, newPropertyValues, $"{NewPropertyValueSuffix}_0");
+            var newParameters = ModelMapper.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, newPropertyValues, $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
             parameters.AddRange(newParameters);
@@ -248,14 +263,13 @@ namespace HB.FullStack.Database
             return new EngineCommand(sql, parameters);
         }
 
-        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model) where T : DatabaseModel, new()
-        {
-            return new EngineCommand(
-                GetCachedSql(engineType, SqlType.DeleteModel, new DatabaseModelDef[] { modelDef }),
-                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
-        }
+        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, long oldTimestamp) where T : DatabaseModel, new()
+            => CreateUpdateCommand(engineType, modelDef, model, oldTimestamp);
 
-        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, WhereExpression<T> whereExpression) where T : DatabaseModel, new()
+        /// <summary>
+        /// 针对Client
+        /// </summary>
+        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, WhereExpression<T> whereExpression) where T : ClientDatabaseModel, new()
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
 
