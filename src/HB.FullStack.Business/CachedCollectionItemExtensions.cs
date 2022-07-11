@@ -38,19 +38,19 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, CachedCollectionItem cachedCollectionItem, CancellationToken cancellationToken = default)
+        public static async Task RemoveAsync(this ICache cache, CachedCollectionItem cachedCollectionItem, CancellationToken cancellationToken = default)
         {
             ThrowOnEmptyCacheKey(cachedCollectionItem);
             ThrowOnEmptyUtcTicks(cachedCollectionItem);
 
-            return cache.RemoveFromCollectionAsync(cachedCollectionItem.CollectionKey, cachedCollectionItem.ItemKey, cachedCollectionItem.UtcTicks, cancellationToken);
+            await cache.RemoveFromCollectionAsync(cachedCollectionItem.CollectionKey, cachedCollectionItem.ItemKey, cancellationToken).ConfigureAwait(false);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
+        public static async Task RemoveAsync(this ICache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
         {
             if (!cachedCollectionItems.Any())
             {
-                return Task.FromResult(true);
+                return;
             }
 
             foreach (CachedCollectionItem cachedCollectionItem in cachedCollectionItems)
@@ -60,14 +60,13 @@ namespace HB.FullStack.Repository
             }
 
             string collectionKey = cachedCollectionItems.First().CollectionKey;
-            UtcNowTicks utcTicks = cachedCollectionItems.First().UtcTicks;
 
-            if (!cachedCollectionItems.All(item => item.CollectionKey == collectionKey && item.UtcTicks == utcTicks))
+            if (!cachedCollectionItems.All(item => item.CollectionKey == collectionKey))
             {
                 throw RepositoryExceptions.CacheCollectionKeyNotSame(cachedCollectionItems);
             }
 
-            return cache.RemoveFromCollectionAsync(collectionKey, cachedCollectionItems.Select(item => item.ItemKey).ToList(), utcTicks, cancellationToken);
+            await cache.RemoveFromCollectionAsync(collectionKey, cachedCollectionItems.Select(item => item.ItemKey).ToList(), cancellationToken).ConfigureAwait(false);
         }
 
         public static Task<bool> RemoveCollectionAsync(this ICache cache, CachedCollectionItem cachedCollectionItem)
@@ -98,7 +97,7 @@ namespace HB.FullStack.Repository
 
         private static void ThrowOnEmptyUtcTicks(CachedCollectionItem cachedCollectionItem)
         {
-            if (cachedCollectionItem.UtcTicks.IsEmpty())
+            if (cachedCollectionItem.Timestamp <= 0)
             {
                 throw RepositoryExceptions.CachedItemTimestampNotSet(resourceType: cachedCollectionItem.CollectionKey, cacheKey: cachedCollectionItem.ItemKey, null);
             }

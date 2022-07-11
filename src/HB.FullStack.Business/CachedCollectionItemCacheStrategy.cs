@@ -8,12 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
+using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Repository
 {
     public static class CachedCollectionItemCacheStrategy
     {
-        public static async Task<TResult?> CacheAsideAsync<TResult>(
+        public static async Task<TResult?> GetUsingCacheAsideAsync<TResult>(
             CachedCollectionItem<TResult> cacheCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
             where TResult : class
@@ -40,13 +41,13 @@ namespace HB.FullStack.Repository
                 }
 
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
-                UtcNowTicks now = TimeUtil.UtcNowTicks;
 
                 // 如果TResult是集合类型，可能会存入空集合。而在ModelCache中是不会存入空集合的。
                 //这样设计是合理的，因为ModelCache是按Model角度，存入的Model会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
                 {
-                    UpdateCache(cacheCollectionItem.Value(dbRt).Timestamp(now), cache);
+                    long timestamp = (dbRt as ServerDatabaseModel)?.Timestamp ?? TimeUtil.UtcNowTicks;
+                    SetCache(cacheCollectionItem.SetValue(dbRt).SetTimestamp(timestamp), cache);
                     logger.LogInformation($"缓存 Missed. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
                 }
                 else
@@ -69,7 +70,7 @@ namespace HB.FullStack.Repository
             cache.RemoveAsync(cachedCollectionItem).SafeFireAndForget(OnException);
         }
 
-        private static void UpdateCache<TResult>(CachedCollectionItem<TResult> cachedItem, ICache cache) where TResult : class
+        private static void SetCache<TResult>(CachedCollectionItem<TResult> cachedItem, ICache cache) where TResult : class
         {
             cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }

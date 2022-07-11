@@ -3,7 +3,7 @@
 namespace HB.FullStack.Repository
 {
     /// <summary>
-    /// 一个collection中的条目
+    /// 一个collection中的条目. 可以将整个Collection Invalidate掉。相当于比CachedItem多了一个范围。
     /// </summary>
     public abstract class CachedCollectionItem
     {

@@ -9,7 +9,7 @@ namespace HB.FullStack.Cache
 
         void Dispose();
 
-        public static bool IsModelEnabled<TCacheModel>() where TCacheModel : Common.Cache.CacheModels.ICacheModel, new()
+        public static bool IsModelEnabled<TCacheModel>() where TCacheModel : ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TCacheModel>();
 

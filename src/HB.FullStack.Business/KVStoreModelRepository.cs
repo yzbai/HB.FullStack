@@ -21,26 +21,12 @@ namespace HB.FullStack.Repository
         {
             return KVStore.GetAsync<TModel>(key.ToString()!);
         }
-
-        /// <summary>
-        /// AddAsync
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
         
         public Task AddAsync(TModel model, string lastUser)
         {
             return KVStore.AddAsync(model, lastUser);
         }
 
-        /// <summary>
-        /// UpdateAsync
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="lastUser"></param>
-        /// <returns></returns>
-        
         public Task UpdateAsync(TModel model, string lastUser)
         {
             return KVStore.UpdateAsync(model, lastUser);
@@ -50,7 +36,7 @@ namespace HB.FullStack.Repository
         {
             model.LastUser = lastUser;
             string key = KVStore.GetModelKey(model);
-            return KVStore.DeleteAsync<TModel>(key, model.Version);
+            return KVStore.DeleteAsync<TModel>(key, model.Timestamp);
         }
     }
 }

@@ -19,18 +19,23 @@ namespace HB.FullStack.Repository
 {
     internal static class ModelCacheStrategy
     {
-        public static async Task<IEnumerable<TModel>> CacheAsideAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TModel>>> dbRetrieve,
-            IDatabase database, Cache.ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TModel : Common.Cache.CacheModels.ICacheModel, new()
+        public static async Task<IEnumerable<TModel>> GetUsingCacheAsideAsync<TModel>(
+            string keyName,
+            IEnumerable keyValues,
+            Func<IDatabaseReader, Task<IEnumerable<TModel>>> dbRetrieve,
+            IDatabase database,
+            ICache cache,
+            IMemoryLockManager memoryLockManager,
+            ILogger logger) where TModel : ICacheModel, new()
         {
-
-            if (!cache.IsModelEnabled<TModel>())
+            if (!ICache.IsModelEnabled<TModel>())
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
 
             try
             {
-                (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
+                (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
 
                 if (allExists)
                 {
@@ -41,7 +46,7 @@ namespace HB.FullStack.Repository
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
+                logger.LogCacheGetError(keyName, keyValues, ex);
             }
 
             //常规做法是先获取锁（参看历史）。
@@ -54,9 +59,10 @@ namespace HB.FullStack.Repository
             //所以可以使用单机版本的锁即可。一个主机同时放一个db请求，还是没问题的。
 
             List<string> resources = new List<string>();
-            foreach (object dimensionKeyValue in dimensionKeyValues)
+
+            foreach (object keyValue in keyValues)
             {
-                resources.Add(dimensionKeyName + dimensionKeyValue.ToString());
+                resources.Add(keyName + keyValue.ToString());
             }
 
             using var @lock = memoryLockManager.Lock(typeof(TModel).Name, resources, Consts.OccupiedTime, Consts.PatienceTime);
@@ -67,7 +73,7 @@ namespace HB.FullStack.Repository
                 try
                 {
                     //Double check
-                    (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues).ConfigureAwait(false);
+                    (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
 
                     if (allExists)
                     {
@@ -78,34 +84,33 @@ namespace HB.FullStack.Repository
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    logger.LogCacheGetError(dimensionKeyName, dimensionKeyValues, ex);
+                    logger.LogCacheGetError(keyName, keyValues, ex);
                 }
 
                 IEnumerable<TModel> models = await dbRetrieve(database).ConfigureAwait(false);
 
                 if (models.IsNotNullOrEmpty())
                 {
-                    UpdateCache(models, cache);
+                    SetCache(models, cache);
 
-                    logger.LogCacheMissed(typeof(TModel).Name, dimensionKeyName, dimensionKeyValues);
+                    logger.LogCacheMissed(typeof(TModel).Name, keyName, keyValues);
                 }
                 else
                 {
-                    logger.LogCacheGetEmpty(typeof(TModel).Name, dimensionKeyName, dimensionKeyValues);
+                    logger.LogCacheGetEmpty(typeof(TModel).Name, keyName, keyValues);
                 }
 
                 return models;
             }
             else
             {
-                logger.LogCacheLockAcquireFailed(typeof(TModel).Name, dimensionKeyName, dimensionKeyValues, @lock.Status.ToString());
+                logger.LogCacheLockAcquireFailed(typeof(TModel).Name, keyName, keyValues, @lock.Status.ToString());
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
-
         }
 
-        private static void UpdateCache<TModel>(IEnumerable<TModel> models, Cache.IModelCache cache) where TModel : Common.Cache.CacheModels.ICacheModel, new()
+        private static void SetCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ICacheModel, new()
         {
             #region 普通缓存，加锁的做法
             //using IDistributedLock distributedLock = await _lockManager.LockModelsAsync(models, OccupiedTime, PatienceTime).ConfigureAwait(false);
@@ -138,9 +143,9 @@ namespace HB.FullStack.Repository
 
         }
 
-        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, Cache.IModelCache cache) where TModel : Common.Cache.CacheModels.ICacheModel, new()
+        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : Common.Cache.CacheModels.ICacheModel, new()
         {
-            if (cache.IsModelEnabled<TModel>())
+            if (ICache.IsModelEnabled<TModel>())
             {
                 cache.RemoveModelsAsync(models).SafeFireAndForget(OnException);
             }

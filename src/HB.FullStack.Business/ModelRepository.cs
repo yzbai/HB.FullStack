@@ -188,7 +188,7 @@ namespace HB.FullStack.Repository
 
         protected async Task<TDatabaseModel?> CacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TDatabaseModel?>> dbRetrieve)
         {
-            IEnumerable<TDatabaseModel>? results = await ModelCacheStrategy.CacheAsideAsync<TDatabaseModel>(
+            IEnumerable<TDatabaseModel>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<TDatabaseModel>(
                 dimensionKeyName,
                 new object[] { dimensionKeyValue },
                 async dbReader =>
@@ -220,21 +220,21 @@ namespace HB.FullStack.Repository
 
         protected Task<IEnumerable<TDatabaseModel>> CacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TDatabaseModel>>> dbRetrieve)
         {
-            return ModelCacheStrategy.CacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
+            return ModelCacheStrategy.GetUsingCacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
 
         #endregion
 
         #region Timestamp Cache Strategy
 
-        protected Task<TResult?> CacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
+        protected Task<TResult?> CacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : ServerDatabaseModel
         {
-            return CachedItemCacheStrategy.CacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
+            return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : ServerDatabaseModel
         {
-            return CachedItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+            return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
         public void InvalidateCache(CachedItem cachedItem)
@@ -242,9 +242,9 @@ namespace HB.FullStack.Repository
             CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
         }
 
-        public void InvalidateCache(IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
+        public void InvalidateCache(IEnumerable<CachedItem> cachedItems)
         {
-            CachedItemCacheStrategy.InvalidateCache(cachedItems, utcNowTicks, Cache);
+            CachedItemCacheStrategy.InvalidateCache(cachedItems, Cache);
         }
 
         #endregion
@@ -253,12 +253,12 @@ namespace HB.FullStack.Repository
 
         protected Task<TResult?> CacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
-            return CachedCollectionItemCacheStrategy.CacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
+            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
         protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
         {
-            return CachedCollectionItemCacheStrategy.CacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
         public void InvalidateCache(CachedCollectionItem cachedCollectionItem)

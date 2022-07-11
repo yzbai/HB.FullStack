@@ -19,7 +19,7 @@ namespace HB.FullStack.Repository
         public static async Task<TResult?> GetUsingCacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
-            where TResult : ServerDatabaseModel
+            where TResult : class
         {
             //Cache First
             TResult? result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
@@ -47,7 +47,8 @@ namespace HB.FullStack.Repository
                 //这样设计是合理的，因为ModelCache是按Model角度，存入的Model会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
                 {
-                    SetCache(cacheItem.SetValue(dbRt).SetTimestamp(dbRt.Timestamp), cache);
+                    long timestamp = (dbRt as ServerDatabaseModel)?.Timestamp ?? TimeUtil.UtcNowTicks;
+                    SetCache(cacheItem.SetValue(dbRt).SetTimestamp(timestamp), cache);
                     logger.LogInformation($"缓存 Missed. Model:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
                 }
                 else
