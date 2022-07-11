@@ -210,7 +210,7 @@ namespace HB.FullStack.DatabaseTests
 
             var fetched = await Db.ScalarAsync<PublisherModel>(item.Id, null).ConfigureAwait(false);
 
-            Assert.AreEqual(item.LastTime, fetched!.LastTime);
+            Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
             fetched.Name = "ssssss";
 
@@ -290,7 +290,7 @@ namespace HB.FullStack.DatabaseTests
 
                 var fetched = await Db.ScalarAsync<PublisherModel>(item.Id, transactionContext).ConfigureAwait(false);
 
-                Assert.AreEqual(item.LastTime, fetched!.LastTime);
+                Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
                 fetched.Name = "ssssss";
 
