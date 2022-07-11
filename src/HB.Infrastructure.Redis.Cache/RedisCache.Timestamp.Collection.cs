@@ -12,9 +12,19 @@ using System.Threading.Tasks;
 namespace HB.Infrastructure.Redis.Cache
 {
     /// <summary>
-    /// Collection构型。
-    /// 一个Collection里，可以放各种条目，但没有自己的过期时间。
-    /// 过期时间是整个Collection的。
+    /// 构造：
+    /// CollectionKey ------------| __absexp__
+    ///               ------------| __sldexp__  
+    ///               ------------| key1
+    ///               ------------| key2
+    ///               ------------| key3
+    ///               ------------| key1__ts__
+    ///               ------------| key2__ts__
+    ///               ------------| key3__ts__
+    /// 
+    /// __minTS__CollectionKeykey1 -------- key1_minTimestamp
+    /// __minTS__CollectionKeykey2 -------- key2_minTimestamp
+    /// __minTS__CollectionKeykey3 -------- key3_minTimestamp
     /// </summary>
     public partial class RedisCache
     {
@@ -23,15 +33,18 @@ namespace HB.Infrastructure.Redis.Cache
         // ARGV[1] = absolute-expiration - unix time seconds as long (null for none)
         // ARGV[2] = sliding-expiration - seconds  as long (null for none)
         // ARGV[3] = ttl seconds 当前过期要设置的过期时间，由上面两个推算
-        // ARGV[4] = timestamp
-        // ARGV[5] = 3 (数据的个数)
+        // ARGV[4] = 3 (数据的个数)
 
-        // ARGV[6] = key1_data
-        // ARGV[7] = key2_data
-        // ARGV[8] = key3_data
+        // ARGV[5] = key1_data
+        // ARGV[6] = key2_data
+        // ARGV[7] = key3_data
+
+        // ARGV[8] = key1_timestamp
+        // ARGV[9] = key2_timestamp
+        // ARGV[10] = key3_timestamp
 
         // this order should not change LUA script depends on it
-        public const string LUA_COLLECTION_SET_WITH_TIMESTAMP = @"
+        public const string LUA_COLLECTION_SET_WITH_TIMESTAMP_2 = @"
 if(redis.call('exists', KEYS[1]) ~= 1) then
     redis.call('hmset', KEYS[1], '__absexp__', ARGV[1],'__sldexp__',ARGV[2])
     if(ARGV[3] ~='-1') then
@@ -40,52 +53,46 @@ if(redis.call('exists', KEYS[1]) ~= 1) then
 end
 
 local minTS = '__minTS__'..KEYS[1]
-local error = 0
-local errorSum = 0
-local dataNum = tonumber(ARGV[5])
+local dataNum = tonumber(ARGV[4])
+
 for j=1, dataNum do
     local minTimestamp = redis.call('get', minTS..KEYS[j+1])
-
-    if(minTimestamp and tonumber(minTimestamp)>=tonumber(ARGV[4])) then
-        error = 8
+    if( minTimestamp and tonumber(minTimestamp)>=tonumber(ARGV[j+7])) then
+        return 8
     end
 
-    if(error == 0) then
-        local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1]..'__ts__')
-        if(cachedTimestamp and tonumber(cachedTimestamp) >= tonumber(ARGV[4])) then
-            error = 90000
-        end
-    end
-
-    if(error == 0) then
-        redis.call('hmset', KEYS[1], KEYS[j+1], ARGV[5+j], KEYS[j+1]..'__ts__', ARGV[4])
-    else
-        errorSum= errorSum+ errror
+    local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
+    if(cachedTimestamp and tonumber(cachedTimestamp) >= tonumber(ARGV[j+7])) then
+        return 9
     end
 end
 
-return errorSum";
+for j=1, dataNum do
+    redis.call('hmset', KEYS[1], KEYS[j+1], ARGV[j+4], KEYS[j+1]..'__ts__', ARGV[j+7])
+end
+return 1";
 
         /// <summary>
         /// keys: CollectionKey, key1, key2, key3
-        /// argv: key_count, utcTicks, invalidationKey_expire_seconds
+        /// argv: key_count, invalidationKey_expire_seconds
         /// </summary>
-        public const string LUA_COLLECTION_REMOVE_ITEM_WITH_TIMESTAMP = @"
+        public const string LUA_COLLECTION_REMOVE_ITEMS_WITH_TIMESTAMP_2 = @"
 local minTS = '__minTS__'..KEYS[1]
 local number=tonumber(ARGV[1])
-local delSum = 0
+
 for j=1,number do
-    redis.call('set', minTS..KEYS[j+1], ARGV[2], 'EX', ARGV[3])
-    delSum = delSum + redis.call('hdel', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
+    local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
+    redis.call('set', minTS..KEYS[j+1], cachedTimestamp, 'EX', ARGV[2])
+    redis.call('hdel', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
 end
 
-return delSum";
+return 1";
 
         /// <summary>
         /// keys:CollectionKey, key1
-        /// argv:utcTicks
+        /// argv:UtcNowUnixTimeSeconds(now) 为了刷新
         /// </summary>
-        public const string LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP = @"
+        public const string LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP_2 = @"
 local data= redis.call('hmget',KEYS[1], '__absexp__', '__sldexp__',KEYS[2])
 
 if (not data[3]) then
@@ -150,7 +157,7 @@ return data[3]";
             }
         }
 
-        public async Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public async Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, IEnumerable<long> timestamps, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
@@ -183,38 +190,43 @@ return data[3]";
                 }
 
                 //Prepare RedisValues
-                RedisValue[] redisValues = new RedisValue[itemCount * 2 + 4];
-
-                redisValues[0] = absoluteExpireUnixSeconds ?? -1;
-                redisValues[1] = slideSeconds ?? -1;
-                redisValues[2] = GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds) ?? -1;
-                redisValues[3] = timestamp;
-                redisValues[4] = itemCount;
-
-                for (int i = 0; i < itemCount; ++i)
+                List<RedisValue> redisValues = new List<RedisValue>(itemCount * 2 + 4)
                 {
-                    redisValues[i + 5] = itemValues.ElementAt(i);
+                    [0] = absoluteExpireUnixSeconds ?? -1,
+                    [1] = slideSeconds ?? -1,
+                    [2] = GetInitialExpireSeconds(absoluteExpireUnixSeconds, slideSeconds) ?? -1,
+                    [3] = itemCount
+                };
+
+                foreach (var itemValue in itemValues)
+                {
+                    redisValues.Add(itemValue);
+                }
+
+                foreach (var timestamp in timestamps)
+                {
+                    redisValues.Add(timestamp);
                 }
 
                 //Do
                 RedisResult redisResult = await database.ScriptEvaluateAsync(
                     GetDefaultLoadLuas().LoadedCollectionSetWithTimestampLua,
                     redisKeys,
-                    redisValues).ConfigureAwait(false);
+                    redisValues.ToArray()).ConfigureAwait(false);
 
                 int rt = (int)redisResult;
 
-                if (rt == 0)
+                if (rt == 1)
                 {
                     return true;
                 }
-                else if (rt < 90000)
+                else if (rt == 8)
                 {
-                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(collectionKey, timestamp, options);
+                    Logger.LogCacheInvalidationConcurrencyWithTimestamp(collectionKey, -1, options);
                 }
                 else
                 {
-                    Logger.LogCacheUpdateTimestampConcurrency(collectionKey, timestamp, options);
+                    Logger.LogCacheUpdateTimestampConcurrency(collectionKey, -1, options);
                 }
 
                 return false;
@@ -225,60 +237,47 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await SetToCollectionAsync(collectionKey, itemKeys, itemValues, timestamp, options, token).ConfigureAwait(false);
+                return await SetToCollectionAsync(collectionKey, itemKeys, itemValues, timestamps, options, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.SetError(collectionKey, timestamp, options, ex);
+                throw CacheExceptions.SetError(collectionKey, -1, options, ex);
             }
         }
 
-        public async Task<bool> RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, long timestamp, CancellationToken token = default)
+        public async Task RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, CancellationToken token = default)
         {
             //TODO: 测试这个
 
             token.ThrowIfCancellationRequested();
 
             //划分组 100个一组
-            int groupLength = 100;
-
-            IEnumerable<string[]> groups = itemKeys.Chunk(groupLength);//PartitionToGroup(keys, groupLength);
 
             IDatabase database = await GetDefaultDatabaseAsync().ConfigureAwait(false);
-
-            int deletedSum = 0;
-
             try
             {
-                foreach (string[] group in groups)
+                //Prepare RedisKeys
+                int itemCount = itemKeys.Count();
+                List<RedisKey> redisKeys = new List<RedisKey>(itemCount + 1);
+                redisKeys[0] = GetRealKey("", collectionKey);
+
+                foreach (var itemKey in itemKeys)
                 {
-                    //Prepare RedisKeys
-                    RedisKey[] redisKeys = new RedisKey[group.Length + 1];
-
-                    redisKeys[0] = GetRealKey("", collectionKey);
-
-                    for (int i = 0; i < itemKeys.Count(); ++i)
-                    {
-                        redisKeys[i + 1] = itemKeys.ElementAt(i);
-                    }
-
-                    //Prepare RedisValues
-                    RedisValue[] redisValues = new RedisValue[]
-                    {
-                        group.Length,
-                        timestamp,
-                        MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS
-                    };
-
-                    RedisResult redisResult = await database.ScriptEvaluateAsync(
-                        GetDefaultLoadLuas().LoadedCollectionRemoveItemWithTimestampLua,
-                        redisKeys,
-                        redisValues).ConfigureAwait(false);
-
-                    deletedSum += (int)redisResult;
+                    redisKeys.Add(itemKey);
                 }
 
-                return deletedSum / 2 == itemKeys.Count();
+                //Prepare RedisValues
+                RedisValue[] redisValues = new RedisValue[]
+                {
+                        itemCount,
+                        MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS
+                };
+
+                //Do
+                _ = await database.ScriptEvaluateAsync(
+                    GetDefaultLoadLuas().LoadedCollectionRemoveItemWithTimestampLua,
+                    redisKeys.ToArray(),
+                    redisValues).ConfigureAwait(false);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
@@ -286,11 +285,11 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await RemoveFromCollectionAsync(collectionKey, itemKeys, timestamp, token).ConfigureAwait(false);
+                await RemoveFromCollectionAsync(collectionKey, itemKeys, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveMultipleError(collectionKey, itemKeys, timestamp, ex);
+                throw CacheExceptions.RemoveMultipleError(collectionKey, itemKeys, ex);
             }
         }
 

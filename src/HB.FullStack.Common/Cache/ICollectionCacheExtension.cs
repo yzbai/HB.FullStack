@@ -17,23 +17,23 @@ namespace HB.FullStack.Cache
             return SerializeUtil.Deserialize<T?>(bytes);
         }
 
-        public static Task<bool> SetToCollectionAsync<T>(this ICache cache, string collectionKey, IEnumerable<string> itemKeys, IEnumerable<T> itemValues, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public static Task<bool> SetToCollectionAsync<T>(this ICache cache, string collectionKey, IEnumerable<string> itemKeys, IEnumerable<T> itemValues, IEnumerable<long> timestamps, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             IEnumerable<byte[]> bytess = SerializeUtil.Serialize<T>(itemValues).ToList();
 
-            return cache.SetToCollectionAsync(collectionKey, itemKeys, bytess, timestamp, options, token);
+            return cache.SetToCollectionAsync(collectionKey, itemKeys, bytess, timestamps, options, token);
         }
 
         public static Task<bool> SetToCollectionAsync<T>(this ICache cache, string collectionKey, string itemKey, T itemValue, long timestamp, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default)
         {
             byte[] bytes = SerializeUtil.Serialize(itemValue);
 
-            return cache.SetToCollectionAsync(collectionKey, new string[] { itemKey }, new List<byte[]> { bytes }, timestamp, options, cancellationToken);
+            return cache.SetToCollectionAsync(collectionKey, new string[] { itemKey }, new List<byte[]> { bytes }, new long[] { timestamp }, options, cancellationToken);
         }
 
-        public static Task<bool> RemoveFromCollectionAsync(this ICache cache, string collectionKey, string itemKey, long timestamp, CancellationToken cancellationToken = default)
+        public static Task RemoveFromCollectionAsync(this ICache cache, string collectionKey, string itemKey, CancellationToken cancellationToken = default)
         {
-            return cache.RemoveFromCollectionAsync(collectionKey, new string[] { itemKey }, timestamp, cancellationToken);
+            return cache.RemoveFromCollectionAsync(collectionKey, new string[] { itemKey }, cancellationToken);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
         private static void AddCore(IServiceCollection services)
         {
-            services.AddSingleton<IModelCache, RedisCache>();
+            services.AddSingleton<ICache, RedisCache>();
 
         }
     }

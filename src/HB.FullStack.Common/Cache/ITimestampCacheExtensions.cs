@@ -10,8 +10,12 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HB.FullStack.Cache
 {
+    /// <summary>
+    /// 这里的timestamp表明数据的LastTime，类似version
+    /// </summary>
     public static class ITimestampCacheExtensions
     {
+
         public static Task SetIntAsync(this ICache cache, string key, int value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             return cache.SetStringAsync(key, value.ToString(GlobalSettings.Culture), timestamp, options, token);
@@ -68,6 +72,18 @@ namespace HB.FullStack.Cache
             }
         }
        
+
+        /// <summary>
+        /// timestamp是ICacheModel.Timestamp
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cache"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="timestamp"></param>
+        /// <param name="options"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task SetAsync<T>(this ICache cache, string key, T value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
         {
             try

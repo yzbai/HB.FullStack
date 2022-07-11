@@ -25,9 +25,9 @@ namespace HB.FullStack.Cache
     { 
         Task<byte[]?> GetFromCollectionAsync(string collectionKey, string itemKey, CancellationToken token = default);
 
-        Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default);
+        Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, IEnumerable<long> timestamps, DistributedCacheEntryOptions options, CancellationToken token = default);
 
-        Task<bool> RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, long timestamp, CancellationToken token = default);
+        Task RemoveFromCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, CancellationToken token = default);
 
         Task<bool> RemoveCollectionAsync(string collectionKey, CancellationToken token = default);
     }

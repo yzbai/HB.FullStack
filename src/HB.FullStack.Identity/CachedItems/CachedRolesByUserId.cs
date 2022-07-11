@@ -28,5 +28,7 @@ namespace HB.FullStack.Identity
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => TimeSpan.FromSeconds(30);
+
+        public override string WhenToInvalidate => "当UserRole变化时，要Invalidate 对应key的条目;当Role变化，要Invalidate所有的条目";
     }
 }

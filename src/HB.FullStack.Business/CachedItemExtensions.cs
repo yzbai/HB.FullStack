@@ -12,23 +12,23 @@ namespace HB.FullStack.Repository
 {
     public static class CachedItemExtensions
     {
-        public static Task<TResult?> GetAsync<TResult>(this IModelCache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task<TResult?> GetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
 
             return cache.GetAsync<TResult>(cachedItem.CacheKey, cancellationToken);
         }
 
-        public static Task SetAsync<TResult>(this IModelCache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
             ThrowOnNullCacheValue(cachedItem);
-            ThrowOnEmptyUtcTicks(cachedItem);
+            ThrowOnEmptyTimestamp(cachedItem);
 
             return cache.SetAsync(
                 cachedItem.CacheKey,
                 cachedItem.CacheValue!,
-                cachedItem.UtcTicks,
+                cachedItem.Timestamp,
                 new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = cachedItem.AbsoluteExpirationRelativeToNow,
@@ -37,17 +37,17 @@ namespace HB.FullStack.Repository
                 cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this IModelCache cache, CachedItem cachedItem)
+        public static Task<bool> RemoveAsync(this ICache cache, CachedItem cachedItem)
         {
             ThrowOnEmptyCacheKey(cachedItem);
-            ThrowOnEmptyUtcTicks(cachedItem);
+            ThrowOnEmptyTimestamp(cachedItem);
 
-            return cache.RemoveAsync(cachedItem.CacheKey, cachedItem.UtcTicks);
+            return cache.RemoveAsync(cachedItem.CacheKey);
         }
 
-        public static Task<bool> RemoveAsync(this IModelCache cache, IEnumerable<CachedItem> cachedItems, UtcNowTicks utcNowTicks)
+        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedItem> cachedItems)
         {
-            return cache.RemoveAsync(cachedItems.Select(item => item.CacheKey).ToArray(), utcNowTicks);
+            return cache.RemoveAsync(cachedItems.Select(item => item.CacheKey).ToArray());
         }
 
         private static void ThrowOnEmptyCacheKey(CachedItem cachedItem)
@@ -66,11 +66,11 @@ namespace HB.FullStack.Repository
             }
         }
 
-        private static void ThrowOnEmptyUtcTicks(CachedItem cachedItem)
+        private static void ThrowOnEmptyTimestamp(CachedItem cachedItem)
         {
-            if (cachedItem.UtcTicks.IsEmpty())
+            if (cachedItem.Timestamp <= 0)
             {
-                throw RepositoryExceptions.UtcTicksNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey, null);
+                throw RepositoryExceptions.CachedItemTimestampNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey, null);
             }
         }
     }

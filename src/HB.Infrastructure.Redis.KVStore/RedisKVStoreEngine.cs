@@ -262,6 +262,9 @@ return array";
             redisKeys.Add(ModelTimestampNameKey(modelName));
         }
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         public async Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, long newTimestamp)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
@@ -330,6 +333,9 @@ return array";
             }
         }
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         public async Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, long newTimestamp)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
@@ -404,6 +410,9 @@ return array";
             }
         }
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         public async Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;

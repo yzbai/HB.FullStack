@@ -93,6 +93,9 @@ namespace HB.FullStack.KVStore
             return AddAsync(new T[] { item }, lastUser);
         }
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
@@ -134,6 +137,9 @@ namespace HB.FullStack.KVStore
             return UpdateAsync(new T[] { item }, lastUser);
         }
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
         {
             if (!items.Any())
@@ -147,7 +153,7 @@ namespace HB.FullStack.KVStore
 
             try
             {
-                IEnumerable<long> originalVersions = items.Select(t => t.Timestamp).ToArray();
+                IEnumerable<long> originalTimestamps = items.Select(t => t.Timestamp).ToArray();
                 long newTimestamp = TimeUtil.UtcNowTicks;
 
                 foreach (var t in items)
@@ -161,7 +167,8 @@ namespace HB.FullStack.KVStore
                     modelDef.ModelType.FullName!,
                     items.Select(t => GetModelKey(t, modelDef)).ToList(),
                     items.Select(t => SerializeUtil.ToJson(t)).ToList(),
-                    originalVersions, newTimestamp).ConfigureAwait(false);
+                    originalTimestamps,
+                    newTimestamp).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
@@ -191,6 +198,9 @@ namespace HB.FullStack.KVStore
             return DeleteAsync<T>(new string[] { key }, new long[] { timestamp });
         }
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : KVStoreModel, new()
         {
             ThrowIf.NullOrEmpty(timestamps, nameof(timestamps));

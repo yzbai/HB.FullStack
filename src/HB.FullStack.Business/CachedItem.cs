@@ -4,6 +4,9 @@ using System.Text;
 
 namespace HB.FullStack.Repository
 {
+    /// <summary>
+    /// 代表一条缓存
+    /// </summary>
     public abstract class CachedItem
     {
         public string CachedType => GetType().Name;
@@ -16,12 +19,14 @@ namespace HB.FullStack.Repository
 
         public abstract TimeSpan? SlidingExpiration { get; }
 
+        public abstract string WhenToInvalidate { get; }
+
         public string CacheKey { get; protected set; } = null!;
 
         /// <summary>
         /// 刚从数据库取出的时间，越贴近数据库取出时间，越好
         /// </summary>
-        public UtcNowTicks UtcTicks { get; protected set; } = UtcNowTicks.Empty;
+        public long Timestamp { get; protected set; } = -1;
     }
 
     /// <summary>
@@ -38,15 +43,15 @@ namespace HB.FullStack.Repository
             CacheKey = $"{CachedType}_{key ?? "null"}";
         }
 
-        public CachedItem<TResult> Value(TResult result)
+        public CachedItem<TResult> SetValue(TResult result)
         {
             CacheValue = result;
             return this;
         }
 
-        public CachedItem<TResult> Timestamp(UtcNowTicks utcTicks)
+        public CachedItem<TResult> SetTimestamp(long timestamp)
         {
-            UtcTicks = utcTicks;
+            Timestamp = timestamp;
 
             return this;
         }

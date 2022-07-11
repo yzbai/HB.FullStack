@@ -20,7 +20,7 @@ namespace HB.FullStack.Repository
     internal static class ModelCacheStrategy
     {
         public static async Task<IEnumerable<TModel>> CacheAsideAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TModel>>> dbRetrieve,
-            IDatabase database, Cache.IModelCache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TModel : Common.Cache.CacheModels.ICacheModel, new()
+            IDatabase database, Cache.ICache cache, IMemoryLockManager memoryLockManager, ILogger logger) where TModel : Common.Cache.CacheModels.ICacheModel, new()
         {
 
             if (!cache.IsModelEnabled<TModel>())

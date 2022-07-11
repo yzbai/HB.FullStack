@@ -28,14 +28,14 @@ namespace HB.Infrastructure.Redis.Cache
     ///
     ///
     ///                                 |------- DimensionKeyValue_1   :  Id
-    /// ModelName_DimensionKeyName-----|......
+    /// ModelName_DimensionKeyName----- |......
     ///                                 |------- DimensionKeyValue_n   :  Id
     ///                                 
     /// _minTS..Id ---------------------| 锁，保证model被删除后的一段时间内，没有比这个小的历史版本写到缓存里
     ///
     /// 所以ModelName_DimensionKeyName 这个key是一个索引key
     /// </summary>
-    public partial class RedisCache : RedisCacheBase, FullStack.Cache.IModelCache
+    public partial class RedisCache : RedisCacheBase, ICache
     {
         /// <summary>
         /// keys:id1, id2, id3
@@ -135,6 +135,7 @@ for j =1,number do
 end
 return array";
 
+        //TODO: 是否需要有一个timestamp冲突，那么整个写入失败？
         /// <summary>
         /// _minTS设置timestamp最小值锁。说明历史上最小的timestamp，比这个小的，版本不对，就不用写了。
         /// 返回0为未更新，返回1为更新
@@ -206,7 +207,6 @@ return rt";
         /// 删除，并设置最小timestamp锁
         /// keys: idKey1, idKey2, idKey3
         /// argv: 3(model_num), invalidationKey_expire_seconds
-        /// 需要SET_MODEL时，新的timestamp>_minTS,而不是大于等于
         /// </summary>
         public const string LUA_MODELS_REMOVE_2 = @"
 local modelNum = tonumber(ARGV[1])
@@ -405,6 +405,10 @@ end
             }
         }
 
+        /// <summary>
+        /// 并不把models作为一个整体看待，里面有的可能会因为timestamp冲突而不成功。
+        /// 需要改变吗？
+        /// </summary>
         public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
@@ -462,16 +466,16 @@ end
             }
         }
 
-        public async Task RemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
+        public async Task RemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
             ThrowIfNotCacheEnabled(modelDef);
-            ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
+            ThrowIf.Null(keyValues, nameof(keyValues));
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            byte[] loadedScript = AddRemoveModelsRedisInfo<TModel>(dimensionKeyName, dimensionKeyValues, modelDef, redisKeys, redisValues);
+            byte[] loadedScript = AddRemoveModelsRedisInfo<TModel>(keyName, keyValues, modelDef, redisKeys, redisValues);
 
             IDatabase database = await GetDatabaseAsync(modelDef.CacheInstanceName).ConfigureAwait(false);
 
@@ -485,24 +489,24 @@ end
 
                 InitLoadedLuas();
 
-                await RemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+                await RemoveModelsAsync<TModel>(keyName, keyValues, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+                throw CacheExceptions.RemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, keyName, keyValues, ex);
             }
         }
 
-        //private async Task ForcedRemoveModelsAsync<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CancellationToken token = default) where TModel : IModelCache, new()
+        //private async Task ForcedRemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : IModelCache, new()
         //{
         //    CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
         //    ThrowIfNotCacheEnabled(modelDef);
-        //    ThrowIf.Null(dimensionKeyValues, nameof(dimensionKeyValues));
+        //    ThrowIf.Null(keyValues, nameof(keyValues));
 
         //    List<RedisKey> redisKeys = new List<RedisKey>();
         //    List<RedisValue> redisValues = new List<RedisValue>();
 
-        //    byte[] loadedScript = AddForcedRemoveModelsRedisInfo<TModel>(dimensionKeyName, dimensionKeyValues, modelDef, redisKeys, redisValues);
+        //    byte[] loadedScript = AddForcedRemoveModelsRedisInfo<TModel>(keyName, keyValues, modelDef, redisKeys, redisValues);
 
         //    IDatabase database = await GetDatabaseAsync(modelDef.CacheInstanceName).ConfigureAwait(false);
 
@@ -516,21 +520,21 @@ end
 
         //        InitLoadedLuas();
 
-        //        await ForcedRemoveModelsAsync<TModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
+        //        await ForcedRemoveModelsAsync<TModel>(keyName, keyValues, token).ConfigureAwait(false);
         //    }
         //    catch (Exception ex)
         //    {
-        //        throw CacheExceptions.ForcedRemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, dimensionKeyName, dimensionKeyValues, ex);
+        //        throw CacheExceptions.ForcedRemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, keyName, keyValues, ex);
         //    }
         //}
 
-        private byte[] AddRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
+        private byte[] AddRemoveModelsRedisInfo<TModel>(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             byte[] loadedScript;
 
-            if (modelDef.KeyProperty.Name == dimensionKeyName)
+            if (modelDef.KeyProperty.Name == keyName)
             {
-                foreach (object dimensionKeyValue in dimensionKeyValues)
+                foreach (object dimensionKeyValue in keyValues)
                 {
                     redisKeys.Add(GetRealKey(modelDef.Name, dimensionKeyValue.ToString()!));
                 }
@@ -539,9 +543,9 @@ end
             }
             else
             {
-                foreach (object dimensionKeyValue in dimensionKeyValues)
+                foreach (object dimensionKeyValue in keyValues)
                 {
-                    redisKeys.Add(GetModelDimensionKey(modelDef.Name, dimensionKeyName, dimensionKeyValue.ToString()!));
+                    redisKeys.Add(GetModelDimensionKey(modelDef.Name, keyName, dimensionKeyValue.ToString()!));
                 }
 
                 loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsRemoveByDimensionLua;
@@ -560,13 +564,13 @@ end
             return loadedScript;
         }
 
-        //private byte[] AddForcedRemoveModelsRedisInfo<TModel>(string dimensionKeyName, IEnumerable dimensionKeyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : IModelCache, new()
+        //private byte[] AddForcedRemoveModelsRedisInfo<TModel>(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : IModelCache, new()
         //{
         //    byte[] loadedScript;
 
-        //    if (modelDef.KeyProperty.Name == dimensionKeyName)
+        //    if (modelDef.KeyProperty.Name == keyName)
         //    {
-        //        foreach (object dimensionKeyValue in dimensionKeyValues)
+        //        foreach (object dimensionKeyValue in keyValues)
         //        {
         //            redisKeys.Add(GetRealKey(modelDef.Name, dimensionKeyValue.ToString()!));
         //        }
@@ -575,9 +579,9 @@ end
         //    }
         //    else
         //    {
-        //        foreach (object dimensionKeyValue in dimensionKeyValues)
+        //        foreach (object dimensionKeyValue in keyValues)
         //        {
-        //            redisKeys.Add(GetModelDimensionKey(modelDef.Name, dimensionKeyName, dimensionKeyValue.ToString()!));
+        //            redisKeys.Add(GetModelDimensionKey(modelDef.Name, keyName, dimensionKeyValue.ToString()!));
         //        }
 
         //        loadedScript = GetLoadedLuas(modelDef.CacheInstanceName!).LoadedModelsForcedRemoveByDimensionLua;

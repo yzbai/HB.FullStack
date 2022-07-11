@@ -29,18 +29,25 @@ namespace HB.FullStack.KVStore
         
         Task AddAsync<T>(T item, string lastUser) where T : KVStoreModel, new();
 
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new();
 
         
         Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreModel, new();
 
-        
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new();
 
         
         Task DeleteAsync<T>(string key, long timestamp) where T : KVStoreModel, new();
 
-        
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : KVStoreModel, new();
 
 

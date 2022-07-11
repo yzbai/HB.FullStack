@@ -56,14 +56,14 @@ namespace HB.Infrastructure.Redis.Cache
                 IServer server = RedisInstanceManager.GetServer(setting, Logger);
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
-                    LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP),
-                    LoadedCollectionRemoveItemWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_REMOVE_ITEM_WITH_TIMESTAMP),
-                    LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP),
+                    LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP_2),
+                    LoadedCollectionRemoveItemWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_REMOVE_ITEMS_WITH_TIMESTAMP_2),
+                    LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP_2),
 
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
-                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP_2),
-                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP_2),
-                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
+                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_2),
+                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_2),
+                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH),
 
                     LoadedModelsGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH),
                     LoadedModelsGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH_BY_DIMENSION),

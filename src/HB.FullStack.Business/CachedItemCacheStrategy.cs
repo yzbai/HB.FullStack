@@ -8,6 +8,7 @@ using AsyncAwaitBestPractices;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Lock.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -15,10 +16,10 @@ namespace HB.FullStack.Repository
 {
     public static class CachedItemCacheStrategy
     {          
-        public static async Task<TResult?> CacheAsideAsync<TResult>(
+        public static async Task<TResult?> GetUsingCacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
-            IModelCache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
-            where TResult : class
+            ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
+            where TResult : ServerDatabaseModel
         {
             //Cache First
             TResult? result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
@@ -41,14 +42,12 @@ namespace HB.FullStack.Repository
                 }
 
                 TResult dbRt = await dbRetrieve(database).ConfigureAwait(false);
-                UtcNowTicks now = TimeUtil.UtcNowTicks;
-
 
                 // 如果TResult是集合类型，可能会存入空集合。而在ModelCache中是不会存入空集合的。
                 //这样设计是合理的，因为ModelCache是按Model角度，存入的Model会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
                 {
-                    UpdateCache(cacheItem.Value(dbRt).Timestamp(now), cache);
+                    SetCache(cacheItem.SetValue(dbRt).SetTimestamp(dbRt.Timestamp), cache);
                     logger.LogInformation($"缓存 Missed. Model:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
                 }
                 else
@@ -66,20 +65,20 @@ namespace HB.FullStack.Repository
             }
         }
         
-        public static void InvalidateCache(CachedItem cachedItem, IModelCache cache)
+        public static void InvalidateCache(CachedItem cachedItem, ICache cache)
         {
             cache.RemoveAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
 
-        private static void UpdateCache<TResult>(CachedItem<TResult> cachedItem, IModelCache cache) where TResult : class
+        private static void SetCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
         {
             cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
-        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,UtcNowTicks utcNowTicks, IModelCache cache)
+        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,ICache cache)
         {
-            cache.RemoveAsync(cachedItems, utcNowTicks).SafeFireAndForget(OnException);
+            cache.RemoveAsync(cachedItems).SafeFireAndForget(OnException);
         }
 
         private static void OnException(Exception ex)

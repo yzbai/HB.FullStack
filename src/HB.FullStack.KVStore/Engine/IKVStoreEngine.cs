@@ -23,13 +23,21 @@ namespace HB.FullStack.KVStore.Engine
         /// </summary>
         Task<IEnumerable<Tuple<string?, long>>> ModelGetAllAsync(string storeName, string modelName);
 
-        
+
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, long newTimestamp);
 
-        
+
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, long newTimestamp);
 
-        
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
         Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps);
 
         

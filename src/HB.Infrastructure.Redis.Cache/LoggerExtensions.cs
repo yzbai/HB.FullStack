@@ -88,20 +88,20 @@ namespace HB.Infrastructure.Redis.Cache
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithTimestamp = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
             CacheErrorCodes.CacheInvalidationConcurrencyWithTimestamp.ToEventId(),
-            "检测到，Cache Invalidation Concurrency冲突，已被阻止. Key={Key}, UtcNowTicks={UtcNowTicks}, Options={Options}");
+            "检测到，Cache Invalidation Concurrency冲突，已被阻止. Key={Key}, Timestamp={Timestamp} Options={Options}");
 
         public static void LogCacheInvalidationConcurrencyWithTimestamp(this ILogger logger, string? key, long timestamp, DistributedCacheEntryOptions options)
         {
-            _logCacheInvalidationConcurrencyWithTimestamp(logger, key, timestamp.ToString(CultureInfo.InvariantCulture), SerializeUtil.ToJson(options), null);
+            _logCacheInvalidationConcurrencyWithTimestamp(logger, key, timestamp.ToString(GlobalSettings.Culture), SerializeUtil.ToJson(options), null);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateTimestampConcurrency = LoggerMessage.Define<string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?,string?, Exception?> _logCacheUpdateTimestampConcurrency = LoggerMessage.Define<string?, string?,string?>(
             LogLevel.Error,
             CacheErrorCodes.CacheUpdateTimestampConcurrency.ToEventId(),
             "检测到，Cache Update Concurrency冲突，已被阻止. Key={Key}, UtcNowTicks={UtcNowTicks}, Options={Options}");
         public static void LogCacheUpdateTimestampConcurrency(this ILogger logger, string? key, long timestamp, DistributedCacheEntryOptions options)
         {
-            _logCacheUpdateTimestampConcurrency(logger, key, timestamp.ToString(CultureInfo.InvariantCulture), SerializeUtil.ToJson(options), null);
+            _logCacheUpdateTimestampConcurrency(logger, key, timestamp.ToString(GlobalSettings.Culture), SerializeUtil.ToJson(options), null);
         }
     }
 }

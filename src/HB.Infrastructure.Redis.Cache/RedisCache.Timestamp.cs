@@ -47,7 +47,7 @@ return 1";
         /// keys: key
         /// argv:invalidationKey_expire_seconds
         /// </summary>
-        public const string LUA_REMOVE_WITH_TIMESTAMP_2 = @"
+        public const string LUA_REMOVE_2 = @"
 local timestamp = redis.call('hget',KEYS[1], 'timestamp')
 redis.call('set', '_minTS'..KEYS[1], timestamp, 'EX', ARGV[1])
 return redis.call('del', KEYS[1])
@@ -57,7 +57,7 @@ return redis.call('del', KEYS[1])
         /// keys: key1, key2, key3
         /// argv: key_count, invalidationKey_expire_seconds
         /// </summary>
-        public const string LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP_2 = @"
+        public const string LUA_REMOVE_MULTIPLE_2 = @"
 local number=tonumber(ARGV[1])
 for i=1,number do
     local timestamp = redis.call('hget', KEYS[i], 'timestamp')
@@ -67,9 +67,9 @@ return redis.call('del', unpack(KEYS))";
 
         /// <summary>
         /// keys:key
-        /// argv:now_timestamp
+        /// argv:UtcNowUnixTimeSeconds(用来比较刷新过期时间)
         /// </summary>
-        public const string LUA_GET_AND_REFRESH_WITH_TIMESTAMP = @"
+        public const string LUA_GET_AND_REFRESH = @"
 local data= redis.call('hmget',KEYS[1], 'absexp', 'sldexp','data')
 
 if (not data[3]) then
@@ -154,7 +154,8 @@ return data[3]";
 
             try
             {
-                RedisResult redisResult = await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetWithTimestampLua, new RedisKey[] { GetRealKey("", key) },
+                RedisResult redisResult = await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetWithTimestampLua, 
+                    new RedisKey[] { GetRealKey("", key) },
                     new RedisValue[]
                     {
                         absoluteExpireUnixSeconds??-1,
@@ -233,7 +234,7 @@ return data[3]";
             }
         }
 
-        public async Task<bool> RemoveAsync(string[] keys, long timestamp, CancellationToken token = default)
+        public async Task<bool> RemoveAsync(string[] keys, CancellationToken token = default)
         {
             //TODO: 测试这个
             if (keys.IsNullOrEmpty())
@@ -276,11 +277,11 @@ return data[3]";
 
                 InitLoadedLuas();
 
-                return await RemoveAsync(keys, timestamp, token).ConfigureAwait(false);
+                return await RemoveAsync(keys, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw CacheExceptions.RemoveMultipleError(keys, timestamp, ex);
+                throw CacheExceptions.RemoveMultipleError(keys, ex);
             }
         }
 

@@ -3,7 +3,7 @@
 
 namespace HB.FullStack.Cache
 {
-    public interface ICache : IModelCache, ITimestampCache, ICollectionCache
+    public interface ICache : IModelCache2, ITimestampCache, ICollectionCache
     {
         void Close();
 

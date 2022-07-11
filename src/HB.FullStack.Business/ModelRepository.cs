@@ -35,14 +35,14 @@ namespace HB.FullStack.Repository
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
         protected ILogger Logger { get; }
-        protected IModelCache Cache { get; }
+        protected ICache Cache { get; }
         private IDatabase Database { get; }
 
         protected IDatabaseReader DbReader => Database;
 
         private IMemoryLockManager MemoryLockManager { get; }
 
-        protected ModelRepository(ILogger logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
+        protected ModelRepository(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
         {
             Logger = logger;
             Cache = cache;
@@ -70,9 +70,6 @@ namespace HB.FullStack.Repository
         /// <summary>
         /// 多个CachedItem的时候，使用Parrell来并行
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
         protected abstract Task InvalidateCacheItemsOnChanged(TDatabaseModel sender, DatabaseWriteEventArgs args);
 
         #region Events

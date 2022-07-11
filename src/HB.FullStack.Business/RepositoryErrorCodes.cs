@@ -14,7 +14,7 @@ namespace System
     {
         public static ErrorCode CacheKeyNotSet { get; } = new ErrorCode(nameof(CacheKeyNotSet), "");
         public static ErrorCode CacheValueNotSet { get; } = new ErrorCode(nameof(CacheValueNotSet), "");
-        public static ErrorCode UtcTicksNotSet { get; } = new ErrorCode(nameof(UtcTicksNotSet), "");
+        public static ErrorCode CachedItemTimestampNotSet { get; } = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
         public static ErrorCode CacheGetError { get; } = new ErrorCode(nameof(CacheGetError), "");
         public static ErrorCode CacheMissed { get; } = new ErrorCode(nameof(CacheMissed), "");
         public static ErrorCode CacheGetEmpty { get; } = new ErrorCode(nameof(CacheGetEmpty), "");
@@ -24,9 +24,9 @@ namespace System
 
     internal static class RepositoryExceptions
     {
-        internal static Exception UtcTicksNotSet(string resourceType, string cacheKey, object? cacheValue)
+        internal static Exception CachedItemTimestampNotSet(string resourceType, string cacheKey, object? cacheValue)
         {
-            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.UtcTicksNotSet);
+            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CachedItemTimestampNotSet);
 
             exception.Data["ResourceType"] = resourceType;
             exception.Data["CacheKey"] = cacheKey;
