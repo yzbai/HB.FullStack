@@ -56,8 +56,8 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(exists == false && cached == null);
             Assert.IsTrue(exists2 == false && cached2 == null);
 
-            await Cache.RemoveModelsAsync<Book>(nameof(Book.Id), ids, books.Select(b => b.Version)).ConfigureAwait(false);
-            await Cache.RemoveModelsAsync<Book>(nameof(Book.Name), bookNames, books.Select(b => b.Version)).ConfigureAwait(false);
+            await Cache.RemoveModelsAsync<Book>(nameof(Book.Id), ids).ConfigureAwait(false);
+            await Cache.RemoveModelsAsync<Book>(nameof(Book.Name), bookNames).ConfigureAwait(false);
 
             stopwatch.Reset();
             stopwatch.Start();
@@ -88,7 +88,7 @@ namespace HB.FullStack.CacheTests
 
             stopwatch.Reset();
             stopwatch.Start();
-            await Cache.RemoveModelsAsync<Book>(nameof(Book.Id), ids, books.Select(b => b.Version)).ConfigureAwait(false);
+            await Cache.RemoveModelsAsync<Book>(nameof(Book.Id), ids).ConfigureAwait(false);
             stopwatch.Stop();
             Console.WriteLine($"Delete 100 Items, Spend: {stopwatch.ElapsedMilliseconds}");
 
@@ -102,7 +102,7 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(idRedisKeys.Count == database.KeyExists(bookIdRedisKeys.ToArray()));
             Assert.IsTrue(idRedisKeys.Count == database.KeyExists(bookNameRedisKeys.ToArray()));
 
-            await Cache.RemoveModelsAsync<Book>(nameof(Book.Name), bookNames, books.Select(b => b.Version)).ConfigureAwait(false);
+            await Cache.RemoveModelsAsync<Book>(nameof(Book.Name), bookNames).ConfigureAwait(false);
 
             Assert.IsTrue(0 == database.KeyExists(bookIdRedisKeys.ToArray()));
             Assert.IsTrue(0 == database.KeyExists(bookNameRedisKeys.ToArray()));
@@ -175,7 +175,7 @@ namespace HB.FullStack.CacheTests
 
             await AddToDatabaeAsync(books).ConfigureAwait(false);
 
-            await Cache.RemoveModelsAsync<Book>("Id", books.Select(b => b.Id.ToString()), books.Select(b => b.Version)).ConfigureAwait(false);
+            await Cache.RemoveModelsAsync<Book>("Id", books.Select(b => b.Id.ToString())).ConfigureAwait(false);
 
             IEnumerable<bool> oks = await Cache.SetModelsAsync(books).ConfigureAwait(false);
 
@@ -185,7 +185,7 @@ namespace HB.FullStack.CacheTests
 
             Assert.IsTrue(oks1.All(b => !b));
 
-            typeof(Book).GetProperty("Version")!.SetValue(books[0], books[0].Version + 1);
+            typeof(Book).GetProperty("Timestamp")!.SetValue(books[0], TimeUtil.UtcNowTicks);
 
             IEnumerable<bool> oks2 = await Cache.SetModelsAsync(books).ConfigureAwait(false);
 

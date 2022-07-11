@@ -22,8 +22,7 @@ namespace HB.FullStack.Database.SQL
         public const string NEW_PROPERTY_VALUES_SUFFIX = "new";
 
         /// <summary>
-        /// 只用于客户端，IdGenModel上,
-        /// 没有Version检查, Version不增长
+        /// 只用于客户端，没有做Timestamp检查
         /// </summary>
         public static string CreateAddOrUpdateSql(DatabaseModelDef modelDef, EngineType engineType, bool returnModel, int number = 0)
         {

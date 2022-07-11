@@ -15,13 +15,13 @@ namespace HB.FullStack.Identity
     {
  
 
-        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
+        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(UserClaim sender, DatabaseWriteEventArgs args)
         {
             Parallel.Invoke(
-                () => InvalidateCache(new CachedUserClaimsByUserId(sender.UserId).Timestamp(args.UtcNowTicks))
+                () => InvalidateCache(new CachedUserClaimsByUserId(sender.UserId).SetTimestamp(args.Timestamp))
             );
 
             return Task.CompletedTask;

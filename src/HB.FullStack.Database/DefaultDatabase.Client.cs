@@ -45,9 +45,9 @@ namespace HB.FullStack.Database
         }
 
         /// <summary>
-        /// AddOrUpdate,即override，不改变version
+        /// AddOrUpdate,即override,不检查Timestamp
         /// </summary>
-        public async Task SetByIdAsync<T>(T item, /*string lastUser, */TransactionContext? transContext = null) where T : ClientDatabaseModel, new()
+        public async Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : ClientDatabaseModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -58,8 +58,21 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.NotWriteable(modelDef.ModelFullName, modelDef.DatabaseName);
             }
 
+            //long oldTimestamp = -1;
+            //string oldLastUser = "";
+
             try
             {
+                ////Prepare
+                //if (item is ServerDatabaseModel serverModel)
+                //{
+                //    oldTimestamp = serverModel.Timestamp;
+                //    oldLastUser = serverModel.LastUser;
+
+                //    serverModel.Timestamp = TimeUtil.UtcNowTicks;
+                //    serverModel.LastUser = lastUser;
+                //}
+
                 var command = DbCommandBuilder.CreateAddOrUpdateCommand(EngineType, modelDef, item, false);
 
                 _ = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);

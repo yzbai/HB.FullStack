@@ -16,7 +16,7 @@ namespace HB.FullStack.WebApi
         private readonly IDataProtector _dataProtector;
         private readonly ILogger _logger;
 
-        public CommonResourceTokenService(IModelCache cache, IDataProtectionProvider dataProtectionProvider, ILogger<CommonResourceTokenService> logger)
+        public CommonResourceTokenService(ICache cache, IDataProtectionProvider dataProtectionProvider, ILogger<CommonResourceTokenService> logger)
         {
             _logger = logger;
 

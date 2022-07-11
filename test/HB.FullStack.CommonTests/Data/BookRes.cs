@@ -2,6 +2,7 @@
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Resources;
 
 using System;
 
@@ -9,7 +10,7 @@ using System;
 namespace HB.FullStack.CommonTests.Data
 {
 
-    [ApiResource(ApiEndpointName, ApiVersion, nameof(BookRes))]
+    [ApiResourceBinding(ApiEndpointName, ApiVersion, nameof(BookRes))]
     public class BookRes : ApiResource
     {
         public string Name { get; set; }

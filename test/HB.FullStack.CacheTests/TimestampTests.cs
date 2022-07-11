@@ -44,7 +44,7 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(cached2 != null);
             Assert.IsTrue(cached2!.Count == books.Count);
 
-            await Cache.RemoveAsync(key, TimeUtil.UtcNowTicks).ConfigureAwait(false);
+            await Cache.RemoveAsync(key).ConfigureAwait(false);
 
             Assert.IsFalse(await database.KeyExistsAsync(key));
         }
@@ -108,12 +108,12 @@ namespace HB.FullStack.CacheTests
 
             await AddToDatabaeAsync(new Book[] { book }).ConfigureAwait(false);
 
-            UtcNowTicks utcNowTicks = TimeUtil.UtcNowTicks;
-            UtcNowTicks utcNowTicks2 = TimeUtil.UtcNowTicks;
-            UtcNowTicks utcNowTicks3 = TimeUtil.UtcNowTicks;
+            long utcNowTicks = TimeUtil.UtcNowTicks;
+            long utcNowTicks2 = TimeUtil.UtcNowTicks;
+            long utcNowTicks3 = TimeUtil.UtcNowTicks;
 
-            utcNowTicks2.Ticks -= 10000;
-            utcNowTicks3.Ticks += 10000;
+            utcNowTicks2 -= 10000;
+            utcNowTicks3 += 10000;
 
             string oldName = book.Name;
             await Cache.SetAsync(nameof(Book) + book.Id.ToString(), book, utcNowTicks, entryOptions).ConfigureAwait(false);

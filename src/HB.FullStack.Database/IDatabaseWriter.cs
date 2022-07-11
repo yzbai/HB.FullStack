@@ -37,7 +37,7 @@ namespace HB.FullStack.Database
 
         Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : ServerDatabaseModel, new();
 
-        Task SetByIdAsync<T>(T item, /*string lastUser, */TransactionContext? transContext = null) where T : ClientDatabaseModel, new();
+        Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : ClientDatabaseModel, new();
 
         Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : DatabaseModel, new();
     }

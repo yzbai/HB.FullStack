@@ -22,7 +22,7 @@ namespace HB.FullStack.Identity
     /// </summary>
     public class UserRepo : ModelRepository<User>
     {
-        public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
+        public UserRepo(ILogger<UserRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager)
         {
             ModelUpdating += (sender, args) =>

@@ -34,19 +34,19 @@ namespace HB.FullStack.CommonTests.ApiClient
                     options.LoginJwtEndpoint = new JwtEndpointSetting
                     {
                         EndpointName = ApiEndpointName,
-                        ResName = JwtRes,
+                        ControllerModelName = JwtRes,
                         Version = ApiVersion
                     };
 
                     options.Endpoints.Add(new EndpointSettings
                     {
-                        Name = ApiEndpointName,
+                        EndpointName = ApiEndpointName,
                         Version = ApiVersion,
-                        Url = new Uri($"http://localhost:{Port}/api/"),
+                        BaseUrl = new Uri($"http://localhost:{Port}/api/"),
                         JwtEndpoint = new JwtEndpointSetting
                         {
                             EndpointName = ApiEndpointName,
-                            ResName = JwtRes,
+                            ControllerModelName = JwtRes,
                             Version = ApiVersion
                         }
                     });

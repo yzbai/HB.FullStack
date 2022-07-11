@@ -40,7 +40,6 @@ namespace HB.FullStack.Repository
         public static Task<bool> RemoveAsync(this ICache cache, CachedItem cachedItem)
         {
             ThrowOnEmptyCacheKey(cachedItem);
-            ThrowOnEmptyTimestamp(cachedItem);
 
             return cache.RemoveAsync(cachedItem.CacheKey);
         }

@@ -86,9 +86,9 @@ namespace HB.FullStack.CacheTests
             //模拟数据库读取
             await Task.Delay(random.Next(1000, 2000)).ConfigureAwait(false);
 
-            UtcNowTicks utcNowTicks = TimeUtil.UtcNowTicks;
+            long utcNowTicks = TimeUtil.UtcNowTicks;
 
-            Console.WriteLine($"任务{taskId}, 数据库读取完成在 at {utcNowTicks.Ticks}");
+            Console.WriteLine($"任务{taskId}, 数据库读取完成在 at {utcNowTicks}");
 
             //模拟其他时间
             await Task.Delay(random.Next(1000, 2000)).ConfigureAwait(false);
@@ -100,7 +100,7 @@ namespace HB.FullStack.CacheTests
 
             Console.WriteLine($"任务{taskId}, Try to Set Value:{value}");
 
-            _multipleUpdates[taskId] = (utcNowTicks.Ticks, value);
+            _multipleUpdates[taskId] = (utcNowTicks, value);
         }
 
         [TestMethod]
@@ -145,7 +145,7 @@ namespace HB.FullStack.CacheTests
         {
             //模拟Retrieve data
             VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);
-            UtcNowTicks timestamp = TimeUtil.UtcNowTicks;
+            long timestamp = TimeUtil.UtcNowTicks;
 
             //模拟发生其他事情
             await Task.Delay(2000);
@@ -160,13 +160,13 @@ namespace HB.FullStack.CacheTests
             VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);
             versionData.Version++;
             await databaseMocker.UpdateAsync(versionData).ConfigureAwait(false);
-            UtcNowTicks timestamp = TimeUtil.UtcNowTicks;
+            long timestamp = TimeUtil.UtcNowTicks;
 
             //其他事情
             await Task.Delay(100).ConfigureAwait(false);
 
             //Invalidate Cache
-            await Cache.RemoveAsync(versionData.Guid, timestamp).ConfigureAwait(false);
+            await Cache.RemoveAsync(versionData.Guid).ConfigureAwait(false);
         }
     }
 }

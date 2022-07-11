@@ -39,22 +39,21 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, book.Version, "UPDATE_FIELDS_VERSION", toUpdate, null);
+            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id,  toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
-            Assert.IsTrue(updatedBook.Version == book.Version + 1);
+            Assert.IsTrue(updatedBook.Timestamp > book.Timestamp);
             Assert.IsTrue(updatedBook.Price == 123456.789);
             Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
             Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");
-            Assert.IsTrue(updatedBook.LastTime > book.LastTime);
 
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, book.Version, "UPDATE_FIELDS_VERSION", toUpdate, null);
+                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id,  toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -83,23 +82,22 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookModel.Price), book.Price, 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), book.Name, "TTTTTXXXXTTTTT"));
 
-            int newVersion = await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, "UPDATE_FIELDS_VERSION", toUpdate, null);
+            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
 
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
-            Assert.IsTrue(updatedBook.Version == newVersion);
+            Assert.IsTrue(updatedBook.Timestamp >= book.Timestamp);
             Assert.IsTrue(updatedBook.Price == 123456.789);
             Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
             Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");
-            Assert.IsTrue(updatedBook.LastTime > book.LastTime);
 
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, "UPDATE_FIELDS_VERSION", toUpdate, null);
+                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -260,7 +258,7 @@ namespace HB.FullStack.DatabaseTests
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
 
-                Assert.IsTrue(lst.All(p => p.Version == 0));
+                //Assert.IsTrue(lst.All(p => p.Version == 0));
             }
             catch (Exception ex)
             {
@@ -347,7 +345,7 @@ namespace HB.FullStack.DatabaseTests
 
             PublisherModel_Client? fetched = await Db.ScalarAsync<PublisherModel_Client>(item.Id, null).ConfigureAwait(false);
 
-            Assert.AreEqual(item.LastTime, fetched!.LastTime);
+            Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
             fetched.Name = "ssssss";
 
@@ -431,7 +429,7 @@ namespace HB.FullStack.DatabaseTests
 
                 PublisherModel_Client? fetched = await Db.ScalarAsync<PublisherModel_Client>(item.Id, transactionContext).ConfigureAwait(false);
 
-                Assert.AreEqual(item.LastTime, fetched!.LastTime);
+                Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
                 fetched.Name = "ssssss";
 
@@ -639,7 +637,7 @@ namespace HB.FullStack.DatabaseTests
             using SqliteConnection conn = new SqliteConnection(connectString);
             conn.Open();
 
-            long id = TimeUtil.UtcNowTicks.Ticks;
+            long id = TimeUtil.UtcNowTicks;
 
             string insertCommandText = $"insert into tb_publishermodel(`Name`, `LastTime`, `Id`, `Version`) values('FSFSF', 100, '{id}', 1)";
 

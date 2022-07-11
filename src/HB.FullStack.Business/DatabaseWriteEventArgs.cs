@@ -15,5 +15,9 @@ namespace HB.FullStack.Repository
             Timestamp = TimeUtil.UtcNowTicks;
         }
 
+        public DatabaseWriteEventArgs(long timestamp)
+        {
+            Timestamp = timestamp;
+        }   
     }
 }

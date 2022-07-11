@@ -15,7 +15,7 @@ namespace HB.FullStack.Identity
 {
     public class RoleRepo : ModelRepository<Role>
     {
-        public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
+        public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override async Task InvalidateCacheItemsOnChanged(Role sender, DatabaseWriteEventArgs args)
@@ -28,7 +28,7 @@ namespace HB.FullStack.Identity
             //问题：可能会有很多cache条目
             IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(ur => ur.RoleId == sender.Id, null).ConfigureAwait(false);
 
-            InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList(), args.UtcNowTicks);
+            InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList());
         }
 
         public Task<IEnumerable<Role>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)

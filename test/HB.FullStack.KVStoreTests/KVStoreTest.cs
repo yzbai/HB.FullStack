@@ -63,9 +63,9 @@ namespace HB.FullStack.KVStoreTests
 
             UserModel? fetchedAgain = await KVStore.GetAsync<UserModel>(_userModel2.Guid).ConfigureAwait(false);
 
-            Assert.IsTrue(condition: fetched.Version == fetchedAgain!.Version);
+            Assert.IsTrue(condition: fetched.Timestamp == fetchedAgain!.Timestamp);
 
-            await KVStore.DeleteAsync<UserModel>(_userModel2.Guid, fetchedAgain.Version).ConfigureAwait(false);
+            await KVStore.DeleteAsync<UserModel>(_userModel2.Guid, fetchedAgain.Timestamp).ConfigureAwait(false);
         }
 
         public static bool Equals([AllowNull] UserModel x, [AllowNull] UserModel y)

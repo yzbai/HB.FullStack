@@ -16,12 +16,12 @@ namespace HB.FullStack.Common.Api.Tests
         [TestMethod()]
         public void GetTest()
         {
-            ApiResourceDef def = ApiResourceDefFactory.Get<BookRes>();
+            ApiResourceBinding def = ApiResourceBindingFactory.Get<BookRes>();
 
             Assert.IsNotNull(def);
 
             Assert.IsNotNull(def.EndpointName);
-            Assert.IsNotNull(def.ResName);
+            Assert.IsNotNull(def.ControllerModelName);
             Assert.IsNotNull(def.Version);
 
 

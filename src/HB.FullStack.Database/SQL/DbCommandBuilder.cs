@@ -280,6 +280,9 @@ namespace HB.FullStack.Database
 
         public EngineCommand CreateBatchAddCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
         {
+            //TODO: 在不需要返回Id的DatabaseModel中，使用如下句式：
+            //insert into user_info （user_id,user_name,status,years）values （123,‘你好’,1,15）,(456,“你好”,2,16)；
+
             ThrowIf.Empty(models, nameof(models));
 
             StringBuilder innerBuilder = new StringBuilder();
@@ -479,12 +482,6 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update，并且无法更新models
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="engineType"></param>
-        /// <param name="modelDef"></param>
-        /// <param name="models"></param>
-        /// <returns></returns>
-
         public EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
         {
             ThrowIf.Empty(models, nameof(models));

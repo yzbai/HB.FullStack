@@ -20,5 +20,7 @@ namespace HB.FullStack.Identity
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => null;
+
+        public override string WhenToInvalidate => "UserClaim变动";
     }
 }

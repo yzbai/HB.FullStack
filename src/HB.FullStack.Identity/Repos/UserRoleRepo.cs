@@ -16,12 +16,12 @@ namespace HB.FullStack.Identity
 {
     public class UserRoleRepo : ModelRepository<UserRole>
     {
-        public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
+        public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)
         {
-            InvalidateCache(new CachedRolesByUserId(sender.UserId).Timestamp(args.UtcNowTicks));
+            InvalidateCache(new CachedRolesByUserId(sender.UserId).SetTimestamp(args.Timestamp));
             return Task.CompletedTask;
         }
 

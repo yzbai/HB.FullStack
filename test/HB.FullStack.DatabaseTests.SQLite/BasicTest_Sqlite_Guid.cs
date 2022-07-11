@@ -155,7 +155,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
 
-                Assert.IsTrue(lst.All(p => p.Version == 0));
+                //Assert.IsTrue(lst.All(p => p.Version == 0));
             }
             catch (Exception ex)
             {
@@ -238,7 +238,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
 
             Guid_PublisherModel_Client? fetched = await Db.ScalarAsync<Guid_PublisherModel_Client>(item.Id, null).ConfigureAwait(false);
 
-            Assert.AreEqual(item.LastTime, fetched!.LastTime);
+            Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
             fetched.Name = "ssssss";
 
@@ -322,7 +322,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
 
                 Guid_PublisherModel_Client? fetched = await Db.ScalarAsync<Guid_PublisherModel_Client>(item.Id, transactionContext).ConfigureAwait(false);
 
-                Assert.AreEqual(item.LastTime, fetched!.LastTime);
+                Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
                 fetched.Name = "ssssss";
 

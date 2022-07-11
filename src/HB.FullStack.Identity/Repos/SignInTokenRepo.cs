@@ -15,7 +15,7 @@ namespace HB.FullStack.Identity
 {
     public class SignInTokenRepo : ModelRepository<SignInToken>
     {
-        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, IModelCache cache, IMemoryLockManager memoryLockManager)
+        public SignInTokenRepo(ILogger<SignInTokenRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         #region Read

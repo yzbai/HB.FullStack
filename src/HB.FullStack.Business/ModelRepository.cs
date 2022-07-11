@@ -131,53 +131,53 @@ namespace HB.FullStack.Repository
         protected virtual Task OnModelUpdatingAsync(TDatabaseModel model)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelUpdatedAsync(TDatabaseModel model)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelUpdateFailedAsync(TDatabaseModel? model)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), model, new DatabaseWriteEventArgs(model?.Timestamp ?? -1));
         }
 
         protected virtual Task OnModelAddingAsync(TDatabaseModel model)
         {
             //events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdding), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdding), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelAddedAsync(TDatabaseModel model)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdded), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdded), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelAddFailedAsync(TDatabaseModel model)
         {
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelDeletingAsync(TDatabaseModel model)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleting), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleting), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelDeletedAsync(TDatabaseModel model)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleted), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleted), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         protected virtual Task OnModelDeleteFailedAsync(TDatabaseModel model)
         {
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), model, new DatabaseWriteEventArgs());
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), model, new DatabaseWriteEventArgs(model.Timestamp));
         }
 
         #endregion
