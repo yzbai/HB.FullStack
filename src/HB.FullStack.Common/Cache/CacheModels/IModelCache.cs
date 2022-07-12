@@ -1,7 +1,4 @@
-﻿
-
-using HB.FullStack.Common;
-using HB.FullStack.Common.Cache.CacheModels;
+﻿using HB.FullStack.Common;
 
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -15,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache.CacheModels
 {
     /// <summary>
     /// string,int,generic 都可以存储空值

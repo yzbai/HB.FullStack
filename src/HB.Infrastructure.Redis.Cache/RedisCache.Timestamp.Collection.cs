@@ -14,14 +14,14 @@ namespace HB.Infrastructure.Redis.Cache
     /// <summary>
     /// 构造：
     /// CollectionKey ------------| __absexp__
-    ///               ------------| __sldexp__  
+    ///               ------------| __sldexp__
     ///               ------------| key1
     ///               ------------| key2
     ///               ------------| key3
     ///               ------------| key1__ts__
     ///               ------------| key2__ts__
     ///               ------------| key3__ts__
-    /// 
+    ///
     /// __minTS__CollectionKeykey1 -------- key1_minTimestamp
     /// __minTS__CollectionKeykey2 -------- key2_minTimestamp
     /// __minTS__CollectionKeykey3 -------- key3_minTimestamp
@@ -61,7 +61,7 @@ for j=1, dataNum do
         return 8
     end
 
-    local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
+    local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1]..'__ts__')
     if(cachedTimestamp and tonumber(cachedTimestamp) >= tonumber(ARGV[j+7])) then
         return 9
     end
@@ -81,8 +81,10 @@ local minTS = '__minTS__'..KEYS[1]
 local number=tonumber(ARGV[1])
 
 for j=1,number do
-    local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
-    redis.call('set', minTS..KEYS[j+1], cachedTimestamp, 'EX', ARGV[2])
+    local cachedTimestamp = redis.call('hget', KEYS[1], KEYS[j+1]..'__ts__')
+    if(cachedTimestamp) then
+        redis.call('set', minTS..KEYS[j+1], cachedTimestamp, 'EX', ARGV[2])
+    end
     redis.call('hdel', KEYS[1], KEYS[j+1], KEYS[j+1]..'__ts__')
 end
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using HB.FullStack.Cache;
+
+using Microsoft.Extensions.Caching.Distributed;
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache.CachedCollectionItems
 {
     public static class ICollectionCacheExtension
     {
@@ -19,7 +21,7 @@ namespace HB.FullStack.Cache
 
         public static Task<bool> SetToCollectionAsync<T>(this ICache cache, string collectionKey, IEnumerable<string> itemKeys, IEnumerable<T> itemValues, IEnumerable<long> timestamps, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            IEnumerable<byte[]> bytess = SerializeUtil.Serialize<T>(itemValues).ToList();
+            IEnumerable<byte[]> bytess = SerializeUtil.Serialize(itemValues).ToList();
 
             return cache.SetToCollectionAsync(collectionKey, itemKeys, bytess, timestamps, options, token);
         }

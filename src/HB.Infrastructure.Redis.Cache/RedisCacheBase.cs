@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Cache.CacheModels;
 using HB.Infrastructure.Redis.Shared;
 
@@ -14,7 +15,9 @@ namespace HB.Infrastructure.Redis.Cache
 {
     public class RedisCacheBase
     {
-        protected const int MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS = 60;
+        //TODO: 放到options中。
+        //TODO: 思考是否需要不过期？
+        protected const int MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS = 24 * 60 * 60;
 
         private readonly RedisCacheOptions _options;
 

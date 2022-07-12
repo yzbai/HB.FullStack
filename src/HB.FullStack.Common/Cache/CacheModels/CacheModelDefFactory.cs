@@ -38,7 +38,7 @@ namespace HB.FullStack.Common.Cache.CacheModels
                 Name = modelType.Name
             };
 
-            CacheModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheModelAttribute>();
+            CacheThisModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheThisModelAttribute>();
 
             if (cacheModelAttribute == null)
             {
@@ -66,7 +66,7 @@ namespace HB.FullStack.Common.Cache.CacheModels
             {
                 if (!foundkeyAttribute)
                 {
-                    CacheKeyAttribute? keyAttribute = propertyInfo.GetCustomAttribute<CacheKeyAttribute>();
+                    CacheModelKeyAttribute? keyAttribute = propertyInfo.GetCustomAttribute<CacheModelKeyAttribute>();
 
                     if (keyAttribute != null)
                     {
@@ -77,7 +77,7 @@ namespace HB.FullStack.Common.Cache.CacheModels
                     }
                 }
 
-                CacheDimensionKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheDimensionKeyAttribute>();
+                CacheModelAltKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheModelAltKeyAttribute>();
 
                 if (dimensionKeyAttribute != null)
                 {

@@ -6,6 +6,6 @@ namespace HB.FullStack.CacheTests
     {
         public string Guid { get; set; } = null!;
 
-        public int Version { get; set; }
+        public long Timestamp { get; set; }
     }
 }

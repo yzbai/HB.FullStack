@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Common.Cache.CachedCollectionItems
 {
     /// <summary>
     /// 一个collection中的条目. 可以将整个Collection Invalidate掉。相当于比CachedItem多了一个范围。

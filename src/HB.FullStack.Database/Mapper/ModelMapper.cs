@@ -141,7 +141,7 @@ namespace HB.FullStack.Database.Mapper
 
             Func<IDatabaseModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef, engineType);
 
-            return func(modelDefFactory, model, number);
+            return new List<KeyValuePair<string, object>>(func(modelDefFactory, model, number));
         }
 
         private static Func<IDatabaseModelDefFactory, object, int, KeyValuePair<string, object>[]> GetCachedModelToParametersFunc(DatabaseModelDef modelDef, EngineType engineType)
@@ -203,7 +203,7 @@ namespace HB.FullStack.Database.Mapper
         {
             Func<IDatabaseModelDefFactory, object?[], string, KeyValuePair<string, object>[]> func = GetCachedPropertyValuesToParametersFunc(modelDef, engineType, propertyNames);
 
-            return func(modelDefFactory, propertyValues.ToArray(), parameterNameSuffix);
+            return new List<KeyValuePair<string, object>>(func(modelDefFactory, propertyValues.ToArray(), parameterNameSuffix));
         }
 
         #endregion

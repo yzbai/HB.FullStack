@@ -33,7 +33,7 @@ namespace HB.FullStack.Identity
 
         public Task<IEnumerable<Role>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
-            return CacheAsideAsync(new CachedRolesByUserId(userId), dbReader =>
+            return GetUsingCacheAsideAsync(new CachedRolesByUserId(userId), dbReader =>
             {
                 var from = dbReader.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
                 var where = dbReader.Where<Role>().And<UserRole>(ru => ru.UserId == userId);

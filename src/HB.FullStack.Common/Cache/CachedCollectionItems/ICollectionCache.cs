@@ -1,6 +1,4 @@
-﻿
-
-using HB.FullStack.Common;
+﻿using HB.FullStack.Common;
 using HB.FullStack.Common.Cache.CacheModels;
 
 using Microsoft.Extensions.Caching.Distributed;
@@ -15,14 +13,14 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache.CachedCollectionItems
 {
     /// <summary>
     /// string,int,generic 都可以存储空值
     /// Model操作不可以
     /// </summary>
     public interface ICollectionCache
-    { 
+    {
         Task<byte[]?> GetFromCollectionAsync(string collectionKey, string itemKey, CancellationToken token = default);
 
         Task<bool> SetToCollectionAsync(string collectionKey, IEnumerable<string> itemKeys, IEnumerable<byte[]> itemValues, IEnumerable<long> timestamps, DistributedCacheEntryOptions options, CancellationToken token = default);

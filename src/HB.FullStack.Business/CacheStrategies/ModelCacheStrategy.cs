@@ -15,7 +15,7 @@ using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Repository.CacheStrategies
 {
     internal static class ModelCacheStrategy
     {
@@ -77,6 +77,7 @@ namespace HB.FullStack.Repository
 
                     if (allExists)
                     {
+                        logger.LogInformation($"//TODO: 请求同一项Cache，等待锁并获取锁后，发现Cache已存在。Model:{typeof(TModel).Name},KeyName:{keyName}, KeyValues:{SerializeUtil.ToJson(keyValues)}");
                         return cachedModels!;
                     }
                 }
@@ -143,7 +144,7 @@ namespace HB.FullStack.Repository
 
         }
 
-        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : Common.Cache.CacheModels.ICacheModel, new()
+        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ICacheModel, new()
         {
             if (ICache.IsModelEnabled<TModel>())
             {

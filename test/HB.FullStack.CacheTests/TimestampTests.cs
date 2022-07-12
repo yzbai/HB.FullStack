@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using StackExchange.Redis;
-using HB.FullStack.Cache;
+using HB.FullStack.Common.Cache.CacheItems;
 
 namespace HB.FullStack.CacheTests
 {

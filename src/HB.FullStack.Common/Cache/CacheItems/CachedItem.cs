@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Common.Cache.CacheItems
 {
     /// <summary>
     /// 代表一条缓存
@@ -33,7 +33,7 @@ namespace HB.FullStack.Repository
     /// 每个CachedItem条目都是独立存在的，有独立的过期日期。
     /// 要确保可以准确的Invalidation
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
+    /// <typeparam name="TResult">被缓存的class</typeparam>
     public abstract class CachedItem<TResult> : CachedItem where TResult : class
     {
         public TResult? CacheValue { get; private set; }

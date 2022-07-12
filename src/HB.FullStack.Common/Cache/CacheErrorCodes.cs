@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using HB.FullStack.Common.Cache.CachedCollectionItems;
+
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 
 using System;
@@ -46,10 +48,53 @@ namespace System
         public static readonly ErrorCode CacheUpdateTimestampConcurrency = new ErrorCode(nameof(CacheUpdateTimestampConcurrency), "");
 
         public static readonly ErrorCode RemoveMultipleError = new ErrorCode(nameof(RemoveMultipleError), "");
+
+        public static ErrorCode CacheCollectionKeyNotSame { get; } = new ErrorCode(nameof(CacheCollectionKeyNotSame), "");
+        public static ErrorCode CacheKeyNotSet { get; } = new ErrorCode(nameof(CacheKeyNotSet), "");
+        public static ErrorCode CacheValueNotSet { get; } = new ErrorCode(nameof(CacheValueNotSet), "");
+        public static ErrorCode CachedItemTimestampNotSet { get; } = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
     }
 
     public static class CacheExceptions
     {
+        internal static Exception CachedItemTimestampNotSet(string resourceType, string cacheKey, object? cacheValue)
+        {
+            CacheException exception = new CacheException(CacheErrorCodes.CachedItemTimestampNotSet);
+
+            exception.Data["ResourceType"] = resourceType;
+            exception.Data["CacheKey"] = cacheKey;
+            exception.Data["CacheValue"] = cacheValue;
+
+            return exception;
+        }
+
+        internal static Exception CacheValueNotSet(string resourceType, string cacheKey)
+        {
+            CacheException exception = new CacheException(CacheErrorCodes.CacheValueNotSet);
+
+            exception.Data["ResourceType"] = resourceType;
+            exception.Data["CacheKey"] = cacheKey;
+
+            return exception;
+        }
+
+        internal static Exception CacheKeyNotSet(string? resourceType)
+        {
+            CacheException exception = new CacheException(CacheErrorCodes.CacheKeyNotSet);
+
+            exception.Data["ResourceType"] = resourceType;
+
+            return exception;
+
+        }
+
+        internal static Exception CacheCollectionKeyNotSame(IEnumerable<CachedCollectionItem> cachedCollectionItems)
+        {
+            CacheException exception = new CacheException(CacheErrorCodes.CacheCollectionKeyNotSame);
+            exception.Data["CachedCollectionItems"] = SerializeUtil.ToJson(cachedCollectionItems);
+
+            return exception;
+        }
         public static CacheException CacheSlidingTimeBiggerThanMaxAlive(string type)
         {
             CacheException exception = new CacheException(CacheErrorCodes.SlidingTimeBiggerThanMaxAlive);

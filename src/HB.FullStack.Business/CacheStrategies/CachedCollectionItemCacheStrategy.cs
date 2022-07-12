@@ -9,8 +9,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Common.Cache.CachedCollectionItems;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Repository.CacheStrategies
 {
     public static class CachedCollectionItemCacheStrategy
     {
@@ -37,6 +38,7 @@ namespace HB.FullStack.Repository
 
                 if (result != null)
                 {
+                    logger.LogInformation($"//TODO: 请求同一项CachedCollectionItem，等待锁并获取锁后，发现Cache已存在。Model:{cacheCollectionItem.GetType().Name},CacheKey:{cacheCollectionItem.CollectionKey}");
                     return result;
                 }
 
@@ -70,12 +72,7 @@ namespace HB.FullStack.Repository
             cache.RemoveAsync(cachedCollectionItem).SafeFireAndForget(OnException);
         }
 
-        private static void SetCache<TResult>(CachedCollectionItem<TResult> cachedItem, ICache cache) where TResult : class
-        {
-            cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
-        }
-
-        internal static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, ICache cache)
+        public static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, ICache cache)
         {
             cache.RemoveAsync(cachedCollectionItems).SafeFireAndForget(OnException);
         }
@@ -83,6 +80,11 @@ namespace HB.FullStack.Repository
         public static void InvalidateCacheCollection(string collectionKey, ICache cache)
         {
             cache.RemoveCollectionAsync(collectionKey).SafeFireAndForget(OnException);
+        }
+
+        private static void SetCache<TResult>(CachedCollectionItem<TResult> cachedItem, ICache cache) where TResult : class
+        {
+            cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
         private static void OnException(Exception ex)

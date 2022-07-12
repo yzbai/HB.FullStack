@@ -14,6 +14,7 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
+    //TODO: 先忽略掉UserRole这种关系表的Repo好了。
     public class UserRoleRepo : ModelRepository<UserRole>
     {
         public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)

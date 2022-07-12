@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Cache.CacheModels
 {
+
+    /// <summary>
+    /// 只有标记了CacheModelAttribute，才会自动启动Model的Cache功能
+    /// </summary>
     public interface ICacheModel : IModel
     {
         //int Version { get; set; }

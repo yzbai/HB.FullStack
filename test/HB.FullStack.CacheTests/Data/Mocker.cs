@@ -19,11 +19,11 @@ namespace HB.FullStack.CacheTests
             };
         }
 
-        public static List<Book> MockMany()
+        public static List<Book> MockMany(int count = 100)
         {
             List<Book> books = new List<Book>();
 
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < count; ++i)
             {
                 books.Add(new Book
                 {

@@ -33,13 +33,18 @@ namespace HB.FullStack.Database.Tests
         [TestMethod()]
         public async Task DeleteAsyncTestAsync()
         {
-            var lst = Mocker.GetCExtModels();
+            IList<CExtModel> lst = Mocker.GetCExtModels();
 
             var trans = await Trans.BeginTransactionAsync<CExtModel>().ConfigureAwait(false);
 
             try
             {
-                await Db.BatchAddAsync(lst, "Tests", trans).ConfigureAwait(false);
+                //await Db.BatchAddAsync(lst, "Tests", trans).ConfigureAwait(false);
+
+                foreach (var item in lst)
+                {
+                    await Db.AddAsync(item, "Tests", trans).ConfigureAwait(false);
+                }
 
                 await trans.CommitAsync().ConfigureAwait(false);
             }

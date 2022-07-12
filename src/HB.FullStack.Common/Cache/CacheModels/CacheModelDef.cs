@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace HB.FullStack.Common.Cache.CacheModels
 {
+
     public class CacheModelDef
     {
         public PropertyInfo KeyProperty { get; internal set; } = null!;
@@ -14,8 +15,14 @@ namespace HB.FullStack.Common.Cache.CacheModels
 
         public string Name { get; internal set; } = null!;
 
+        /// <summary>
+        /// 多久不经常用就消失掉
+        /// </summary>
         public TimeSpan? SlidingTime { get; set; }
 
+        /// <summary>
+        /// 最多存在多久
+        /// </summary>
         public TimeSpan? AbsoluteTimeRelativeToNow { get; set; }
 
         public string? CacheInstanceName { get; set; }

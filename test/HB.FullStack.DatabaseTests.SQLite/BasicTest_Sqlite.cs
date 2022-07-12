@@ -126,10 +126,21 @@ namespace HB.FullStack.DatabaseTests
 
             //update book2
             book2!.Name = "Update book2";
-            await Db.UpdateAsync(book2, "tester", null);
 
 
-            
+            try
+            {
+                await Db.UpdateAsync(book2, "tester", null);
+            }
+            catch(DatabaseException ex)
+            {
+                Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
+
+                if(ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                {
+                    throw;
+                }
+            }
         }
 
         /// <summary>
@@ -146,16 +157,20 @@ namespace HB.FullStack.DatabaseTests
 
             Guid_BookModel? book1 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
-
-
             int rt = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
                 new EngineCommand($"update tb_Guid_BookModel set Name='Update_xxx' where Id = '{book.Id}'"));
+
+            Assert.IsTrue(rt == 1);
 
             int rt2 = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
                 new EngineCommand($"update tb_Guid_BookModel set Name='Update_xxx' where Id = '{book.Id}'"));
 
+            Assert.IsTrue(rt2 == 1);
+
             int rt3 = await Db.DatabaseEngine.ExecuteCommandNonQueryAsync(null, Db.DatabaseNames.First(),
                 new EngineCommand($"update tb_Guid_BookModel set Name='Update_xxx' where Id = '{book.Id}'"));
+
+            Assert.IsTrue(rt3 == 1);
         }
 
         [TestMethod]

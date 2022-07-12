@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Reflection.Metadata;
 
 #pragma warning disable CA1822 // Mark members as static
 namespace HB.FullStack.Database
@@ -196,7 +197,7 @@ namespace HB.FullStack.Database
             if (modelDef.IsServerDatabaseModel)
             {
                 DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
-                paramters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0 ", oldTimestamp));
+                paramters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
             }
 
             return new EngineCommand(
@@ -227,7 +228,7 @@ namespace HB.FullStack.Database
             if (modelDef.IsServerDatabaseModel)
             {
                 DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
-                parameters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0 ", oldTimestamp));
+                parameters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
             }
 
             return new EngineCommand(
@@ -338,8 +339,9 @@ namespace HB.FullStack.Database
             return new EngineCommand(commandTextBuilder.ToString(), parameters);
         }
 
-        public EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
+        public EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DatabaseModel, new()
         {
+
             ThrowIf.Empty(models, nameof(models));
 
             StringBuilder innerBuilder = new StringBuilder();
@@ -347,11 +349,20 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
+            DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
+
             foreach (T model in models)
             {
                 string updateCommandText = SqlHelper.CreateUpdateModelSql(modelDef, number);
 
                 parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
+
+                //这里要添加 一些参数值，参考update
+                if (modelDef.IsServerDatabaseModel)
+                {
+                    parameters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamps[number]));
+                }
+
 
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
@@ -376,42 +387,9 @@ namespace HB.FullStack.Database
             return new EngineCommand(commandText, parameters);
         }
 
-        public EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new()
-        {
-            ThrowIf.Empty(models, nameof(models));
+        public EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DatabaseModel, new()
+            => CreateBatchUpdateCommand<T>(engineType, modelDef, models, oldTimestamps, needTrans);
 
-            StringBuilder innerBuilder = new StringBuilder();
-            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
-            int number = 0;
-
-            foreach (T model in models)
-            {
-                string deleteCommandText = SqlHelper.CreateDeleteModelSql(modelDef, number);
-
-                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
-#if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
-#elif NETSTANDARD2_1
-                innerBuilder.Append($"{deleteCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundMatchedRows_Statement(engineType), engineType)}");
-#endif
-
-                number++;
-            }
-
-            string may_trans_begin = needTrans ? SqlHelper.Transaction_Begin(engineType) : "";
-            string may_trans_commit = needTrans ? SqlHelper.Transaction_Commit(engineType) : "";
-
-            string commandText = $@"{may_trans_begin}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-                                    {innerBuilder}
-                                    {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {may_trans_commit}";
-
-            return new EngineCommand(commandText, parameters);
-        }
 
         #endregion
 

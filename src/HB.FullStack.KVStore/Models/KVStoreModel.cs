@@ -13,7 +13,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
     {
         [Required]
         [KVStoreBackupKey]
-        [CacheKey]
+        [CacheModelKey]
         public string Guid { get; set; } = SecurityUtil.CreateUniqueToken();
 
         public long Timestamp { get; set; } = -1;

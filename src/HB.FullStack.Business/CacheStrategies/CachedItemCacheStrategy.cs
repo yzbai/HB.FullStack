@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Cache;
+using HB.FullStack.Common.Cache.CacheItems;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Lock.Memory;
+
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Repository.CacheStrategies
 {
     public static class CachedItemCacheStrategy
-    {          
+    {
         public static async Task<TResult?> GetUsingCacheAsideAsync<TResult>(
             CachedItem<TResult> cacheItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
@@ -33,11 +35,14 @@ namespace HB.FullStack.Repository
 
             if (@lock.IsAcquired)
             {
-                //Double Check
+                //Double Check ：
+                //如果大量请求，请求同一项资源。那么十分有用。
+                //根据log来kan是否省略，如果比较少，其实可以让db承压，而且timestamp的检查让重复SetCache是没问题的
                 result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
 
                 if (result != null)
                 {
+                    logger.LogInformation($"//TODO: 请求同一项CachedItem，等待锁并获取锁后，发现Cache已存在。Model:{cacheItem.GetType().Name},CacheKey:{cacheItem.CacheKey}");
                     return result;
                 }
 
@@ -65,7 +70,7 @@ namespace HB.FullStack.Repository
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
         }
-        
+
         public static void InvalidateCache(CachedItem cachedItem, ICache cache)
         {
             cache.RemoveAsync(cachedItem).SafeFireAndForget(OnException);
@@ -77,7 +82,7 @@ namespace HB.FullStack.Repository
             cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
-        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems,ICache cache)
+        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems, ICache cache)
         {
             cache.RemoveAsync(cachedItems).SafeFireAndForget(OnException);
         }

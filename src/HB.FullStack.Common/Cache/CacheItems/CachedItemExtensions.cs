@@ -8,7 +8,7 @@ using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Common.Cache.CacheItems
 {
     public static class CachedItemExtensions
     {
@@ -19,7 +19,7 @@ namespace HB.FullStack.Repository
             return cache.GetAsync<TResult>(cachedItem.CacheKey, cancellationToken);
         }
 
-        public static Task SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task<bool> SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
         {
             ThrowOnEmptyCacheKey(cachedItem);
             ThrowOnNullCacheValue(cachedItem);
@@ -53,7 +53,7 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(cachedItem?.CacheKey))
             {
-                throw RepositoryExceptions.CacheKeyNotSet(resourceType: cachedItem?.CachedType);
+                throw CacheExceptions.CacheKeyNotSet(resourceType: cachedItem?.CachedType);
             }
         }
 
@@ -61,7 +61,7 @@ namespace HB.FullStack.Repository
         {
             if (cachedItem.CacheValue == null)
             {
-                throw RepositoryExceptions.CacheValueNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey);
+                throw CacheExceptions.CacheValueNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey);
             }
         }
 
@@ -69,7 +69,7 @@ namespace HB.FullStack.Repository
         {
             if (cachedItem.Timestamp <= 0)
             {
-                throw RepositoryExceptions.CachedItemTimestampNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey, null);
+                throw CacheExceptions.CachedItemTimestampNotSet(resourceType: cachedItem.CachedType, cacheKey: cachedItem.CacheKey, null);
             }
         }
     }

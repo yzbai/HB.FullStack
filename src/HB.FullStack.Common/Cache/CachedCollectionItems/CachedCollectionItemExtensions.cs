@@ -8,7 +8,7 @@ using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Repository
+namespace HB.FullStack.Common.Cache.CachedCollectionItems
 {
     public static class CachedCollectionItemExtensions
     {
@@ -63,7 +63,7 @@ namespace HB.FullStack.Repository
 
             if (!cachedCollectionItems.All(item => item.CollectionKey == collectionKey))
             {
-                throw RepositoryExceptions.CacheCollectionKeyNotSame(cachedCollectionItems);
+                throw CacheExceptions.CacheCollectionKeyNotSame(cachedCollectionItems);
             }
 
             await cache.RemoveFromCollectionAsync(collectionKey, cachedCollectionItems.Select(item => item.ItemKey).ToList(), cancellationToken).ConfigureAwait(false);
@@ -78,12 +78,12 @@ namespace HB.FullStack.Repository
         {
             if (string.IsNullOrEmpty(cachedCollectionItem?.CollectionKey))
             {
-                throw RepositoryExceptions.CacheKeyNotSet(resourceType: cachedCollectionItem?.CollectionKey);
+                throw CacheExceptions.CacheKeyNotSet(resourceType: cachedCollectionItem?.CollectionKey);
             }
 
             if (string.IsNullOrEmpty(cachedCollectionItem?.ItemKey))
             {
-                throw RepositoryExceptions.CacheKeyNotSet(resourceType: cachedCollectionItem?.ItemKey);
+                throw CacheExceptions.CacheKeyNotSet(resourceType: cachedCollectionItem?.ItemKey);
             }
         }
 
@@ -91,7 +91,7 @@ namespace HB.FullStack.Repository
         {
             if (cachedCollectionItem.ItemValue == null)
             {
-                throw RepositoryExceptions.CacheValueNotSet(resourceType: cachedCollectionItem.CollectionKey, cacheKey: cachedCollectionItem.ItemKey);
+                throw CacheExceptions.CacheValueNotSet(resourceType: cachedCollectionItem.CollectionKey, cacheKey: cachedCollectionItem.ItemKey);
             }
         }
 
@@ -99,7 +99,7 @@ namespace HB.FullStack.Repository
         {
             if (cachedCollectionItem.Timestamp <= 0)
             {
-                throw RepositoryExceptions.CachedItemTimestampNotSet(resourceType: cachedCollectionItem.CollectionKey, cacheKey: cachedCollectionItem.ItemKey, null);
+                throw CacheExceptions.CachedItemTimestampNotSet(resourceType: cachedCollectionItem.CollectionKey, cacheKey: cachedCollectionItem.ItemKey, null);
             }
         }
     }

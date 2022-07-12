@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using HB.FullStack.Common.Cache.CacheItems;
 using HB.FullStack.Identity.Models;
-using HB.FullStack.Repository;
 
 namespace HB.FullStack.Identity
 {

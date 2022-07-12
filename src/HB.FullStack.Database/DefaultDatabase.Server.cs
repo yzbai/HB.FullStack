@@ -1200,7 +1200,7 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers);
 
-                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, modelDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, modelDef, items, oldTimestamps, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext?.Transaction,
                     modelDef.DatabaseName!,
@@ -1273,7 +1273,7 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers);
 
-                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, modelDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, modelDef, items, oldTimestamps, transContext == null);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext?.Transaction,
                     modelDef.DatabaseName!,

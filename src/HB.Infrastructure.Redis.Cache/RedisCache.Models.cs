@@ -211,18 +211,19 @@ return rt";
         public const string LUA_MODELS_REMOVE_2 = @"
 local modelNum = tonumber(ARGV[1])
 for j=1, modelNum do
-
     local data=redis.call('hmget', KEYS[j], 'dim','timestamp')
-
-    redis.call('set', '_minTS'..KEYS[j], data[2], 'EX', ARGV[2])
-
-    redis.call('del', KEYS[j])
-
-    local dim=data[1]
-
-    if(dim and dim ~= '') then
-        for i in string.gmatch(dim, '%S+') do
-            redis.call('del', i)
+    if((not data) or (not data[1])) then
+        redis.call('del', KEYS[j])        
+    else
+        if(data[2]) then
+            redis.call('set', '_minTS'..KEYS[j], data[2], 'EX', ARGV[2])
+        end
+        redis.call('del', KEYS[j])
+        local dim=data[1]
+        if(dim and dim ~= '') then
+            for i in string.gmatch(dim, '%S+') do
+                redis.call('del', i)
+            end
         end
     end
 end
@@ -273,12 +274,14 @@ for j = 1, modelNum do
 
         local data= redis.call('hmget',id, 'dim', 'timestamp')
 
-        if (not data) then
+        if ((not data) or (not data[1])) then
             redis.call('del', KEYS[1])
+            redis.call('del', id)
         else
             redis.call('del',id)
-            redis.call('set', '_minTS'..id, data[2], 'EX', ARGV[2])
-            
+            if(data[2]) then
+                redis.call('set', '_minTS'..id, data[2], 'EX', ARGV[2])
+            end
             local dim = data[1]
             
             if (dim and dim ~= '') then
@@ -406,7 +409,7 @@ end
         }
 
         /// <summary>
-        /// 并不把models作为一个整体看待，里面有的可能会因为timestamp冲突而不成功。
+        /// //TODO:并不把models作为一个整体看待，里面有的可能会因为timestamp冲突而不成功。
         /// 需要改变吗？
         /// </summary>
         public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
@@ -442,11 +445,11 @@ end
 
                     if (rt == 8)
                     {
-                        Logger.LogCacheInvalidationConcurrencyWithModels(modelDef.CacheInstanceName, modelDef.Name, models.ElementAt(i));
+                        Logger.LogCacheSetTimestampConcurrency(modelDef.CacheInstanceName, modelDef.Name,"与已删除的缓存项留下的minTimestamp冲突", models.ElementAt(i));
                     }
                     else if (rt == 9)
                     {
-                        Logger.LogCacheUpdateVersionConcurrency(modelDef.CacheInstanceName, modelDef.Name, models.ElementAt(i));
+                        Logger.LogCacheSetTimestampConcurrency(modelDef.CacheInstanceName, modelDef.Name,"与已存在的缓存项Timestamp冲突", models.ElementAt(i));
                     }
                 }
 

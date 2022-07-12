@@ -6,9 +6,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.Cache;
+
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache.CacheItems
 {
     /// <summary>
     /// 这里的timestamp表明数据的LastTime，类似version
@@ -16,7 +18,7 @@ namespace HB.FullStack.Cache
     public static class ITimestampCacheExtensions
     {
 
-        public static Task SetIntAsync(this ICache cache, string key, int value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
+        public static Task<bool> SetIntAsync(this ICache cache, string key, int value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             return cache.SetStringAsync(key, value.ToString(GlobalSettings.Culture), timestamp, options, token);
         }
@@ -36,28 +38,28 @@ namespace HB.FullStack.Cache
             }
             catch (FormatException ex)
             {
-                throw CacheExceptions.ConvertError(key:key, innerException: ex);
+                throw CacheExceptions.ConvertError(key: key, innerException: ex);
             }
-            catch(OverflowException ex)
+            catch (OverflowException ex)
             {
-                throw CacheExceptions.ConvertError(key:key, innerException: ex);
+                throw CacheExceptions.ConvertError(key: key, innerException: ex);
             }
         }
-        
-        public static async Task SetStringAsync(this ICache cache, string key, string value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
+
+        public static async Task<bool> SetStringAsync(this ICache cache, string key, string value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             try
             {
                 byte[] bytes = SerializeUtil.Serialize(value);
 
-                await cache.SetAsync(key, bytes, timestamp, options, token).ConfigureAwait(false);
+                return await cache.SetAsync(key, bytes, timestamp, options, token).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
-                throw CacheExceptions.Unkown(key:key, value:value, nameof(SetStringAsync), innerException: ex);
+                throw CacheExceptions.Unkown(key: key, value: value, nameof(SetStringAsync), innerException: ex);
             }
         }
-        
+
         public static async Task<string?> GetStringAsync(this ICache cache, string key, CancellationToken token = default)
         {
             try
@@ -71,33 +73,25 @@ namespace HB.FullStack.Cache
                 throw CacheExceptions.Unkown(key, null, nameof(GetStringAsync), ex);
             }
         }
-       
+
 
         /// <summary>
         /// timestamp是ICacheModel.Timestamp
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="cache"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="timestamp"></param>
-        /// <param name="options"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public static async Task SetAsync<T>(this ICache cache, string key, T value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
+        public static async Task<bool> SetAsync<T>(this ICache cache, string key, T value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
         {
             try
             {
                 byte[] bytes = SerializeUtil.Serialize(value);
 
-                await cache.SetAsync(key, bytes, timestamp, options, token).ConfigureAwait(false);
+                return await cache.SetAsync(key, bytes, timestamp, options, token).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not ErrorCode2Exception)
             {
                 throw CacheExceptions.Unkown(key, value, nameof(SetAsync), ex);
             }
         }
-        
+
         public static async Task<T?> GetAsync<T>(this ICache cache, string key, CancellationToken token = default) where T : class
         {
             try

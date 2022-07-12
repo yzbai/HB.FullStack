@@ -36,7 +36,7 @@ namespace HB.FullStack.Identity
 
         public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
-            return CacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>
+            return GetUsingCacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>
             {
                 return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
             })!;

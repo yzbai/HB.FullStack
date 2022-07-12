@@ -33,7 +33,7 @@ namespace HB.FullStack.Database.DatabaseModels
     {
         [AutoIncrementPrimaryKey]
         [DatabaseModelProperty(0)]
-        [CacheKey]
+        [CacheModelKey]
         public override long Id { get; set; } = -1;
     }
 
@@ -41,7 +41,7 @@ namespace HB.FullStack.Database.DatabaseModels
     {
         [PrimaryKey]
         [DatabaseModelProperty(0)]
-        [CacheKey]
+        [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
@@ -51,7 +51,7 @@ namespace HB.FullStack.Database.DatabaseModels
         [DatabaseModelProperty(0)]
         [NoEmptyGuid]
         [PrimaryKey]
-        [CacheKey]
+        [CacheModelKey]
         public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
 
         //TODO: 这里是按AsBinary来生成的，在不同的数据库需要不同的生成

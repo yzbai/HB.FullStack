@@ -21,8 +21,8 @@ namespace HB.FullStack.Database
         EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, bool returnModel) where T : DatabaseModel, new();
         EngineCommand CreateBatchAddCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
         EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
-        EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
-        EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DatabaseModel, new();
+        EngineCommand CreateBatchDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DatabaseModel, new();
+        EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DatabaseModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DatabaseModel, new();
         EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DatabaseModel, new();
         EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, T model, long oldTimestamp) where T : DatabaseModel, new();
         EngineCommand CreateDeleteCommand<T>(EngineType engineType, DatabaseModelDef modelDef, WhereExpression<T> whereExpression) where T : ClientDatabaseModel, new();

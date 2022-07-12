@@ -5,7 +5,7 @@ using System.Text;
 namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class CacheModelAttribute : Attribute
+    public sealed class CacheThisModelAttribute : Attribute
     {
         public string? CacheInstanceName { get; set; }
 
@@ -22,8 +22,5 @@ namespace System
 
         //public bool IsBatchEnabled { get; set; }
 
-        public CacheModelAttribute()
-        {
-        }
     }
 }

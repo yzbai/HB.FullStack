@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Repository;
+﻿using HB.FullStack.Common.Cache.CachedCollectionItems;
 
 using Microsoft.Extensions.Logging;
 
@@ -12,56 +12,16 @@ namespace System
     /// </summary>
     internal static class RepositoryErrorCodes
     {
-        public static ErrorCode CacheKeyNotSet { get; } = new ErrorCode(nameof(CacheKeyNotSet), "");
-        public static ErrorCode CacheValueNotSet { get; } = new ErrorCode(nameof(CacheValueNotSet), "");
-        public static ErrorCode CachedItemTimestampNotSet { get; } = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
+
         public static ErrorCode CacheGetError { get; } = new ErrorCode(nameof(CacheGetError), "");
         public static ErrorCode CacheMissed { get; } = new ErrorCode(nameof(CacheMissed), "");
         public static ErrorCode CacheGetEmpty { get; } = new ErrorCode(nameof(CacheGetEmpty), "");
         public static ErrorCode CacheLockAcquireFailed { get; } = new ErrorCode(nameof(CacheLockAcquireFailed), "");
-        public static ErrorCode CacheCollectionKeyNotSame { get; } = new ErrorCode(nameof(CacheCollectionKeyNotSame), "");
     }
 
     internal static class RepositoryExceptions
     {
-        internal static Exception CachedItemTimestampNotSet(string resourceType, string cacheKey, object? cacheValue)
-        {
-            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CachedItemTimestampNotSet);
 
-            exception.Data["ResourceType"] = resourceType;
-            exception.Data["CacheKey"] = cacheKey;
-            exception.Data["CacheValue"] = cacheValue;
-
-            return exception;
-        }
-
-        internal static Exception CacheValueNotSet(string resourceType, string cacheKey)
-        {
-            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CacheValueNotSet);
-
-            exception.Data["ResourceType"] = resourceType;
-            exception.Data["CacheKey"] = cacheKey;
-
-            return exception;
-        }
-
-        internal static Exception CacheKeyNotSet(string? resourceType)
-        {
-            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CacheKeyNotSet);
-
-            exception.Data["ResourceType"] = resourceType;
-
-            return exception;
-
-        }
-
-        internal static Exception CacheCollectionKeyNotSame(IEnumerable<CachedCollectionItem> cachedCollectionItems)
-        {
-            RepositoryException exception = new RepositoryException(RepositoryErrorCodes.CacheCollectionKeyNotSame);
-            exception.Data["CachedCollectionItems"] = SerializeUtil.ToJson(cachedCollectionItems);
-
-            return exception;
-        }
     }
 
     internal static class LoggerExtensions

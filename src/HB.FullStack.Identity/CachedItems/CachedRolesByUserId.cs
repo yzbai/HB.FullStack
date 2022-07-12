@@ -1,5 +1,4 @@
 ﻿using HB.FullStack.Identity.Models;
-using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
@@ -11,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using HB.FullStack.Common.Cache.CacheItems;
 
 namespace HB.FullStack.Identity
 {

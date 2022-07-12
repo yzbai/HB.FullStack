@@ -8,7 +8,6 @@ namespace HB.FullStack.Identity.Models
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-
     public class UserRole : GuidDatabaseModel
     {
         [NoEmptyGuid]

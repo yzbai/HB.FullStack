@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace System
 {
+    /// <summary>
+    /// 这时主key，一般标记在Id上。
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class CacheDimensionKeyAttribute : Attribute
+    public sealed class CacheModelKeyAttribute : Attribute
     {
 
     }

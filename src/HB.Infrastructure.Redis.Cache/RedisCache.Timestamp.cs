@@ -49,7 +49,9 @@ return 1";
         /// </summary>
         public const string LUA_REMOVE_2 = @"
 local timestamp = redis.call('hget',KEYS[1], 'timestamp')
-redis.call('set', '_minTS'..KEYS[1], timestamp, 'EX', ARGV[1])
+if (timestamp) then
+    redis.call('set', '_minTS'..KEYS[1], timestamp, 'EX', ARGV[1])
+end
 return redis.call('del', KEYS[1])
 ";
 
@@ -61,7 +63,9 @@ return redis.call('del', KEYS[1])
 local number=tonumber(ARGV[1])
 for i=1,number do
     local timestamp = redis.call('hget', KEYS[i], 'timestamp')
-    redis.call('set', '_minTS'..KEYS[i], timestamp, 'EX', ARGV[2])
+    if(timestamp) then
+        redis.call('set', '_minTS'..KEYS[i], timestamp, 'EX', ARGV[2])
+    end
 end
 return redis.call('del', unpack(KEYS))";
 
@@ -154,7 +158,7 @@ return data[3]";
 
             try
             {
-                RedisResult redisResult = await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetWithTimestampLua, 
+                RedisResult redisResult = await database.ScriptEvaluateAsync(GetDefaultLoadLuas().LoadedSetWithTimestampLua,
                     new RedisKey[] { GetRealKey("", key) },
                     new RedisValue[]
                     {

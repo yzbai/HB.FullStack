@@ -11,6 +11,7 @@ using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 using HB.FullStack.Common.Server;
 using HB.FullStack.Cache;
 using AsyncAwaitBestPractices;
+using HB.FullStack.Common.Cache.CacheItems;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {

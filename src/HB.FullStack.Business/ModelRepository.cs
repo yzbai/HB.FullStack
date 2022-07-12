@@ -1,9 +1,12 @@
 ﻿using HB.FullStack.Cache;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Cache.CachedCollectionItems;
+using HB.FullStack.Common.Cache.CacheItems;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.Lock.Memory;
+using HB.FullStack.Repository.CacheStrategies;
 
 using Microsoft.Extensions.Logging;
 
@@ -184,13 +187,11 @@ namespace HB.FullStack.Repository
 
         #region Model Cache Strategy
 
-        //TODO: 尝试提取IRetrieveStrategy
-
-        protected async Task<TDatabaseModel?> CacheAsideAsync(string dimensionKeyName, object dimensionKeyValue, Func<IDatabaseReader, Task<TDatabaseModel?>> dbRetrieve)
+        protected async Task<TDatabaseModel?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDatabaseReader, Task<TDatabaseModel?>> dbRetrieve)
         {
             IEnumerable<TDatabaseModel>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<TDatabaseModel>(
-                dimensionKeyName,
-                new object[] { dimensionKeyValue },
+                keyName,
+                new object[] { keyValue },
                 async dbReader =>
                 {
                     TDatabaseModel? single = await dbRetrieve(dbReader).ConfigureAwait(false);
@@ -209,30 +210,30 @@ namespace HB.FullStack.Repository
 
             if (results.IsNullOrEmpty())
             {
-                Logger.LogDebug("Repo中没有找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TDatabaseModel).Name, dimensionKeyName, dimensionKeyValue);
+                Logger.LogDebug("Repo中没有找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TDatabaseModel).Name, keyName, keyValue);
                 return null;
             }
 
-            Logger.LogDebug("Repo中 找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TDatabaseModel).Name, dimensionKeyName, dimensionKeyValue);
+            Logger.LogDebug("Repo中 找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TDatabaseModel).Name, keyName, keyValue);
 
             return results.ElementAt(0);
         }
 
-        protected Task<IEnumerable<TDatabaseModel>> CacheAsideAsync(string dimensionKeyName, IEnumerable dimensionKeyValues, Func<IDatabaseReader, Task<IEnumerable<TDatabaseModel>>> dbRetrieve)
+        protected Task<IEnumerable<TDatabaseModel>> GetUsingCacheAsideAsync(string keyName, IEnumerable keyValues, Func<IDatabaseReader, Task<IEnumerable<TDatabaseModel>>> dbRetrieve)
         {
-            return ModelCacheStrategy.GetUsingCacheAsideAsync(dimensionKeyName, dimensionKeyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
+            return ModelCacheStrategy.GetUsingCacheAsideAsync(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
 
         #endregion
 
         #region Timestamp Cache Strategy
 
-        protected Task<TResult?> CacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : ServerDatabaseModel
+        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : ServerDatabaseModel
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : ServerDatabaseModel
+        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : ServerDatabaseModel
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
@@ -251,12 +252,12 @@ namespace HB.FullStack.Repository
 
         #region Collection Cache Strategy
 
-        protected Task<TResult?> CacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
+        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
         {
             return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> CacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
         {
             return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }

@@ -8,7 +8,7 @@ using MessagePack;
 
 namespace HB.FullStack.CacheTests
 {
-    [CacheModel]
+    [CacheThisModel]
     public class BookModel : FlackIdDatabaseModel
     {
         [DatabaseModelProperty]
@@ -18,7 +18,7 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; } = default!;
     }
 
-    [CacheModel]
+    [CacheThisModel]
     public class Guid_BookModel : GuidDatabaseModel
     {
         [DatabaseModelProperty]
@@ -28,15 +28,15 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; } = default!;
     }
 
-    [CacheModel]
+    [CacheThisModel]
     public class Book : FlackIdDatabaseModel
     {
         [DatabaseModelProperty]
-        [CacheDimensionKey]
+        [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
         [DatabaseModelProperty]
-        [CacheDimensionKey]
+        [CacheModelAltKey]
         public long BookID { get; set; }
 
         [DatabaseModelProperty]
@@ -46,7 +46,7 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; }
     }
 
-    [CacheModel]
+    [CacheThisModel]
     public class BookModel_Client : FlackIdDatabaseModel
     {
         [DatabaseModelProperty(NeedIndex = true)]
@@ -56,15 +56,15 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; } = default!;
     }
 
-    [CacheModel]
+    [CacheThisModel]
     public class Book_Client : FlackIdDatabaseModel
     {
-        [CacheDimensionKey]
+        [CacheModelAltKey]
         [DatabaseModelProperty]
         public string Name { get; set; } = null!;
 
         [DatabaseModelProperty]
-        [CacheDimensionKey]
+        [CacheModelAltKey]
         public long BookID { get; set; }
 
         [DatabaseModelProperty]

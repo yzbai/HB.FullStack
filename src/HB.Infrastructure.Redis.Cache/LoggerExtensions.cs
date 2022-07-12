@@ -45,24 +45,14 @@ namespace HB.Infrastructure.Redis.Cache
             _logForcedRemoveError(logger, cacheInstance, modelName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithModels = LoggerMessage.Define<string?, string?, string?>(
-            LogLevel.Error,
-            CacheErrorCodes.CacheInvalidationConcurrencyWithModels.ToEventId(),
-            "检测到，Cache Invalidation Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, ModelName={ModelName}, Object={Object}");
-
-        public static void LogCacheInvalidationConcurrencyWithModels(this ILogger logger, string? cacheInstance, string? modelName, object? obj)
-        {
-            _logCacheInvalidationConcurrencyWithModels(logger, cacheInstance, modelName, SerializeUtil.ToJson(obj), null);
-        }
-
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateVersionConcurrency = LoggerMessage.Define<string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logCacheSetTimestampConcurrency = LoggerMessage.Define<string?, string?, string?, string?>(
             LogLevel.Error,
             CacheErrorCodes.CacheUpdateVersionConcurrency.ToEventId(),
-            "检测到，Cache Update Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, ModelName={ModelName}, Object={Object}");
+            "检测到，Cache Update Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, ModelName={ModelName}, Cause={Cause}, Object={Object}");
 
-        public static void LogCacheUpdateVersionConcurrency(this ILogger logger, string? cacheInstance, string? modelName, object? obj)
+        public static void LogCacheSetTimestampConcurrency(this ILogger logger, string? cacheInstance, string? modelName, string cause, object? obj)
         {
-            _logCacheUpdateVersionConcurrency(logger, cacheInstance, modelName, SerializeUtil.ToJson(obj), null);
+            _logCacheSetTimestampConcurrency(logger, cacheInstance, modelName, cause, SerializeUtil.ToJson(obj), null);
         }
 
         private static readonly Action<ILogger, string?, Exception?> _logCacheGetError = LoggerMessage.Define<string?>(
