@@ -1,7 +1,4 @@
-﻿
-
-using HB.FullStack.Common;
-using HB.FullStack.Database.Engine;
+﻿using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
@@ -12,10 +9,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using System.Reflection.Metadata;
 
 #pragma warning disable CA1822 // Mark members as static
 namespace HB.FullStack.Database
@@ -360,7 +355,7 @@ namespace HB.FullStack.Database
                 //这里要添加 一些参数值，参考update
                 if (modelDef.IsServerDatabaseModel)
                 {
-                    parameters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamps[number]));
+                    parameters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", oldTimestamps[number]));
                 }
 
 

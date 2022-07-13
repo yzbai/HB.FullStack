@@ -59,21 +59,25 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception ExecuterError(string commandText, string cause, Exception? innerException = null)
+        internal static Exception MySQLExecuterError(string? commandText, string? cause, string? sqlState, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ExecuterError, innerException);
 
             exception.Data["Cause"] = cause;
             exception.Data["CommandText"] = commandText;
+            exception.Data["SqlState"] = sqlState;
 
             return exception;
         }
 
-        internal static Exception ExecuterError(string commandText, Exception? innerException = null)
+        internal static Exception SQLiteExecuterError(string? commandText, string? cause, int? errorCode, int? extendedErrorCode, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.ExecuterError, innerException);
 
             exception.Data["CommandText"] = commandText;
+            exception.Data["Cause"] = cause;
+            exception.Data["ErrorCode"] = errorCode;
+            exception.Data["ExtendedErrorCode"] = extendedErrorCode;
 
             return exception;
         }

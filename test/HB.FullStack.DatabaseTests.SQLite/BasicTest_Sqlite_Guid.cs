@@ -19,7 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.DatabaseTests
+namespace HB.FullStack.DatabaseTests.SQLite
 {
     [TestClass]
     public class BasicTest_Sqlite_Guid : BaseTestClass
@@ -56,8 +56,9 @@ namespace HB.FullStack.DatabaseTests
 
             await Db.AddAsync(book, "tester", null);
 
+            long timestamp = TimeUtil.UtcNowTicks;
             string sql = $@"
-update tb_guid_bookmodel set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Deleted = 0 and Version='10';
+update tb_guid_bookmodel set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Deleted = 0 and Timestamp={timestamp};
 select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
 ";
             using IDataReader reader = await Db.DatabaseEngine.ExecuteCommandReaderAsync(null, Db.DatabaseNames.First(),
@@ -451,7 +452,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(Db.ModelDefFactory,reader0);
+                    object obj1 = mapper1(Db.ModelDefFactory, reader0);
 
                     list1.Add((BookModel_Client)obj1);
                     stopwatch1.Stop();

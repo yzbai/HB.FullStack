@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.DatabaseTests
+namespace HB.FullStack.DatabaseTests.SQLite
 {
     [TestClass]
     public class JoinTest_Sqlite : BaseTestClass

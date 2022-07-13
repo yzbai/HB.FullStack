@@ -25,7 +25,7 @@ namespace HB.FullStack.DatabaseTests
         {
             PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
-            publisherModel.Version = 0;
+     
 
             var emit_results = publisherModel.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, Db.ModelDefFactory, 1);
 
@@ -36,7 +36,7 @@ namespace HB.FullStack.DatabaseTests
             //PublisherModel2
 
             PublisherModel2 publisherModel2 = new PublisherModel2();
-            publisherModel2.Version = 0;
+          
 
             var emit_results2 = publisherModel2.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, Db.ModelDefFactory, 1);
 
@@ -47,7 +47,7 @@ namespace HB.FullStack.DatabaseTests
             //PublisherModel3
 
             PublisherModel3 publisherModel3 = new PublisherModel3();
-            publisherModel3.Version = 0;
+           
 
             var emit_results3 = publisherModel3.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, Db.ModelDefFactory, 1);
 
@@ -79,7 +79,7 @@ namespace HB.FullStack.DatabaseTests
         {
             var models = Mocker.GetPublishers(10000);
 
-            Parallel.ForEach(models, e => e.Version = 0);
+           
 
             var def = Db.ModelDefFactory.GetDef<PublisherModel>();
 

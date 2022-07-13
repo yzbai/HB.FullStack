@@ -117,14 +117,6 @@ namespace HB.Infrastructure.MySQL
 
         #region Command 能力
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <returns></returns>
-
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -139,15 +131,6 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -161,15 +144,6 @@ namespace HB.Infrastructure.MySQL
                 return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
-
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
 
         public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {

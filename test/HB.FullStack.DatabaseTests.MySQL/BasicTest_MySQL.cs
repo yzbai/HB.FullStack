@@ -51,6 +51,8 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_2_Batch_Update_PublisherModelAsync()
         {
+            await Test_1_Batch_Add_PublisherModelAsync();
+
             TransactionContext transContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
@@ -86,15 +88,21 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_3_Batch_Delete_PublisherModelAsync()
         {
+            await Test_1_Batch_Add_PublisherModelAsync();
+
             TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<PublisherModel> lst = (await Db.RetrieveAllAsync<PublisherModel>(transactionContext, 1, 100).ConfigureAwait(false)).ToList();
+                IList<PublisherModel> lst = (await Db.RetrieveAllAsync<PublisherModel>(transactionContext, 0, 10).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
                     await Db.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new Exception("没有数据");
                 }
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
@@ -176,6 +184,8 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_6_Delete_PublisherModelAsync()
         {
+            await Test_1_Batch_Add_PublisherModelAsync();
+
             TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherModel>().ConfigureAwait(false);
 
             try
@@ -355,7 +365,7 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_ModelMapperPerformanceAsync()
         {
-            var books = Mocker.GetBooks(50);
+            var books = Mocker.GetBooks(500);
 
             var trans = await Trans.BeginTransactionAsync<BookModel>().ConfigureAwait(false);
 

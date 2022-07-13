@@ -15,22 +15,13 @@ namespace HB.Infrastructure.SQLite
     internal static class SQLiteExecuter
     {
         #region Command Reader
-
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
         
         public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandReaderAsync(sqliteTransaction.Connection!, false, dbCommand).ConfigureAwait(false);
         }
-
-        /// <returns></returns>
-        
+       
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
@@ -38,14 +29,6 @@ namespace HB.Infrastructure.SQLite
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             SqliteDataReader? reader = null;
@@ -82,7 +65,12 @@ namespace HB.Infrastructure.SQLite
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                throw DatabaseExceptions.ExecuterError(command.CommandText, ex);
+                if (ex is SqliteException sEx)
+                {
+                    throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
+                }
+
+                throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, "UnKown", null, null, ex);
             }
         }
 
@@ -90,39 +78,18 @@ namespace HB.Infrastructure.SQLite
 
         #region Command Scalar
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<object?> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandScalarAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<object?> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
         {
             try
@@ -138,7 +105,12 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                throw DatabaseExceptions.ExecuterError(command.CommandText, ex);
+                if (ex is SqliteException sEx)
+                {
+                    throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
+                }
+
+                throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, "UnKown", null, null, ex);
             }
         }
 
@@ -174,7 +146,12 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                throw DatabaseExceptions.ExecuterError(command.CommandText, ex);
+                if (ex is SqliteException sEx)
+                {
+                    throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
+                }
+
+                throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, "UnKown", null, null, ex);
             }
         }
 

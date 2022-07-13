@@ -19,7 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.DatabaseTests
+namespace HB.FullStack.DatabaseTests.SQLite
 {
     [TestClass]
     public class BasicTest_Sqlite : BaseTestClass
@@ -39,7 +39,7 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id,  toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -53,7 +53,7 @@ namespace HB.FullStack.DatabaseTests
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id,  toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -132,11 +132,11 @@ namespace HB.FullStack.DatabaseTests
             {
                 await Db.UpdateAsync(book2, "tester", null);
             }
-            catch(DatabaseException ex)
+            catch (DatabaseException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
 
-                if(ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                if (ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
                 {
                     throw;
                 }
@@ -197,6 +197,8 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_2_Batch_Update_PublisherModelAsync()
         {
+            await Test_1_Batch_Add_PublisherModelAsync();
+
             TransactionContext transContext = await Trans.BeginTransactionAsync<PublisherModel_Client>().ConfigureAwait(false);
 
             try
@@ -232,6 +234,8 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_3_Batch_Delete_PublisherModelAsync()
         {
+            await Test_1_Batch_Add_PublisherModelAsync();
+
             TransactionContext transactionContext = await Trans.BeginTransactionAsync<PublisherModel_Client>().ConfigureAwait(false);
 
             try
@@ -241,6 +245,10 @@ namespace HB.FullStack.DatabaseTests
                 if (lst.Count != 0)
                 {
                     await Db.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new Exception("没有数据");
                 }
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
@@ -326,6 +334,8 @@ namespace HB.FullStack.DatabaseTests
         [TestMethod]
         public async Task Test_6_Delete_PublisherModelAsync()
         {
+            await Test_1_Batch_Add_PublisherModelAsync();
+
             TransactionContext tContext = await Trans.BeginTransactionAsync<PublisherModel_Client>().ConfigureAwait(false);
 
             try
@@ -525,6 +535,7 @@ namespace HB.FullStack.DatabaseTests
             catch
             {
                 await Trans.RollbackAsync(trans).ConfigureAwait(false);
+                throw;
             }
 
             Stopwatch stopwatch = new Stopwatch();
@@ -652,15 +663,16 @@ namespace HB.FullStack.DatabaseTests
             using SqliteConnection conn = new SqliteConnection(connectString);
             conn.Open();
 
-            long id = TimeUtil.UtcNowTicks;
+            long id = new Random().NextInt64(long.MaxValue);
+            long timestamp = TimeUtil.UtcNowTicks;
 
-            string insertCommandText = $"insert into tb_publishermodel(`Name`, `LastTime`, `Id`, `Version`) values('FSFSF', 100, '{id}', 1)";
+            string insertCommandText = $"insert into tb_publishermodel(`Name`, `Id`, `Timestamp`) values('FSFSF', '{id}', {timestamp})";
 
             using SqliteCommand insertCommand = new SqliteCommand(insertCommandText, conn);
 
             insertCommand.ExecuteScalar();
 
-            string commandText = $"update `tb_publishermodel` set  `Name`='{new Random().NextDouble()}', `Version`=2 WHERE `Id`='{id}' ;";
+            string commandText = $"update `tb_publishermodel` set  `Name`='{new Random().NextDouble()}', `Timestamp`={timestamp} WHERE `Id`='{id}' ;";
 
             using SqliteCommand mySqlCommand1 = new SqliteCommand(commandText, conn);
 
@@ -678,8 +690,7 @@ namespace HB.FullStack.DatabaseTests
 
             long? rowCount2 = (long?)rowCountCommand2.ExecuteScalar();
 
-            Assert.AreEqual(rt1, rt2);
-            Assert.AreEqual(rowCount1, rowCount2);
+            Assert.AreEqual(rt1, rt2, rowCount1.ToString(), rowCount2.ToString());
         }
     }
 }

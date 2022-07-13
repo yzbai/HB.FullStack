@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HB.FullStack.Database;
 
 using System;
 using System.Collections.Generic;
@@ -9,8 +8,9 @@ using System.Threading.Tasks;
 using HB.FullStack.Database.SQL;
 using System.Linq;
 using HB.FullStack.DatabaseTests;
+using HB.FullStack.Database.Tests;
 
-namespace HB.FullStack.Database.Tests
+namespace HB.FullStack.DatabaseTests.SQLite
 {
     [TestClass()]
     public class DatabaseClientExtensionsTests : BaseTestClass
