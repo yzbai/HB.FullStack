@@ -172,9 +172,9 @@ namespace HB.FullStack.Database.DatabaseModels
                 TableName = dbSchema.TableName,
                 
                 IsTimestampDBModel = typeof(TimestampDBModel).IsAssignableFrom(modelType),
-                IsIdAutoIncrement = typeof(TimestampAutoIncrementIdDBModel).IsAssignableFrom(modelType) || typeof(TimelessAutoIncrementIdDBModel).IsAssignableFrom(modelType),
-                IsIdGuid = typeof(TimestampGuidDBModel).IsAssignableFrom(modelType) || typeof(TimelessGuidDBModel).IsAssignableFrom(modelType),
-                IsIdLong = typeof(TimestampLongIdDBModel).IsAssignableFrom( modelType) || typeof(TimelessLongIdDBModel).IsAssignableFrom(modelType)
+                IsIdAutoIncrement = typeof(IAutoIncrementId).IsAssignableFrom(modelType),
+                IsIdGuid = typeof(IGuidIdModel).IsAssignableFrom(modelType),
+                IsIdLong = typeof(ILongIdModel).IsAssignableFrom( modelType)
             };
 
             modelDef.DbTableReservedName = SqlHelper.GetReserved(modelDef.TableName!, engineType);

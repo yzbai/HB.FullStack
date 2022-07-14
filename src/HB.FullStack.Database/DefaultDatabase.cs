@@ -485,15 +485,15 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : TimestampLongIdDBModel, new()
+            where T : DBModel, ILongIdModel, new()
         {
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(TimestampLongIdDBModel.Id), EngineType)}={{0}}", id);
+            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(ILongIdModel.Id), EngineType)}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
-            where T : TimestampGuidDBModel, new()
+            where T : DBModel, IGuidIdModel, new()
         {
             //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(TimestampGuidDBModel.Id), EngineType)}={{0}}", guid);
             WhereExpression<T> where = Where<T>(t => t.Id == id);
@@ -742,7 +742,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IsIdAutoIncrement)
                 {
-                    ((TimestampAutoIncrementIdDBModel)(object)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                    ((ILongIdModel)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
             }
             catch (DatabaseException ex)
@@ -1167,21 +1167,21 @@ namespace HB.FullStack.Database
 
                     foreach (var item in items)
                     {
-                        ((TimestampAutoIncrementIdDBModel)(object)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
+                        ((ILongIdModel)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
                     }
                 }
                 else if (modelDef.IsIdGuid)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((TimestampGuidDBModel)(object)item).Id);
+                        newIds.Add(((IGuidIdModel)item).Id);
                     }
                 }
                 else if (modelDef.IsIdLong)
                 {
                     foreach (var item in items)
                     {
-                        newIds.Add(((TimestampLongIdDBModel)(object)item).Id);
+                        newIds.Add(((ILongIdModel)item).Id);
                     }
                 }
 
@@ -1440,7 +1440,7 @@ namespace HB.FullStack.Database
         {
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
-                object id = modelDef.IsIdLong ? ((TimestampLongIdDBModel)(object)item).Id : modelDef.IsIdGuid ? ((TimestampGuidDBModel)(object)item).Id : "None";
+                object id = modelDef.IsIdLong ? ((ILongIdModel)item).Id : modelDef.IsIdGuid ? ((IGuidIdModel)item).Id : "None";
                 _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, id);
 
                 lastUser = lastUser.Substring(0, DefaultLengthConventions.MAX_LAST_USER_LENGTH);

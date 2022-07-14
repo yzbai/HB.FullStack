@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-
+using HB.FullStack.Common;
 using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.SQL;
 
@@ -48,9 +48,9 @@ namespace HB.FullStack.Database
 
         Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : DBModel, new();
 
-        Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext) where T : TimestampLongIdDBModel, new();
+        Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext) where T : DBModel, ILongIdModel, new();
 
-        Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext) where T : TimestampGuidDBModel, new();
+        Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext) where T : DBModel, IGuidIdModel, new();
 
 
         Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : DBModel, new();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Cache.CacheModels;
 using HB.FullStack.Common.IdGen;
 
@@ -23,13 +24,16 @@ namespace HB.FullStack.Database.DatabaseModels
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }
 
-    public abstract class TimestampLongIdDBModel : TimestampDBModel
+
+
+
+    public abstract class TimestampLongIdDBModel : TimestampDBModel, ILongIdModel
     {
         [DatabaseModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
-    public abstract class TimestampAutoIncrementIdDBModel : TimestampLongIdDBModel
+    public abstract class TimestampAutoIncrementIdDBModel : TimestampLongIdDBModel, IAutoIncrementId
     {
         [AutoIncrementPrimaryKey]
         [DatabaseModelProperty(0)]
@@ -46,7 +50,7 @@ namespace HB.FullStack.Database.DatabaseModels
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 
-    public abstract class TimestampGuidDBModel : TimestampDBModel
+    public abstract class TimestampGuidDBModel : TimestampDBModel, IGuidIdModel
     {
         [DatabaseModelProperty(0)]
         [NoEmptyGuid]

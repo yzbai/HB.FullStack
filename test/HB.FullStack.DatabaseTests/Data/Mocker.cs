@@ -8,6 +8,30 @@ namespace HB.FullStack.DatabaseTests.Data
     {
         private static readonly Random _random = new Random();
 
+        public static IList<AutoIdBTTimestamp> GetAutoIdBTTimestamps(int count)
+        {
+            List<AutoIdBTTimestamp> lst = new List<AutoIdBTTimestamp>();
+
+            for (int i = 0; i < count; ++i)
+            {
+                lst.Add(new AutoIdBTTimestamp());
+            }
+
+            return lst;
+        }
+
+        public static IList<AutoIdBTTimeless> GetAutoIdBTTimelesses(int count)
+        {
+            List<AutoIdBTTimeless> lst = new List<AutoIdBTTimeless>();
+
+            for (int i = 0; i < count; ++i)
+            {
+                lst.Add(new AutoIdBTTimeless());
+            }
+
+            return lst;
+        }
+
         public static Book MockOne()
         {
             return new Book

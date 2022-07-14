@@ -14,4 +14,10 @@ namespace HB.FullStack.Database.DatabaseModels
         /// </summary>
         public bool Deleted { get; /*internal*/ set; }
     }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1040:Avoid empty interfaces", Justification = "<Pending>")]
+    public interface IAutoIncrementId
+    {
+
+    }
 }
