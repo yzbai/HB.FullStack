@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
 using System.Collections;
+using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Identity
 {
@@ -28,14 +29,34 @@ namespace HB.FullStack.Identity
         {
             ModelUpdating += (sender, args) =>
             {
-                //NOTICE: SecurityStamp主要用来加盐，每次User实体改动，SecurityStamp改动提高安全性
-                //从另一个角度提供了类似Version/timestamp的作用
-                sender.SecurityStamp = SecurityUtil.CreateUniqueToken();
+                if (sender is IEnumerable<User> users)
+                {
+                    foreach (var user in users)
+                    {
+                        //NOTICE: SecurityStamp主要用来加盐，每次User实体改动，SecurityStamp改动提高安全性
+                        //从另一个角度提供了类似Version/timestamp的作用
+                        user.SecurityStamp = SecurityUtil.CreateUniqueToken();
+                    }
+                }
+
                 return Task.CompletedTask;
             };
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(User sender, DatabaseWriteEventArgs args) => Task.CompletedTask;
+        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args)
+        {
+            if (sender is IEnumerable<UserRole> userRoles)
+            {
+                foreach (UserRole userRole in userRoles)
+                {
+                    //User-Role发生变化，就Invalidate
+                    //比如：为用户添加角色，删除角色
+                    InvalidateCache(new CachedRolesByUserId(userRole.UserId));
+                }
+            }
+
+            return Task.CompletedTask;
+        }
 
         #region 主表 Read 所有的查询都要经过这里
 
@@ -129,9 +150,13 @@ namespace HB.FullStack.Identity
             }
         }
 
-        //Set
-        public async Task AddRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext? transactionContext)
+        /// <summary>
+        /// 如果已经存在其中一些，则报错
+        /// </summary>
+        public async Task AddRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
         {
+            ThrowIf.Null(transactionContext, nameof(transactionContext));
+
             long count = await DbReader.CountAsync<UserRole>(
                 ur => ur.UserId == userId && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
                 transactionContext).ConfigureAwait(false);
@@ -143,21 +168,23 @@ namespace HB.FullStack.Identity
 
             List<UserRole> userRoles = roles.Select(r => new UserRole(userId, r.Id)).ToList();
 
-            AddAsync
+            _ = await AddAsync(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        public Task RemoveRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext? transactionContext)
+        public async Task RemoveRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
         {
+            ThrowIf.Null(transactionContext, nameof(transactionContext));
 
-        }
+            IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(
+                ur => ur.UserId == userId && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
+                transactionContext).ConfigureAwait(false);
 
-        protected Task Invalidate___CacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)
-        {
-            //User-Role发生变化，就Invalidate
-            //比如：为用户添加角色，删除角色
+            if (!userRoles.Any())
+            {
+                return;
+            }
 
-            InvalidateCache(new CachedRolesByUserId(sender.UserId).SetTimestamp(args.Timestamp));
-            return Task.CompletedTask;
+            await DeleteAsync(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
         #endregion

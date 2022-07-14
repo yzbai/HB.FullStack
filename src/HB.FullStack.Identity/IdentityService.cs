@@ -402,7 +402,7 @@ namespace HB.FullStack.Identity
 
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string audience, TransactionContext transactionContext)
         {
-            IEnumerable<Role> roles = await _roleRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
             IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
 
             IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
@@ -611,74 +611,76 @@ namespace HB.FullStack.Identity
 
         #region Role
 
-        public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
-        {
-            //TODO: 需要重新构建 jwt
+//        public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
+//        {
+//            //TODO: 需要重新构建 jwt
 
-            ThrowIf.Empty(ref userId, nameof(userId));
-            ThrowIf.Empty(ref roleId, nameof(roleId));
+//            ThrowIf.Empty(ref userId, nameof(userId));
+//            ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
-            try
-            {
-                //查重
-                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+//            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+//            try
+//            {
+//                //查重
+//                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
-                if (storeds.Any(ur => ur.Id == roleId))
-                {
-                    throw IdentityExceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
-                }
+//                if (storeds.Any(ur => ur.Id == roleId))
+//                {
+//                    throw IdentityExceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
+//                }
 
-                UserRole ru = new UserRole(userId, roleId);
 
-                await _userRoleRepo.AddAsync(ru, lastUser, trans).ConfigureAwait(false);
 
-                await trans.CommitAsync().ConfigureAwait(false);
-            }
-            catch
-            {
-                await trans.RollbackAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
+//                UserRole ru = new UserRole(userId, roleId);
 
-        public async Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
-        {
-            //需要重新构建 jwt
+//                await _userRoleRepo.AddAsync(ru, lastUser, trans).ConfigureAwait(false);
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+//                await trans.CommitAsync().ConfigureAwait(false);
+//            }
+//            catch
+//            {
+//                await trans.RollbackAsync().ConfigureAwait(false);
+//                throw;
+//            }
+//        }
 
-            try
-            {
-                //查重
-                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+//        public async Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
+//        {
+//            //需要重新构建 jwt
 
-                Role? stored = storeds.SingleOrDefault(ur => ur.Id == roleId);
+//            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
 
-                if (stored == null)
-                {
-                    return false;
-                }
+//            try
+//            {
+//                //查重
+//                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
-                UserRole? userRole = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+//                Role? stored = storeds.SingleOrDefault(ur => ur.Id == roleId);
 
-                await _userRoleRepo.DeleteAsync(userRole!, lastUser, trans).ConfigureAwait(false);
+//                if (stored == null)
+//                {
+//                    return false;
+//                }
 
-                await trans.CommitAsync().ConfigureAwait(false);
+//                UserRole? userRole = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
 
-                return true;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                await trans.RollbackAsync().ConfigureAwait(false);
+//                await _userRoleRepo.DeleteAsync(userRole!, lastUser, trans).ConfigureAwait(false);
 
-                _logger.LogTryRemoveRoleFromUserError(userId, roleId, lastUser, ex);
+//                await trans.CommitAsync().ConfigureAwait(false);
 
-                return false;
-            }
-        }
+//                return true;
+//            }
+//#pragma warning disable CA1031 // Do not catch general exception types
+//            catch (Exception ex)
+//#pragma warning restore CA1031 // Do not catch general exception types
+//            {
+//                await trans.RollbackAsync().ConfigureAwait(false);
+
+//                _logger.LogTryRemoveRoleFromUserError(userId, roleId, lastUser, ex);
+
+//                return false;
+//            }
+//        }
 
         #endregion
 

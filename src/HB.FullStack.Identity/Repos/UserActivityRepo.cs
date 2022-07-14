@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
@@ -19,6 +20,7 @@ namespace HB.FullStack.Identity
         public UserActivityRepo(ILogger<UserActivityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(UserActivity sender, DatabaseWriteEventArgs args) => Task.CompletedTask;
+
+        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args) => Task.CompletedTask;
     }
 }

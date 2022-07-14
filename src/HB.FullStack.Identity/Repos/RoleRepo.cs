@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Identity
 {
@@ -18,7 +19,7 @@ namespace HB.FullStack.Identity
         public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override async Task InvalidateCacheItemsOnChanged(Role sender, DatabaseWriteEventArgs args)
+        protected override async Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args)
         {
             //解决方案1：删除所有。Role改变，对于CachedRolesByUserId来说，就是Values变了，所以要全部Invalidate
             //问题：速度慢
@@ -26,21 +27,21 @@ namespace HB.FullStack.Identity
 
             //解决方案2：找到相关的UserId，删除
             //问题：可能会有很多cache条目
-            IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(ur => ur.RoleId == sender.Id, null).ConfigureAwait(false);
-
-            InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList());
 
             //TODO: 解决方案3：删除某个前缀的所有key
-        }
 
-        public Task<IEnumerable<Role>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
-        {
-            return GetUsingCacheAsideAsync(new CachedRolesByUserId(userId), dbReader =>
+            if (args.ChangeType == DBChangeType.Update || args.ChangeType == DBChangeType.Delete)
             {
-                var from = dbReader.From<Role>().RightJoin<UserRole>((r, ru) => r.Id == ru.RoleId);
-                var where = dbReader.Where<Role>().And<UserRole>(ru => ru.UserId == userId);
-                return dbReader.RetrieveAsync(from, where, transContext);
-            })!;
+                if (sender is IEnumerable<Role> roles)
+                {
+                    foreach (var role in roles)
+                    {
+                        IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(ur => ur.RoleId == role.Id, null).ConfigureAwait(false);
+
+                        InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList());
+                    }
+                }
+            }
         }
     }
 }

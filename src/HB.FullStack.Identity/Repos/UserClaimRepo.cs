@@ -8,21 +8,29 @@ using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Common;
+using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Identity
 {
     public class UserClaimRepo : ModelRepository<UserClaim>
     {
- 
+
 
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(UserClaim sender, DatabaseWriteEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args)
         {
-            Parallel.Invoke(
-                () => InvalidateCache(new CachedUserClaimsByUserId(sender.UserId).SetTimestamp(sender.Timestamp))
-            );
+            if (sender is IEnumerable<UserClaim> userClaims)
+            {
+                //大部分都是一个，用不着
+                //Parallel.ForEach(userClaims, (userClaim) => InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId)));
+
+                foreach(var userClaim in userClaims)
+                {
+                    InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
+                }
+            }
 
             return Task.CompletedTask;
         }

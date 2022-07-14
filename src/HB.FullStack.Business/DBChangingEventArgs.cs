@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Repository
 {
-    public class DatabaseWriteEventArgs : EventArgs
-    {
 
-        public DatabaseWriteEventArgs()
-        {
-        }
+    public class DBChangingEventArgs : EventArgs
+    {
+        public DBChangeType ChangeType { get; set; }
     }
 }
