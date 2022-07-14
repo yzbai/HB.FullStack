@@ -8,9 +8,9 @@ namespace HB.FullStack.Database.DatabaseModels
     /// <summary>
     /// 实体内属性定义（一个）
     /// </summary>
-    public class DatabaseModelPropertyDef
+    public class DBModelPropertyDef
     {
-        public DatabaseModelDef ModelDef { get; set; } = null!;
+        public DBModelDef ModelDef { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 

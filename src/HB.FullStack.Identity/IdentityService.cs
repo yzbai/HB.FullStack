@@ -31,7 +31,7 @@ namespace HB.FullStack.Identity
         private readonly LoginControlRepo _userLoginControlRepo;
         private readonly RoleRepo _roleRepo;
         private readonly UserActivityRepo _userActivityModelRepo;
-        private readonly UserRoleRepo _userRoleRepo;
+        //private readonly UserRoleRepo _userRoleRepo;
 
         //Jwt Signing
         private string _jsonWebKeySetJson = null!;
@@ -56,7 +56,7 @@ namespace HB.FullStack.Identity
             UserClaimRepo userClaimRepo,
             LoginControlRepo userLoginControlRepo,
             RoleRepo roleRepo,
-            UserRoleRepo userRoleRepo,
+            //UserRoleRepo userRoleRepo,
             UserActivityRepo userActivityModelRepo)
         {
             _options = options.Value;
@@ -70,7 +70,7 @@ namespace HB.FullStack.Identity
             _signInTokenRepo = signInTokenRepo;
 
             _roleRepo = roleRepo;
-            _userRoleRepo = userRoleRepo;
+            //_userRoleRepo = userRoleRepo;
 
             _userActivityModelRepo = userActivityModelRepo;
 

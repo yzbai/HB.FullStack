@@ -343,7 +343,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DatabaseModel, new()
+        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DBModel, new()
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UpdateVersionError);
 

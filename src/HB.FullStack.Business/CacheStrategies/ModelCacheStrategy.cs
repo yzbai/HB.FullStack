@@ -11,6 +11,7 @@ using HB.FullStack.Cache;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Cache.CacheModels;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             IMemoryLockManager memoryLockManager,
             ILogger logger) where TModel : ICacheModel, new()
         {
-            if (!ICache.IsModelEnabled<TModel>())
+            if (!ICache.IsModelCachable<TModel>())
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
@@ -144,12 +145,14 @@ namespace HB.FullStack.Repository.CacheStrategies
 
         }
 
-        public static void InvalidateCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ICacheModel, new()
+        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) //where TModel : ICacheModel, new()
         {
-            if (ICache.IsModelEnabled<TModel>())
-            {
-                cache.RemoveModelsAsync(models).SafeFireAndForget(OnException);
-            }
+            cache.RemoveModelsAsync(models).SafeFireAndForget(OnException);
+        }
+
+        public static void InvalidateCache<T>(T model, ICache cache)
+        {
+            cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
         }
 
         private static void OnException(Exception ex)

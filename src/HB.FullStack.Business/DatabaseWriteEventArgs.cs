@@ -8,16 +8,9 @@ namespace HB.FullStack.Repository
 {
     public class DatabaseWriteEventArgs : EventArgs
     {
-        public long Timestamp { get; private set; }
 
         public DatabaseWriteEventArgs()
         {
-            Timestamp = TimeUtil.UtcNowTicks;
         }
-
-        public DatabaseWriteEventArgs(long timestamp)
-        {
-            Timestamp = timestamp;
-        }   
     }
 }

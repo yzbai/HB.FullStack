@@ -5,13 +5,13 @@ using HB.FullStack.Database.Converter;
 
 namespace HB.FullStack.Database.DatabaseModels
 {
-    public interface IDatabaseModelDefFactory
+    public interface IDBModelDefFactory
     {
-        DatabaseModelDef? GetDef<T>() where T : DatabaseModel;
+        DBModelDef? GetDef<T>() where T : DBModel;
 
-        DatabaseModelDef? GetDef(Type? modelType);
+        DBModelDef? GetDef(Type? modelType);
 
-        IEnumerable<DatabaseModelDef> GetAllDefsByDatabase(string databaseName);
+        IEnumerable<DBModelDef> GetAllDefsByDatabase(string databaseName);
 
         ITypeConverter? GetPropertyTypeConverter(Type modelType, string propertyName);
     }

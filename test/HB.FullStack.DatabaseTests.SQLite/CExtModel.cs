@@ -7,7 +7,7 @@ using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Database.Tests
 {
-    public class CExtModel : ClientFlackIdDatabaseModel
+    public class CExtModel : TimelessFlackIdDBModel
     {
         public string? Name { get; set; }
     }

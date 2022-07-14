@@ -7,7 +7,7 @@ using HB.FullStack.Database.DatabaseModels;
 namespace HB.FullStack.DatabaseTests
 {
 
-    public class A : FlackIdDatabaseModel
+    public class A : TimestampFlackIdDBModel
     {
 
 
@@ -16,7 +16,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B : FlackIdDatabaseModel
+    public class B : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty]
@@ -24,7 +24,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB : FlackIdDatabaseModel
+    public class AB : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty]
@@ -35,7 +35,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C : FlackIdDatabaseModel
+    public class C : TimestampFlackIdDBModel
     {
         [DatabaseModelProperty]
         public string Name { get; set; } = default!;
@@ -44,7 +44,7 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class A_Client : FlackIdDatabaseModel
+    public class A_Client : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty]
@@ -52,7 +52,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class B_Client : FlackIdDatabaseModel
+    public class B_Client : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty]
@@ -60,7 +60,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class AB_Client : FlackIdDatabaseModel
+    public class AB_Client : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty]
@@ -71,7 +71,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class C_Client : FlackIdDatabaseModel
+    public class C_Client : TimestampFlackIdDBModel
     {
         [DatabaseModelProperty]
         public string Name { get; set; } = default!;
@@ -80,7 +80,7 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class Guid_A : GuidDatabaseModel
+    public class Guid_A : TimestampGuidDBModel
     {
 
 
@@ -89,7 +89,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_B : GuidDatabaseModel
+    public class Guid_B : TimestampGuidDBModel
     {
 
         [DatabaseModelProperty]
@@ -97,7 +97,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_AB : GuidDatabaseModel
+    public class Guid_AB : TimestampGuidDBModel
     {
 
         public Guid Guid_AId { get; set; }
@@ -106,7 +106,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_C : GuidDatabaseModel
+    public class Guid_C : TimestampGuidDBModel
     {
         [DatabaseModelProperty]
         public string Name { get; set; } = default!;
@@ -115,7 +115,7 @@ namespace HB.FullStack.DatabaseTests
         public Guid Guid_AId { get; set; }
     }
 
-    public class Guid_A_Client : GuidDatabaseModel
+    public class Guid_A_Client : TimestampGuidDBModel
     {
 
         [DatabaseModelProperty]
@@ -123,7 +123,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_B_Client : GuidDatabaseModel
+    public class Guid_B_Client : TimestampGuidDBModel
     {
 
         [DatabaseModelProperty]
@@ -131,7 +131,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_AB_Client : GuidDatabaseModel
+    public class Guid_AB_Client : TimestampGuidDBModel
     {
 
         [DatabaseModelProperty]
@@ -142,7 +142,7 @@ namespace HB.FullStack.DatabaseTests
     }
 
 
-    public class Guid_C_Client : GuidDatabaseModel
+    public class Guid_C_Client : TimestampGuidDBModel
     {
         [DatabaseModelProperty]
         public string Name { get; set; } = default!;

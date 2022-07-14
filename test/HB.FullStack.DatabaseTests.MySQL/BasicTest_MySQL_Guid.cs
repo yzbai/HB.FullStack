@@ -679,10 +679,10 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                 List<Guid_BookModel> list3 = new List<Guid_BookModel>();
 
                 int len = reader.FieldCount;
-                DatabaseModelPropertyDef[] propertyDefs = new DatabaseModelPropertyDef[len];
+                DBModelPropertyDef[] propertyDefs = new DBModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DatabaseModelDef definition = Db.ModelDefFactory.GetDef<Guid_BookModel>()!;
+                DBModelDef definition = Db.ModelDefFactory.GetDef<Guid_BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -690,7 +690,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDatabaseModelDefFactory, IDataReader, object> fullStack_mapper = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader, 0, definition.FieldCount, false, EngineType.MySQL);
+                Func<IDBModelDefFactory, IDataReader, object> fullStack_mapper = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_BookModel), reader);
 
@@ -700,7 +700,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DatabaseModelPropertyDef property = propertyDefs[i];
+                        DBModelPropertyDef property = propertyDefs[i];
 
                         object? value = TypeConvert.DbValueToTypeValue(r[i], property, EngineType.MySQL);
 

@@ -2,7 +2,7 @@ using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class Role : GuidDatabaseModel
+    public class Role : TimestampGuidDBModel
     {
         [DatabaseModelProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;

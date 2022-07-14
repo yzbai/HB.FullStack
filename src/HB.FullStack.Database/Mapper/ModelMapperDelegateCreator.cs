@@ -25,21 +25,21 @@ namespace HB.FullStack.Database.Mapper
         /// 得到一个将 数据库行 转为Model 的 delegate
         /// 缓存构建key时，应该包含def，startindex，length, returnNullIfFirstNull。engineType, Reader因为返回字段顺序固定了，不用加入key中
         /// </summary>
-        public static Func<IDatabaseModelDefFactory, IDataReader, object> CreateToModelDelegate(
-            DatabaseModelDef def,
+        public static Func<IDBModelDefFactory, IDataReader, object> CreateToModelDelegate(
+            DBModelDef def,
             IDataReader reader,
             int startIndex,
             int length,
             bool returnNullIfFirstNull,
             EngineType engineType)
         {
-            DynamicMethod dm = new DynamicMethod("ToModel" + Guid.NewGuid().ToString(), def.ModelType, new[] { typeof(IDatabaseModelDefFactory), typeof(IDataReader) }, true);
+            DynamicMethod dm = new DynamicMethod("ToModel" + Guid.NewGuid().ToString(), def.ModelType, new[] { typeof(IDBModelDefFactory), typeof(IDataReader) }, true);
             ILGenerator il = dm.GetILGenerator();
 
             EmitModelMapper(def, reader, startIndex, length, returnNullIfFirstNull, engineType, il);
 
-            Type funcType = Expression.GetFuncType(typeof(IDatabaseModelDefFactory), typeof(IDataReader), def.ModelType);
-            return (Func<IDatabaseModelDefFactory, IDataReader, object>)dm.CreateDelegate(funcType);
+            Type funcType = Expression.GetFuncType(typeof(IDBModelDefFactory), typeof(IDataReader), def.ModelType);
+            return (Func<IDBModelDefFactory, IDataReader, object>)dm.CreateDelegate(funcType);
         }
 
         /// <summary>
@@ -52,11 +52,11 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="returnNullIfFirstNull"></param>
         /// <param name="engineType"></param>
         /// <param name="il"></param>
-        private static void EmitModelMapper(DatabaseModelDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
+        private static void EmitModelMapper(DBModelDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
         {
             try
             {
-                List<DatabaseModelPropertyDef> propertyDefs = new List<DatabaseModelPropertyDef>();
+                List<DBModelPropertyDef> propertyDefs = new List<DBModelPropertyDef>();
 
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
@@ -95,15 +95,15 @@ namespace HB.FullStack.Database.Mapper
 
                     il.Emit(OpCodes.Dup); // stack is now [target][target]
 
-                    DatabaseModelPropertyDef propertyDef = propertyDefs[index];
+                    DBModelPropertyDef propertyDef = propertyDefs[index];
                     Type trueType = propertyDef.NullableUnderlyingType ?? propertyDef.Type;
 
                     //======属性自定义Converter
                     if (propertyDef.TypeConverter != null)
                     {
-                        il.Emit(OpCodes.Ldarg_0);//stack is now [target][target][IDatabaseModelDefFactory]
-                        il.Emit(OpCodes.Ldloc, modelTypeLocal);//stack is now [target][target][IDatabaseModelDefFactory][ModelType]
-                        il.Emit(OpCodes.Ldstr, propertyDef.Name);//stack is now [target][target][IDatabaseModelDefFactory][ModelType][PropertyName]
+                        il.Emit(OpCodes.Ldarg_0);//stack is now [target][target][IDBModelDefFactory]
+                        il.Emit(OpCodes.Ldloc, modelTypeLocal);//stack is now [target][target][IDBModelDefFactory][ModelType]
+                        il.Emit(OpCodes.Ldstr, propertyDef.Name);//stack is now [target][target][IDBModelDefFactory][ModelType][PropertyName]
                         il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);// stack is now [target][target][TypeConverter]
 
                         hasConverter = true;
@@ -272,14 +272,14 @@ namespace HB.FullStack.Database.Mapper
         }
 
         /// <summary>
-        /// 得到一个将 (IDatabaseModelDefFactory,Model,parameter_num_suffix)转换为键值对的delegate
+        /// 得到一个将 (IDBModelDefFactory,Model,parameter_num_suffix)转换为键值对的delegate
         /// </summary>
         /// <param name="modelDef"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        public static Func<IDatabaseModelDefFactory, object, int, KeyValuePair<string, object>[]> CreateModelToParametersDelegate(DatabaseModelDef modelDef, EngineType engineType)
+        public static Func<IDBModelDefFactory, object, int, KeyValuePair<string, object>[]> CreateModelToParametersDelegate(DBModelDef modelDef, EngineType engineType)
         {
-            DynamicMethod dm = new DynamicMethod("ModelToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IDatabaseModelDefFactory), typeof(object), typeof(int) }, true);
+            DynamicMethod dm = new DynamicMethod("ModelToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IDBModelDefFactory), typeof(object), typeof(int) }, true);
             ILGenerator il = dm.GetILGenerator();
 
             LocalBuilder array = il.DeclareLocal(typeof(KeyValuePair<string, object>[]));
@@ -343,12 +343,12 @@ namespace HB.FullStack.Database.Mapper
                 {
                     il.Emit(OpCodes.Stloc, tmpObj);//[rtArray][key]
 
-                    il.Emit(OpCodes.Ldarg_0); //[rtArray][key][IDatabaseModelDefFactory]
+                    il.Emit(OpCodes.Ldarg_0); //[rtArray][key][IDBModelDefFactory]
 
-                    il.Emit(OpCodes.Ldloc, modelTypeLocal);//[rtArray][key][IDatabaseModelDefFactory][modelType]
+                    il.Emit(OpCodes.Ldloc, modelTypeLocal);//[rtArray][key][IDBModelDefFactory][modelType]
                     //emiter.LoadLocal(modelTypeLocal);
 
-                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[rtArray][key][IDatabaseModelDefFactory][modelType][propertyName]
+                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[rtArray][key][IDBModelDefFactory][modelType][propertyName]
                     il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);//[rtArray][key][typeconverter]
 
                     il.Emit(OpCodes.Ldloc, tmpObj);
@@ -466,9 +466,9 @@ namespace HB.FullStack.Database.Mapper
             il.Emit(OpCodes.Ret);
             //emiter.Return();
 
-            Type funType = Expression.GetFuncType(typeof(IDatabaseModelDefFactory), typeof(object), typeof(int), typeof(KeyValuePair<string, object>[]));
+            Type funType = Expression.GetFuncType(typeof(IDBModelDefFactory), typeof(object), typeof(int), typeof(KeyValuePair<string, object>[]));
 
-            return (Func<IDatabaseModelDefFactory, object, int, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
+            return (Func<IDBModelDefFactory, object, int, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
 
             //return emiter.CreateDelegate();
         }
@@ -480,14 +480,14 @@ namespace HB.FullStack.Database.Mapper
         /// <param name="engineType"></param>
         /// <param name="propertyNames"></param>
         /// <returns></returns>
-        public static Func<IDatabaseModelDefFactory, object?[], string, KeyValuePair<string, object>[]> CreatePropertyValuesToParametersDelegate(DatabaseModelDef modelDef, EngineType engineType, IList<string> propertyNames)
+        public static Func<IDBModelDefFactory, object?[], string, KeyValuePair<string, object>[]> CreatePropertyValuesToParametersDelegate(DBModelDef modelDef, EngineType engineType, IList<string> propertyNames)
         {
             DynamicMethod dm = new DynamicMethod(
                 "PropertyValuesToParameters" + Guid.NewGuid().ToString(),
                 typeof(KeyValuePair<string, object>[]),
                 new[]
                 {
-                    typeof(IDatabaseModelDefFactory),
+                    typeof(IDBModelDefFactory),
                     typeof(object?[]), //propertyValues
                     typeof(string) //parameterNameSuffix
                 },
@@ -525,7 +525,7 @@ namespace HB.FullStack.Database.Mapper
             int index = 0;
             foreach (string propertyName in propertyNames)
             {
-                DatabaseModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
+                DBModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
 
                 if (propertyDef == null)
                 {
@@ -571,12 +571,12 @@ namespace HB.FullStack.Database.Mapper
                 {
                     il.Emit(OpCodes.Stloc, tmpObj);//[rtArray][key]
 
-                    il.Emit(OpCodes.Ldarg_0); //[rtArray][key][IDatabaseModelDefFactory]
+                    il.Emit(OpCodes.Ldarg_0); //[rtArray][key][IDBModelDefFactory]
 
-                    il.Emit(OpCodes.Ldloc, modelTypeLocal);//[rtArray][key][IDatabaseModelDefFactory][modelType]
+                    il.Emit(OpCodes.Ldloc, modelTypeLocal);//[rtArray][key][IDBModelDefFactory][modelType]
                     //emiter.LoadLocal(modelTypeLocal);
 
-                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[rtArray][key][IDatabaseModelDefFactory][modelType][propertyName]
+                    il.Emit(OpCodes.Ldstr, propertyDef.Name);//[rtArray][key][IDBModelDefFactory][modelType][propertyName]
                     il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);//[rtArray][key][typeconverter]
 
                     il.Emit(OpCodes.Ldloc, tmpObj);//[rtArray][key][typeconveter][property_value_obj]
@@ -693,9 +693,9 @@ namespace HB.FullStack.Database.Mapper
             il.Emit(OpCodes.Ret);
             //emiter.Return();
 
-            Type funType = Expression.GetFuncType(typeof(IDatabaseModelDefFactory), typeof(object?[]), typeof(string), typeof(KeyValuePair<string, object>[]));
+            Type funType = Expression.GetFuncType(typeof(IDBModelDefFactory), typeof(object?[]), typeof(string), typeof(KeyValuePair<string, object>[]));
 
-            return (Func<IDatabaseModelDefFactory, object?[], string, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
+            return (Func<IDBModelDefFactory, object?[], string, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
 
             //return emiter.CreateDelegate();
         }
@@ -840,7 +840,7 @@ namespace HB.FullStack.Database.Mapper
 
         private static readonly MethodInfo _invariantCultureMethod = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static)!.GetGetMethod()!;
 
-        private static readonly MethodInfo _getPropertyTypeConverterMethod2 = typeof(IDatabaseModelDefFactory).GetMethod(nameof(IDatabaseModelDefFactory.GetPropertyTypeConverter))!;
+        private static readonly MethodInfo _getPropertyTypeConverterMethod2 = typeof(IDBModelDefFactory).GetMethod(nameof(IDBModelDefFactory.GetPropertyTypeConverter))!;
 
         private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(TypeConvert).GetMethod(nameof(TypeConvert.GetGlobalTypeConverter), new Type[] { typeof(Type), typeof(int) })!;
 

@@ -7,9 +7,9 @@ namespace HB.FullStack.Database.DatabaseModels
     /// <summary>
     /// 实体定义
     /// </summary>
-    public class DatabaseModelDef
+    public class DBModelDef
     {
-        public bool IsServerDatabaseModel { get; set; }
+        public bool IsTimestampDBModel{ get; set; }
 
         /// <summary>
         /// 是否是GuidModel
@@ -66,18 +66,18 @@ namespace HB.FullStack.Database.DatabaseModels
         /// <summary>
         /// 属性字典
         /// </summary>
-        public Dictionary<string, DatabaseModelPropertyDef> PropertyDict { get; } = new Dictionary<string, DatabaseModelPropertyDef>();
+        public Dictionary<string, DBModelPropertyDef> PropertyDict { get; } = new Dictionary<string, DBModelPropertyDef>();
 
         /// <summary>
         /// 属性枚举
         /// </summary>
-        public IList<DatabaseModelPropertyDef> PropertyDefs { get; } = new List<DatabaseModelPropertyDef>();
+        public IList<DBModelPropertyDef> PropertyDefs { get; } = new List<DBModelPropertyDef>();
 
-        public DatabaseModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
+        public DBModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
 
-        public DatabaseModelPropertyDef? GetPropertyDef(string propertyName)
+        public DBModelPropertyDef? GetPropertyDef(string propertyName)
         {
-            if (PropertyDict.TryGetValue(propertyName, out DatabaseModelPropertyDef? propertyDef))
+            if (PropertyDict.TryGetValue(propertyName, out DBModelPropertyDef? propertyDef))
             {
                 return propertyDef;
             }

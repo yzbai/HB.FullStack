@@ -24,14 +24,14 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 只用于客户端，没有做Timestamp检查
         /// </summary>
-        public static string CreateAddOrUpdateSql(DatabaseModelDef modelDef, EngineType engineType, bool returnModel, int number = 0)
+        public static string CreateAddOrUpdateSql(DBModelDef modelDef, EngineType engineType, bool returnModel, int number = 0)
         {
             StringBuilder addArgs = new StringBuilder();
             StringBuilder selectArgs = new StringBuilder();
             StringBuilder addValues = new StringBuilder();
             StringBuilder updatePairs = new StringBuilder();
 
-            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
+            foreach (DBModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (returnModel)
                 {
@@ -51,7 +51,7 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                //if (propertyDef.Name == nameof(DatabaseModel.Version) /*|| propertyDef.EndpointName == nameof(Model.CreateTime)*/)
+                //if (propertyDef.Name == nameof(DBModel.Version) /*|| propertyDef.EndpointName == nameof(Model.CreateTime)*/)
                 //{
                 //    continue;
                 //}
@@ -59,7 +59,7 @@ namespace HB.FullStack.Database.SQL
                 updatePairs.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
             }
 
-            //DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Version))!;
+            //DBModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(DBModel.Version))!;
 
             //updatePairs.Append(Invariant($"{timestampProperty.DbReservedName}={timestampProperty.DbReservedName} + 1"));
             //updatePairs.Append(Invariant($"{timestampProperty.DbReservedName}={timestampProperty.DbReservedName}"));
@@ -73,7 +73,7 @@ namespace HB.FullStack.Database.SQL
             addArgs.RemoveLast();
             updatePairs.RemoveLast();
 
-            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DBModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
 
             string sql = $"insert into {modelDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(engineType, primaryKeyProperty)} {updatePairs};";
 
@@ -92,12 +92,12 @@ namespace HB.FullStack.Database.SQL
             return sql;
         }
 
-        public static string CreateAddModelSql(DatabaseModelDef modelDef, EngineType engineType, bool returnId, int number = 0)
+        public static string CreateAddModelSql(DBModelDef modelDef, EngineType engineType, bool returnId, int number = 0)
         {
             StringBuilder args = new StringBuilder();
             StringBuilder values = new StringBuilder();
 
-            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
+            foreach (DBModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (propertyDef.IsAutoIncrementPrimaryKey)
                 {
@@ -120,11 +120,11 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 需要随后在Parameters中特别添加Timestamp_old_number的值
         /// </summary>
-        public static string CreateUpdateModelSql(DatabaseModelDef modelDef, int number = 0)
+        public static string CreateUpdateModelSql(DBModelDef modelDef, int number = 0)
         {
             StringBuilder args = new StringBuilder();
 
-            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
+            foreach (DBModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (propertyDef.IsPrimaryKey /*|| propertyDef.EndpointName == nameof(Model.CreateTime)*/)
                 {
@@ -138,16 +138,16 @@ namespace HB.FullStack.Database.SQL
 
             StringBuilder where = new StringBuilder();
 
-            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DBModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DBModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DBModel.Deleted))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
-            if (modelDef.IsServerDatabaseModel)
+            if (modelDef.IsTimestampDBModel)
             {
                 //TODO: 提高效率。简化所有的Version、LastTime、LastUser、Deleted、Id字段的 Property读取和DbReservedName使用
-                DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
+                DBModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(TimestampDBModel.Timestamp))!;
                 //where.Append(Invariant($" AND {timestampProperty.DbReservedName}={timestampProperty.DbParameterizedName}_{number} - 1 "));
                 where.Append(Invariant($" AND {timestampProperty.DbReservedName}={timestampProperty.DbParameterizedName}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
             }
@@ -158,18 +158,18 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 使用Timestamp乐观锁的Update-Fields。行粒度。
         /// </summary>
-        public static string CreateUpdateFieldsUsingTimestampCompareSql(DatabaseModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
+        public static string CreateUpdateFieldsUsingTimestampCompareSql(DBModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
         {
             StringBuilder args = new StringBuilder();
 
             foreach (string propertyName in propertyNames)
             {
-                if (/*propertyName == nameof(Model.CreateTime) || */propertyName == nameof(LongIdDatabaseModel.Id))
+                if (/*propertyName == nameof(Model.CreateTime) || */propertyName == nameof(TimestampLongIdDBModel.Id))
                 {
                     continue;
                 }
 
-                DatabaseModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
+                DBModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
 
                 if (propertyDef == null)
                 {
@@ -183,15 +183,15 @@ namespace HB.FullStack.Database.SQL
 
             StringBuilder where = new StringBuilder();
 
-            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DBModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DBModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DBModel.Deleted))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
-            if (modelDef.IsServerDatabaseModel)
+            if (modelDef.IsTimestampDBModel)
             {
-                DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
+                DBModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(TimestampDBModel.Timestamp))!;
                 //TODO: 这里可能有些问题，只能保证updateVersion比之前Version大一
                 where.Append(Invariant($" AND {timestampProperty.DbReservedName}={timestampProperty.DbParameterizedName}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
             }
@@ -202,18 +202,18 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 使用新旧值比较乐观锁的update-fields.field粒度
         /// </summary>
-        public static string CreateUpdateFieldsUsingOldNewCompareSql(DatabaseModelDef modelDef, EngineType engineType, IEnumerable<string> propertyNames, int number = 0)
+        public static string CreateUpdateFieldsUsingOldNewCompareSql(DBModelDef modelDef, EngineType engineType, IEnumerable<string> propertyNames, int number = 0)
         {
-            DatabaseModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DBModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
+            DBModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DBModel.Deleted))!;
 
             StringBuilder args = new StringBuilder();
             StringBuilder where = new StringBuilder();
 
-            if (modelDef.IsServerDatabaseModel)
+            if (modelDef.IsTimestampDBModel)
             {
-                DatabaseModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.Timestamp))!;
-                DatabaseModelPropertyDef lastUserProperty = modelDef.GetPropertyDef(nameof(ServerDatabaseModel.LastUser))!;
+                DBModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(TimestampDBModel.Timestamp))!;
+                DBModelPropertyDef lastUserProperty = modelDef.GetPropertyDef(nameof(TimestampDBModel.LastUser))!;
 
                 args.Append(Invariant($" {timestampProperty.DbReservedName}={timestampProperty.DbParameterizedName}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
                 args.Append(Invariant($",{lastUserProperty.DbReservedName}={lastUserProperty.DbParameterizedName}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
@@ -224,7 +224,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                DatabaseModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
+                DBModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
 
                 if (propertyDef == null)
                 {
@@ -238,7 +238,7 @@ namespace HB.FullStack.Database.SQL
             //TODO: 还是要查验一下found_rows的并发
             string sql = $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
 
-            if (modelDef.IsServerDatabaseModel)
+            if (modelDef.IsTimestampDBModel)
             {
                 //" SELECT {FoundMatchedRows_Statement(engineType)}, {timestampProperty.DbReservedName} FROM {modelDef.DbTableReservedName} WHERE {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} AND {deletedProperty.DbReservedName}=0 ";
             }
@@ -246,20 +246,20 @@ namespace HB.FullStack.Database.SQL
             return sql;
         }
 
-        public static string CreateDeleteModelSql(DatabaseModelDef modelDef, int number = 0)
+        public static string CreateDeleteModelSql(DBModelDef modelDef, int number = 0)
         {
             return CreateUpdateModelSql(modelDef, number);
         }
 
-        public static string CreateSelectModelSql(params DatabaseModelDef[] modelDefs)
+        public static string CreateSelectModelSql(params DBModelDef[] modelDefs)
         {
             StringBuilder builder = new StringBuilder("SELECT ");
 
-            foreach (DatabaseModelDef modelDef in modelDefs)
+            foreach (DBModelDef modelDef in modelDefs)
             {
                 string DbTableReservedName = modelDef.DbTableReservedName;
 
-                foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
+                foreach (DBModelPropertyDef propertyDef in modelDef.PropertyDefs)
                 {
                     builder.Append(Invariant($"{DbTableReservedName}.{propertyDef.DbReservedName},"));
                 }
@@ -273,9 +273,9 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 针对Client
         /// </summary>
-        public static string CreateDeleteSql(DatabaseModelDef modelDef)
+        public static string CreateDeleteSql(DBModelDef modelDef)
         {
-            DatabaseModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DatabaseModel.Deleted))!;
+            DBModelPropertyDef deletedProperty = modelDef.GetPropertyDef(nameof(DBModel.Deleted))!;
 
             return $"update {modelDef.DbTableReservedName} set  {deletedProperty.DbReservedName}=1";
         }
@@ -337,7 +337,7 @@ namespace HB.FullStack.Database.SQL
             return _needQuotedTypes.Contains(type);
         }
 
-        public static bool IsDbFieldNeedLength(DatabaseModelPropertyDef propertyDef, EngineType engineType)
+        public static bool IsDbFieldNeedLength(DBModelPropertyDef propertyDef, EngineType engineType)
         {
             DbType dbType = TypeConvert.TypeToDbType(propertyDef, engineType);
 
@@ -466,12 +466,12 @@ namespace HB.FullStack.Database.SQL
             throw new NotSupportedException();
         }
 
-        public static string SQLite_Table_Create_Statement(DatabaseModelDef modelDef, bool addDropStatement)
+        public static string SQLite_Table_Create_Statement(DBModelDef modelDef, bool addDropStatement)
         {
             StringBuilder propertyInfoSql = new StringBuilder();
             StringBuilder indexSqlBuilder = new StringBuilder();
 
-            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
+            foreach (DBModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 string dbTypeStatement = TypeConvert.TypeToDbTypeStatement(propertyDef, EngineType.SQLite);
 
@@ -504,14 +504,14 @@ namespace HB.FullStack.Database.SQL
             return tableCreateSql;
         }
 
-        public static string MySQL_Table_Create_Statement(DatabaseModelDef modelDef, bool addDropStatement, int varcharDefaultLength)
+        public static string MySQL_Table_Create_Statement(DBModelDef modelDef, bool addDropStatement, int varcharDefaultLength)
         {
             StringBuilder propertySqlBuilder = new StringBuilder();
             StringBuilder indexSqlBuilder = new StringBuilder();
 
-            DatabaseModelPropertyDef? primaryKeyPropertyDef = null;
+            DBModelPropertyDef? primaryKeyPropertyDef = null;
 
-            foreach (DatabaseModelPropertyDef propertyDef in modelDef.PropertyDefs)
+            foreach (DBModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 if (propertyDef.IsPrimaryKey)
                 {
@@ -578,7 +578,7 @@ namespace HB.FullStack.Database.SQL
             return $"{dropStatement} create table {modelDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
         }
 
-        public static string GetTableCreateSql(DatabaseModelDef modelDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)
+        public static string GetTableCreateSql(DBModelDef modelDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)
         {
             return engineType switch
             {
@@ -588,7 +588,7 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
-        public static string OnDuplicateKeyUpdateStatement(EngineType engineType, DatabaseModelPropertyDef primaryDef)
+        public static string OnDuplicateKeyUpdateStatement(EngineType engineType, DBModelPropertyDef primaryDef)
         {
             return engineType switch
             {

@@ -182,7 +182,7 @@ namespace System
             return exception;
         }
 
-        public static CacheException NotEnabledForModel(string typeName)
+        public static CacheException NotEnabledForModel(string? typeName)
         {
             CacheException exception = new CacheException(CacheErrorCodes.NotEnabledForModel);
 

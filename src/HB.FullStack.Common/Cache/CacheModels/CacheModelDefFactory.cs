@@ -6,13 +6,13 @@ namespace HB.FullStack.Common.Cache.CacheModels
 {
     public static class CacheModelDefFactory
     {
-        private static readonly ConcurrentDictionary<Type, CacheModelDef> _defDict = new ConcurrentDictionary<Type, CacheModelDef>();
+        private static readonly ConcurrentDictionary<Type, CacheModelDef?> _defDict = new ConcurrentDictionary<Type, CacheModelDef?>();
 
         //private static readonly object _lockObj = new object();
 
-        public static CacheModelDef Get<TModel>()
+        public static CacheModelDef? Get<T>()
         {
-            return _defDict.GetOrAdd(typeof(TModel), type => CreateModelDef(type));
+            return _defDict.GetOrAdd(typeof(T), type => CreateModelDef(type));
 
             //Type modelType = typeof(TModel);
 
@@ -31,23 +31,19 @@ namespace HB.FullStack.Common.Cache.CacheModels
 
         }
 
-        private static CacheModelDef CreateModelDef(Type modelType)
+        private static CacheModelDef? CreateModelDef(Type modelType)
         {
+            CacheModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheModelAttribute>();
+
+            if (cacheModelAttribute == null)
+            {
+                return null;
+            }
+
             CacheModelDef def = new()
             {
                 Name = modelType.Name
             };
-
-            CacheThisModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheThisModelAttribute>();
-
-            if (cacheModelAttribute == null)
-            {
-                def.IsCacheable = false;
-
-                return def;
-            }
-
-            def.IsCacheable = true;
 
             def.CacheInstanceName = cacheModelAttribute.CacheInstanceName;
 

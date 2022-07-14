@@ -19,6 +19,7 @@ namespace HB.FullStack.Identity
 {
     /// <summary>
     /// 所有的User这个Model的增删改查都要经过这里
+    /// 所有通过User来使用与User相关的关系表的，都经过这里
     /// </summary>
     public class UserRepo : ModelRepository<User>
     {
@@ -36,14 +37,7 @@ namespace HB.FullStack.Identity
 
         protected override Task InvalidateCacheItemsOnChanged(User sender, DatabaseWriteEventArgs args) => Task.CompletedTask;
 
-        #region Read 所有的查询都要经过这里
-
-        /// <summary>
-        /// GetByIdAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
+        #region 主表 Read 所有的查询都要经过这里
 
         public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
@@ -56,13 +50,6 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// GetByIdsAsync
-        /// </summary>
-        /// <param name="userIds"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-
         public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
@@ -73,13 +60,6 @@ namespace HB.FullStack.Identity
                     return db.RetrieveAsync<User>(u => SqlStatement.In(u.Id, true, userIds), transContext);
                 }).ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// GetByMobileAsync
-        /// </summary>
-        /// <param name="mobile"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
 
         public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
@@ -92,13 +72,6 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// GetByLoginNameAsync
-        /// </summary>
-        /// <param name="loginName"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-
         public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
@@ -109,13 +82,6 @@ namespace HB.FullStack.Identity
                     return db.ScalarAsync<User>(u => u.LoginName == loginName, transContext);
                 }).ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// GetByEmailAsync
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
 
         public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
@@ -128,19 +94,70 @@ namespace HB.FullStack.Identity
                 }).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// CountUserAsync
-        /// </summary>
-        /// <param name="loginName"></param>
-        /// <param name="mobile"></param>
-        /// <param name="email"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
             WhereExpression<User> where = DbReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
             return DbReader.CountAsync(where, transContext);
+        }
+
+        #endregion
+
+        #region 关系表 User-Role CRUD
+
+        private FromExpression<User>? _fromUserToRole;
+        private FromExpression<User> FromUserToRole => _fromUserToRole ??= DbReader
+                                                                            .From<User>()
+                                                                            .LeftJoin<User, UserRole>((u, ur) => u.Id == ur.UserId)
+                                                                            .LeftJoin<UserRole, Role>((ur, r) => ur.RoleId == r.Id);
+
+        public async Task<IEnumerable<Role>> GetRolesByUserIdAsync(Guid userId, TransactionContext? transactionContext)
+        {
+            return await GetUsingCacheAsideAsync<Role>(
+                new CachedRolesByUserId(userId),
+                dbReader => GetRolesByUserIdCoreAsync(userId, transactionContext)).ConfigureAwait(false);
+
+            async Task<IEnumerable<Role>> GetRolesByUserIdCoreAsync(Guid userId, TransactionContext? transactionContext)
+            {
+                var where = DbReader.Where<User>(u => u.Id == userId);
+
+                IEnumerable<Tuple<User, UserRole?, Role?>> result = await DbReader.RetrieveAsync<User, UserRole, Role>(
+                    FromUserToRole,
+                    where,
+                    transactionContext).ConfigureAwait(false);
+
+                return result.Where(t => t.Item3 != null).Select(t => t.Item3!).ToList();
+            }
+        }
+
+        //Set
+        public async Task AddRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext? transactionContext)
+        {
+            long count = await DbReader.CountAsync<UserRole>(
+                ur => ur.UserId == userId && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
+                transactionContext).ConfigureAwait(false);
+
+            if (count != 0)
+            {
+                throw IdentityExceptions.AlreadyHaveRoles(userId, roles, lastUser);
+            }
+
+            List<UserRole> userRoles = roles.Select(r => new UserRole(userId, r.Id)).ToList();
+
+            AddAsync
+        }
+
+        public Task RemoveRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext? transactionContext)
+        {
+
+        }
+
+        protected Task Invalidate___CacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)
+        {
+            //User-Role发生变化，就Invalidate
+            //比如：为用户添加角色，删除角色
+
+            InvalidateCache(new CachedRolesByUserId(sender.UserId).SetTimestamp(args.Timestamp));
+            return Task.CompletedTask;
         }
 
         #endregion

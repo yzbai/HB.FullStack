@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.FullStack.Identity.Models;
+
+using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Generic;
 
 namespace HB.FullStack.Identity
 {
@@ -16,6 +19,7 @@ namespace HB.FullStack.Identity
         public static ErrorCode ServiceRegisterError { get; } = new ErrorCode(nameof(ServiceRegisterError), "");
         public static ErrorCode TryRemoveRoleFromUserError { get; } = new ErrorCode(nameof(TryRemoveRoleFromUserError), "");
         public static ErrorCode AudienceNotFound { get; } = new ErrorCode(nameof(AudienceNotFound), "");
+        public static ErrorCode AlreadyHaveRoles { get; } = new ErrorCode(nameof(AlreadyHaveRoles), "用户已经有了一些你要添加的Role");
     }
 
     internal static class IdentityExceptions
@@ -190,6 +194,17 @@ namespace HB.FullStack.Identity
             IdentityException exception = new IdentityException(IdentityErrorCodes.IdentityNothingConfirmed);
 
             return exception;
+        }
+
+        internal static Exception AlreadyHaveRoles(Guid userId, IEnumerable<Role> roles, string lastUser)
+        {
+            IdentityException ex = new IdentityException(IdentityErrorCodes.AlreadyHaveRoles);
+            
+            ex.Data["UserId"] = userId.ToString();
+            ex.Data["Roles"] = SerializeUtil.ToJson(roles);
+            ex.Data["LastUser"] = lastUser;
+
+            return ex;
         }
     }
 

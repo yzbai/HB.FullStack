@@ -7,7 +7,7 @@ using HB.FullStack.Database.DatabaseModels;
 namespace HB.FullStack.DatabaseTests.Data
 {
     
-    public class BookModel : FlackIdDatabaseModel
+    public class BookModel : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty]
@@ -18,7 +18,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     
-    public class Guid_BookModel : GuidDatabaseModel
+    public class Guid_BookModel : TimestampGuidDBModel
     {
 
         [DatabaseModelProperty]
@@ -29,7 +29,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     
-    public class Book : FlackIdDatabaseModel
+    public class Book : TimestampFlackIdDBModel
     {
         [DatabaseModelProperty]
         
@@ -47,7 +47,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     
-    public class BookModel_Client : FlackIdDatabaseModel
+    public class BookModel_Client : TimestampFlackIdDBModel
     {
 
         [DatabaseModelProperty(NeedIndex = true)]
@@ -58,7 +58,7 @@ namespace HB.FullStack.DatabaseTests.Data
     }
 
     
-    public class Book_Client : FlackIdDatabaseModel
+    public class Book_Client : TimestampFlackIdDBModel
     {
         
         [DatabaseModelProperty]

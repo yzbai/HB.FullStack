@@ -34,7 +34,7 @@ namespace HB.FullStack.Database
 
         internal IDatabaseEngine DatabaseEngine { get; }
 
-        internal IDatabaseModelDefFactory ModelDefFactory { get; }
+        internal IDBModelDefFactory ModelDefFactory { get; }
 
         internal IDbCommandBuilder DbCommandBuilder { get; }
     }

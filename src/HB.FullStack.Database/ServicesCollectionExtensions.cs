@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddDatabase(this IServiceCollection services)
         {
             //public
-            services.AddSingleton<IDatabaseModelDefFactory, DatabaseModelDefFactory>();
+            services.AddSingleton<IDBModelDefFactory, DBModelDefFactory>();
             services.AddSingleton<ISQLExpressionVisitor, SQLExpressionVisitor>(); 
             services.AddSingleton<IDbCommandBuilder, DbCommandBuilder>();
             services.AddSingleton<ITransaction, DefaultTransaction>();

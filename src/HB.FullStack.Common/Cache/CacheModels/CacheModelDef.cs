@@ -11,7 +11,7 @@ namespace HB.FullStack.Common.Cache.CacheModels
 
         public IList<PropertyInfo> Dimensions { get; private set; } = new List<PropertyInfo>();
 
-        public bool IsCacheable { get; internal set; }
+        //public bool IsCacheable { get; internal set; }
 
         public string Name { get; internal set; } = null!;
 

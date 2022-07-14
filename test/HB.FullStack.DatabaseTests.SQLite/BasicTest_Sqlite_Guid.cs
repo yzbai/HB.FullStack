@@ -427,10 +427,10 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
                 List<BookModel_Client> list3 = new List<BookModel_Client>();
 
                 int len = reader0.FieldCount;
-                DatabaseModelPropertyDef[] propertyDefs = new DatabaseModelPropertyDef[len];
+                DBModelPropertyDef[] propertyDefs = new DBModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DatabaseModelDef definition = Db.ModelDefFactory.GetDef<BookModel_Client>()!;
+                DBModelDef definition = Db.ModelDefFactory.GetDef<BookModel_Client>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -438,7 +438,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDatabaseModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
+                Func<IDBModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
@@ -469,7 +469,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DatabaseModelPropertyDef property = propertyDefs[i];
+                        DBModelPropertyDef property = propertyDefs[i];
 
                         object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
 

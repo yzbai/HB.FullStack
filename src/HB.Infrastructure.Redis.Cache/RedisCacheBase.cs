@@ -163,19 +163,6 @@ namespace HB.Infrastructure.Redis.Cache
             }
         }
 
-        /// <summary>
-        /// ThrowIfNotCacheEnabled
-        /// </summary>
-        /// <param name="modelDef"></param>
-
-        protected static void ThrowIfNotCacheEnabled(CacheModelDef modelDef)
-        {
-            if (!modelDef.IsCacheable)
-            {
-                throw CacheExceptions.NotEnabledForModel(modelDef.Name);
-            }
-        }
-
         protected static long? GetInitialExpireSeconds(long? absoluteExpireUnixSeconds, long? slideSeconds)
         {
             //参见Readme.txt

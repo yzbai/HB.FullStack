@@ -6,7 +6,7 @@ using HB.FullStack.Database.DatabaseModels;
 
 namespace HB.FullStack.Client.KeyValue
 {
-    public class KV : ClientGuidDatabaseModel
+    public class KV : TimelessGuidDBModel
     {
         public string Key { get; set; } = null!;
 

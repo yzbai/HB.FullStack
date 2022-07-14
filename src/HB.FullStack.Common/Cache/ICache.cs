@@ -11,11 +11,11 @@ namespace HB.FullStack.Cache
 
         void Dispose();
 
-        public static bool IsModelEnabled<TCacheModel>() where TCacheModel : ICacheModel, new()
+        public static bool IsModelCachable<T>()
         {
-            CacheModelDef modelDef = CacheModelDefFactory.Get<TCacheModel>();
+            CacheModelDef? modelDef = CacheModelDefFactory.Get<T>();
 
-            return modelDef.IsCacheable;
+            return modelDef != null;
         }
     }
 }

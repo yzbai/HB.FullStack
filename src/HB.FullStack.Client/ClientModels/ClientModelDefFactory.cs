@@ -14,7 +14,7 @@ namespace HB.FullStack.Client.ClientModels
     {
         private static readonly ConcurrentDictionary<Type, ClientModelDef> _clientModelDefs = new ConcurrentDictionary<Type, ClientModelDef>();
 
-        public static ClientModelDef? Get<T>() where T : Model
+        public static ClientModelDef? Get<T>() where T : IModel
         {
             Type type = typeof(T);
 
@@ -47,7 +47,7 @@ namespace HB.FullStack.Client.ClientModels
             return _clientModelDefs[type];
         }
 
-        public static void Register<T>(ClientModelDef def) where T : Model
+        public static void Register<T>(ClientModelDef def) where T : IModel
         {
             _ = _clientModelDefs.AddOrUpdate(typeof(T), def, (_, _) => def);
         }

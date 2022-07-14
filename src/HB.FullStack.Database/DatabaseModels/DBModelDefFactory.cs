@@ -10,14 +10,14 @@ using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database.DatabaseModels
 {
-    internal class DatabaseModelDefFactory : IDatabaseModelDefFactory
+    internal class DBModelDefFactory : IDBModelDefFactory
     {
         /// <summary>
         /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructModelDefs，后续只有read，没有write
         /// </summary>
-        private readonly IDictionary<Type, DatabaseModelDef> _defDict = new Dictionary<Type, DatabaseModelDef>();
+        private readonly IDictionary<Type, DBModelDef> _defDict = new Dictionary<Type, DBModelDef>();
 
-        public DatabaseModelDefFactory(IDatabaseEngine databaseEngine)
+        public DBModelDefFactory(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
@@ -38,7 +38,7 @@ namespace HB.FullStack.Database.DatabaseModels
 
             static bool modelTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(DatabaseModel)) && !t.IsAbstract;
+                return t.IsSubclassOf(typeof(DBModel)) && !t.IsAbstract;
             }
         }
 
@@ -135,19 +135,19 @@ namespace HB.FullStack.Database.DatabaseModels
             return resusltModelSchemaDict;
         }
 
-        public DatabaseModelDef? GetDef<T>() where T : DatabaseModel
+        public DBModelDef? GetDef<T>() where T : DBModel
         {
             return GetDef(typeof(T));
         }
 
-        public DatabaseModelDef? GetDef(Type? modelType)
+        public DBModelDef? GetDef(Type? modelType)
         {
             if (modelType == null)
             {
                 return null;
             }
 
-            if (_defDict.TryGetValue(modelType, out DatabaseModelDef? modelDef))
+            if (_defDict.TryGetValue(modelType, out DBModelDef? modelDef))
             {
                 return modelDef;
             }
@@ -155,7 +155,7 @@ namespace HB.FullStack.Database.DatabaseModels
             return null;
         }
 
-        private static DatabaseModelDef CreateModelDef(Type modelType, EngineType engineType, IDictionary<string, DatabaseModelSetting> modelSettingDict)
+        private static DBModelDef CreateModelDef(Type modelType, EngineType engineType, IDictionary<string, DatabaseModelSetting> modelSettingDict)
         {
             //GlobalSettings.Logger.LogInformation($"{modelType} : {modelType.GetHashCode()}");
 
@@ -164,17 +164,17 @@ namespace HB.FullStack.Database.DatabaseModels
                 throw DatabaseExceptions.ModelError(type: modelType.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
             }
 
-            DatabaseModelDef modelDef = new DatabaseModelDef
+            DBModelDef modelDef = new DBModelDef
             {
                 ModelType = modelType,
                 ModelFullName = modelType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
                 TableName = dbSchema.TableName,
                 
-                IsServerDatabaseModel = typeof(ServerDatabaseModel).IsAssignableFrom(modelType),
-                IsIdAutoIncrement = typeof(AutoIncrementIdDatabaseModel).IsAssignableFrom(modelType) || typeof(ClientAutoIncrementIdDatabaseModel).IsAssignableFrom(modelType),
-                IsIdGuid = typeof(GuidDatabaseModel).IsAssignableFrom(modelType) || typeof(ClientGuidDatabaseModel).IsAssignableFrom(modelType),
-                IsIdLong = typeof(LongIdDatabaseModel).IsAssignableFrom( modelType) || typeof(ClientLongIdDatabaseModel).IsAssignableFrom(modelType)
+                IsTimestampDBModel = typeof(TimestampDBModel).IsAssignableFrom(modelType),
+                IsIdAutoIncrement = typeof(TimestampAutoIncrementIdDBModel).IsAssignableFrom(modelType) || typeof(TimelessAutoIncrementIdDBModel).IsAssignableFrom(modelType),
+                IsIdGuid = typeof(TimestampGuidDBModel).IsAssignableFrom(modelType) || typeof(TimelessGuidDBModel).IsAssignableFrom(modelType),
+                IsIdLong = typeof(TimestampLongIdDBModel).IsAssignableFrom( modelType) || typeof(TimelessLongIdDBModel).IsAssignableFrom(modelType)
             };
 
             modelDef.DbTableReservedName = SqlHelper.GetReserved(modelDef.TableName!, engineType);
@@ -200,13 +200,13 @@ namespace HB.FullStack.Database.DatabaseModels
                         modelPropertyAttribute = new DatabaseModelPropertyAttribute();
                     }
 
-                    if (info.Name == nameof(ServerDatabaseModel.LastUser))
+                    if (info.Name == nameof(TimestampDBModel.LastUser))
                     {
                         modelPropertyAttribute.MaxLength = DefaultLengthConventions.MAX_LAST_USER_LENGTH;
                     }
                 }
 
-                DatabaseModelPropertyDef propertyDef = CreatePropertyDef(modelDef, info, modelPropertyAttribute, engineType);
+                DBModelPropertyDef propertyDef = CreatePropertyDef(modelDef, info, modelPropertyAttribute, engineType);
 
                 modelDef.FieldCount++;
 
@@ -222,9 +222,9 @@ namespace HB.FullStack.Database.DatabaseModels
             return modelDef;
         }
 
-        private static DatabaseModelPropertyDef CreatePropertyDef(DatabaseModelDef modelDef, PropertyInfo propertyInfo, DatabaseModelPropertyAttribute propertyAttribute, EngineType engineType)
+        private static DBModelPropertyDef CreatePropertyDef(DBModelDef modelDef, PropertyInfo propertyInfo, DatabaseModelPropertyAttribute propertyAttribute, EngineType engineType)
         {
-            DatabaseModelPropertyDef propertyDef = new DatabaseModelPropertyDef
+            DBModelPropertyDef propertyDef = new DBModelPropertyDef
             {
                 ModelDef = modelDef,
                 Name = propertyInfo.Name,
@@ -281,7 +281,7 @@ namespace HB.FullStack.Database.DatabaseModels
             return propertyDef;
         }
 
-        public IEnumerable<DatabaseModelDef> GetAllDefsByDatabase(string databaseName)
+        public IEnumerable<DBModelDef> GetAllDefsByDatabase(string databaseName)
         {
             return _defDict.Values.Where(def => databaseName.Equals(def.DatabaseName, GlobalSettings.ComparisonIgnoreCase));
         }

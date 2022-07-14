@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Cache;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Cache.CacheModels;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -294,74 +295,70 @@ for j = 1, modelNum do
 end
 ";
 
-//        /// <summary>
-//        /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
-//        /// argv: 3(model_count)
-//        /// </summary>
-//        public const string LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION = @"
-//local modelNum = tonumber(ARGV[1])
+        //        /// <summary>
+        //        /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
+        //        /// argv: 3(model_count)
+        //        /// </summary>
+        //        public const string LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION = @"
+        //local modelNum = tonumber(ARGV[1])
 
-//for j = 1, modelNum do
-//    local id = redis.call('get',KEYS[j])
+        //for j = 1, modelNum do
+        //    local id = redis.call('get',KEYS[j])
 
-//    if (id) then
+        //    if (id) then
 
-//        local data= redis.call('hget',id, 'dim')
+        //        local data= redis.call('hget',id, 'dim')
 
-//        if (not data) then
-//            redis.call('del', KEYS[1])
-//        else
-//            redis.call('del',id)
+        //        if (not data) then
+        //            redis.call('del', KEYS[1])
+        //        else
+        //            redis.call('del',id)
 
-//            if (data~='') then
-//                for i in string.gmatch(data, '%S+') do
-//                    redis.call('del', i)
-//                end
-//            end
-//        end
-//    end
-//end
-//";
+        //            if (data~='') then
+        //                for i in string.gmatch(data, '%S+') do
+        //                    redis.call('del', i)
+        //                end
+        //            end
+        //        end
+        //    end
+        //end
+        //";
 
-//        /// <summary>
-//        /// keys: idKey1, idKey2, idKey3
-//        /// argv: 3(model_num)
-//        /// </summary>
-//        public const string LUA_MODELS_REMOVE_FORECED_NO_VERSION = @"
-//local modelNum = tonumber(ARGV[1])
-//for j=1, modelNum do
+        //        /// <summary>
+        //        /// keys: idKey1, idKey2, idKey3
+        //        /// argv: 3(model_num)
+        //        /// </summary>
+        //        public const string LUA_MODELS_REMOVE_FORECED_NO_VERSION = @"
+        //local modelNum = tonumber(ARGV[1])
+        //for j=1, modelNum do
 
-//    local data=redis.call('hget', KEYS[j], 'dim')
+        //    local data=redis.call('hget', KEYS[j], 'dim')
 
-//    redis.call('del', KEYS[j])
+        //    redis.call('del', KEYS[j])
 
-//    if(data and data~='') then
-//        for i in string.gmatch(data, '%S+') do
-//            redis.call('del', i)
-//        end
-//    end
-//end
-//";
+        //    if(data and data~='') then
+        //        for i in string.gmatch(data, '%S+') do
+        //            redis.call('del', i)
+        //        end
+        //    end
+        //end
+        //";
 
         public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
         {
             Logger.LogInformation($"RedisCache初始化完成");
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TModel"></typeparam>
-        /// <param name="keyName">可以是primaryKey，也可以是dimensionKey</param>
-        /// <param name="keyValues"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
-            CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
-
             ThrowIf.Null(keyValues, nameof(keyValues));
-            ThrowIfNotCacheEnabled(modelDef);
+
+            CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
+
+            if(modelDef == null)
+            {
+                throw CacheExceptions.NotEnabledForModel(typeof(TModel).FullName);
+            }
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -414,10 +411,14 @@ end
         /// </summary>
         public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
-            CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
-
-            ThrowIfNotCacheEnabled(modelDef);
             ThrowIf.NullOrEmpty(models, nameof(models));
+
+            CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
+
+            if(modelDef == null)
+            {
+                throw CacheExceptions.NotEnabledForModel(typeof(TModel).FullName);
+            }
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -445,11 +446,11 @@ end
 
                     if (rt == 8)
                     {
-                        Logger.LogCacheSetTimestampConcurrency(modelDef.CacheInstanceName, modelDef.Name,"与已删除的缓存项留下的minTimestamp冲突", models.ElementAt(i));
+                        Logger.LogCacheSetTimestampConcurrency(modelDef.CacheInstanceName, modelDef.Name, "与已删除的缓存项留下的minTimestamp冲突", models.ElementAt(i));
                     }
                     else if (rt == 9)
                     {
-                        Logger.LogCacheSetTimestampConcurrency(modelDef.CacheInstanceName, modelDef.Name,"与已存在的缓存项Timestamp冲突", models.ElementAt(i));
+                        Logger.LogCacheSetTimestampConcurrency(modelDef.CacheInstanceName, modelDef.Name, "与已存在的缓存项Timestamp冲突", models.ElementAt(i));
                     }
                 }
 
@@ -469,10 +470,17 @@ end
             }
         }
 
-        public async Task RemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
+        public async Task RemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) //where TModel : ICacheModel, new()
         {
-            CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
-            ThrowIfNotCacheEnabled(modelDef);
+            CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
+            //ThrowIfNotCacheEnabled(modelDef);
+
+            if (modelDef == null)
+            {
+                Logger.LogWarning("尝试Remove一个没有启动Cache功能的Model {ModelName}, Key {KeyName}", typeof(TModel).Name, keyName);
+                return;
+            }
+
             ThrowIf.Null(keyValues, nameof(keyValues));
 
             List<RedisKey> redisKeys = new List<RedisKey>();
@@ -531,7 +539,7 @@ end
         //    }
         //}
 
-        private byte[] AddRemoveModelsRedisInfo<TModel>(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
+        private byte[] AddRemoveModelsRedisInfo<TModel>(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) //where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
         {
             byte[] loadedScript;
 
@@ -684,7 +692,7 @@ end
             {
                 return (null, false);
             }
-            
+
             List<TModel> models = new List<TModel>();
 
             foreach (RedisResult item in results)

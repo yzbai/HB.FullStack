@@ -47,11 +47,11 @@ namespace HB.FullStack.Database.DatabaseModels
         {
             return info.Name switch
             {
-                nameof(GuidDatabaseModel.Id) => new DatabaseModelPropertyAttribute(0),
-                nameof(ServerDatabaseModel.LastUser) => new DatabaseModelPropertyAttribute(1),
-                nameof(ServerDatabaseModel.Timestamp) => new DatabaseModelPropertyAttribute(2),
-                nameof(ServerDatabaseModel.Deleted) => new DatabaseModelPropertyAttribute(3),
-                //nameof(DatabaseModel.CreateTime) => new DatabaseModelPropertyAttribute(6),
+                nameof(TimestampGuidDBModel.Id) => new DatabaseModelPropertyAttribute(0),
+                nameof(TimestampDBModel.LastUser) => new DatabaseModelPropertyAttribute(1),
+                nameof(TimestampDBModel.Timestamp) => new DatabaseModelPropertyAttribute(2),
+                nameof(TimestampDBModel.Deleted) => new DatabaseModelPropertyAttribute(3),
+                //nameof(DBModel.CreateTime) => new DatabaseModelPropertyAttribute(6),
                 _ => null
             };
         }

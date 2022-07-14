@@ -11,9 +11,9 @@ namespace HB.FullStack.Database
     public class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly IDatabaseModelDefFactory _modelDefFactory;
+        private readonly IDBModelDefFactory _modelDefFactory;
 
-        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDatabaseModelDefFactory modelDefFactory)
+        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDBModelDefFactory modelDefFactory)
         {
             _databaseEngine = datbaseEngine;
             _modelDefFactory = modelDefFactory;
@@ -28,9 +28,9 @@ namespace HB.FullStack.Database
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DatabaseModel
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DBModel
         {
-            DatabaseModelDef modelDef = _modelDefFactory.GetDef<T>()!;
+            DBModelDef modelDef = _modelDefFactory.GetDef<T>()!;
 
             return BeginTransactionAsync(modelDef.DatabaseName!, isolationLevel);
         }

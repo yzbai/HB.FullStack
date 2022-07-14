@@ -7,7 +7,7 @@ using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DatabaseModels
 {
-    public abstract class DatabaseModel : Model
+    public abstract class DBModel : Model
     {
         /// <summary>
         /// 不是真正的删除，而是用Deleted=1表示删除。

@@ -6,7 +6,7 @@ using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DatabaseModels
 {
-    public abstract class ServerDatabaseModel : DatabaseModel, ICacheModel
+    public abstract class TimestampDBModel : DBModel, ICacheModel
     {
         //public int Version { get; set; } = -1;
 
@@ -23,13 +23,13 @@ namespace HB.FullStack.Database.DatabaseModels
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }
 
-    public abstract class LongIdDatabaseModel : ServerDatabaseModel
+    public abstract class TimestampLongIdDBModel : TimestampDBModel
     {
         [DatabaseModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
-    public abstract class AutoIncrementIdDatabaseModel : LongIdDatabaseModel
+    public abstract class TimestampAutoIncrementIdDBModel : TimestampLongIdDBModel
     {
         [AutoIncrementPrimaryKey]
         [DatabaseModelProperty(0)]
@@ -37,7 +37,7 @@ namespace HB.FullStack.Database.DatabaseModels
         public override long Id { get; set; } = -1;
     }
 
-    public abstract class FlackIdDatabaseModel : LongIdDatabaseModel
+    public abstract class TimestampFlackIdDBModel : TimestampLongIdDBModel
     {
         [PrimaryKey]
         [DatabaseModelProperty(0)]
@@ -46,7 +46,7 @@ namespace HB.FullStack.Database.DatabaseModels
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 
-    public abstract class GuidDatabaseModel : ServerDatabaseModel
+    public abstract class TimestampGuidDBModel : TimestampDBModel
     {
         [DatabaseModelProperty(0)]
         [NoEmptyGuid]

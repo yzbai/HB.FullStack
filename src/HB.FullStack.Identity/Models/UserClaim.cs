@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class UserClaim : GuidDatabaseModel
+    public class UserClaim : TimestampGuidDBModel
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User), false)]

@@ -66,12 +66,12 @@ namespace System
         {
             if (lst == null || !lst.Any())
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
             if (!lst.Any())
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return lst;
@@ -82,12 +82,12 @@ namespace System
         {
             if (lst == null)
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
             if (lst.Count == 0)
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return lst;
@@ -97,7 +97,7 @@ namespace System
         {
             if (!lst.Any())
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
             return lst;
@@ -115,7 +115,7 @@ namespace System
         {
             if (str.Length == 0)
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return str;
@@ -126,7 +126,7 @@ namespace System
         {
             if (lst == null || lst.Any(t => t == null))
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
             return lst;
@@ -137,7 +137,7 @@ namespace System
         {
             if (string.IsNullOrEmpty(o))
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
 #pragma warning disable CS8777 // net standard 2.0 不能良好识别 string.IsNullOrEmpty
@@ -161,7 +161,7 @@ namespace System
 
             if (!ValidationMethods.IsMobilePhone(mobile))
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return mobile;
@@ -176,7 +176,7 @@ namespace System
 
             if (!ValidationMethods.IsPassword(password))
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return password;
@@ -198,7 +198,7 @@ namespace System
 
             if (!ValidationMethods.IsLoginName(loginName))
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return loginName;
@@ -214,13 +214,13 @@ namespace System
                 }
                 else
                 {
-                    throw new ArgumentNullException($"Parameter:{ paramName}");
+                    throw new ArgumentNullException($"Parameter:{paramName}");
                 }
             }
 
             if (!ValidationMethods.IsEmail(email))
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return email;
@@ -231,7 +231,17 @@ namespace System
         {
             if (a == null && b != null || a != null && !a.Equals(b, GlobalSettings.Comparison))
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
+            }
+
+            return a;
+        }
+
+        public static int NotEqual(int a, int b, string paramName1, string paramName2)
+        {
+            if (a != b)
+            {
+                throw new ArgumentException($"Parameter1:{paramName1} 不等于 Parameter2:{paramName2}");
             }
 
             return a;
@@ -243,7 +253,7 @@ namespace System
         public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class
         {
             if (o == null)
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
 
             return o;
         }
@@ -251,11 +261,11 @@ namespace System
         public static T ThrowIfNullOrNotValid<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class, IValidatableObject
         {
             if (o == null)
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
 
             if (!o.IsValid())
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return o;
@@ -266,7 +276,7 @@ namespace System
         {
             if (string.IsNullOrEmpty(o))
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
 #pragma warning disable CS8777 // net standard 2.0 不能良好识别string.IsNullOrEmpty()
@@ -279,7 +289,7 @@ namespace System
         {
             if (dict == null || !dict.Any())
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
             return dict;
@@ -290,7 +300,7 @@ namespace System
         {
             if (lst == null || !lst.Any())
             {
-                throw new ArgumentNullException($"Parameter:{ paramName}");
+                throw new ArgumentNullException($"Parameter:{paramName}");
             }
 
             return lst;
@@ -301,7 +311,7 @@ namespace System
         {
             if (a == null && b != null || a != null && !a.Equals(b, GlobalSettings.Comparison))
             {
-                throw new ArgumentException($"Parameter:{ paramName}");
+                throw new ArgumentException($"Parameter:{paramName}");
             }
 
             return a;

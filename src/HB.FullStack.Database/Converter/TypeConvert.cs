@@ -113,7 +113,7 @@ namespace HB.FullStack.Database.Converter
         /// <summary>
         /// 将DataReader.GetValue(i)得到的数据库值，转换为Model的Type值. 逻辑同ModelMapperCreator一致
         /// </summary>
-        public static object? DbValueToTypeValue(object dbValue, DatabaseModelPropertyDef propertyDef, EngineType engineType) //Type targetType)
+        public static object? DbValueToTypeValue(object dbValue, DBModelPropertyDef propertyDef, EngineType engineType) //Type targetType)
         {
             Type dbValueType = dbValue.GetType();
 
@@ -170,7 +170,7 @@ namespace HB.FullStack.Database.Converter
         /// <summary>
         /// propertyDef为null，则不考虑这个属性自定义的TypeConverter
         /// </summary>
-        public static object TypeValueToDbValue(object? typeValue, DatabaseModelPropertyDef? propertyDef, EngineType engineType)
+        public static object TypeValueToDbValue(object? typeValue, DBModelPropertyDef? propertyDef, EngineType engineType)
         {
             if (typeValue == null)
             {
@@ -216,7 +216,7 @@ namespace HB.FullStack.Database.Converter
             }
 
             Type type = typeValue.GetType();
-            DatabaseModelPropertyDef propertyDef = new DatabaseModelPropertyDef
+            DBModelPropertyDef propertyDef = new DBModelPropertyDef
             {
                 Type = type,
                 NullableUnderlyingType = Nullable.GetUnderlyingType(type),
@@ -244,7 +244,7 @@ namespace HB.FullStack.Database.Converter
             return SqlHelper.GetQuoted(statement);
         }
 
-        public static DbType TypeToDbType(DatabaseModelPropertyDef propertyDef, EngineType engineType)
+        public static DbType TypeToDbType(DBModelPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性的TypeConvert
             if (propertyDef.TypeConverter != null)
@@ -271,7 +271,7 @@ namespace HB.FullStack.Database.Converter
             throw DatabaseExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
-        public static string TypeToDbTypeStatement(DatabaseModelPropertyDef propertyDef, EngineType engineType)
+        public static string TypeToDbTypeStatement(DBModelPropertyDef propertyDef, EngineType engineType)
         {
             //查看属性自定义
             if (propertyDef.TypeConverter != null)

@@ -13,13 +13,13 @@ using static System.FormattableString;
 
 namespace HB.FullStack.Database.SQL
 {
-    public class WhereExpression<T> where T : DatabaseModel, new()
+    public class WhereExpression<T> where T : DBModel, new()
     {
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;
         private readonly List<string> _orderByProperties = new List<string>();
         private readonly EngineType _engineType;
-        private readonly IDatabaseModelDefFactory _modelDefFactory;
+        private readonly IDBModelDefFactory _modelDefFactory;
         private readonly ISQLExpressionVisitor _expressionVisitor;
         private string _whereString = string.Empty;
         private string? _orderByString;
@@ -30,7 +30,7 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        internal WhereExpression(EngineType engineType, IDatabaseModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
+        internal WhereExpression(EngineType engineType, IDBModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
         {
             _engineType = engineType;
             _modelDefFactory = modelDefFactory;
@@ -547,7 +547,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> AddOrderAndLimits(int? page, int? perPage, string? orderBy)
         {
-            DatabaseModelDef modelDef = _modelDefFactory.GetDef<T>()!;
+            DBModelDef modelDef = _modelDefFactory.GetDef<T>()!;
 
             if (orderBy.IsNotNullOrEmpty())
             {

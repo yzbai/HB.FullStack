@@ -15,9 +15,9 @@ using HB.FullStack.Common;
 namespace HB.FullStack.Identity
 {
     //TODO: 先忽略掉UserRole这种关系表的Repo好了。
-    public class UserRoleRepo : ModelRepository<UserRole>
+    public class Deleted_UserRoleRepo : ModelRepository<UserRole>
     {
-        public UserRoleRepo(ILogger<UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public Deleted_UserRoleRepo(ILogger<Deleted_UserRoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(UserRole sender, DatabaseWriteEventArgs args)

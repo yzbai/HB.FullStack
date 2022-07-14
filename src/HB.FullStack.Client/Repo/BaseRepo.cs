@@ -22,7 +22,7 @@ using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Client
 {
-    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DatabaseModel, new();
+    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DBModel, new();
 
     public abstract class BaseRepo
     {
@@ -83,10 +83,10 @@ namespace HB.FullStack.Client
         }
     }
 
-    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DatabaseModel//, new() where TRes : ApiResource
+    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DBModel//, new() where TRes : ApiResource
     {
         private readonly ILogger _logger;
-        private readonly DatabaseModelDef _modelDef = null!;
+        private readonly DBModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
 
@@ -389,7 +389,7 @@ namespace HB.FullStack.Client
                 {
                     OfflineHistory history = new OfflineHistory
                     {
-                        ModelId = (model as LongIdDatabaseModel)!.Id.ToString(CultureInfo.InvariantCulture),
+                        ModelId = (model as TimestampLongIdDBModel)!.Id.ToString(CultureInfo.InvariantCulture),
                         ModelFullName = _modelDef.ModelFullName,
                         Operation = dbOperation,
                         OperationTime = model.LastTime,
@@ -405,7 +405,7 @@ namespace HB.FullStack.Client
                 {
                     OfflineHistory history = new OfflineHistory
                     {
-                        ModelId = (model as GuidDatabaseModel)!.Id.ToString(),
+                        ModelId = (model as TimestampGuidDBModel)!.Id.ToString(),
                         ModelFullName = _modelDef.ModelFullName,
                         Operation = dbOperation,
                         OperationTime = model.LastTime,

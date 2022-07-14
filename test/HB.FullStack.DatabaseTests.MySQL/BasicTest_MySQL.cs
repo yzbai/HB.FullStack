@@ -403,10 +403,10 @@ namespace HB.FullStack.DatabaseTests
                 List<BookModel> list3 = new List<BookModel>();
 
                 int len = reader0.FieldCount;
-                DatabaseModelPropertyDef[] propertyDefs = new DatabaseModelPropertyDef[len];
+                DBModelPropertyDef[] propertyDefs = new DBModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DatabaseModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
+                DBModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -414,7 +414,7 @@ namespace HB.FullStack.DatabaseTests
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDatabaseModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
+                Func<IDBModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookModel), reader0);
@@ -444,7 +444,7 @@ namespace HB.FullStack.DatabaseTests
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DatabaseModelPropertyDef property = propertyDefs[i];
+                        DBModelPropertyDef property = propertyDefs[i];
 
                         object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, EngineType.MySQL);
 

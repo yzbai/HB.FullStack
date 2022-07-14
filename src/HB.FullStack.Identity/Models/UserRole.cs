@@ -8,7 +8,8 @@ namespace HB.FullStack.Identity.Models
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
-    public class UserRole : GuidDatabaseModel
+    //TODO: 把关系表定义到各个相关实体中，而不单独设置关系Model
+    public class UserRole : TimelessFlackIdDBModel
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User), false)]
@@ -18,9 +19,7 @@ namespace HB.FullStack.Identity.Models
         [ForeignKey(typeof(Role), false)]
         public Guid RoleId { get; set; }
 
-        public UserRole()
-        {
-        }
+        public UserRole() { }
 
         public UserRole(Guid userId, Guid roleId)
         {

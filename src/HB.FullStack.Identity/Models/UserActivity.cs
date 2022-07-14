@@ -4,7 +4,7 @@ using System;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class UserActivity : GuidDatabaseModel
+    public class UserActivity : TimestampGuidDBModel
     {
         [ForeignKey(typeof(User), false)]
         public Guid? UserId { get; set; }

@@ -29,6 +29,8 @@ namespace HB.FullStack.Identity
             IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(ur => ur.RoleId == sender.Id, null).ConfigureAwait(false);
 
             InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList());
+
+            //TODO: 解决方案3：删除某个前缀的所有key
         }
 
         public Task<IEnumerable<Role>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
