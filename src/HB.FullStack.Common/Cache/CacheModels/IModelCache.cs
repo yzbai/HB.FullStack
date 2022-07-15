@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace HB.FullStack.Common.Cache.CacheModels
+namespace HB.FullStack.Common.Cache
 {
     /// <summary>
     /// string,int,generic 都可以存储空值

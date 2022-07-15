@@ -10,7 +10,7 @@ using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Common.Cache.CacheItems
+namespace HB.FullStack.Common.Cache
 {
     /// <summary>
     /// 这里的timestamp表明数据的LastTime，类似version

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Cache.CacheModels
+namespace HB.FullStack.Common.Cache
 {
 
     /// <summary>

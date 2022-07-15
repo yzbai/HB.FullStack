@@ -1,9 +1,7 @@
-﻿using HB.FullStack.Common.Cache.CachedCollectionItems;
-using HB.FullStack.Common.Cache.CacheItems;
-using HB.FullStack.Common.Cache.CacheModels;
+﻿
 
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Common.Cache
 {
     public interface ICache : IModelCache2, ITimestampCache, ICollectionCache
     {

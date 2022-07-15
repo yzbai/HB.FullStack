@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Cache.CachedCollectionItems
+namespace HB.FullStack.Common.Cache
 {
     public static class ICollectionCacheExtension
     {

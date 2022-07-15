@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Cache;
-
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Common.Cache.CachedCollectionItems
+namespace HB.FullStack.Common.Cache
 {
     public static class CachedCollectionItemExtensions
     {

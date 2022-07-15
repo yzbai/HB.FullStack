@@ -1,23 +1,15 @@
-﻿using HB.FullStack.Common;
-using HB.FullStack.Common.Cache.CacheModels;
-
-using Microsoft.Extensions.Caching.Distributed;
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Common.Cache.CachedCollectionItems
+
+namespace HB.FullStack.Common.Cache
 {
     /// <summary>
     /// string,int,generic 都可以存储空值
-    /// Model操作不可以
+    /// Model操作不可以 
     /// </summary>
     public interface ICollectionCache
     {

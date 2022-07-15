@@ -8,7 +8,7 @@ using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Common.Cache.CacheItems
+namespace HB.FullStack.Common.Cache
 {
     public static class CachedItemExtensions
     {

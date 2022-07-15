@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.Common.Cache.CacheItems
+namespace HB.FullStack.Common.Cache
 {
     /// <summary>
     /// 代表一条缓存
