@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Memory;
@@ -22,7 +23,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             IDatabase database,
             ICache cache,
             IMemoryLockManager memoryLockManager,
-            ILogger logger) where TModel : ICacheModel, new()
+            ILogger logger) where TModel : ITimestampModel, new()
         {
             if (!ICache.IsModelCachable<TModel>())
             {
@@ -107,7 +108,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             }
         }
 
-        private static void SetCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ICacheModel, new()
+        private static void SetCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ITimestampModel, new()
         {
             #region 普通缓存，加锁的做法
             //using IDistributedLock distributedLock = await _lockManager.LockModelsAsync(models, OccupiedTime, PatienceTime).ConfigureAwait(false);
@@ -140,7 +141,7 @@ namespace HB.FullStack.Repository.CacheStrategies
 
         }
 
-        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) //where TModel : ICacheModel, new()
+        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) //where TModel : ITimestampModel, new()
         {
             cache.RemoveModelsAsync(models).SafeFireAndForget(OnException);
         }

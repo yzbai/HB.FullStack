@@ -21,7 +21,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             where TResult : class
         {
             //Cache First
-            TResult? result = await cache.GetAsync(cacheItem).ConfigureAwait(false);
+            TResult? result = await cache.GetAsync<TResult>(cacheItem).ConfigureAwait(false);
 
             if (result != null)
             {
@@ -68,7 +68,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             }
         }
 
-        public static void InvalidateCache(CachedItem cachedItem, ICache cache)
+        public static void InvalidateCache(ICachedItem cachedItem, ICache cache)
         {
             cache.RemoveAsync(cachedItem).SafeFireAndForget(OnException);
         }
@@ -79,7 +79,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             cache.SetAsync(cachedItem).SafeFireAndForget(OnException);
         }
 
-        internal static void InvalidateCache(IEnumerable<CachedItem> cachedItems, ICache cache)
+        internal static void InvalidateCache(IEnumerable<ICachedItem> cachedItems, ICache cache)
         {
             cache.RemoveAsync(cachedItems).SafeFireAndForget(OnException);
         }

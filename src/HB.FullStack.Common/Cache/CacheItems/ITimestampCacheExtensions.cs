@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Globalization;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -78,7 +72,7 @@ namespace HB.FullStack.Common.Cache
         /// <summary>
         /// timestamp是ICacheModel.Timestamp
         /// </summary>
-        public static async Task<bool> SetAsync<T>(this ICache cache, string key, T value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default) where T : class
+        public static async Task<bool> SetAsync<T>(this ICache cache, string key, T value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
             try
             {
@@ -92,7 +86,7 @@ namespace HB.FullStack.Common.Cache
             }
         }
 
-        public static async Task<T?> GetAsync<T>(this ICache cache, string key, CancellationToken token = default) where T : class
+        public static async Task<T?> GetAsync<T>(this ICache cache, string key, CancellationToken token = default)
         {
             try
             {

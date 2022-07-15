@@ -2,12 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
-using HB.FullStack.Common.Cache;
 using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DBModels
 {
-    public abstract class TimestampDBModel : DBModel, ICacheModel
+    public abstract class TimestampDBModel : DBModel, ITimestampModel
     {
         //public int Version { get; set; } = -1;
 
@@ -23,9 +22,6 @@ namespace HB.FullStack.Database.DBModels
 
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }
-
-
-
 
     public abstract class TimestampLongIdDBModel : TimestampDBModel, ILongIdModel
     {

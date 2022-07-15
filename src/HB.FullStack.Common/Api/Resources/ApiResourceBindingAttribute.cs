@@ -1,9 +1,10 @@
-﻿using HB.FullStack.Common.Api;
-
-using System;
+﻿using System;
 
 namespace HB.FullStack.Common.Api
 {
+    /// <summary>
+    /// 绑定到Endpoint
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ApiResourceBindingAttribute : Attribute
     {

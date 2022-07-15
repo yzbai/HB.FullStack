@@ -28,4 +28,10 @@ namespace HB.FullStack.Common
     {
         long Id { get; set; }
     }
+
+    public interface ITimestampModel : IModel
+    {
+        //int Version { get; set; }
+        long Timestamp { get; set; }
+    }
 }

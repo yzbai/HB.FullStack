@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -12,14 +10,14 @@ namespace HB.FullStack.Common.Cache
 {
     public static class CachedItemExtensions
     {
-        public static Task<TResult?> GetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task<TResult?> GetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default)
         {
             ThrowOnEmptyCacheKey(cachedItem);
 
             return cache.GetAsync<TResult>(cachedItem.CacheKey, cancellationToken);
         }
 
-        public static Task<bool> SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default) where TResult : class
+        public static Task<bool> SetAsync<TResult>(this ICache cache, CachedItem<TResult> cachedItem, CancellationToken cancellationToken = default)
         {
             ThrowOnEmptyCacheKey(cachedItem);
             ThrowOnNullCacheValue(cachedItem);
@@ -37,19 +35,19 @@ namespace HB.FullStack.Common.Cache
                 cancellationToken);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, CachedItem cachedItem)
+        public static Task<bool> RemoveAsync(this ICache cache, ICachedItem cachedItem)
         {
             ThrowOnEmptyCacheKey(cachedItem);
 
             return cache.RemoveAsync(cachedItem.CacheKey);
         }
 
-        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<CachedItem> cachedItems)
+        public static Task<bool> RemoveAsync(this ICache cache, IEnumerable<ICachedItem> cachedItems)
         {
             return cache.RemoveAsync(cachedItems.Select(item => item.CacheKey).ToArray());
         }
 
-        private static void ThrowOnEmptyCacheKey(CachedItem cachedItem)
+        private static void ThrowOnEmptyCacheKey(ICachedItem cachedItem)
         {
             if (string.IsNullOrEmpty(cachedItem?.CacheKey))
             {
@@ -57,7 +55,7 @@ namespace HB.FullStack.Common.Cache
             }
         }
 
-        private static void ThrowOnNullCacheValue<TResult>(CachedItem<TResult> cachedItem) where TResult : class
+        private static void ThrowOnNullCacheValue<TResult>(CachedItem<TResult> cachedItem)
         {
             if (cachedItem.CacheValue == null)
             {
@@ -65,7 +63,7 @@ namespace HB.FullStack.Common.Cache
             }
         }
 
-        private static void ThrowOnEmptyTimestamp(CachedItem cachedItem)
+        private static void ThrowOnEmptyTimestamp(ICachedItem cachedItem)
         {
             if (cachedItem.Timestamp <= 0)
             {

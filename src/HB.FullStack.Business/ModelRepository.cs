@@ -26,8 +26,8 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// Cache架构策略可以参考笔记
     /// </summary>
-    /// <typeparam name="TDatabaseModel"></typeparam>
-    public abstract class ModelRepository<TDatabaseModel> where TDatabaseModel : TimestampDBModel, new()
+    /// <typeparam name="TMainDBModel"></typeparam>
+    public abstract class ModelRepository<TMainDBModel> where TMainDBModel : TimestampDBModel, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
         protected ILogger Logger { get; }
@@ -325,21 +325,21 @@ namespace HB.FullStack.Repository
 
         #region Model Cache Strategy
 
-        protected async Task<TDatabaseModel?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDatabaseReader, Task<TDatabaseModel?>> dbRetrieve)
+        protected async Task<TMainDBModel?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDatabaseReader, Task<TMainDBModel?>> dbRetrieve)
         {
-            IEnumerable<TDatabaseModel>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<TDatabaseModel>(
+            IEnumerable<TMainDBModel>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<TMainDBModel>(
                 keyName,
                 new object[] { keyValue },
                 async dbReader =>
                 {
-                    TDatabaseModel? single = await dbRetrieve(dbReader).ConfigureAwait(false);
+                    TMainDBModel? single = await dbRetrieve(dbReader).ConfigureAwait(false);
 
                     if (single == null)
                     {
-                        return Array.Empty<TDatabaseModel>();
+                        return Array.Empty<TMainDBModel>();
                     }
 
-                    return new TDatabaseModel[] { single };
+                    return new TMainDBModel[] { single };
                 },
                 Database,
                 Cache,
@@ -348,16 +348,16 @@ namespace HB.FullStack.Repository
 
             if (results.IsNullOrEmpty())
             {
-                Logger.LogDebug("Repo中没有找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TDatabaseModel).Name, keyName, keyValue);
+                Logger.LogDebug("Repo中没有找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TMainDBModel).Name, keyName, keyValue);
                 return null;
             }
 
-            Logger.LogDebug("Repo中 找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TDatabaseModel).Name, keyName, keyValue);
+            Logger.LogDebug("Repo中 找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TMainDBModel).Name, keyName, keyValue);
 
             return results.ElementAt(0);
         }
 
-        protected Task<IEnumerable<TDatabaseModel>> GetUsingCacheAsideAsync(string keyName, IEnumerable keyValues, Func<IDatabaseReader, Task<IEnumerable<TDatabaseModel>>> dbRetrieve)
+        protected Task<IEnumerable<TMainDBModel>> GetUsingCacheAsideAsync(string keyName, IEnumerable keyValues, Func<IDatabaseReader, Task<IEnumerable<TMainDBModel>>> dbRetrieve)
         {
             return ModelCacheStrategy.GetUsingCacheAsideAsync(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
@@ -376,12 +376,12 @@ namespace HB.FullStack.Repository
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
-        public void InvalidateCache(CachedItem cachedItem)
+        public void InvalidateCache(ICachedItem cachedItem)
         {
             CachedItemCacheStrategy.InvalidateCache(cachedItem, Cache);
         }
 
-        public void InvalidateCache(IEnumerable<CachedItem> cachedItems)
+        public void InvalidateCache(IEnumerable<ICachedItem> cachedItems)
         {
             CachedItemCacheStrategy.InvalidateCache(cachedItems, Cache);
         }

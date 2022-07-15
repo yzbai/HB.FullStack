@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Cache;
 
 using Microsoft.Extensions.Logging;
@@ -347,7 +348,7 @@ end
             Logger.LogInformation($"RedisCache初始化完成");
         }
 
-        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : ICacheModel, new()
+        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : ITimestampModel, new()
         {
             ThrowIf.Null(keyValues, nameof(keyValues));
 
@@ -407,7 +408,7 @@ end
         /// //TODO:并不把models作为一个整体看待，里面有的可能会因为timestamp冲突而不成功。
         /// 需要改变吗？
         /// </summary>
-        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : ICacheModel, new()
+        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : ITimestampModel, new()
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
 
@@ -468,7 +469,7 @@ end
             }
         }
 
-        public async Task RemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) //where TModel : ICacheModel, new()
+        public async Task RemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) //where TModel : ITimestampModel, new()
         {
             CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
             //ThrowIfNotCacheEnabled(modelDef);
@@ -537,7 +538,7 @@ end
         //    }
         //}
 
-        private byte[] AddRemoveModelsRedisInfo<TModel>(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) //where TModel : FullStack.Common.Cache.CacheModels.ICacheModel, new()
+        private byte[] AddRemoveModelsRedisInfo<TModel>(string keyName, IEnumerable keyValues, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) //where TModel : FullStack.Common.Cache.CacheModels.ITimestampModel, new()
         {
             byte[] loadedScript;
 
@@ -633,7 +634,7 @@ end
             return loadedScript;
         }
 
-        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ICacheModel, new()
+        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ITimestampModel, new()
         {
             /// keys: model1_idKey, model1_dimensionkey1, model1_dimensionkey2, model1_dimensionkey3, model2_idKey, model2_dimensionkey1, model2_dimensionkey2, model2_dimensionkey3
             /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_timestamp, model1_dimensionKeyJoinedString, model2_data, model2_timestamp, model2_dimensionKeyJoinedString
@@ -677,7 +678,7 @@ end
             }
         }
 
-        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ICacheModel, new()
+        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ITimestampModel, new()
         {
             if (result.IsNull)
             {
