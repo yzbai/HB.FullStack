@@ -1,13 +1,11 @@
-﻿using HB.FullStack.Cache;
-
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+
+using HB.FullStack.Common.Cache;
+
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.WebApi
 {

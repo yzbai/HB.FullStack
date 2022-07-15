@@ -1,24 +1,17 @@
-﻿using HB.FullStack.Cache;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using HB.FullStack.Common;
-using HB.FullStack.Common.Cache.CachedCollectionItems;
-using HB.FullStack.Common.Cache.CacheItems;
-using HB.FullStack.Common.Cache.CacheModels;
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DBModels;
-using HB.FullStack.Database.SQL;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository.CacheStrategies;
 
 using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace HB.FullStack.Repository
 {

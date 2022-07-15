@@ -1,14 +1,15 @@
-﻿using HB.FullStack.Database;
+﻿using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using HB.FullStack.Identity.Models;
-using System;
-using HB.FullStack.Repository;
-using HB.FullStack.Cache;
-using HB.FullStack.Lock.Memory;
-using HB.FullStack.Common;
+
+using HB.FullStack.Common.Cache;
+using HB.FullStack.Database;
 using HB.FullStack.Database.DBModels;
+using HB.FullStack.Identity.Models;
+using HB.FullStack.Lock.Memory;
+using HB.FullStack.Repository;
+
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Identity
 {
@@ -26,7 +27,7 @@ namespace HB.FullStack.Identity
                 //大部分都是一个，用不着
                 //Parallel.ForEach(userClaims, (userClaim) => InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId)));
 
-                foreach(var userClaim in userClaims)
+                foreach (var userClaim in userClaims)
                 {
                     InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
                 }

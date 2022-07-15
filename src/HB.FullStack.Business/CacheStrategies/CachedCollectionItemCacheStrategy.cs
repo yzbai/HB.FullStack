@@ -1,15 +1,15 @@
-﻿using HB.FullStack.Cache;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using AsyncAwaitBestPractices;
+
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
-using HB.FullStack.Database.DBModels;
-using HB.FullStack.Common.Cache.CachedCollectionItems;
 
 namespace HB.FullStack.Repository.CacheStrategies
 {

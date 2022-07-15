@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using HB.FullStack.Cache;
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DBModels;
 using HB.FullStack.Identity.Models;

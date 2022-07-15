@@ -1,16 +1,15 @@
-﻿using HB.FullStack.Identity.Models;
-using HB.FullStack.Database;
-using HB.FullStack.Database.SQL;
-using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HB.FullStack.KVStore;
-using HB.FullStack.Repository;
-using Microsoft.Extensions.Logging;
-using HB.FullStack.Cache;
-using HB.FullStack.Lock.Memory;
+
+using HB.FullStack.Common.Cache;
+using HB.FullStack.Database;
 using HB.FullStack.Database.DBModels;
+using HB.FullStack.Identity.Models;
+using HB.FullStack.Lock.Memory;
+using HB.FullStack.Repository;
+
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Identity
 {

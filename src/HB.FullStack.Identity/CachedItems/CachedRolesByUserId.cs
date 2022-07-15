@@ -1,16 +1,8 @@
-﻿using HB.FullStack.Identity.Models;
-using HB.FullStack.Cache;
-
-using Microsoft.Extensions.Caching.Distributed;
-
-using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using HB.FullStack.Common.Cache.CacheItems;
+
+using HB.FullStack.Common.Cache;
+using HB.FullStack.Identity.Models;
 
 namespace HB.FullStack.Identity
 {

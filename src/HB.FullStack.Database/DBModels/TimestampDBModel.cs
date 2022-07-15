@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
-using HB.FullStack.Common.Cache.CacheModels;
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DBModels

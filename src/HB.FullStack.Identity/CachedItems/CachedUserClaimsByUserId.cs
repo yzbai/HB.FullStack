@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
-using HB.FullStack.Common.Cache.CacheItems;
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Identity.Models;
 
 namespace HB.FullStack.Identity

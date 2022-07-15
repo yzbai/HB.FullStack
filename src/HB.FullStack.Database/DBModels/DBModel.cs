@@ -1,9 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-using HB.FullStack.Common;
-using HB.FullStack.Common.Cache.CacheModels;
-using HB.FullStack.Common.IdGen;
+﻿using HB.FullStack.Common;
 
 namespace HB.FullStack.Database.DBModels
 {
@@ -18,6 +13,8 @@ namespace HB.FullStack.Database.DBModels
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1040:Avoid empty interfaces", Justification = "<Pending>")]
     public interface IAutoIncrementId
     {
+
+
 
     }
 }

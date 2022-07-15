@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Cache;
-using HB.FullStack.Common.Cache.CacheItems;
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DBModels;
 using HB.FullStack.Lock.Memory;
