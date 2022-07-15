@@ -266,7 +266,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 针对Client
         /// </summary>
-        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DBModelDef modelDef, WhereExpression<T> whereExpression) where T : TimeLessDBModel, new()
+        public EngineCommand CreateDeleteCommand<T>(EngineType engineType, DBModelDef modelDef, WhereExpression<T> whereExpression) where T : TimelessDBModel, new()
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
 

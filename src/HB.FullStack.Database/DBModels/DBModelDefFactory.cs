@@ -185,7 +185,7 @@ namespace HB.FullStack.Database.DBModels
 
             foreach (PropertyInfo info in orderedProperties)
             {
-                DatabaseModelPropertyAttribute? modelPropertyAttribute = info.GetCustomAttribute<DatabaseModelPropertyAttribute>(true);
+                DBModelPropertyAttribute? modelPropertyAttribute = info.GetCustomAttribute<DBModelPropertyAttribute>(true);
 
                 if (modelPropertyAttribute == null)
                 {
@@ -197,7 +197,7 @@ namespace HB.FullStack.Database.DBModels
                     }
                     else
                     {
-                        modelPropertyAttribute = new DatabaseModelPropertyAttribute();
+                        modelPropertyAttribute = new DBModelPropertyAttribute();
                     }
 
                     if (info.Name == nameof(TimestampDBModel.LastUser))
@@ -222,7 +222,7 @@ namespace HB.FullStack.Database.DBModels
             return modelDef;
         }
 
-        private static DBModelPropertyDef CreatePropertyDef(DBModelDef modelDef, PropertyInfo propertyInfo, DatabaseModelPropertyAttribute propertyAttribute, EngineType engineType)
+        private static DBModelPropertyDef CreatePropertyDef(DBModelDef modelDef, PropertyInfo propertyInfo, DBModelPropertyAttribute propertyAttribute, EngineType engineType)
         {
             DBModelPropertyDef propertyDef = new DBModelPropertyDef
             {

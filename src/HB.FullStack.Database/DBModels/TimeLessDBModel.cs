@@ -6,21 +6,21 @@ using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Database.DBModels
 {
-    public abstract class TimeLessDBModel : DBModel
+    public abstract class TimelessDBModel : DBModel
     {
 
     }
 
-    public abstract class TimelessLongIdDBModel : TimeLessDBModel, ILongIdModel
+    public abstract class TimelessLongIdDBModel : TimelessDBModel, ILongIdModel
     {
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
     public abstract class TimelessAutoIncrementIdDBModel : TimelessLongIdDBModel, IAutoIncrementId
     {
         [AutoIncrementPrimaryKey]
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         [CacheModelKey]
         public override long Id { get; set; } = -1;
     }
@@ -28,15 +28,15 @@ namespace HB.FullStack.Database.DBModels
     public abstract class TimelessFlackIdDBModel : TimelessLongIdDBModel
     {
         [PrimaryKey]
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 
-    public abstract class TimelessGuidDBModel : TimeLessDBModel, IGuidIdModel
+    public abstract class TimelessGuidDBModel : TimelessDBModel, IGuidIdModel
     {
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         [NoEmptyGuid]
         [PrimaryKey]
         [CacheModelKey]

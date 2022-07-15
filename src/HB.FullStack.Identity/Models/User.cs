@@ -24,7 +24,7 @@ namespace HB.FullStack.Identity.Models
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [DatabaseModelProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
+        [DBModelProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -32,14 +32,14 @@ namespace HB.FullStack.Identity.Models
         /// 唯一
         /// </summary>
         [Mobile]
-        [DatabaseModelProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
+        [DBModelProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [DatabaseModelProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
+        [DBModelProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
         public string? Email { get; set; }
 
         /// <summary>

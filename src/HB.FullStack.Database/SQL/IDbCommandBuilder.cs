@@ -25,7 +25,7 @@ namespace HB.FullStack.Database
         EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DBModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DBModel, new();
         EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DBModel, new();
         EngineCommand CreateDeleteCommand<T>(EngineType engineType, DBModelDef modelDef, T model, long oldTimestamp) where T : DBModel, new();
-        EngineCommand CreateDeleteCommand<T>(EngineType engineType, DBModelDef modelDef, WhereExpression<T> whereExpression) where T : TimeLessDBModel, new();
+        EngineCommand CreateDeleteCommand<T>(EngineType engineType, DBModelDef modelDef, WhereExpression<T> whereExpression) where T : TimelessDBModel, new();
         EngineCommand CreateIsTableExistCommand(EngineType engineType, string databaseName, string tableName);
         EngineCommand CreateRetrieveCommand<T>(EngineType engineType, DBModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DBModel, new();
         EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DBModelDef[] returnModelDefs)

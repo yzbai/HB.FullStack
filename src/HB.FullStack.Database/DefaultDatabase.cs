@@ -851,7 +851,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimeLessDBModel, new()
+        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDBModel, new()
         {
             DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -1075,7 +1075,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// AddOrUpdate,即override,不检查Timestamp
         /// </summary>
-        public async Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimeLessDBModel, new()
+        public async Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDBModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -1397,7 +1397,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimeLessDBModel, new()
+        public async Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDBModel, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 

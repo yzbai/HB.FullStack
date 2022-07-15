@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
 
         Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new();
 
-        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimeLessDBModel, new();
+        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDBModel, new();
 
         Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new();
 
@@ -37,8 +37,8 @@ namespace HB.FullStack.Database
 
         Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new();
 
-        Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimeLessDBModel, new();
+        Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDBModel, new();
 
-        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimeLessDBModel, new();
+        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDBModel, new();
     }
 }

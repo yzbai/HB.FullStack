@@ -14,20 +14,20 @@ namespace HB.FullStack.Identity.Models
 
         public string? Ip { get; set; }
 
-        [DatabaseModelProperty(MaxLength = LengthConventions.MAX_URL_LENGTH)]
+        [DBModelProperty(MaxLength = LengthConventions.MAX_URL_LENGTH)]
         public string? Url { get; set; }
 
-        [DatabaseModelProperty(MaxLength = 10)]
+        [DBModelProperty(MaxLength = 10)]
         public string? HttpMethod { get; set; }
 
-        [DatabaseModelProperty(MaxLength = LengthConventions.MAX_ARGUMENTS_LENGTH)]
+        [DBModelProperty(MaxLength = LengthConventions.MAX_ARGUMENTS_LENGTH)]
         public string? Arguments { get; set; }
 
         public int? ResultStatusCode { get; set; }
 
         public string? ResultType { get; set; }
 
-        [DatabaseModelProperty(MaxLength = LengthConventions.MAX_RESULT_ERROR_LENGTH)]
+        [DBModelProperty(MaxLength = LengthConventions.MAX_RESULT_ERROR_LENGTH)]
         public string? ResultError { get; set; }
     }
 }

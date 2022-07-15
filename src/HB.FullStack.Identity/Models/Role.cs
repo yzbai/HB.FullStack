@@ -4,15 +4,15 @@ namespace HB.FullStack.Identity.Models
 {
     public class Role : TimestampGuidDBModel
     {
-        [DatabaseModelProperty(Unique = true, NotNull = true)]
+        [DBModelProperty(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty(NotNull = true)]
+        [DBModelProperty(NotNull = true)]
         public string DisplayName { get; set; } = default!;
 
         public bool IsActivated { get; set; }
 
-        [DatabaseModelProperty(MaxLength = LengthConventions.MAX_ROLE_COMMENT_LENGTH)]
+        [DBModelProperty(MaxLength = LengthConventions.MAX_ROLE_COMMENT_LENGTH)]
         public string? Comment { get; set; }
 
         public void Update(string name, string displayName, bool isActivated, string? comment)

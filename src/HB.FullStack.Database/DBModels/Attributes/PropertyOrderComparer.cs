@@ -20,8 +20,8 @@ namespace HB.FullStack.Database.DBModels
                 return 0;
             }
 
-            var xAttr = x.GetCustomAttribute<DatabaseModelPropertyAttribute>(true) ?? GetModelBasePropertyAttribute(x);
-            var yAttr = y.GetCustomAttribute<DatabaseModelPropertyAttribute>(true) ?? GetModelBasePropertyAttribute(y);
+            var xAttr = x.GetCustomAttribute<DBModelPropertyAttribute>(true) ?? GetModelBasePropertyAttribute(x);
+            var yAttr = y.GetCustomAttribute<DBModelPropertyAttribute>(true) ?? GetModelBasePropertyAttribute(y);
 
 
             if (xAttr == null && yAttr == null)
@@ -43,15 +43,15 @@ namespace HB.FullStack.Database.DBModels
 
         }
 
-        private static DatabaseModelPropertyAttribute? GetModelBasePropertyAttribute(PropertyInfo info)
+        private static DBModelPropertyAttribute? GetModelBasePropertyAttribute(PropertyInfo info)
         {
             return info.Name switch
             {
-                nameof(TimestampGuidDBModel.Id) => new DatabaseModelPropertyAttribute(0),
-                nameof(TimestampDBModel.LastUser) => new DatabaseModelPropertyAttribute(1),
-                nameof(TimestampDBModel.Timestamp) => new DatabaseModelPropertyAttribute(2),
-                nameof(TimestampDBModel.Deleted) => new DatabaseModelPropertyAttribute(3),
-                //nameof(DBModel.CreateTime) => new DatabaseModelPropertyAttribute(6),
+                nameof(TimestampGuidDBModel.Id) => new DBModelPropertyAttribute(0),
+                nameof(TimestampDBModel.LastUser) => new DBModelPropertyAttribute(1),
+                nameof(TimestampDBModel.Timestamp) => new DBModelPropertyAttribute(2),
+                nameof(TimestampDBModel.Deleted) => new DBModelPropertyAttribute(3),
+                //nameof(DBModel.CreateTime) => new DBModelPropertyAttribute(6),
                 _ => null
             };
         }

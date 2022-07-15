@@ -29,14 +29,14 @@ namespace HB.FullStack.Database.DBModels
 
     public abstract class TimestampLongIdDBModel : TimestampDBModel, ILongIdModel
     {
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
     public abstract class TimestampAutoIncrementIdDBModel : TimestampLongIdDBModel, IAutoIncrementId
     {
         [AutoIncrementPrimaryKey]
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         [CacheModelKey]
         public override long Id { get; set; } = -1;
     }
@@ -44,7 +44,7 @@ namespace HB.FullStack.Database.DBModels
     public abstract class TimestampFlackIdDBModel : TimestampLongIdDBModel
     {
         [PrimaryKey]
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
@@ -52,7 +52,7 @@ namespace HB.FullStack.Database.DBModels
 
     public abstract class TimestampGuidDBModel : TimestampDBModel, IGuidIdModel
     {
-        [DatabaseModelProperty(0)]
+        [DBModelProperty(0)]
         [NoEmptyGuid]
         [PrimaryKey]
         [CacheModelKey]
