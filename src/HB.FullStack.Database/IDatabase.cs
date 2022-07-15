@@ -5,7 +5,7 @@
  */
 
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

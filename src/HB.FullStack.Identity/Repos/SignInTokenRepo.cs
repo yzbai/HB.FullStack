@@ -10,7 +10,7 @@ using HB.FullStack.Repository;
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.Identity
 {

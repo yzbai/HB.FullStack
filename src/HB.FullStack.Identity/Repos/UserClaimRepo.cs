@@ -8,7 +8,7 @@ using HB.FullStack.Repository;
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Common;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.Identity
 {

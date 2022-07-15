@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class JsonModelPropertyAttribute : DatabaseModelPropertyAttribute

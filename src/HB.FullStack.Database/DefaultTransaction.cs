@@ -3,7 +3,7 @@ using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database

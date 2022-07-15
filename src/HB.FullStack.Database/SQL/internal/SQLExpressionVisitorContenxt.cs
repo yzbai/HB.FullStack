@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.Database.SQL
 {

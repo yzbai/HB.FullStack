@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.Mapper

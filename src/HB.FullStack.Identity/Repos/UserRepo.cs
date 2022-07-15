@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
 using System.Collections;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.Identity
 {

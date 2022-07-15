@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Common.Cache.CachedCollectionItems;
 
 namespace HB.FullStack.Repository.CacheStrategies

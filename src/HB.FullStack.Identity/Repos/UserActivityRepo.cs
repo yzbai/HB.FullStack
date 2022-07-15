@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;

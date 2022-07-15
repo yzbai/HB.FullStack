@@ -3,7 +3,7 @@
 using HB.FullStack.Common;
 using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 using Microsoft.Extensions.Primitives;
 

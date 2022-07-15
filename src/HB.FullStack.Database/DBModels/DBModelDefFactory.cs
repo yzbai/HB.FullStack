@@ -8,7 +8,7 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     internal class DBModelDefFactory : IDBModelDefFactory
     {

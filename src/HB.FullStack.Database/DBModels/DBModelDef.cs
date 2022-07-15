@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     /// <summary>
     /// 实体定义

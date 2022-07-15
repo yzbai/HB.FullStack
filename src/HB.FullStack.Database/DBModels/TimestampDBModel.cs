@@ -5,7 +5,7 @@ using HB.FullStack.Common;
 using HB.FullStack.Common.Cache.CacheModels;
 using HB.FullStack.Common.IdGen;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     public abstract class TimestampDBModel : DBModel, ICacheModel
     {

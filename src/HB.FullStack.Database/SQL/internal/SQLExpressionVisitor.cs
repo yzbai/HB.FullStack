@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.Database.SQL
 {

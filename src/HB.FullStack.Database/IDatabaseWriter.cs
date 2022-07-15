@@ -4,7 +4,7 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 using System;
 using System.Collections.Generic;

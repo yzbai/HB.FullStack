@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using HB.FullStack.Database.Converter;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     public interface IDBModelDefFactory
     {

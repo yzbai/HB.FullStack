@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     public abstract class TimeLessDBModel : DBModel
     {

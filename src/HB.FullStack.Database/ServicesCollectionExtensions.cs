@@ -1,7 +1,7 @@
 ﻿
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.SQL;
 
 namespace Microsoft.Extensions.DependencyInjection

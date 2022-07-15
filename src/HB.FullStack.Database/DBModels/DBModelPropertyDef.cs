@@ -3,7 +3,7 @@ using System.Reflection;
 
 using HB.FullStack.Database.Converter;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     /// <summary>
     /// 实体内属性定义（一个）

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.Engine;
 using System.Linq;
 

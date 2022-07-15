@@ -1,5 +1,5 @@
 ﻿using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 

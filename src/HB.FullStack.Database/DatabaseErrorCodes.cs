@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
 [assembly: InternalsVisibleTo("HB.Infrastructure.SQLite")]

@@ -9,7 +9,7 @@ using AsyncAwaitBestPractices;
 using HB.FullStack.Cache;
 using HB.FullStack.Common.Cache.CacheItems;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;

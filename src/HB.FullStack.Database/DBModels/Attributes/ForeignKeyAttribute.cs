@@ -2,7 +2,7 @@
 
 using System;
 
-namespace HB.FullStack.Database.DatabaseModels
+namespace HB.FullStack.Database.DBModels
 {
     /// <summary>
     /// 标识字段为外键
