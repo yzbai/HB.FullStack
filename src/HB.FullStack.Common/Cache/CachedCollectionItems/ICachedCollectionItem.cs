@@ -5,9 +5,9 @@ namespace HB.FullStack.Common.Cache
     public interface ICachedCollectionItem
     {
 
-        public static string GetCollectionKey(Type type)
+        public static string GetCollectionKey(Type cachedCollectionItemType)
         {
-            return type.Name;
+            return cachedCollectionItemType.Name;
         }
 
         TimeSpan? AbsoluteExpirationRelativeToNow { get; }

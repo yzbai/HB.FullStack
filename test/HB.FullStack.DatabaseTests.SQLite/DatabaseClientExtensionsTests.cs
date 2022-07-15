@@ -1,14 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
-using HB.FullStack.Database.SQL;
+﻿using System.Collections.Generic;
 using System.Linq;
-using HB.FullStack.DatabaseTests;
+using System.Threading.Tasks;
+
+using HB.FullStack.Database.SQL;
 using HB.FullStack.Database.Tests;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.DatabaseTests.SQLite
 {

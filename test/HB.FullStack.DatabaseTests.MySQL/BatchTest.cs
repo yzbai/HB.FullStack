@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.DatabaseTests.Data;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -1,24 +1,18 @@
-﻿using HB.FullStack.BaseTest;
-using HB.FullStack.Cache;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+
+using HB.FullStack.BaseTest;
+using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
-using HB.Infrastructure.Redis.Cache;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using StackExchange.Redis;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using IDatabase = HB.FullStack.Database.IDatabase;
 
@@ -48,7 +42,7 @@ namespace HB.FullStack.CacheTests
                .SetBasePath(Environment.CurrentDirectory)
                .AddJsonFile("appsettings.json", optional: false)
                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
-               .AddUserSecrets(typeof(BC).Assembly, optional:true);
+               .AddUserSecrets(typeof(BC).Assembly, optional: true);
 
             IConfiguration configuration = configurationBuilder.Build();
 

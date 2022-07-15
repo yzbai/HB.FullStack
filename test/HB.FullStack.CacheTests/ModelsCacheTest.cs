@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Cache.CacheModels;
+using HB.FullStack.Common.Cache;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using StackExchange.Redis;
@@ -15,7 +13,7 @@ using StackExchange.Redis;
 namespace HB.FullStack.CacheTests
 {
 
-    [TestClass]
+	[TestClass]
 	public class ModelsCacheTest : BaseTestClass
 	{
 		[TestMethod]

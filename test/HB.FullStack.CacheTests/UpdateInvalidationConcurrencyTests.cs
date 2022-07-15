@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.DependencyInjection;
+using HB.FullStack.Common.Cache;
 
-using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HB.FullStack.Common.Cache.CacheItems;
 
 namespace HB.FullStack.CacheTests
 {
@@ -121,7 +118,7 @@ namespace HB.FullStack.CacheTests
             Task task1 = RetrieveDbAndUpdateCacheAsync(entryOptions, databaseMocker);
 
             //线程2启动更新了数据库， 数据版本变为 2. Invalidate Cache中的数据
-            Task task2 = UpdateDbAndInvalidateCacheAsync(databaseMocker,entryOptions);
+            Task task2 = UpdateDbAndInvalidateCacheAsync(databaseMocker, entryOptions);
 
             //线程1这时才去更新Cache， 可能会将版本又变为1
 

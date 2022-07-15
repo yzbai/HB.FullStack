@@ -1,17 +1,14 @@
-﻿using HB.FullStack.Database.Converter;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
+using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.DatabaseTests.Data;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HB.FullStack.DatabaseTests
 {
@@ -25,7 +22,7 @@ namespace HB.FullStack.DatabaseTests
         {
             PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
-     
+
 
             var emit_results = publisherModel.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, Db.ModelDefFactory, 1);
 
@@ -36,7 +33,7 @@ namespace HB.FullStack.DatabaseTests
             //PublisherModel2
 
             PublisherModel2 publisherModel2 = new PublisherModel2();
-          
+
 
             var emit_results2 = publisherModel2.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, Db.ModelDefFactory, 1);
 
@@ -47,7 +44,7 @@ namespace HB.FullStack.DatabaseTests
             //PublisherModel3
 
             PublisherModel3 publisherModel3 = new PublisherModel3();
-           
+
 
             var emit_results3 = publisherModel3.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, Db.ModelDefFactory, 1);
 
@@ -79,7 +76,7 @@ namespace HB.FullStack.DatabaseTests
         {
             var models = Mocker.GetPublishers(10000);
 
-           
+
 
             var def = Db.ModelDefFactory.GetDef<PublisherModel>();
 

@@ -1,58 +1,54 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-using HB.FullStack.Database.DatabaseModels;
-
-using MessagePack;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.CacheTests
 {
     [CacheModel]
     public class BookModel : TimestampFlackIdDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; } = default!;
     }
 
     [CacheModel]
     public class Guid_BookModel : TimestampGuidDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; } = default!;
     }
 
     [CacheModel]
     public class Book : TimestampFlackIdDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         [CacheModelAltKey]
         public long BookID { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string? Publisher { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; }
     }
 
     [CacheModel]
     public class BookModel_Client : TimestampFlackIdDBModel
     {
-        [DatabaseModelProperty(NeedIndex = true)]
+        [DBModelProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; } = default!;
     }
 
@@ -60,17 +56,17 @@ namespace HB.FullStack.CacheTests
     public class Book_Client : TimestampFlackIdDBModel
     {
         [CacheModelAltKey]
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = null!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         [CacheModelAltKey]
         public long BookID { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string? Publisher { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; }
     }
 }

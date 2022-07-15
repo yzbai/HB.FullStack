@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HB.FullStack.Database.DatabaseModels;
+
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.Database.Tests
 {
@@ -16,10 +14,7 @@ namespace HB.FullStack.Database.Tests
     {
         public static IList<CExtModel> GetCExtModels(int? count = null)
         {
-            if (count == null)
-            {
-                count = 100;
-            }
+            count ??= 100;
 
             List<CExtModel> lst = new List<CExtModel>();
 

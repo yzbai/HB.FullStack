@@ -1,9 +1,18 @@
-﻿using ClassLibrary1;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+
+using ClassLibrary1;
 
 using HB.FullStack.Database;
 using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DatabaseModels;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
@@ -12,15 +21,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MySqlConnector;
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace HB.FullStack.DatabaseTests
 {

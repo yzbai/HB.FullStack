@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.DatabaseTests
 {
@@ -11,7 +9,7 @@ namespace HB.FullStack.DatabaseTests
     {
 
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -19,7 +17,7 @@ namespace HB.FullStack.DatabaseTests
     public class B : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -27,27 +25,27 @@ namespace HB.FullStack.DatabaseTests
     public class AB : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public long AId { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public long BId { get; set; } = default!;
     }
 
 
     public class C : TimestampFlackIdDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public long AId { get; set; } = default!;
     }
 
     public class A_Client : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -55,7 +53,7 @@ namespace HB.FullStack.DatabaseTests
     public class B_Client : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -63,20 +61,20 @@ namespace HB.FullStack.DatabaseTests
     public class AB_Client : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public long AId { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public long BId { get; set; } = default!;
     }
 
 
     public class C_Client : TimestampFlackIdDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public long AId { get; set; } = default!;
     }
 
@@ -84,7 +82,7 @@ namespace HB.FullStack.DatabaseTests
     {
 
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -92,7 +90,7 @@ namespace HB.FullStack.DatabaseTests
     public class Guid_B : TimestampGuidDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -108,17 +106,17 @@ namespace HB.FullStack.DatabaseTests
 
     public class Guid_C : TimestampGuidDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public Guid Guid_AId { get; set; }
     }
 
     public class Guid_A_Client : TimestampGuidDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -126,7 +124,7 @@ namespace HB.FullStack.DatabaseTests
     public class Guid_B_Client : TimestampGuidDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -134,20 +132,20 @@ namespace HB.FullStack.DatabaseTests
     public class Guid_AB_Client : TimestampGuidDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public Guid Guid_AId { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public Guid Guid_BId { get; set; } = default!;
     }
 
 
     public class Guid_C_Client : TimestampGuidDBModel
     {
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public Guid Guid_AId { get; set; } = default!;
     }
 }

@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Cache;
+
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using StackExchange.Redis;
-using HB.FullStack.Common.Cache.CacheItems;
 
 namespace HB.FullStack.CacheTests
 {
@@ -138,7 +135,7 @@ namespace HB.FullStack.CacheTests
         /// </summary>
         /// <param name="books"></param>
         /// <returns></returns>
-        
+
         private async Task AddToDatabaeAsync(IEnumerable<Book> books)
         {
             await Db.BatchAddAsync(books, "", GetFakeTransactionContext()).ConfigureAwait(false);

@@ -1,77 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using HB.FullStack.Database.DatabaseModels;
+﻿using HB.FullStack.Database.DBModels;
 
 namespace HB.FullStack.DatabaseTests.Data
 {
-    
+
     public class BookModel : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; } = default!;
     }
 
-    
+
     public class Guid_BookModel : TimestampGuidDBModel
     {
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; } = default!;
     }
 
-    
+
     public class Book : TimestampFlackIdDBModel
     {
-        [DatabaseModelProperty]
-        
+        [DBModelProperty]
+
         public string Name { get; set; } = null!;
 
-        [DatabaseModelProperty]
-        
+        [DBModelProperty]
+
         public long BookID { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string? Publisher { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; }
     }
 
-    
+
     public class BookModel_Client : TimestampFlackIdDBModel
     {
 
-        [DatabaseModelProperty(NeedIndex = true)]
+        [DBModelProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; } = default!;
     }
 
-    
+
     public class Book_Client : TimestampFlackIdDBModel
     {
-        
-        [DatabaseModelProperty]
+
+        [DBModelProperty]
         public string Name { get; set; } = null!;
 
-        [DatabaseModelProperty]
-        
+        [DBModelProperty]
+
         public long BookID { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public string? Publisher { get; set; }
 
-        [DatabaseModelProperty]
+        [DBModelProperty]
         public double Price { get; set; }
     }
 }
