@@ -82,7 +82,7 @@ namespace System
 
         }
 
-        internal static Exception CacheCollectionKeyNotSame(IEnumerable<CachedCollectionItem> cachedCollectionItems)
+        internal static Exception CacheCollectionKeyNotSame(IEnumerable<ICachedCollectionItem> cachedCollectionItems)
         {
             CacheException exception = new CacheException(CacheErrorCodes.CacheCollectionKeyNotSame);
             exception.Data["CachedCollectionItems"] = SerializeUtil.ToJson(cachedCollectionItems);

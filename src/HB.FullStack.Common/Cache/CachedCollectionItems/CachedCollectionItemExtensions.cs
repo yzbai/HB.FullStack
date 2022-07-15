@@ -36,7 +36,7 @@ namespace HB.FullStack.Common.Cache
                 cancellationToken);
         }
 
-        public static async Task RemoveAsync(this ICache cache, CachedCollectionItem cachedCollectionItem, CancellationToken cancellationToken = default)
+        public static async Task RemoveAsync(this ICache cache, ICachedCollectionItem cachedCollectionItem, CancellationToken cancellationToken = default)
         {
             ThrowOnEmptyCacheKey(cachedCollectionItem);
             ThrowOnEmptyUtcTicks(cachedCollectionItem);
@@ -44,14 +44,14 @@ namespace HB.FullStack.Common.Cache
             await cache.RemoveFromCollectionAsync(cachedCollectionItem.CollectionKey, cachedCollectionItem.ItemKey, cancellationToken).ConfigureAwait(false);
         }
 
-        public static async Task RemoveAsync(this ICache cache, IEnumerable<CachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
+        public static async Task RemoveAsync(this ICache cache, IEnumerable<ICachedCollectionItem> cachedCollectionItems, CancellationToken cancellationToken = default)
         {
             if (!cachedCollectionItems.Any())
             {
                 return;
             }
 
-            foreach (CachedCollectionItem cachedCollectionItem in cachedCollectionItems)
+            foreach (ICachedCollectionItem cachedCollectionItem in cachedCollectionItems)
             {
                 ThrowOnEmptyCacheKey(cachedCollectionItem);
                 ThrowOnEmptyUtcTicks(cachedCollectionItem);
@@ -67,12 +67,12 @@ namespace HB.FullStack.Common.Cache
             await cache.RemoveFromCollectionAsync(collectionKey, cachedCollectionItems.Select(item => item.ItemKey).ToList(), cancellationToken).ConfigureAwait(false);
         }
 
-        public static Task<bool> RemoveCollectionAsync(this ICache cache, CachedCollectionItem cachedCollectionItem)
+        public static Task<bool> RemoveCollectionAsync(this ICache cache, ICachedCollectionItem cachedCollectionItem)
         {
             return cache.RemoveCollectionAsync(cachedCollectionItem.CollectionKey);
         }
 
-        private static void ThrowOnEmptyCacheKey(CachedCollectionItem cachedCollectionItem)
+        private static void ThrowOnEmptyCacheKey(ICachedCollectionItem cachedCollectionItem)
         {
             if (string.IsNullOrEmpty(cachedCollectionItem?.CollectionKey))
             {
@@ -93,7 +93,7 @@ namespace HB.FullStack.Common.Cache
             }
         }
 
-        private static void ThrowOnEmptyUtcTicks(CachedCollectionItem cachedCollectionItem)
+        private static void ThrowOnEmptyUtcTicks(ICachedCollectionItem cachedCollectionItem)
         {
             if (cachedCollectionItem.Timestamp <= 0)
             {

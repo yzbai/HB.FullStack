@@ -157,7 +157,7 @@ namespace HB.Infrastructure.Redis.Cache
 
         protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheModelDef modelDef)
         {
-            if (!modelDef.Dimensions.Any(p => p.Name == dimensionKeyName))
+            if (!modelDef.AltKeyProperties.Any(p => p.Name == dimensionKeyName))
             {
                 throw CacheExceptions.NoSuchDimensionKey(typeName: modelDef.Name, dimensionKeyName: dimensionKeyName);
             }

@@ -9,9 +9,7 @@ namespace HB.FullStack.Common.Cache
     {
         public PropertyInfo KeyProperty { get; internal set; } = null!;
 
-        public IList<PropertyInfo> Dimensions { get; private set; } = new List<PropertyInfo>();
-
-        //public bool IsCacheable { get; internal set; }
+        public IList<PropertyInfo> AltKeyProperties { get; private set; } = new List<PropertyInfo>();
 
         public string Name { get; internal set; } = null!;
 

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace System
+﻿namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CacheModelAttribute : Attribute
     {
+        /// <summary>
+        /// null表示使用默认的Cache
+        /// </summary>
         public string? CacheInstanceName { get; set; }
 
 

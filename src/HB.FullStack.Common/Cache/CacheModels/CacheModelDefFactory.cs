@@ -77,7 +77,7 @@ namespace HB.FullStack.Common.Cache
 
                 if (dimensionKeyAttribute != null)
                 {
-                    def.Dimensions.Add(propertyInfo);
+                    def.AltKeyProperties.Add(propertyInfo);
                 }
             }
 

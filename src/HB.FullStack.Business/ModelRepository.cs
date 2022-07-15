@@ -400,19 +400,19 @@ namespace HB.FullStack.Repository
             return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
-        public void InvalidateCache(CachedCollectionItem cachedCollectionItem)
+        public void InvalidateCache(ICachedCollectionItem cachedCollectionItem)
         {
             CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItem, Cache);
         }
 
-        public void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems)
+        public void InvalidateCache(IEnumerable<ICachedCollectionItem> cachedCollectionItems)
         {
             CachedCollectionItemCacheStrategy.InvalidateCache(cachedCollectionItems, Cache);
         }
 
-        public void InvalidateCacheCollection<T>() where T : CachedCollectionItem
+        public void InvalidateCacheCollection<T>() where T : ICachedCollectionItem
         {
-            CachedCollectionItemCacheStrategy.InvalidateCacheCollection(CachedCollectionItem.GetCollectionKey<T>(), Cache);
+            CachedCollectionItemCacheStrategy.InvalidateCacheCollection(ICachedCollectionItem.GetCollectionKey(typeof(T)), Cache);
         }
 
         #endregion

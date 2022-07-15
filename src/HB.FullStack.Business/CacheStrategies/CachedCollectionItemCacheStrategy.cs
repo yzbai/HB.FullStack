@@ -67,12 +67,12 @@ namespace HB.FullStack.Repository.CacheStrategies
             }
         }
 
-        public static void InvalidateCache(CachedCollectionItem cachedCollectionItem, ICache cache)
+        public static void InvalidateCache(ICachedCollectionItem cachedCollectionItem, ICache cache)
         {
             cache.RemoveAsync(cachedCollectionItem).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache(IEnumerable<CachedCollectionItem> cachedCollectionItems, ICache cache)
+        public static void InvalidateCache(IEnumerable<ICachedCollectionItem> cachedCollectionItems, ICache cache)
         {
             cache.RemoveAsync(cachedCollectionItems).SafeFireAndForget(OnException);
         }

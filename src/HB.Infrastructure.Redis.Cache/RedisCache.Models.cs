@@ -646,8 +646,10 @@ end
 
             redisValues.Add(absoluteExpireUnixSeconds ?? -1);
             redisValues.Add(expireSeconds ?? -1);
+            //TODO: 考虑设置过期时间的限制？最大过期时间？现在是如果不设置absoluteExpire和slideseconds，那么就一直不过期
+
             redisValues.Add(models.Count());
-            redisValues.Add(modelDef.Dimensions.Count);
+            redisValues.Add(modelDef.AltKeyProperties.Count);
 
             foreach (TModel model in models)
             {
@@ -657,7 +659,7 @@ end
 
                 StringBuilder joinedDimensinKeyBuilder = new StringBuilder();
 
-                foreach (PropertyInfo property in modelDef.Dimensions)
+                foreach (PropertyInfo property in modelDef.AltKeyProperties)
                 {
                     string dimentionKey = GetModelDimensionKey(modelDef.Name, property.Name, property.GetValue(model)?.ToString()!);
                     redisKeys.Add(dimentionKey);
