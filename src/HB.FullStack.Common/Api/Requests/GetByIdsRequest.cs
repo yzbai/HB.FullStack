@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using HB.FullStack.Common.Api.Resources;
+
 
 namespace HB.FullStack.Common.Api.Requests
 {

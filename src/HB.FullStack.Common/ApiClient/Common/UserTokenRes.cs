@@ -1,11 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using HB.FullStack.Common.Api.Resources;
+
+using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
     /// <summary>
-    /// 可能存在多个Endpoint，即不同的Endpoint使用不同站点的BearerToken
+    /// 可能存在多个Endpoint，即不同的Endpoint使用不同站点的UserToken
     /// </summary>
     public class UserTokenRes : ApiResource
     {

@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-
-namespace HB.FullStack.Common.Api
+﻿namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// 本质是解决ApiResource的来源问题，与谁binding,哪个Model是这个Dto的根
     /// </summary>
-    public class ApiResourceBinding
+    public class EndpointBinding
     {
         /// <summary>
         /// 站点

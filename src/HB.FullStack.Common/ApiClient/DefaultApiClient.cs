@@ -1,6 +1,6 @@
 ﻿using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Api.Requests;
-using HB.FullStack.Common.Api.Resources;
+
 using Microsoft.Extensions.Options;
 
 using System;

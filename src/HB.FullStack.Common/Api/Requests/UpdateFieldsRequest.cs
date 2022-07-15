@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Http;
-using System.Text.Json.Serialization;
-using HB.FullStack.Common.Api.Requests;
-using HB.FullStack.Common.Api.Resources;
+﻿using HB.FullStack.Common.Api.Requests;
+
 
 namespace HB.FullStack.Common.Api
 {

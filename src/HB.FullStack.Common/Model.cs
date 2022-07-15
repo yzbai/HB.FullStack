@@ -17,8 +17,6 @@ namespace HB.FullStack.Common
 
     public interface IDTO : IValidatableObject { }
 
-    public class DTO : ValidatableObject, IDTO { }
-
     public interface IGuidIdModel
     {
         Guid Id { get; set; }

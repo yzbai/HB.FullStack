@@ -4,19 +4,16 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common.Utils
 {
     /// <summary>
-    /// provide the ability to dispose additional thing with stream
+    /// 工具类：提供在dispose stream的同时，dipose附加。往往是stream的源头或者产生者
+    /// 比如HttpResponse产出Stream，在dispose stream后才能dispose httpResponse
     /// </summary>
     public class WrappedStream : Stream
     {
         private readonly Stream _stream;
         private IDisposable? _additionalDisposable;
-
-        public WrappedStream(Stream wrapped) : this(wrapped, null)
-        {
-        }
 
         public WrappedStream(Stream stream, IDisposable? additionalDisposable)
         {
@@ -102,7 +99,7 @@ namespace HB.FullStack.Common.Api
 #if NET5_0_OR_GREATER
             return new WrappedStream(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), response);
 #elif NETSTANDARD2_1
-			return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
+            return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
 #elif NETSTANDARD2_0
             return new WrappedStream(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), response);
 #endif

@@ -2,31 +2,30 @@
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
-using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.Api
 {
-    public static class ApiResourceBindingFactory
+    public static class EndpointBindingFactory
     {
-        private static readonly ConcurrentDictionary<Type, ApiResourceBinding?> _defDict = new ConcurrentDictionary<Type, ApiResourceBinding?>();
+        private static readonly ConcurrentDictionary<Type, EndpointBinding?> _defDict = new ConcurrentDictionary<Type, EndpointBinding?>();
 
-        public static ApiResourceBinding? Get<T>() where T : ApiResource
+        public static EndpointBinding? Get<T>()
         {
-            return _defDict.GetOrAdd(typeof(T), t => CreateResourceDef(t));
+            return _defDict.GetOrAdd(typeof(T), t => CreateEndpointBinding(t));
         }
 
-        private static ApiResourceBinding? CreateResourceDef(Type type)
+        private static EndpointBinding? CreateEndpointBinding(Type type)
         {
             //TODO: 除了从ApiResourceAttribute里获得配置外，增加Configuration读取.并且Configuration可以覆盖Attribute设置
 
-            var attr = type.GetCustomAttribute<ApiResourceBindingAttribute>();
+            var attr = type.GetCustomAttribute<EndpointBindingAttribute>();
 
             if (attr == null)
             {
                 return null;
             }
 
-            ApiResourceBinding def = new ApiResourceBinding
+            EndpointBinding def = new EndpointBinding
             {
                 EndpointName = attr.EndPointName,
                 Version = attr.Version,
@@ -62,7 +61,7 @@ namespace HB.FullStack.Common.Api
             return def;
         }
 
-        public static void Register<T>(ApiResourceBinding def) where T : ApiResource
+        public static void Register<T>(EndpointBinding def)
         {
             _ = _defDict.AddOrUpdate(typeof(T), def, (_, _) => def);
         }

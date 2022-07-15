@@ -1,13 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
-using System.IO;
+using HB.FullStack.Common.Utils;
 
-using System.Threading;
 using Microsoft.Net.Http.Headers;
-using System.Collections.Generic;
-using System.Linq;
-using HB.FullStack.Common.Api.Resources;
 
 namespace System.Net.Http
 {

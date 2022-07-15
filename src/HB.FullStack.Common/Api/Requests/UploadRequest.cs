@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using HB.FullStack.Common.Api.Resources;
+
 
 namespace HB.FullStack.Common.Api
 {
@@ -13,9 +13,6 @@ namespace HB.FullStack.Common.Api
         byte[] GetFile();
     }
 
-    /// <summary>
-    /// PUT /Ver/ResoruceCollection
-    /// </summary>
     public class UploadRequest<T> : UpdateFieldsRequest<T>, IUploadRequest where T : ApiResource
     {
         private readonly byte[]? _file;

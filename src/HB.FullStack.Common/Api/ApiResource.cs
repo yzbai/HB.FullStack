@@ -1,12 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace HB.FullStack.Common.Api.Resources
+﻿namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// One kind of Data Transfer Objects. Mainly using on net.
     /// </summary>
-    public abstract class ApiResource : DTO
+    public class ApiResource : ValidatableObject, IDTO
     {
         //[Range(0, int.MaxValue)]
         //public int Version { get; set; } = -1;
@@ -16,6 +13,18 @@ namespace HB.FullStack.Common.Api.Resources
         //public DateTimeOffset LastTime { get; set; }
 
         //public abstract override int GetHashCode();
+    }
+
+    public class EmptyApiResource : ApiResource
+    {
+        public static EmptyApiResource Value { get; }
+
+        static EmptyApiResource()
+        {
+            Value = new EmptyApiResource();
+        }
+
+        private EmptyApiResource() { }
     }
 
     //public abstract class GuidResource : ApiResource

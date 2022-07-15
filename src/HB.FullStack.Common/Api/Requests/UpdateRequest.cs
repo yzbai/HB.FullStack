@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+
 using HB.FullStack.Common.Api.Requests;
-using HB.FullStack.Common.Api.Resources;
+
 
 namespace HB.FullStack.Common.Api
 {
@@ -21,7 +22,7 @@ namespace HB.FullStack.Common.Api
             Resources.AddRange(ress);
         }
 
-        public UpdateRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res },auth, condition) { }
+        public UpdateRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res }, auth, condition) { }
 
         public override int GetHashCode()
         {

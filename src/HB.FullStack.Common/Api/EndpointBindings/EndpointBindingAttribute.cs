@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace HB.FullStack.Common.Api
+﻿namespace System
 {
     /// <summary>
     /// 绑定到Endpoint
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ApiResourceBindingAttribute : Attribute
+    public sealed class EndpointBindingAttribute : Attribute
     {
         /// <summary>
         /// 资源在哪里
@@ -30,7 +28,7 @@ namespace HB.FullStack.Common.Api
 
         //public string? Parent2ModelName { get; set; }
 
-        public ApiResourceBindingAttribute(string endPointName, string version, string controllerModelName)
+        public EndpointBindingAttribute(string endPointName, string version, string controllerModelName)
         {
             EndPointName = endPointName;
             Version = version;

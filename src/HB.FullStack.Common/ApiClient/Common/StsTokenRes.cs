@@ -1,5 +1,6 @@
 ﻿using System;
-using HB.FullStack.Common.Api.Resources;
+
+using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {

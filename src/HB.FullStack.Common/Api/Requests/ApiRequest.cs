@@ -2,15 +2,15 @@
 
 using System;
 using System.Text.Json.Serialization;
+
 using HB.FullStack.Common.Api.Requests;
-using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// ApiRequest包含两部分，一是必须由每个Request决定的构建信息，二是业务数据
     /// </summary>
-    public abstract class ApiRequest : DTO
+    public abstract class ApiRequest : ValidatableObject, IDTO
     {
         #region Builder
 
@@ -81,7 +81,7 @@ namespace HB.FullStack.Common.Api
         {
             RestfulHttpRequestBuilder builder = new RestfulHttpRequestBuilder(apiRequest.ApiMethodName, apiRequest.Auth, apiRequest.Condition, null, null, null);
 
-            ApiResourceBinding? binding = ApiResourceBindingFactory.Get<T>();
+            EndpointBinding? binding = EndpointBindingFactory.Get<T>();
 
             if (binding == null)
             {
