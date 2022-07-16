@@ -26,7 +26,6 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// Cache架构策略可以参考笔记
     /// </summary>
-    /// <typeparam name="TMainDBModel"></typeparam>
     public abstract class ModelRepository<TMainDBModel> where TMainDBModel : TimestampDBModel, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();

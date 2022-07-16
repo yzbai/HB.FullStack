@@ -17,6 +17,10 @@ namespace HB.FullStack.Common.Cache
 
         public long Timestamp { get; protected set; } = -1;
 
+        #region Settings
+
+        //TODO: 其实没必要将这些设置每一个实例都声明。一个类有一份就行了，要是static 可以 override就好了。
+        //或者移到一个统一设置的地方，可能会变得复杂起来，目前先这样。
 
         /// <summary>
         /// 对于那些无法主动Invalidate的项目，必须设置绝对过期值
@@ -30,6 +34,8 @@ namespace HB.FullStack.Common.Cache
         /// 强迫程序员填写，作为提醒
         /// </summary>
         public abstract string WhenToInvalidate { get; }
+
+        #endregion
 
         protected CachedItem(object? key)
         {
