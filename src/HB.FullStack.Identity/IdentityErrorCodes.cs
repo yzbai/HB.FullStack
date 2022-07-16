@@ -1,16 +1,16 @@
-﻿using HB.FullStack.Identity.Models;
+﻿using System;
+using System.Collections.Generic;
+
+using HB.FullStack.Identity.Models;
 
 using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections.Generic;
 
 namespace HB.FullStack.Identity
 {
     internal static class IdentityErrorCodes
     {
-      
-        
+
+
         public static ErrorCode FoundTooMuch { get; } = new ErrorCode(nameof(FoundTooMuch), "");
         public static ErrorCode NotFound { get; } = new ErrorCode(nameof(NotFound), "");
         public static ErrorCode IdentityNothingConfirmed { get; } = new ErrorCode(nameof(IdentityNothingConfirmed), "");
@@ -40,25 +40,17 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationTooFrequent(RefreshContext context)
+        internal static Exception AccessTokenRefreshing(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationTooFrequent);
+            IdentityException exception = new IdentityException(ApiErrorCodes.AccessTokenRefreshing, ApiErrorCodes.AccessTokenRefreshing.Description);
             exception.Data["Context"] = context;
 
             return exception;
         }
 
-        internal static Exception AuthorizationInvalideAccessToken(RefreshContext context, Exception innerException)
+        internal static Exception RefreshAccessTokenError(string cause, Exception? innerException, object? context)
         {
-            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationInvalideAccessToken, innerException);
-            exception.Data["Context"] = context;
-
-            return exception;
-        }
-
-        internal static Exception AuthorizationInvalideAccessToken(RefreshContext context)
-        {
-            IdentityException exception = new IdentityException(ApiErrorCodes.AuthorizationInvalideAccessToken);
+            IdentityException exception = new IdentityException(ApiErrorCodes.RefreshAccessTokenError, cause, innerException);
             exception.Data["Context"] = context;
 
             return exception;
@@ -199,7 +191,7 @@ namespace HB.FullStack.Identity
         internal static Exception AlreadyHaveRoles(Guid userId, IEnumerable<Role> roles, string lastUser)
         {
             IdentityException ex = new IdentityException(IdentityErrorCodes.AlreadyHaveRoles);
-            
+
             ex.Data["UserId"] = userId.ToString();
             ex.Data["Roles"] = SerializeUtil.ToJson(roles);
             ex.Data["LastUser"] = lastUser;

@@ -1,16 +1,14 @@
 ﻿global using static HB.FullStack.CommonTests.Data.ApiConstants;
 
-using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Api.Resources;
-
 using System;
+
+using HB.FullStack.Common.Api;
 
 
 namespace HB.FullStack.CommonTests.Data
 {
 
-    [ApiResourceBinding(ApiEndpointName, ApiVersion, nameof(BookRes))]
+    [EndpointBinding(ApiEndpointName, ApiVersion, nameof(BookRes))]
     public class BookRes : ApiResource
     {
         public string Name { get; set; }

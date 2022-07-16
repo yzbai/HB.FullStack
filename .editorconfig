@@ -36,6 +36,11 @@ dotnet_diagnostic.CA1024.severity = none
 
 # CA1003: 使用泛型事件处理程序实例
 dotnet_diagnostic.CA1003.severity = none
+
+# CA1848: 使用 LoggerMessage 委托，也许后期可以
+dotnet_diagnostic.CA1848.severity = none
+
+
 [*.cs]
 #### Naming styles ####
 
@@ -157,3 +162,4 @@ end_of_line = crlf
 dotnet_style_predefined_type_for_locals_parameters_members = true:silent
 dotnet_diagnostic.CA1724.severity = suggestion
 dotnet_diagnostic.CA1031.severity = suggestion
+dotnet_style_prefer_simplified_interpolation = true:suggestion

@@ -1,35 +1,26 @@
-﻿using HB.FullStack.Common.Api;
-
-using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 
 namespace System
 {
     public static partial class CommonErrorCodes
     {
-        public static readonly ErrorCode CertNotInPackage = new ErrorCode( nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
-        public static readonly ErrorCode CertNotFound = new ErrorCode( nameof(CertNotFound), "没有找到证书");
-        public static readonly ErrorCode IsFileSignatureMatchedError = new ErrorCode( nameof(IsFileSignatureMatchedError), "");
-        public static readonly ErrorCode SaveFileError = new ErrorCode( nameof(SaveFileError), "");
-        public static readonly ErrorCode ReadFileError = new ErrorCode( nameof(ReadFileError), "");
+        public static readonly ErrorCode CertNotInPackage = new ErrorCode(nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
+        public static readonly ErrorCode CertNotFound = new ErrorCode(nameof(CertNotFound), "没有找到证书");
+        public static readonly ErrorCode IsFileSignatureMatchedError = new ErrorCode(nameof(IsFileSignatureMatchedError), "");
+        public static readonly ErrorCode SaveFileError = new ErrorCode(nameof(SaveFileError), "");
+        public static readonly ErrorCode ReadFileError = new ErrorCode(nameof(ReadFileError), "");
 
-        public static readonly ErrorCode HttpResponseDeSerializeJsonError = new ErrorCode( nameof(HttpResponseDeSerializeJsonError), "");
+        public static readonly ErrorCode HttpResponseDeSerializeJsonError = new ErrorCode(nameof(HttpResponseDeSerializeJsonError), "");
 
-        public static readonly ErrorCode SerializeLogError = new ErrorCode( nameof(SerializeLogError), "序列化出错");
+        public static readonly ErrorCode SerializeLogError = new ErrorCode(nameof(SerializeLogError), "序列化出错");
 
         public static readonly ErrorCode UnSerializeLogError = new ErrorCode(nameof(UnSerializeLogError), "反序列化出错");
 
-        public static readonly ErrorCode PerformValidateError = new ErrorCode( nameof(PerformValidateError), "");
+        public static readonly ErrorCode PerformValidateError = new ErrorCode(nameof(PerformValidateError), "");
 
-        public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode( nameof(TryFromJsonWithCollectionCheckError), "");
+        public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode(nameof(TryFromJsonWithCollectionCheckError), "");
 
-        public static readonly ErrorCode EnvironmentVariableError = new ErrorCode( nameof(EnvironmentVariableError), "");
+        public static readonly ErrorCode EnvironmentVariableError = new ErrorCode(nameof(EnvironmentVariableError), "");
     }
 
     //TODO: 也把其他的Exceptions类改造成这样
@@ -127,49 +118,16 @@ namespace System
         }
     }
 
-    public class CommonException : ErrorCode2Exception
-    {
-        public CommonException()
-        {
-        }
-
-        public CommonException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
-
-        public CommonException(string? message) : base(message)
-        {
-        }
-
-        public CommonException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
-        public CommonException(string? message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }
-
     public static partial class CommonExceptions
     {
-        public static ErrorCode2Exception CertNotFound(string? subject, string? fullPath)
+        public static Exception CertNotFound(string? subject, string? fullPath)
         {
-            ErrorCode2Exception ex = new ErrorCode2Exception(CommonErrorCodes.CertNotFound);
-            ex.Data["Subject"] = subject;
-            ex.Data["FullPath"] = fullPath;
-
-            return ex;
+            return new CommonException(CommonErrorCodes.CertNotFound, nameof(CertNotFound), null, new { Subject = subject, FullPath = fullPath });
         }
 
         internal static Exception EnvironmentVariableError(object? value, string cause)
         {
-            CommonException ex = new CommonException(CommonErrorCodes.EnvironmentVariableError);
-
-            ex.Data["Value"] = value?.ToString();
-            ex.Data["Cause"] = cause;
-
-            return ex;
-
+            return new CommonException(CommonErrorCodes.EnvironmentVariableError, cause, null, new { Value = value });
         }
     }
 }

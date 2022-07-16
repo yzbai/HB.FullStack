@@ -1,16 +1,10 @@
-﻿using HB.FullStack.Common.Api;
+﻿using System;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.ExceptionServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HB.FullStack.WebApi
 {
@@ -26,38 +20,42 @@ namespace HB.FullStack.WebApi
 
         [AllowAnonymous]
         [Route("GlobalException")]
-        public async Task<IActionResult> ExceptionAsync()
+        public IActionResult ExceptionAsync()
         {
             IExceptionHandlerPathFeature? exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
 
             if (exceptionHandlerPathFeature == null)
             {
-                _logger.LogError("IExceptionHandlerPathFeature = null");
+                //TODO: 完善， 记录请求Request。
 
-                return new BadRequestObjectResult(WebApiErrorCodes.ExceptionHandlerPathFeatureNull);
+                _logger.LogCritical("IExceptionHandlerPathFeature = null");
+
+                return new BadRequestObjectResult(WebApiErrorCodes.ServerInternalError);
             }
-            
+
             string path = exceptionHandlerPathFeature.Path;
-            //TODO: wait for .net 6
-            //var routeValues = exceptionHandlerPathFeature.RouteValues;
 
-            string? queryString = HttpContext.Request.QueryString.ToString();
-            string? content = null;
+            //TODO: Do we need so mutch detail ?
 
-            using (StreamReader bodyStream = new StreamReader(HttpContext.Request.Body))
-            {
-                bodyStream.BaseStream.Seek(0, SeekOrigin.Begin);
-                content = await bodyStream.ReadToEndAsync().ConfigureAwait(false);
-            }
+            //RouteValueDictionary? routeValues = exceptionHandlerPathFeature.RouteValues;
 
-            ErrorCode? errorCode = WebApiErrorCodes.ServerUnKownNonErrorCodeError;
+            //string? queryString = HttpContext.Request.QueryString.ToString();
+            //string? content = null;
 
-            if(exceptionHandlerPathFeature.Error is ErrorCode2Exception errorCodeException)
+            //using (StreamReader bodyStream = new StreamReader(HttpContext.Request.Body))
+            //{
+            //    bodyStream.BaseStream.Seek(0, SeekOrigin.Begin);
+            //    content = await bodyStream.ReadToEndAsync().ConfigureAwait(false);
+            //}
+
+            ErrorCode errorCode = WebApiErrorCodes.ServerInternalError;
+
+            if (exceptionHandlerPathFeature.Error is ErrorCode2Exception errorCodeException)
             {
                 errorCode = errorCodeException.ErrorCode;
             }
 
-            _logger.LogGlobalException(path, null, queryString, content, errorCode, exceptionHandlerPathFeature.Error);
+            _logger.LogError(exceptionHandlerPathFeature.Error, "GlobalExceptionController捕捉异常：RequestPath:{RequestPath}", path);
 
             return new BadRequestObjectResult(errorCode)
             {

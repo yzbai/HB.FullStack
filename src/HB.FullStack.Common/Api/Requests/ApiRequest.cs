@@ -85,7 +85,7 @@ namespace HB.FullStack.Common.Api
 
             if (binding == null)
             {
-                throw ApiExceptions.LackApiResourceAttribute(typeof(T).FullName);
+                throw ApiExceptions.ApiModelError("缺少EndpointBinding", null, new { Type = typeof(T).FullName });
             }
 
             //From Res Def

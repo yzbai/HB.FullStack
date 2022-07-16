@@ -33,7 +33,6 @@ namespace System
 
         public static readonly ErrorCode CacheUpdateVersionConcurrency = new ErrorCode(nameof(CacheUpdateVersionConcurrency), "");
 
-
         public static readonly ErrorCode SetError = new ErrorCode(nameof(SetError), "");
 
         public static readonly ErrorCode RemoveError = new ErrorCode(nameof(RemoveError), "");
@@ -53,210 +52,107 @@ namespace System
     {
         internal static Exception CachedItemTimestampNotSet(string resourceType, string cacheKey, object? cacheValue)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.CachedItemTimestampNotSet);
-
-            exception.Data["ResourceType"] = resourceType;
-            exception.Data["CacheKey"] = cacheKey;
-            exception.Data["CacheValue"] = cacheValue;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.CachedItemTimestampNotSet, nameof(CachedItemTimestampNotSet), null, new { ResourceType = resourceType, CacheKey = cacheKey, CacheValue = cacheValue });
         }
 
         internal static Exception CacheValueNotSet(string resourceType, string cacheKey)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.CacheValueNotSet);
-
-            exception.Data["ResourceType"] = resourceType;
-            exception.Data["CacheKey"] = cacheKey;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.CacheValueNotSet, nameof(CacheValueNotSet), null, new { ResourceType = resourceType, CacheKey = cacheKey });
         }
 
         internal static Exception CacheKeyNotSet(string? resourceType)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.CacheKeyNotSet);
-
-            exception.Data["ResourceType"] = resourceType;
-
-            return exception;
-
+            return new CacheException(CacheErrorCodes.CacheKeyNotSet, nameof(CacheKeyNotSet), null, new { ResourceType = resourceType });
         }
 
         internal static Exception CacheCollectionKeyNotSame(IEnumerable<ICachedCollectionItem> cachedCollectionItems)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.CacheCollectionKeyNotSame);
-            exception.Data["CachedCollectionItems"] = SerializeUtil.ToJson(cachedCollectionItems);
-
-            return exception;
+            return new CacheException(CacheErrorCodes.CacheCollectionKeyNotSame, nameof(CacheCollectionKeyNotSame), null, new { CachedCollectionItems = cachedCollectionItems });
         }
         public static CacheException CacheSlidingTimeBiggerThanMaxAlive(string type)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.SlidingTimeBiggerThanMaxAlive);
-
-            exception.Data["Type"] = type;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.SlidingTimeBiggerThanMaxAlive, nameof(CacheSlidingTimeBiggerThanMaxAlive), null, new { Type = type });
         }
 
         public static CacheException CacheModelNotHaveKeyAttribute(string? type)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.ModelNotHaveKeyAttribute);
-
-            exception.Data["Type"] = type;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.ModelNotHaveKeyAttribute, nameof(CacheModelNotHaveKeyAttribute), null, new { Type = type });
         }
 
         public static CacheException ConvertError(string key, Exception innerException)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.ConvertError, innerException);
-
-            exception.Data["Key"] = key;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.ConvertError, nameof(ConvertError), innerException, new { Key = key });
         }
 
         public static CacheException Unkown(object key, object? value, string? method, Exception innerException)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.Unkown, innerException);
+            return new CacheException(CacheErrorCodes.Unkown, nameof(Unkown), innerException, new { Key = key, Value = value, Method = method });
 
-            exception.Data["Key"] = key;
-            exception.Data["Value"] = value;
-            exception.Data["Method"] = method;
-
-            return exception;
         }
 
         public static CacheException GetModelsErrorButDeleted(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception innerException)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.GetModelsErrorButDeleted, innerException);
-
-            exception.Data["CacheInstanceName"] = cacheInstanceName;
-            exception.Data["TypeName"] = typeName;
-            exception.Data["DimensionKeyName"] = dimensionKeyName;
-            exception.Data["DimensionKeyValues"] = SerializeUtil.ToJson(dimensionKeyValues);
-
-            return exception;
+            return new CacheException(CacheErrorCodes.GetModelsErrorButDeleted, nameof(GetModelsErrorButDeleted), innerException,
+                new { CacheInstanceName = cacheInstanceName, Type = typeName, KeyName = dimensionKeyName, KeyValue = dimensionKeyValues });
         }
 
         public static CacheException GetError(string key, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.GetError, ex);
+            return new CacheException(CacheErrorCodes.GetError, nameof(GetError), ex, new { Key = key });
 
-            exception.Data["Key"] = key;
-
-            return exception;
         }
 
         public static CacheException CacheLoadedLuaNotFound(string? cacheInstanceName)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.CacheLoadedLuaNotFound);
-
-            exception.Data["CacheInstanceName"] = cacheInstanceName;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.CacheLoadedLuaNotFound, nameof(CacheLoadedLuaNotFound), null, new { CacheInstanceName = cacheInstanceName });
         }
 
         public static CacheException InstanceNotFound(string cacheInstanceName)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.CacheInstanceNotFound);
-
-            exception.Data["CacheInstanceName"] = cacheInstanceName;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.CacheInstanceNotFound, nameof(InstanceNotFound), null, new { CacheInstanceName = cacheInstanceName });
         }
 
         public static CacheException NoSuchDimensionKey(string typeName, string dimensionKeyName)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.NoSuchDimensionKey);
-
-            exception.Data["TypeName"] = typeName;
-            exception.Data["DimensionKeyName"] = dimensionKeyName;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.NoSuchDimensionKey, nameof(NoSuchDimensionKey), null, new { Type = typeName, KeyName = dimensionKeyName });
         }
 
         public static CacheException NotEnabledForModel(string? typeName)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.NotEnabledForModel);
-
-            exception.Data["TypeName"] = typeName;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.NotEnabledForModel, nameof(NotEnabledForModel), null, new { Type = typeName });
         }
 
         public static CacheException SetModelsError(string? cacheInstanceName, string? typeName, IEnumerable models, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.SetModelsError, ex);
-
-            exception.Data["CacheInstanceName"] = cacheInstanceName;
-            exception.Data["TypeName"] = typeName;
-            exception.Data["Values"] = SerializeUtil.ToJson(models);
-
-            return exception;
+            return new CacheException(CacheErrorCodes.SetModelsError, nameof(SetModelsError), ex, new { CacheInstancename = cacheInstanceName, Type = typeName, Values = models });
         }
 
         public static Exception SetError(string key, long timestamp, DistributedCacheEntryOptions options, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.SetError, ex);
-
-            exception.Data["Key"] = key;
-            exception.Data["Option"] = SerializeUtil.ToJson(options);
-            exception.Data["Timestamp"] = timestamp;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.SetError, nameof(SetError), ex, new { Key = key, Options = options, Timestamp = timestamp });
         }
 
-        public static CacheException RemoveModelsError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception ex)
+        public static CacheException RemoveModelsError(string? cacheInstanceName, string? typeName, string? keyName, IEnumerable keyValues, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.RemoveModelsError, ex);
-
-            exception.Data["CacheInstanceName"] = cacheInstanceName;
-            exception.Data["TypeName"] = typeName;
-            exception.Data["DimensionKeyName"] = dimensionKeyName;
-            exception.Data["DimensionKeyValues"] = SerializeUtil.ToJson(dimensionKeyValues);
-
-            return exception;
+            return new CacheException(CacheErrorCodes.RemoveModelsError, nameof(RemoveModelsError), ex,
+                new { CacheInstanceName = cacheInstanceName, Type = typeName, KeyName = keyName, KeyValues = keyValues });
         }
 
-        public static CacheException ForcedRemoveModelsError(string? cacheInstanceName, string? typeName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception ex)
-        {
-            CacheException exception = new CacheException(CacheErrorCodes.ForcedRemoveModelsError, ex);
-
-            exception.Data["CacheInstanceName"] = cacheInstanceName;
-            exception.Data["TypeName"] = typeName;
-            exception.Data["DimensionKeyName"] = dimensionKeyName;
-            exception.Data["DimensionKeyValues"] = SerializeUtil.ToJson(dimensionKeyValues);
-
-            return exception;
-        }
+        //TODO: 归类这些ErrorCode，没必要这么多。后期需要对那种情况进行单独处理，那么再单独 独立一个ErrorCode
 
         public static Exception RemoveError(string key, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.RemoveError, ex);
-
-            exception.Data["Key"] = key;
-
-            return exception;
+            return new CacheException(CacheErrorCodes.RemoveError, nameof(RemoveError), ex, new { Key = key });
         }
 
         public static Exception RemoveMultipleError(string collectionKey, IEnumerable<string> keys, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
-
-            exception.Data["CollectionKey"] = collectionKey;
-            exception.Data["Keys"] = keys.ToJoinedString(",");
-
-            return exception;
+            return new CacheException(CacheErrorCodes.RemoveMultipleError, nameof(RemoveMultipleError), ex, new { CollectionKey = collectionKey, Keys = keys.ToJoinedString(",") });
         }
 
         public static Exception RemoveMultipleError(IEnumerable<string> keys, Exception ex)
         {
-            CacheException exception = new CacheException(CacheErrorCodes.RemoveMultipleError, ex);
-
-            exception.Data["Keys"] = keys.ToJoinedString(",");
-
-            return exception;
+            return new CacheException(CacheErrorCodes.RemoveMultipleError, nameof(RemoveMultipleError), ex, new { Keys = keys.ToJoinedString(",") });
         }
     }
 }

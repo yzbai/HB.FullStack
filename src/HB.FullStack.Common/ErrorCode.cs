@@ -4,16 +4,16 @@ namespace System
 {
     public class ErrorCode : IEquatable<ErrorCode>
     {
-        public static readonly ErrorCode Empty = new ErrorCode(nameof(Empty), "Empty ErrorCode");
+        public static readonly ErrorCode Empty = new ErrorCode(nameof(Empty), "");
 
         public string Code { get; } = null!;
 
-        public string Message { get; } = null!;
+        public string Description { get; } = null!;
 
-        public ErrorCode(string code, string message)
+        public ErrorCode(string code, string description)
         {
             Code = code;
-            Message = message;
+            Description = description;
         }
 
         public override string ToString()
@@ -69,14 +69,6 @@ namespace System
         public static bool operator !=(ErrorCode? left, ErrorCode? right)
         {
             return !(left == right);
-        }
-    }
-
-    public static class ErrorCodeExtensions
-    {
-        public static ErrorCode WithMessage(this ErrorCode errorCode, string? messsage)
-        {
-            return new ErrorCode(errorCode.Code, messsage ?? errorCode.Message);
         }
     }
 }

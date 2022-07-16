@@ -1,14 +1,14 @@
-﻿using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Api.Requests;
-
-using Microsoft.Extensions.Options;
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Requests;
+
+using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Common.ApiClient
 {
@@ -121,7 +121,7 @@ namespace HB.FullStack.Common.ApiClient
         {
             if (!request.IsValid())
             {
-                throw ApiExceptions.ApiRequestInvalidateError(request, request.GetValidateErrorMessage());
+                throw ApiExceptions.ApiModelError("Request没有通过Validate", null, new { ValidateErrorMessage = request.GetValidateErrorMessage() });
             }
 
             HttpRequestBuilder requestBuilder = request.GetHttpRequestBuilder();
@@ -177,7 +177,7 @@ namespace HB.FullStack.Common.ApiClient
             }
             catch (Exception ex)
             {
-                throw ApiExceptions.ApiClientUnkownError($"ApiClient.SendAsync Failed.", request, ex);
+                throw ApiExceptions.ApiClientInnerError("ApiClient非ErrorCodeException", ex, new { Request = request });
             }
         }
 
@@ -213,7 +213,7 @@ namespace HB.FullStack.Common.ApiClient
                         }
                         else
                         {
-                            throw ApiExceptions.ApiRequestSetApiKeyError(requestBuilder);
+                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = requestBuilder.Auth.ApiKeyName, RequeestUri = requestBuilder.AssembleUrl() });
                         }
 
                         break;
@@ -222,7 +222,7 @@ namespace HB.FullStack.Common.ApiClient
                 case ApiAuthType.Jwt:
                     if (_tokenProvider.AccessToken.IsNullOrEmpty())
                     {
-                        throw ApiExceptions.ApiRequestSetJwtError(requestBuilder);
+                        throw ApiExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.AssembleUrl() });
                     }
 
                     requestBuilder.SetJwt(_tokenProvider.AccessToken);

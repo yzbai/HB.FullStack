@@ -524,7 +524,7 @@ end
         //    {
         //        await database.ScriptEvaluateAsync(loadedScript, redisKeys.ToArray(), redisValues.ToArray()).ConfigureAwait(false);
         //    }
-        //    catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
+        //    catch (RedisServerException ex) when (ex.Description.StartsWith("NOSCRIPT", StringComparison.Ordinal))
         //    {
         //        Logger.LogLuaScriptNotLoaded(modelDef.CacheInstanceName, modelDef.Name, nameof(ForcedRemoveModelsAsync));
 

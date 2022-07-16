@@ -1,18 +1,17 @@
-﻿using HB.FullStack.Database;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading.Tasks;
+
+using HB.FullStack.Database;
 using HB.FullStack.Database.Engine;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MySqlConnector;
-using MySqlConnector.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
 {
@@ -44,7 +43,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (InvalidOperationException ex)
             {
-                GlobalSettings.Logger.LogError(ex, $"Connections:{SerializeUtil.ToJson(options.Value.Connections)}");
+                GlobalSettings.Logger.LogError(ex, "Connections:{@Connections}", options.Value.Connections);
             }
 
             _options = options.Value;

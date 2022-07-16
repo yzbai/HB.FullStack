@@ -2,22 +2,21 @@
 {
     public class ApiException : ErrorCode2Exception
     {
-        public ApiException(ErrorCode errorCode) : base(errorCode)
+        public ApiException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
 
-        public ApiException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("不要用")]
         public ApiException()
         {
         }
 
+        [Obsolete("不要用")]
         public ApiException(string message) : base(message)
         {
         }
 
+        [Obsolete("不要用")]
         public ApiException(string message, Exception innerException) : base(message, innerException)
         {
         }

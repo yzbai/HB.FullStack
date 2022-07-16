@@ -1,11 +1,9 @@
-﻿using HB.FullStack.Common.Api;
-
-using System.Net.Http;
-
-namespace System
+﻿namespace System
 {
     public static partial class ApiErrorCodes
     {
+        public static readonly ErrorCode ApiClientInnerError = new ErrorCode(nameof(ApiClientInnerError), "ApiClient本身出错");
+
         public static ErrorCode NoAuthority { get; } = new ErrorCode(nameof(NoAuthority), "");
         public static ErrorCode AccessTokenExpired { get; } = new ErrorCode(nameof(AccessTokenExpired), "");
         public static ErrorCode ModelValidationError { get; } = new ErrorCode(nameof(ModelValidationError), "");
@@ -69,8 +67,8 @@ namespace System
 
         public static ErrorCode AuthorizationNotFound { get; } = new ErrorCode(nameof(AuthorizationNotFound), "");
         public static ErrorCode AuthorizationPasswordWrong { get; } = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
-        public static ErrorCode AuthorizationTooFrequent { get; } = new ErrorCode(nameof(AuthorizationTooFrequent), "");
-        public static ErrorCode AuthorizationInvalideAccessToken { get; } = new ErrorCode(nameof(AuthorizationInvalideAccessToken), "");
+        public static ErrorCode AccessTokenRefreshing { get; } = new ErrorCode(nameof(AccessTokenRefreshing), "同一设备正在Refreshing");
+        public static ErrorCode RefreshAccessTokenError { get; } = new ErrorCode(nameof(RefreshAccessTokenError), "");
         public static ErrorCode AuthorizationInvalideDeviceId { get; } = new ErrorCode(nameof(AuthorizationInvalideDeviceId), "");
         public static ErrorCode AuthorizationInvalideUserId { get; } = new ErrorCode(nameof(AuthorizationInvalideUserId), "");
         public static ErrorCode AuthorizationUserSecurityStampChanged { get; } = new ErrorCode(nameof(AuthorizationUserSecurityStampChanged), "");
@@ -82,169 +80,39 @@ namespace System
         public static ErrorCode AuthorizationOverMaxFailedCount { get; } = new ErrorCode(nameof(AuthorizationOverMaxFailedCount), "");
         public static ErrorCode JwtSigningCertNotFound { get; } = new ErrorCode(nameof(JwtSigningCertNotFound), "");
         public static ErrorCode JwtEncryptionCertNotFound { get; } = new ErrorCode(nameof(JwtEncryptionCertNotFound), "");
+        public static ErrorCode ServerReturnError { get; } = new ErrorCode(nameof(ServerReturnError), "Server收到了请求，但返回了错误");
+        public static ErrorCode ApiModelError { get; } = new ErrorCode(nameof(ApiModelError), "ApiRequest等Model出错");
+        public static ErrorCode ApiAuthenticationError { get; } = new ErrorCode(nameof(ApiAuthenticationError), "ApiClient请求时，授权信息有错或缺少");
 
         #endregion
     }
 
     public static partial class ApiExceptions
     {
-        internal static Exception RequestUnderlyingIssue(ApiRequest request, HttpRequestException innerException)
-        {
-            ApiException ex = new(ApiErrorCodes.RequestUnderlyingIssue, innerException);
 
-            return ex;
+        public static Exception ServerUnkownError(string responseString)
+        {
+            return new ApiException(ApiErrorCodes.ServerUnKownError, "Server返回了其他格式的错误表示，赶紧处理", null, new { Response = responseString });
         }
 
-        internal static Exception RequestAlreadyUsed(ApiRequest request, Exception innerException)
+        internal static Exception ApiClientInnerError(string cause, Exception? innerEx, object? context)
         {
-            ApiException ex = new(ApiErrorCodes.RequestAlreadyUsed, innerException);
-
-            return ex;
+            return new ApiException(ApiErrorCodes.ApiClientInnerError, cause, innerEx, context);
         }
 
-        public static Exception RequestCanceled(ApiRequest request, Exception innerException)
+        internal static Exception ServerReturnError(ErrorCode errorCode)
         {
-            ApiException ex = new(ApiErrorCodes.RequestCanceled, innerException);
-
-            return ex;
+            return new ApiException(errorCode, "Server认为请求无法返回正确");
         }
 
-        public static Exception ApiClientGetStreamUnkownError(ApiRequest request, Exception innerException)
+        internal static Exception ApiModelError(string cause, Exception? innerEx, object? context)
         {
-            ApiException ex = new ApiException(ApiErrorCodes.ApiClientGetStreamUnkownError, innerException);
-
-            return ex;
+            return new ApiException(ApiErrorCodes.ApiModelError, cause, innerEx, context);
         }
 
-        public static Exception ApiRequestInvalidateError(ApiRequest request, string validationErrorMessage)
+        internal static Exception ApiAuthenticationError(string cause, Exception? innerEx, object? context)
         {
-            ApiException ex = new ApiException(ApiErrorCodes.ApiRequestInvalidateError);
-
-            ex.Data["ValidationError"] = validationErrorMessage;
-
-            return ex;
-        }
-
-        public static Exception RequestTimeout(ApiRequest request, Exception innerException)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.RequestTimeout, innerException);
-
-            return ex;
-        }
-
-        public static Exception ApiClientUnkownError(string cause, ApiRequest request, Exception innerException)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.ApiClientUnkownError, innerException);
-
-            ex.Data["Cause"] = cause;
-
-            return ex;
-        }
-
-        public static Exception ServerUnkownError(string response)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.ServerUnKownError);
-            ex.Data["Response"] = response;
-            return ex;
-        }
-
-        public static Exception ApiClientSendUnkownError(ApiRequest request, Exception innerException)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.ApiClientSendUnkownError, innerException);
-
-            return ex;
-        }
-
-        internal static Exception FileUpdateRequestCountNotEven()
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.FileUpdateRequestCountNotEven);
-            return ex;
-        }
-
-        internal static Exception LackApiResourceAttribute(string? type)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.LackApiResourceAttribute);
-            ex.Data["Type"] = type;
-
-            return ex;
-        }
-
-        internal static Exception HttpResponseDeserializeError(ApiRequest request, string? responseString)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.HttpResponseDeserializeError);
-            ex.Data["Request"] = SerializeUtil.ToJson(request);
-            ex.Data["ResponseString"] = responseString;
-
-            return ex;
-        }
-
-        public static Exception UploadError(string cause, string? fileName, Exception? innerException)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.UploadError, innerException);
-
-            ex.Data["Cause"] = cause;
-            ex.Data["FileName"] = fileName;
-
-            return ex;
-        }
-
-        public static Exception ApiRequestSetJwtError(HttpRequestBuilder request)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetJwtError);
-
-            return ex;
-        }
-
-        public static Exception ApiRequestSetApiKeyError(HttpRequestBuilder requestBuilder)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.ApiRequestSetApiKeyError);
-
-            return ex;
-        }
-
-        public static Exception TokenRefreshError(string cause)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.TokenRefreshError);
-
-            ex.Data["Cause"] = cause;
-
-            return ex;
-        }
-
-        public static Exception ServerNullReturn(string parameter)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.ServerNullReturn);
-
-            ex.Data["Parameter"] = parameter;
-
-            return ex;
-        }
-
-        public static Exception NeedOwnerResId(string resName)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.NeedOwnerResId);
-
-            ex.Data["ResName"] = resName;
-
-            return ex;
-        }
-
-        internal static Exception LackParent1ResAttribute(Type type)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.LackParent1ResIdAttribute);
-
-            ex.Data["ResName"] = type.FullName;
-
-            return ex;
-        }
-
-        internal static Exception LackParent2ResAttribute(Type type)
-        {
-            ApiException ex = new ApiException(ApiErrorCodes.LackParent2ResIdAttribute);
-
-            ex.Data["ResName"] = type.FullName;
-
-            return ex;
+            return new ApiException(ApiErrorCodes.ApiAuthenticationError, cause, innerEx, context);
         }
     }
 }

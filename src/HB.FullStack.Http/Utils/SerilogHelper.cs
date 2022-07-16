@@ -16,7 +16,7 @@ namespace HB.FullStack.WebApi
     public static class SerilogHelper
     {
         private const string LogFilePathTemplate = "logs/{0}_{1}_Id.log";
-        private const string LogOutputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}]  {Message:lj} [{SourceContext}] [{Properties:j}] {NewLine}{Exception}";
+        private const string LogOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}[{Level:u3}] {Message:lj} [{SourceContext}]{NewLine}{Exception}{Properties:j}{NewLine}";
 
         private static SerilogLoggerFactory? _loggerFactory;
 
@@ -60,7 +60,7 @@ namespace HB.FullStack.WebApi
         private static LoggerConfiguration CreateLoggerConfiguration()
         {
             string logFilePath = string.Format(
-                CultureInfo.InvariantCulture, 
+                CultureInfo.InvariantCulture,
                 LogFilePathTemplate,
                 Assembly.GetEntryAssembly()?.FullName ?? "UnKown",
                 EnvironmentUtil.MachineId.GetValueOrDefault());

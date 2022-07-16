@@ -1,28 +1,22 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-using HB.FullStack.Cache;
-
-namespace System
+﻿namespace System
 {
     public class CacheException : ErrorCode2Exception
     {
-        public CacheException(ErrorCode errorCode) : base(errorCode)
+        public CacheException(ErrorCode errorCode, string cause, Exception? innerException, object? context) : base(errorCode, cause, innerException, context)
         {
         }
 
-        public CacheException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("Do not use.")]
         public CacheException()
         {
         }
 
+        [Obsolete("Do not use.")]
         public CacheException(string message) : base(message)
         {
         }
 
+        [Obsolete("Do not use.")]
         public CacheException(string message, Exception innerException) : base(message, innerException)
         {
         }

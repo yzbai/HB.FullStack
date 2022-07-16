@@ -1,6 +1,7 @@
 ﻿using System;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.WebApi
 {
@@ -11,9 +12,11 @@ namespace HB.FullStack.WebApi
         public static ErrorCode StartupError { get; set; } = new ErrorCode(nameof(StartupError), "");
         public static ErrorCode DatabaseInitLockError { get; set; } = new ErrorCode(nameof(DatabaseInitLockError), "");
 
-        public static ErrorCode ExceptionHandlerPathFeatureNull { get; } = new ErrorCode(nameof(ExceptionHandlerPathFeatureNull), "");
+        //public static ErrorCode ExceptionHandlerPathFeatureNull { get; } = new ErrorCode(nameof(ExceptionHandlerPathFeatureNull), "");
 
-        public static ErrorCode ServerUnKownNonErrorCodeError { get; } = new ErrorCode(nameof(ServerUnKownNonErrorCodeError), "");
+        //public static ErrorCode ServerUnKownNonErrorCodeError { get; } = new ErrorCode(nameof(ServerUnKownNonErrorCodeError), "");
+
+        public static ErrorCode ServerInternalError { get; } = new ErrorCode(nameof(ServerInternalError), "服务器内部运行错误");
 
         public static ErrorCode GlobalExceptionError { get; } = new ErrorCode(nameof(GlobalExceptionError), "");
     }
@@ -52,6 +55,8 @@ namespace HB.FullStack.WebApi
         {
             _logGlobalException(logger, path, route, query, content, errorCode, exception);
         }
+
+
 
         public static void LogStarup(this ILogger logger)
         {

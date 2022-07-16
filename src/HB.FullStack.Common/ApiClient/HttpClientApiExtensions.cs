@@ -41,7 +41,7 @@ namespace System.Net.Http
                     string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 #endif
 
-                    throw ApiExceptions.HttpResponseDeserializeError(request, responseString);
+                    throw ApiExceptions.ApiClientInnerError("Server返回成功，但Json解析不成功", null, new { Request = request, ResponseString = responseString });
                 }
 
                 return response;
@@ -72,17 +72,9 @@ namespace System.Net.Http
             }
 
             //https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.sendasync?view=netstandard-2.1
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
-                throw ApiExceptions.RequestAlreadyUsed(request: request, innerException: ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw ApiExceptions.RequestTimeout(request: request, innerException: ex);
-            }
-            catch (HttpRequestException ex)
-            {
-                throw ApiExceptions.RequestUnderlyingIssue(request: request, innerException: ex);
+                throw ApiExceptions.ApiClientInnerError("HttpClient.SendAsync出错", ex, new { ApiRequest = request, RequestUri = requestMessage.RequestUri });
             }
         }
 
@@ -95,7 +87,7 @@ namespace System.Net.Http
 
             //开始处理错误
 
-            //401, 解析Header
+            //step 1: 401, 从Header解析ErrorCode
             if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
             {
                 if (responseMessage.Headers.TryGetValues(HeaderNames.WWWAuthenticate, out IEnumerable<string>? headValues) && headValues.Count() == 1)
@@ -110,7 +102,7 @@ namespace System.Net.Http
                         {
                             if (authErrorCode != null)
                             {
-                                throw new ApiException(authErrorCode);
+                                throw ApiExceptions.ServerReturnError(authErrorCode);
                             }
                         }
                     }
@@ -118,18 +110,20 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
+
+            //step 2: 从内容处理
             (bool success, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonContentAsync<ErrorCode>().ConfigureAwait(false);
 
             //responseMessage.Dispose();
 
             if (success && errorCode != null)
             {
-                throw new ApiException(errorCode);
+                throw ApiExceptions.ServerReturnError(errorCode);
             }
             else
             {
                 string? responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw ApiExceptions.ServerUnkownError(response: responseString);
+                throw ApiExceptions.ServerUnkownError(responseString: responseString);
             }
         }
     }

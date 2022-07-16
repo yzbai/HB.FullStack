@@ -2,12 +2,12 @@
 {
     public class IdentityException : ErrorCode2Exception
     {
-        public IdentityException(ErrorCode errorCode) : base(errorCode)
+        public IdentityException(ErrorCode errorCode, string cause) : base(errorCode, cause)
         {
-            
+
         }
 
-        public IdentityException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
+        public IdentityException(ErrorCode errorCode, string cause, Exception? innerException) : base(errorCode, cause, innerException)
         {
         }
 

@@ -2,14 +2,14 @@
 {
     public class ErrorCode2Exception : Exception
     {
-        public ErrorCode2Exception(ErrorCode errorCode) : base(errorCode.Message)
+        public ErrorCode2Exception(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(cause, innerException)
         {
             ErrorCode = errorCode;
-        }
 
-        public ErrorCode2Exception(ErrorCode errorCode, Exception? innerException) : base(errorCode.Message, innerException)
-        {
-            ErrorCode = errorCode;
+            if (context != null)
+            {
+                Context = context;
+            }
         }
 
         public ErrorCode ErrorCode
@@ -24,15 +24,30 @@
             }
         }
 
+        //TODO: 这会引起Memory Leack吗？
+        //TODO: 有必要吗？还是直接用Data就行
+
+        /// <summary>
+        /// 异常发生时，上下文数据
+        /// </summary>
+        public object? Context
+        {
+            get { return Data[nameof(Context)]; }
+            set { Data[nameof(Context)] = value; }
+        }
+
+        [Obsolete("不要用")]
         public ErrorCode2Exception()
         {
         }
 
-        public ErrorCode2Exception(string? message) : base(message)
+        [Obsolete("不要用")]
+        public ErrorCode2Exception(string? cause) : base(cause)
         {
         }
 
-        public ErrorCode2Exception(string? message, Exception innerException) : base(message, innerException)
+        [Obsolete("不要用")]
+        public ErrorCode2Exception(string? cause, Exception innerException) : base(cause, innerException)
         {
         }
     }

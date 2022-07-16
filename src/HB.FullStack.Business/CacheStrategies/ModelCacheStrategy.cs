@@ -74,7 +74,7 @@ namespace HB.FullStack.Repository.CacheStrategies
 
                     if (allExists)
                     {
-                        logger.LogInformation($"//TODO: 请求同一项Cache，等待锁并获取锁后，发现Cache已存在。Model:{typeof(TModel).Name},KeyName:{keyName}, KeyValues:{SerializeUtil.ToJson(keyValues)}");
+                        logger.LogInformation("//TODO: 请求同一项Cache，等待锁并获取锁后，发现Cache已存在。Model:{Model},KeyName:{KeyName}, KeyValues:{@KeyValues}", typeof(TModel).Name, keyName, keyValues);
                         return cachedModels!;
                     }
                 }

@@ -1,4 +1,10 @@
-﻿using AsyncAwaitBestPractices;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using AsyncAwaitBestPractices;
 
 using HB.FullStack.EventBus.Abstractions;
 using HB.FullStack.Lock.Distributed;
@@ -7,12 +13,6 @@ using HB.Infrastructure.Redis.Shared;
 using Microsoft.Extensions.Logging;
 
 using StackExchange.Redis;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.EventBus
 {
@@ -229,7 +229,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     if (now - model.Timestamp > _eventBusEventMessageExpiredSeconds)
                     {
-                        _logger.LogCritical("有EventMessage过期，{eventType}, {model}", _eventType, SerializeUtil.ToJson(model));
+                        _logger.LogCritical("有EventMessage过期，{eventType}, {@model}", _eventType, model);
 
                         await distributedLock.DisposeAsync().ConfigureAwait(false);
 
@@ -246,7 +246,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     if (isExist == null || isExist.Value)
 #pragma warning restore CA1508 // Avoid dead conditional code
                     {
-                        _logger.LogInformation("有EventMessage重复，{eventType}, {model}", _eventType, SerializeUtil.ToJson(model));
+                        _logger.LogInformation("有EventMessage重复，{eventType}, {@model}", _eventType, model);
 
                         await distributedLock.DisposeAsync().ConfigureAwait(false);
 
@@ -262,7 +262,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                     {
-                        _logger.LogCritical(ex, "处理消息出错, {_eventType}, {model}", _eventType, SerializeUtil.ToJson(model));
+                        _logger.LogCritical(ex, "处理消息出错, {_eventType}, {@model}", _eventType, model);
                     }
 
                     //5, Acks

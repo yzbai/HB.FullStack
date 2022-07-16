@@ -1,22 +1,16 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HB.FullStack.Common.Api;
+﻿using HB.FullStack.CommonTests.Data;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HB.FullStack.CommonTests.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.Common.Api.Tests
 {
     [TestClass()]
-    public class ApiResourceDefFactoryTests
+    public class EndpointBindingFactoryTests
     {
         [TestMethod()]
         public void GetTest()
         {
-            ApiResourceBinding def = ApiResourceBindingFactory.Get<BookRes>();
+            EndpointBinding def = EndpointBindingFactory.Get<BookRes>();
 
             Assert.IsNotNull(def);
 
