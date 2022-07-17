@@ -46,7 +46,7 @@ namespace HB.FullStack.WebApi
             //捕捉漏网Exception
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
-                GlobalSettings.Logger.LogCritical2(args.Exception, $"未被发现的Task异常，Sender : {sender}");
+                GlobalSettings.Logger.LogCritical(args.Exception, "未被发现的Task异常，Sender : {Sender}", sender);
                 args.SetObserved();
             };
 

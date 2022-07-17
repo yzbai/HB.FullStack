@@ -19,6 +19,7 @@ namespace HB.FullStack.WebApi
         public static ErrorCode ServerInternalError { get; } = new ErrorCode(nameof(ServerInternalError), "服务器内部运行错误");
 
         public static ErrorCode GlobalExceptionError { get; } = new ErrorCode(nameof(GlobalExceptionError), "");
+        public static ErrorCode UploadError { get; } = new ErrorCode(nameof(UploadError), "");
     }
 
     public static class WebApiExceptions
@@ -40,6 +41,11 @@ namespace HB.FullStack.WebApi
             exception.Data["Cause"] = cause;
 
             return exception;
+        }
+
+        internal static Exception UploadError(string cause, Exception? innerEx, object? context)
+        {
+            return new WebApiException(WebApiErrorCodes.UploadError, cause, innerEx, context);
         }
     }
 

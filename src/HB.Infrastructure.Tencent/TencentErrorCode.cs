@@ -11,7 +11,7 @@ namespace HB.Infrastructure.Tencent
     {
         internal static Exception CapthaError(string appId, string cause)
         {
-            TencentException exception = new TencentException(TencentErrorCodes.CapthaError);
+            TencentException exception = new TencentException(TencentErrorCodes.CapthaError, cause);
 
             exception.Data["AppId"] = appId;
             exception.Data["Cause"] = cause;
