@@ -39,7 +39,8 @@ namespace HB.FullStack.Repository.CacheStrategies
 
                 if (result != null)
                 {
-                    logger.LogInformation($"//TODO: 请求同一项CachedItem，等待锁并获取锁后，发现Cache已存在。Model:{cacheItem.GetType().Name},CacheKey:{cacheItem.CacheKey}");
+                    logger.LogInformation("//TODO: 请求同一项CachedItem，等待锁并获取锁后，发现Cache已存在。Model:{ModelName},CacheKey:{CacheKey}",
+                        cacheItem.GetType().Name, cacheItem.CacheKey);
                     return result;
                 }
 
@@ -51,18 +52,19 @@ namespace HB.FullStack.Repository.CacheStrategies
                 {
                     long timestamp = (dbRt as TimestampDBModel)?.Timestamp ?? TimeUtil.UtcNowTicks;
                     SetCache(cacheItem.SetValue(dbRt).SetTimestamp(timestamp), cache);
-                    logger.LogInformation($"缓存 Missed. Model:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
+                    logger.LogInformation("缓存 Missed. Model:{ModelName}, CacheKey:{CacheKey}", cacheItem.GetType().Name, cacheItem.CacheKey);
                 }
                 else
                 {
-                    logger.LogInformation($"查询到空值. Model:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}");
+                    logger.LogInformation("查询到空值. Model:{ModelName}, CacheKey:{CacheKey}", cacheItem.GetType().Name, cacheItem.CacheKey);
                 }
 
                 return dbRt;
             }
             else
             {
-                logger.LogCritical($"锁未能占用. Model:{cacheItem.GetType().Name}, CacheKey:{cacheItem.CacheKey}, Lock Status:{@lock.Status}");
+                logger.LogCritical("锁未能占用. Model:{ModelName}, CacheKey:{CacheKey}, Lock Status:{LockStatus}",
+                    cacheItem.GetType().Name, cacheItem.CacheKey, @lock.Status);
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }
@@ -72,7 +74,6 @@ namespace HB.FullStack.Repository.CacheStrategies
         {
             cache.RemoveAsync(cachedItem).SafeFireAndForget(OnException);
         }
-
 
         private static void SetCache<TResult>(CachedItem<TResult> cachedItem, ICache cache) where TResult : class
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
 
 using HB.FullStack.Common.Cache;
 
@@ -30,27 +29,21 @@ namespace HB.FullStack.WebApi
                 return false;
             }
 
-
             try
             {
                 content = _dataProtector.Unprotect(protectedToken);
 
                 if (content.IsNullOrEmpty())
                 {
-                    _logger.LogWarning("UnProtected Failed. May has an attack. {protectedToken}.", content);
+                    _logger.LogWarning("UnProtected Failed. May has an attack. {ProtectedToken}.", protectedToken);
                     return false;
                 }
 
                 return true;
             }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "{protectedToken}", protectedToken);
-                return false;
-            }
-            catch (CryptographicException ex)
-            {
-                _logger.LogError(ex, "{protectedToken}", protectedToken);
+                _logger.LogError(ex, "UnProtected Failed. ProtecedToken : {ProtectedToken}", protectedToken);
                 return false;
             }
         }

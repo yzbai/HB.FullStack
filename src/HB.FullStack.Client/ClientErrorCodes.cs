@@ -39,7 +39,6 @@ namespace System
             _logDbSimpleLockerNoWaitLockFailed(logger, resourceType, resource, availableTime, exception);
         }
 
-
         private static readonly Action<ILogger, string?, string?, Exception?> _logDbSimpleLockerUnLockFailed =
             LoggerMessage.Define<string?, string?>(
                 LogLevel.Error,
@@ -56,7 +55,7 @@ namespace System
     {
         public static Exception LocalFileSaveError(string fullPath)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.LocalFileSaveError);
+            ClientException ex = new ClientException(ClientErrorCodes.LocalFileSaveError, nameof(LocalFileSaveError));
 
             ex.Data["FullPath"] = fullPath;
 
@@ -65,7 +64,7 @@ namespace System
 
         public static Exception NoInternet(string cause)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.NoInternet);
+            ClientException ex = new ClientException(ClientErrorCodes.NoInternet, nameof(NoInternet));
 
             ex.Data["Cause"] = cause;
 
@@ -74,7 +73,7 @@ namespace System
 
         public static Exception AliyunOssPutObjectError(string cause, Exception? innerException)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.AliyunOssPutObjectError, innerException);
+            ClientException ex = new ClientException(ClientErrorCodes.AliyunOssPutObjectError, nameof(AliyunOssPutObjectError), innerException);
 
             ex.Data["Cause"] = cause;
 
@@ -83,7 +82,7 @@ namespace System
 
         public static Exception FileServiceError(string fileName, string directoryName, string cause, Exception innerException)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.FileServiceError, innerException);
+            ClientException ex = new ClientException(ClientErrorCodes.FileServiceError, nameof(FileServiceError), innerException);
 
             ex.Data["FileName"] = fileName;
             ex.Data["DirectoryName"] = directoryName;
@@ -94,7 +93,7 @@ namespace System
 
         public static Exception ImageOptionsOutOfRange(int selectedIndex, string cause)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.ImageOptionsOutOfRange);
+            ClientException ex = new ClientException(ClientErrorCodes.ImageOptionsOutOfRange, nameof(ImageOptionsOutOfRange));
 
             ex.Data["SelectedIndex"] = selectedIndex;
             ex.Data["Cause"] = cause;
@@ -104,7 +103,7 @@ namespace System
 
         public static Exception IdBarrierError(string cause)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.IdBarrierError);
+            ClientException ex = new ClientException(ClientErrorCodes.IdBarrierError, nameof(IdBarrierError));
 
             ex.Data["Cause"] = cause;
 
@@ -113,7 +112,7 @@ namespace System
 
         public static Exception ResourceNotFound(string resourceId)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.ResourceNotFound);
+            ClientException ex = new ClientException(ClientErrorCodes.ResourceNotFound, nameof(ResourceNotFound));
 
             ex.Data["ResourceId"] = resourceId;
 
@@ -122,7 +121,7 @@ namespace System
 
         public static Exception AliyunStsTokenOverTime(string casuse, string directoryPermissionName, bool needWrite)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.AliyunStsTokenOverTime);
+            ClientException ex = new ClientException(ClientErrorCodes.AliyunStsTokenOverTime, nameof(AliyunStsTokenOverTime));
 
             ex.Data["Cause"] = casuse;
             ex.Data["DirectoryPermissionName"] = directoryPermissionName;
@@ -133,14 +132,14 @@ namespace System
 
         public static Exception NotLogined()
         {
-            ClientException ex = new ClientException(ClientErrorCodes.NotLogined);
+            ClientException ex = new ClientException(ClientErrorCodes.NotLogined, nameof(NotLogined));
 
             return ex;
         }
 
         public static Exception SmsCodeValidateError(string mobile)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.SmsCodeValidateError);
+            ClientException ex = new ClientException(ClientErrorCodes.SmsCodeValidateError, nameof(SmsCodeValidateError));
 
             ex.Data["Mobile"] = mobile;
 
@@ -149,7 +148,7 @@ namespace System
 
         public static Exception UploadError(string cause)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.UploadError);
+            ClientException ex = new ClientException(ClientErrorCodes.UploadError, nameof(UploadError));
 
             ex.Data["Cause"] = cause;
 
@@ -158,7 +157,7 @@ namespace System
 
         internal static Exception UnSupportedModelType(string? modelFullName)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.UnSupportedModelType);
+            ClientException ex = new ClientException(ClientErrorCodes.UnSupportedModelType, nameof(UnSupportedModelType));
 
             ex.Data["FullName"] = modelFullName;
 
@@ -167,14 +166,14 @@ namespace System
 
         internal static Exception OperationInvalidCauseofSyncingAfterReconnected()
         {
-            ClientException ex = new ClientException(ClientErrorCodes.OperationInvalidCauseofSyncingAfterReconnected);
+            ClientException ex = new ClientException(ClientErrorCodes.OperationInvalidCauseofSyncingAfterReconnected, nameof(OperationInvalidCauseofSyncingAfterReconnected));
 
             return ex;
         }
 
         public static Exception NoSuchDirectory(string directoryName)
         {
-            ClientException ex = new ClientException(ClientErrorCodes.NoSuchDirectory);
+            ClientException ex = new ClientException(ClientErrorCodes.NoSuchDirectory, nameof(NoSuchDirectory));
             ex.Data["DirectoryName"] = directoryName;
             return ex;
         }

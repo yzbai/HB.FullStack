@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.Redis.KVStore")]
 namespace HB.FullStack.KVStore
@@ -28,7 +26,7 @@ namespace HB.FullStack.KVStore
     {
         internal static Exception NoModelSchemaFound(string? type)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoModelSchemaFound);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoModelSchemaFound, nameof(NoModelSchemaFound));
 
             exception.Data["Type"] = type;
 
@@ -37,7 +35,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception LackKVStoreKeyAttributeError(string? type)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.LackKVStoreKeyAttributeError);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.LackKVStoreKeyAttributeError, nameof(LackKVStoreKeyAttributeError));
 
             exception.Data["Type"] = type;
 
@@ -46,7 +44,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception Unkown(string? type, string storeName, object? key, Exception innerException)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, innerException);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, nameof(Unkown), innerException);
 
             exception.Data["Type"] = type;
             exception.Data["StoreName"] = storeName;
@@ -57,14 +55,14 @@ namespace HB.FullStack.KVStore
 
         internal static Exception VersionsKeysNotEqualError()
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.VersionsKeysNotEqualError);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.VersionsKeysNotEqualError, nameof(VersionsKeysNotEqualError));
 
             return exception;
         }
 
         internal static Exception Unkown(string? type, string storeName, object? keys, object? values, Exception innerException)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, innerException);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, nameof(Unkown), innerException);
 
             exception.Data["Type"] = type;
             exception.Data["StoreName"] = storeName;
@@ -76,7 +74,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception CacheLoadedLuaNotFound(string instanceName)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.LoadedLuaNotFound);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.LoadedLuaNotFound, nameof(CacheLoadedLuaNotFound));
 
             exception.Data["InstanceName"] = instanceName;
 
@@ -85,7 +83,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception KVStoreRedisConnectionFailed(string type, Exception innerException)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.RedisConnectionFailed, innerException);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.RedisConnectionFailed, nameof(KVStoreRedisConnectionFailed), innerException);
 
             exception.Data["Type"] = type;
 
@@ -94,7 +92,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception KVStoreRedisTimeout(string type, Exception innerException)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.KVStoreRedisTimeout, innerException);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.KVStoreRedisTimeout, nameof(KVStoreRedisTimeout), innerException);
 
             exception.Data["Type"] = type;
 
@@ -103,7 +101,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception Unkown(string type, Exception innerException)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, innerException);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.UnKown, nameof(Unkown), innerException);
 
             exception.Data["Type"] = type;
 
@@ -112,7 +110,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception WriteError(string type, string storeName, object? keys, object? values, ErrorCode errorCode)
         {
-            KVStoreException exception = new KVStoreException(errorCode);
+            KVStoreException exception = new KVStoreException(errorCode, nameof(WriteError));
 
             exception.Data["Type"] = type;
             exception.Data["StoreName"] = storeName;
@@ -124,7 +122,7 @@ namespace HB.FullStack.KVStore
 
         internal static Exception NoSuchInstance(string instanceName)
         {
-            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoSuchInstance);
+            KVStoreException exception = new KVStoreException(KVStoreErrorCodes.NoSuchInstance, nameof(NoSuchInstance));
 
             exception.Data["InstanceName"] = instanceName;
 

@@ -1,32 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using HB.FullStack.Lock;
-
-namespace System
+﻿namespace System
 {
     public class LockException : ErrorCode2Exception
     {
-        public LockException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
 
-        public LockException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
 
+        [Obsolete("DoNotUse")]
         public LockException()
         {
         }
 
+        [Obsolete("DoNotUse")]
         public LockException(string message) : base(message)
         {
         }
 
+        [Obsolete("DoNotUse")]
         public LockException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public LockException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

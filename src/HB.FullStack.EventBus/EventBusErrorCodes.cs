@@ -18,7 +18,7 @@ namespace HB.FullStack.EventBus
     {
         internal static Exception SettingsError(string eventName, string cause)
         {
-            EventBusException exception = new EventBusException(EventBusErrorCodes.SettingsError);
+            EventBusException exception = new EventBusException(EventBusErrorCodes.SettingsError, cause);
 
             exception.Data["EventName"] = eventName;
             exception.Data["Cause"] = cause;
@@ -28,7 +28,7 @@ namespace HB.FullStack.EventBus
 
         internal static Exception NoHandler(string eventType)
         {
-            EventBusException exception = new EventBusException(EventBusErrorCodes.NoHandler);
+            EventBusException exception = new EventBusException(EventBusErrorCodes.NoHandler, nameof(NoHandler));
 
             exception.Data["EventType"] = eventType;
 
@@ -37,7 +37,7 @@ namespace HB.FullStack.EventBus
 
         internal static Exception HandlerAlreadyExisted(string eventType, string brokerName)
         {
-            EventBusException exception = new EventBusException(EventBusErrorCodes.HandlerAlreadyExisted);
+            EventBusException exception = new EventBusException(EventBusErrorCodes.HandlerAlreadyExisted, nameof(HandlerAlreadyExisted));
 
             exception.Data["EventType"] = eventType;
             exception.Data["BrokerName"] = brokerName;

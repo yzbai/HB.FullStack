@@ -46,8 +46,6 @@ namespace HB.FullStack.Repository
             //Dirty trick
             Database = (IDatabase)databaseReader;
 
-            Logger.LogInformation($"{GetType().Name} 初始化完成");
-
             //在Changed后Delete Cache，而不是Changing时Delete Cache
             //https://zongwb.medium.com/how-to-invalidate-or-update-cache-correctly-5dce2db9dde5
             RegisterModelChangedEvents(InvalidateCacheItemsOnChanged);
@@ -347,11 +345,11 @@ namespace HB.FullStack.Repository
 
             if (results.IsNullOrEmpty())
             {
-                Logger.LogDebug("Repo中没有找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TMainDBModel).Name, keyName, keyValue);
+                Logger.LogDebug("Repo中没有找到 {ModelType}, KeyName :{KeyName}, KeyValue :{KeyValue}", typeof(TMainDBModel).Name, keyName, keyValue);
                 return null;
             }
 
-            Logger.LogDebug("Repo中 找到 {ModelType}, dimensionKey :{dimensionKey}, dimensionKeyValue :{dimensionKeyValue}", typeof(TMainDBModel).Name, keyName, keyValue);
+            Logger.LogDebug("Repo中 找到 {@Context}", new { ModelName = typeof(TMainDBModel).Name, KeyName = keyName, KeyValue = keyValue });
 
             return results.ElementAt(0);
         }

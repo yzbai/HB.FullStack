@@ -129,26 +129,26 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     if (result == 0)
                     {
                         //还没有数据，等会吧
-                        _logger.LogTrace("ScanHistory {InstanceName} 中,还没有数据，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
+                        _logger.LogTrace("ScanHistory {InstanceName} 中,还没有数据，，EventType:{EventType}", _instanceSetting.InstanceName, _eventType);
                         //await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
                         Thread.Sleep(10 * 1000);//让出线程
                     }
                     else if (result == 1)
                     {
                         //时间太早，等会再检查
-                        _logger.LogTrace("ScanHistory {InstanceName} 中,数据还太新，一会再检查，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
+                        _logger.LogTrace("ScanHistory {InstanceName} 中,数据还太新，一会再检查，，EventType:{EventType}", _instanceSetting.InstanceName, _eventType);
                         //await Task.Delay(10 * 1000, cancellationToken).ConfigureAwait(false);
                         Thread.Sleep(10 * 1000); //让出线程
                     }
                     else if (result == 2)
                     {
                         //成功
-                        _logger.LogTrace("ScanHistory {InstanceName} 中,消息已被处理，现在移出History，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
+                        _logger.LogTrace("ScanHistory {InstanceName} 中,消息已被处理，现在移出History，EventType:{EventType}", _instanceSetting.InstanceName, _eventType);
                     }
                     else if (result == 3)
                     {
                         //重新放入队列再发送
-                        _logger.LogWarning("ScanHistory {InstanceName} 中,消息可能被遗漏， 重新放入队列，，EventType:{eventType}", _instanceSetting.InstanceName, _eventType);
+                        _logger.LogWarning("ScanHistory {InstanceName} 中,消息可能被遗漏， 重新放入队列，，EventType:{EventType}", _instanceSetting.InstanceName, _eventType);
                     }
                     else
                     {
@@ -180,7 +180,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 }
             }
 
-            _logger.LogTrace("History Task For {eventType} Stopped.", _eventType);
+            _logger.LogTrace("History Task For {EventType} Stopped.", _eventType);
         }
 
         private async Task CosumeAsync(CancellationToken cancellationToken)
@@ -198,7 +198,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     if (redisValue.IsNullOrEmpty)
                     {
-                        _logger.LogTrace("ConsumeTask Sleep, {InstanceName}, {eventType}", _instanceSetting.InstanceName, _eventType);
+                        _logger.LogTrace("ConsumeTask Sleep, {InstanceName}, {EventType}", _instanceSetting.InstanceName, _eventType);
 
                         await Task.Delay(CONSUME_INTERVAL_SECONDS * 1000, cancellationToken).ConfigureAwait(false);
 
@@ -209,7 +209,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     if (model == null)
                     {
-                        _logger.LogCritical("有空EventMessageModel, {eventType}, {value}", _eventType, redisValue);
+                        _logger.LogCritical("有空EventMessageModel, {EventType}, {Value}", _eventType, redisValue);
                         continue;
                     }
 
@@ -229,7 +229,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
 
                     if (now - model.Timestamp > _eventBusEventMessageExpiredSeconds)
                     {
-                        _logger.LogCritical("有EventMessage过期，{eventType}, {@model}", _eventType, model);
+                        _logger.LogCritical("有EventMessage过期，{EventType}, {Model}", _eventType, model);
 
                         await distributedLock.DisposeAsync().ConfigureAwait(false);
 
@@ -246,7 +246,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     if (isExist == null || isExist.Value)
 #pragma warning restore CA1508 // Avoid dead conditional code
                     {
-                        _logger.LogInformation("有EventMessage重复，{eventType}, {@model}", _eventType, model);
+                        _logger.LogInformation("有EventMessage重复，{EventType}, {Model}", _eventType, model);
 
                         await distributedLock.DisposeAsync().ConfigureAwait(false);
 
@@ -262,28 +262,28 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                     catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                     {
-                        _logger.LogCritical(ex, "处理消息出错, {_eventType}, {@model}", _eventType, model);
+                        _logger.LogCritical(ex, "处理消息出错, {EventType}, {Model}", _eventType, model);
                     }
 
                     //5, Acks
                     await AddAcksAsync(now, database, AcksSetName, model.Guid, model.Timestamp).ConfigureAwait(false);
 
-                    _logger.LogTrace("Consume Task For {eventType} Stopped.", _eventType);
+                    _logger.LogTrace("Consume Task For {EventType} Stopped.", _eventType);
                 }
                 catch (RedisConnectionException ex)
                 {
-                    _logger.LogError(ex, "Consume 中出现Redis链接问题. {eventType}", _eventType);
+                    _logger.LogError(ex, "Consume 中出现Redis链接问题. {EventType}", _eventType);
                     await Task.Delay(5000, cancellationToken).ConfigureAwait(false);
                 }
                 catch (RedisTimeoutException ex)
                 {
-                    _logger.LogError(ex, "Consume 中出现Redis超时问题. {eventType}", _eventType);
+                    _logger.LogError(ex, "Consume 中出现Redis超时问题. {EventType}", _eventType);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    _logger.LogCritical(ex, "Consume 出现未知问题. {eventType}", _eventType);
+                    _logger.LogCritical(ex, "Consume 出现未知问题. {EventType}", _eventType);
                 }
             }
         }
@@ -339,7 +339,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 await Task.WhenAll(tasks).ConfigureAwait(false);
             }
 
-            _logger.LogTrace("Task For {eventType} Stopped.", _eventType);
+            _logger.LogTrace("Task For {EventType} Stopped.", _eventType);
         }
 
         //TODO: 使用Channel重写

@@ -38,7 +38,9 @@ namespace HB.FullStack.Repository.CacheStrategies
 
                 if (result != null)
                 {
-                    logger.LogInformation($"//TODO: 请求同一项CachedCollectionItem，等待锁并获取锁后，发现Cache已存在。Model:{cacheCollectionItem.GetType().Name},CacheKey:{cacheCollectionItem.CollectionKey}");
+                    logger.LogInformation("//TODO: 请求同一项CachedCollectionItem，等待锁并获取锁后，发现Cache已存在。Model:{ModelName},CacheKey:{CacheKey}",
+                        cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey);
+
                     return result;
                 }
 
@@ -50,18 +52,21 @@ namespace HB.FullStack.Repository.CacheStrategies
                 {
                     long timestamp = (dbRt as TimestampDBModel)?.Timestamp ?? TimeUtil.UtcNowTicks;
                     SetCache(cacheCollectionItem.SetValue(dbRt).SetTimestamp(timestamp), cache);
-                    logger.LogInformation($"缓存 Missed. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
+                    logger.LogInformation("缓存 Missed. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}",
+                        cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey, cacheCollectionItem.ItemKey);
                 }
                 else
                 {
-                    logger.LogInformation($"查询到空值. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}");
+                    logger.LogInformation("查询到空值. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}",
+                        cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey, cacheCollectionItem.ItemKey);
                 }
 
                 return dbRt;
             }
             else
             {
-                logger.LogCritical($"锁未能占用. Model:{cacheCollectionItem.GetType().Name}, CacheCollectionKey:{cacheCollectionItem.CollectionKey}, CacheItemKey:{cacheCollectionItem.ItemKey}, Lock Status:{@lock.Status}");
+                logger.LogCritical("锁未能占用. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}, Lock Status:{LockStatus}",
+                    cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey, cacheCollectionItem.ItemKey, @lock.Status);
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }

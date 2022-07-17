@@ -1,4 +1,8 @@
-﻿using HB.FullStack.Common.Api;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+
 using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
@@ -9,11 +13,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,16 +26,6 @@ using Polly;
 using Serilog;
 
 using StackExchange.Redis;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Encodings.Web;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace System
 {
@@ -198,7 +190,7 @@ namespace System
         /// <returns></returns>
         public static async Task<bool> InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
-            GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
+            GlobalSettings.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
             IDistributedLock distributedLock = await lockManager.LockAsync(
                 resources: database.DatabaseNames,
@@ -212,7 +204,7 @@ namespace System
                     ThrowIfDatabaseInitLockNotGet(database.DatabaseNames);
                 }
 
-                GlobalSettings.Logger.LogDebug($"获取了初始化数据库的锁:{database.DatabaseNames.ToJoinedString(",")}");
+                GlobalSettings.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
                 return await database.InitializeAsync(migrations).ConfigureAwait(false);
             }

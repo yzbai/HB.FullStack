@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -104,13 +102,13 @@ return 1";
 		{
 			if (expiryTime < _minimumExpiryTime)
 			{
-				_logger.LogWarning("Expiry {settingTime} ms too low, setting to {minimumExpiryTime} ms", expiryTime.TotalMilliseconds, _minimumExpiryTime.TotalMilliseconds);
+				_logger.LogWarning("Expiry {SettingTime} ms too low, setting to {MinimumExpiryTime} ms", expiryTime.TotalMilliseconds, _minimumExpiryTime.TotalMilliseconds);
 				expiryTime = _minimumExpiryTime;
 			}
 
 			if (retryInterval != null && retryInterval.Value < _minimumRetryTime)
 			{
-				_logger.LogWarning("Retry {settingTime} ms too low, setting to {minimumRetryTime} ms", retryInterval.Value.TotalMilliseconds, _minimumRetryTime.TotalMilliseconds);
+				_logger.LogWarning("Retry {SettingTime} ms too low, setting to {MinimumRetryTime} ms", retryInterval.Value.TotalMilliseconds, _minimumRetryTime.TotalMilliseconds);
 				retryInterval = _minimumRetryTime;
 			}
 
@@ -139,13 +137,16 @@ return 1";
 
 				while (!redisLock.IsAcquired && stopwatch.Elapsed <= redisLock.WaitTime)
 				{
-					logger.LogDebug($"锁在等待... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug("锁在等待... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+						Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
 
 					redisLock.Status = await AcquireResourceAsync(redisLock, logger).ConfigureAwait(false);
 
 					if (!redisLock.IsAcquired)
 					{
-						logger.LogDebug($"锁继续等待... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+						logger.LogDebug("锁继续等待... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
+
 						if (redisLock.CancellationToken == null)
 						{
 							await Task.Delay((int)redisLock.RetryTime.TotalMilliseconds).ConfigureAwait(false);
@@ -159,7 +160,9 @@ return 1";
 
 				if (!redisLock.IsAcquired)
 				{
-					logger.LogDebug($"锁等待超时... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug("锁等待超时... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
+
 					redisLock.Status = DistributedLockStatus.Expired;
 				}
 
@@ -173,12 +176,15 @@ return 1";
 
 			if (redisLock.IsAcquired)
 			{
-				logger.LogDebug($"锁获取成功... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug("锁获取成功... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
+
 				StartAutoExtendTimer(redisLock, logger);
 			}
 			else
 			{
-				logger.LogDebug($"锁获取失败... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug("锁获取失败... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
 			}
 		}
 
@@ -233,11 +239,13 @@ return 1";
 		{
 			if (redisLock.Status != DistributedLockStatus.Acquired)
 			{
-				logger.LogDebug($"锁已不是获取状态，停止自动延期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+				logger.LogDebug("锁已不是获取状态，停止自动延期... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}, Status:{LockStatus}",
+					Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","), redisLock.Status);
 				return;
 			}
 
-			logger.LogDebug($"锁在自动延期... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+			logger.LogDebug("锁在自动延期... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
 
 			List<RedisKey> redisKeys = new List<RedisKey>();
 			List<RedisValue> redisValues = new List<RedisValue>();
@@ -257,7 +265,8 @@ return 1";
 
 				if (rt != 1)
 				{
-					logger.LogError($"RedisLock 延期 失败. Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+					logger.LogError("RedisLock 延期 失败. Resources:{Resources}, Status:{LockStatus}",
+						redisLock.Resources.ToJoinedString(","), redisLock.Status);
 					return;
 				}
 
@@ -287,7 +296,8 @@ return 1";
 						redisLock.KeepAliveTimer.Dispose();
 						redisLock.KeepAliveTimer = null;
 
-						logger.LogDebug($"锁停止自动延期，Resources:{redisLock.Resources.ToJoinedString(",")}");
+						logger.LogDebug("锁停止自动延期，Resources:{Resources}", redisLock.Resources.ToJoinedString(","));
+
 					}
 				}
 			}
@@ -305,7 +315,8 @@ return 1";
 
 			if (redisLock.NotUnlockWhenDispose)
 			{
-				logger.LogDebug($"自动延期停止,但锁被设置为等他自己过期，不干预它... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+				logger.LogDebug("自动延期停止,但锁被设置为等他自己过期，不干预它... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
 				return;
 			}
 
@@ -327,7 +338,8 @@ return 1";
 
 				if (rt == 1)
 				{
-					logger.LogDebug($"锁已经解锁... ThreadID: {Environment.CurrentManagedThreadId}, Resources:{redisLock.Resources.ToJoinedString(",")}");
+					logger.LogDebug("锁已经解锁... ThreadID: {CurrentManagedThreadId}, Resources:{Resources}",
+							Environment.CurrentManagedThreadId, redisLock.Resources.ToJoinedString(","));
 				}
 				else
 				{
@@ -390,7 +402,8 @@ return 1";
 			}
 			catch (NullReferenceException ex)
 			{
-				logger.LogError(ex, $"在试图延长锁的时候，ResourceValues被清空. Resources:{redisLock.Resources.ToJoinedString(",")}, Status:{redisLock.Status}");
+				logger.LogError(ex, "在试图延长锁的时候，ResourceValues被清空. Resources:{Resources}, Status:{LockStatus}",
+					redisLock.Resources.ToJoinedString(","), redisLock.Status);
 			}
 		}
 

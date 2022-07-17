@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
+
+using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Client.Network;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DBModels;
 //using Xamarin.Essentials;
 //using Xamarin.Forms;
 using Microsoft;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using HB.FullStack.Database.DatabaseModels;
 using Microsoft.VisualStudio.Threading;
-using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.Network;
-using HB.FullStack.Common.Api.Resources;
 
 namespace HB.FullStack.Client
 {
@@ -146,7 +145,7 @@ namespace HB.FullStack.Client
             //TODO: 是否应该由ClientModel来决定需要login？或者由业务决定
             if (ClientModelDef.NeedLogined)
             {
-                _logger.LogDebug("检查Logined, Type:{type}", typeof(TModel).Name);
+                _logger.LogDebug("检查Logined, Type:{Type}", typeof(TModel).Name);
 
                 EnsureLogined();
             }
@@ -257,14 +256,14 @@ namespace HB.FullStack.Client
             //如果不强制远程，并且满足使用本地数据条件
             if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(remoteRequest, localModels))
             {
-                _logger.LogDebug("本地数据可用，返回本地, Type:{type}", typeof(TModel).Name);
+                _logger.LogDebug("本地数据可用，返回本地, Type:{Type}", typeof(TModel).Name);
                 return localModels;
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
             if (!IsInternetConnected(!ClientModelDef.AllowOfflineRead))
             {
-                _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{type}", typeof(TModel).Name);
+                _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{Type}", typeof(TModel).Name);
 
                 ConnectivityManager.OnOfflineDataReaded();
 
@@ -276,7 +275,7 @@ namespace HB.FullStack.Client
 
             IEnumerable<TModel> remotes = ress!.Select(r => ToModel(r)).ToList();
 
-            _logger.LogDebug("远程数据获取完毕, Type:{type}", typeof(TModel).Name);
+            _logger.LogDebug("远程数据获取完毕, Type:{Type}", typeof(TModel).Name);
 
             //TODO:
             //检查同步. 比如：离线创建的数据，现在联线，本地数据反而是新的。
@@ -304,7 +303,7 @@ namespace HB.FullStack.Client
                 await Database.SetByIdAsync(model, transactionContext).ConfigureAwait(false);
             }
 
-            _logger.LogDebug("重新添加远程数据到本地数据库, Type:{type}", typeof(TModel).Name);
+            _logger.LogDebug("重新添加远程数据到本地数据库, Type:{Type}", typeof(TModel).Name);
 
             return remotes;
         }

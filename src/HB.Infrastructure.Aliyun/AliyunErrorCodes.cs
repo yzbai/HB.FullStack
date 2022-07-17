@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Text.Json;
 
 using Aliyun.Acs.Core.Exceptions;
@@ -24,7 +23,7 @@ namespace HB.Infrastructure.Aliyun
     {
         internal static Exception OssError(string bucket, string cause)
         {
-            AliyunException exception = new AliyunException(AliyunErrorCodes.OssError);
+            AliyunException exception = new AliyunException(AliyunErrorCodes.OssError, nameof(OssError), null, null);
 
             exception.Data["Bucket"] = bucket;
             exception.Data["Cause"] = cause;
@@ -34,7 +33,7 @@ namespace HB.Infrastructure.Aliyun
 
         internal static Exception SmsSendError(string mobile, string? code, string? message)
         {
-            SmsException exception = new SmsException(AliyunErrorCodes.SmsSendError);
+            SmsException exception = new SmsException(AliyunErrorCodes.SmsSendError, nameof(SmsSendError));
 
             exception.Data["Mobile"] = mobile;
             exception.Data["Code"] = code;
@@ -45,7 +44,7 @@ namespace HB.Infrastructure.Aliyun
 
         internal static Exception SmsCacheError(string cause, CacheException ex)
         {
-            SmsException exception = new SmsException(AliyunErrorCodes.SmsCacheError, ex);
+            SmsException exception = new SmsException(AliyunErrorCodes.SmsCacheError, cause, ex);
 
             exception.Data["Cause"] = cause;
 
@@ -54,7 +53,7 @@ namespace HB.Infrastructure.Aliyun
 
         internal static Exception SmsServerError(string cause, AliyunException ex)
         {
-            SmsException exception = new SmsException(AliyunErrorCodes.SmsServerError, ex);
+            SmsException exception = new SmsException(AliyunErrorCodes.SmsServerError, cause, ex);
 
             exception.Data["Cause"] = cause;
 
@@ -64,7 +63,7 @@ namespace HB.Infrastructure.Aliyun
 
         internal static Exception SmsFormatError(string cause, JsonException ex)
         {
-            SmsException exception = new SmsException(AliyunErrorCodes.SmsFormatError, ex);
+            SmsException exception = new SmsException(AliyunErrorCodes.SmsFormatError, cause, ex);
 
             exception.Data["Cause"] = cause;
 
@@ -74,7 +73,7 @@ namespace HB.Infrastructure.Aliyun
 
         internal static Exception SmsClientError(string cause, ClientException ex)
         {
-            SmsException exception = new SmsException(AliyunErrorCodes.SmsClientError, ex);
+            SmsException exception = new SmsException(AliyunErrorCodes.SmsClientError, cause, ex);
 
             exception.Data["Cause"] = cause;
 
@@ -84,7 +83,7 @@ namespace HB.Infrastructure.Aliyun
 
         internal static Exception StsError(Guid userId, string bucketname, string direcotry, bool readOnly, Exception ex)
         {
-            SmsException exception = new SmsException(AliyunErrorCodes.StsError, ex);
+            SmsException exception = new SmsException(AliyunErrorCodes.StsError, nameof(StsError), ex);
 
             exception.Data["UserId"] = userId.ToString();
             exception.Data["BucketName"] = bucketname;

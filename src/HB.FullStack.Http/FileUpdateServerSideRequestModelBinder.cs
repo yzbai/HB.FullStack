@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
@@ -38,7 +39,6 @@ namespace HB.FullStack.Common.Api
 
                 modelType.GetProperty("Files")!.SetValue(model, bindingContext.HttpContext.Request.Form.Files.GetFiles("Files").ToList());
 
-
                 bindingContext.Result = ModelBindingResult.Success(model);
 
                 return Task.CompletedTask;
@@ -47,7 +47,7 @@ namespace HB.FullStack.Common.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger.LogWarning(ex, $"FileUpdateServerSideRequestModelBinder出错.{valueProviderResult.FirstValue}");
+                GlobalSettings.Logger.LogWarning(ex, "FileUpdateServerSideRequestModelBinder出错.{ValueProviderResult}", valueProviderResult.FirstValue);
 
                 bindingContext.ModelState.AddModelError("Request", "Request modelbinding throw.");
                 bindingContext.Result = ModelBindingResult.Failed();

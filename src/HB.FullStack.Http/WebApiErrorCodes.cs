@@ -25,7 +25,7 @@ namespace HB.FullStack.WebApi
     {
         public static Exception DatabaseInitLockError(IEnumerable<string> databases)
         {
-            WebApiException exception = new WebApiException(WebApiErrorCodes.DatabaseInitLockError);
+            WebApiException exception = new WebApiException(WebApiErrorCodes.DatabaseInitLockError, nameof(DatabaseInitLockError));
 
             exception.Data["Databases"] = databases;
 
@@ -34,7 +34,7 @@ namespace HB.FullStack.WebApi
 
         public static Exception StartupError(object? value, string cause)
         {
-            WebApiException exception = new WebApiException(WebApiErrorCodes.StartupError);
+            WebApiException exception = new WebApiException(WebApiErrorCodes.StartupError, nameof(StartupError));
 
             exception.Data["Value"] = value;
             exception.Data["Cause"] = cause;
@@ -56,11 +56,10 @@ namespace HB.FullStack.WebApi
             _logGlobalException(logger, path, route, query, content, errorCode, exception);
         }
 
-
-
         public static void LogStarup(this ILogger logger)
         {
-            logger.LogInformation($"启动 MyColorfulTime.Server.MainApi, 环境: {EnvironmentUtil.AspNetCoreEnvironment}, MachineId:{EnvironmentUtil.MachineId}");
+            logger.LogInformation("启动 MyColorfulTime.Server.MainApi, 环境: {AspNetCoreEnvironment}, MachineId:{MachineId}",
+                EnvironmentUtil.AspNetCoreEnvironment, EnvironmentUtil.MachineId);
         }
 
         public static void LogCriticalShutDown(this ILogger logger, Exception ex)

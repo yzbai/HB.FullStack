@@ -1,28 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace System
+﻿namespace System
 {
     public class ClientException : ErrorCode2Exception
     {
-        public ClientException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
-
-        public ClientException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("DoNotUse")]
         public ClientException()
         {
         }
 
+        [Obsolete("DoNotUse")]
         public ClientException(string message) : base(message)
         {
         }
 
+        [Obsolete("DoNotUse")]
         public ClientException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public ClientException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

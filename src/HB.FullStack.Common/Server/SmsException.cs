@@ -2,9 +2,7 @@
 {
     public class SmsException : ErrorCode2Exception
     {
-        public SmsException(ErrorCode errorCode, string cause, Exception? innerException, object? context) : base(errorCode, cause, innerException, context)
-        {
-        }
+
 
         [Obsolete("Do not use.")]
         public SmsException()
@@ -18,6 +16,10 @@
 
         [Obsolete("Do not use.")]
         public SmsException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public SmsException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

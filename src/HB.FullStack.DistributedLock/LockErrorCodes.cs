@@ -18,16 +18,14 @@ namespace HB.FullStack.Lock
     {
         internal static Exception MemoryLockError(string cause)
         {
-            LockException exception = new LockException(LockErrorCodes.MemoryLockError);
-
-            exception.Data["Cause"] = cause;
+            LockException exception = new LockException(LockErrorCodes.MemoryLockError, cause);
 
             return exception;
         }
 
         internal static Exception DistributedLockUnLockFailed(int threadId, IEnumerable<string> resources, Exception? innerException = null)
         {
-            LockException exception = new LockException(LockErrorCodes.DistributedLockUnLockFailed, innerException);
+            LockException exception = new LockException(LockErrorCodes.DistributedLockUnLockFailed, nameof(DistributedLockUnLockFailed), innerException);
 
             exception.Data["ThreadId"] = threadId;
             exception.Data["Resources"] = resources;

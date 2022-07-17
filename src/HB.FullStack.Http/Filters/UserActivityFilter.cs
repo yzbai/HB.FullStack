@@ -72,7 +72,7 @@ namespace HB.FullStack.WebApi.Filters
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.LogError(ex, "UserActivityFilter中捕捉到错误，不应该。请检查,是否有漏捕捉。{url}", context.HttpContext?.Request?.GetDisplayUrl());
+                _logger.LogError(ex, "UserActivityFilter中捕捉到错误，不应该。请检查,是否有漏捕捉。{RequestUrl}", context.HttpContext?.Request?.GetDisplayUrl());
                 OnError(context);
             }
         }
