@@ -141,7 +141,7 @@ namespace System
                 });
         }
 
-        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool autoAddAuthorizeFilter = true)
+        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
         {
             Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
 
@@ -150,7 +150,7 @@ namespace System
             services
                 .AddControllers(options =>
                 {
-                    if (autoAddAuthorizeFilter)
+                    if (addAuthentication)
                     {
                         //need authenticated by default. no need add [Authorize] everywhere
                         AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
