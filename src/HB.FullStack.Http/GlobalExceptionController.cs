@@ -3,7 +3,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.WebApi
@@ -19,7 +18,7 @@ namespace HB.FullStack.WebApi
         }
 
         [AllowAnonymous]
-        [Route("GlobalException")]
+        [HttpGet("GlobalException")]
         public IActionResult ExceptionAsync()
         {
             IExceptionHandlerPathFeature? exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();

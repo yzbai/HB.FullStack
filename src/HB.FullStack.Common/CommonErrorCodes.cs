@@ -21,6 +21,7 @@ namespace System
         public static readonly ErrorCode TryFromJsonWithCollectionCheckError = new ErrorCode(nameof(TryFromJsonWithCollectionCheckError), "");
 
         public static readonly ErrorCode EnvironmentVariableError = new ErrorCode(nameof(EnvironmentVariableError), "");
+
     }
 
     //TODO: 也把其他的Exceptions类改造成这样
