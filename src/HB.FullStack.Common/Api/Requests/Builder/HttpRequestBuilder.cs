@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Net.Http;
-using System.Text;
+
 using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// 构建一个完整的HttpRequest,需要的信息来自三方面：
-    /// 1. Resource定义，即ApiResourceBinding
+    /// 1. Resource定义，即EndpointBinding(地址信息)
     /// 2. Request本身，即业务数据和参数
-    /// 3. Endpoint Setting，即Server与Client的服务设定
+    /// 3. Endpoint Setting，即Server与Client的配置设定
     /// </summary>
     public abstract class HttpRequestBuilder
     {

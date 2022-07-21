@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-
 namespace HB.FullStack.Common.Api.Requests
 {
-    public class GetByIdsRequest<T> : ApiRequest<T> where T : ApiResource
+    public class GetByIdsRequest<T> : GetRequest<T> where T : ApiResource
     {
         [NoEmptyGuid]
         public IList<Guid> Ids { get; set; } = new List<Guid>();
@@ -13,7 +12,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetByIdsRequest() { }
 
-        public GetByIdsRequest(ApiRequestAuth auth, params Guid[] ids) : base(ApiMethodName.Get, auth, "ByIds")
+        public GetByIdsRequest(ApiRequestAuth auth, params Guid[] ids) : base(auth, "ByIds")
         {
             ids.AddRange(ids);
         }

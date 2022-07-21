@@ -2,7 +2,6 @@
 using System.Linq.Expressions;
 using System.Text;
 
-
 namespace HB.FullStack.Common.Api.Requests
 {
     public class GetRequest<T> : ApiRequest<T> where T : ApiResource
@@ -12,6 +11,11 @@ namespace HB.FullStack.Common.Api.Requests
         public int? PerPage { get; set; }
 
         public string? OrderBys { get; set; }
+
+        /// <summary>
+        /// 包含哪些子资源
+        /// </summary>
+        public string? Includes { get; set; }
 
         [OnlyForJsonConstructor]
         public GetRequest() { }
@@ -48,6 +52,22 @@ namespace HB.FullStack.Common.Api.Requests
             orderByBuilder.RemoveLast();
 
             OrderBys = orderByBuilder.ToString();
+        }
+
+        public GetRequest<T> Include<TRes>() where TRes : ApiResource
+        {
+            string resName = typeof(TRes).Name;
+
+            if (Includes == null)
+            {
+                Includes = resName;
+            }
+            else
+            {
+                Includes += $",{resName}";
+            }
+
+            return this;
         }
     }
 }
