@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common.ApiClient.Config
+namespace HB.FullStack.Common.ApiClient
 {
     /// <summary>
     /// 本质是解决ApiResource的来源问题，与谁binding,哪个Model是这个Dto的根

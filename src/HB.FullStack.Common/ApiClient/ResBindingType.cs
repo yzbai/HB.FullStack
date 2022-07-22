@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Common.ApiClient.Config
+﻿namespace HB.FullStack.Common.ApiClient
 {
     public enum ResBindingType
     {

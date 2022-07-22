@@ -2,7 +2,7 @@
 
 using HB.FullStack.Common.Api;
 
-namespace HB.FullStack.Common.ApiClient
+namespace HB.FullStack.Common.Api
 {
     public class StsTokenRes : ApiResource
     {

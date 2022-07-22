@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.ApiClient.Config;
+using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {

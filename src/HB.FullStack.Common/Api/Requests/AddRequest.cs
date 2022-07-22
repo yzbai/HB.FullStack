@@ -4,16 +4,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class PostRequest<T> : ApiRequest where T : ApiResource
+    public class AddRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]
         public T Resource { get; set; } = null!;
 
         [OnlyForJsonConstructor]
-        public PostRequest() { }
+        public AddRequest() { }
 
-        public PostRequest(T res, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Post, auth, condition)
+        public AddRequest(T res, ApiRequestAuth auth, string? condition) : base(typeof(T).Name, ApiMethodName.Post, auth, condition)
         {
             Resource = res;
         }

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Utils;
 
 using Microsoft.Net.Http.Headers;

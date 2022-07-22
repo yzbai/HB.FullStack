@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common.Api;
 
-namespace HB.FullStack.Common.ApiClient
+namespace HB.FullStack.Common.Api
 {
     public class UserTokenResGetByRefresh : GetRequest<UserTokenRes>
     {
@@ -37,7 +37,7 @@ namespace HB.FullStack.Common.ApiClient
             string deviceId,
             string deviceVersion,
             DeviceInfos deviceInfos)
-            : base(nameof(UserTokenRes), ApiRequestAuth.NONE, "ByRefresh")
+            : base(ApiRequestAuth.NONE, "ByRefresh")
         {
             UserId = userId;
             AccessToken = accessToken;

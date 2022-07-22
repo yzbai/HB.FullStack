@@ -4,8 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
+using HB.FullStack.Common.Api;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common.ApiClient
 {
     public static class HttpRequestBuilderExtensions
     {

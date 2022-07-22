@@ -1,9 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Common.Api;
-
-namespace HB.FullStack.Common.ApiClient
+namespace HB.FullStack.Common.Api
 {
     public class StsTokenResGetByDirectoryPermissionName : GetRequest<StsTokenRes>
     {
@@ -17,7 +14,7 @@ namespace HB.FullStack.Common.ApiClient
         public StsTokenResGetByDirectoryPermissionName() { }
 
         public StsTokenResGetByDirectoryPermissionName(ApiRequestAuth auth, string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly)
-            : base(nameof(StsTokenRes), auth, "ByDirectoryPermissionName")
+            : base(auth, "ByDirectoryPermissionName")
         {
             DirectoryPermissionName = directoryPermissionName;
 

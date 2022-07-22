@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.ApiClient.Config;
 
 using Microsoft.Extensions.Options;
 

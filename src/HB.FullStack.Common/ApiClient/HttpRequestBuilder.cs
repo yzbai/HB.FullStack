@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HB.FullStack.Common.Api;
 
-using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Common.ApiClient.Config;
-
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common.ApiClient
 {
     public class HttpRequestBuilder
     {

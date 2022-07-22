@@ -20,9 +20,9 @@ namespace HB.FullStack.Common.Api
         public string? Includes { get; set; }
 
         [OnlyForJsonConstructor]
-        protected GetRequest() { }
+        public GetRequest() { }
 
-        protected GetRequest(string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Get, auth, condition) { }
+        public GetRequest(ApiRequestAuth auth, string? condition) : base(typeof(T).Name, ApiMethodName.Get, auth, condition) { }
 
         public void OrderBy(params Expression<Func<T, object>>[]? orderBys)
         {

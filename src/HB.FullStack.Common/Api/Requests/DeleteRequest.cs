@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public DeleteRequest() { }
 
-        public DeleteRequest(T res, string resName, ApiRequestAuth auth) : base(resName, ApiMethodName.Delete, auth, null)
+        public DeleteRequest(T res, ApiRequestAuth auth) : base(typeof(T).Name, ApiMethodName.Delete, auth, null)
         {
             Resource = res;
         }
