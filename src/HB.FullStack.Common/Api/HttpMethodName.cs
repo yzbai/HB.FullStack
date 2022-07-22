@@ -1,6 +1,19 @@
-﻿using System.Net.Http;
+﻿
+/* Unmerged change from project 'HB.FullStack.Common (netstandard2.1)'
+Before:
+using System.Net.Http;
+After:
+using System.Net.Http;
+using HB;
+using HB.FullStack;
+using HB.FullStack.Common;
+using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Api.Requests;
+*/
+using System.Net.Http;
 
-namespace HB.FullStack.Common.Api.Requests
+namespace HB.FullStack.Common.Api
 {
     public enum ApiMethodName
     {

@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Common.Api.Requests;
+﻿using HB.FullStack.Common.Api;
 using System;
 using System.Net.Http;
 

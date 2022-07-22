@@ -1,33 +1,18 @@
-﻿using HB.FullStack.Common.Api;
-using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
+
+using HB.FullStack.Common.Api;
+
+using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Common.ApiClient
 {
     public class ApiClientOptions : IOptions<ApiClientOptions>
     {
-        public const string NO_BASEURL_HTTPCLIENT_NAME = nameof(NO_BASEURL_HTTPCLIENT_NAME);
-
-        private IDictionary<string, string>? _apiKeysDict;
-
         public ApiClientOptions Value => this;
 
-        /// <summary>
-        /// 用于用户login的Jwt
-        /// </summary>
-        public JwtEndpointSetting LoginJwtEndpoint { get; set; } = null!;
-
-        /// <summary>
-        /// 没有指定Endpoint的apiRequest使用的配置，比如plainurl那些request
-        /// </summary>
-        public string DefaultEndpointName { get; set; } = null!;
-
-        public IList<EndpointSettings> Endpoints { get; set; } = new List<EndpointSettings>();
+        public IList<EndpointSetting> EndpointSettings { get; set; } = new List<EndpointSetting>();
 
         public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
@@ -35,51 +20,6 @@ namespace HB.FullStack.Common.ApiClient
 
         public Func<HttpMessageHandler>? ConfigureHttpMessageHandler { get; set; }
 
-        //public AsyncEventHandler<ApiRequest, ApiEventArgs>? OnRequestingAsync { get; set; }
-
-        public void AddEndpoint(EndpointSettings endpointSettings)
-        {
-            if (!Endpoints.Any(e => e.EndpointName!.Equals(endpointSettings.EndpointName, GlobalSettings.ComparisonIgnoreCase)
-            && e.Version!.Equals(endpointSettings.Version, GlobalSettings.ComparisonIgnoreCase)))
-            {
-                Endpoints.Add(endpointSettings);
-            }
-        }
-
-        public bool TryGetApiKey(string? name, [NotNullWhen(true)] out string? key)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                key = string.Empty;
-                return false;
-            }
-
-            if (_apiKeysDict == null)
-            {
-                _apiKeysDict = new Dictionary<string, string>();
-
-                foreach (var apiKey in ApiKeys)
-                {
-                    _apiKeysDict.Add(apiKey.Name, apiKey.Key);
-                }
-            }
-
-            return _apiKeysDict.TryGetValue(name!, out key);
-        }
-
-        public static HttpMessageHandler GetPassLocalSSLHttpMessageHandler()
-        {
-            HttpClientHandler handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                {
-                    if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
-                        return true;
-                    return errors == System.Net.Security.SslPolicyErrors.None;
-                }
-            };
-            return handler;
-        }
     }
 
 }

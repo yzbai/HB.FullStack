@@ -4,23 +4,23 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class DeleteRequest<T> : ApiRequest where T : ApiResource
+    public class PutRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [Required]
         public T Resource { get; set; } = null!;
 
         [OnlyForJsonConstructor]
-        public DeleteRequest() { }
+        public PutRequest() { }
 
-        public DeleteRequest(T res, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Delete, auth, condition)
+        public PutRequest(T res, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Put, auth, condition)
         {
             Resource = res;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Resource);
+            return HashCode.Combine(base.GetHashCode(), Resource.GetHashCode());
         }
     }
 }

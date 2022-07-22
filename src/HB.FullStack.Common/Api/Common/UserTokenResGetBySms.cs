@@ -2,14 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common.Api;
-using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class UserTokenResGetBySmsRequest : ApiRequest
+    public class UserTokenResGetBySms : GetRequest<UserTokenRes>
     {
-        private readonly JwtEndpointSetting _jwtEndpointSetting = null!;
-
         [Required]
         [Mobile]
         public string Mobile { get; set; } = null!;
@@ -32,13 +29,11 @@ namespace HB.FullStack.Common.ApiClient
         /// <summary>
         /// Only for Deserialization
         /// </summary>
-        public UserTokenResGetBySmsRequest() { }
+        public UserTokenResGetBySms() { }
 
-        public UserTokenResGetBySmsRequest(JwtEndpointSetting jwtEndpointSetting, string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
-            : base(ApiMethodName.Get, ApiRequestAuth.NONE, "BySms")
+        public UserTokenResGetBySms(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
+            : base(nameof(UserTokenRes), ApiRequestAuth.NONE, "BySms")
         {
-            _jwtEndpointSetting = jwtEndpointSetting;
-
             Mobile = mobile;
             SmsCode = smsCode;
             SignToWhere = signToWhere;
@@ -50,11 +45,6 @@ namespace HB.FullStack.Common.ApiClient
         public override int GetHashCode()
         {
             return HashCode.Combine(base.GetHashCode(), Mobile, SmsCode, SignToWhere, DeviceId, DeviceVersion);
-        }
-
-        protected override HttpRequestBuilder CreateHttpRequestBuilder()
-        {
-            return new RestfulHttpRequestBuilder(ApiMethodName, Auth, Condition, _jwtEndpointSetting.EndpointName, _jwtEndpointSetting.Version, _jwtEndpointSetting.ControllerModelName);
         }
     }
 }

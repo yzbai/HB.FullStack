@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Common.Api.Requests;
-
-
 namespace HB.FullStack.Common.Api
 {
-    public class UpdateRequest<T> : ApiRequest<T> where T : ApiResource
+    public class BatchPutRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [CollectionMemeberValidated]
@@ -15,14 +12,12 @@ namespace HB.FullStack.Common.Api
         public IList<T> Resources { get; set; } = new List<T>();
 
         [OnlyForJsonConstructor]
-        public UpdateRequest() { }
+        public BatchPutRequest() { }
 
-        public UpdateRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(ApiMethodName.Put, auth, condition)
+        public BatchPutRequest(IEnumerable<T> ress, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Put, auth, condition)
         {
             Resources.AddRange(ress);
         }
-
-        public UpdateRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res }, auth, condition) { }
 
         public override int GetHashCode()
         {

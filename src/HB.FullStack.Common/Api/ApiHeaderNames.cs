@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common.Api.Requests
+namespace HB.FullStack.Common.Api
 {
     public static class ApiHeaderNames
     {

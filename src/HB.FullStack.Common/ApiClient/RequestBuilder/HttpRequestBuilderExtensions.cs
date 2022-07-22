@@ -4,26 +4,21 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
-using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.Api
 {
     public static class HttpRequestBuilderExtensions
     {
-        //private static readonly Version _version20 = new Version(2, 0);
-
         /// <summary>
         /// 构建HTTP的基本信息
         /// 之所以写成扩展方法的形式，是为了避免HttpRequestBuilder过大。又为了调用方式比静态方法舒服。
         /// </summary>
-        public static HttpRequestMessage Build(this HttpRequestBuilder builder, ApiRequest apiRequest)
+        public static HttpRequestMessage Build(this HttpRequestBuilder builder)
         {
-            //TODO: 思考，HttpRequestBuilder 是否应该包含一个ApiRequest的引用，而使代码看上去更简洁？就不需要apiRequest参数了
-
             //1. Mthod
-            HttpMethod httpMethod = builder.ApiMethodName.ToHttpMethod();
+            HttpMethod httpMethod = builder.Request.ApiMethodName.ToHttpMethod();
 
-            switch (builder.EndpointSettings.HttpMethodOverrideMode)
+            switch (builder.ResBinding.EndpointSetting!.HttpMethodOverrideMode)
             {
                 case HttpMethodOverrideMode.None:
                     break;
@@ -43,8 +38,7 @@ namespace HB.FullStack.Common.Api
             //2. url
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.AssembleUrl())
             {
-                //TODO: 看需要不需要使用http2.0
-                //Version = _version20
+                Version = builder.ResBinding.EndpointSetting.HttpVersion
             };
 
             //3. headers
@@ -54,9 +48,9 @@ namespace HB.FullStack.Common.Api
             }
 
             //4, contents
-            if (apiRequest is IUploadRequest fileUpdateRequest)
+            if (builder.Request is IUploadRequest uploadRequest)
             {
-                httpRequest.Content = BuildMultipartContent(fileUpdateRequest);
+                httpRequest.Content = BuildMultipartContent(uploadRequest);
             }
             else if (httpRequest.Method == HttpMethod.Get)
             {
@@ -67,7 +61,7 @@ namespace HB.FullStack.Common.Api
             {
                 //具体传递的数据
                 //包括Get的参数也放到body中去
-                httpRequest.Content = new StringContent(SerializeUtil.ToJson(apiRequest), Encoding.UTF8, "application/json");
+                httpRequest.Content = new StringContent(SerializeUtil.ToJson(builder.Request), Encoding.UTF8, "application/json");
             }
 
             return httpRequest;

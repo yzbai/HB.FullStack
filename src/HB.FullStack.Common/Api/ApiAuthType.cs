@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Common.Api.Requests
+﻿namespace HB.FullStack.Common.Api
 {
     public enum ApiAuthType
     {

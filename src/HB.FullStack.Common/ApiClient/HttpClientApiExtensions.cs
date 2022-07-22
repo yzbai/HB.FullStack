@@ -15,15 +15,15 @@ namespace System.Net.Http
     {
         private static readonly Type _emptyResourceType = typeof(EmptyApiResource);
 
-        public static async Task<TResource?> GetAsync<TResource>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResource : class
+        public static async Task<TResource?> GetAsync<TResource>(this HttpClient httpClient, ApiRequest request, HttpRequestBuilder requestBuilder, CancellationToken cancellationToken) where TResource : class
         {
             //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
-            using HttpRequestMessage requestMessage = request.GetHttpRequestBuilder().Build(request);
+            using HttpRequestMessage requestMessage = requestBuilder.Build();
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.EndpointSetting.Challenge).ConfigureAwait(false);
 
             if (typeof(TResource) == _emptyResourceType)
             {
@@ -48,14 +48,14 @@ namespace System.Net.Http
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken = default)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, HttpRequestBuilder requestBuilder, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage requestMessage = request.GetHttpRequestBuilder().Build(request);
+            using HttpRequestMessage requestMessage = requestBuilder.Build();
 
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.EndpointSetting.Challenge).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);

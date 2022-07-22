@@ -1,22 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.Extensions.Options;
+
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Globalization;
+using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class TokenAutoRefreshedHttpClientHandler : HttpClientHandler
+    public class UserTokenAutoRefreshHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
         private readonly IPreferenceProvider _tokenProvider;
         private readonly ApiClientOptions _options;
 
-        public TokenAutoRefreshedHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
+        public UserTokenAutoRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
             _tokenProvider = tokenProvider;
@@ -33,10 +34,10 @@ namespace HB.FullStack.Common.ApiClient
 
             GlobalSettings.Logger.LogInformation("TokenAutoRefreshedHttpClientHandler Inited.");
         }
-       
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            EndpointSettings? endpointSettings = GetEndpointByUri(request.RequestUri);
+            EndpointSetting? endpointSettings = GetEndpointByUri(request.RequestUri);
 
             if (endpointSettings == null)
             {
@@ -50,13 +51,13 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage,endpointSettings.Challenge).ConfigureAwait(false);
+                await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage, endpointSettings.Challenge).ConfigureAwait(false);
             }
             catch (ErrorCode2Exception ex)
             {
                 if (ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
-                    await TokenRefresher.RefreshAccessTokenAsync(_apiClient, endpointSettings, _tokenProvider).ConfigureAwait(false);
+                    await UserTokenRefresher.RefreshUserTokenAsync(_apiClient).ConfigureAwait(false);
 
                     return responseMessage;
                 }
@@ -88,11 +89,11 @@ namespace HB.FullStack.Common.ApiClient
             request.RequestUri = new Uri(UriUtil.AddQuerys(request.RequestUri?.ToString(), parameters));
         }
 
-        private EndpointSettings? GetEndpointByUri(Uri? requestUri)
+        private EndpointSetting? GetEndpointByUri(Uri? requestUri)
         {
             string authority = requestUri!.Authority;
 
-            return _options.Endpoints.FirstOrDefault(endpoint =>
+            return _options.EndpointSettings.FirstOrDefault(endpoint =>
             {
                 return authority.StartsWith(endpoint.BaseUrl!.Authority, StringComparison.OrdinalIgnoreCase);
             });

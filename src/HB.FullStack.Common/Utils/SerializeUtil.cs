@@ -1,8 +1,4 @@
 ﻿
-
-using MessagePack;
-using MessagePack.Resolvers;
-
 using System.Buffers;
 using System.Buffers.Text;
 using System.Collections;
@@ -17,6 +13,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+
+using MessagePack;
+using MessagePack.Resolvers;
 
 namespace System
 {
@@ -135,10 +134,6 @@ namespace System
         /// 返回是否成功解析，
         /// 有可能成功解析，但结果是null
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="jsonString"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
         public static bool TryFromJsonWithCollectionCheck<T>(string? jsonString, out T? target) where T : class
         {
             //if json begine with '[', and T is a array or can be assignable to IEnumerable<T> ,ok

@@ -4,16 +4,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class DeleteRequest<T> : ApiRequest where T : ApiResource
+    public class PostRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [Required]
         public T Resource { get; set; } = null!;
 
         [OnlyForJsonConstructor]
-        public DeleteRequest() { }
+        public PostRequest() { }
 
-        public DeleteRequest(T res, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Delete, auth, condition)
+        public PostRequest(T res, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Post, auth, condition)
         {
             Resource = res;
         }

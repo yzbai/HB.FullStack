@@ -1,5 +1,4 @@
 ﻿using System;
-using HB.FullStack.Common.Api.Requests;
 
 namespace HB.FullStack.Common.Api
 {

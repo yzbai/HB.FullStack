@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace HB.FullStack.Common.Api.Requests
+namespace HB.FullStack.Common.Api
 {
-    public class GetRequest<T> : ApiRequest<T> where T : ApiResource
+    public class GetRequest<T> : ApiRequest where T : ApiResource
     {
         public int? Page { get; set; }
 
@@ -20,7 +22,7 @@ namespace HB.FullStack.Common.Api.Requests
         [OnlyForJsonConstructor]
         public GetRequest() { }
 
-        public GetRequest(ApiRequestAuth auth, string? condition) : base(ApiMethodName.Get, auth, condition) { }
+        public GetRequest(string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Get, auth, condition) { }
 
         public override int GetHashCode()
         {
@@ -68,6 +70,34 @@ namespace HB.FullStack.Common.Api.Requests
             }
 
             return this;
+        }
+    }
+
+    public class GetByIdsRequest<T> : GetRequest<T> where T : ApiResource
+    {
+        [NoEmptyGuid]
+        public IList<Guid> Ids { get; set; } = new List<Guid>();
+
+        [OnlyForJsonConstructor]
+        public GetByIdsRequest() { }
+
+        public GetByIdsRequest(string resName, ApiRequestAuth auth, params Guid[] ids) : base(resName, auth, "ByIds")
+        {
+            ids.AddRange(ids);
+        }
+    }
+
+    public class GetByIdRequest<T> : GetRequest<T> where T : ApiResource
+    {
+        [NoEmptyGuid]
+        public Guid Id { get; set; }
+
+        [OnlyForJsonConstructor]
+        public GetByIdRequest() { }
+
+        public GetByIdRequest(string resName, ApiRequestAuth auth, Guid id) : base(resName, auth, "ById")
+        {
+            Id = id;
         }
     }
 }

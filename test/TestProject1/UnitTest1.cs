@@ -6,11 +6,18 @@ namespace TestProject1
         [TestMethod]
         public void TestMethod1()
         {
-            Console.WriteLine("Test Results!");
+            var item = new TestGeneric<UnitTest1>();
 
-            Assert.IsTrue(true);
+            var types = item.GetType().GenericTypeArguments;
 
-            throw new ArgumentException("thisis");
+        }
+    }
+
+    public class TestGeneric<T>
+    {
+        public TestGeneric()
+        {
+            Console.WriteLine(nameof(T));
         }
     }
 }

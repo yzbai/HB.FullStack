@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.ApiClient.Config;
+
 namespace HB.FullStack.Common.ApiClient
 {
-    public static class TokenRefresher
+    public static class UserTokenRefresher
     {
         private static readonly MemorySimpleLocker _requestLimiter = new MemorySimpleLocker();
 
@@ -13,19 +15,26 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshAccessTokenAsync(IApiClient apiClient, EndpointSettings? endpointSettings, IPreferenceProvider preferenceProvider)
+        public static async Task<bool> RefreshUserTokenAsync(this IApiClient apiClient)
         {
-            if (preferenceProvider.AccessToken.IsNullOrEmpty())
+            IPreferenceProvider tokenProvider = apiClient.UserTokenProvider;
+
+            if (tokenProvider.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            JwtEndpointSetting jwtEndpoint = endpointSettings?.JwtEndpoint ?? apiClient.GetLoginJwtEndpointSetting();
+            ResBinding? resBinding = apiClient.UserTokenResBinding;
 
-            string accessTokenHashKey = SecurityUtil.GetHash(preferenceProvider.AccessToken);
+            if (resBinding == null)
+            {
+                return false;
+            }
+
+            string accessTokenHashKey = SecurityUtil.GetHash(tokenProvider.AccessToken);
 
             //这个AccessToken不久前刷新过
-            if (!_requestLimiter.NoWaitLock(nameof(RefreshAccessTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(jwtEndpoint.RefreshIntervalSeconds)))
+            if (!_requestLimiter.NoWaitLock(nameof(RefreshUserTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(resBinding.EndpointSetting!.UserTokenRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
@@ -56,16 +65,15 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                if (preferenceProvider.RefreshToken.IsNotNullOrEmpty())
+                if (tokenProvider.RefreshToken.IsNotNullOrEmpty())
                 {
-                    UserTokenResGetByRefreshRequest refreshRequest = new UserTokenResGetByRefreshRequest(
-                        jwtEndpoint,
-                        preferenceProvider.UserId!.Value,
-                        preferenceProvider.AccessToken,
-                        preferenceProvider.RefreshToken,
-                        preferenceProvider.DeviceId,
-                        preferenceProvider.DeviceVersion,
-                        preferenceProvider.DeviceInfos);
+                    UserTokenResGetByRefresh refreshRequest = new UserTokenResGetByRefresh(
+                        tokenProvider.UserId!.Value,
+                        tokenProvider.AccessToken,
+                        tokenProvider.RefreshToken,
+                        tokenProvider.DeviceId,
+                        tokenProvider.DeviceVersion,
+                        tokenProvider.DeviceInfos);
 
                     UserTokenRes? res = await apiClient.GetAsync<UserTokenRes>(refreshRequest).ConfigureAwait(false);
 
@@ -74,7 +82,7 @@ namespace HB.FullStack.Common.ApiClient
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        OnRefreshSucceed(res, preferenceProvider);
+                        OnRefreshSucceed(res, tokenProvider);
 
                         return true;
                     }
@@ -84,7 +92,7 @@ namespace HB.FullStack.Common.ApiClient
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed(preferenceProvider);
+                OnRefreshFailed(tokenProvider);
 
                 return false;
             }
@@ -94,7 +102,7 @@ namespace HB.FullStack.Common.ApiClient
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed(preferenceProvider);
+                OnRefreshFailed(tokenProvider);
 
                 throw;
             }
@@ -106,7 +114,7 @@ namespace HB.FullStack.Common.ApiClient
 
         private static void OnRefreshSucceed(UserTokenRes res, IPreferenceProvider preferenceProvider)
         {
-            preferenceProvider.OnTokenFetched(
+            preferenceProvider.OnTokenReceived(
                 res.UserId,
                 res.CreatedTime,
                 res.Mobile,

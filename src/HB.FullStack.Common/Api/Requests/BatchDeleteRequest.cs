@@ -2,27 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Common.Api.Requests;
-
-
 namespace HB.FullStack.Common.Api
 {
-    public sealed class AddRequest<T> : ApiRequest<T> where T : ApiResource
+    public class BatchDeleteRequest<T> : ApiRequest where T : ApiResource
     {
         [CollectionNotEmpty]
         [CollectionMemeberValidated]
         [IdBarrier]
-        public IList<T> Resources { get; } = new List<T>();
+        public IList<T> Resources { get; set; } = new List<T>();
 
         [OnlyForJsonConstructor]
-        public AddRequest() { }
+        public BatchDeleteRequest() { }
 
-        public AddRequest(IEnumerable<T> ress, ApiRequestAuth auth, string? condition) : base(ApiMethodName.Post, auth, condition)
+        public BatchDeleteRequest(IEnumerable<T> ress, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Delete, auth, condition)
         {
             Resources.AddRange(ress);
         }
-
-        public AddRequest(T res, ApiRequestAuth auth, string? condition) : this(new T[] { res }, auth, condition) { }
 
         public override int GetHashCode()
         {

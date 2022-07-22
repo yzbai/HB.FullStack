@@ -21,7 +21,7 @@ namespace System
 
         bool IsLogined();
 
-        void OnTokenFetched(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
+        void OnTokenReceived(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
 
         void OnTokenRefreshFailed();
     }
