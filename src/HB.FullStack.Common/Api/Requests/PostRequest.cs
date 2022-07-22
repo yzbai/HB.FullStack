@@ -7,7 +7,7 @@ namespace HB.FullStack.Common.Api
     public class PostRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
-        [Required]
+        [ValidatedObject(CanBeNull = false)]
         public T Resource { get; set; } = null!;
 
         [OnlyForJsonConstructor]

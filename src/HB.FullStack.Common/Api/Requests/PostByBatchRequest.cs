@@ -4,17 +4,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class BatchPutRequest<T> : ApiRequest where T : ApiResource
+    public class PostByBatchRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
-        [CollectionMemeberValidated]
-        [CollectionNotEmpty]
+        [CollectionMemeberValidated(CanBeNullOrEmpty = false)]
         public IList<T> Resources { get; set; } = new List<T>();
 
         [OnlyForJsonConstructor]
-        public BatchPutRequest() { }
+        public PostByBatchRequest() { }
 
-        public BatchPutRequest(IEnumerable<T> ress, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Put, auth, condition)
+        public PostByBatchRequest(IEnumerable<T> ress, string resName, ApiRequestAuth auth) : base(resName, ApiMethodName.Post, auth, "ByBatch")
         {
             Resources.AddRange(ress);
         }

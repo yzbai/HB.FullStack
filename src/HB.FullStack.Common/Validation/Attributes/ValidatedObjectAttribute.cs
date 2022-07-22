@@ -1,20 +1,16 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-
-using HB.FullStack.Common;
-using HB.FullStack.Common.Validate;
+﻿using HB.FullStack.Common;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    public sealed class DayAttribute : ValidationAttribute
+    public sealed class ValidatedObjectAttribute : ValidationAttribute
     {
         public bool CanBeNull { get; set; } = true;
 
-        public DayAttribute()
+        public ValidatedObjectAttribute()
         {
             if (string.IsNullOrEmpty(ErrorMessage))
             {
-                ErrorMessage = "Not a valid Day.";
+                ErrorMessage = "Not a Valid";
             }
         }
 
@@ -25,7 +21,7 @@ namespace System.ComponentModel.DataAnnotations
                 return CanBeNull;
             }
 
-            return value is string text && ValidationMethods.IsDay(text);
+            return value is ValidatableObject validatableObject && validatableObject.IsValid();
         }
     }
 }

@@ -4,17 +4,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class BatchDeleteRequest<T> : ApiRequest where T : ApiResource
+    public class DeleteByBatchRequest<T> : ApiRequest where T : ApiResource
     {
-        [CollectionNotEmpty]
-        [CollectionMemeberValidated]
         [IdBarrier]
+        [CollectionMemeberValidated(CanBeNullOrEmpty = false)]
         public IList<T> Resources { get; set; } = new List<T>();
 
         [OnlyForJsonConstructor]
-        public BatchDeleteRequest() { }
+        public DeleteByBatchRequest() { }
 
-        public BatchDeleteRequest(IEnumerable<T> ress, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Delete, auth, condition)
+        public DeleteByBatchRequest(IEnumerable<T> ress, string resName, ApiRequestAuth auth) : base(resName, ApiMethodName.Delete, auth, "ByBatch")
         {
             Resources.AddRange(ress);
         }

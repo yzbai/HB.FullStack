@@ -7,7 +7,7 @@ using HB.FullStack.Common.ApiClient.Config;
 namespace HB.FullStack.Common.ApiClient
 {
     /// <summary>
-    /// 对Endpoint(站点)的描述
+    /// Endpoint(站点)的描述文档
     /// </summary>
     public class EndpointSetting
     {
@@ -42,7 +42,7 @@ namespace HB.FullStack.Common.ApiClient
         }
     }
 
-    public static class EndpointSettingsExtensions
+    public static class EndpointSettingExtensions
     {
         public static string GetHttpClientName(this EndpointSetting endpointSettings)
         {
