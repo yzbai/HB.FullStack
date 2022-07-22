@@ -12,7 +12,7 @@ namespace HB.FullStack.Common.Api
         byte[] GetFile();
     }
 
-    public class UploadRequest<T> : ApiRequest, IUploadRequest where T : ApiResource
+    public sealed class UploadRequest<T> : ApiRequest, IUploadRequest where T : ApiResource
     {
         private readonly byte[]? _file;
 
@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.Api
         public string HttpContentName { get; } = "File";
 
         [JsonIgnore]
-        public string FileName { get; protected set; } = null!;
+        public string FileName { get; set; } = null!;
 
         [OnlyForJsonConstructor]
         public UploadRequest() { }

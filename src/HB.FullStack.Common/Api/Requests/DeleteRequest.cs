@@ -4,7 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class DeleteRequest<T> : ApiRequest where T : ApiResource
+    /// <summary>
+    /// DELETE /Model
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public sealed class DeleteRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]
@@ -13,7 +17,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public DeleteRequest() { }
 
-        public DeleteRequest(T res, ApiRequestAuth auth) : base(typeof(T).Name, ApiMethodName.Delete, auth, null)
+        public DeleteRequest(T res) : base(typeof(T).Name, ApiMethodName.Delete, null, null)
         {
             Resource = res;
         }

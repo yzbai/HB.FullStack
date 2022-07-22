@@ -1,5 +1,7 @@
 ﻿using System;
 
+using HB.FullStack.Common.Api;
+
 namespace HB.FullStack.Common.ApiClient
 {
     /// <summary>
@@ -19,6 +21,20 @@ namespace HB.FullStack.Common.ApiClient
         /// 当Type为PlainUrl时，BindingValue为除去BaseUrl剩下的url
         /// </summary>
         public string BindingValue { get; set; } = null!;
+
+        /// <summary>
+        /// 默认的GetRequest的Auth
+        /// 默认权限是指没有指定Condition下的权限.
+        /// 可以在ApiRequest中覆盖
+        /// </summary>
+        public ApiRequestAuth ReadAuth { get; set; }
+
+        /// <summary>
+        /// 默认的Put,Patch,Post,Delete权限
+        /// 默认权限是指没有指定Condition下的权限.
+        /// 可以在ApiRequest中覆盖
+        /// </summary>
+        public ApiRequestAuth WriteAuth { get; set; }
 
         public EndpointSetting? EndpointSetting { get; set; }
 

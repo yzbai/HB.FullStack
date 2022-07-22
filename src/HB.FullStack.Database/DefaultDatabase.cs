@@ -1,15 +1,4 @@
 ﻿
-
-using HB.FullStack.Common;
-using HB.FullStack.Common.Extensions;
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.DBModels;
-using HB.FullStack.Database.Mapper;
-using HB.FullStack.Database.SQL;
-
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,6 +6,16 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common;
+using HB.FullStack.Common.Extensions;
+using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.SQL;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 namespace HB.FullStack.Database
 {
@@ -66,9 +65,7 @@ namespace HB.FullStack.Database
 
             EngineType = databaseEngine.EngineType;
 
-
             VarcharDefaultLength = _databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : _databaseSettings.DefaultVarcharLength;
-
 
             _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(DBModel.Deleted), _databaseEngine.EngineType);
         }
@@ -954,7 +951,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdateFieldsAsync<T>(object id, IList<(string, object?)> propertyNameValues, long curTimestamp, string lastUser, TransactionContext? transContext) where T : TimestampDBModel, new()
+        public async Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? propertyValue)> propertyNameValues, long curTimestamp, string lastUser, TransactionContext? transContext) where T : TimestampDBModel, new()
         {
             if (propertyNameValues.Count <= 0)
             {
@@ -991,8 +988,8 @@ namespace HB.FullStack.Database
                     oldTimestamp: curTimestamp,
                     newTimestamp: TimeUtil.UtcNowTicks,
                     lastUser: lastUser,
-                    propertyNames: propertyNameValues.Select(t => t.Item1).ToList(),
-                    propertyValues: propertyNameValues.Select(t => t.Item2).ToList());
+                    propertyNames: propertyNameValues.Select(t => t.propertyName).ToList(),
+                    propertyValues: propertyNameValues.Select(t => t.propertyValue).ToList());
 
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
@@ -1015,7 +1012,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdateFieldsAsync<T>(object id, IList<(string, object?, object?)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext)
+        public async Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext)
             where T : DBModel, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
@@ -1047,9 +1044,9 @@ namespace HB.FullStack.Database
                     id,
                     TimeUtil.UtcNowTicks,
                     lastUser,
-                    propertyNameOldNewValues.Select(t => t.Item1).ToList(),
-                    propertyNameOldNewValues.Select(t => t.Item2).ToList(),
-                    propertyNameOldNewValues.Select(t => t.Item3).ToList());
+                    propertyNameOldNewValues.Select(t => t.propertyName).ToList(),
+                    propertyNameOldNewValues.Select(t => t.oldValue).ToList(),
+                    propertyNameOldNewValues.Select(t => t.newValue).ToList());
 
                 int matchedRows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
 
@@ -1205,7 +1202,6 @@ namespace HB.FullStack.Database
 
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
-
 
         }
 

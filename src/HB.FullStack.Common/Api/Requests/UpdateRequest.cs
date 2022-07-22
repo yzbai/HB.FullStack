@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UpdateRequest<T> : ApiRequest where T : ApiResource
+    public sealed class UpdateRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Common.Api;
-
 namespace HB.FullStack.Common.Api
 {
-    public class UserTokenResGetBySms : GetRequest<UserTokenRes>
+    public class UserTokenResGetBySms : ApiRequest
     {
         [Required]
         [Mobile]
@@ -29,7 +27,7 @@ namespace HB.FullStack.Common.Api
         public UserTokenResGetBySms() { }
 
         public UserTokenResGetBySms(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
-            : base(ApiRequestAuth.NONE, "BySms")
+            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth.NONE, "BySms")
         {
             Mobile = mobile;
             SmsCode = smsCode;

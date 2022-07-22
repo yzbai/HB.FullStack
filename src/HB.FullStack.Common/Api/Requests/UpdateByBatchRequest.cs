@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UpdateByBatchRequest<T> : ApiRequest where T : ApiResource
+    public sealed class UpdateByBatchRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [CollectionMemeberValidated(CanBeNullOrEmpty = false)]

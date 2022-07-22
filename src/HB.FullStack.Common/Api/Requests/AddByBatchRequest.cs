@@ -4,7 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddByBatchRequest<T> : ApiRequest where T : ApiResource
+    /// <summary>
+    /// POST /Model/ByBatch
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public sealed class AddByBatchRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [CollectionMemeberValidated(CanBeNullOrEmpty = false)]
@@ -13,7 +17,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddByBatchRequest() { }
 
-        public AddByBatchRequest(IEnumerable<T> ress, ApiRequestAuth auth) : base(typeof(T).Name, ApiMethodName.Post, auth, "ByBatch")
+        public AddByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethodName.Post, null, "ByBatch")
         {
             Resources.AddRange(ress);
         }

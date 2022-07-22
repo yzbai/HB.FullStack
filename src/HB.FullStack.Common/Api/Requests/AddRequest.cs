@@ -4,7 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class AddRequest<T> : ApiRequest where T : ApiResource
+    /// <summary>
+    /// POST /Model
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public sealed class AddRequest<T> : ApiRequest where T : ApiResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]
@@ -13,7 +17,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddRequest() { }
 
-        public AddRequest(T res, ApiRequestAuth auth, string? condition) : base(typeof(T).Name, ApiMethodName.Post, auth, condition)
+        public AddRequest(T res) : base(typeof(T).Name, ApiMethodName.Post, null, null)
         {
             Resource = res;
         }

@@ -92,6 +92,9 @@ namespace HB.FullStack.Common.ApiClient
         {
             return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
         }
+        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyApiResource>(request, cancellationToken);
+
+        public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
 
         public Task<TResponse?> GetAsync<TResponse>(ApiRequest request) where TResponse : class => GetAsync<TResponse>(request, CancellationToken.None);
 
@@ -161,10 +164,6 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiClientInnerError("ApiClient非ErrorCodeException", ex, new { Request = request });
             }
         }
-
-        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyApiResource>(request, cancellationToken);
-
-        public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
 
         private void ApplyTokenInfo(HttpRequestBuilder requestBuilder)
         {

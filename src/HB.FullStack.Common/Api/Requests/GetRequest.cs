@@ -6,7 +6,10 @@ using System.Text;
 
 namespace HB.FullStack.Common.Api
 {
-    public class GetRequest<T> : ApiRequest where T : ApiResource
+    /// <summary>
+    /// GET /Model
+    /// </summary>
+    public sealed class GetRequest<T> : ApiRequest where T : ApiResource
     {
         public int? Page { get; set; }
 
@@ -19,10 +22,9 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string? Includes { get; set; }
 
-        [OnlyForJsonConstructor]
-        public GetRequest() { }
+        public IDictionary<string, string?> PropertyValues { get; } = new Dictionary<string, string?>();
 
-        public GetRequest(ApiRequestAuth auth, string? condition) : base(typeof(T).Name, ApiMethodName.Get, auth, condition) { }
+        public GetRequest() : base(typeof(T).Name, ApiMethodName.Get, null, null) { }
 
         public void OrderBy(params Expression<Func<T, object>>[]? orderBys)
         {
@@ -57,6 +59,21 @@ namespace HB.FullStack.Common.Api
             {
                 Includes += $",{resName}";
             }
+
+            return this;
+        }
+
+        public GetRequest<T> FilterBy(Expression<Func<T, bool>> filterExp)
+        {
+            //TODO: 实现这个
+            throw new NotImplementedException();
+        }
+
+        public GetRequest<T> FilterBy(string propertyName, object? propertyValue)
+        {
+            //TODO: 需要检查PropertyName是否属于Res
+
+            PropertyValues[propertyName] = propertyValue;
 
             return this;
         }

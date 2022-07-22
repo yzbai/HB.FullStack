@@ -5,7 +5,7 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UserTokenResGetByRefresh : GetRequest<UserTokenRes>
+    public class UserTokenResGetByRefresh : ApiRequest
     {
         [NoEmptyGuid]
         public Guid UserId { get; set; }
@@ -37,7 +37,7 @@ namespace HB.FullStack.Common.Api
             string deviceId,
             string deviceVersion,
             DeviceInfos deviceInfos)
-            : base(ApiRequestAuth.NONE, "ByRefresh")
+            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth.NONE, "ByRefresh")
         {
             UserId = userId;
             AccessToken = accessToken;

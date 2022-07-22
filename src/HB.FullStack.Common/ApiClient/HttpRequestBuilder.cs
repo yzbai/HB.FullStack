@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
@@ -11,7 +12,8 @@ namespace HB.FullStack.Common.ApiClient
         internal ApiRequest Request { get; }
 
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
-        public ApiRequestAuth Auth => Request.Auth;
+
+        public ApiRequestAuth Auth { get; }
 
         public EndpointSetting EndpointSetting => ResBinding.EndpointSetting!;
 
@@ -19,6 +21,17 @@ namespace HB.FullStack.Common.ApiClient
         {
             ResBinding = resBinding;
             Request = request;
+
+            Auth = request.Auth.HasValue ? request.Auth.Value : request.ApiMethodName switch
+            {
+                ApiMethodName.Get => resBinding.ReadAuth,
+                ApiMethodName.Post => resBinding.WriteAuth,
+                ApiMethodName.Put => resBinding.WriteAuth,
+                ApiMethodName.Delete => resBinding.WriteAuth,
+                ApiMethodName.Patch => resBinding.WriteAuth,
+                ApiMethodName.None => throw new NotImplementedException(),
+                _ => throw new NotImplementedException(),
+            };
         }
 
         public void SetJwt(string jwt)
