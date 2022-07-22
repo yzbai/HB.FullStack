@@ -17,10 +17,5 @@ namespace HB.FullStack.Common.Api
         {
             Resource = res;
         }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), Resource);
-        }
     }
 }

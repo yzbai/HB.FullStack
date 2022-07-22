@@ -1,15 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
     public class PatchRequest<T> : ApiRequest where T : ApiResource
     {
-        public IDictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
+        public IDictionary<string, object?> Properties { get; set; } = new Dictionary<string, object?>();
 
         [OnlyForJsonConstructor]
-        protected PatchRequest() { }
+        public PatchRequest() { }
 
-        protected PatchRequest(string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Patch, auth, condition) { }
+        public PatchRequest(string resName, ApiRequestAuth auth) : base(resName, ApiMethodName.Patch, auth, null) { }
+
+        public PatchRequest<T> AddProperty(string propertyName, object? propertyValue)
+        {
+            Properties[propertyName] = propertyValue;
+            return this;
+        }
     }
 }

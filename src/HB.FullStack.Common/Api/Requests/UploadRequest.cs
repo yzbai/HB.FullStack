@@ -12,7 +12,7 @@ namespace HB.FullStack.Common.Api
         byte[] GetFile();
     }
 
-    public class UploadRequest<T> : PatchRequest<T>, IUploadRequest where T : ApiResource
+    public class UploadRequest<T> : ApiRequest, IUploadRequest where T : ApiResource
     {
         private readonly byte[]? _file;
 
@@ -25,7 +25,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UploadRequest() { }
 
-        public UploadRequest(byte[] file, string fileName, string resName, ApiRequestAuth auth, string? condition) : base(resName, auth, condition)
+        public UploadRequest(byte[] file, string fileName, string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Patch, auth, condition)
         {
             _file = file;
             FileName = fileName;
@@ -34,11 +34,6 @@ namespace HB.FullStack.Common.Api
         public byte[] GetFile()
         {
             return _file ?? Array.Empty<byte>();
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), _file?.Length, FileName);
         }
     }
 }

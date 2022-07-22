@@ -17,19 +17,5 @@ namespace HB.FullStack.Common.Api
         {
             Resources.AddRange(ress);
         }
-
-        public override int GetHashCode()
-        {
-            HashCode hash = new HashCode();
-
-            hash.Add(base.GetHashCode());
-
-            foreach (T item in Resources)
-            {
-                hash.Add(item);
-            }
-
-            return hash.ToHashCode();
-        }
     }
 }

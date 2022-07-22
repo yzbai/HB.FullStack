@@ -49,6 +49,9 @@ namespace TestProject1
             IList<B> list = new List<B>();
 
             Assert.IsTrue(list is IEnumerable<object> e && e.Count() == 0);
+
+            IEnumerable er = list;
+
         }
 
     }
@@ -60,7 +63,20 @@ namespace TestProject1
 
     public class A : BaseA
     {
+        public sealed override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+    }
 
+    public class AA : A
+    {
+        //Can not override GetHashCode
+    }
+
+    public class AAA : AA
+    {
+        //Can not override GetHashCode
     }
 
     public class B

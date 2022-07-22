@@ -35,31 +35,12 @@ namespace HB.FullStack.Common.Api
             Condition = condition;
         }
 
-        /// <summary>
-        /// NOTICE: 排除了RequestId，所以相同条件的Request的HashCode相同
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ApiMethodName, Auth, Condition, ResName);
-        }
+        ///// <summary>
+        ///// NOTICE: 排除了RequestId，所以相同条件的Request的HashCode相同
+        ///// </summary>
+        //public sealed override int GetHashCode()
+        //{
+        //    return HashCode.Combine(GetChildHashCode(), ApiMethodName, Auth, Condition, ResName);
+        //}
     }
-
-    /// <summary>
-    /// 指明是对哪一个资源的请求
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    //public abstract class ApiRequest<T> : ApiRequest where T : ApiResource
-    //{
-    //    [OnlyForJsonConstructor]
-    //    protected ApiRequest() { }
-
-    //    protected ApiRequest(ApiMethodName apiMethodName, ApiRequestAuth auth, string? condition)
-    //        : base(apiMethodName, auth, typeof(T).Name, condition) { }
-
-    //    //protected sealed override HttpRequestBuilder CreateHttpRequestBuilder()
-    //    //{
-    //    //    return CreateRestfulHttpRequestBuilder(this);
-    //    //}
-
-    //}
 }

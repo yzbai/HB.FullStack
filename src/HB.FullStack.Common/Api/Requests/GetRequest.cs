@@ -20,20 +20,9 @@ namespace HB.FullStack.Common.Api
         public string? Includes { get; set; }
 
         [OnlyForJsonConstructor]
-        public GetRequest() { }
+        protected GetRequest() { }
 
-        public GetRequest(string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Get, auth, condition) { }
-
-        public override int GetHashCode()
-        {
-            HashCode hashCode = new HashCode();
-
-            hashCode.Add(Page);
-            hashCode.Add(PerPage);
-            hashCode.Add(OrderBys);
-
-            return hashCode.ToHashCode();
-        }
+        protected GetRequest(string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethodName.Get, auth, condition) { }
 
         public void OrderBy(params Expression<Func<T, object>>[]? orderBys)
         {
@@ -70,34 +59,6 @@ namespace HB.FullStack.Common.Api
             }
 
             return this;
-        }
-    }
-
-    public class GetByIdsRequest<T> : GetRequest<T> where T : ApiResource
-    {
-        [NoEmptyGuid]
-        public IList<Guid> Ids { get; set; } = new List<Guid>();
-
-        [OnlyForJsonConstructor]
-        public GetByIdsRequest() { }
-
-        public GetByIdsRequest(string resName, ApiRequestAuth auth, params Guid[] ids) : base(resName, auth, "ByIds")
-        {
-            ids.AddRange(ids);
-        }
-    }
-
-    public class GetByIdRequest<T> : GetRequest<T> where T : ApiResource
-    {
-        [NoEmptyGuid]
-        public Guid Id { get; set; }
-
-        [OnlyForJsonConstructor]
-        public GetByIdRequest() { }
-
-        public GetByIdRequest(string resName, ApiRequestAuth auth, Guid id) : base(resName, auth, "ById")
-        {
-            Id = id;
         }
     }
 }
