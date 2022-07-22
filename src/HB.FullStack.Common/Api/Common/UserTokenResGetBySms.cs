@@ -41,10 +41,5 @@ namespace HB.FullStack.Common.ApiClient
             DeviceVersion = deviceVersion;
             DeviceInfos = deviceInfos;
         }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), Mobile, SmsCode, SignToWhere, DeviceId, DeviceVersion);
-        }
     }
 }

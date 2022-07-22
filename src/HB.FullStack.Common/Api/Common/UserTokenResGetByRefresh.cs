@@ -46,15 +46,5 @@ namespace HB.FullStack.Common.ApiClient
             DeviceVersion = deviceVersion;
             DeviceInfos = deviceInfos;
         }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), AccessToken, RefreshToken, UserId, DeviceId, DeviceVersion, DeviceInfos);
-        }
-
-        //protected override HttpRequestBuilder CreateHttpRequestBuilder()
-        //{
-        //    return new RestfulHttpRequestBuilder(ApiMethodName, Auth, Condition, _jwtEndpointSetting.EndpointName, _jwtEndpointSetting.Version, _jwtEndpointSetting.ControllerModelName);
-        //}
     }
 }

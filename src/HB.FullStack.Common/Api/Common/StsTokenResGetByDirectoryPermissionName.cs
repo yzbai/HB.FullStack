@@ -24,10 +24,5 @@ namespace HB.FullStack.Common.ApiClient
             RegexPlaceHolderValue = regexPlaceHolderValue;
             ReadOnly = readOnly;
         }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(base.GetHashCode(), DirectoryPermissionName, RegexPlaceHolderValue, ReadOnly);
-        }
     }
 }
