@@ -9,7 +9,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// GET /Model
     /// </summary>
-    public sealed class GetRequest<T> : ApiRequest where T : ApiResource
+    public class GetRequest : ApiRequest
     {
         public int? Page { get; set; }
 
@@ -22,60 +22,13 @@ namespace HB.FullStack.Common.Api
         /// </summary>
         public string? Includes { get; set; }
 
-        public IDictionary<string, string?> PropertyValues { get; } = new Dictionary<string, string?>();
+        public IList<PropertyFilter> PropertyFilters { get; } = new List<PropertyFilter>();
 
-        public GetRequest() : base(typeof(T).Name, ApiMethodName.Get, null, null) { }
+        public GetRequest(string resName) : base(resName, ApiMethodName.Get, null, null) { }
+    }
 
-        public void OrderBy(params Expression<Func<T, object>>[]? orderBys)
-        {
-            if (orderBys.IsNullOrEmpty())
-            {
-                return;
-            }
-
-            StringBuilder orderByBuilder = new StringBuilder();
-
-            foreach (Expression<Func<T, object>> orderBy in orderBys)
-            {
-                string orderByName = ((MemberExpression)orderBy.Body).Member.Name;
-                orderByBuilder.Append(orderByName);
-                orderByBuilder.Append(',');
-            }
-
-            orderByBuilder.RemoveLast();
-
-            OrderBys = orderByBuilder.ToString();
-        }
-
-        public GetRequest<T> Include<TRes>() where TRes : ApiResource
-        {
-            string resName = typeof(TRes).Name;
-
-            if (Includes == null)
-            {
-                Includes = resName;
-            }
-            else
-            {
-                Includes += $",{resName}";
-            }
-
-            return this;
-        }
-
-        public GetRequest<T> FilterBy(Expression<Func<T, bool>> filterExp)
-        {
-            //TODO: 实现这个
-            throw new NotImplementedException();
-        }
-
-        public GetRequest<T> FilterBy(string propertyName, object? propertyValue)
-        {
-            //TODO: 需要检查PropertyName是否属于Res
-
-            PropertyValues[propertyName] = propertyValue;
-
-            return this;
-        }
+    public sealed class GetRequest<T> : GetRequest where T : ApiResource
+    {
+        public GetRequest() : base(typeof(T).Name) { }
     }
 }

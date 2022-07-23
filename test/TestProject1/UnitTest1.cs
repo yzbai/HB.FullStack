@@ -1,4 +1,6 @@
 using System.Collections;
+using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 
 namespace TestProject1
 {
@@ -52,6 +54,20 @@ namespace TestProject1
 
             IEnumerable er = list;
 
+        }
+
+        [TestMethod]
+        public void TestConverter()
+        {
+            var guidConvertor = TypeDescriptor.GetConverter(typeof(Guid));
+
+            Guid guid = Guid.NewGuid();
+
+            string? str = guidConvertor.ConvertToString(guid);
+
+            Guid? guid2 = (Guid?)guidConvertor.ConvertFromString(str);
+
+            Assert.AreEqual(guid, guid2.Value);
         }
 
     }

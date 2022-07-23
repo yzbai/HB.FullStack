@@ -1,15 +1,14 @@
 ﻿
-
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Reflection;
 
+using HB.FullStack.Common;
 using HB.FullStack.Database.DBModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.Common;
 
 namespace HB.FullStack.Database.Converter
 {
@@ -186,7 +185,6 @@ namespace HB.FullStack.Database.Converter
             Type trueType = propertyDef == null ? typeValue.GetType() : propertyDef.NullableUnderlyingType ?? propertyDef.Type;
 
             //查看全局TypeConvert
-
             ITypeConverter? globalConverter = GetGlobalTypeConverter(trueType, engineType);
 
             if (globalConverter != null)
@@ -207,7 +205,6 @@ namespace HB.FullStack.Database.Converter
         /// 没有考虑属性自定义的TypeConvert
         /// 有安全隐患,
         /// </summary>
-
         public static string DoNotUseUnSafeTypeValueToDbValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
         {
             if (typeValue == null)

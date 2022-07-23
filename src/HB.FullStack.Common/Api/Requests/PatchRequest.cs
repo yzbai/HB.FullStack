@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Api
 
         public PatchRequest<T> AddProperty(string propertyName, object? oldValue, object? newValue)
         {
-            PropertyOldNewValues.Add((propertyName, oldValue, newValue));
+            PropertyOldNewValues.Add((propertyName, TypeStringConverter.ConvertToString(oldValue), TypeStringConverter.ConvertToString(newValue)));
             return this;
         }
     }

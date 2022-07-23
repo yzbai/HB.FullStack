@@ -1,5 +1,4 @@
 ﻿
-
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -249,6 +248,11 @@ namespace System
         public static int ToInt32(this string str)
         {
             return Convert.ToInt32(str, GlobalSettings.Culture); ;
+        }
+
+        public static string Append(this string? str, string toAppend, char seprator)
+        {
+            return str.IsNullOrEmpty() ? toAppend : $"{str}{seprator}{toAppend}";
         }
 
         #endregion Extensions

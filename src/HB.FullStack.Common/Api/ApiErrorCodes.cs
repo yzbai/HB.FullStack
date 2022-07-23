@@ -83,6 +83,7 @@
         public static ErrorCode ServerReturnError { get; } = new ErrorCode(nameof(ServerReturnError), "Server收到了请求，但返回了错误");
         public static ErrorCode ApiModelError { get; } = new ErrorCode(nameof(ApiModelError), "ApiRequest等Model出错");
         public static ErrorCode ApiAuthenticationError { get; } = new ErrorCode(nameof(ApiAuthenticationError), "ApiClient请求时，授权信息有错或缺少");
+        public static ErrorCode ApiResourceError { get; } = new ErrorCode(nameof(ApiResourceError), "");
 
         #endregion
     }
@@ -113,6 +114,11 @@
         internal static Exception ApiAuthenticationError(string cause, Exception? innerEx, object? context)
         {
             return new ApiException(ApiErrorCodes.ApiAuthenticationError, cause, innerEx, context);
+        }
+
+        internal static Exception ApiResourceError(string cause, Exception? innerEx, object? context)
+        {
+            return new ApiException(ApiErrorCodes.ApiResourceError, cause, innerEx, context);
         }
     }
 }
