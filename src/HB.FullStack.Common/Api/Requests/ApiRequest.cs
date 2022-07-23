@@ -20,14 +20,14 @@ namespace HB.FullStack.Common.Api
         /// <summary>
         /// 如果没有指定，那么会使用ResBinding中指定的Auth
         /// </summary>
-        public ApiRequestAuth? Auth { get; set; }
+        public ApiRequestAuth2? Auth { get; set; }
 
         public string? Condition { get; set; }
 
         [OnlyForJsonConstructor]
         protected ApiRequest() { }
 
-        protected ApiRequest(string resName, ApiMethodName apiMethodName, ApiRequestAuth? auth, string? condition)
+        protected ApiRequest(string resName, ApiMethodName apiMethodName, ApiRequestAuth2? auth, string? condition)
         {
             ResName = resName;
             ApiMethodName = apiMethodName;

@@ -4,12 +4,33 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
+
 using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
     public static class HttpRequestBuilderExtensions
     {
+        public static void SetJwt(this HttpRequestBuilder builder, string jwt)
+        {
+            builder.Headers[ApiHeaderNames.Authorization] = $"{builder.EndpointSetting.Challenge} {jwt}";
+        }
+
+        public static void SetApiKey(this HttpRequestBuilder builder, string apiKey)
+        {
+            builder.Headers[ApiHeaderNames.XApiKey] = apiKey;
+        }
+
+        public static void SetDeviceId(this HttpRequestBuilder builder, string deviceId)
+        {
+            builder.Headers[ApiHeaderNames.DEVICE_ID] = deviceId;
+        }
+
+        public static void SetDeviceVersion(this HttpRequestBuilder builder, string deviceVersion)
+        {
+            builder.Headers[ApiHeaderNames.DEVICE_VERSION] = deviceVersion;
+        }
+
         /// <summary>
         /// 构建HTTP的基本信息
         /// 之所以写成扩展方法的形式，是为了避免HttpRequestBuilder过大。又为了调用方式比静态方法舒服。
@@ -66,6 +87,40 @@ namespace HB.FullStack.Common.ApiClient
             }
 
             return httpRequest;
+        }
+
+        public static string GetUrl(this HttpRequestBuilder httpRequestBuilder)
+        {
+            if (httpRequestBuilder.ResBinding.Type == ResBindingType.PlainUrl)
+            {
+                return httpRequestBuilder.ResBinding.BindingValue;
+            }
+
+            if (httpRequestBuilder.ResBinding.Type == ResBindingType.ControllerModel)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                //Version
+                if (httpRequestBuilder.ResBinding.EndpointSetting!.Version.IsNotNullOrEmpty())
+                {
+                    builder.Append(httpRequestBuilder.ResBinding.EndpointSetting.Version);
+                    builder.Append('/');
+                }
+
+                //ControllerModelName
+                builder.Append(httpRequestBuilder.ResBinding.BindingValue);
+
+                //Condition
+                if (httpRequestBuilder.Request.Condition.IsNotNullOrEmpty())
+                {
+                    builder.Append('/');
+                    builder.Append(httpRequestBuilder.Request.Condition);
+                }
+
+                return builder.ToString();
+            }
+
+            throw new NotImplementedException("Other ResBindingType not implemented.");
         }
 
         public static string AssembleUrl(this HttpRequestBuilder builder)

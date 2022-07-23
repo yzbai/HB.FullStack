@@ -27,7 +27,7 @@ namespace HB.FullStack.Common.Api
         public UserTokenResGetBySms() { }
 
         public UserTokenResGetBySms(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
-            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth.NONE, "BySms")
+            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth2.NONE, "BySms")
         {
             Mobile = mobile;
             SmsCode = smsCode;

@@ -27,14 +27,14 @@ namespace HB.FullStack.Common.ApiClient
         /// 默认权限是指没有指定Condition下的权限.
         /// 可以在ApiRequest中覆盖
         /// </summary>
-        public ApiRequestAuth ReadAuth { get; set; }
+        public ApiRequestAuth2 ReadAuth { get; set; } = null!;
 
         /// <summary>
         /// 默认的Put,Patch,Post,Delete权限
         /// 默认权限是指没有指定Condition下的权限.
         /// 可以在ApiRequest中覆盖
         /// </summary>
-        public ApiRequestAuth WriteAuth { get; set; }
+        public ApiRequestAuth2 WriteAuth { get; set; } = null!;
 
         public EndpointSetting? EndpointSetting { get; set; }
 

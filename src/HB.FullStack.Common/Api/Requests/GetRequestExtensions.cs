@@ -5,10 +5,28 @@ namespace HB.FullStack.Common.Api
 {
     public static class GetRequestExtensions
     {
+        public static GetRequest Id(this GetRequest request, object id)
+        {
+            request.Id = id.ToString();
+
+            return request;
+        }
+
+        public static GetRequest Page(this GetRequest request, int page, int perPage)
+        {
+            request.Page = page;
+            request.PerPage = perPage;
+
+            return request;
+        }
+
         public static GetRequest Include<TRes>(this GetRequest request) where TRes : ApiResource
         {
-            string resName = typeof(TRes).Name;
+            return Include(request, typeof(TRes).Name);
+        }
 
+        public static GetRequest Include(this GetRequest request, string resName)
+        {
             request.Includes = request.Includes.Append(resName, ',');
 
             return request;
@@ -30,7 +48,7 @@ namespace HB.FullStack.Common.Api
             throw new NotImplementedException();
         }
 
-        public static GetRequest FilterBy(this GetRequest request, string propertyName, object? propertyValue, PropertyFilterOperator @operator)
+        public static GetRequest FilterBy(this GetRequest request, string propertyName, object? propertyValue)
         {
             //TODO: 考虑提高性能
             //是否建立统一的ApiResourceDefFactory?
@@ -45,14 +63,13 @@ namespace HB.FullStack.Common.Api
             request.PropertyFilters.Add(new PropertyFilter
             {
                 PropertyName = propertyName,
-                Operator = @operator,
                 PropertyStringValue = TypeStringConverter.ConvertToString(propertyValue)
             });
 
             return request;
         }
 
-        public static GetRequest Auth(this GetRequest request, ApiRequestAuth auth)
+        public static GetRequest Auth(this GetRequest request, ApiRequestAuth2 auth)
         {
             request.Auth = auth;
             return request;

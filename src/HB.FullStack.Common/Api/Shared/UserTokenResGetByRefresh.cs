@@ -37,7 +37,7 @@ namespace HB.FullStack.Common.Api
             string deviceId,
             string deviceVersion,
             DeviceInfos deviceInfos)
-            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth.NONE, "ByRefresh")
+            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth2.NONE, "ByRefresh")
         {
             UserId = userId;
             AccessToken = accessToken;

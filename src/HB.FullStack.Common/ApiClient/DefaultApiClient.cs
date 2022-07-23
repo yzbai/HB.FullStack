@@ -141,7 +141,7 @@ namespace HB.FullStack.Common.ApiClient
             }
             catch (ErrorCode2Exception ex)
             {
-                if (requestBuilder.Auth.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (requestBuilder.Request.Auth == ApiRequestAuth2.JWT && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await this.RefreshUserTokenAsync().ConfigureAwait(false);
 
@@ -150,7 +150,7 @@ namespace HB.FullStack.Common.ApiClient
                         return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
-                else if (requestBuilder.Auth.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AuthorizationNoTokenInStore)
+                else if (requestBuilder.Request.Auth == ApiRequestAuth2.JWT && ex.ErrorCode == ApiErrorCodes.AuthorizationNoTokenInStore)
                 {
                     //TODO: 重新登陆， 客户端应该针对Authroization开头的ErrorCode进行相应处理
                 }
@@ -170,20 +170,22 @@ namespace HB.FullStack.Common.ApiClient
             requestBuilder.SetDeviceId(UserTokenProvider.DeviceId);
             requestBuilder.SetDeviceVersion(UserTokenProvider.DeviceVersion);
 
+            ApiRequestAuth2 auth = requestBuilder.Request.Auth!;
+
             //Auto
-            switch (requestBuilder.Auth.AuthType)
+            switch (auth.AuthType)
             {
                 case ApiAuthType.ApiKey:
                     {
-                        ThrowIf.NullOrEmpty(requestBuilder.Auth.ApiKeyName, nameof(HttpRequestBuilder.Auth.ApiKeyName));
+                        ThrowIf.NullOrEmpty(auth.ApiKeyName, "ApiKeyName");
 
-                        if (_apiKeys.TryGetValue(requestBuilder.Auth.ApiKeyName, out string? key))
+                        if (_apiKeys.TryGetValue(auth.ApiKeyName, out string? key))
                         {
                             requestBuilder.SetApiKey(key);
                         }
                         else
                         {
-                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = requestBuilder.Auth.ApiKeyName, RequeestUri = requestBuilder.AssembleUrl() });
+                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.AssembleUrl() });
                         }
 
                         break;

@@ -6,6 +6,5 @@
 
         public string PropertyStringValue { get; set; } = null!;
 
-        public PropertyFilterOperator Operator { get; set; }
     }
 }

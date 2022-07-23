@@ -2,26 +2,21 @@
 
 namespace HB.FullStack.Common.Api
 {
-    public struct ApiRequestAuth : IEquatable<ApiRequestAuth>
+    public class ApiRequestAuth2 : IEquatable<ApiRequestAuth2>
     {
-        public static ApiRequestAuth JWT = new ApiRequestAuth { AuthType = ApiAuthType.Jwt };
+        public static ApiRequestAuth2 JWT = new ApiRequestAuth2 { AuthType = ApiAuthType.Jwt };
+        public static ApiRequestAuth2 NONE = new ApiRequestAuth2 { AuthType = ApiAuthType.None };
+        public static ApiRequestAuth2 APIKEY(string apiKeyName) => new ApiRequestAuth2 { AuthType = ApiAuthType.ApiKey, ApiKeyName = apiKeyName };
 
-        public static ApiRequestAuth NONE = new ApiRequestAuth { AuthType = ApiAuthType.None };
+        public ApiAuthType AuthType { get; private set; }
 
-        public ApiAuthType AuthType { get; set; }
-
-        public string? ApiKeyName { get; set; }
+        public string? ApiKeyName { get; private set; }
 
         public override bool Equals(object? obj)
         {
-            if(obj == null)
+            if (obj is ApiRequestAuth2 other)
             {
-                return false;
-            }
-
-            if(obj is ApiRequestAuth other)
-            {
-                return Equals(other);
+                return other.AuthType == AuthType && other.ApiKeyName == ApiKeyName;
             }
 
             return false;
@@ -32,18 +27,33 @@ namespace HB.FullStack.Common.Api
             return HashCode.Combine(AuthType, ApiKeyName);
         }
 
-        public static bool operator ==(ApiRequestAuth left, ApiRequestAuth right)
+        public static bool operator ==(ApiRequestAuth2? left, ApiRequestAuth2? right)
         {
+            if (left is null && right is null)
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
             return left.Equals(right);
         }
 
-        public static bool operator !=(ApiRequestAuth left, ApiRequestAuth right)
+        public static bool operator !=(ApiRequestAuth2? left, ApiRequestAuth2? right)
         {
             return !(left == right);
         }
 
-        public bool Equals(ApiRequestAuth other)
+        public bool Equals(ApiRequestAuth2? other)
         {
+            if (other is null)
+            {
+                return false;
+            }
+
             return other.AuthType == AuthType && other.ApiKeyName == ApiKeyName;
         }
     }
