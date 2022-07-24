@@ -1,9 +1,0 @@
-<Project>
-	<PropertyGroup>
-		<!--Common out put-->
-		<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
-		<BaseOutputPath>D:\BuildCommonOutput\bin\HB.FullStack</BaseOutputPath>
-		<BaseIntermediateOutputPath>D:\BuildCommonOutput\obj\$(MSBuildProjectName)\$(Configuration)</BaseIntermediateOutputPath>
-		<MSBuildProjectExtensionsPath>D:\BuildCommonOutput\obj\$(MSBuildProjectName)\$(Configuration)</MSBuildProjectExtensionsPath>
-    </PropertyGroup>
-</Project>

@@ -351,3 +351,4 @@ ASALocalRun/
 healthchecksdb
 src/Directory.Build.props
 src/Directory.Build.props
+*.props
