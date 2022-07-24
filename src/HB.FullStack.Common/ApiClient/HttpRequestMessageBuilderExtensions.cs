@@ -9,24 +9,24 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public static class HttpRequestBuilderExtensions
+    public static class HttpRequestMessageBuilderExtensions
     {
-        public static void SetJwt(this HttpRequestBuilder builder, string jwt)
+        public static void SetJwt(this HttpRequestMessageBuilder builder, string jwt)
         {
             builder.Headers[ApiHeaderNames.Authorization] = $"{builder.EndpointSetting.Challenge} {jwt}";
         }
 
-        public static void SetApiKey(this HttpRequestBuilder builder, string apiKey)
+        public static void SetApiKey(this HttpRequestMessageBuilder builder, string apiKey)
         {
             builder.Headers[ApiHeaderNames.XApiKey] = apiKey;
         }
 
-        public static void SetDeviceId(this HttpRequestBuilder builder, string deviceId)
+        public static void SetDeviceId(this HttpRequestMessageBuilder builder, string deviceId)
         {
             builder.Headers[ApiHeaderNames.DEVICE_ID] = deviceId;
         }
 
-        public static void SetDeviceVersion(this HttpRequestBuilder builder, string deviceVersion)
+        public static void SetDeviceVersion(this HttpRequestMessageBuilder builder, string deviceVersion)
         {
             builder.Headers[ApiHeaderNames.DEVICE_VERSION] = deviceVersion;
         }
@@ -35,7 +35,7 @@ namespace HB.FullStack.Common.ApiClient
         /// 构建HTTP的基本信息
         /// 之所以写成扩展方法的形式，是为了避免HttpRequestBuilder过大。又为了调用方式比静态方法舒服。
         /// </summary>
-        public static HttpRequestMessage Build(this HttpRequestBuilder builder)
+        public static HttpRequestMessage Build(this HttpRequestMessageBuilder builder)
         {
             //1. Mthod
             HttpMethod httpMethod = builder.Request.ApiMethodName.ToHttpMethod();
@@ -58,7 +58,7 @@ namespace HB.FullStack.Common.ApiClient
             }
 
             //2. url
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.AssembleUrl())
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GenerateUrl())
             {
                 Version = builder.ResBinding.EndpointSetting.HttpVersion
             };
@@ -89,7 +89,7 @@ namespace HB.FullStack.Common.ApiClient
             return httpRequest;
         }
 
-        public static string GetUrl(this HttpRequestBuilder httpRequestBuilder)
+        public static string GenerateUrlCore(this HttpRequestMessageBuilder httpRequestBuilder)
         {
             if (httpRequestBuilder.ResBinding.Type == ResBindingType.PlainUrl)
             {
@@ -123,9 +123,9 @@ namespace HB.FullStack.Common.ApiClient
             throw new NotImplementedException("Other ResBindingType not implemented.");
         }
 
-        public static string AssembleUrl(this HttpRequestBuilder builder)
+        public static string GenerateUrl(this HttpRequestMessageBuilder builder)
         {
-            string uri = builder.GetUrl();
+            string uri = builder.GenerateUrlCore();
 
             IDictionary<string, string?> parameters = new Dictionary<string, string?>
                 {

@@ -111,7 +111,7 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
             }
 
-            HttpRequestBuilder requestBuilder = new HttpRequestBuilder(resBinding, request);
+            HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resBinding, request);
 
             HttpClient httpClient = GetHttpClient(resBinding.EndpointSetting!);
 
@@ -165,7 +165,7 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private void ApplyTokenInfo(HttpRequestBuilder requestBuilder)
+        private void ApplyTokenInfo(HttpRequestMessageBuilder requestBuilder)
         {
             requestBuilder.SetDeviceId(UserTokenProvider.DeviceId);
             requestBuilder.SetDeviceVersion(UserTokenProvider.DeviceVersion);
@@ -185,7 +185,7 @@ namespace HB.FullStack.Common.ApiClient
                         }
                         else
                         {
-                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.AssembleUrl() });
+                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.GenerateUrl() });
                         }
 
                         break;
@@ -194,7 +194,7 @@ namespace HB.FullStack.Common.ApiClient
                 case ApiAuthType.Jwt:
                     if (UserTokenProvider.AccessToken.IsNullOrEmpty())
                     {
-                        throw ApiExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.AssembleUrl() });
+                        throw ApiExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.GenerateUrl() });
                     }
 
                     requestBuilder.SetJwt(UserTokenProvider.AccessToken);
