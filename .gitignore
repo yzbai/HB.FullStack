@@ -12,6 +12,7 @@ PublishProfiles/
 *.pubxml
 *.DS_Store
 *.db
+*.Build.props
 
 # User-specific files
 *.rsuser
@@ -348,3 +349,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+src/Directory.Build.props
+src/Directory.Build.props
