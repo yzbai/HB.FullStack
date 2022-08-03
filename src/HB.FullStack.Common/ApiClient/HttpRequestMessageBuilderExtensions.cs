@@ -96,31 +96,37 @@ namespace HB.FullStack.Common.ApiClient
                 return httpRequestBuilder.ResBinding.BindingValue;
             }
 
-            if (httpRequestBuilder.ResBinding.Type == ResBindingType.ControllerModel)
+            if (httpRequestBuilder.ResBinding.Type != ResBindingType.ControllerModel)
             {
-                StringBuilder builder = new StringBuilder();
+                throw new NotImplementedException("Other ResBindingType not implemented.");
+            }
 
-                //Version
-                if (httpRequestBuilder.ResBinding.EndpointSetting!.Version.IsNotNullOrEmpty())
-                {
-                    builder.Append(httpRequestBuilder.ResBinding.EndpointSetting.Version);
-                    builder.Append('/');
-                }
+            StringBuilder builder = new StringBuilder();
 
-                //ControllerModelName
-                builder.Append(httpRequestBuilder.ResBinding.BindingValue);
+            //Version
+            if (httpRequestBuilder.ResBinding.EndpointSetting!.Version.IsNotNullOrEmpty())
+            {
+                builder.Append(httpRequestBuilder.ResBinding.EndpointSetting.Version);
+                builder.Append('/');
+            }
 
-                //Condition
-                if (httpRequestBuilder.Request.Condition.IsNotNullOrEmpty())
-                {
-                    builder.Append('/');
-                    builder.Append(httpRequestBuilder.Request.Condition);
-                }
+            //ControllerModelName
+            builder.Append(httpRequestBuilder.ResBinding.BindingValue);
 
+            //Condition
+            if (httpRequestBuilder.Request.Condition.IsNotNullOrEmpty())
+            {
+                builder.Append('/');
+                builder.Append(httpRequestBuilder.Request.Condition);
+            }
+
+            //Query
+            if(httpRequestBuilder.EndpointSetting.HttpMethodOverrideMode == HttpMethodOverrideMode.All)
+            {
                 return builder.ToString();
             }
 
-            throw new NotImplementedException("Other ResBindingType not implemented.");
+            return builder.ToString();
         }
 
         public static string GenerateUrl(this HttpRequestMessageBuilder builder)
