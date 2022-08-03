@@ -6,7 +6,7 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class HttpRequestBuilder
+    public class HttpRequestMessageBuilder
     {
         internal ResBinding ResBinding { get; }
         internal ApiRequest Request { get; }
@@ -15,11 +15,16 @@ namespace HB.FullStack.Common.ApiClient
 
         public EndpointSetting EndpointSetting => ResBinding.EndpointSetting!;
 
-        public HttpRequestBuilder(ResBinding resBinding, ApiRequest request)
+        public HttpRequestMessageBuilder(ResBinding resBinding, ApiRequest request)
         {
             ResBinding = resBinding;
             Request = request;
 
+            EnsureApiRequestAuth(resBinding);
+        }
+
+        private void EnsureApiRequestAuth(ResBinding resBinding)
+        {
             if (Request.Auth == null)
             {
                 Request.Auth = Request.ApiMethodName switch
