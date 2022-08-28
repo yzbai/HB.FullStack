@@ -19,11 +19,10 @@ namespace HB.FullStack.Database.DBModels
         /// </summary>
         public long Timestamp { get; set; } = TimeUtil.UtcNowTicks;
 
-
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }
 
-    public abstract class TimestampLongIdDBModel : TimestampDBModel, ILongIdModel
+    public abstract class TimestampLongIdDBModel : TimestampDBModel, ILongId
     {
         [DBModelProperty(0)]
         public abstract long Id { get; set; }
@@ -46,7 +45,7 @@ namespace HB.FullStack.Database.DBModels
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 
-    public abstract class TimestampGuidDBModel : TimestampDBModel, IGuidIdModel
+    public abstract class TimestampGuidDBModel : TimestampDBModel, IGuidId
     {
         [DBModelProperty(0)]
         [NoEmptyGuid]
